@@ -1,0 +1,30 @@
+site-ie-js:
+    contents:
+        - bower/html5shiv/src/html5shiv.js
+        - bower/respond/respond.src.js
+    filters: uglifyjs
+    output: js/site-ie-less-9.min.js
+
+site-js:
+    contents:
+        - bower/jquery/jquery.js
+        - bower/bootstrap/dist/js/bootstrap.js
+        - bower/typeahead.js/dist/typeahead.js
+        - js/site.js
+    filters: uglifyjs
+    output: js/site.min.js
+
+site-css:
+    contents:
+        - site-less-css
+        - css/typeahead.css
+    filters: cssrewrite,cssmin
+    output: css/site.min.css
+
+site-less-css:
+    contents: less/site.less
+    depends:
+        - bower/bootstrap/less/bootstrap.less
+        - less/*.less
+    filters: less
+    output: css/site-less.css
