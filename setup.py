@@ -65,7 +65,7 @@ setup(
         },
     include_package_data = True,
     install_requires = [
-        "Babel >= 0.9.4",
+        'Babel >= 0.9.4',
         'Biryani1 >= 0.9dev',
         'bleach >= 1.2',
         'Mako >= 0.8',

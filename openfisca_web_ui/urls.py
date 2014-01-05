@@ -159,8 +159,7 @@ def make_router(*routings, **kwargs):
                     apiVersion = '1.0',
                     error = dict(
                         code = 404,  # Not Found
-                        message = ctx._(u"Path not found: {0}").format(
-                            req.path_info),
+                        message = ctx._(u"Path not found: {0}").format(req.path_info),
                         ),
                     ),
                 headers = headers,
