@@ -126,6 +126,18 @@ def make_router(*routings, **kwargs):
             # When path_info doesn't start with a "/" this is an error or a attack => Reject request.
             # An example of an URL with such a invalid path_info: http://127.0.0.1http%3A//127.0.0.1%3A80/result?...
             ctx = contexts.Ctx(req)
+            if error_format == 'json':
+                headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
+                return wsgihelpers.respond_json(ctx,
+                    dict(
+                        apiVersion = '1.0',
+                        error = dict(
+                            code = 400,  # Bad Request
+                            message = ctx._(u"Invalid path: {0}").format(req.path_info),
+                            ),
+                        ),
+                    headers = headers,
+                    )(environ, start_response)
             return wsgihelpers.bad_request(ctx, explanation = ctx._(u"Invalid path: {0}").format(
                 req.path_info))(environ, start_response)
         for methods, regex, app, vars in routes:
