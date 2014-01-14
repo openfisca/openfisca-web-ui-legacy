@@ -69,6 +69,8 @@ setup(
         'Biryani1 >= 0.9dev',
         'bleach >= 1.2',
         'Mako >= 0.8',
+        'matplotlib >= 1.3.1',
+        'numpy >= 1.7.1',
         'PyYAML',
         'pymongo >= 2.2',
         'webassets >= 0.8',
