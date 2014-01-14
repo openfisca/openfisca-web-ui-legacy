@@ -108,7 +108,7 @@ def iter_full_urls(ctx, *path, **query):
 # To use in Python 3:
 # def make_router(*routings, error_format = None):
 def make_router(*routings, **kwargs):
-    """Return a WSGI application that dispatches requests to controllers """
+    """Return a WSGI application that dispatches requests to controllers."""
     error_format = kwargs.get('error_format')
     routes = []
     for routing in routings:

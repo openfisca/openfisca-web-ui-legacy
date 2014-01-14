@@ -62,7 +62,7 @@ input_to_words = pipe(
 #                not_none,
 #                ),
 #            ),
-#        default = noop,  # TODO
+#        default = noop,  # TODO(rsoufflet)
 #        ),
 #    rename_item('id', '_id'),
 #    )

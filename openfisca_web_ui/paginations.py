@@ -26,7 +26,7 @@
 
 
 class Pager(object):
-    """A representation of one page of items in a larger sequence"""
+    """A representation of one page of items in a larger sequence."""
     first_item_index = None  # index of first item on the current page - starts with 0
     first_item_number = None  # number of first item on the current page - starts with 1 (= first_item_index + 1)
     first_page_number = 1  # number of the first page - starts with 1

@@ -39,7 +39,7 @@ from . import contexts, conv
 
 
 class Cursor(pymongo.cursor.Cursor):
-    """A MongoDB cursor that returns mapped documents instead of BSON documents"""
+    """A MongoDB cursor that returns mapped documents instead of BSON documents."""
     document_class = None
 
     def __getitem__(self, index):

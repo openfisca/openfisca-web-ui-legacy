@@ -32,8 +32,8 @@ import urllib
 
 from paste.cascade import Cascade
 from paste.urlparser import StaticURLParser
-import webob
 from weberror.errormiddleware import ErrorMiddleware
+import webob
 
 from . import conf, contexts, controllers, environment, model, urls
 

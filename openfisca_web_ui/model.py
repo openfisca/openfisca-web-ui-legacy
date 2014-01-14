@@ -352,9 +352,9 @@ def is_admin(ctx, check = False):
 
 def setup():
     """Setup MongoDb database."""
+    from . import upgrades
     import imp
     import os
-    from . import upgrades
 
     upgrades_dir = os.path.dirname(upgrades.__file__)
     upgrades_name = sorted(

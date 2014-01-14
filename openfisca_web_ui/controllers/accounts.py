@@ -521,7 +521,7 @@ def extract_account_inputs_from_params(ctx, params = None):
 
 @wsgihelpers.wsgify
 def login(req):
-    """Authorization request"""
+    """Authorization request."""
     ctx = contexts.Ctx(req)
 
     assert req.method == 'POST'

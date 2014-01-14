@@ -73,7 +73,7 @@ class Ctx(conv.State):
     def _(self):
         return self.translator.ugettext
 
-    def blank_req(self, path, environ = None, base_url = None, headers = None, POST = None, **kw):
+    def blank_req(self, path, environ = None, base_url = None, headers = None, POST = None, **kw):  # NOQA
         env = environ.copy() if environ else {}
         openfisca_web_ui_env = env.setdefault('openfisca-web-ui', {})
         for key in self.env_keys:

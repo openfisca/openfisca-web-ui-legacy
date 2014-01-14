@@ -43,7 +43,7 @@ def index(req):
 
 
 def make_router():
-    """Return a WSGI application that searches requests to controllers """
+    """Return a WSGI application that searches requests to controllers."""
     global router
     router = urls.make_router(
         ('GET', '^/?$', index),
