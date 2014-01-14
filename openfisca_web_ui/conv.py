@@ -28,12 +28,12 @@
 
 import re
 
-from biryani1.baseconv import *
-from biryani1.bsonconv import *
-from biryani1.datetimeconv import *
-from biryani1.objectconv import *
-from biryani1.jsonconv import *
-from biryani1.states import default_state, State
+from biryani1.baseconv import *  # NOQA
+from biryani1.bsonconv import *  # NOQA
+from biryani1.datetimeconv import *  # NOQA
+from biryani1.objectconv import *  # NOQA
+from biryani1.jsonconv import *  # NOQA
+from biryani1.states import default_state, State  # NOQA
 
 
 N_ = lambda message: message
