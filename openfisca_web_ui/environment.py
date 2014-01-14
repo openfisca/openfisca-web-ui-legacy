@@ -75,6 +75,7 @@ def load_environment(global_conf, app_conf):
                 ),
             'cache_dir': conv.default(os.path.join(os.path.dirname(app_dir), 'cache')),
             'cookie': conv.default('openfisca-web-ui'),
+            'customs_dir': conv.default(None),
             'database': conv.default('openfisca_web_ui'),
             'debug': conv.pipe(conv.guess_bool, conv.default(False)),
             'global_conf': conv.set_value(global_conf),
