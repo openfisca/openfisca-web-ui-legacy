@@ -185,7 +185,7 @@ def simulation(req):
     ax.set_xticks(numpy.arange(len(names)) + bar_width / 2)
     ax.set_xlim(xlim)
 
-    figure.savefig('openfisca_web_ui/static/test.png')
+    figure.savefig('openfisca_web_ui/static/waterfall.png')
     pyplot.close(figure)
 
     title = u'Variation du revenu disponible' if simulation.get('reform') else u'Revenu disponible'
@@ -206,7 +206,7 @@ def simulation(req):
 
     matplotlib_helpers.draw_node(ax, tree, [0] * len(x_values), x_values)
     matplotlib_helpers.draw_legend(ax)
-    figure.savefig('openfisca_web_ui/static/test2.png')
+    figure.savefig('openfisca_web_ui/static/bareme.png')
     pyplot.close(figure)
 
     return templates.render(
@@ -214,6 +214,6 @@ def simulation(req):
         '/simulation.mako',
         data = data,
         errors = errors,
-        img_name = '/test.png',
-        img2_name = 'test2.png',
+        img_name = '/waterfall.png',
+        img2_name = '/bareme.png',
         )
