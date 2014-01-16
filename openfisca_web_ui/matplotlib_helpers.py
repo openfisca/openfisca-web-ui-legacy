@@ -26,10 +26,20 @@
 """Matplotlib functions"""  # TODO(rsoufflet) This file will disappear as soon as graphs are rendered client-side
 
 
+import collections
 import operator
+import os
 
+import matplotlib
+# This is a hack to use matlplotlib without X
+# http://stackoverflow.com/questions/4931376/generating-matplotlib-graphs-without-a-running-x-server
+matplotlib.use('Agg')
 from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
+from matplotlib.patches import FancyArrow, Rectangle
+from matplotlib import pyplot
+import numpy
+
+from . import conf
 
 
 def iter_columns_from_tree(node, base_value = 0, code = None):
@@ -90,3 +100,84 @@ def iter_nodes_from_tree(node, code = None):
             yield descendant_code, descendant_node
     if code is not None:
         yield code, node
+
+
+def create_waterfall_png(trees, filename = 'waterfall.png'):
+    bar_width = 0.8
+    title = u'Revenu annuel'
+    tree = trees[0]
+    xlabel = u'Prélèvements et prestations sociales'
+    ylabel = u'Montant en €'
+
+    figure = pyplot.figure(figsize = (12, 9), dpi = 100)
+    ax = figure.add_subplot(111)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xscale('linear')
+    ax.set_yscale('linear')
+
+    names = []
+    for column_index, column in enumerate(iter_columns_from_tree(tree)):
+        r, g, b = column['color']
+        base_value = column['base_value']
+        value = column['value']
+        arrow = FancyArrow(
+            column_index + bar_width / 2,
+            base_value, 0,
+            value,
+            width = bar_width,
+            fc = (float(r) / 255, float(g) / 255, float(b) / 255),
+            linewidth = 0.5,
+            edgecolor = 'black',
+            label = column['description'],
+            picker = True,
+            length_includes_head = True,
+            head_width = bar_width,
+            head_length = abs(value / 15),
+            )
+
+        ax.add_patch(arrow)
+        rounded_value = round(value)
+        ax.text(
+            column_index + bar_width / 2,
+            max(base_value, value) + 1,
+            str(rounded_value),
+            horizontalalignment = 'center',
+            verticalalignment = 'bottom',
+            color = 'black' if rounded_value >= 0 else 'red',
+            weight = 'bold',
+            )
+        names.append(column['name'])
+
+    xlim = (-bar_width / 2, len(names) - 1 + bar_width * 1.5)
+    ax.plot(xlim, [0, 0], color = 'black')
+    ax.set_xticklabels(names, rotation = '45')
+    ax.set_xticks(numpy.arange(len(names)) + bar_width / 2)
+    ax.set_xlim(xlim)
+
+    figure.savefig(os.path.join(conf['static_files_dir'], filename))
+    pyplot.close(figure)
+
+
+def create_bareme_png(trees, simulation, filename = 'bareme.png'):
+    title = u'Variation du revenu disponible' if simulation.get('reform') else u'Revenu disponible'
+    tree = trees[0]
+    ylabel = u'Revenu disponible (en € par an)'
+
+    figure = pyplot.figure(figsize = (8, 5), dpi = 100)
+    ax = figure.add_subplot(111)
+    ax.set_title(title)
+    figure.subplots_adjust(bottom = 0.09, top = 0.95, left = 0.11, right = 0.95)
+
+    code_node_couples = collections.OrderedDict(iter_nodes_from_tree(tree))
+    x_node = code_node_couples['sal']
+    x_values = x_node['values']
+    ax.set_xlabel(x_node['description'])
+    ax.set_xlim(min(x_values), max(x_values))
+    ax.set_ylabel(ylabel)
+
+    draw_node(ax, tree, [0] * len(x_values), x_values)
+    draw_legend(ax)
+    figure.savefig(os.path.join(conf['static_files_dir'], filename))
+    pyplot.close(figure)

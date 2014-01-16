@@ -26,14 +26,7 @@
 """Root controllers"""
 
 
-import collections
-import json
 import logging
-import urllib2
-
-from matplotlib.patches import FancyArrow
-from matplotlib import pyplot
-import numpy
 
 from .. import contexts, conv, matplotlib_helpers, templates, urls, wsgihelpers
 from . import accounts, sessions, simulations
@@ -124,96 +117,21 @@ def simulation(req):
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Login Error: {0}').format(errors))
 
-    request = urllib2.Request('http://api.raviart.com/api/1/simulate', headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'OpenFisca-Notebook',
-        })
-    response = urllib2.urlopen(request, json.dumps(data))
-    response_dict = json.loads(response.read(), object_pairs_hook = collections.OrderedDict)
-    trees = response_dict['value']
+    simulation, errors = conv.data_to_simulation(data, state = ctx)
+    if errors is not None:
+        # TODO(rsoufflet) Make a real 500 internal error
+        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+    trees = simulation['value']
 
-    bar_width = 0.8
-    title = u'Revenu annuel'
-    tree = trees[0]
-    xlabel = u'Prélèvements et prestations sociales'
-    ylabel = u'Montant en €'
-
-    figure = pyplot.figure(figsize = (12, 9), dpi = 100)
-    ax = figure.add_subplot(111)
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_xscale('linear')
-    ax.set_yscale('linear')
-
-    names = []
-    for column_index, column in enumerate(matplotlib_helpers.iter_columns_from_tree(tree)):
-        r, g, b = column['color']
-        base_value = column['base_value']
-        value = column['value']
-        arrow = FancyArrow(
-            column_index + bar_width / 2,
-            base_value, 0,
-            value,
-            width = bar_width,
-            fc = (float(r) / 255, float(g) / 255, float(b) / 255),
-            linewidth = 0.5,
-            edgecolor = 'black',
-            label = column['description'],
-            picker = True,
-            length_includes_head = True,
-            head_width = bar_width,
-            head_length = abs(value / 15),
-            )
-
-        ax.add_patch(arrow)
-        rounded_value = round(value)
-        ax.text(
-            column_index + bar_width / 2,
-            max(base_value, value) + 1,
-            str(rounded_value),
-            horizontalalignment = 'center',
-            verticalalignment = 'bottom',
-            color = 'black' if rounded_value >= 0 else 'red',
-            weight = 'bold',
-            )
-        names.append(column['name'])
-
-    xlim = (-bar_width / 2, len(names) - 1 + bar_width * 1.5)
-    ax.plot(xlim, [0, 0], color = 'black')
-    ax.set_xticklabels(names, rotation = '45')
-    ax.set_xticks(numpy.arange(len(names)) + bar_width / 2)
-    ax.set_xlim(xlim)
-
-    figure.savefig('openfisca_web_ui/static/waterfall.png')
-    pyplot.close(figure)
-
-    title = u'Variation du revenu disponible' if simulation.get('reform') else u'Revenu disponible'
-    tree = trees[0]
-    ylabel = u'Revenu disponible (en € par an)'
-
-    figure = pyplot.figure(figsize = (8, 5), dpi = 100)
-    ax = figure.add_subplot(111)
-    ax.set_title(title)
-    figure.subplots_adjust(bottom = 0.09, top = 0.95, left = 0.11, right = 0.95)
-
-    code_node_couples = collections.OrderedDict(matplotlib_helpers.iter_nodes_from_tree(tree))
-    x_node = code_node_couples['sal']
-    x_values = x_node['values']
-    ax.set_xlabel(x_node['description'])
-    ax.set_xlim(min(x_values), max(x_values))
-    ax.set_ylabel(ylabel)
-
-    matplotlib_helpers.draw_node(ax, tree, [0] * len(x_values), x_values)
-    matplotlib_helpers.draw_legend(ax)
-    figure.savefig('openfisca_web_ui/static/bareme.png')
-    pyplot.close(figure)
+    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
+    matplotlib_helpers.create_bareme_png(trees, data, filename = 'bareme.png')
 
     return templates.render(
         ctx,
         '/simulation.mako',
         data = data,
         errors = errors,
+        simulation_json = trees[0],
         img_name = '/waterfall.png',
         img2_name = '/bareme.png',
         )

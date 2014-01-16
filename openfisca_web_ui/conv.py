@@ -26,7 +26,10 @@
 """Conversion functions"""
 
 
+import collections
+import json
 import re
+import urllib2
 
 from biryani1.baseconv import *  # NOQA
 from biryani1.bsonconv import *  # NOQA
@@ -38,6 +41,22 @@ from biryani1.states import default_state, State  # NOQA
 
 N_ = lambda message: message
 uuid_re = re.compile(ur'[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$')
+
+
+def data_to_simulation(data, state = None):
+    from . import conf
+    if data is None:
+        return None, None
+    if state is None:
+        state = default_state
+
+    request = urllib2.Request(conf['openfisca.api.url'], headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'OpenFisca-Notebook',
+        })
+    response = urllib2.urlopen(request, json.dumps(data))
+    response_dict = json.loads(response.read(), object_pairs_hook = collections.OrderedDict)
+    return response_dict, None
 
 
 input_to_uuid = pipe(
