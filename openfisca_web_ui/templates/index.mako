@@ -44,10 +44,6 @@ from openfisca_web_ui import model, texthelpers, urls
 ##            <h1><%self:brand/></h1>
 ##        </div>
         <%self:jumbotron/>
-<%
-    user = model.get_user(ctx)
-%>\
-    % if user is not None:
         <form action="/simulation" role="form">
             <div class="form-group">
                 <label for="maxrev">Salaire imposable</label>
@@ -70,7 +66,6 @@ from openfisca_web_ui import model, texthelpers, urls
             </div>
             <button type="submit" class="btn btn-default">Submit</button>
         </form>
-    % endif
 </%def>
 
 
