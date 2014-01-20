@@ -31,4 +31,8 @@
 
 
 <%def name="container_content()" filter="trim">
+    <form action="/personne" method="POST">
+        ${first_page_forms.html | n}
+        <input type="submit">
+    </form>
 </%def>
