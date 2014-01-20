@@ -67,7 +67,7 @@ setup(
     install_requires = [
         'Babel >= 0.9.4',
         'Biryani1 >= 0.9dev',
-        'bleach >= 1.2',
+        #'bleach >= 1.2',
         'Mako >= 0.8',
         'matplotlib >= 1.3.1',
         'numpy >= 1.7.1',
