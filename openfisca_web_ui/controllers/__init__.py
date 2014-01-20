@@ -39,7 +39,25 @@ router = None
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    return templates.render(ctx, '/index.mako')
+    return wsgihelpers.redirect(ctx, location = '/personne')
+
+
+@wsgihelpers.wsgify
+def declaration_impot(req):
+    ctx = contexts.Ctx(req)
+    return templates.render(ctx, '/declaration-impot.mako')
+
+
+@wsgihelpers.wsgify
+def famille(req):
+    ctx = contexts.Ctx(req)
+    return templates.render(ctx, '/famille.mako')
+
+
+@wsgihelpers.wsgify
+def logement_principal(req):
+    ctx = contexts.Ctx(req)
+    return templates.render(ctx, '/logement-principal.mako')
 
 
 def make_router():
@@ -47,7 +65,10 @@ def make_router():
     global router
     router = urls.make_router(
         ('GET', '^/?$', index),
-        ('GET', '^/simulation?$', simulation),
+        ('GET', '^/personne/?$', personne),
+        ('GET', '^/declaration-impot/?$', declaration_impot),
+        ('GET', '^/famille/?$', famille),
+        ('GET', '^/logement-principal/?$', logement_principal),
 
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
@@ -58,6 +79,12 @@ def make_router():
         ('POST', '^/logout/?$', accounts.logout),
         )
     return router
+
+
+@wsgihelpers.wsgify
+def personne(req):
+    ctx = contexts.Ctx(req)
+    return templates.render(ctx, '/personne.mako')
 
 
 @wsgihelpers.wsgify
