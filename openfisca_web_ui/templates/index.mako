@@ -44,26 +44,9 @@ from openfisca_web_ui import model, texthelpers, urls
 ##            <h1><%self:brand/></h1>
 ##        </div>
         <%self:jumbotron/>
+
         <form action="/simulation" role="form">
-            <div class="form-group">
-                <label for="maxrev">Salaire imposable</label>
-                <input class="form-control" id="maxrev" name="maxrev" value="20000" type="int">
-            </div>
-
-            <div class="form-group">
-                <label for="nmen">Nombre de ménage</label>
-                <input class="form-control" id="nmen" name="nmen" value="3" type="int">
-            </div>
-
-            <div class="form-group">
-                <label for="birth">Date de naissance</label>
-                <input class="form-control" id="birth" name="birth" value="1965-12-27" type="date">
-            </div>
-
-            <div class="form-group">
-                <label for="year">Année</label>
-                <input class="form-control" id="year" name="year" value="2006" type="int">
-            </div>
+            ${first_page_forms.html | n}
             <button type="submit" class="btn btn-default">Submit</button>
         </form>
 </%def>

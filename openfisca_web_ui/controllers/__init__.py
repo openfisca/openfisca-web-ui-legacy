@@ -28,6 +28,13 @@
 
 import logging
 
+from formencode import variabledecode
+from korma.date import Date
+from korma.group import Group, List
+from korma.group import Group
+from korma.repeat import Repeat
+from korma.text import Number, Text
+
 from .. import contexts, conv, matplotlib_helpers, templates, urls, wsgihelpers
 from . import accounts, sessions, simulations
 
@@ -39,7 +46,20 @@ router = None
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    return templates.render(ctx, '/index.mako')
+    first_page_forms = Repeat(
+        count = 2,
+        question = List(
+            name = 'person_data',
+            questions = [
+                Text(label = u'Revenu (net mensuel)', name = 'maxrev'),
+                Text(label = u'Situation'),
+                Date(label = u'Date de naissance', name = 'birth'),
+                Number(label = u'Année', name = 'year'),
+                ]
+            ),
+        )
+
+    return templates.render(ctx, '/index.mako', first_page_forms = first_page_forms)
 
 
 def make_router():
@@ -64,21 +84,52 @@ def make_router():
 def simulation(req):
     ctx = contexts.Ctx(req)
     params = req.params
+
+    first_page_forms = Repeat(
+        count = 2,
+        question = List(
+            name = 'person_data',
+            questions = [
+                Text(label = u'Revenu (net mensuel)', name = 'maxrev'),
+                Text(label = u'Situation'),
+                Date(label = u'Date de naissance', name = 'birth'),
+                Number(label = u'Année', name = 'year'),
+                ]
+            ),
+        )
+    korma_inputs = variabledecode.variable_decode(params)
+    korma_data, errors = first_page_forms.root_input_to_data(korma_inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Error: {0}').format(errors))
+
+    print '--- KORMA DATA {}'.format('-' * 120)
+    print korma_data
     inputs = {
-        'maxrev': params.get('maxrev'),
-        'nmen': params.get('nmen'),
+        'maxrev': max([person['person_data'].get('maxrev') for person in korma_inputs['repeat']]),
+        'nmen': len(korma_inputs['repeat']),
         'scenarios': [{
-            'indiv': [{
-                'birth': params.get('birth'),
-                }],
-            'year': params.get('year'),
+            'indiv': [
+                {
+                    'birth': person['person_data'].get('birth'),
+                    'noichef': 0,
+                    'noidec': 0,
+                    'noipref': 0,
+#                    'quifam': 'chef',
+#                    'quifoy': 'vous',
+#                    'quimen': 'pref',
+                    }
+                for person in korma_inputs['repeat']
+                ],
+            'year': korma_inputs['repeat'][0]['person_data'].get('year') or 2006,
             }],
-        'x_axis': params.get('x_axis'),
+        'x_axis': 'sali',
         }
+    print '--- INPUTS {}'.format('-' * 120)
+    print inputs
     data, errors = conv.struct(
         {
             'maxrev': conv.pipe(conv.input_to_int, conv.default(14000)),
-            'nmen': conv.pipe(conv.input_to_int, conv.default(3)),
+#            'nmen': conv.pipe(conv.input_to_int, conv.default(3)),
             'scenarios': conv.pipe(
                 conv.uniform_sequence(
                     conv.struct(
@@ -90,11 +141,11 @@ def simulation(req):
                                     {
                                         'birth': conv.pipe(conv.cleanup_line, conv.not_none),
                                         'noichef': conv.pipe(conv.input_to_int, conv.default(0)),
-                                        'noidec': conv.pipe(conv.input_to_int, conv.default(0)),
-                                        'noipref': conv.pipe(conv.input_to_int, conv.default(0)),
-                                        'quifam': conv.pipe(conv.cleanup_line, conv.default('chef')),
-                                        'quifoy': conv.pipe(conv.cleanup_line, conv.default('vous')),
-                                        'quimen': conv.pipe(conv.cleanup_line, conv.default('pref')),
+#                                        'noidec': conv.pipe(conv.input_to_int, conv.default(0)),
+#                                        'noipref': conv.pipe(conv.input_to_int, conv.default(0)),
+#                                        'quifam': conv.pipe(conv.cleanup_line, conv.default('chef')),
+#                                        'quifoy': conv.pipe(conv.cleanup_line, conv.default('vous')),
+#                                        'quimen': conv.pipe(conv.cleanup_line, conv.default('pref')),
                                         },
                                     drop_none_values = False,
                                     ),
@@ -115,7 +166,7 @@ def simulation(req):
             },
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Login Error: {0}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Data Error: {0}').format(errors))
 
     simulation, errors = conv.data_to_simulation(data, state = ctx)
     if errors is not None:
