@@ -35,9 +35,7 @@
     <div class="error">${errors}</div>
     % endif
 
-    % if img_name is not None:
-    <img src="${img_name}" alt="Graphique" width="600">
-    % endif
+    <img src="/waterfall.png" alt="Graphique" width="600">
 
     <form action="/famille" class="korma" method="POST">
         ${page_form.html | n}

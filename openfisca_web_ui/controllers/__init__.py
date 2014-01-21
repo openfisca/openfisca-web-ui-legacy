@@ -82,8 +82,6 @@ def declaration_impot(req):
             '/declaration-impot.mako',
             errors = errors,
             page_form = page_form,
-            img_name = None,
-            img2_name = None,
             )
 
     if session.user.korma_data is None:
@@ -99,8 +97,6 @@ def declaration_impot(req):
             api_data = api_data,
             errors = errors,
             page_form = page_form,
-            img_name = None,
-            img2_name = None,
             )
 
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
@@ -182,8 +178,6 @@ def personne(req):
             ctx,
             '/personne.mako',
             page_form = page_form,
-            img_name = None,
-            img2_name = None,
             )
 
     params = req.params
@@ -196,8 +190,6 @@ def personne(req):
             '/personne.mako',
             errors = errors,
             page_form = page_form,
-            img_name = None,
-            img2_name = None,
             )
 
     if session.user.korma_data is None:
@@ -212,8 +204,6 @@ def personne(req):
             api_data = api_data,
             errors = errors,
             page_form = page_form,
-            img_name = None,
-            img2_name = None,
             )
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
