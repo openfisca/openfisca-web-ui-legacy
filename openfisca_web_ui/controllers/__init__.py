@@ -198,72 +198,12 @@ def personne(req):
             img_name = None,
             img2_name = None,
             )
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Error: {0}').format(errors))
-
-    inputs = {
-        'maxrev': max([person['person_data'].get('maxrev') for person in korma_inputs['repeat']]),
-        'nmen': len(korma_inputs['repeat']),
-        'scenarios': [{
-            'indiv': [
-                {
-                    'birth': person['person_data'].get('birth'),
-                    'noichef': 0,
-                    'noidec': 0,
-                    'noipref': 0,
-#                    'quifam': 'chef',
-#                    'quifoy': 'vous',
-#                    'quimen': 'pref',
-                    }
-                for person in korma_inputs['repeat']
-                ],
-            'year': korma_inputs['repeat'][0]['person_data'].get('year') or 2006,
-            }],
-        'x_axis': 'sali',
-        }
-    data, errors = conv.struct(
-        {
-            'maxrev': conv.pipe(conv.anything_to_int, conv.default(14000)),
-            'nmen': conv.pipe(conv.anything_to_int, conv.default(3)),
-            'scenarios': conv.pipe(
-                conv.uniform_sequence(
-                    conv.struct(
-                        {
-                            'declar': conv.default({'0': {}}),
-                            'famille': conv.default({'0': {}}),
-                            'indiv': conv.uniform_sequence(
-                                conv.struct(
-                                    {
-                                        'birth': conv.pipe(conv.cleanup_line, conv.not_none),
-                                        'noichef': conv.pipe(conv.anything_to_int, conv.default(0)),
-                                        'noidec': conv.pipe(conv.anything_to_int, conv.default(0)),
-                                        'noipref': conv.pipe(conv.anything_to_int, conv.default(0)),
-                                        'quifam': conv.pipe(conv.cleanup_line, conv.default('chef')),
-                                        'quifoy': conv.pipe(conv.cleanup_line, conv.default('vous')),
-                                        'quimen': conv.pipe(conv.cleanup_line, conv.default('pref')),
-                                        },
-                                    drop_none_values = False,
-                                    ),
-                                ),
-                            'menage': conv.default({'0': {}}),
-                            'year': conv.pipe(
-                                conv.anything_to_int,
-                                conv.test_greater_or_equal(1950),
-                                conv.test_less_or_equal(2015),
-                                ),
-                            },
-                        ),
-                    drop_none_items = True,
-                    ),
-                conv.test(lambda l: len(l) > 0, error = ctx._('You must provide at least one scenario')),
-                ),
-            'x_axis': conv.pipe(conv.default('sali'), conv.test_in(['sali'])),
-            },
-        )(inputs, state = ctx)
 
     if session.user.korma_data is None:
         session.user.korma_data = {}
     session.user.korma_data.update(korma_data)
 
+    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
     if errors is not None:
         return templates.render(
             ctx,
@@ -275,9 +215,6 @@ def personne(req):
             img2_name = None,
             )
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Data Error: {0}').format(errors))
-
-    simulation, errors = conv.data_to_simulation(data, state = ctx)
     if errors is not None:
         # TODO(rsoufflet) Make a real 500 internal error
         return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))

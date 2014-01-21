@@ -98,3 +98,71 @@ def method(method_name, *args, **kwargs):
             return value, None
         return getattr(value, method_name)(state or default_state, *args, **kwargs)
     return method_converter
+
+
+def user_data_to_api_data(user_data, state = None):
+    if user_data is None:
+        return None, None
+    if state is None:
+        state = default_state
+
+    # TODO(rsoufflet) Ask for annual revenue. Annual revenu != "net mensuel * 12"
+    inputs = {
+        'maxrev': sum([person['person_data'].get('maxrev') * 12 for person in user_data.get('personnes') or []]),
+        'nmen': 2,
+        'scenarios': [{
+            'indiv': [
+                {
+                    'birth': person['person_data'].get('birth'),
+                    'noichef': 0,
+                    'noidec': 0,
+                    'noipref': 0,
+                    }
+                for person in user_data.get('personnes') or []
+                ],
+            'year': 2006,
+            }],
+        'x_axis': 'sali',
+        }
+    return inputs_to_api_data(inputs, state = state)
+
+
+inputs_to_api_data = struct(
+    {
+        'maxrev': pipe(anything_to_int, default(14000)),
+        'nmen': pipe(anything_to_int, default(3)),
+        'scenarios': pipe(
+            uniform_sequence(
+                struct(
+                    {
+                        'declar': default({'0': {}}),
+                        'famille': default({'0': {}}),
+                        'indiv': uniform_sequence(
+                            struct(
+                                {
+                                    'birth': function(lambda d: d.isoformat()),
+                                    'noichef': pipe(anything_to_int, default(0)),
+                                    'noidec': pipe(anything_to_int, default(0)),
+                                    'noipref': pipe(anything_to_int, default(0)),
+                                    'quifam': pipe(cleanup_line, default('chef')),
+                                    'quifoy': pipe(cleanup_line, default('vous')),
+                                    'quimen': pipe(cleanup_line, default('pref')),
+                                    },
+                                drop_none_values = False,
+                                ),
+                            ),
+                        'menage': default({'0': {}}),
+                        'year': pipe(
+                            anything_to_int,
+                            test_greater_or_equal(1950),
+                            test_less_or_equal(2015),
+                            ),
+                        },
+                    ),
+                drop_none_items = True,
+                ),
+            test(lambda l: len(l) > 0),
+            ),
+        'x_axis': pipe(default('sali'), test_in(['sali'])),
+        },
+    )
