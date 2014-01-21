@@ -191,7 +191,6 @@ def logement_principal(req):
                 Select(
                     first_unselected = True,
                     label = u'Statut d\'occupation',
-                    label_position = u'right',
                     required = True,
                     choices = [
                         u'Non renseigné',
@@ -295,7 +294,6 @@ def personne(req):
                 Select(
                     first_unselected = True,
                     label = u'Activité',
-                    label_position = u'right',
                     required = True,
                     choices = [
                         u'Actif occupé',
@@ -309,7 +307,6 @@ def personne(req):
                 Select(
                     first_unselected = True,
                     label = u'Statut marital',
-                    label_position = u'right',
                     required = True,
                     choices = [
                         u'Marié',
