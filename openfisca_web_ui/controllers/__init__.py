@@ -32,7 +32,7 @@ import uuid
 
 from formencode import variabledecode
 from korma.choice import Select
-from korma.group import List
+from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
@@ -59,7 +59,7 @@ def declaration_impot(req):
 
     page_form = Repeat(
         count = 2,
-        question = List(
+        question = Group(
             name = 'person_data',
             questions = [
                 Text(label = u'Vous'),
@@ -129,7 +129,7 @@ def famille(req):
 
     page_form = Repeat(
         count = 2,
-        question = List(
+        question = Group(
             name = 'person_data',
             questions = [
                 Text(label = u'Parent1'),
@@ -199,7 +199,7 @@ def logement_principal(req):
 
     page_form = Repeat(
         count = 2,
-        question = List(
+        question = Group(
             name = 'person_data',
             questions = [
                 Select(
@@ -306,13 +306,14 @@ def personne(req):
     session.save(ctx, safe = True)
 
     page_form = Repeat(
-        count = 2,
         name = 'personnes',
-        question = List(
+        question = Group(
             name = 'person_data',
             questions = [
-                Number(label = u'Salaire imposable annuel', name = 'maxrev'),
+                Number(control_attributes = {'class': u'form-control'}, label = u'Salaire imposable annuel',
+                       name = 'maxrev'),
                 Select(
+                    control_attributes = {'class': u'form-control'},
                     first_unselected = True,
                     label = u'Activité',
                     required = True,
@@ -324,8 +325,10 @@ def personne(req):
                         u'Autre inactif',
                         ]
                     ),
-                questions.MongoDate(label = u'Date de naissance', name = 'birth'),
+                questions.MongoDate(control_attributes = {'class': u'form-control'}, label = u'Date de naissance',
+                                    name = 'birth'),
                 Select(
+                    control_attributes = {'class': u'form-control'},
                     first_unselected = True,
                     label = u'Statut marital',
                     required = True,

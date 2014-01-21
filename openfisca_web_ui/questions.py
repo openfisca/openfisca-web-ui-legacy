@@ -23,7 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""Korma custom questions"""
+"""Korma questions adapted to MongoDB"""
 
 
 from korma.date import Date
