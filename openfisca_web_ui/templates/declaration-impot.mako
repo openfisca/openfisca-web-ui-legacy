@@ -31,4 +31,16 @@
 
 
 <%def name="container_content()" filter="trim">
+    % if errors is not None:
+    <div class="error">${errors}</div>
+    % endif
+
+    % if img_name is not None:
+    <img src="${img_name}" alt="Graphique" width="600">
+    % endif
+
+    <form action="/famille" method="POST">
+        ${second_page_forms.html | n}
+        <input type="submit">
+    </form>
 </%def>

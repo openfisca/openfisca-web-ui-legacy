@@ -26,7 +26,9 @@
 """Root controllers"""
 
 
+import datetime
 import logging
+import uuid
 
 from formencode import variabledecode
 from korma.date import Date
@@ -34,7 +36,7 @@ from korma.group import List
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from .. import contexts, conv, matplotlib_helpers, templates, urls, wsgihelpers
+from .. import contexts, conv, matplotlib_helpers, model, templates, urls, wsgihelpers
 from . import accounts, sessions, simulations
 
 
@@ -51,7 +53,65 @@ def index(req):
 @wsgihelpers.wsgify
 def declaration_impot(req):
     ctx = contexts.Ctx(req)
-    return templates.render(ctx, '/declaration-impot.mako')
+    session = ctx.session
+    if session is None:
+        raise wsgihelpers.redirect(ctx, location = '/personne')
+
+    second_page_forms = Repeat(
+        count = 2,
+        question = List(
+            name = 'person_data',
+            questions = [
+                Text(label = u'Vous'),
+                Text(label = u'Conv'),
+                Repeat(
+                    count = 1,
+                    question = Text(label = u'Personne à charge', name = 'pac'),
+                    ),
+                ]
+            ),
+        )
+
+    params = req.params
+    korma_inputs = variabledecode.variable_decode(params)
+    korma_data, errors = second_page_forms.root_input_to_data(korma_inputs, state = ctx)
+    if errors is not None:
+        second_page_forms.fill(korma_inputs)
+        return templates.render(
+            ctx,
+            '/declaration-impot.mako',
+            errors = errors,
+            second_page_forms = second_page_forms,
+            img_name = None,
+            img2_name = None,
+            )
+
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+    session.user.korma_data.update(korma_data)
+
+    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/declaration-impot.mako',
+            api_data = api_data,
+            errors = errors,
+            second_page_forms = second_page_forms,
+            img_name = None,
+            img2_name = None,
+            )
+
+    simulation, errors = conv.data_to_simulation(api_data, state = ctx)
+    if errors is not None:
+        # TODO(rsoufflet) Make a real 500 internal error
+        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+    trees = simulation['value']
+
+    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
+    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
+
+    return wsgihelpers.redirect(ctx, location = '/famille')
 
 
 @wsgihelpers.wsgify
@@ -72,7 +132,7 @@ def make_router():
     router = urls.make_router(
         ('GET', '^/?$', index),
         (('GET', 'POST'), '^/personne/?$', personne),
-        ('GET', '^/declaration-impot/?$', declaration_impot),
+        (('GET', 'POST'), '^/declaration-impot/?$', declaration_impot),
         ('GET', '^/famille/?$', famille),
         ('GET', '^/logement-principal/?$', logement_principal),
 
