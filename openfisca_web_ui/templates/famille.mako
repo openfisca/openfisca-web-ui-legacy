@@ -23,12 +23,14 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-<%inherit file="site.mako"/>
-
-
-<%def name="breadcrumb()" filter="trim">
-</%def>
+<%inherit file="form.mako"/>
 
 
 <%def name="container_content()" filter="trim">
+    <img src="/waterfall.png" alt="Graphique" width="600">
+
+    <form action="/logement-principal" class="korma" method="POST">
+        ${page_form.html | n}
+        <input type="submit">
+    </form>
 </%def>

@@ -23,42 +23,14 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-<%inherit file="site.mako"/>
-
-
-<%def name="breadcrumb()" filter="trim">
-</%def>
+<%inherit file="form.mako"/>
 
 
 <%def name="container_content()" filter="trim">
-    % if errors is not None:
-    <div class="error">${errors}</div>
-    % endif
-
     <img src="/waterfall.png" alt="Graphique" width="600">
 
     <form action="/famille" class="korma" method="POST">
         ${page_form.html | n}
         <input type="submit">
     </form>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-    <%parent:scripts/>
-    <script>
-requirejs.config({
-  paths : {
-    domReady: '/bower/requirejs-domready/domReady',
-    jquery: '/bower/jquery/jquery',
-    modernizr: '/bower/modernizr/modernizr',
-    myClass: '/bower/my-class/my.class'
-  }
-});
-define(
-  'config',
-${page_form.full_javascript_config | n, js}
-);
-require(['/js/main.js']);
-    </script>
 </%def>

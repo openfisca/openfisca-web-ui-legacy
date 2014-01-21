@@ -71,6 +71,13 @@ def declaration_impot(req):
                 ]
             ),
         )
+    if req.method == 'GET':
+        page_form.fill(session.user.korma_data)
+        return templates.render(
+            ctx,
+            '/declaration-impot.mako',
+            page_form = page_form,
+            )
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
@@ -134,6 +141,13 @@ def famille(req):
                 ]
             ),
         )
+    if req.method == 'GET':
+        page_form.fill(session.user.korma_data)
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            page_form = page_form,
+            )
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
@@ -207,6 +221,13 @@ def logement_principal(req):
                 ]
             ),
         )
+    if req.method == 'GET':
+        page_form.fill(session.user.korma_data)
+        return templates.render(
+            ctx,
+            '/logement-principal.mako',
+            page_form = page_form,
+            )
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
