@@ -57,8 +57,8 @@ def data_to_simulation(data, state = None):
     try:
         response = urllib2.urlopen(request, json.dumps(data))
     except urllib2.HTTPError as http_exc:
-        return data, state._('API respond with HTTP code {}'.format(http_exc.code))
-    except urllib2.URLError as url_exc:
+        return data, state._('API respond with HTTP code {}').format(http_exc.code)
+    except urllib2.URLError:
         return data, state._('API didn\'t respond')
     response_dict = json.loads(response.read(), object_pairs_hook = collections.OrderedDict)
     return response_dict, None
