@@ -57,7 +57,7 @@ def declaration_impot(req):
     if session is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
-    second_page_forms = Repeat(
+    page_form = Repeat(
         count = 2,
         question = List(
             name = 'person_data',
@@ -74,14 +74,14 @@ def declaration_impot(req):
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
-    korma_data, errors = second_page_forms.root_input_to_data(korma_inputs, state = ctx)
+    korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
-        second_page_forms.fill(korma_inputs)
+        page_form.fill(korma_inputs)
         return templates.render(
             ctx,
             '/declaration-impot.mako',
             errors = errors,
-            second_page_forms = second_page_forms,
+            page_form = page_form,
             img_name = None,
             img2_name = None,
             )
@@ -89,6 +89,7 @@ def declaration_impot(req):
     if session.user.korma_data is None:
         session.user.korma_data = {}
     session.user.korma_data.update(korma_data)
+    session.user.save(ctx, safe = True)
 
     api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
     if errors is not None:
@@ -97,7 +98,7 @@ def declaration_impot(req):
             '/declaration-impot.mako',
             api_data = api_data,
             errors = errors,
-            second_page_forms = second_page_forms,
+            page_form = page_form,
             img_name = None,
             img2_name = None,
             )
@@ -133,8 +134,8 @@ def make_router():
         ('GET', '^/?$', index),
         (('GET', 'POST'), '^/personne/?$', personne),
         (('GET', 'POST'), '^/declaration-impot/?$', declaration_impot),
-        ('GET', '^/famille/?$', famille),
-        ('GET', '^/logement-principal/?$', logement_principal),
+        (('GET', 'POST'), '^/famille/?$', famille),
+        (('GET', 'POST'), '^/logement-principal/?$', logement_principal),
 
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
@@ -163,7 +164,7 @@ def personne(req):
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
 
-    first_page_forms = Repeat(
+    page_form = Repeat(
         count = 2,
         name = 'personnes',
         question = List(
@@ -180,21 +181,21 @@ def personne(req):
         return templates.render(
             ctx,
             '/personne.mako',
-            first_page_forms = first_page_forms,
+            page_form = page_form,
             img_name = None,
             img2_name = None,
             )
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
-    korma_data, errors = first_page_forms.root_input_to_data(korma_inputs, state = ctx)
+    korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
-        first_page_forms.fill(korma_inputs)
+        page_form.fill(korma_inputs)
         return templates.render(
             ctx,
             '/personne.mako',
             errors = errors,
-            first_page_forms = first_page_forms,
+            page_form = page_form,
             img_name = None,
             img2_name = None,
             )
@@ -210,7 +211,7 @@ def personne(req):
             '/personne.mako',
             api_data = api_data,
             errors = errors,
-            first_page_forms = first_page_forms,
+            page_form = page_form,
             img_name = None,
             img2_name = None,
             )

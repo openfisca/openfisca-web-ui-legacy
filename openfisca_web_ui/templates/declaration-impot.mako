@@ -39,8 +39,28 @@
     <img src="${img_name}" alt="Graphique" width="600">
     % endif
 
-    <form action="/famille" method="POST">
-        ${second_page_forms.html | n}
+    <form action="/famille" class="korma" method="POST">
+        ${page_form.html | n}
         <input type="submit">
     </form>
+</%def>
+
+
+<%def name="scripts()" filter="trim">
+    <%parent:scripts/>
+    <script>
+requirejs.config({
+  paths : {
+    domReady: '/bower/requirejs-domready/domReady',
+    jquery: '/bower/jquery/jquery',
+    modernizr: '/bower/modernizr/modernizr',
+    myClass: '/bower/my-class/my.class'
+  }
+});
+define(
+  'config',
+${page_form.full_javascript_config | n, js}
+);
+require(['/js/main.js']);
+    </script>
 </%def>

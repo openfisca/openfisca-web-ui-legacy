@@ -10,6 +10,7 @@ site-js:
         - bower/jquery/jquery.js
         - bower/bootstrap/dist/js/bootstrap.js
         - bower/typeahead.js/dist/typeahead.js
+        - bower/requirejs/require.js
         - js/site.js
     filters: uglifyjs
     output: js/site.min.js
