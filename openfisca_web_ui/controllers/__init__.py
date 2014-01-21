@@ -31,12 +31,11 @@ import logging
 import uuid
 
 from formencode import variabledecode
-from korma.date import Date
 from korma.group import List
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from .. import contexts, conv, matplotlib_helpers, model, templates, urls, wsgihelpers
+from .. import contexts, conv, matplotlib_helpers, model, questions, templates, urls, wsgihelpers
 from . import accounts, sessions, simulations
 
 
@@ -168,7 +167,7 @@ def personne(req):
             questions = [
                 Number(label = u'Salaire imposable annuel', name = 'maxrev'),
                 Text(label = u'Situation'),
-                Date(label = u'Date de naissance', name = 'birth'),
+                questions.MongoDate(label = u'Date de naissance', name = 'birth'),
                 Number(label = u'Année', name = 'year'),
                 ]
             ),
@@ -195,6 +194,7 @@ def personne(req):
     if session.user.korma_data is None:
         session.user.korma_data = {}
     session.user.korma_data.update(korma_data)
+    session.user.save(ctx, safe = True)
 
     api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
     if errors is not None:

@@ -27,6 +27,7 @@
 
 
 import collections
+import datetime
 import json
 import re
 import urllib2
@@ -62,6 +63,12 @@ def data_to_simulation(data, state = None):
         return data, state._('API didn\'t respond')
     response_dict = json.loads(response.read(), object_pairs_hook = collections.OrderedDict)
     return response_dict, None
+
+
+date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[:6])))
+
+
+datetime_to_date = function(lambda value: value.date())
 
 
 input_to_uuid = pipe(
