@@ -31,6 +31,7 @@ import logging
 import uuid
 
 from formencode import variabledecode
+from korma.choice import Select
 from korma.group import List
 from korma.repeat import Repeat
 from korma.text import Number, Text
@@ -73,9 +74,9 @@ def declaration_impot(req):
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
+    page_form.fill(korma_inputs)
     korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
-        page_form.fill(korma_inputs)
         return templates.render(
             ctx,
             '/declaration-impot.mako',
@@ -113,13 +114,138 @@ def declaration_impot(req):
 @wsgihelpers.wsgify
 def famille(req):
     ctx = contexts.Ctx(req)
-    return templates.render(ctx, '/famille.mako')
+    session = ctx.session
+    if session is None:
+        raise wsgihelpers.redirect(ctx, location = '/personne')
+    print 'Famille session id : ', session.user_id
+    print 'Famille user data : ', session.user.korma_data
+
+    page_form = Repeat(
+        count = 2,
+        question = List(
+            name = 'person_data',
+            questions = [
+                Text(label = u'Parent1'),
+                Text(label = u'Parent2'),
+                Repeat(
+                    count = 1,
+                    question = Text(label = u'Enfant', name = 'enf'),
+                    ),
+                ]
+            ),
+        )
+
+    params = req.params
+    korma_inputs = variabledecode.variable_decode(params)
+    page_form.fill(korma_inputs)
+    korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            errors = errors,
+            page_form = page_form,
+            )
+
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+    session.user.korma_data.update(korma_data)
+    session.user.save(ctx, safe = True)
+
+    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
+
+    simulation, errors = conv.data_to_simulation(api_data, state = ctx)
+    if errors is not None:
+        # TODO(rsoufflet) Make a real 500 internal error
+        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+    trees = simulation['value']
+
+    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
+    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
+
+    return wsgihelpers.redirect(ctx, location = '/logement-principal')
 
 
 @wsgihelpers.wsgify
 def logement_principal(req):
     ctx = contexts.Ctx(req)
-    return templates.render(ctx, '/logement-principal.mako')
+    session = ctx.session
+    if session is None:
+        raise wsgihelpers.redirect(ctx, location = '/personne')
+    print 'Logement principal session id : ', session.user_id
+    print 'Logement principal user data : ', session.user.korma_data
+
+    page_form = Repeat(
+        count = 2,
+        question = List(
+            name = 'person_data',
+            questions = [
+                Select(
+                    first_unselected = True,
+                    label = u'Statut d\'occupation',
+                    label_position = u'right',
+                    required = True,
+                    choices = [
+                        u'Non renseigné',
+                        u'Accédant à la propriété',
+                        u'Propriétaire (non accédant) du logement',
+                        u'Locataire d\'un logement HLM',
+                        u'Locataire ou sous-locataire d\'un logement loué vide non-HLM',
+                        u'Locataire ou sous-locataire d\'un logement loué meublé ou d\'une chambre d\'hôtel',
+                        u'Logé gratuitement par des parents, des amis ou l\'employeur',
+                        ]
+                    ),
+                Number(label = u'Loyer'),
+                Text(label = u'Localité'),
+                ]
+            ),
+        )
+
+    params = req.params
+    korma_inputs = variabledecode.variable_decode(params)
+    page_form.fill(korma_inputs)
+    korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            errors = errors,
+            page_form = page_form,
+            )
+
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+    session.user.korma_data.update(korma_data)
+    session.user.save(ctx, safe = True)
+
+    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
+
+    simulation, errors = conv.data_to_simulation(api_data, state = ctx)
+    if errors is not None:
+        # TODO(rsoufflet) Make a real 500 internal error
+        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+    trees = simulation['value']
+
+    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
+    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
+
+    return wsgihelpers.redirect(ctx, location = '/logement-principal')
 
 
 def make_router():
@@ -166,13 +292,39 @@ def personne(req):
             name = 'person_data',
             questions = [
                 Number(label = u'Salaire imposable annuel', name = 'maxrev'),
-                Text(label = u'Situation'),
+                Select(
+                    first_unselected = True,
+                    label = u'Activité',
+                    label_position = u'right',
+                    required = True,
+                    choices = [
+                        u'Actif occupé',
+                        u'Chômeur',
+                        u'Étudiant, élève',
+                        u'Retraité',
+                        u'Autre inactif',
+                        ]
+                    ),
                 questions.MongoDate(label = u'Date de naissance', name = 'birth'),
-                Number(label = u'Année', name = 'year'),
+                Select(
+                    first_unselected = True,
+                    label = u'Statut marital',
+                    label_position = u'right',
+                    required = True,
+                    choices = [
+                        u'Marié',
+                        u'Célibataire',
+                        u'Divorcé',
+                        u'Veuf',
+                        u'Pacsé',
+                        u'Jeune veuf',
+                        ]
+                    ),
                 ]
             ),
         )
     if req.method == 'GET':
+        page_form.fill(session.user.korma_data)
         return templates.render(
             ctx,
             '/personne.mako',
@@ -181,9 +333,9 @@ def personne(req):
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
+    page_form.fill(korma_inputs)
     korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
-        page_form.fill(korma_inputs)
         return templates.render(
             ctx,
             '/personne.mako',
