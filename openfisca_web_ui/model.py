@@ -42,6 +42,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     description = None
     email = None
     full_name = None
+    korma_data = None
     slug = None
 
     @classmethod

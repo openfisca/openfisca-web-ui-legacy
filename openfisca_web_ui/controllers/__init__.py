@@ -91,6 +91,18 @@ def make_router():
 @wsgihelpers.wsgify
 def personne(req):
     ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None:
+        ctx.session = session = model.Session()
+        session.token = unicode(uuid.uuid4())
+    if session.user_id is None:
+        user = model.Account()
+        user._id = unicode(uuid.uuid4())
+        user.compute_words()
+        user.save(ctx, safe = True)
+        session.user_id = user._id
+    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+    session.save(ctx, safe = True)
 
     first_page_forms = Repeat(
         count = 2,
@@ -172,6 +184,11 @@ def personne(req):
             'x_axis': conv.pipe(conv.default('sali'), conv.test_in(['sali'])),
             },
         )(inputs, state = ctx)
+
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+    session.user.korma_data.update(korma_data)
+
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Data Error: {0}').format(errors))
 
