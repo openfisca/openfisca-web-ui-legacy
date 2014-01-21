@@ -31,6 +31,10 @@
 
 
 <%def name="container_content()" filter="trim">
+    % if img_name is not None:
+    <img src="${img_name}" alt="Graphique" width="600">
+    % endif
+
     <form action="/personne" method="POST">
         ${first_page_forms.html | n}
         <input type="submit">

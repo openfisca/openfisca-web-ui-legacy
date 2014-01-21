@@ -30,8 +30,7 @@ import logging
 
 from formencode import variabledecode
 from korma.date import Date
-from korma.group import Group, List
-from korma.group import Group
+from korma.group import List
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
@@ -106,10 +105,11 @@ def personne(req):
 
     first_page_forms = Repeat(
         count = 2,
+        name = 'personnes',
         question = List(
             name = 'person_data',
             questions = [
-                Text(label = u'Revenu (net mensuel)', name = 'maxrev'),
+                Number(label = u'Salaire imposable annuel', name = 'maxrev'),
                 Text(label = u'Situation'),
                 Date(label = u'Date de naissance', name = 'birth'),
                 Number(label = u'Année', name = 'year'),
@@ -117,12 +117,27 @@ def personne(req):
             ),
         )
     if req.method == 'GET':
-        return templates.render(ctx, '/personne.mako', first_page_forms = first_page_forms)
+        return templates.render(
+            ctx,
+            '/personne.mako',
+            first_page_forms = first_page_forms,
+            img_name = None,
+            img2_name = None,
+            )
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
     korma_data, errors = first_page_forms.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
+        first_page_forms.fill(korma_inputs)
+        return templates.render(
+            ctx,
+            '/personne.mako',
+            errors = errors,
+            first_page_forms = first_page_forms,
+            img_name = None,
+            img2_name = None,
+            )
         return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Error: {0}').format(errors))
 
     inputs = {
@@ -190,6 +205,16 @@ def personne(req):
     session.user.korma_data.update(korma_data)
 
     if errors is not None:
+        return templates.render(
+            ctx,
+            '/personne.mako',
+            api_data = api_data,
+            errors = errors,
+            first_page_forms = first_page_forms,
+            img_name = None,
+            img2_name = None,
+            )
+    simulation, errors = conv.data_to_simulation(api_data, state = ctx)
         return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Data Error: {0}').format(errors))
 
     simulation, errors = conv.data_to_simulation(data, state = ctx)
@@ -199,14 +224,6 @@ def personne(req):
     trees = simulation['value']
 
     matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
-    matplotlib_helpers.create_bareme_png(trees, data, filename = 'bareme.png')
+    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
 
-    return templates.render(
-        ctx,
-        '/personne.mako',
-        data = data,
-        errors = errors,
-        simulation_json = trees[0],
-        img_name = '/waterfall.png',
-        img2_name = '/bareme.png',
-        )
+    return wsgihelpers.redirect(ctx, location = '/declaration-impot')
