@@ -98,6 +98,7 @@ ${conf['realm']}
 
 
 <%def name="footer()" filter="trim">
+        <hr>
         <footer class="footer">
             <%self:footer_service/>
             <p>
