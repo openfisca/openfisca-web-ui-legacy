@@ -36,7 +36,7 @@ from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from .. import contexts, conv, matplotlib_helpers, model, questions, templates, urls, wsgihelpers
+from .. import contexts, conf, conv, matplotlib_helpers, model, questions, templates, urls, wsgihelpers
 from . import accounts, sessions, simulations
 
 
@@ -91,7 +91,7 @@ def declaration_impot(req):
 
     if session.user.korma_data is None:
         session.user.korma_data = {}
-    session.user.korma_data.update(korma_data)
+    session.user.korma_data.setdefault('declaration_impot', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
     api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
@@ -157,7 +157,7 @@ def famille(req):
 
     if session.user.korma_data is None:
         session.user.korma_data = {}
-    session.user.korma_data.update(korma_data)
+    session.user.korma_data.setdefault('famille', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
     api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
@@ -233,7 +233,7 @@ def logement_principal(req):
 
     if session.user.korma_data is None:
         session.user.korma_data = {}
-    session.user.korma_data.update(korma_data)
+    session.user.korma_data.setdefault('logement_principal', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
     api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
@@ -294,6 +294,8 @@ def personne(req):
         session.user_id = user._id
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
+    if req.cookies.get(conf['cookie']) != session.token:
+        req.response.set_cookie(conf['cookie'], session.token, httponly = True)  # , secure = req.scheme == 'https')
 
     page_form = Repeat(
         name = 'personnes',
@@ -356,7 +358,7 @@ def personne(req):
 
     if session.user.korma_data is None:
         session.user.korma_data = {}
-    session.user.korma_data.update(korma_data)
+    session.user.korma_data.setdefault('personne', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
     api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
