@@ -345,7 +345,8 @@ def personne(req):
             ),
         )
     if req.method == 'GET':
-        page_form.fill(session.user.korma_data)
+        if session.user.korma_data is not None:
+            page_form.fill(session.user.korma_data)
         return templates.render(
             ctx,
             '/personne.mako',
