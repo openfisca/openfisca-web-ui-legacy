@@ -286,14 +286,16 @@ def personne(req):
     if session is None:
         ctx.session = session = model.Session()
         session.token = unicode(uuid.uuid4())
-    if session.user_id is None:
+    if session.user is None:
         user = model.Account()
         user._id = unicode(uuid.uuid4())
+        user.api_key = unicode(uuid.uuid4())
         user.compute_words()
-        user.save(ctx, safe = True)
         session.user_id = user._id
+        user.save(ctx, safe = True)
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
+
     if req.cookies.get(conf['cookie']) != session.token:
         req.response.set_cookie(conf['cookie'], session.token, httponly = True)  # , secure = req.scheme == 'https')
 
@@ -335,7 +337,7 @@ def personne(req):
             ),
         )
     if req.method == 'GET':
-        if session.user.korma_data is not None:
+        if session.user is not None and session.user.korma_data is not None:
             page_form.fill(session.user.korma_data.get('personne', {}))
         return templates.render(
             ctx,
