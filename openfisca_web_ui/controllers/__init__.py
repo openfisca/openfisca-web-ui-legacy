@@ -58,21 +58,19 @@ def declaration_impot(req):
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
     page_form = Repeat(
-        count = 2,
         question = Group(
-            name = 'person_data',
+            name = 'declaration_impot',
             questions = [
                 Text(label = u'Vous'),
-                Text(label = u'Conv'),
+                Text(label = u'Conj'),
                 Repeat(
-                    count = 1,
                     question = Text(label = u'Personne à charge', name = 'pac'),
                     ),
                 ]
             ),
         )
     if req.method == 'GET':
-        page_form.fill(session.user.korma_data)
+        page_form.fill(session.user.korma_data.get('declaration_impot', {}))
         return templates.render(
             ctx,
             '/declaration-impot.mako',
@@ -124,25 +122,21 @@ def famille(req):
     session = ctx.session
     if session is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
-    print 'Famille session id : ', session.user_id
-    print 'Famille user data : ', session.user.korma_data
 
     page_form = Repeat(
-        count = 2,
         question = Group(
-            name = 'person_data',
+            name = 'famille',
             questions = [
                 Text(label = u'Parent1'),
                 Text(label = u'Parent2'),
                 Repeat(
-                    count = 1,
                     question = Text(label = u'Enfant', name = 'enf'),
                     ),
                 ]
             ),
         )
     if req.method == 'GET':
-        page_form.fill(session.user.korma_data)
+        page_form.fill(session.user.korma_data.get('famille', {}))
         return templates.render(
             ctx,
             '/famille.mako',
@@ -151,7 +145,7 @@ def famille(req):
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
-    page_form.fill(korma_inputs)
+    page_form.fill(korma_inputs if korma_inputs.get('famille') else {})
     korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
         return templates.render(
@@ -194,18 +188,14 @@ def logement_principal(req):
     session = ctx.session
     if session is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
-    print 'Logement principal session id : ', session.user_id
-    print 'Logement principal user data : ', session.user.korma_data
 
     page_form = Repeat(
-        count = 2,
         question = Group(
-            name = 'person_data',
+            name = 'logement_principal',
             questions = [
                 Select(
                     first_unselected = True,
                     label = u'Statut d\'occupation',
-                    required = True,
                     choices = [
                         u'Non renseigné',
                         u'Accédant à la propriété',
@@ -222,7 +212,7 @@ def logement_principal(req):
             ),
         )
     if req.method == 'GET':
-        page_form.fill(session.user.korma_data)
+        page_form.fill(session.user.korma_data.get('logement_principal', {}))
         return templates.render(
             ctx,
             '/logement-principal.mako',
@@ -316,7 +306,6 @@ def personne(req):
                     control_attributes = {'class': u'form-control'},
                     first_unselected = True,
                     label = u'Activité',
-                    required = True,
                     choices = [
                         u'Actif occupé',
                         u'Chômeur',
@@ -331,7 +320,6 @@ def personne(req):
                     control_attributes = {'class': u'form-control'},
                     first_unselected = True,
                     label = u'Statut marital',
-                    required = True,
                     choices = [
                         u'Marié',
                         u'Célibataire',
@@ -346,10 +334,11 @@ def personne(req):
         )
     if req.method == 'GET':
         if session.user.korma_data is not None:
-            page_form.fill(session.user.korma_data)
+            page_form.fill(session.user.korma_data.get('personne', {}))
         return templates.render(
             ctx,
             '/personne.mako',
+            errors = None,
             page_form = page_form,
             )
 

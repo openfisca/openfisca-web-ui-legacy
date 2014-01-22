@@ -29,7 +29,7 @@
 <%def name="container_content()" filter="trim">
     <img src="/waterfall.png" alt="Graphique" width="600">
 
-    <form action="/famille" class="korma" method="POST">
+    <form action="/declaration-impot" class="korma" method="POST">
         ${page_form.html | n}
         <input type="submit">
     </form>
