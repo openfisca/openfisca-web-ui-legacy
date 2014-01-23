@@ -56,7 +56,10 @@ def data_to_simulation(data, state = None):
         'User-Agent': 'OpenFisca-Notebook',
         })
     try:
-        response = urllib2.urlopen(request, json.dumps(data))
+        response = urllib2.urlopen(
+            request,
+            json.dumps(data, default = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj),
+            )
     except urllib2.HTTPError as http_exc:
         return data, state._('API respond with HTTP code {}').format(http_exc.code)
     except urllib2.URLError:
