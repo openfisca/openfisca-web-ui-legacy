@@ -27,7 +27,9 @@
 
 
 <%def name="container_content()" filter="trim">
-    <img src="/waterfall.png" alt="Graphique" width="600">
+    <h1>Déclaration d'impôt sur le revenu</h1>
+
+    <img src="/waterfall.png" alt="Graphique" style="width: 500px;">
 
     <form action="/declaration-impot" class="korma" method="POST">
         ${page_form.html | n}

@@ -27,7 +27,9 @@
 
 
 <%def name="container_content()" filter="trim">
-    <img src="/waterfall.png" alt="Graphique" width="600">
+    <h1>Personnes</h1>
+
+    <img src="/waterfall.png" alt="Graphique" style="width: 500px;">
 
     <form action="/personne" class="korma" method="POST" role="form">
         ${page_form.html | n}

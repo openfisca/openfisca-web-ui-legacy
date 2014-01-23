@@ -27,7 +27,9 @@
 
 
 <%def name="container_content()" filter="trim">
-    <img src="/waterfall.png" alt="Graphique" width="600">
+    <h1>Logement principal</h1>
+
+    <img src="/waterfall.png" alt="Graphique" style="width: 600px;">
 
     <form action="/logement-principal" class="korma" method="POST">
         ${page_form.html | n}
