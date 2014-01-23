@@ -54,17 +54,31 @@ def index(req):
 def declaration_impot(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    if session is None:
+    if session is None or session.user is None or session.user.korma_data.get('personne') is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
+    persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
     page_form = Repeat(
         question = Group(
             name = 'declaration_impot',
             questions = [
-                Text(label = u'Vous'),
-                Text(label = u'Conj'),
+                Select(
+                    choices = persons_name,
+                    control_attributes = {'class': u'form-control'},
+                    label = u'Vous',
+                    ),
+                Select(
+                    choices = persons_name,
+                    control_attributes = {'class': u'form-control'},
+                    label = u'Conj',
+                    ),
                 Repeat(
-                    question = Text(label = u'Personne à charge', name = 'pac'),
+                    question = Select(
+                        choices = persons_name,
+                        control_attributes = {'class': u'form-control'},
+                        label = u'Personne à charge',
+                        name = 'pac',
+                        ),
                     ),
                 ]
             ),
@@ -120,17 +134,31 @@ def declaration_impot(req):
 def famille(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    if session is None:
+    if session is None or session.user is None or session.user.korma_data.get('personne') is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
+    persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
     page_form = Repeat(
         question = Group(
             name = 'famille',
             questions = [
-                Text(label = u'Parent1'),
-                Text(label = u'Parent2'),
+                Select(
+                    choices = persons_name,
+                    control_attributes = {'class': u'form-control'},
+                    label = u'Parent1',
+                    ),
+                Select(
+                    choices = persons_name,
+                    control_attributes = {'class': u'form-control'},
+                    label = u'Parent2',
+                    ),
                 Repeat(
-                    question = Text(label = u'Enfant', name = 'enf'),
+                    question = Select(
+                        choices = persons_name,
+                        control_attributes = {'class': u'form-control'},
+                        label = u'Enfant',
+                        name = 'enf',
+                        ),
                     ),
                 ]
             ),
@@ -194,6 +222,7 @@ def logement_principal(req):
             name = 'logement_principal',
             questions = [
                 Select(
+                    control_attributes = {'class': u'form-control'},
                     first_unselected = True,
                     label = u'Statut d\'occupation',
                     choices = [
@@ -206,8 +235,8 @@ def logement_principal(req):
                         u'Logé gratuitement par des parents, des amis ou l\'employeur',
                         ]
                     ),
-                Number(label = u'Loyer'),
-                Text(label = u'Localité'),
+                Number(control_attributes = {'class': u'form-control'}, label = u'Loyer'),
+                Text(control_attributes = {'class': u'form-control'}, label = u'Localité'),
                 ]
             ),
         )
@@ -304,6 +333,7 @@ def personne(req):
         question = Group(
             name = 'person_data',
             questions = [
+                Text(control_attributes = {'class': u'form-control'}, label = u'Nom', name = 'name'),
                 Number(control_attributes = {'class': u'form-control'}, label = u'Salaire imposable annuel',
                        name = 'maxrev'),
                 Select(
