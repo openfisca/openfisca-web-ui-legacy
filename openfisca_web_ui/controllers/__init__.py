@@ -40,6 +40,12 @@ from .. import contexts, conf, conv, matplotlib_helpers, model, questions, templ
 from . import accounts, sessions, simulations
 
 
+bootstrap_control_inner_html_template = u'''
+<label class="col-sm-8 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-4">
+  {self.control_html}
+</div>'''
+bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
 log = logging.getLogger(__name__)
 router = None
 
@@ -55,9 +61,8 @@ def all_questions(req):
     group_questions = questions.openfisca_france_column_data_to_questions(keep_entities=inputs['entities'])
     page_form = Group(
         children_attributes = {
-            'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-            'inner_html_template': u'''<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">{self.control_html}</div>''',
+            '_inner_html_template': bootstrap_control_inner_html_template,
+            '_outer_html_template': bootstrap_group_outer_html_template,
             },
         name=u'all_questions',
         questions=group_questions,
@@ -108,21 +113,20 @@ def declaration_impot(req):
     page_form = Repeat(
         template_question = Group(
             children_attributes = {
-                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                'inner_html_template': u'''
-<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">{self.control_html}</div>''',
+                '_outer_html_template': bootstrap_group_outer_html_template,
                 },
             name = 'declaration_impot',
             questions = [
                 Select(
                     control_attributes = {'class': 'form-control'},
                     choices = persons_name,
+                    inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Vous',
                     ),
                 Select(
                     control_attributes = {'class': 'form-control'},
                     choices = persons_name,
+                    inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Conj',
                     ),
                 Repeat(
@@ -130,6 +134,7 @@ def declaration_impot(req):
                         control_attributes = {'class': 'form-control'},
                         choices = persons_name,
                         label = u'Personne à charge',
+                        inner_html_template = bootstrap_control_inner_html_template,
                         name = 'pac',
                         ),
                     ),
@@ -194,27 +199,27 @@ def famille(req):
     page_form = Repeat(
         template_question = Group(
             children_attributes = {
-                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                'inner_html_template': u'''
-<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">{self.control_html}</div>''',
+                '_outer_html_template': bootstrap_group_outer_html_template,
                 },
             name = 'famille',
             questions = [
                 Select(
                     control_attributes = {'class': 'form-control'},
                     choices = persons_name,
+                    inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent1',
                     ),
                 Select(
                     control_attributes = {'class': 'form-control'},
                     choices = persons_name,
+                    inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent2',
                     ),
                 Repeat(
                     template_question = Select(
                         control_attributes = {'class': 'form-control'},
                         choices = persons_name,
+                        inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Enfant',
                         name = 'enf',
                         ),
@@ -279,10 +284,9 @@ def logement_principal(req):
     page_form = Repeat(
         template_question = Group(
             children_attributes = {
-                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                'inner_html_template': u'''
-<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">{self.control_html}</div>''',
+                '_control_attributes': {'class': u'form-control'},
+                '_inner_html_template': bootstrap_control_inner_html_template,
+                '_outer_html_template': bootstrap_group_outer_html_template,
                 },
             name = 'logement_principal',
             questions = [
@@ -296,19 +300,12 @@ def logement_principal(req):
                         u'Locataire ou sous-locataire d\'un logement loué meublé ou d\'une chambre d\'hôtel',
                         u'Logé gratuitement par des parents, des amis ou l\'employeur',
                         ],
-                    control_attributes = {'class': 'form-control'},
                     first_unselected = True,
                     label = u'Statut d\'occupation',
                     name = u'so',
                     ),
-                Number(
-                    control_attributes = {'class': 'form-control'},
-                    label = u'Loyer',
-                    ),
-                Text(
-                    control_attributes = {'class': 'form-control'},
-                    label = u'Localité',
-                    ),
+                Number(label = u'Loyer'),
+                Text(label = u'Localité'),
                 ]
             ),
         )
@@ -405,27 +402,20 @@ def personne(req):
         name = 'personnes',
         template_question = Group(
             children_attributes = {
-                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                'inner_html_template': u'''
-<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">
-    {self.control_html}
-</div>
-''',
+                '_control_attributes': {'class': 'form-control'},
+                '_inner_html_template': bootstrap_control_inner_html_template,
+                '_outer_html_template': bootstrap_group_outer_html_template,
                 },
             name = 'person_data',
             questions = [
                 Text(
-                    control_attributes = {'class': 'form-control'},
                     label = u'Nom',
                     name = 'name',
                     ),
                 Number(
-                    control_attributes = {'class': 'form-control'},
                     label = u'Salaire imposable annuel',
                     name = 'maxrev'),
                 Select(
-                    control_attributes = {'class': 'form-control'},
                     first_unselected = True,
                     label = u'Activité',
                     choices = [
@@ -437,11 +427,9 @@ def personne(req):
                         ]
                     ),
                 questions.MongoDate(
-                    control_attributes = {'class': 'form-control'},
                     label = u'Date de naissance',
                     name = 'birth'),
                 Select(
-                    control_attributes = {'class': 'form-control'},
                     first_unselected = True,
                     label = u'Statut marital',
                     choices = [
