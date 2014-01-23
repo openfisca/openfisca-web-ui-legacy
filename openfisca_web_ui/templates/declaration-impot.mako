@@ -31,6 +31,13 @@
 
     <img src="/waterfall.png" alt="Graphique" style="width: 500px;">
 
+    <ul class="nav nav-tabs">
+      <li><a href="/personne">Personnes</a></li>
+      <li class="active"><a href="/declaration-impot">Déclaration d'impôt</a></li>
+      <li><a href="/famille">Famille</a></li>
+      <li><a href="/logement-principal">Logement principal</a></li>
+    </ul>
+
     <form action="/declaration-impot" class="korma" method="POST">
         ${page_form.html | n}
         <input class="btn btn-success" type="submit">

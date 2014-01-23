@@ -27,9 +27,16 @@
 
 
 <%def name="container_content()" filter="trim">
-    <h1>Personnes</h1>
+    <h1>Openfisca</h1>
 
     <img src="/waterfall.png" alt="Graphique" style="width: 500px;">
+
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="/personne">Personnes</a></li>
+      <li><a href="/declaration-impot">Déclaration d'impôt</a></li>
+      <li><a href="/famille">Famille</a></li>
+      <li><a href="/logement-principal">Logement principal</a></li>
+    </ul>
 
     <form class="korma form-horizontal" method="POST" role="form">
         ${page_form.html | n}

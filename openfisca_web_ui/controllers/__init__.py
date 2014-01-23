@@ -193,18 +193,27 @@ def famille(req):
     persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
     page_form = Repeat(
         template_question = Group(
+            children_attributes = {
+                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+                'inner_html_template': u'''
+<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-10">{self.control_html}</div>''',
+                },
             name = 'famille',
             questions = [
                 Select(
+                    control_attributes = {'class': 'form-control'},
                     choices = persons_name,
                     label = u'Parent1',
                     ),
                 Select(
+                    control_attributes = {'class': 'form-control'},
                     choices = persons_name,
                     label = u'Parent2',
                     ),
                 Repeat(
                     template_question = Select(
+                        control_attributes = {'class': 'form-control'},
                         choices = persons_name,
                         label = u'Enfant',
                         name = 'enf',
@@ -269,12 +278,15 @@ def logement_principal(req):
 
     page_form = Repeat(
         template_question = Group(
+            children_attributes = {
+                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+                'inner_html_template': u'''
+<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-10">{self.control_html}</div>''',
+                },
             name = 'logement_principal',
             questions = [
                 Select(
-                    first_unselected = True,
-                    label = u'Statut d\'occupation',
-                    name = u'so',
                     choices = [
                         u'Non renseigné',
                         u'Accédant à la propriété',
@@ -283,10 +295,20 @@ def logement_principal(req):
                         u'Locataire ou sous-locataire d\'un logement loué vide non-HLM',
                         u'Locataire ou sous-locataire d\'un logement loué meublé ou d\'une chambre d\'hôtel',
                         u'Logé gratuitement par des parents, des amis ou l\'employeur',
-                        ]
+                        ],
+                    control_attributes = {'class': 'form-control'},
+                    first_unselected = True,
+                    label = u'Statut d\'occupation',
+                    name = u'so',
                     ),
-                Number(label = u'Loyer'),
-                Text(label = u'Localité'),
+                Number(
+                    control_attributes = {'class': 'form-control'},
+                    label = u'Loyer',
+                    ),
+                Text(
+                    control_attributes = {'class': 'form-control'},
+                    label = u'Localité',
+                    ),
                 ]
             ),
         )
