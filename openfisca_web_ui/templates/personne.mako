@@ -31,8 +31,8 @@
 
     <img src="/waterfall.png" alt="Graphique" style="width: 500px;">
 
-    <form action="/personne" class="korma" method="POST" role="form">
+    <form class="korma form-horizontal" method="POST" role="form">
         ${page_form.html | n}
-        <input type="submit">
+        <input class="btn btn-success" type="submit">
     </form>
 </%def>

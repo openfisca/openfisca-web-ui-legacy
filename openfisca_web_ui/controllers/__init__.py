@@ -49,11 +49,14 @@ def all_questions(req):
     ctx = contexts.Ctx(req)
     inputs = {'entities': req.params.getall('entity') or None}
     group_questions = questions.openfisca_france_column_data_to_questions(keep_entities=inputs['entities'])
-    page_form = Group(name=u'all_questions', questions=group_questions)
-    return templates.render(
-        ctx,
-        '/all-questions.mako',
-        page_form = page_form,
+    page_form = Group(
+        children_attributes = {
+            'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+            'inner_html_template': u'''<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-10">{self.control_html}</div>''',
+            },
+        name=u'all_questions',
+        questions=group_questions,
         )
 
 
@@ -72,23 +75,29 @@ def declaration_impot(req):
 
     persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
     page_form = Repeat(
-        question = Group(
+        template_question = Group(
+            children_attributes = {
+                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+                'inner_html_template': u'''
+<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-10">{self.control_html}</div>''',
+                },
             name = 'declaration_impot',
             questions = [
                 Select(
+                    control_attributes = {'class': 'form-control'},
                     choices = persons_name,
-                    control_attributes = {'class': u'form-control'},
                     label = u'Vous',
                     ),
                 Select(
+                    control_attributes = {'class': 'form-control'},
                     choices = persons_name,
-                    control_attributes = {'class': u'form-control'},
                     label = u'Conj',
                     ),
                 Repeat(
-                    question = Select(
+                    template_question = Select(
+                        control_attributes = {'class': 'form-control'},
                         choices = persons_name,
-                        control_attributes = {'class': u'form-control'},
                         label = u'Personne à charge',
                         name = 'pac',
                         ),
@@ -152,23 +161,20 @@ def famille(req):
 
     persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
     page_form = Repeat(
-        question = Group(
+        template_question = Group(
             name = 'famille',
             questions = [
                 Select(
                     choices = persons_name,
-                    control_attributes = {'class': u'form-control'},
                     label = u'Parent1',
                     ),
                 Select(
                     choices = persons_name,
-                    control_attributes = {'class': u'form-control'},
                     label = u'Parent2',
                     ),
                 Repeat(
-                    question = Select(
+                    template_question = Select(
                         choices = persons_name,
-                        control_attributes = {'class': u'form-control'},
                         label = u'Enfant',
                         name = 'enf',
                         ),
@@ -231,13 +237,13 @@ def logement_principal(req):
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
     page_form = Repeat(
-        question = Group(
+        template_question = Group(
             name = 'logement_principal',
             questions = [
                 Select(
-                    control_attributes = {'class': u'form-control'},
                     first_unselected = True,
                     label = u'Statut d\'occupation',
+                    name = u'so',
                     choices = [
                         u'Non renseigné',
                         u'Accédant à la propriété',
@@ -248,8 +254,8 @@ def logement_principal(req):
                         u'Logé gratuitement par des parents, des amis ou l\'employeur',
                         ]
                     ),
-                Number(control_attributes = {'class': u'form-control'}, label = u'Loyer'),
-                Text(control_attributes = {'class': u'form-control'}, label = u'Localité'),
+                Number(label = u'Loyer'),
+                Text(label = u'Localité'),
                 ]
             ),
         )
@@ -344,14 +350,29 @@ def personne(req):
 
     page_form = Repeat(
         name = 'personnes',
-        question = Group(
+        template_question = Group(
+            children_attributes = {
+                'outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+                'inner_html_template': u'''
+<label class="col-sm-2 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-10">
+    {self.control_html}
+</div>
+''',
+                },
             name = 'person_data',
             questions = [
-                Text(control_attributes = {'class': u'form-control'}, label = u'Nom', name = 'name'),
-                Number(control_attributes = {'class': u'form-control'}, label = u'Salaire imposable annuel',
-                       name = 'maxrev'),
+                Text(
+                    control_attributes = {'class': 'form-control'},
+                    label = u'Nom',
+                    name = 'name',
+                    ),
+                Number(
+                    control_attributes = {'class': 'form-control'},
+                    label = u'Salaire imposable annuel',
+                    name = 'maxrev'),
                 Select(
-                    control_attributes = {'class': u'form-control'},
+                    control_attributes = {'class': 'form-control'},
                     first_unselected = True,
                     label = u'Activité',
                     choices = [
@@ -362,10 +383,12 @@ def personne(req):
                         u'Autre inactif',
                         ]
                     ),
-                questions.MongoDate(control_attributes = {'class': u'form-control'}, label = u'Date de naissance',
-                                    name = 'birth'),
+                questions.MongoDate(
+                    control_attributes = {'class': 'form-control'},
+                    label = u'Date de naissance',
+                    name = 'birth'),
                 Select(
-                    control_attributes = {'class': u'form-control'},
+                    control_attributes = {'class': 'form-control'},
                     first_unselected = True,
                     label = u'Statut marital',
                     choices = [

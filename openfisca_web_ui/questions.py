@@ -43,12 +43,15 @@ class MongoDate(Date):
         return conv.pipe(super(MongoDate, self).default_input_to_data, conv.date_to_datetime)
 
 
-def openfisca_france_column_data_to_questions(keep_entities=None):
+def openfisca_france_column_data_to_questions(keep_entities = None):
     u'''keep_entities examples: "foy", "ind", "men"'''
     questions = []
     for name, column in openfisca_france.model.data.column_by_name.iteritems():
         if keep_entities is not None and column.entity not in keep_entities:
             continue
-        question = Text(name=name, label=conv.check(conv.decode_str()(column.label)))
+        question = Text(
+            control_attributes = {'class': u'form-control'},
+            name = name,
+            label = conv.check(conv.decode_str()(column.label)))
         questions.append(question)
     return questions

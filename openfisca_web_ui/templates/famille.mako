@@ -33,6 +33,6 @@
 
     <form action="/famille" class="korma" method="POST">
         ${page_form.html | n}
-        <input type="submit">
+        <input class="btn btn-success" type="submit">
     </form>
 </%def>
