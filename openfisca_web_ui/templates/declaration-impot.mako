@@ -35,4 +35,6 @@
         ${page_form.html | n}
         <input class="btn btn-success" type="submit">
     </form>
+
+    <a class="btn btn-primary" href="/all-questions?entity=foy">Plus de détails</a>
 </%def>

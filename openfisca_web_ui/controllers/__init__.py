@@ -47,6 +47,10 @@ router = None
 @wsgihelpers.wsgify
 def all_questions(req):
     ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None or session.user is None:
+        raise wsgihelpers.redirect(ctx, location = '/personne')
+
     inputs = {'entities': req.params.getall('entity') or None}
     group_questions = questions.openfisca_france_column_data_to_questions(keep_entities=inputs['entities'])
     page_form = Group(
@@ -58,6 +62,33 @@ def all_questions(req):
         name=u'all_questions',
         questions=group_questions,
         )
+    if req.method == 'GET':
+        if session is not None and session.user is not None:
+            page_form.fill(session.user.korma_data.get('all_questions', {}))
+        return templates.render(
+            ctx,
+            '/all-questions.mako',
+            page_form = page_form,
+            )
+
+    params = req.params
+    korma_inputs = variabledecode.variable_decode(params)
+    page_form.fill(korma_inputs)
+    korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/all-questions.mako',
+            errors = errors,
+            page_form = page_form,
+            )
+
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+    session.user.korma_data.setdefault('all_questions', {}).update(korma_data)
+    session.user.save(ctx, safe = True)
+
+    raise wsgihelpers.redirect(ctx, location = '/personne')
 
 
 @wsgihelpers.wsgify
