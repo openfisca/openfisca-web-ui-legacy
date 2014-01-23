@@ -45,6 +45,19 @@ router = None
 
 
 @wsgihelpers.wsgify
+def all_questions(req):
+    ctx = contexts.Ctx(req)
+    inputs = {'entities': req.params.getall('entity') or None}
+    group_questions = questions.openfisca_france_column_data_to_questions(keep_entities=inputs['entities'])
+    page_form = Group(name=u'all_questions', questions=group_questions)
+    return templates.render(
+        ctx,
+        '/all-questions.mako',
+        page_form = page_form,
+        )
+
+
+@wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
     return wsgihelpers.redirect(ctx, location = '/personne')
@@ -296,6 +309,7 @@ def make_router():
         (('GET', 'POST'), '^/declaration-impot/?$', declaration_impot),
         (('GET', 'POST'), '^/famille/?$', famille),
         (('GET', 'POST'), '^/logement-principal/?$', logement_principal),
+        (('GET', 'POST'), '^/all-questions/?$', all_questions),
 
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
