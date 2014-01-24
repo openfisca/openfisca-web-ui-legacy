@@ -35,7 +35,7 @@
     </p>
 % endif
 
-    <form class="korma" method="POST">
+    <form class="korma form-horizontal" method="POST">
         ${page_form.html | n}
         <input class="btn btn-success" type="submit">
     </form>

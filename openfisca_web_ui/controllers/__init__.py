@@ -57,19 +57,36 @@ def all_questions(req):
     if session is None or session.user is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
-    inputs = {'entities': req.params.getall('entity') or None}
-    group_questions = questions.openfisca_france_column_data_to_questions(keep_entities=inputs['entities'])
+    inputs = {
+        'entity': req.params.get('entity') or None,
+        'idx': req.params.get('idx') or None,
+        }
+    data, errors = conv.struct({
+        'idx': conv.anything_to_int,
+        'entities': conv.test_in(['fam', 'foy', 'ind', 'men']),
+        })(inputs, state = ctx)
+    group_questions = questions.openfisca_france_column_data_to_questions(keep_entity=data['entity'])
     page_form = Group(
         children_attributes = {
             '_inner_html_template': bootstrap_control_inner_html_template,
             '_outer_html_template': bootstrap_group_outer_html_template,
             },
-        name=u'all_questions',
-        questions=group_questions,
+        name = u'all_questions',
+        questions = group_questions,
         )
+
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+    if data['entity'] == 'fam':
+        user_data = session.user.korma_data['famille']['famille_repeat'][data['idx']]
+    elif data['entity'] == 'foy':
+        user_data = session.user.korma_data['declaration_impot']['declaration_impot_repeat'][data['idx']]
+    elif data['entity'] == 'ind':
+        user_data = session.user.korma_data['personne']['personnes'][data['idx']]
+
     if req.method == 'GET':
         if session is not None and session.user is not None:
-            page_form.fill(session.user.korma_data.get('all_questions', {}))
+            page_form.fill(user_data)
         return templates.render(
             ctx,
             '/all-questions.mako',
@@ -78,7 +95,7 @@ def all_questions(req):
 
     params = req.params
     korma_inputs = variabledecode.variable_decode(params)
-    page_form.fill(korma_inputs)
+    page_form.fill(user_data)
     korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
     if errors is not None:
         return templates.render(
@@ -87,10 +104,7 @@ def all_questions(req):
             errors = errors,
             page_form = page_form,
             )
-
-    if session.user.korma_data is None:
-        session.user.korma_data = {}
-    session.user.korma_data.setdefault('all_questions', {}).update(korma_data)
+    user_data.update(korma_data)
     session.user.save(ctx, safe = True)
 
     raise wsgihelpers.redirect(ctx, location = '/personne')
@@ -307,7 +321,7 @@ def famille(req):
     page_form = Repeat(
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=foy&idx={self.parent_data[famille_repeat][index]}" class="btn btn-primary pull-right">
+<a href="/all-questions?entity=fam&idx={self.parent_data[famille_repeat][index]}" class="btn btn-primary pull-right">
 Plus de détails</a></div>''',
             },
         outer_html_template = u'<div class="repeat">{self.inner_html_template}</div>',
@@ -401,7 +415,7 @@ def logement_principal(req):
     page_form = Repeat(
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=foy&idx={self.parent_data[logement_principal_repeat][index]}"
+<a href="/all-questions?entity=men&idx={self.parent_data[logement_principal_repeat][index]}"
 class="btn btn-primary pull-right">Plus de détails</a></div>''',
             },
         template_question = Group(
@@ -529,7 +543,7 @@ def personne(req):
     page_form = Repeat(
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=foy&idx={self.parent_data[personnes][index]}" class="btn btn-primary pull-right">
+<a href="/all-questions?entity=ind&idx={self.parent_data[personnes][index]}" class="btn btn-primary pull-right">
 Plus de détails</a></div>''',
             },
         outer_html_template = u'<div class="repeat">{self.inner_html_template}</div>',
