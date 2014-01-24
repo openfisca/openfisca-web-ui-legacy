@@ -109,7 +109,10 @@ def declaration_impot(req):
     if session is None or session.user is None or session.user.korma_data.get('personne') is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
-    persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
+    persons_value_and_name = [
+        (unicode(idx), person['person_data']['name'])
+        for idx, person in enumerate(session.user.korma_data['personne']['personnes'] or [])
+        ]
     page_form = Repeat(
         template_question = Group(
             children_attributes = {
@@ -119,20 +122,20 @@ def declaration_impot(req):
             questions = [
                 Select(
                     control_attributes = {'class': 'form-control'},
-                    choices = persons_name,
+                    choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Vous',
                     ),
                 Select(
                     control_attributes = {'class': 'form-control'},
-                    choices = persons_name,
+                    choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Conj',
                     ),
                 Repeat(
                     template_question = Select(
                         control_attributes = {'class': 'form-control'},
-                        choices = persons_name,
+                        choices = persons_value_and_name,
                         label = u'Personne à charge',
                         inner_html_template = bootstrap_control_inner_html_template,
                         name = 'pac',
@@ -195,7 +198,10 @@ def famille(req):
     if session is None or session.user is None or session.user.korma_data.get('personne') is None:
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
-    persons_name = [person['person_data']['name'] for person in session.user.korma_data['personne']['personnes'] or []]
+    persons_value_and_name = [
+        (unicode(idx), person['person_data']['name'])
+        for idx, person in enumerate(session.user.korma_data['personne']['personnes'] or [])
+        ]
     page_form = Repeat(
         template_question = Group(
             children_attributes = {
@@ -205,20 +211,20 @@ def famille(req):
             questions = [
                 Select(
                     control_attributes = {'class': 'form-control'},
-                    choices = persons_name,
+                    choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent1',
                     ),
                 Select(
                     control_attributes = {'class': 'form-control'},
-                    choices = persons_name,
+                    choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent2',
                     ),
                 Repeat(
                     template_question = Select(
                         control_attributes = {'class': 'form-control'},
-                        choices = persons_name,
+                        choices = persons_value_and_name,
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Enfant',
                         name = 'enf',
