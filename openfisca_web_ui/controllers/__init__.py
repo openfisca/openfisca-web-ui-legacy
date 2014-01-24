@@ -278,8 +278,13 @@ class="btn btn-primary pull-right"> Plus de détails</a></div>''',
 
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
-        # TODO(rsoufflet) Make a real 500 internal error
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+        return templates.render(
+            ctx,
+            '/declaration-impot.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     trees = simulation['value']
 
     matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
@@ -371,8 +376,13 @@ Plus de détails</a></div>''',
 
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
-        # TODO(rsoufflet) Make a real 500 internal error
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     trees = simulation['value']
 
     matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
@@ -459,8 +469,13 @@ class="btn btn-primary pull-right">Plus de détails</a></div>''',
 
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
-        # TODO(rsoufflet) Make a real 500 internal error
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     trees = simulation['value']
 
     matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
@@ -602,8 +617,13 @@ Plus de détails</a></div>''',
             )
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
-        # TODO(rsoufflet) Make a real 500 internal error
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'API Error: {0}').format(errors))
+        return templates.render(
+            ctx,
+            '/personne.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     trees = simulation['value']
 
     matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')

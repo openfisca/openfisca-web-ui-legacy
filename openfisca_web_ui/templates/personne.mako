@@ -45,7 +45,13 @@
         </div>
 
         <div class="col-sm-6">
+% if errors:
+            <p class="alert alert-warning">
+                ${errors | n, js}
+            </p>
+% else:
             <img class="waterfall-img" src="/waterfall.png" alt="Graphique">
+% endif
         </div>
     </div>
 </%def>

@@ -29,6 +29,12 @@
 <%def name="container_content()" filter="trim">
     <h1>Toutes les questions</h1>
 
+% if errors:
+    <p class="alert alert-warning">
+        ${errors | n, js}
+    </p>
+% endif
+
     <form class="korma" method="POST">
         ${page_form.html | n}
         <input class="btn btn-success" type="submit">

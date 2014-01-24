@@ -26,6 +26,7 @@
 """Mako templates rendering"""
 
 
+import datetime
 import email.header
 import json
 import os
@@ -39,7 +40,15 @@ from .. import conf
 custom_lookups = {}  # custom TemplateLookups, inited by function load_environment
 default_lookup = None  # default TemplateLookup, inited by function load_environment
 dirs = None  # Sequence of templates directories, inited by function load_environment
-js = lambda x: json.dumps(x, encoding = 'utf-8', ensure_ascii = False)
+
+js = lambda x: json.dumps(
+    x,
+    default = lambda obj: obj.isoformat() \
+        if isinstance(obj, datetime.datetime)  or isinstance(obj, datetime.date) else None,
+    encoding = 'utf-8',
+    ensure_ascii = False,
+    )
+
 
 
 def get_default_lookup():
