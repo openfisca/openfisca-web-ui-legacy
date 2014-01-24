@@ -45,10 +45,50 @@ from openfisca_web_ui import model, texthelpers, urls
 ##        </div>
         <%self:jumbotron/>
 
-        <form action="/simulation" role="form">
-            ${first_page_forms.html | n}
-            <button type="submit" class="btn btn-default">Submit</button>
-        </form>
+% if errors is not None:
+        <p class="alert alert-warning">
+            ${errors | n, js}
+        </p>
+% endif
+        <div class="media well">
+            <a class="pull-left" href="/?type=celibataire">
+                <img class="media-object" src="/img/celibataire.jpg" alt="célibataire">
+            </a>
+            <div class="media-body">
+                <h4 class="media-heading">Célibataire</h4>
+                <a class="btn btn-large btn-success" href="/?type=celibataire">Utiliser ce profil</a>
+            </div>
+        </div>
+
+        <div class="media well">
+            <a class="pull-left" href="/?type=famille-trad">
+                <img class="media-object" src="/img/famille-trad.jpg" alt="Famille 'traditionnelle'">
+            </a>
+            <div class="media-body">
+                <h4 class="media-heading">Famille "traditionnelle"</h4>
+                <a class="btn btn-large btn-success" href="/?type=famille-trad">Utiliser ce profil</a>
+            </div>
+        </div>
+
+        <div class="media well">
+            <a class="pull-left" href="/?type=famille-recomp">
+                <img class="media-object" src="/img/famille-recomp.jpg" alt="Famille 'traditionnel'">
+            </a>
+            <div class="media-body">
+                <h4 class="media-heading">Famille "recomposée"</h4>
+                <a class="btn btn-large btn-success" href="/?type=famille-recomp">Utiliser ce profil</a>
+            </div>
+        </div>
+
+        <div class="media well">
+            <a class="pull-left" href="/?type=autre">
+                <img class="media-object" src="/img/autre.jpg" alt="Autre">
+            </a>
+            <div class="media-body">
+                <h4 class="media-heading">Autre</h4>
+                <a class="btn btn-large btn-success" href="/?type=autre">Utiliser ce profil</a>
+            </div>
+        </div>
 </%def>
 
 

@@ -99,7 +99,102 @@ def all_questions(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    return wsgihelpers.redirect(ctx, location = '/personne')
+    session = ctx.session
+    if session is None:
+        ctx.session = session = model.Session()
+        session.token = unicode(uuid.uuid4())
+    if session.user is None:
+        user = model.Account()
+        user._id = unicode(uuid.uuid4())
+        user.api_key = unicode(uuid.uuid4())
+        user.compute_words()
+        session.user_id = user._id
+        user.save(ctx, safe = True)
+    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+    session.save(ctx, safe = True)
+
+    if req.cookies.get(conf['cookie']) != session.token:
+        req.response.set_cookie(conf['cookie'], session.token, httponly = True)  # , secure = req.scheme == 'https')
+
+    params = req.params
+    inputs = {
+        'type': params.get('type'),
+        }
+    preset_type, error = conv.test_in(['celibataire', 'famille-trad', 'famille-recomp', 'autre'])(inputs['type'], state = ctx)
+    if error is not None or inputs['type'] is None:
+        return templates.render(ctx, '/index.mako', errors = error)
+
+    preset_by_type = {
+        'celibataire': {
+            u'declaration_impot': {u'declaration_impot_repeat': [
+                {u'declaration_impot': {u'conj': None, u'pac_repeat': [{u'pac': None}], u'vous': u'0'}}
+                ]},
+            u'famille': {u'famille_repeat': [
+                {u'famille': {u'enf_repeat': [{u'enf': None}], u'parent1': u'0', u'parent2': None}}
+                ]},
+            u'personne': {u'personnes': [
+                {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1986, 8, 22, 0, 0),
+                    u'maxrev': 24000.0, u'name': 'Personne declarant', u'statut_marital': u'celibataire'}}
+                ]}
+            },
+        'famille-trad': {
+            u'declaration_impot': {u'declaration_impot_repeat': [
+                {u'declaration_impot': {u'conj': u'1', u'pac_repeat': [{u'pac': u'2'}, {u'pac': u'3'}], u'vous': u'0'}},
+                ]},
+            u'famille': {u'famille_repeat': [
+                {u'famille': {u'enf_repeat': [{u'enf': u'2'}, {u'enf': u'3'}], u'parent1': u'0', u'parent2': u'1'}},
+                ]},
+            u'personne': {u'personnes': [
+                {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
+                    u'maxrev': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
+                {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
+                    u'maxrev': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
+                {u'person_data': {u'activite': None, u'birth': None,
+                    u'maxrev': None, u'name': 'enfant1', u'statut_marital': None}},
+                {u'person_data': {u'activite': None, u'birth': None,
+                    u'maxrev': None, u'name': 'enfant2', u'statut_marital': None}},
+                ]},
+            },
+        'famille-recomp': {
+            u'declaration_impot': {u'declaration_impot_repeat': [
+                {u'declaration_impot': {u'conj': None, u'pac_repeat': [{u'pac': u'2'}, {u'pac': None}], u'vous': u'0'}},
+                {u'declaration_impot': {u'conj': None, u'pac_repeat': [{u'pac': u'3'}, {u'pac': None}], u'vous': u'1'}},
+                ]},
+            u'famille': {u'famille_repeat': [
+                {u'famille': {u'enf_repeat': [{u'enf': u'2'}, {u'enf': None}], u'parent1': u'0', u'parent2': None}},
+                {u'famille': {u'enf_repeat': [{u'enf': u'3'}, {u'enf': None}], u'parent1': u'1', u'parent2': None}},
+                ]},
+            u'personne': {u'personnes': [
+                {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
+                    u'maxrev': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
+                {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
+                    u'maxrev': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
+                {u'person_data': {u'activite': None, u'birth': None,
+                    u'maxrev': None, u'name': 'enfant1', u'statut_marital': None}},
+                {u'person_data': {u'activite': None, u'birth': None,
+                    u'maxrev': None, u'name': 'enfant2', u'statut_marital': None}}
+                ]}
+            },
+        'autre': {},
+        }
+
+    if session.user.korma_data is None:
+        session.user.korma_data = preset_by_type[preset_type]
+        session.user.save(ctx, safe = True)
+
+    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(ctx, '/index.mako', errors = errors)
+
+    simulation, errors = conv.data_to_simulation(api_data, state = ctx)
+    if errors is not None:
+        return templates.render(ctx, '/index.mako', errors = errors)
+    trees = simulation['value']
+
+    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
+    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
+
+    raise wsgihelpers.redirect(ctx, location = '/personne')
 
 
 @wsgihelpers.wsgify
