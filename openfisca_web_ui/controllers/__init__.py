@@ -46,7 +46,6 @@ bootstrap_control_inner_html_template = u'''
   {self.control_html}
 </div>'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
-default_korma_data = {'declaration_impot': {}, 'famille': {}, 'personne': {},}
 log = logging.getLogger(__name__)
 router = None
 
@@ -79,11 +78,11 @@ def all_questions(req):
     if session.user.korma_data is None:
         session.user.korma_data = {}
     if data['entity'] == 'fam':
-        user_data = session.user.korma_data['famille']['famille_repeat'][data['idx']]
+        user_data = session.user.korma_data['famille']['famille_repeat'][data['idx']]['famille']
     elif data['entity'] == 'foy':
-        user_data = session.user.korma_data['declaration_impot']['declaration_impot_repeat'][data['idx']]
+        user_data = session.user.korma_data['declaration_impot']['declaration_impot_repeat'][data['idx']]['declaration_impot']
     elif data['entity'] == 'ind':
-        user_data = session.user.korma_data['personne']['personnes'][data['idx']]
+        user_data = session.user.korma_data['personne']['personnes'][data['idx']]['person_data']
 
     if req.method == 'GET':
         if session is not None and session.user is not None:
@@ -105,7 +104,7 @@ def all_questions(req):
             errors = errors,
             page_form = page_form,
             )
-    user_data.update(korma_data)
+    user_data.update(korma_data['all_questions'])
     session.user.save(ctx, safe = True)
 
     api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
