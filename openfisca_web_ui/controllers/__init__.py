@@ -161,7 +161,7 @@ def index(req):
                 ]},
             u'personne': {u'personnes': [
                 {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1986, 8, 22, 0, 0),
-                    u'sali': 24000.0, u'name': 'Personne declarant', u'statut_marital': u'celibataire'}}
+                    u'sali': 24000, u'name': 'Personne declarant', u'statmarit': u'celibataire'}}
                 ]}
             },
         'famille-trad': {
@@ -173,13 +173,13 @@ def index(req):
                 ]},
             u'personne': {u'personnes': [
                 {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
-                    u'sali': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
+                    u'sali': 25500, u'name': 'parent1', u'statmarit': u'marie'}},
                 {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
-                    u'sali': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
-                {u'person_data': {u'activite': None, u'birth': None,
-                    u'sali': None, u'name': 'enfant1', u'statut_marital': None}},
-                {u'person_data': {u'activite': None, u'birth': None,
-                    u'sali': None, u'name': 'enfant2', u'statut_marital': None}},
+                    u'sali': 5500, u'name': 'parent2', u'statmarit': u'marie'}},
+                {u'person_data': {u'activite': None, u'birth': datetime.datetime(2000, 05, 19, 0, 0),
+                    u'sali': None, u'name': 'enfant1', u'statmarit': None}},
+                {u'person_data': {u'activite': None, u'birth': datetime.datetime(2007, 03, 14, 0, 0),
+                    u'sali': None, u'name': 'enfant2', u'statmarit': None}},
                 ]},
             },
         'famille-recomp': {
@@ -193,13 +193,13 @@ def index(req):
                 ]},
             u'personne': {u'personnes': [
                 {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
-                    u'sali': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
+                    u'sali': 25500, u'name': 'parent1', u'statmarit': u'marie'}},
                 {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
-                    u'sali': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
-                {u'person_data': {u'activite': None, u'birth': None,
-                    u'sali': None, u'name': 'enfant1', u'statut_marital': None}},
-                {u'person_data': {u'activite': None, u'birth': None,
-                    u'sali': None, u'name': 'enfant2', u'statut_marital': None}}
+                    u'sali': 5500, u'name': 'parent2', u'statmarit': u'marie'}},
+                {u'person_data': {u'activite': None, u'birth': datetime.datetime(2000, 05, 19, 0, 0),
+                    u'sali': None, u'name': 'enfant1', u'statmarit': None}},
+                {u'person_data': {u'activite': None, u'birth': datetime.datetime(2007, 03, 14, 0, 0),
+                    u'sali': None, u'name': 'enfant2', u'statmarit': None}}
                 ]}
             },
         'autre': {},
