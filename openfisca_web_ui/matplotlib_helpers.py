@@ -42,6 +42,10 @@ import numpy
 from . import conf
 
 
+waterfall_image_resolution = (1200, 900)
+bareme_image_resolution = (800, 500)
+
+
 def iter_columns_from_tree(node, base_value = 0, code = None):
     value_index = -1
     children = node.get('children')
@@ -109,7 +113,10 @@ def create_waterfall_png(trees, filename = 'waterfall.png'):
     xlabel = u'Prélèvements et prestations sociales'
     ylabel = u'Montant en €'
 
-    figure = pyplot.figure(figsize = (12, 9), dpi = 100)
+    figure = pyplot.figure(
+        figsize = (float(waterfall_image_resolution[0]) / 100, float(waterfall_image_resolution[1]) / 100),
+        dpi = 100,
+        )
     ax = figure.add_subplot(111)
     ax.set_title(title)
     ax.set_xlabel(xlabel)
@@ -165,7 +172,10 @@ def create_bareme_png(trees, simulation, filename = 'bareme.png'):
     tree = trees[0]
     ylabel = u'Revenu disponible (en € par an)'
 
-    figure = pyplot.figure(figsize = (8, 5), dpi = 100)
+    figure = pyplot.figure(
+        figsize = (float(bareme_image_resolution[0]) / 100, float(bareme_image_resolution[1]) / 100),
+        dpi = 150,
+        )
     ax = figure.add_subplot(111)
     ax.set_title(title)
     figure.subplots_adjust(bottom = 0.09, top = 0.95, left = 0.11, right = 0.95)

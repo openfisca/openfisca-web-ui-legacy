@@ -41,8 +41,8 @@ from . import accounts, sessions, simulations
 
 
 bootstrap_control_inner_html_template = u'''
-<label class="col-sm-8 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-4">
+<label class="col-sm-6 control-label" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-6">
   {self.control_html}
 </div>'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'

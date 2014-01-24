@@ -29,8 +29,6 @@
 <%def name="container_content()" filter="trim">
     <h1>Déclaration d'impôt sur le revenu</h1>
 
-    <img src="/waterfall.png" alt="Graphique" style="width: 500px;">
-
     <ul class="nav nav-tabs">
       <li><a href="/personne">Personnes</a></li>
       <li class="active"><a href="/declaration-impot">Déclaration d'impôt</a></li>
@@ -38,10 +36,18 @@
       <li><a href="/logement-principal">Logement principal</a></li>
     </ul>
 
-    <form action="/declaration-impot" class="korma" method="POST">
-        ${page_form.html | n}
-        <input class="btn btn-success" type="submit">
-    </form>
+    <div class="row">
+        <div class="col-sm-6">
+            <form class="korma form-horizontal" method="POST" role="form">
+                ${page_form.html | n}
+                <input class="btn btn-success" type="submit">
+            </form>
+        </div>
+
+        <div class="col-sm-6">
+            <img class="waterfall-img" src="/waterfall.png" alt="Graphique">
+        </div>
+    </div>
 
     <a class="btn btn-primary" href="/all-questions?entity=foy">Plus de détails</a>
 </%def>
