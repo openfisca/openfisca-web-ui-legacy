@@ -49,7 +49,7 @@ def openfisca_france_column_data_to_questions(keep_entity = None):
     for name, column in openfisca_france.model.data.column_by_name.iteritems():
         if keep_entity is not None and column.entity != keep_entity:
             continue
-        if name in ['quifam', 'quifoy', 'quimen', 'idfoy', 'idfam', 'idmen', 'sali']:
+        if name in ['quifam', 'quifoy', 'quimen', 'idfoy', 'idfam', 'idmen', 'sali', 'statmarit', 'birth']:
             continue
         question = Text(
             label = conv.check(conv.decode_str()(column.label)),

@@ -136,6 +136,8 @@ def index(req):
         user.compute_words()
         session.user_id = user._id
         user.save(ctx, safe = True)
+    elif session.user.korma_data is not None:
+        raise wsgihelpers.redirect(ctx, location = '/personne')
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
 
