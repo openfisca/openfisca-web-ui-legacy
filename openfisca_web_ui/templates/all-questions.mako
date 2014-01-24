@@ -37,6 +37,6 @@
 
     <form class="korma form-horizontal" method="POST">
         ${page_form.html | n}
-        <input class="btn btn-success" type="submit">
+        <p><input class="btn btn-success" type="submit"></p>
     </form>
 </%def>

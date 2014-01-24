@@ -46,6 +46,7 @@ bootstrap_control_inner_html_template = u'''
   {self.control_html}
 </div>'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
+default_korma_data = {'declaration_impot': {}, 'famille': {}, 'personne': {},}
 log = logging.getLogger(__name__)
 router = None
 
@@ -148,7 +149,7 @@ def index(req):
                 ]},
             u'personne': {u'personnes': [
                 {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1986, 8, 22, 0, 0),
-                    u'maxrev': 24000.0, u'name': 'Personne declarant', u'statut_marital': u'celibataire'}}
+                    u'sali': 24000.0, u'name': 'Personne declarant', u'statut_marital': u'celibataire'}}
                 ]}
             },
         'famille-trad': {
@@ -160,13 +161,13 @@ def index(req):
                 ]},
             u'personne': {u'personnes': [
                 {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
-                    u'maxrev': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
+                    u'sali': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
                 {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
-                    u'maxrev': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
+                    u'sali': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
                 {u'person_data': {u'activite': None, u'birth': None,
-                    u'maxrev': None, u'name': 'enfant1', u'statut_marital': None}},
+                    u'sali': None, u'name': 'enfant1', u'statut_marital': None}},
                 {u'person_data': {u'activite': None, u'birth': None,
-                    u'maxrev': None, u'name': 'enfant2', u'statut_marital': None}},
+                    u'sali': None, u'name': 'enfant2', u'statut_marital': None}},
                 ]},
             },
         'famille-recomp': {
@@ -180,13 +181,13 @@ def index(req):
                 ]},
             u'personne': {u'personnes': [
                 {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
-                    u'maxrev': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
+                    u'sali': 25500.0, u'name': 'parent1', u'statut_marital': u'marie'}},
                 {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
-                    u'maxrev': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
+                    u'sali': 5500.0, u'name': 'parent2', u'statut_marital': u'marie'}},
                 {u'person_data': {u'activite': None, u'birth': None,
-                    u'maxrev': None, u'name': 'enfant1', u'statut_marital': None}},
+                    u'sali': None, u'name': 'enfant1', u'statut_marital': None}},
                 {u'person_data': {u'activite': None, u'birth': None,
-                    u'maxrev': None, u'name': 'enfant2', u'statut_marital': None}}
+                    u'sali': None, u'name': 'enfant2', u'statut_marital': None}}
                 ]}
             },
         'autre': {},
@@ -196,7 +197,7 @@ def index(req):
         session.user.korma_data = preset_by_type[preset_type]
         session.user.save(ctx, safe = True)
 
-    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
+    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
     if errors is not None:
         return templates.render(ctx, '/index.mako', errors = errors)
 
@@ -226,7 +227,7 @@ def declaration_impot(req):
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
 <a href="/all-questions?entity=foy&idx={self.parent_data[declaration_impot_repeat][index]}"
-class="btn btn-primary pull-right"> Plus de détails</a></div>''',
+class="btn btn-primary"> Plus de détails</a></div>''',
             },
         template_question = Group(
             children_attributes = {
@@ -236,17 +237,20 @@ class="btn btn-primary pull-right"> Plus de détails</a></div>''',
             questions = [
                 Select(
                     choices = persons_value_and_name,
+                    control_attributes = {'class': 'form-control'},
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Vous',
                     ),
                 Select(
                     choices = persons_value_and_name,
+                    control_attributes = {'class': 'form-control'},
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Conj',
                     ),
                 Repeat(
                     template_question = Select(
                         choices = persons_value_and_name,
+                        control_attributes = {'class': 'form-control'},
                         label = u'Personne à charge',
                         inner_html_template = bootstrap_control_inner_html_template,
                         name = 'pac',
@@ -280,7 +284,15 @@ class="btn btn-primary pull-right"> Plus de détails</a></div>''',
     session.user.korma_data.setdefault('declaration_impot', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
+    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/declaration-impot.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(
@@ -312,10 +324,10 @@ def famille(req):
     page_form = Repeat(
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=fam&idx={self.parent_data[famille_repeat][index]}" class="btn btn-primary pull-right">
+<a href="/all-questions?entity=fam&idx={self.parent_data[famille_repeat][index]}" class="btn btn-primary">
 Plus de détails</a></div>''',
             },
-        outer_html_template = u'<div class="repeat">{self.inner_html_template}</div>',
+        outer_html_template = u'<div class="repeat">{self.inner_html}</div>',
         template_question = Group(
             children_attributes = {
                 '_outer_html_template': bootstrap_group_outer_html_template,
@@ -324,18 +336,20 @@ Plus de détails</a></div>''',
             questions = [
                 Select(
                     choices = persons_value_and_name,
+                    control_attributes = {'class': 'form-control'},
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent1',
                     ),
                 Select(
                     choices = persons_value_and_name,
+                    control_attributes = {'class': 'form-control'},
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent2',
                     ),
                 Repeat(
                     template_question = Select(
-                        control_attributes = {'class': 'form-control'},
                         choices = persons_value_and_name,
+                        control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Enfant',
                         name = 'enf',
@@ -369,7 +383,15 @@ Plus de détails</a></div>''',
     session.user.korma_data.setdefault('famille', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
+    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(
@@ -398,7 +420,7 @@ def logement_principal(req):
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
 <a href="/all-questions?entity=men&idx={self.parent_data[logement_principal_repeat][index]}"
-class="btn btn-primary pull-right">Plus de détails</a></div>''',
+class="btn btn-primary">Plus de détails</a></div>''',
             },
         template_question = Group(
             outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
@@ -453,7 +475,15 @@ class="btn btn-primary pull-right">Plus de détails</a></div>''',
     session.user.korma_data.setdefault('logement_principal', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
+    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/famille.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(
@@ -516,10 +546,10 @@ def personne(req):
     page_form = Repeat(
         children_attributes = {
             '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=ind&idx={self.parent_data[personnes][index]}" class="btn btn-primary pull-right">
+<a href="/all-questions?entity=ind&idx={self.parent_data[personnes][index]}" class="btn btn-primary">
 Plus de détails</a></div>''',
             },
-        outer_html_template = u'<div class="repeat">{self.inner_html_template}</div>',
+        outer_html_template = u'<div class="repeat">{self.inner_html}</div>',
         name = 'personnes',
         template_question = Group(
             children_attributes = {
@@ -536,7 +566,9 @@ Plus de détails</a></div>''',
                     ),
                 Number(
                     label = u'Salaire imposable annuel',
-                    name = 'maxrev'),
+                    name = 'sali',
+                    step = 1,
+                    ),
                 Select(
                     first_unselected = True,
                     label = u'Activité',
@@ -554,6 +586,7 @@ Plus de détails</a></div>''',
                 Select(
                     first_unselected = True,
                     label = u'Statut marital',
+                    name = u'statmarit',
                     choices = [
                         u'Marié',
                         u'Célibataire',
@@ -593,7 +626,16 @@ Plus de détails</a></div>''',
     session.user.korma_data.setdefault('personne', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
+    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(
+            ctx,
+            '/personne.mako',
+            api_data = api_data,
+            errors = errors,
+            page_form = page_form,
+            )
+
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(

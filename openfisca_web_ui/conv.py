@@ -29,6 +29,7 @@
 import collections
 import datetime
 import json
+from pprint import pformat, pprint
 import re
 import urllib2
 
@@ -55,16 +56,20 @@ def data_to_simulation(data, state = None):
         'Content-Type': 'application/json',
         'User-Agent': 'OpenFisca-Notebook',
         })
+    print 'calling API: data', pformat(data)
     try:
         response = urllib2.urlopen(
             request,
             json.dumps(data, default = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj),
             )
     except urllib2.HTTPError as http_exc:
+        print http_exc.read()
         return data, state._('API respond with HTTP code {}').format(http_exc.code)
     except urllib2.URLError:
         return data, state._('API didn\'t respond')
-    response_dict = json.loads(response.read(), object_pairs_hook = collections.OrderedDict)
+    response_str = response.read()
+#    print 'response_str', response_str
+    response_dict = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
     return response_dict, None
 
 
@@ -143,15 +148,18 @@ def korma_data_to_api_data(values, state = None):
     if state is None:
         state = default_state
 
+    for key in ('declaration_impot', 'famille', 'personne'):
+        if key not in values:
+            return values, u'Veuillez remplir l\'onglet "{}"'.format(key)
+
     persons_data = values.get('personne', {}).get('personnes')
-    maxrev = sum(person['person_data'].get('maxrev') * 12 for person in persons_data)
     # TODO(rsoufflet) Ask for annual revenue. Annual revenu != "net mensuel * 12"
 
     api_noidec_by_korma_declaration_impot_index = {}
     api_noichef_by_korma_famille_index = {}
     declarations = {}
     familles = {}
-    menages = {}
+    menages = {u'0': {}}
     individus = []
     for person_index, person in enumerate(persons_data):
         quifam, korma_famille_index = extract_famille_data(person_index, values['famille'])
@@ -164,7 +172,6 @@ def korma_data_to_api_data(values, state = None):
             declarations[unicode(person_index)] = {}
             api_noidec_by_korma_declaration_impot_index[korma_declaration_impot_index] = person_index
         individu = {
-            'birth': person['person_data'].get('birth'),
             'noichef': api_noichef_by_korma_famille_index[korma_famille_index],
             'noidec': api_noidec_by_korma_declaration_impot_index[korma_declaration_impot_index],
             'noipref': person_index,
@@ -172,11 +179,13 @@ def korma_data_to_api_data(values, state = None):
             'quifoy': quifoy,
             'quimen': 'pref',
             }
+        pprint(values)
+        individu.update({
+            key: value for key, value in person['person_data'].iteritems() if key != u'name'
+            })
         individus.append(individu)
 
     api_data = {
-        'maxrev': maxrev,
-        'nmen': 2,
         'scenarios': [
             {
                 'declar': declarations,
@@ -186,6 +195,5 @@ def korma_data_to_api_data(values, state = None):
                 'year': 2006,
                 },
             ],
-        'x_axis': 'sali',
         }
     return api_data, None

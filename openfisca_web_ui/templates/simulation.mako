@@ -48,7 +48,7 @@ from openfisca_web_ui import model, texthelpers, urls
             </tr>
             <tr>
                 <td>Revenue maximal</td>
-                <td>${data['maxrev']}</td>
+                <td>${data['sali']}</td>
             </tr>
 
             <tr>

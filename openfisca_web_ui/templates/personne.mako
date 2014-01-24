@@ -40,7 +40,7 @@
         <div class="col-sm-6">
             <form class="korma form-horizontal" method="POST" role="form">
                 ${page_form.html | n}
-                <input class="btn btn-success" type="submit">
+                <p><input class="btn btn-success" type="submit"></p>
             </form>
         </div>
 
