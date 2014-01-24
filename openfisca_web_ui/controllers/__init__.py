@@ -108,6 +108,18 @@ def all_questions(req):
     user_data.update(korma_data)
     session.user.save(ctx, safe = True)
 
+    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
+    if errors is not None:
+        return templates.render(ctx, '/index.mako', errors = errors)
+
+    simulation, errors = conv.data_to_simulation(api_data, state = ctx)
+    if errors is not None:
+        return templates.render(ctx, '/index.mako', errors = errors)
+    trees = simulation['value']
+
+    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
+    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
+
     raise wsgihelpers.redirect(ctx, location = '/personne')
 
 
@@ -584,9 +596,6 @@ Plus de détails</a></div>''',
                     label = u'Date de naissance',
                     name = 'birth'),
                 Select(
-                    first_unselected = True,
-                    label = u'Statut marital',
-                    name = u'statmarit',
                     choices = [
                         u'Marié',
                         u'Célibataire',
@@ -594,7 +603,10 @@ Plus de détails</a></div>''',
                         u'Veuf',
                         u'Pacsé',
                         u'Jeune veuf',
-                        ]
+                        ],
+                    first_unselected = True,
+                    label = u'Statut marital',
+                    name = u'statmarit',
                     ),
                 ]
             ),
