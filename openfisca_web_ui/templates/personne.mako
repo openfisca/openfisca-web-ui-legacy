@@ -48,6 +48,4 @@
             <img class="waterfall-img" src="/waterfall.png" alt="Graphique">
         </div>
     </div>
-
-    <a class="btn btn-primary" href="/all-questions?entity=ind">Plus de détails</a>
 </%def>

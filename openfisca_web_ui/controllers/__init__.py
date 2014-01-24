@@ -205,10 +205,15 @@ def declaration_impot(req):
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
     persons_value_and_name = [
-        (unicode(idx), person['person_data']['name'])
+        (unicode(idx), person['person_data'].get('name') or idx)
         for idx, person in enumerate(session.user.korma_data['personne']['personnes'] or [])
         ]
     page_form = Repeat(
+        children_attributes = {
+            '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
+<a href="/all-questions?entity=foy&idx={self.parent_data[declaration_impot_repeat][index]}"
+class="btn btn-primary pull-right"> Plus de détails</a></div>''',
+            },
         template_question = Group(
             children_attributes = {
                 '_outer_html_template': bootstrap_group_outer_html_template,
@@ -216,20 +221,17 @@ def declaration_impot(req):
             name = 'declaration_impot',
             questions = [
                 Select(
-                    control_attributes = {'class': 'form-control'},
                     choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Vous',
                     ),
                 Select(
-                    control_attributes = {'class': 'form-control'},
                     choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Conj',
                     ),
                 Repeat(
                     template_question = Select(
-                        control_attributes = {'class': 'form-control'},
                         choices = persons_value_and_name,
                         label = u'Personne à charge',
                         inner_html_template = bootstrap_control_inner_html_template,
@@ -294,10 +296,16 @@ def famille(req):
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
     persons_value_and_name = [
-        (unicode(idx), person['person_data']['name'])
+        (unicode(idx), person['person_data'].get('name') or idx)
         for idx, person in enumerate(session.user.korma_data['personne']['personnes'] or [])
         ]
     page_form = Repeat(
+        children_attributes = {
+            '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
+<a href="/all-questions?entity=foy&idx={self.parent_data[famille_repeat][index]}" class="btn btn-primary pull-right">
+Plus de détails</a></div>''',
+            },
+        outer_html_template = u'<div class="repeat">{self.inner_html_template}</div>',
         template_question = Group(
             children_attributes = {
                 '_outer_html_template': bootstrap_group_outer_html_template,
@@ -305,13 +313,11 @@ def famille(req):
             name = 'famille',
             questions = [
                 Select(
-                    control_attributes = {'class': 'form-control'},
                     choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent1',
                     ),
                 Select(
-                    control_attributes = {'class': 'form-control'},
                     choices = persons_value_and_name,
                     inner_html_template = bootstrap_control_inner_html_template,
                     label = u'Parent2',
@@ -383,7 +389,13 @@ def logement_principal(req):
         raise wsgihelpers.redirect(ctx, location = '/personne')
 
     page_form = Repeat(
+        children_attributes = {
+            '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
+<a href="/all-questions?entity=foy&idx={self.parent_data[logement_principal_repeat][index]}"
+class="btn btn-primary pull-right">Plus de détails</a></div>''',
+            },
         template_question = Group(
+            outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
             children_attributes = {
                 '_control_attributes': {'class': u'form-control'},
                 '_inner_html_template': bootstrap_control_inner_html_template,
@@ -461,7 +473,7 @@ def make_router():
     """Return a WSGI application that searches requests to controllers."""
     global router
     router = urls.make_router(
-        ('GET', '^/?$', index),
+        (('GET', 'POST'), '^/?$', index),
         (('GET', 'POST'), '^/personne/?$', personne),
         (('GET', 'POST'), '^/declaration-impot/?$', declaration_impot),
         (('GET', 'POST'), '^/famille/?$', famille),
@@ -500,6 +512,12 @@ def personne(req):
         req.response.set_cookie(conf['cookie'], session.token, httponly = True)  # , secure = req.scheme == 'https')
 
     page_form = Repeat(
+        children_attributes = {
+            '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
+<a href="/all-questions?entity=foy&idx={self.parent_data[personnes][index]}" class="btn btn-primary pull-right">
+Plus de détails</a></div>''',
+            },
+        outer_html_template = u'<div class="repeat">{self.inner_html_template}</div>',
         name = 'personnes',
         template_question = Group(
             children_attributes = {
@@ -508,6 +526,7 @@ def personne(req):
                 '_outer_html_template': bootstrap_group_outer_html_template,
                 },
             name = 'person_data',
+            outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
             questions = [
                 Text(
                     label = u'Nom',
