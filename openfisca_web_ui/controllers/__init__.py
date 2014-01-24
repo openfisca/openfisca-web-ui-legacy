@@ -280,16 +280,7 @@ class="btn btn-primary pull-right"> Plus de détails</a></div>''',
     session.user.korma_data.setdefault('declaration_impot', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
-    if errors is not None:
-        return templates.render(
-            ctx,
-            '/declaration-impot.mako',
-            api_data = api_data,
-            errors = errors,
-            page_form = page_form,
-            )
-
+    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(
@@ -378,16 +369,7 @@ Plus de détails</a></div>''',
     session.user.korma_data.setdefault('famille', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
-    if errors is not None:
-        return templates.render(
-            ctx,
-            '/famille.mako',
-            api_data = api_data,
-            errors = errors,
-            page_form = page_form,
-            )
-
+    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(
@@ -471,16 +453,7 @@ class="btn btn-primary pull-right">Plus de détails</a></div>''',
     session.user.korma_data.setdefault('logement_principal', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
-    if errors is not None:
-        return templates.render(
-            ctx,
-            '/famille.mako',
-            api_data = api_data,
-            errors = errors,
-            page_form = page_form,
-            )
-
+    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(
@@ -620,15 +593,7 @@ Plus de détails</a></div>''',
     session.user.korma_data.setdefault('personne', {}).update(korma_data)
     session.user.save(ctx, safe = True)
 
-    api_data, errors = conv.user_data_to_api_data(session.user.korma_data, state = ctx)
-    if errors is not None:
-        return templates.render(
-            ctx,
-            '/personne.mako',
-            api_data = api_data,
-            errors = errors,
-            page_form = page_form,
-            )
+    api_data = conv.check(conv.korma_data_to_api_data(session.user.korma_data, state = ctx))
     simulation, errors = conv.data_to_simulation(api_data, state = ctx)
     if errors is not None:
         return templates.render(

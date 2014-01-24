@@ -110,69 +110,82 @@ def method(method_name, *args, **kwargs):
     return method_converter
 
 
-def user_data_to_api_data(user_data, state = None):
-    if user_data is None:
+def korma_data_to_api_data(values, state = None):
+    def extract_famille_data(person_index, famille_data):
+        for famille_repeat_index, famille_repeat_data in enumerate(famille_data['famille_repeat']):
+            famille = famille_repeat_data['famille']
+            if famille['parent1'] is not None and person_index == int(famille['parent1']):
+                return u'chef', famille_repeat_index
+            elif famille['parent2'] is not None and person_index == int(famille['parent2']):
+                return u'part', famille_repeat_index
+            elif famille['enf_repeat'] is not None:
+                for enf_repeat_index, enf_repeat_data in enumerate(famille['enf_repeat']):
+                    if enf_repeat_data['enf'] is not None and person_index == int(enf_repeat_data['enf']):
+                        return u'enf{}'.format(int(enf_repeat_index) + 1), famille_repeat_index
+        assert False
+
+    def extract_declaration_impot_data(person_index, declaration_impot_data):
+        for declaration_impot_repeat_index, declaration_impot_repeat_data in enumerate(
+                declaration_impot_data['declaration_impot_repeat']):
+            declaration_impot = declaration_impot_repeat_data['declaration_impot']
+            if declaration_impot['vous'] is not None and person_index == int(declaration_impot['vous']):
+                return u'vous', declaration_impot_repeat_index
+            elif declaration_impot['conj'] is not None and person_index == int(declaration_impot['conj']):
+                return u'conj', declaration_impot_repeat_index
+            elif declaration_impot['pac_repeat'] is not None:
+                for pac_repeat_index, pac_repeat_data in enumerate(declaration_impot['pac_repeat']):
+                    if pac_repeat_data['pac'] is not None and person_index == int(pac_repeat_data['pac']):
+                        return u'pac{}'.format(int(pac_repeat_index) + 1), declaration_impot_repeat_index
+        assert False
+
+    if values is None:
         return None, None
     if state is None:
         state = default_state
 
+    persons_data = values.get('personne', {}).get('personnes')
+    maxrev = sum(person['person_data'].get('maxrev') * 12 for person in persons_data)
     # TODO(rsoufflet) Ask for annual revenue. Annual revenu != "net mensuel * 12"
-    inputs = {
-        'maxrev': sum([person['person_data'].get('maxrev') * 12 for person in user_data.get('personnes') or []]),
+
+    api_noidec_by_korma_declaration_impot_index = {}
+    api_noichef_by_korma_famille_index = {}
+    declarations = {}
+    familles = {}
+    menages = {}
+    individus = []
+    for person_index, person in enumerate(persons_data):
+        quifam, korma_famille_index = extract_famille_data(person_index, values['famille'])
+        if quifam == u'chef':
+            familles[unicode(person_index)] = {}
+            api_noichef_by_korma_famille_index[korma_famille_index] = person_index
+        quifoy, korma_declaration_impot_index = extract_declaration_impot_data(
+            person_index, values['declaration_impot'])
+        if quifoy == u'vous':
+            declarations[unicode(person_index)] = {}
+            api_noidec_by_korma_declaration_impot_index[korma_declaration_impot_index] = person_index
+        individu = {
+            'birth': person['person_data'].get('birth'),
+            'noichef': api_noichef_by_korma_famille_index[korma_famille_index],
+            'noidec': api_noidec_by_korma_declaration_impot_index[korma_declaration_impot_index],
+            'noipref': person_index,
+            'quifam': quifam,
+            'quifoy': quifoy,
+            'quimen': 'pref',
+            }
+        individus.append(individu)
+
+    api_data = {
+        'maxrev': maxrev,
         'nmen': 2,
-        'scenarios': [{
-            'indiv': [
-                {
-                    'birth': person['person_data'].get('birth'),
-                    'noichef': 0,
-                    'noidec': 0,
-                    'noipref': 0,
-                    }
-                for person in user_data.get('personnes') or []
-                ],
-            'year': 2006,
-            }],
+        'scenarios': [
+            {
+                'declar': declarations,
+                'famille': familles,
+                'indiv': individus,
+                'menage': menages,
+                'year': 2006,
+                },
+            ],
         'x_axis': 'sali',
         }
-    return inputs_to_api_data(inputs, state = state)
-
-
-inputs_to_api_data = struct(
-    {
-        'maxrev': pipe(anything_to_int, default(14000)),
-        'nmen': pipe(anything_to_int, default(3)),
-        'scenarios': pipe(
-            uniform_sequence(
-                struct(
-                    {
-                        'declar': default({'0': {}}),
-                        'famille': default({'0': {}}),
-                        'indiv': uniform_sequence(
-                            struct(
-                                {
-                                    'birth': function(lambda d: d.isoformat()),
-                                    'noichef': pipe(anything_to_int, default(0)),
-                                    'noidec': pipe(anything_to_int, default(0)),
-                                    'noipref': pipe(anything_to_int, default(0)),
-                                    'quifam': pipe(cleanup_line, default('chef')),
-                                    'quifoy': pipe(cleanup_line, default('vous')),
-                                    'quimen': pipe(cleanup_line, default('pref')),
-                                    },
-                                drop_none_values = False,
-                                ),
-                            ),
-                        'menage': default({'0': {}}),
-                        'year': pipe(
-                            anything_to_int,
-                            test_greater_or_equal(1950),
-                            test_less_or_equal(2015),
-                            ),
-                        },
-                    ),
-                drop_none_items = True,
-                ),
-            test(lambda l: len(l) > 0),
-            ),
-        'x_axis': pipe(default('sali'), test_in(['sali'])),
-        },
-    )
+    return api_data, None
