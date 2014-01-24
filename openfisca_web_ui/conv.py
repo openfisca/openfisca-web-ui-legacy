@@ -39,6 +39,7 @@ from biryani1.datetimeconv import *  # NOQA
 from biryani1.objectconv import *  # NOQA
 from biryani1.jsonconv import *  # NOQA
 from biryani1.states import default_state, State  # NOQA
+import openfisca_france.model.data
 
 
 N_ = lambda message: message
@@ -127,7 +128,7 @@ def korma_data_to_api_data(values, state = None):
                 for enf_repeat_index, enf_repeat_data in enumerate(famille['enf_repeat']):
                     if enf_repeat_data['enf'] is not None and person_index == int(enf_repeat_data['enf']):
                         return u'enf{}'.format(int(enf_repeat_index) + 1), famille_repeat_index
-        assert False
+        return None, None
 
     def extract_declaration_impot_data(person_index, declaration_impot_data):
         for declaration_impot_repeat_index, declaration_impot_repeat_data in enumerate(
@@ -141,7 +142,15 @@ def korma_data_to_api_data(values, state = None):
                 for pac_repeat_index, pac_repeat_data in enumerate(declaration_impot['pac_repeat']):
                     if pac_repeat_data['pac'] is not None and person_index == int(pac_repeat_data['pac']):
                         return u'pac{}'.format(int(pac_repeat_index) + 1), declaration_impot_repeat_index
-        assert False
+        return None, None
+
+    def iter_api_variables(korma_data, keep_entities=None):
+        api_vars_name = openfisca_france.model.data.column_by_name.keys()
+        api_vars_name.extend([u'birth'])
+        for k, v in korma_data.iteritems():
+            if k in api_vars_name and v is not None:
+                yield k, v
+#                korma_data.column_by_name[k].entity
 
     if values is None:
         return None, None
@@ -179,10 +188,9 @@ def korma_data_to_api_data(values, state = None):
             'quifoy': quifoy,
             'quimen': 'pref',
             }
-        pprint(values)
-        individu.update({
-            key: value for key, value in person['person_data'].iteritems() if key != u'name'
-            })
+        individu.update(iter_api_variables(person['person_data']))
+        if 'all_questions' in person:
+            individu.update(iter_api_variables(person['all_questions']))
         individus.append(individu)
 
     api_data = {
