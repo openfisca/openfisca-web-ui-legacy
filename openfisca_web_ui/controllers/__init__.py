@@ -38,59 +38,6 @@ from . import accounts, sessions, simulations
 
 
 log = logging.getLogger(__name__)
-preset_by_type = {
-    'celibataire': {
-        u'declaration_impot': {u'declaration_impot_repeat': [
-            {u'declaration_impot': {u'conj': None, u'pac_repeat': [{u'pac': None}], u'vous': u'0'}}
-            ]},
-        u'famille': {u'famille_repeat': [
-            {u'famille': {u'enf_repeat': [{u'enf': None}], u'parent1': u'0', u'parent2': None}}
-            ]},
-        u'personne': {u'personnes': [
-            {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1986, 8, 22, 0, 0),
-                u'sali': 24000, u'name': 'Personne declarant', u'statmarit': u'celibataire'}}
-            ]}
-        },
-    'famille-trad': {
-        u'declaration_impot': {u'declaration_impot_repeat': [
-            {u'declaration_impot': {u'conj': u'1', u'pac_repeat': [{u'pac': u'2'}, {u'pac': u'3'}], u'vous': u'0'}},
-            ]},
-        u'famille': {u'famille_repeat': [
-            {u'famille': {u'enf_repeat': [{u'enf': u'2'}, {u'enf': u'3'}], u'parent1': u'0', u'parent2': u'1'}},
-            ]},
-        u'personne': {u'personnes': [
-            {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
-                u'sali': 25500, u'name': 'parent1', u'statmarit': u'marie'}},
-            {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
-                u'sali': 5500, u'name': 'parent2', u'statmarit': u'marie'}},
-            {u'person_data': {u'activite': None, u'birth': datetime.datetime(2000, 05, 19, 0, 0),
-                u'sali': None, u'name': 'enfant1', u'statmarit': None}},
-            {u'person_data': {u'activite': None, u'birth': datetime.datetime(2007, 03, 14, 0, 0),
-                u'sali': None, u'name': 'enfant2', u'statmarit': None}},
-            ]},
-        },
-    'famille-recomp': {
-        u'declaration_impot': {u'declaration_impot_repeat': [
-            {u'declaration_impot': {u'conj': None, u'pac_repeat': [{u'pac': u'2'}, {u'pac': None}], u'vous': u'0'}},
-            {u'declaration_impot': {u'conj': None, u'pac_repeat': [{u'pac': u'3'}, {u'pac': None}], u'vous': u'1'}},
-            ]},
-        u'famille': {u'famille_repeat': [
-            {u'famille': {u'enf_repeat': [{u'enf': u'2'}, {u'enf': None}], u'parent1': u'0', u'parent2': None}},
-            {u'famille': {u'enf_repeat': [{u'enf': u'3'}, {u'enf': None}], u'parent1': u'1', u'parent2': None}},
-            ]},
-        u'personne': {u'personnes': [
-            {u'person_data': {u'activite': u'actif_occupe', u'birth': datetime.datetime(1985, 6, 3, 0, 0),
-                u'sali': 25500, u'name': 'parent1', u'statmarit': u'marie'}},
-            {u'person_data': {u'activite': u'etudiant_eleve', u'birth': datetime.datetime(1990, 11, 29, 0, 0),
-                u'sali': 5500, u'name': 'parent2', u'statmarit': u'marie'}},
-            {u'person_data': {u'activite': None, u'birth': datetime.datetime(2000, 05, 19, 0, 0),
-                u'sali': None, u'name': 'enfant1', u'statmarit': None}},
-            {u'person_data': {u'activite': None, u'birth': datetime.datetime(2007, 03, 14, 0, 0),
-                u'sali': None, u'name': 'enfant2', u'statmarit': None}}
-            ]}
-        },
-    'autre': {},
-    }
 router = None
 
 
@@ -222,15 +169,7 @@ def form(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    ensure_session(ctx)
-    params = req.params
-    inputs = {
-        'type': params.get('type'),
-        }
-    preset_type, error = conv.test_in(['celibataire', 'famille-trad', 'famille-recomp', 'autre'])(inputs['type'], state = ctx)
-    if error is not None or inputs['type'] is None:
-        return templates.render(ctx, '/index.mako', errors = error)
-    raise wsgihelpers.redirect(ctx, location = '/personnes')
+    raise wsgihelpers.redirect(ctx, location = '/famille')
 
 
 def make_router():
