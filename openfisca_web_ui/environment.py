@@ -68,6 +68,7 @@ def load_environment(global_conf, app_conf):
     conf.update(conv.check(conv.struct(
         {
             'api.url': conv.cleanup_line,
+            'api.fields.url': conv.cleanup_line,
             'app_conf': conv.set_value(app_conf),
             'app_dir': conv.set_value(app_dir),
             'app_name': conv.cleanup_line,
