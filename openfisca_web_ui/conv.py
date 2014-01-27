@@ -38,7 +38,6 @@ from biryani1.datetimeconv import *  # NOQA
 from biryani1.objectconv import *  # NOQA
 from biryani1.jsonconv import *  # NOQA
 from biryani1.states import default_state, State  # NOQA
-import openfisca_france.model.data
 
 
 N_ = lambda message: message
@@ -129,7 +128,18 @@ def korma_data_to_api_data(values, state = None):
         return None, None
 
     def iter_api_variables(korma_data, keep_entities=None):
-        api_vars_name = openfisca_france.model.data.column_by_name.keys()
+        request = urllib2.Request(conf['api.fields.url'])
+        try:
+            response = urllib2.urlopen(request)
+        except urllib2.HTTPError as response:
+            # return response.read()
+            pass
+        except urllib2.URLError as response:
+            # return response.read()
+            pass
+        response_str = response.read()
+        column_by_name = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
+        api_vars_name = column_by_name.keys()
         api_vars_name.extend([u'birth'])
         for k, v in korma_data.iteritems():
             if k in api_vars_name and v is not None:
