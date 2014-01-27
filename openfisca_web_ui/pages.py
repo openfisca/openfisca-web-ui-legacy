@@ -46,19 +46,14 @@ bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html
 
 pages_data = [
     {
-        'name': 'personnes',
-        'slug': 'personnes',
-        'title': u'Personnes',
+        'name': 'famille',
+        'slug': 'famille',
+        'title': u'Famille',
         },
     {
         'name': 'declaration_impots',
         'slug': 'declaration-impots',
         'title': u'Déclaration d\'impôts',
-        },
-    {
-        'name': 'famille',
-        'slug': 'famille',
-        'title': u'Famille',
         },
     {
         'name': 'logement_principal',
@@ -238,6 +233,8 @@ Plus de détails</a></div>''',
 
 
 def persons_value_and_name(ctx):
+    if ctx.session.user.korma_data is None:
+        return []
     return [
         (unicode(idx), person['person_data'].get('name') or idx)
         for idx, person in enumerate(ctx.session.user.korma_data['personne']['personnes'] or [])

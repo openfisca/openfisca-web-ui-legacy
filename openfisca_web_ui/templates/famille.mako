@@ -27,15 +27,7 @@
 
 
 <%def name="container_content()" filter="trim">
-    <h1>Familles</h1>
-
-    <ul class="nav nav-tabs">
-      <li><a href="/personnes">Personnes</a></li>
-      <li><a href="/declaration-impots">Déclaration d'impôt</a></li>
-      <li class="active"><a href="/famille">Famille</a></li>
-      <li><a href="/logement-principal">Logement principal</a></li>
-    </ul>
-
+    <%parent:container_content/>
     <div class="row">
         <div class="col-sm-6">
             <form class="korma form-horizontal" method="POST" role="form">

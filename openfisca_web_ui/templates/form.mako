@@ -23,6 +23,10 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+<%!
+from openfisca_web_ui import pages
+%>
+
 <%inherit file="site.mako"/>
 
 
@@ -30,7 +34,20 @@
 </%def>
 
 
+<%def name="tabs()" filter="trim">
+    <ul class="nav nav-tabs">
+    % for page_data in pages.pages_data:
+      <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u''}>
+        <a href="${u'/{}'.format(page_data['slug'])}">${page_data['title']}</a>
+      </li>
+    % endfor
+    </ul>
+</%def>
+
+
 <%def name="container_content()" filter="trim">
+    <h1>${req.urlvars['page_data']['title']}</h1>
+    <%self:tabs/>
 </%def>
 
 

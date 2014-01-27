@@ -138,7 +138,8 @@ def form(req):
     page_form = pages.page_form(ctx, page_data['name'])
     if req.method == 'GET':
         errors = None
-        page_form.fill(session.user.korma_data.get(page_data['name'], {}))
+        if session.user.korma_data is not None:
+            page_form.fill(session.user.korma_data.get(page_data['name'], {}))
     else:
         params = req.params
         korma_inputs = variabledecode.variable_decode(params)
