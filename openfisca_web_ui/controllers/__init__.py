@@ -44,9 +44,8 @@ router = None
 @wsgihelpers.wsgify
 def all_questions(req):
     ctx = contexts.Ctx(req)
+    ensure_session(ctx)
     session = ctx.session
-    if session is None or session.user is None:
-        raise wsgihelpers.redirect(ctx, location = '/personne')
 
     inputs = {
         'entity': req.params.get('entity') or None,
@@ -68,48 +67,38 @@ def all_questions(req):
 
     if session.user.korma_data is None:
         session.user.korma_data = {}
-    if data['entity'] == 'fam':
-        user_data = session.user.korma_data['famille']['famille_repeat'][data['idx']]['famille']
-    elif data['entity'] == 'foy':
-        user_data = session.user.korma_data['declaration_impot']['declaration_impot_repeat'][data['idx']][
-            'declaration_impot']
-    elif data['entity'] == 'ind':
-        user_data = session.user.korma_data['personne']['personnes'][data['idx']]['person_data']
 
     if req.method == 'GET':
-        if session is not None and session.user is not None:
-            page_form.fill(user_data)
-        return templates.render(
-            ctx,
-            '/all-questions.mako',
-            page_form = page_form,
-            )
-
-    params = req.params
-    korma_inputs = variabledecode.variable_decode(params)
-    page_form.fill(user_data)
-    korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
-    if errors is not None:
-        return templates.render(
-            ctx,
-            '/all-questions.mako',
-            errors = errors,
-            page_form = page_form,
-            )
-    user_data.update(korma_data['all_questions'])
-    session.user.save(ctx, safe = True)
-    api_data, errors = conv.korma_data_to_api_data(session.user.korma_data, state = ctx)
-    if errors is not None:
-        return templates.render(ctx, '/index.mako', errors = errors)
-    simulation, errors = conv.api_data_to_simulation_output(api_data, state = ctx)
-    if errors is not None:
-        return templates.render(ctx, '/index.mako', errors = errors)
-    trees = simulation['value']
-
-    matplotlib_helpers.create_waterfall_png(trees, filename = 'waterfall.png')
-    matplotlib_helpers.create_bareme_png(trees, simulation, filename = 'bareme.png')
-
-    raise wsgihelpers.redirect(ctx, location = '/personne')
+        errors = None
+    else:
+        params = req.params
+        korma_inputs = variabledecode.variable_decode(params)
+        page_form.fill(korma_inputs)
+        korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
+        if errors is None:
+            if session.user.korma_data is None:
+                session.user.korma_data = {}
+            session.user.korma_data.setdefault('all_questions', {}).update(korma_data)
+            session.user.save(ctx, safe = True)
+            simulation_output, errors = conv.pipe(
+                conv.korma_data_to_api_data,
+                conv.api_data_to_simulation_output,
+                )(session.user.korma_data, state = ctx)
+            if errors is None:
+                trees = simulation_output['value']
+                matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))
+#                matplotlib_helpers.create_bareme_png(
+#                    trees,
+#                    simulation_output,
+#                    filename = u'bareme_{}.png'.format(session.token),
+#                    )
+                return wsgihelpers.redirect(ctx, location = '')
+    return templates.render(
+        ctx,
+        '/all-questions.mako',
+        errors = errors or {},
+        page_form = page_form,
+        )
 
 
 def ensure_session(ctx):
@@ -183,6 +172,7 @@ def make_router():
     global router
     routings = [
         (('GET', 'POST'), '^/?$', index),
+        ('GET', '^/all-questions?$', all_questions),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/simulations(?=/|$)', simulations.route_admin_class),
