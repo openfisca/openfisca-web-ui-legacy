@@ -30,8 +30,8 @@
     <h1>Familles</h1>
 
     <ul class="nav nav-tabs">
-      <li><a href="/personne">Personnes</a></li>
-      <li><a href="/declaration-impot">Déclaration d'impôt</a></li>
+      <li><a href="/personnes">Personnes</a></li>
+      <li><a href="/declaration-impots">Déclaration d'impôt</a></li>
       <li class="active"><a href="/famille">Famille</a></li>
       <li><a href="/logement-principal">Logement principal</a></li>
     </ul>

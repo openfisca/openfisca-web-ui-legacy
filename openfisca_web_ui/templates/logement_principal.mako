@@ -27,13 +27,13 @@
 
 
 <%def name="container_content()" filter="trim">
-    <h1>Openfisca</h1>
+    <h1>Logement principal</h1>
 
     <ul class="nav nav-tabs">
-      <li class="active"><a href="/personne">Personnes</a></li>
-      <li><a href="/declaration-impot">Déclaration d'impôt</a></li>
+      <li><a href="/personnes">Personnes</a></li>
+      <li><a href="/declaration-impots">Déclaration d'impôt</a></li>
       <li><a href="/famille">Famille</a></li>
-      <li><a href="/logement-principal">Logement principal</a></li>
+      <li class="active"><a href="/logement-principal">Logement principal</a></li>
     </ul>
 
     <div class="row">

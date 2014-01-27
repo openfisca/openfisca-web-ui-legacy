@@ -13,5 +13,5 @@ openfisca_web_ui/static/css/site.min.css
 *.pyo
 *~
 
-/openfisca_web_ui/static/waterfall.png
-/openfisca_web_ui/static/bareme.png
+/openfisca_web_ui/static/waterfall*.png
+/openfisca_web_ui/static/bareme*.png

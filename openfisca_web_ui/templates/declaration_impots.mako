@@ -30,7 +30,7 @@
     <h1>Déclaration d'impôt sur le revenu</h1>
 
     <ul class="nav nav-tabs">
-      <li><a href="/personne">Personnes</a></li>
+      <li><a href="/personnes">Personnes</a></li>
       <li class="active"><a href="/declaration-impot">Déclaration d'impôt</a></li>
       <li><a href="/famille">Famille</a></li>
       <li><a href="/logement-principal">Logement principal</a></li>

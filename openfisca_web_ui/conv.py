@@ -43,35 +43,35 @@ import openfisca_france.model.data
 
 
 N_ = lambda message: message
+json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
 uuid_re = re.compile(ur'[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$')
 
 
-def data_to_simulation(data, state = None):
+api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
+
+
+def api_post_content_to_simulation_output(api_post_content, state = None):
     from . import conf
-    if data is None:
+    if api_post_content is None:
         return None, None
     if state is None:
         state = default_state
-
-    request = urllib2.Request(conf['openfisca.api.url'], headers = {
+    request = urllib2.Request(conf['api.url'], headers = {
         'Content-Type': 'application/json',
-        'User-Agent': 'OpenFisca-Notebook',
+        'User-Agent': conf['app_name'],
         })
-    print 'calling API: data', pformat(data)
     try:
-        response = urllib2.urlopen(
-            request,
-            json.dumps(data, default = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj),
-            )
-    except urllib2.HTTPError as http_exc:
-        print http_exc.read()
-        return data, state._('API respond with HTTP code {}').format(http_exc.code)
-    except urllib2.URLError:
-        return data, state._('API didn\'t respond')
+        response = urllib2.urlopen(request, api_post_content)
+    except urllib2.HTTPError as response:
+        return api_post_content, response.read()
+    except urllib2.URLError as response:
+        return api_post_content, response.read()
     response_str = response.read()
-#    print 'response_str', response_str
-    response_dict = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
-    return response_dict, None
+    simulation_output = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
+    return simulation_output, None
+
+
+api_data_to_simulation_output = pipe(api_data_to_api_post_content, api_post_content_to_simulation_output)
 
 
 date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[:6])))
@@ -91,21 +91,6 @@ input_to_words = pipe(
     function(lambda slug: sorted(set(slug.split(u'-')))),
     empty_to_none,
     )
-
-
-#json_to_item_attributes = pipe(
-#    test_isinstance(dict),
-#    struct(
-#        dict(
-#            id = pipe(
-#                input_to_object_id,
-#                not_none,
-#                ),
-#            ),
-#        default = noop,  # TODO(rsoufflet)
-#        ),
-#    rename_item('id', '_id'),
-#    )
 
 
 def method(method_name, *args, **kwargs):

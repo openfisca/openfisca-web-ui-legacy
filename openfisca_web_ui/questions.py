@@ -27,7 +27,7 @@
 
 
 from korma.date import Date
-from korma.text import Text
+from korma.text import Number
 import openfisca_france.model.data
 
 from . import conv
@@ -51,9 +51,10 @@ def openfisca_france_column_data_to_questions(keep_entity = None):
             continue
         if name in ['quifam', 'quifoy', 'quimen', 'idfoy', 'idfam', 'idmen', 'sali', 'statmarit', 'birth']:
             continue
-        question = Text(
+        question = Number(
             label = conv.check(conv.decode_str()(column.label)),
             name = name,
+            step = 1,
             )
         questions.append(question)
     return questions

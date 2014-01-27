@@ -45,7 +45,7 @@ from openfisca_web_ui import conf, model, urls
 
 
 <%def name="brand()" filter="trim">
-${conf['realm']}
+${conf['app_name']}
 </%def>
 
 
