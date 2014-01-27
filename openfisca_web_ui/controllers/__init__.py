@@ -71,7 +71,8 @@ def all_questions(req):
     if data['entity'] == 'fam':
         user_data = session.user.korma_data['famille']['famille_repeat'][data['idx']]['famille']
     elif data['entity'] == 'foy':
-        user_data = session.user.korma_data['declaration_impot']['declaration_impot_repeat'][data['idx']]['declaration_impot']
+        user_data = session.user.korma_data['declaration_impot']['declaration_impot_repeat'][data['idx']][
+            'declaration_impot']
     elif data['entity'] == 'ind':
         user_data = session.user.korma_data['personne']['personnes'][data['idx']]['person_data']
 
@@ -157,7 +158,11 @@ def form(req):
             if errors is None:
                 trees = simulation_output['value']
                 matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))
-    #            matplo tlib_helpers.create_bareme_png(trees, simulation_output, filename = u'bareme_{}.png'.format(session.token))
+#                matplotlib_helpers.create_bareme_png(
+#                    trees,
+#                    simulation_output,
+#                    filename = u'bareme_{}.png'.format(session.token),
+#                    )
                 return wsgihelpers.redirect(ctx, location = '')
     return templates.render(
         ctx,

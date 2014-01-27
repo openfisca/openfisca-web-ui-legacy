@@ -29,7 +29,6 @@
 import collections
 import datetime
 import json
-from pprint import pformat, pprint
 import re
 import urllib2
 

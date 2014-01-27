@@ -37,7 +37,7 @@ from openfisca_web_ui import pages
 <%def name="tabs()" filter="trim">
     <ul class="nav nav-tabs">
     % for page_data in pages.pages_data:
-      <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u''}>
+      <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
         <a href="${u'/{}'.format(page_data['slug'])}">${page_data['title']}</a>
       </li>
     % endfor
