@@ -233,7 +233,11 @@ Plus de détails</a></div>''',
 
 
 def persons_value_and_name(ctx):
-    if ctx.session.user.korma_data is None:
+    if ctx.session is None or \
+            ctx.session.user is None or \
+            ctx.session.user.korma_data is None or \
+            ctx.session.user.korma_data.get('personne') is None or \
+            ctx.session.user.korma_data['personne'].get('personnes') is None:
         return []
     return [
         (unicode(idx), person['person_data'].get('name') or idx)
