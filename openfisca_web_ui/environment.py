@@ -34,8 +34,6 @@ import sys
 from biryani1 import strings
 import pkg_resources
 import pymongo
-import webassets
-import webassets.loaders
 
 import openfisca_web_ui
 from . import conv, model, templates
@@ -43,21 +41,6 @@ from . import conv, model, templates
 
 app_dir = os.path.dirname(os.path.abspath(__file__))
 hostname = socket.gethostname().split('.')[0]
-
-
-def configure_assets(debug = False, static_dir = None):
-    """Configure WebAssets."""
-    assets = webassets.Environment(static_dir, '/')
-    assets.auto_build = debug
-    assets.debug = debug
-
-    # Load bundle from yaml file.
-    assets_loader = webassets.loaders.YAMLLoader(pkg_resources.resource_stream(__name__, 'assets.yaml'))
-    bundles = assets_loader.load_bundles()
-    for name, bundle in bundles.items():
-        assets.register(name, bundle)
-
-    return assets
 
 
 def load_environment(global_conf, app_conf):
@@ -126,9 +109,6 @@ def load_environment(global_conf, app_conf):
 
     # Create the Mako TemplateLookup, with the default auto-escaping.
     templates.dirs = [os.path.join(app_dir, 'templates')]
-
-    # Configure WebAssets.
-    conf['assets'] = configure_assets(debug = conf['debug'], static_dir = conf['static_files_dir'])
 
 
 def setup_environment():

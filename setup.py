@@ -60,7 +60,6 @@ setup(
         ('share/locale/fr/LC_MESSAGES', ['openfisca_web_ui/i18n/fr/LC_MESSAGES/openfisca-web-ui.mo']),
         ],
     entry_points = {
-        'distutils.commands': 'build_assets = openfisca_web_ui.commands:BuildAssets',
         'paste.app_factory': 'main = openfisca_web_ui.application:make_app',
         },
     include_package_data = True,
@@ -71,9 +70,7 @@ setup(
         'Mako >= 0.8',
         'matplotlib >= 1.3.1',
         'numpy >= 1.7.1',
-        'PyYAML',
         'pymongo >= 2.2',
-        'webassets >= 0.8',
         'WebError >= 0.10',
         'WebOb >= 1.1',
         ],

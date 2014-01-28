@@ -66,9 +66,10 @@ ${conf['app_name']}
 
 
 <%def name="css()" filter="trim">
-    % for url in conf['assets']['site-css'].urls():
-    <link href="${url}" media="screen" rel="stylesheet">
-    % endfor
+    <link href="${urls.get_url(ctx, u'/bower/bootstrap/dist/css/bootstrap.css')}" media="screen"
+rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'/css/typeahead.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'/css/site.css')}" media="screen" rel="stylesheet">
 </%def>
 
 
@@ -124,9 +125,8 @@ ${conf['app_name']}
 
 <%def name="ie_scripts()" filter="trim">
     <!--[if lt IE 9]>
-    % for url in conf['assets']['site-ie-js'].urls():
-        <script src="${url}"></script>
-    % endfor
+    <script src="${urls.get_url(ctx, u'/bower/html5shiv/src/html5shiv.js')}"></script>
+    <script src="${urls.get_url(ctx, u'/bower/respond/respond.src.js')}"></script>
     <![endif]-->
 </%def>
 
@@ -140,9 +140,11 @@ ${conf['app_name']}
 
 
 <%def name="scripts()" filter="trim">
-    % for url in conf['assets']['site-js'].urls():
-    <script src="${url}"></script>
-    % endfor
+    <script src="${urls.get_url(ctx, u'/bower/jquery/jquery.js')}"></script>
+    <script src="${urls.get_url(ctx, u'/bower/bootstrap/dist/js/bootstrap.js')}"></script>
+    <script src="${urls.get_url(ctx, u'/bower/typeahead.js/dist/typeahead.js')}"></script>
+    <script src="${urls.get_url(ctx, u'/bower/requirejs/require.js')}"></script>
+    <script src="${urls.get_url(ctx, u'/js/site.js')}"></script>
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
     <script src="https://login.persona.org/include.js"></script>
