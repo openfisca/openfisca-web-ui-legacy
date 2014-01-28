@@ -28,6 +28,7 @@
 
 import datetime
 import logging
+import os
 import uuid
 
 from formencode import variabledecode
@@ -163,6 +164,42 @@ def form(req):
 
 
 @wsgihelpers.wsgify
+def image(req):
+    ctx = contexts.Ctx(req)
+    ensure_session(ctx)
+    session = ctx.session
+    if session.user.korma_data is None:
+        session.user.korma_data = {}
+
+    params = {
+        'name': req.urlvars.get('name')
+        }
+    image_name = conv.check(conv.test_in(['bareme', 'waterfall'])(params['name']))
+    simulation_output, errors = conv.pipe(
+        conv.korma_data_to_api_data,
+        conv.api_data_to_simulation_output,
+        )(session.user.korma_data, state = ctx)
+    if errors is None:
+        trees = simulation_output['value']
+        if image_name == 'waterfall':
+            matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))
+        elif image_name == 'bareme':
+            matplotlib_helpers.create_bareme_png(
+                trees,
+                simulation_output,
+                filename = u'bareme_{}.png'.format(session.token),
+                )
+        image_filename = os.path.join(
+            conf['static_files_dir'],
+            '{}_{}.png'.format(image_name, session.token),
+            )
+        req.response.content_type = 'image/jpeg'
+        with open(image_filename, 'r') as img:
+            req.response.write(img.read())
+    return wsgihelpers.no_content(ctx)
+
+
+@wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
     raise wsgihelpers.redirect(ctx, location = '/famille')
@@ -174,6 +211,7 @@ def make_router():
     routings = [
         (('GET', 'POST'), '^/?$', index),
         ('GET', '^/all-questions?$', all_questions),
+        ('GET', '^/image/(?P<name>bareme|waterfall)(?=/|$)', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/simulations(?=/|$)', simulations.route_admin_class),

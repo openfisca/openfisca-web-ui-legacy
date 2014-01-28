@@ -65,8 +65,9 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
             )
     except requests.exceptions.ConnectionError:
         return api_post_content, state._('Unable to connect to API, url: {}').format(conf['api_url'])
-    response_str = response.read()
-    simulation_output = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
+    if not response.ok:
+        return api_post_content, state._('API respond with status code {}'.format(response.status_code))
+    simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
     return simulation_output, None
 
 
