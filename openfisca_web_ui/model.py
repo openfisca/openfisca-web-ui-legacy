@@ -33,8 +33,8 @@ import requests
 
 from biryani1 import strings
 from korma.checkbox import Checkbox
-from korma.choice import Select
-from korma.text import Number
+from korma.choice import Radio, Select
+from korma.text import Number, Text
 
 from . import conf, conv, objects, texthelpers, urls, wsgihelpers
 
@@ -384,16 +384,25 @@ def make_question(question_info):
             value = question_info.get('default'),
             )
     elif question_info['@type'] == 'Enumeration':
-        return Select(
-            choices = question_info['labels'].iteritems() if question_info.get('labels') else [],
-            label = question_label,
-            name = question_info['name'],
-            )
+        labels = question_info.get('labels', [])
+        if len(labels) > 3:
+            return Select(
+                choices = question_info['labels'].iteritems(),
+                label = question_label,
+                name = question_info['name'],
+                )
+        elif len(labels) > 0:
+            return Radio(
+                choices = question_info['labels'].iteritems() if question_info.get('labels') else [],
+                label = question_label,
+                name = question_info['name'],
+                )
+        else:
+            return Text(label = question_label, name = question_info['name'])
     elif question_info['@type'] == 'Float':
         return Number(label = question_label, name = question_info['name'], step = 0.01)
     elif question_info['@type'] == 'Integer':
         return Number(label = question_label, name = question_info['name'], step = 1)
-    assert False, 'Can\'t process {} question type'.format(question_info['@type'])
 
 
 def setup():
