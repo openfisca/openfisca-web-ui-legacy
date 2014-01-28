@@ -26,14 +26,9 @@
 """Korma questions adapted to MongoDB"""
 
 
-import collections
-import json
-import urllib2
-
 from korma.date import Date
-from korma.text import Number
 
-from . import conf, conv
+from . import conv
 
 
 class MongoDate(Date):
@@ -44,32 +39,3 @@ class MongoDate(Date):
     @property
     def default_input_to_data(self):
         return conv.pipe(super(MongoDate, self).default_input_to_data, conv.date_to_datetime)
-
-
-def openfisca_france_column_data_to_questions(keep_entity = None):
-    u'''keep_entities examples: "foy", "ind", "men"'''
-    request = urllib2.Request(conf['api.fields.url'])
-    try:
-        response = urllib2.urlopen(request)
-    except urllib2.HTTPError as response:
-        # return response.read()
-        pass
-    except urllib2.URLError as response:
-        # return response.read()
-        pass
-    response_str = response.read()
-    column_by_name = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
-
-    questions = []
-    for name, column in column_by_name['columns'].iteritems():
-        if keep_entity is not None and column.get('entity') != keep_entity:
-            continue
-        if name in ['quifam', 'quifoy', 'quimen', 'idfoy', 'idfam', 'idmen', 'sali', 'statmarit', 'birth']:
-            continue
-        question = Number(
-            label = conv.check(conv.decode_str()(column.get('label'))),
-            name = name,
-            step = 1,
-            )
-        questions.append(question)
-    return questions

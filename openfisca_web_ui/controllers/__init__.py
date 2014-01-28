@@ -33,7 +33,7 @@ import uuid
 from formencode import variabledecode
 from korma.group import Group
 
-from .. import contexts, conf, conv, matplotlib_helpers, model, pages, questions, templates, urls, wsgihelpers
+from .. import contexts, conf, conv, matplotlib_helpers, model, pages, templates, urls, wsgihelpers
 from . import accounts, sessions, simulations
 
 
@@ -46,6 +46,8 @@ def all_questions(req):
     ctx = contexts.Ctx(req)
     ensure_session(ctx)
     session = ctx.session
+    if model.column_by_name is None:
+        model.init_api_columns_and_prestations()
 
     inputs = {
         'entity': req.params.get('entity') or None,
@@ -55,14 +57,13 @@ def all_questions(req):
         'idx': conv.anything_to_int,
         'entities': conv.test_in(['fam', 'foy', 'ind', 'men']),
         })(inputs, state = ctx)
-    group_questions = questions.openfisca_france_column_data_to_questions(keep_entity=data['entity'])
     page_form = Group(
         children_attributes = {
             '_inner_html_template': pages.bootstrap_control_inner_html_template,
             '_outer_html_template': pages.bootstrap_group_outer_html_template,
             },
         name = u'all_questions',
-        questions = group_questions,
+        questions = model.questions_by_entity[data['entity']] if model.questions_by_entity is not None else [],
         )
 
     if session.user.korma_data is None:

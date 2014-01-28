@@ -122,6 +122,7 @@ def load_environment(global_conf, app_conf):
     # Load MongoDB database.
     db = pymongo.Connection()[conf['database']]
     model.init(db)
+    model.init_api_columns_and_prestations()
 
     # Create the Mako TemplateLookup, with the default auto-escaping.
     templates.dirs = [os.path.join(app_dir, 'templates')]

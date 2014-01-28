@@ -29,10 +29,18 @@
 import collections
 import datetime
 import re
+import requests
 
 from biryani1 import strings
+from korma.checkbox import Checkbox
+from korma.choice import Select
+from korma.text import Number
 
-from . import conv, objects, texthelpers, urls, wsgihelpers
+from . import conf, conv, objects, texthelpers, urls, wsgihelpers
+
+
+column_by_name = None
+questions_by_entity = None
 
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
@@ -339,6 +347,22 @@ def init(db):
     objects.Wrapper.db = db
 
 
+def init_api_columns_and_prestations():
+    global column_by_name
+    global questions_by_entity
+    try:
+        response = requests.request('GET', conf['api.fields.url'])
+    except requests.exceptions.ConnectionError:
+        return
+    except requests.exceptions.HTTPError:
+        return
+    if response.ok:
+        column_by_name = response.json()['columns']
+        questions_by_entity = {}
+        for name, column in column_by_name.iteritems():
+            questions_by_entity.setdefault(column.get('entity'), []).append(make_question(column))
+
+
 def is_admin(ctx, check = False):
     user = get_user(ctx)
     if user is None or not user.admin:
@@ -349,6 +373,27 @@ def is_admin(ctx, check = False):
             raise wsgihelpers.forbidden(ctx, message = ctx._(u"You must be an administrator to access this page."))
         return False
     return True
+
+
+def make_question(question_info):
+    question_label = conv.check(conv.decode_str()(question_info.get('label')))
+    if question_info['@type'] == 'Boolean':
+        return Checkbox(
+            label = question_label,
+            name = question_info['name'],
+            value = question_info.get('default'),
+            )
+    elif question_info['@type'] == 'Enumeration':
+        return Select(
+            choices = question_info['labels'].iteritems() if question_info.get('labels') else [],
+            label = question_label,
+            name = question_info['name'],
+            )
+    elif question_info['@type'] == 'Float':
+        return Number(label = question_label, name = question_info['name'], step = 0.01)
+    elif question_info['@type'] == 'Integer':
+        return Number(label = question_label, name = question_info['name'], step = 1)
+    assert False, 'Can\'t process {} question type'.format(question_info['@type'])
 
 
 def setup():
