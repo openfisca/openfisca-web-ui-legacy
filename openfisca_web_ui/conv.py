@@ -30,7 +30,7 @@ import collections
 import datetime
 import json
 import re
-import urllib2
+import requests
 
 from biryani1.baseconv import *  # NOQA
 from biryani1.bsonconv import *  # NOQA
@@ -54,16 +54,17 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
         return None, None
     if state is None:
         state = default_state
-    request = urllib2.Request(conf['api.url'], headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': conf['app_name'],
-        })
     try:
-        response = urllib2.urlopen(request, api_post_content)
-    except urllib2.HTTPError as response:
-        return api_post_content, response.read()
-    except urllib2.URLError as response:
-        return api_post_content, response.read()
+        response = requests.post(
+            conf['api.url'],
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': conf['app_name'],
+                },
+            params = api_post_content,
+            )
+    except requests.exceptions.ConnectionError:
+        return api_post_content, state._('Unable to connect to API, url: {}').format(conf['api_url'])
     response_str = response.read()
     simulation_output = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
     return simulation_output, None
@@ -128,18 +129,8 @@ def korma_data_to_api_data(values, state = None):
         return None, None
 
     def iter_api_variables(korma_data, keep_entities=None):
-        request = urllib2.Request(conf['api.fields.url'])
-        try:
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError as response:
-            # return response.read()
-            pass
-        except urllib2.URLError as response:
-            # return response.read()
-            pass
-        response_str = response.read()
-        column_by_name = json.loads(response_str, object_pairs_hook = collections.OrderedDict)
-        api_vars_name = column_by_name.keys()
+        from . import model
+        api_vars_name = model.column_by_name.keys()
         api_vars_name.extend([u'birth'])
         for k, v in korma_data.iteritems():
             if k in api_vars_name and v is not None:

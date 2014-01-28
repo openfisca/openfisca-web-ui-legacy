@@ -351,7 +351,7 @@ def init_api_columns_and_prestations():
     global column_by_name
     global questions_by_entity
     try:
-        response = requests.request('GET', conf['api.fields.url'])
+        response = requests.get(conf['api.fields.url'])
     except requests.exceptions.ConnectionError:
         return
     except requests.exceptions.HTTPError:
