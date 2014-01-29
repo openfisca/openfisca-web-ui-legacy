@@ -47,6 +47,7 @@ js = lambda x: json.dumps(
         if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date) else None,
     encoding = 'utf-8',
     ensure_ascii = False,
+    indent = 2,
     )
 
 
