@@ -172,62 +172,6 @@ class="btn btn-primary">Plus de détails</a></div>''',
                     ]
                 ),
             ),
-        'personnes': Repeat(
-            children_attributes = {
-                '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=ind&idx={self.parent_data[personnes][index]}" class="btn btn-primary">
-Plus de détails</a></div>''',
-                },
-            outer_html_template = u'<div class="repeat">{self.inner_html}</div>',
-            name = 'personnes',
-            template_question = Group(
-                children_attributes = {
-                    '_control_attributes': {'class': 'form-control'},
-                    '_inner_html_template': bootstrap_control_inner_html_template,
-                    '_outer_html_template': bootstrap_group_outer_html_template,
-                    },
-                name = 'person_data',
-                outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
-                questions = [
-                    Text(
-                        label = u'Nom',
-                        name = 'name',
-                        ),
-                    Number(
-                        label = u'Salaire imposable annuel',
-                        name = 'sali',
-                        step = 1,
-                        ),
-                    Select(
-                        first_unselected = True,
-                        label = u'Activité',
-                        choices = [
-                            u'Actif occupé',
-                            u'Chômeur',
-                            u'Étudiant, élève',
-                            u'Retraité',
-                            u'Autre inactif',
-                            ]
-                        ),
-                    questions.MongoDate(
-                        label = u'Date de naissance',
-                        name = 'birth'),
-                    Select(
-                        choices = [
-                            u'Marié',
-                            u'Célibataire',
-                            u'Divorcé',
-                            u'Veuf',
-                            u'Pacsé',
-                            u'Jeune veuf',
-                            ],
-                        first_unselected = True,
-                        label = u'Statut marital',
-                        name = u'statmarit',
-                        ),
-                    ]
-                ),
-            )
         }
     return page_form_by_page_name[page_name]
 
