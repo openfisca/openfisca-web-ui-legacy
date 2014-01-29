@@ -62,6 +62,9 @@ pages_data = [
 
 
 def page_form(ctx, page_name):
+    assert ctx.session is not None
+    korma_data = None if ctx.session.user is None else ctx.session.user.korma_data
+    persons_choices = None if korma_data is None else persons_value_and_name(korma_data)
     page_form_by_page_name = {
         'declaration_impots': Repeat(
             children_attributes = {
@@ -76,20 +79,20 @@ class="btn btn-primary"> Plus de détails</a></div>''',
                 name = 'declaration_impot',
                 questions = [
                     Select(
-                        choices = persons_value_and_name(ctx),
+                        choices = persons_choices,
                         control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Vous',
                         ),
                     Select(
-                        choices = persons_value_and_name(ctx),
+                        choices = persons_choices,
                         control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Conj',
                         ),
                     Repeat(
                         template_question = Select(
-                            choices = persons_value_and_name(ctx),
+                            choices = persons_choices,
                             control_attributes = {'class': 'form-control'},
                             label = u'Personne à charge',
                             inner_html_template = bootstrap_control_inner_html_template,
@@ -113,20 +116,20 @@ Plus de détails</a></div>''',
                 name = 'famille',
                 questions = [
                     Select(
-                        choices = persons_value_and_name(ctx),
+                        choices = persons_choices,
                         control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Parent1',
                         ),
                     Select(
-                        choices = persons_value_and_name(ctx),
+                        choices = persons_choices,
                         control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Parent2',
                         ),
                     Repeat(
                         template_question = Select(
-                            choices = persons_value_and_name(ctx),
+                            choices = persons_choices,
                             control_attributes = {'class': 'form-control'},
                             inner_html_template = bootstrap_control_inner_html_template,
                             label = u'Enfant',
@@ -174,14 +177,9 @@ class="btn btn-primary">Plus de détails</a></div>''',
     return page_form_by_page_name[page_name]
 
 
-def persons_value_and_name(ctx):
-    if ctx.session is None or \
-            ctx.session.user is None or \
-            ctx.session.user.korma_data is None or \
-            ctx.session.user.korma_data.get('personne') is None or \
-            ctx.session.user.korma_data['personne'].get('personnes') is None:
-        return []
-    return [
-        (unicode(idx), person['person_data'].get('name') or idx)
-        for idx, person in enumerate(ctx.session.user.korma_data['personne']['personnes'] or [])
-        ]
+def persons_value_and_name(korma_data):
+    return [] if korma_data.get('personne', {}).get('personnes') is None else \
+        [
+            (unicode(idx), person['person_data'].get('name') or idx)
+            for idx, person in enumerate(korma_data['personne']['personnes'])
+            ]
