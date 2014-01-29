@@ -31,8 +31,6 @@ from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from . import questions
-
 
 bootstrap_control_inner_html_template = u'''
 <label class="col-sm-6 control-label" for="{self.full_name}">{self.label}</label>

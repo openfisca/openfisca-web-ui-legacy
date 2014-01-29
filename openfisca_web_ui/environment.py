@@ -32,7 +32,6 @@ import socket
 import sys
 
 from biryani1 import strings
-import pkg_resources
 import pymongo
 
 import openfisca_web_ui
