@@ -115,6 +115,7 @@ def ensure_session(ctx):
         user.compute_words()
         session.user_id = user._id
         user.save(ctx, safe = True)
+        session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
     if ctx.req.cookies.get(conf['cookie']) != session.token:

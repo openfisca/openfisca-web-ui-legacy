@@ -308,6 +308,10 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
             self._user = Account.find_one(self.user_id) if self.user_id is not None else None
         return self._user
 
+    @user.setter
+    def user(self, value):
+        self._user = value
+
     @classmethod
     def uuid_to_instance(cls, value, state = None):
         if value is None:
