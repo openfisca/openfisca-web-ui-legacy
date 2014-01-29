@@ -26,7 +26,12 @@
 """Pages meta-data"""
 
 
+import datetime
+
+from korma.base import Button
 from korma.choice import Select
+from korma.condition import Condition
+from korma.date import Date
 from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
@@ -40,6 +45,76 @@ bootstrap_control_inner_html_template = u'''
 
 
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
+
+
+def make_person(persons_choices):
+    roles_choices = (u'Parent', u'Enfant')
+    return Group(
+        children_attributes = {
+            '_control_attributes': {'class': u'form-control'},
+            '_outer_html_template': bootstrap_group_outer_html_template,
+            },
+        javascript_module = u'person_modal',
+        name = u'personne_in_famille',
+        questions = [
+            Select(
+                choices = roles_choices,
+                inner_html_template = bootstrap_control_inner_html_template,
+                label = u'Rôle',
+                ),
+            Condition(
+                base_question = Select(
+                    choices = persons_choices,
+                    label = u'Prénom',
+                    ),
+                conditional_questions = {
+                    prenom: Group(
+                        children_attributes = {
+                            '_control_attributes': {'class': u'form-control'},
+                            '_inner_html_template': bootstrap_control_inner_html_template,
+                            '_outer_html_template': bootstrap_group_outer_html_template,
+                            },
+                        inner_html_template = u'''
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
+      </div>
+      <div class="modal-body">
+        {{self[salaire].html}}
+        {{self[prenom_text].html}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
+'''.format(prenom=prenom),
+                        name = 'personne',
+                        questions = [
+                            Number(label = u'Salaire', min = 0, step = 1),
+                            Text(label = u'Prénom', name = 'prenom_text'),
+                            Date(label = u'Date de naissance', max = datetime.datetime.now().date()),
+                            ],
+                        )
+                    for prenom in [u'Christophe']
+                    },
+                ),
+            Button(
+                control_attributes = {
+                    'class': 'btn btn-primary',
+                    'data-target': '#myModal',
+                    'data-toggle': 'modal',
+                },
+                inner_html_template = bootstrap_control_inner_html_template,
+                label = u'Éditer',
+                outer_html_template = u'<div class="col-sm-offset-6 col-sm-10">{self.inner_html}</div>',
+                ),
+            ],
+        )
 
 
 pages_data = [
@@ -65,6 +140,8 @@ def page_form(ctx, page_name):
     assert ctx.session is not None
     korma_data = None if ctx.session.user is None else ctx.session.user.korma_data
     persons_choices = None if korma_data is None else persons_value_and_name(korma_data)
+    if persons_choices is None:
+        persons_choices = [u'Nouvelle personne']
     page_form_by_page_name = {
         'declaration_impots': Repeat(
             children_attributes = {
@@ -103,40 +180,17 @@ class="btn btn-primary"> Plus de détails</a></div>''',
                 ),
             ),
         'famille': Repeat(
-            children_attributes = {
-                '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=fam&idx={self.parent_data[famille_repeat][index]}" class="btn btn-primary">
-Plus de détails</a></div>''',
-                },
-            outer_html_template = u'<div class="repeat">{self.inner_html}</div>',
-            template_question = Group(
-                children_attributes = {
-                    '_outer_html_template': bootstrap_group_outer_html_template,
-                    },
-                name = 'famille',
-                questions = [
-                    Select(
-                        choices = persons_choices,
-                        control_attributes = {'class': 'form-control'},
-                        inner_html_template = bootstrap_control_inner_html_template,
-                        label = u'Parent1',
-                        ),
-                    Select(
-                        choices = persons_choices,
-                        control_attributes = {'class': 'form-control'},
-                        inner_html_template = bootstrap_control_inner_html_template,
-                        label = u'Parent2',
-                        ),
-                    Repeat(
-                        template_question = Select(
-                            choices = persons_choices,
-                            control_attributes = {'class': 'form-control'},
-                            inner_html_template = bootstrap_control_inner_html_template,
-                            label = u'Enfant',
-                            name = 'enf',
-                            ),
-                        ),
-                    ]
+            name = u'familles',
+            template_question = Repeat(
+                name = u'personnes',
+                outer_html_template = u'''
+<div class="repeated-group">
+  {self.inner_html}
+  <a href="/all-questions?entity=fam&idx={self.parent_data[familles][index]}" class="btn btn-primary">
+    Plus de détails
+  </a>
+</div>''',
+                template_question = make_person(persons_choices=persons_choices),
                 ),
             ),
         'logement_principal': Repeat(
@@ -164,7 +218,6 @@ class="btn btn-primary">Plus de détails</a></div>''',
                             u'Locataire ou sous-locataire d\'un logement loué meublé ou d\'une chambre d\'hôtel',
                             u'Logé gratuitement par des parents, des amis ou l\'employeur',
                             ],
-                        first_unselected = True,
                         label = u'Statut d\'occupation',
                         name = u'so',
                         ),
@@ -178,7 +231,7 @@ class="btn btn-primary">Plus de détails</a></div>''',
 
 
 def persons_value_and_name(korma_data):
-    return [] if korma_data.get('personne', {}).get('personnes') is None else \
+    return None if korma_data.get('personne', {}).get('personnes') is None else \
         [
             (unicode(idx), person['person_data'].get('name') or idx)
             for idx, person in enumerate(korma_data['personne']['personnes'])
