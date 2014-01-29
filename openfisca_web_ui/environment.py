@@ -62,7 +62,9 @@ def load_environment(global_conf, app_conf):
             'cache_dir': conv.default(os.path.join(os.path.dirname(app_dir), 'cache')),
             'cookie': conv.default('openfisca-web-ui'),
             'customs_dir': conv.default(None),
-            'database': conv.default('openfisca_web_ui'),
+            'database.host': conv.default('localhost'),
+            'database.name': conv.default('openfisca_web_ui'),
+            'database.port': conv.pipe(conv.input_to_int, conv.default(27017)),
             'debug': conv.pipe(conv.guess_bool, conv.default(False)),
             'global_conf': conv.set_value(global_conf),
 #            'host_urls': conv.pipe(
@@ -103,7 +105,7 @@ def load_environment(global_conf, app_conf):
         errorware['smtp_server'] = conf.get('smtp_server', 'localhost')
 
     # Load MongoDB database.
-    db = pymongo.Connection()[conf['database']]
+    db = pymongo.Connection(conf['database.host'], conf['database.port'])[conf['database.name']]
     model.init(db)
     model.init_api_columns_and_prestations()
 
