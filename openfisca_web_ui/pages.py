@@ -47,19 +47,13 @@ bootstrap_control_inner_html_template = u'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
 
 
-def make_person(persons_choices):
-    roles_choices = (u'Parent', u'Enfant')
+def make_personne_in_famille_group(persons_choices):
     return Group(
-        children_attributes = {
-            '_control_attributes': {'class': u'form-control'},
-            '_outer_html_template': bootstrap_group_outer_html_template,
-            },
         javascript_module = u'person_modal',
         name = u'personne_in_famille',
         questions = [
             Select(
-                choices = roles_choices,
-                inner_html_template = bootstrap_control_inner_html_template,
+                choices = (u'Parent', u'Enfant'),
                 label = u'Rôle',
                 ),
             Condition(
@@ -68,12 +62,7 @@ def make_person(persons_choices):
                     label = u'Prénom',
                     ),
                 conditional_questions = {
-                    prenom: Group(
-                        children_attributes = {
-                            '_control_attributes': {'class': u'form-control'},
-                            '_inner_html_template': bootstrap_control_inner_html_template,
-                            '_outer_html_template': bootstrap_group_outer_html_template,
-                            },
+                    person_idx: Group(
                         inner_html_template = u'''
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -83,11 +72,12 @@ def make_person(persons_choices):
         <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
       </div>
       <div class="modal-body">
-        {{self[salaire].html}}
         {{self[prenom_text].html}}
+        {{self[salaire].html}}
+        {{self[statmarit].html}}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
+        <input class="btn btn-primary" data-dismiss="modal" type="submit" value="Valider">
       </div>
     </div>
   </div>
@@ -95,12 +85,18 @@ def make_person(persons_choices):
 '''.format(prenom=prenom),
                         name = 'personne',
                         questions = [
-                            Number(label = u'Salaire', min = 0, step = 1),
                             Text(label = u'Prénom', name = 'prenom_text'),
                             Date(label = u'Date de naissance', max = datetime.datetime.now().date()),
+                            Number(label = u'Salaire', min = 0, step = 1),
+                            # TODO(rsoufflet) add values
+                            Select(
+                                choices = (u'Célibataire', u'Marié', u'Pacsé'),
+                                label = u'Statut marital',
+                                name = 'statmarit',
+                                ),
                             ],
                         )
-                    for prenom in [u'Christophe']
+                    for (person_idx, prenom) in persons_choices
                     },
                 ),
             Button(
@@ -141,7 +137,7 @@ def page_form(ctx, page_name):
     korma_data = None if ctx.session.user is None else ctx.session.user.korma_data
     persons_choices = None if korma_data is None else persons_value_and_name(korma_data)
     if persons_choices is None:
-        persons_choices = [u'Nouvelle personne']
+        persons_choices = [('new', u'Nouvelle personne')]
     page_form_by_page_name = {
         'declaration_impots': Repeat(
             children_attributes = {
@@ -190,7 +186,7 @@ class="btn btn-primary"> Plus de détails</a></div>''',
     Plus de détails
   </a>
 </div>''',
-                template_question = make_person(persons_choices=persons_choices),
+                template_question = make_personne_in_famille_group(persons_choices=persons_choices),
                 ),
             ),
         'logement_principal': Repeat(
