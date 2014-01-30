@@ -191,7 +191,7 @@ class="btn btn-primary"> Plus de détails</a></div>''',
                 outer_html_template = u'''
 <div class="repeated-group">
   {self.inner_html}
-  <a href="/all-questions?entity=fam&idx={self.parent_data[familles][index]}" class="btn btn-primary">
+  <a class="btn btn-primary" href="/all-questions?entity=fam&idx={self.parent_data[familles][index]}">
     Plus de détails
   </a>
 </div>''',

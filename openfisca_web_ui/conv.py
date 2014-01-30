@@ -32,6 +32,7 @@ from itertools import chain
 import json
 import re
 import requests
+import uuid
 
 from biryani1.baseconv import *  # NOQA
 from biryani1.bsonconv import *  # NOQA
@@ -47,6 +48,14 @@ uuid_re = re.compile(ur'[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$
 
 
 api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
+
+
+def api_data_to_korma_data(api_data, state = None):
+    if api_data is None:
+        return None, None
+    if state is None:
+        state = default_state
+    return None, None
 
 
 def api_post_content_to_simulation_output(api_post_content, state = None):
@@ -118,93 +127,21 @@ def method(method_name, *args, **kwargs):
     return method_converter
 
 
-def korma_data_to_api_data(values, state = None):
-    def extract_famille_data(person_index, famille_data):
-        for famille_repeat_index, famille_repeat_data in enumerate(famille_data['famille_repeat']):
-            famille = famille_repeat_data['famille']
-            if famille['parent1'] is not None and person_index == int(famille['parent1']):
-                return u'chef', famille_repeat_index
-            elif famille['parent2'] is not None and person_index == int(famille['parent2']):
-                return u'part', famille_repeat_index
-            elif famille['enf_repeat'] is not None:
-                for enf_repeat_index, enf_repeat_data in enumerate(famille['enf_repeat']):
-                    if enf_repeat_data['enf'] is not None and person_index == int(enf_repeat_data['enf']):
-                        return u'enf{}'.format(int(enf_repeat_index) + 1), famille_repeat_index
+def korma_to_api_personnes(korma_personnes, state = None):
+    if korma_personnes is None:
         return None, None
-
-    def extract_declaration_impot_data(person_index, declaration_impot_data):
-        for declaration_impot_repeat_index, declaration_impot_repeat_data in enumerate(
-                declaration_impot_data['declaration_impot_repeat']):
-            declaration_impot = declaration_impot_repeat_data['declaration_impot']
-            if declaration_impot['vous'] is not None and person_index == int(declaration_impot['vous']):
-                return u'vous', declaration_impot_repeat_index
-            elif declaration_impot['conj'] is not None and person_index == int(declaration_impot['conj']):
-                return u'conj', declaration_impot_repeat_index
-            elif declaration_impot['pac_repeat'] is not None:
-                for pac_repeat_index, pac_repeat_data in enumerate(declaration_impot['pac_repeat']):
-                    if pac_repeat_data['pac'] is not None and person_index == int(pac_repeat_data['pac']):
-                        return u'pac{}'.format(int(pac_repeat_index) + 1), declaration_impot_repeat_index
-        return None, None
-
-    def iter_api_variables(korma_data, keep_entities=None):
-        from . import model
-        api_vars_name = model.column_by_name.keys()
-        api_vars_name.extend([u'birth'])
-        for k, v in korma_data.iteritems():
-            if k in api_vars_name and v is not None:
-                yield k, v
-#                korma_data.column_by_name[k].entity
-
-    if values is None:
-        return None, None
-    if state is None:
+    if state == None:
         state = default_state
-
-    for key in ('declaration_impot', 'famille', 'personne'):
-        if key not in values:
-            return values, u'Veuillez remplir l\'onglet "{}"'.format(key)
-
-    persons_data = values.get('personne', {}).get('personnes')
-    # TODO(rsoufflet) Ask for annual revenue. Annual revenu != "net mensuel * 12"
-
-    api_noidec_by_korma_declaration_impot_index = {}
-    api_noichef_by_korma_famille_index = {}
-    declarations = {}
-    familles = {}
-    menages = {u'0': {}}
-    individus = []
-    for person_index, person in enumerate(persons_data):
-        quifam, korma_famille_index = extract_famille_data(person_index, values['famille'])
-        if quifam == u'chef':
-            familles[unicode(person_index)] = {}
-            api_noichef_by_korma_famille_index[korma_famille_index] = person_index
-        quifoy, korma_declaration_impot_index = extract_declaration_impot_data(
-            person_index, values['declaration_impot'])
-        if quifoy == u'vous':
-            declarations[unicode(person_index)] = {}
-            api_noidec_by_korma_declaration_impot_index[korma_declaration_impot_index] = person_index
-        individu = {
-            'noichef': api_noichef_by_korma_famille_index[korma_famille_index],
-            'noidec': api_noidec_by_korma_declaration_impot_index[korma_declaration_impot_index],
-            'noipref': person_index,
-            'quifam': quifam,
-            'quifoy': quifoy,
-            'quimen': 'pref',
-            }
-        individu.update(iter_api_variables(person['person_data']))
-        if 'all_questions' in person:
-            individu.update(iter_api_variables(person['all_questions']))
-        individus.append(individu)
-
-    api_data = {
-        'scenarios': [
-            {
-                'declar': declarations,
-                'famille': familles,
-                'indiv': individus,
-                'menage': menages,
-                'year': 2006,
-                },
-            ],
-        }
-    return api_data, None
+    api_personnes = (state.session.user.api_data or {}).get('personnes') or {}
+    from pprint import pprint
+    print 'api_personnes'
+    pprint(api_personnes)
+    for korma_personne in korma_personnes:
+        pprint(korma_personne)
+        if korma_personne['id'] == 'new':
+            api_personnes[unicode(uuid.uuid4())] = korma_personne['personne']
+        else:
+            api_personne = api_personnes.get(personne['id'])
+            if api_personne is not None:
+                api_personne.update(korma_personne)
+    return api_personnes, None

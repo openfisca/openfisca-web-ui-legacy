@@ -66,10 +66,6 @@ def all_questions(req):
         name = u'all_questions',
         questions = model.questions_by_entity[data['entity']] if model.questions_by_entity is not None else [],
         )
-
-    if session.user.korma_data is None:
-        session.user.korma_data = {}
-
     if req.method == 'GET':
         errors = None
     else:
@@ -78,8 +74,6 @@ def all_questions(req):
         page_form.fill(korma_inputs)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
         if errors is None:
-            if session.user.korma_data is None:
-                session.user.korma_data = {}
             session.user.korma_data.setdefault('all_questions', {}).update(korma_data)
             session.user.save(ctx, safe = True)
             simulation_output, errors = conv.pipe(
@@ -131,28 +125,24 @@ def form(req):
     page_form = pages.page_form(ctx, page_data['name'])
     if req.method == 'GET':
         errors = None
-        if session.user is not None and session.user.korma_data is not None:
-            page_form.fill(session.user.korma_data.get(page_data['name'], {}))
+        if session.user is not None and session.user.api_data is not None:
+            korma_data = conv.api_data_to_korma_data(session.user.api_data, state = ctx)
+            page_form.fill(korma_data)
     else:
         params = req.params
         korma_inputs = variabledecode.variable_decode(params)
         page_form.fill(korma_inputs)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
         if errors is None:
-            personnes = conv.check(page_data['korma_data_to_personnes'](korma_data, state = ctx))
-            simulation_output, errors = conv.pipe(
-                conv.korma_data_to_api_data,
-                conv.api_data_to_simulation_output,
-                )(session.user.korma_data, state = ctx)
-            if errors is None:
-                trees = simulation_output['value']
-                matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))
-#                matplotlib_helpers.create_bareme_png(
-#                    trees,
-#                    simulation_output,
-#                    filename = u'bareme_{}.png'.format(session.token),
-#                    )
-                return wsgihelpers.redirect(ctx, location = '')
+            korma_personnes = conv.check(page_data['korma_data_to_personnes'](korma_data, state = ctx))
+            # TODO extract famille data from korma data
+            api_data = {}
+            api_data['personnes'] = conv.check(conv.korma_to_api_personnes(korma_personnes, state = ctx))
+            from pprint import pprint
+            pprint(api_data)
+            session.user.api_data = api_data
+            session.user.save(ctx, safe = True)
+            return wsgihelpers.redirect(ctx, location = '')
     return templates.render(
         ctx,
         '/{}.mako'.format(page_data['name']),
@@ -168,16 +158,12 @@ def image(req):
     session = ctx.session
     if session.user.korma_data is None:
         session.user.korma_data = {}
-
-    params = {
-        'name': req.urlvars.get('name')
-        }
-    image_name = conv.check(conv.test_in(['bareme', 'waterfall'])(params['name']))
-    simulation_output, errors = conv.pipe(
-        conv.korma_data_to_api_data,
-        conv.api_data_to_simulation_output,
-        )(session.user.korma_data, state = ctx)
+    simulation_output, errors = conv.user_data_to_simulation_output(session.user, state = ctx)
     if errors is None:
+        params = {
+            'name': req.urlvars.get('name'),
+            }
+        image_name = conv.check(conv.test_in(['bareme', 'waterfall'])(params['name']))
         trees = simulation_output['value']
         if image_name == 'waterfall':
             matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))

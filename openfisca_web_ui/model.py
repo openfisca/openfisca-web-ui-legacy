@@ -45,12 +45,12 @@ questions_by_entity = None
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     admin = False
+    api_data = None
     api_key = None
     collection_name = 'accounts'
     description = None
     email = None
     full_name = None
-    korma_data = None
     slug = None
 
     @classmethod
