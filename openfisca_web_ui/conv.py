@@ -90,6 +90,32 @@ date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[
 datetime_to_date = function(lambda value: value.date())
 
 
+famille_korma_data_to_familles = pipe(
+    function(lambda item: item.get('familles')),
+    uniform_sequence(
+        pipe(
+            function(lambda item: item.get('personnes')),
+            uniform_sequence(
+                pipe(
+                    function(lambda item: item.get('personne_in_famille')),
+                    struct(
+                        {
+                            'famille_id': cleanup_line,
+                            'role': test_in(['parents', 'enfants']),
+                            'prenom_condition': noop,
+                            },
+                        default = noop,
+                        ),
+                    rename_item('prenom_condition', 'personne'),
+                    rename_item('famille_id', 'id'),
+                    ),
+                ),
+            ),
+        ),
+    function(lambda lists: list(chain.from_iterable(lists))),
+    )
+
+
 famille_korma_data_to_personnes = pipe(
     function(lambda item: item.get('familles')),
     uniform_sequence(
@@ -105,6 +131,7 @@ famille_korma_data_to_personnes = pipe(
         ),
     function(lambda lists: list(chain.from_iterable(lists))),
     )
+
 
 input_to_uuid = pipe(
     cleanup_line,
@@ -127,17 +154,32 @@ def method(method_name, *args, **kwargs):
     return method_converter
 
 
-def korma_to_api_personnes(korma_personnes, state = None):
-    if korma_personnes is None:
+def korma_to_api(korma_data, state = None):
+    if korma_data is None:
         return None, None
     if state == None:
         state = default_state
-    api_personnes = (state.session.user.api_data or {}).get('personnes') or {}
-    for korma_personne in korma_personnes:
+    new_person_id = None
+    new_famille_id = None
+
+    api_data = state.session.user.api_data or {}
+    for korma_personne in korma_data['personnes']:
         if korma_personne['id'] == 'new':
-            api_personnes[unicode(uuid.uuid4())] = korma_personne['personne']
+            new_person_id = unicode(uuid.uuid4())
+            api_data.setdefault('personnes', {})[new_person_id] = korma_personne
         else:
-            api_personne = api_personnes.get(personne['id'])
-            if api_personne is not None:
-                api_personne.update(korma_personne)
-    return api_personnes, None
+            api_data.setdefault('personnes', {})[korma_personne['id']].update(korma_personne)
+
+    for korma_famille in korma_data['familles']:
+        if korma_famille['id'] is None and new_famille_id is None:
+            new_famille_id = unicode(uuid.uuid4())
+        personnes = set(
+            api_data.setdefault('familles', {}).get(korma_famille['id'] or new_famille_id, {}).get(korma_famille['role'], [])
+            )
+        personnes.add(
+            korma_famille['personne']['prenom'] if korma_famille['personne']['prenom'] != 'new' else new_person_id
+            )
+        api_data.setdefault('familles', {}).setdefault(korma_famille['id'] or new_famille_id, {})[korma_famille['role']] = list(
+            personnes
+            )
+    return api_data, None

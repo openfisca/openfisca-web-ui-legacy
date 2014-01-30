@@ -36,7 +36,7 @@ from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from . import conv
+from . import conv, questions
 
 
 bootstrap_control_inner_html_template = u'''
@@ -54,8 +54,12 @@ def make_personne_in_famille_group(personnes_choices):
         javascript_module = u'person_modal',
         name = u'personne_in_famille',
         questions = [
+            questions.Hidden(name ='famille_id'),
             Select(
-                choices = (u'Parent', u'Enfant'),
+                choices = [
+                    (u'parents', u'Parent'),
+                    (u'enfants', u'Enfant'),
+                    ],
                 label = u'Rôle',
                 ),
             Condition(
@@ -127,6 +131,7 @@ pages_data = [
         'slug': 'famille',
         'title': u'Famille',
         'korma_data_to_personnes': conv.famille_korma_data_to_personnes,
+        'korma_data_to_familles': conv.famille_korma_data_to_familles,
         },
     {
         'name': 'declaration_impots',

@@ -26,9 +26,26 @@
 """Korma questions adapted to MongoDB"""
 
 
+from korma.base import Input
 from korma.date import Date
+from korma import helpers
 
 from . import conv
+
+
+class Hidden(Input):
+    type = u'hidden'
+
+    @property
+    def control_attributes(self):
+        return helpers.merge_mappings(
+            super(Hidden, self).control_attributes,
+            {u'value': self.value},
+        )
+
+    @property
+    def default_input_to_data(self):
+        return conv.cleanup_line
 
 
 class MongoDate(Date):

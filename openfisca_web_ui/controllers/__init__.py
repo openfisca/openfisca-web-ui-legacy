@@ -136,8 +136,14 @@ def form(req):
         if errors is None:
             korma_personnes = conv.check(page_data['korma_data_to_personnes'](korma_data, state = ctx))
             # TODO extract famille data from korma data
-            api_data = {}
-            api_data['personnes'] = conv.check(conv.korma_to_api_personnes(korma_personnes, state = ctx))
+            korma_familles = conv.check(page_data['korma_data_to_familles'](korma_data, state = ctx))
+            api_data = conv.check(conv.korma_to_api(
+                {
+                    'familles': korma_familles,
+                    'personnes': korma_personnes,
+                    },
+                state = ctx,
+                ))
             session.user.api_data = api_data
             session.user.save(ctx, safe = True)
             return wsgihelpers.redirect(ctx, location = '')
