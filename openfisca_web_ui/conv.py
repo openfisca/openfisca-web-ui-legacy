@@ -133,11 +133,7 @@ def korma_to_api_personnes(korma_personnes, state = None):
     if state == None:
         state = default_state
     api_personnes = (state.session.user.api_data or {}).get('personnes') or {}
-    from pprint import pprint
-    print 'api_personnes'
-    pprint(api_personnes)
     for korma_personne in korma_personnes:
-        pprint(korma_personne)
         if korma_personne['id'] == 'new':
             api_personnes[unicode(uuid.uuid4())] = korma_personne['personne']
         else:

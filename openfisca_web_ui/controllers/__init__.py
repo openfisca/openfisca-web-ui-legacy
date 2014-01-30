@@ -126,8 +126,8 @@ def form(req):
     if req.method == 'GET':
         errors = None
         if session.user is not None and session.user.api_data is not None:
-            korma_data = conv.api_data_to_korma_data(session.user.api_data, state = ctx)
-            page_form.fill(korma_data)
+            korma_data = conv.check(conv.api_data_to_korma_data(session.user.api_data, state = ctx))
+            page_form.fill(korma_data or {})
     else:
         params = req.params
         korma_inputs = variabledecode.variable_decode(params)
@@ -138,8 +138,6 @@ def form(req):
             # TODO extract famille data from korma data
             api_data = {}
             api_data['personnes'] = conv.check(conv.korma_to_api_personnes(korma_personnes, state = ctx))
-            from pprint import pprint
-            pprint(api_data)
             session.user.api_data = api_data
             session.user.save(ctx, safe = True)
             return wsgihelpers.redirect(ctx, location = '')

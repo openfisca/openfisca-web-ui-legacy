@@ -49,7 +49,7 @@ bootstrap_control_inner_html_template = u'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
 
 
-def make_personne_in_famille_group(persons_choices):
+def make_personne_in_famille_group(personnes_choices):
     return Group(
         javascript_module = u'person_modal',
         name = u'personne_in_famille',
@@ -60,7 +60,7 @@ def make_personne_in_famille_group(persons_choices):
                 ),
             Condition(
                 base_question = Select(
-                    choices = persons_choices,
+                    choices = personnes_choices,
                     label = u'Prénom',
                     ),
                 conditional_questions = {
@@ -79,7 +79,7 @@ def make_personne_in_famille_group(persons_choices):
         {{self[statmarit].html}}
       </div>
       <div class="modal-footer">
-        <input class="btn btn-primary" data-dismiss="modal" type="submit" value="Valider">
+        <input class="btn btn-primary" type="submit" value="Valider">
       </div>
     </div>
   </div>
@@ -104,7 +104,7 @@ def make_personne_in_famille_group(persons_choices):
                                 ),
                             ],
                         )
-                    for (person_idx, prenom) in persons_choices
+                    for person_idx, prenom in personnes_choices
                     },
                 ),
             Button(
@@ -141,12 +141,22 @@ pages_data = [
     ]
 
 
+def build_personnes_choices(ctx):
+    personnes_choices = []
+    if ctx.session.user is not None:
+        api_data = ctx.session.user.api_data
+        if api_data is not None:
+            api_personnes = api_data.get('personnes')
+            if api_personnes is not None:
+                for api_personne_id, api_personne in api_personnes.iteritems():
+                    personnes_choices.append((api_personne_id, api_personne.get('prenom') or u'Inconnu'))
+    personnes_choices.append(('new', u'Nouvelle personne'))
+    return personnes_choices
+
+
 def page_form(ctx, page_name):
     assert ctx.session is not None
-    korma_data = None if ctx.session.user is None else ctx.session.user.korma_data
-    persons_choices = None if korma_data is None else persons_value_and_name(korma_data)
-    if persons_choices is None:
-        persons_choices = [('new', u'Nouvelle personne')]
+    personnes_choices = build_personnes_choices(ctx)
     page_form_by_page_name = {
         'declaration_impots': Repeat(
             children_attributes = {
@@ -161,20 +171,20 @@ class="btn btn-primary"> Plus de détails</a></div>''',
                 name = 'declaration_impot',
                 questions = [
                     Select(
-                        choices = persons_choices,
+                        choices = personnes_choices,
                         control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Vous',
                         ),
                     Select(
-                        choices = persons_choices,
+                        choices = personnes_choices,
                         control_attributes = {'class': 'form-control'},
                         inner_html_template = bootstrap_control_inner_html_template,
                         label = u'Conj',
                         ),
                     Repeat(
                         template_question = Select(
-                            choices = persons_choices,
+                            choices = personnes_choices,
                             control_attributes = {'class': 'form-control'},
                             label = u'Personne à charge',
                             inner_html_template = bootstrap_control_inner_html_template,
@@ -195,7 +205,7 @@ class="btn btn-primary"> Plus de détails</a></div>''',
     Plus de détails
   </a>
 </div>''',
-                template_question = make_personne_in_famille_group(persons_choices=persons_choices),
+                template_question = make_personne_in_famille_group(personnes_choices=personnes_choices),
                 ),
             ),
         'logement_principal': Repeat(
@@ -233,11 +243,3 @@ class="btn btn-primary">Plus de détails</a></div>''',
             ),
         }
     return page_form_by_page_name[page_name]
-
-
-def persons_value_and_name(korma_data):
-    return None if korma_data.get('personne', {}).get('personnes') is None else \
-        [
-            (unicode(idx), person['person_data'].get('name') or idx)
-            for idx, person in enumerate(korma_data['personne']['personnes'])
-            ]
