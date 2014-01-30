@@ -157,7 +157,7 @@ def method(method_name, *args, **kwargs):
 def korma_to_api(korma_data, state = None):
     if korma_data is None:
         return None, None
-    if state == None:
+    if state is None:
         state = default_state
     new_person_id = None
     new_famille_id = None
@@ -174,12 +174,12 @@ def korma_to_api(korma_data, state = None):
         if korma_famille['id'] is None and new_famille_id is None:
             new_famille_id = unicode(uuid.uuid4())
         personnes = set(
-            api_data.setdefault('familles', {}).get(korma_famille['id'] or new_famille_id, {}).get(korma_famille['role'], [])
+            api_data.setdefault('familles', {}).get(korma_famille['id'] or new_famille_id, {}).get(
+                korma_famille['role'], [])
             )
         personnes.add(
             korma_famille['personne']['prenom'] if korma_famille['personne']['prenom'] != 'new' else new_person_id
             )
-        api_data.setdefault('familles', {}).setdefault(korma_famille['id'] or new_famille_id, {})[korma_famille['role']] = list(
-            personnes
-            )
+        api_data.setdefault('familles', {}).setdefault(
+            korma_famille['id'] or new_famille_id, {})[korma_famille['role']] = list(personnes)
     return api_data, None
