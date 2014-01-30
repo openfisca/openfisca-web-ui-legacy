@@ -36,7 +36,7 @@ from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from . import conv, questions
+from . import conv
 
 
 bootstrap_control_inner_html_template = u'''
@@ -49,27 +49,21 @@ bootstrap_control_inner_html_template = u'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
 
 
-def make_personne_in_famille_group(personnes_choices):
-    return Group(
-        javascript_module = u'person_modal',
-        name = u'personne_in_famille',
-        questions = [
-            questions.Hidden(name ='famille_id'),
-            Select(
-                choices = [
-                    (u'parents', u'Parent'),
-                    (u'enfants', u'Enfant'),
-                    ],
-                label = u'Rôle',
-                ),
-            Condition(
-                base_question = Select(
-                    choices = personnes_choices,
-                    label = u'Prénom',
-                    ),
-                conditional_questions = {
-                    person_idx: Group(
-                        inner_html_template = u'''
+make_prenoms_condition = lambda personnes_choices: Condition(
+    base_question = Select(
+        choices = personnes_choices,
+        input_to_data = conv.input_to_uuid,
+        label = u'Prénom',
+        ),
+    conditional_questions = {
+        person_idx: make_personne_group(prenom)
+        for person_idx, prenom in personnes_choices
+        },
+    )
+
+
+make_personne_group = lambda prenom: Group(
+    inner_html_template = u'''
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -88,29 +82,92 @@ def make_personne_in_famille_group(personnes_choices):
     </div>
   </div>
 </div>'''.format(prenom=prenom),
-                        name = 'personne',
-                        questions = [
-                            Text(label = u'Prénom'),
-                            Date(label = u'Date de naissance', max = datetime.datetime.now().date()),
-                            Number(label = u'Salaire', min = 0, step = 1),
-                            # TODO(rsoufflet) add values
-                            Select(
-                                choices = [
-                                    u'Marié',
-                                    u'Célibataire',
-                                    u'Divorcé',
-                                    u'Veuf',
-                                    u'Pacsé',
-                                    u'Jeune veuf',
-                                    ],
-                                label = u'Statut marital',
-                                name = 'statmarit',
-                                ),
-                            ],
-                        )
-                    for person_idx, prenom in personnes_choices
-                    },
+    name = 'personne',
+    questions = [
+        Text(label = u'Prénom'),
+        Date(label = u'Date de naissance', max = datetime.datetime.now().date()),
+        Number(label = u'Salaire', min = 0, step = 1),
+        # TODO(rsoufflet) add values
+        Select(
+            choices = [
+                u'Marié',
+                u'Célibataire',
+                u'Divorcé',
+                u'Veuf',
+                u'Pacsé',
+                u'Jeune veuf',
+                ],
+            label = u'Statut marital',
+            name = 'statmarit',
+            ),
+        ],
+    )
+
+
+def make_personne_in_declaration_impots_group(personnes_choices):
+    return Group(
+        name = u'personne_in_declaration_impots',
+        questions = [
+            Select(
+                choices = (
+                    ('déclarants', u'Déclarant'),
+                    ('déclarants', u'Conjoint'),
+                    ('personnes_à_charge', u'Personne à charge'),
+                    ),
+                label = u'Rôle',
                 ),
+            make_prenoms_condition(personnes_choices),
+            Button(
+                control_attributes = {
+                    'class': 'btn btn-primary',
+                    'data-target': '#myModal',
+                    'data-toggle': 'modal',
+                },
+                inner_html_template = bootstrap_control_inner_html_template,
+                label = u'Éditer',
+                outer_html_template = u'<div class="col-sm-offset-6 col-sm-10">{self.inner_html}</div>',
+                ),
+            ],
+        )
+
+
+def make_personne_in_famille_group(personnes_choices):
+    return Group(
+        name = u'personne_in_famille',
+        questions = [
+            Select(
+                choices = (('parents', u'Parent'), ('enfants', u'Enfant')),
+                label = u'Rôle',
+                ),
+            make_prenoms_condition(personnes_choices),
+            Button(
+                control_attributes = {
+                    'class': 'btn btn-primary',
+                    'data-target': '#myModal',
+                    'data-toggle': 'modal',
+                },
+                inner_html_template = bootstrap_control_inner_html_template,
+                label = u'Éditer',
+                outer_html_template = u'<div class="col-sm-offset-6 col-sm-10">{self.inner_html}</div>',
+                ),
+            ],
+        )
+
+
+def make_personne_in_logement_principal_group(personnes_choices):
+    return Group(
+        name = u'personne_in_logement_principal',
+        questions = [
+            Select(
+                choices = (
+                    (u'personne_de_référence', u'Personne de référence'),
+                    (u'conjoint', u'Conjoint de la personne de référence'),
+                    (u'enfant', u'Enfant de la personne de référence ou de son conjoint'),
+                    (u'autre', u'Autre'),
+                    ),
+                label = u'Rôle',
+                ),
+            make_prenoms_condition(personnes_choices),
             Button(
                 control_attributes = {
                     'class': 'btn btn-primary',
@@ -164,39 +221,17 @@ def page_form(ctx, page_name):
     personnes_choices = build_personnes_choices(ctx)
     page_form_by_page_name = {
         'declaration_impots': Repeat(
-            children_attributes = {
-                '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=foy&idx={self.parent_data[declaration_impot_repeat][index]}"
-class="btn btn-primary"> Plus de détails</a></div>''',
-                },
-            template_question = Group(
-                children_attributes = {
-                    '_outer_html_template': bootstrap_group_outer_html_template,
-                    },
-                name = 'declaration_impot',
-                questions = [
-                    Select(
-                        choices = personnes_choices,
-                        control_attributes = {'class': 'form-control'},
-                        inner_html_template = bootstrap_control_inner_html_template,
-                        label = u'Vous',
-                        ),
-                    Select(
-                        choices = personnes_choices,
-                        control_attributes = {'class': 'form-control'},
-                        inner_html_template = bootstrap_control_inner_html_template,
-                        label = u'Conj',
-                        ),
-                    Repeat(
-                        template_question = Select(
-                            choices = personnes_choices,
-                            control_attributes = {'class': 'form-control'},
-                            label = u'Personne à charge',
-                            inner_html_template = bootstrap_control_inner_html_template,
-                            name = 'pac',
-                            ),
-                        ),
-                    ]
+            name = u'declaration_impots',
+            template_question = Repeat(
+                name = u'personnes',
+                outer_html_template = u'''
+<div class="repeated-group">
+  {self.inner_html}
+  <a class="btn btn-primary" href="/all-questions?entity=foy&idx={self.parent_data[declaration_impots][index]}">
+    Plus de détails
+  </a>
+</div>''',
+                template_question = make_personne_in_declaration_impots_group(personnes_choices=personnes_choices),
                 ),
             ),
         'famille': Repeat(
@@ -215,17 +250,16 @@ class="btn btn-primary"> Plus de détails</a></div>''',
             ),
         'logement_principal': Repeat(
             children_attributes = {
-                '_outer_html_template': u'''<div class="repeated-group">{self.inner_html}
-<a href="/all-questions?entity=men&idx={self.parent_data[logement_principal_repeat][index]}"
-class="btn btn-primary">Plus de détails</a></div>''',
+                '_outer_html_template': u'''
+<div class="repeated-group">
+  {self.inner_html}
+  <a class="btn btn-primary" href="/all-questions?entity=men&idx={self.parent_data[logements_principaux][index]}">
+    Plus de détails
+  </a>
+</div>''',
                 },
+            name = 'logements_principaux',
             template_question = Group(
-                outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
-                children_attributes = {
-                    '_control_attributes': {'class': u'form-control'},
-                    '_inner_html_template': bootstrap_control_inner_html_template,
-                    '_outer_html_template': bootstrap_group_outer_html_template,
-                    },
                 name = 'logement_principal',
                 questions = [
                     Select(
@@ -243,6 +277,11 @@ class="btn btn-primary">Plus de détails</a></div>''',
                         ),
                     Number(label = u'Loyer'),
                     Text(label = u'Localité'),
+                    Repeat(
+                        name = u'personnes',
+                        template_question = make_personne_in_logement_principal_group(
+                            personnes_choices=personnes_choices),
+                        ),
                     ]
                 ),
             ),
