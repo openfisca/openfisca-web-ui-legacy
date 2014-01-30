@@ -110,9 +110,9 @@ def make_personne_in_declaration_impots_group(personnes_choices):
         questions = [
             Select(
                 choices = (
-                    ('déclarants', u'Déclarant'),
-                    ('déclarants', u'Conjoint'),
-                    ('personnes_à_charge', u'Personne à charge'),
+                    (u'déclarants', u'Déclarant'),
+                    (u'déclarants', u'Conjoint'),
+                    (u'personnes_à_charge', u'Personne à charge'),
                     ),
                 label = u'Rôle',
                 ),
@@ -136,7 +136,7 @@ def make_personne_in_famille_group(personnes_choices):
         name = u'personne_in_famille',
         questions = [
             Select(
-                choices = (('parents', u'Parent'), ('enfants', u'Enfant')),
+                choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
                 label = u'Rôle',
                 ),
             make_prenoms_condition(personnes_choices),
