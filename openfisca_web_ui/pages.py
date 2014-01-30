@@ -72,7 +72,7 @@ def make_personne_in_famille_group(persons_choices):
         <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
       </div>
       <div class="modal-body">
-        {{self[prenom_text].html}}
+        {{self[prenom].html}}
         {{self[salaire].html}}
         {{self[statmarit].html}}
       </div>
@@ -81,11 +81,10 @@ def make_personne_in_famille_group(persons_choices):
       </div>
     </div>
   </div>
-</div>
-'''.format(prenom=prenom),
+</div>'''.format(prenom=prenom),
                         name = 'personne',
                         questions = [
-                            Text(label = u'Prénom', name = 'prenom_text'),
+                            Text(label = u'Prénom'),
                             Date(label = u'Date de naissance', max = datetime.datetime.now().date()),
                             Number(label = u'Salaire', min = 0, step = 1),
                             # TODO(rsoufflet) add values
