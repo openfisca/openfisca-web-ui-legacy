@@ -36,6 +36,8 @@ from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
+from . import conv
+
 
 bootstrap_control_inner_html_template = u'''
 <label class="col-sm-6 control-label" for="{self.full_name}">{self.label}</label>
@@ -89,7 +91,14 @@ def make_personne_in_famille_group(persons_choices):
                             Number(label = u'Salaire', min = 0, step = 1),
                             # TODO(rsoufflet) add values
                             Select(
-                                choices = (u'Célibataire', u'Marié', u'Pacsé'),
+                                choices = [
+                                    u'Marié',
+                                    u'Célibataire',
+                                    u'Divorcé',
+                                    u'Veuf',
+                                    u'Pacsé',
+                                    u'Jeune veuf',
+                                    ],
                                 label = u'Statut marital',
                                 name = 'statmarit',
                                 ),
@@ -117,6 +126,7 @@ pages_data = [
         'name': 'famille',
         'slug': 'famille',
         'title': u'Famille',
+        'korma_data_to_personnes': conv.famille_korma_data_to_personnes,
         },
     {
         'name': 'declaration_impots',

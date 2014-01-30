@@ -28,6 +28,7 @@
 
 import collections
 import datetime
+from itertools import chain
 import json
 import re
 import requests
@@ -66,7 +67,7 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
     except requests.exceptions.ConnectionError:
         return api_post_content, state._('Unable to connect to API, url: {}').format(conf['api_url'])
     if not response.ok:
-        return api_post_content, state._('API respond with status code {}'.format(response.status_code))
+        return api_post_content, state._('API respond with status code {}').format(response.status_code)
     simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
     return simulation_output, None
 
@@ -79,6 +80,22 @@ date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[
 
 datetime_to_date = function(lambda value: value.date())
 
+
+famille_korma_data_to_personnes = pipe(
+    function(lambda item: item.get('familles')),
+    uniform_sequence(
+        pipe(
+            function(lambda item: item.get('personnes')),
+            uniform_sequence(
+                pipe(
+                    function(lambda item: item.get('personne_in_famille', {}).get('prenom_condition')),
+                    rename_item('prenom', 'id'),
+                    ),
+                ),
+            ),
+        ),
+    function(lambda lists: list(chain.from_iterable(lists))),
+    )
 
 input_to_uuid = pipe(
     cleanup_line,

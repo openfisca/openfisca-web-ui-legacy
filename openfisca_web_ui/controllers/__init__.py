@@ -139,10 +139,7 @@ def form(req):
         page_form.fill(korma_inputs)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
         if errors is None:
-            if session.user.korma_data is None:
-                session.user.korma_data = {}
-            session.user.korma_data.setdefault(page_data['name'], {}).update(korma_data)
-            session.user.save(ctx, safe = True)
+            personnes = conv.check(page_data['korma_data_to_personnes'](korma_data, state = ctx))
             simulation_output, errors = conv.pipe(
                 conv.korma_data_to_api_data,
                 conv.api_data_to_simulation_output,
