@@ -147,6 +147,11 @@ def form(req):
             session.user.api_data = api_data
             session.user.save(ctx, safe = True)
             return wsgihelpers.redirect(ctx, location = '')
+    session.user.api_data['validate'] = True
+    simulation_output, errors = conv.pipe(
+        conv.user_data_to_api_data,
+        conv.api_data_to_simulation_output,
+        )(session.user.api_data, state = ctx)
     return templates.render(
         ctx,
         '/{}.mako'.format(page_data['name']),
