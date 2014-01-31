@@ -162,7 +162,10 @@ def image(req):
     session = ctx.session
     if session.user.korma_data is None:
         session.user.korma_data = {}
-    simulation_output, errors = conv.user_data_to_simulation_output(session.user, state = ctx)
+    simulation_output, errors = conv.pipe(
+        conv.user_data_to_api_data,
+        conv.api_data_to_simulation_output,
+        )(session.user.api_data, state = ctx)
     if errors is None:
         params = {
             'name': req.urlvars.get('name'),
@@ -184,6 +187,7 @@ def image(req):
         req.response.content_type = 'image/jpeg'
         with open(image_filename, 'r') as img:
             req.response.write(img.read())
+        return
     return wsgihelpers.no_content(ctx)
 
 
@@ -199,7 +203,7 @@ def make_router():
     routings = [
         (('GET', 'POST'), '^/?$', index),
         ('GET', '^/all-questions?$', all_questions),
-        ('GET', '^/image/(?P<name>bareme|waterfall)(?=/|$)', image),
+        ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/simulations(?=/|$)', simulations.route_admin_class),

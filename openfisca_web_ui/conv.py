@@ -179,7 +179,23 @@ def korma_to_api(korma_data, state = None):
             )
         personnes.add(
             korma_famille['personne']['prenom'] if korma_famille['personne']['prenom'] != 'new' else new_person_id
+def user_data_to_api_data(user_data, state = None):
+    if user_data is None:
+        return None, None
+    if state is None:
+        state = default_state
+
+    api_data = {
+        'familles': user_data.get('familles', {}).values(),
+        'foyers_fiscaux': user_data.get('foyers_fiscaux', {}).values(),
+        'menages': user_data.get('menages', {}).values(),
+        'individus': [],
+        }
+    for individu_id in user_data.get('individus', {}).iterkeys():
+        individu = dict(
+            (key, value)
+            for key, value in user_data['individus'][individu_id].iteritems()
             )
-        api_data.setdefault('familles', {}).setdefault(
-            korma_famille['id'] or new_famille_id, {})[korma_famille['role']] = list(personnes)
+        individu['id'] = individu_id
+        api_data['individus'].append(individu)
     return api_data, None
