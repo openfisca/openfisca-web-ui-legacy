@@ -133,13 +133,13 @@ def form(req):
         korma_inputs = variabledecode.variable_decode(params)
         page_form.fill(korma_inputs)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
+        page_form.fill(korma_data or {})
         if errors is None:
             korma_personnes = conv.check(page_data['korma_data_to_personnes'](korma_data, state = ctx))
-            # TODO extract famille data from korma data
-            korma_familles = conv.check(page_data['korma_data_to_familles'](korma_data, state = ctx))
+            korma_entities = conv.check(page_data['korma_data_to_page_entities'](korma_data, state = ctx))
             api_data = conv.check(conv.korma_to_api(
                 {
-                    'familles': korma_familles,
+                    page_data['entities']: korma_entities,
                     'personnes': korma_personnes,
                     },
                 state = ctx,

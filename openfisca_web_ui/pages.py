@@ -205,17 +205,24 @@ pages_data = [
         'slug': 'famille',
         'title': u'Famille',
         'korma_data_to_personnes': conv.famille_korma_data_to_personnes,
-        'korma_data_to_familles': conv.famille_korma_data_to_familles,
+        'korma_data_to_page_entities': conv.famille_korma_data_to_familles,
+        'entities': 'familles',
         },
     {
         'name': 'declaration_impots',
         'slug': 'declaration-impots',
         'title': u'Déclaration d\'impôts',
+        'korma_data_to_personnes': conv.declaration_impot_korma_data_to_personnes,
+        'korma_data_to_page_entities': conv.declaration_impot_korma_data_to_declaration_impots,
+        'entities': 'declaration_impots',
         },
     {
         'name': 'logement_principal',
         'slug': 'logement-principal',
         'title': u'Logement principal',
+        'korma_data_to_personnes': conv.menage_korma_data_to_personnes,
+        'korma_data_to_page_entities': conv.menage_korma_data_to_menages,
+        'entities': 'logement_principal',
         },
     ]
 
@@ -225,7 +232,7 @@ def build_personnes_choices(ctx):
     if ctx.session.user is not None:
         api_data = ctx.session.user.api_data
         if api_data is not None:
-            api_personnes = api_data.get('personnes')
+            api_personnes = api_data.get('individus')
             if api_personnes is not None:
                 for api_personne_id, api_personne in api_personnes.iteritems():
                     personnes_choices.append((api_personne_id, api_personne.get('prenom') or u'Inconnu'))

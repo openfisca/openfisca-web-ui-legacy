@@ -55,7 +55,42 @@ def api_data_to_korma_data(api_data, state = None):
         return None, None
     if state is None:
         state = default_state
-    return None, None
+    korma_data = {
+        'familles': [],
+        'declaration_impots': [],
+        }
+    for famille_id, famille in api_data.get('familles', {}).iteritems():
+        korma_famille = {
+            'personnes': [],
+            }
+        for role in ['parents', 'enfants']:
+            for idx, personne_id in enumerate(famille.get(role, [])):
+                personne_in_famille = {
+                    'famille_id': famille_id,
+                    'prenom_condition': dict(api_data.get('individus', {}).iteritems()),
+                    'role': role,
+                    }
+                personne_in_famille['prenom_condition']['prenom'] = famille[role][idx]
+                korma_famille['personnes'].append({'personne_in_famille': personne_in_famille})
+        korma_data['familles'].append(korma_famille)
+
+    for declaration_impot_id, declaration_impot in api_data.get('foyers_fiscaux', {}).iteritems():
+        korma_declaration_import = {
+            'personnes': [],
+            }
+        for role in ['declarants', 'personne_a_charges']:
+            for idx, personne_id in enumerate(declaration_impot.get(role, [])):
+                personne_in_declaration_impots = {
+                    'declaration_impot_id': declaration_impot_id,
+                    'prenom_condition': dict(api_data.get('individus', {}).iteritems()),
+                    'role': role,
+                    }
+                personne_in_declaration_impots['prenom_condition']['prenom'] = declaration_impot[role][idx]
+                korma_declaration_import['personnes'].append(
+                    {'personne_in_declaration_impots': personne_in_declaration_impots}
+                    )
+        korma_data['declaration_impots'].append(korma_declaration_import)
+    return korma_data, None
 
 
 def api_post_content_to_simulation_output(api_post_content, state = None):
@@ -71,7 +106,7 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
                 'Content-Type': 'application/json',
                 'User-Agent': conf['app_name'],
                 },
-            params = api_post_content,
+            data = api_post_content,
             )
     except requests.exceptions.ConnectionError:
         return api_post_content, state._('Unable to connect to API, url: {}').format(conf['api_url'])
@@ -88,6 +123,49 @@ date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[
 
 
 datetime_to_date = function(lambda value: value.date())
+
+
+declaration_impot_korma_data_to_declaration_impots = pipe(
+    function(lambda item: item.get('declaration_impots')),
+    uniform_sequence(
+        pipe(
+            function(lambda item: item.get('personnes')),
+            uniform_sequence(
+                pipe(
+                    function(lambda item: item.get('personne_in_declaration_impots')),
+                    struct(
+                        {
+                            'declaration_impot_id': cleanup_line,
+                            'role': test_in([u'declarants', u'personne_a_charges']),
+                            'prenom_condition': noop,
+                            },
+                        default = noop,
+                        ),
+                    rename_item('prenom_condition', 'personne'),
+                    rename_item('declaration_impot_id', 'id'),
+                    ),
+                ),
+            ),
+        ),
+    function(lambda lists: list(chain.from_iterable(lists))),
+    )
+
+
+declaration_impot_korma_data_to_personnes = pipe(
+    function(lambda item: item.get('declaration_impots')),
+    uniform_sequence(
+        pipe(
+            function(lambda item: item.get('personnes')),
+            uniform_sequence(
+                pipe(
+                    function(lambda item: item.get('personne_in_declaration_impots', {}).get('prenom_condition')),
+                    rename_item('prenom', 'id'),
+                    ),
+                ),
+            ),
+        ),
+    function(lambda lists: list(chain.from_iterable(lists))),
+    )
 
 
 famille_korma_data_to_familles = pipe(
@@ -146,6 +224,50 @@ input_to_words = pipe(
     )
 
 
+menage_korma_data_to_menages = pipe(
+    function(lambda item: item.get('logements_principaux')),
+    uniform_sequence(
+        pipe(
+            function(lambda item: item.get('logement_principal')),
+            struct(
+                {
+                    'localite': cleanup_line,
+                    'logement_principal_id': cleanup_line,
+                    'loyer': noop,
+                    'personnes': uniform_sequence(
+                        pipe(
+                            function(lambda item: item.get('personne_in_logement_principal', {}).get('prenom_condition')),
+                            rename_item('prenom', 'id'),
+                            ),
+                        ),
+                    'so': cleanup_line,
+                    },
+                default = noop,
+                ),
+            rename_item('logement_principal_id', 'id'),
+            ),
+        ),
+    )
+
+
+menage_korma_data_to_personnes = pipe(
+    function(lambda item: item.get('logements_principaux')),
+    uniform_sequence(
+        pipe(
+            function(lambda item: item.get('logement_principal')),
+            function(lambda item: item.get('personnes')),
+            uniform_sequence(
+                pipe(
+                    function(lambda item: item.get('personne_in_logement_principal', {}).get('prenom_condition')),
+                    rename_item('prenom', 'id'),
+                    ),
+                ),
+            ),
+        ),
+    function(lambda lists: list(chain.from_iterable(lists))),
+    )
+
+
 def method(method_name, *args, **kwargs):
     def method_converter(value, state = None):
         if value is None:
@@ -161,24 +283,63 @@ def korma_to_api(korma_data, state = None):
         state = default_state
     new_person_id = None
     new_famille_id = None
+    new_foyer_fiscal_id = None
+    new_logement_principal_id = None
+
 
     api_data = state.session.user.api_data or {}
     for korma_personne in korma_data['personnes']:
         if korma_personne['id'] == 'new':
-            new_person_id = unicode(uuid.uuid4())
-            api_data.setdefault('personnes', {})[new_person_id] = korma_personne
+            new_person_id = unicode(uuid.uuid4()).replace('-', '')
+            api_data.setdefault('individus', {})[new_person_id] = korma_personne[korma_personne['id']]
         else:
-            api_data.setdefault('personnes', {})[korma_personne['id']].update(korma_personne)
+            api_data.setdefault('individus', {})[korma_personne['id']].update(korma_personne[korma_personne['id']])
 
-    for korma_famille in korma_data['familles']:
-        if korma_famille['id'] is None and new_famille_id is None:
-            new_famille_id = unicode(uuid.uuid4())
-        personnes = set(
-            api_data.setdefault('familles', {}).get(korma_famille['id'] or new_famille_id, {}).get(
-                korma_famille['role'], [])
-            )
-        personnes.add(
-            korma_famille['personne']['prenom'] if korma_famille['personne']['prenom'] != 'new' else new_person_id
+    if korma_data.get('familles'):
+        for korma_famille in korma_data['familles']:
+            if korma_famille['id'] is None and new_famille_id is None:
+                new_famille_id = unicode(uuid.uuid4()).replace('-', '')
+            personnes = set(
+                api_data.setdefault('familles', {}).get(korma_famille['id'] or new_famille_id, {}).get(
+                    korma_famille['role'], [])
+                )
+            personnes.add(
+                korma_famille['personne']['prenom'] if korma_famille['personne']['prenom'] != 'new' else new_person_id
+                )
+            api_data.setdefault('familles', {}).setdefault(
+                korma_famille['id'] or new_famille_id, {})[korma_famille['role']] = list(personnes)
+
+    if korma_data.get('declaration_impots'):
+        for korma_foyer_fiscal in korma_data['declaration_impots']:
+            if korma_foyer_fiscal['id'] is None and new_foyer_fiscal_id is None:
+                new_foyer_fiscal_id = unicode(uuid.uuid4()).replace('-', '')
+            personnes = set(
+                api_data.setdefault('foyers_fiscaux', {}).get(
+                    korma_foyer_fiscal['id'] or new_foyer_fiscal_id, {}).get(
+                        korma_foyer_fiscal['role'], []
+                        )
+                )
+            personnes.add(
+                korma_foyer_fiscal['personne']['prenom'] if korma_foyer_fiscal['personne']['prenom'] != 'new' else new_person_id
+                )
+            api_data.setdefault('foyers_fiscaux', {}).setdefault(
+                korma_foyer_fiscal['id'] or new_foyer_fiscal_id, {})[korma_foyer_fiscal['role']] = list(personnes)
+
+    if korma_data.get('logement_principal'):
+        for korma_logement_principal in korma_data['logement_principal']:
+            if korma_logement_principal['id'] is None and new_logement_principal_id is None:
+                new_logement_principal_id = unicode(uuid.uuid4()).replace('-', '')
+            personnes = set(
+                api_data.setdefault('menages', {}).get(
+                    korma_logement_principal['id'] or new_logement_principal_id, {}).get('occupants', [])
+                )
+            for personne in korma_logement_principal['personnes']:
+                personnes.add(personne['id'] if personne['id'] != 'new' else new_person_id)
+            api_data.setdefault('menages', {}).setdefault(
+                korma_logement_principal['id'] or new_logement_principal_id, {})['occupants'] = list(personnes)
+    return api_data, None
+
+
 def user_data_to_api_data(user_data, state = None):
     if user_data is None:
         return None, None
