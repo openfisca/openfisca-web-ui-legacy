@@ -30,7 +30,7 @@
     <%parent:container_content/>
     <div class="row">
         <div class="col-sm-6">
-            <form class="korma form-horizontal" method="POST" role="form">
+            <form class="korma form" method="POST" role="form">
                 ${page_form.html | n}
                 <p><input class="btn btn-success" type="submit"></p>
             </form>

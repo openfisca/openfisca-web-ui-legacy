@@ -36,14 +36,12 @@ from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Number, Text
 
-from . import conv
+from . import conv, questions
 
 
 bootstrap_control_inner_html_template = u'''
-<label class="col-sm-6 control-label" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-6">
-  {self.control_html}
-</div>'''
+<label class="control-label" for="{self.full_name}">{self.label}</label>
+{self.control_html}'''
 
 
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
@@ -51,8 +49,8 @@ bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html
 
 make_prenoms_condition = lambda personnes_choices: Condition(
     base_question = Select(
+        control_attributes = {'class': 'form-control'},
         choices = personnes_choices,
-        input_to_data = conv.input_to_uuid,
         label = u'Prénom',
         ),
     conditional_questions = {
@@ -63,6 +61,9 @@ make_prenoms_condition = lambda personnes_choices: Condition(
 
 
 make_personne_group = lambda prenom: Group(
+    children_attributes = {
+        'inner_html_template': bootstrap_control_inner_html_template,
+        },
     inner_html_template = u'''
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -84,11 +85,23 @@ make_personne_group = lambda prenom: Group(
 </div>'''.format(prenom=prenom),
     name = 'personne',
     questions = [
-        Text(label = u'Prénom'),
-        Date(label = u'Date de naissance', max = datetime.datetime.now().date()),
-        Number(label = u'Salaire', min = 0, step = 1),
-        # TODO(rsoufflet) add values
+        Text(
+            control_attributes = {'class': 'form-control'},
+            label = u'Prénom',
+            ),
+        Date(
+            control_attributes = {'class': 'form-control'},
+            label = u'Date de naissance',
+            max = datetime.datetime.now().date(),
+            ),
+        Number(
+            control_attributes = {'class': 'form-control'},
+            label = u'Salaire',
+            min = 0,
+            step = 1,
+            ),
         Select(
+            control_attributes = {'class': 'form-control'},
             choices = [
                 u'Marié',
                 u'Célibataire',
@@ -108,11 +121,13 @@ def make_personne_in_declaration_impots_group(personnes_choices):
     return Group(
         name = u'personne_in_declaration_impots',
         questions = [
+            questions.Hidden(name = 'declaration_impot_id'),
             Select(
+                control_attributes = {'class': 'form-control'},
                 choices = (
-                    (u'déclarants', u'Déclarant'),
-                    (u'déclarants', u'Conjoint'),
-                    (u'personnes_à_charge', u'Personne à charge'),
+                    (u'declarants', u'Déclarant'),
+                    (u'declarants', u'Conjoint'),
+                    (u'personnes_a_charge', u'Personne à charge'),
                     ),
                 label = u'Rôle',
                 ),
@@ -120,7 +135,7 @@ def make_personne_in_declaration_impots_group(personnes_choices):
             Button(
                 control_attributes = {
                     'class': 'btn btn-primary',
-                    'data-target': '#myModal',
+                    'data-target': '#myModal-new',
                     'data-toggle': 'modal',
                 },
                 inner_html_template = bootstrap_control_inner_html_template,
@@ -135,7 +150,9 @@ def make_personne_in_famille_group(personnes_choices):
     return Group(
         name = u'personne_in_famille',
         questions = [
+            questions.Hidden(name = 'famille_id'),
             Select(
+                control_attributes = {'class': 'form-control'},
                 choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
                 label = u'Rôle',
                 ),
@@ -143,7 +160,7 @@ def make_personne_in_famille_group(personnes_choices):
             Button(
                 control_attributes = {
                     'class': 'btn btn-primary',
-                    'data-target': '#myModal',
+                    'data-target': '#myModal-new',
                     'data-toggle': 'modal',
                 },
                 inner_html_template = bootstrap_control_inner_html_template,
@@ -171,12 +188,11 @@ def make_personne_in_logement_principal_group(personnes_choices):
             Button(
                 control_attributes = {
                     'class': 'btn btn-primary',
-                    'data-target': '#myModal',
+                    'data-target': '#myModal-new',
                     'data-toggle': 'modal',
                 },
                 inner_html_template = bootstrap_control_inner_html_template,
                 label = u'Éditer',
-                outer_html_template = u'<div class="col-sm-offset-6 col-sm-10">{self.inner_html}</div>',
                 ),
             ],
         )
@@ -260,9 +276,13 @@ def page_form(ctx, page_name):
                 },
             name = 'logements_principaux',
             template_question = Group(
+                children_attributes = {
+                    '_outer_html_template': bootstrap_group_outer_html_template,
+                    },
                 name = 'logement_principal',
                 questions = [
                     Select(
+                        control_attributes = {'class': 'form-control'},
                         choices = [
                             u'Non renseigné',
                             u'Accédant à la propriété',
@@ -275,8 +295,14 @@ def page_form(ctx, page_name):
                         label = u'Statut d\'occupation',
                         name = u'so',
                         ),
-                    Number(label = u'Loyer'),
-                    Text(label = u'Localité'),
+                    Number(
+                        control_attributes = {'class': 'form-control'},
+                        label = u'Loyer',
+                        ),
+                    Text(
+                        control_attributes = {'class': 'form-control'},
+                        label = u'Localité',
+                        ),
                     Repeat(
                         name = u'personnes',
                         template_question = make_personne_in_logement_principal_group(
