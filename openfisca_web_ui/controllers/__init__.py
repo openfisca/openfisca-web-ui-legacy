@@ -147,6 +147,8 @@ def form(req):
             session.user.api_data = api_data
             session.user.save(ctx, safe = True)
             return wsgihelpers.redirect(ctx, location = '')
+    if session.user.api_data is None:
+        session.user.api_data = {}
     session.user.api_data['validate'] = True
     simulation_output, errors = conv.pipe(
         conv.user_data_to_api_data,
