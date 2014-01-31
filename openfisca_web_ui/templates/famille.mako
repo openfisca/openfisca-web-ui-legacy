@@ -38,7 +38,7 @@
 
         <div class="col-sm-6">
 % if errors:
-            <pre class="alert alert-warning">${errors | n, js}</pre>
+            <pre class="alert alert-warning">${errors | n, js, h}</pre>
 % else:
             <img class="waterfall-img" src="/image/waterfall.png" alt="Graphique">
 % endif

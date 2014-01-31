@@ -359,4 +359,4 @@ def user_data_to_api_data(user_data, state = None):
             )
         individu['id'] = individu_id
         api_data['individus'].append(individu)
-    return api_data, None
+    return {'scenarios': [api_data]}, None
