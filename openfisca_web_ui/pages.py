@@ -54,18 +54,18 @@ make_prenoms_condition = lambda personnes_choices: Condition(
         label = u'Prénom',
         ),
     conditional_questions = {
-        person_idx: make_personne_group(prenom)
+        person_idx: make_personne_group(person_idx, prenom)
         for person_idx, prenom in personnes_choices
         },
     )
 
 
-make_personne_group = lambda prenom: Group(
+make_personne_group = lambda uuid, prenom: Group(
     children_attributes = {
         'inner_html_template': bootstrap_control_inner_html_template,
         },
     inner_html_template = u'''
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="{{self.full_name}}-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -82,8 +82,8 @@ make_personne_group = lambda prenom: Group(
       </div>
     </div>
   </div>
-</div>'''.format(prenom=prenom),
-    name = 'personne',
+</div>'''.format(prenom = prenom, uuid = uuid),
+    name = uuid,
     questions = [
         Text(
             control_attributes = {'class': 'form-control'},
@@ -176,6 +176,7 @@ def make_personne_in_logement_principal_group(personnes_choices):
         name = u'personne_in_logement_principal',
         questions = [
             Select(
+                control_attributes = {'class': 'form-control'},
                 choices = (
                     (u'personne_de_référence', u'Personne de référence'),
                     (u'conjoint', u'Conjoint de la personne de référence'),
