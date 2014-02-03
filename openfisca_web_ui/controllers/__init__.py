@@ -73,32 +73,34 @@ def all_questions(req):
         return wsgihelpers.redirect(ctx, location = '/famille')
 
     questions_list = model.questions_by_entity.get(data['entity'], []) if model.questions_by_entity is not None else []
-    questions_list.append(questions.Hidden(name = 'idx', value=data['idx']))
-    questions_list.append(questions.Hidden(name = 'entity', value=data['entity']))
     page_form = Group(
         children_attributes = {
             '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
             },
+        outer_html_template = u'''
+{{self.inner_html}}
+<input name="entity" type="hidden" value="{data[entity]}">
+<input name="idx" type="hidden" value="{data[idx]}">
+'''.format(data=data),
         name = u'all_questions',
         questions = questions_list,
         )
+    api_data_key_by_entity = {
+        'fam': 'familles',
+        'foy': 'foyers_fiscaux',
+        'ind': 'individus',
+        'men': 'menages',
+        }
     if req.method == 'GET':
         errors = None
         if session.user is not None and session.user.api_data is not None:
-            page_form.fill({'all_questions': session.user.api_data.get('individus', {}).get(data['idx'], {})})
+            page_form.fill({'all_questions': session.user.api_data.get(api_data_key_by_entity[data['entity']], {}).get(
+                data['idx'], {})})
     else:
         params = req.params
-        from pprint import pprint
-        pprint(params)
         korma_inputs = variabledecode.variable_decode(params)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
         if errors is None:
-            api_data_key_by_entity = {
-                'fam': 'familles',
-                'foy': 'foyers_fiscaux',
-                'ind': 'individus',
-                'men': 'menages',
-                }
             if data['entity'] in api_data_key_by_entity:
                 session.user.api_data.setdefault(
                     api_data_key_by_entity[data['entity']],
