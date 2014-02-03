@@ -236,7 +236,9 @@ menage_korma_data_to_menages = pipe(
                     'loyer': noop,
                     'personnes': uniform_sequence(
                         pipe(
-                            function(lambda item: item.get('personne_in_logement_principal', {}).get('prenom_condition')),
+                            function(
+                                lambda item: item.get('personne_in_logement_principal', {}).get('prenom_condition')
+                                ),
                             rename_item('prenom', 'id'),
                             ),
                         ),
@@ -286,7 +288,6 @@ def korma_to_api(korma_data, state = None):
     new_foyer_fiscal_id = None
     new_logement_principal_id = None
 
-
     api_data = state.session.user.api_data or {}
     for korma_personne in korma_data['personnes']:
         if korma_personne['id'] == 'new':
@@ -315,12 +316,12 @@ def korma_to_api(korma_data, state = None):
                 new_foyer_fiscal_id = unicode(uuid.uuid4()).replace('-', '')
             personnes = set(
                 api_data.setdefault('foyers_fiscaux', {}).get(
-                    korma_foyer_fiscal['id'] or new_foyer_fiscal_id, {}).get(
-                        korma_foyer_fiscal['role'], []
-                        )
+                    korma_foyer_fiscal['id'] or new_foyer_fiscal_id, {}).get(korma_foyer_fiscal['role'], [])
                 )
             personnes.add(
-                korma_foyer_fiscal['personne']['prenom'] if korma_foyer_fiscal['personne']['prenom'] != 'new' else new_person_id
+                korma_foyer_fiscal['personne']['prenom']
+                if korma_foyer_fiscal['personne']['prenom'] != 'new'
+                else new_person_id
                 )
             api_data.setdefault('foyers_fiscaux', {}).setdefault(
                 korma_foyer_fiscal['id'] or new_foyer_fiscal_id, {})[korma_foyer_fiscal['role']] = list(personnes)
