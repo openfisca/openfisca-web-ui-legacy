@@ -71,7 +71,7 @@ def api_data_to_korma_data(api_data, state = None):
         for famille_id, famille in api_data.get('familles', {}).iteritems():
             api_data['foyers_fiscaux'][unicode(uuid.uuid4())] = {
                 'declarants': famille.get('parents', []),
-                'personne_a_charges': famille.get('enfants', []),
+                'personnes_a_charge': famille.get('enfants', []),
             }
 
     korma_data = {
@@ -98,7 +98,7 @@ def api_data_to_korma_data(api_data, state = None):
         korma_declaration_impot = {
             'personnes': [],
             }
-        for role in ['declarants', 'personne_a_charges']:
+        for role in ['declarants', 'personnes_a_charge']:
             for idx, personne_id in enumerate(declaration_impot.get(role, [])):
                 personne_in_declaration_impots = {
                     'declaration_impot_id': declaration_impot_id,
@@ -191,7 +191,7 @@ declaration_impot_korma_data_to_declaration_impots = pipe(
                     struct(
                         {
                             'declaration_impot_id': cleanup_line,
-                            'role': test_in([u'declarants', u'personne_a_charges']),
+                            'role': test_in([u'declarants', u'personnes_a_charge']),
                             'prenom_condition': noop,
                             },
                         default = noop,
