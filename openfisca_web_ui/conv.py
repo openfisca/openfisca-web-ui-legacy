@@ -131,7 +131,6 @@ def api_data_to_korma_data(api_data, state = None):
             korma_menage['personnes'].append(
                 {'personne_in_logement_principal': personne_in_logement_principal}
                 )
-            korma_data.setdefault('logements_principaux', []).append({'logement_principal': korma_menage})
         for role in ['enfants', 'autres']:
             for idx, personne_id in enumerate(menage.get(role, [])):
                 personne_in_logement_principal = {
@@ -143,7 +142,7 @@ def api_data_to_korma_data(api_data, state = None):
                 korma_menage['personnes'].append(
                     {'personne_in_logement_principal': personne_in_logement_principal}
                     )
-                korma_data.setdefault('logements_principaux', []).append({'logement_principal': korma_menage})
+        korma_data.setdefault('logements_principaux', []).append({'logement_principal': korma_menage})
 
     return korma_data, None
 
@@ -294,7 +293,7 @@ menage_korma_data_to_menages = pipe(
                             struct(
                                 {
                                     'logement_principal_id': cleanup_line,
-                                    'role': test_in([u'personne_de_référence', u'conjoint', u'enfants', u'autres']),
+                                    'role': test_in([u'personne_de_reference', u'conjoint', u'enfants', u'autres']),
                                     'prenom_condition': rename_item('prenom', 'id'),
                                     },
                                 default = noop
@@ -395,12 +394,12 @@ def korma_to_api(korma_data, state = None):
                 )
             for personne in korma_logement_principal.get('personnes'):
                 logement_principal_id = personne.get('logement_principal_id') or new_logement_principal_id
-                if personne['role'] == u'personne_de_référence':
-                    menage['personne_de_reference'] = personne['prenom_condition']['id']
-                if personne['role'] == u'conjoint':
-                    menage['conjoint'] = personne['prenom_condition']['id']
+                personne_id = new_person_id \
+                    if personne['prenom_condition']['id'] == 'new' else personne['prenom_condition']['id']
+                if personne['role'] in [u'conjoint', u'personne_de_reference']:
+                    menage[personne['role']] = personne_id
                 if personne['role'] in ['enfants', 'autres']:
-                    menage.setdefault(personne['role'], []).append(personne[personne['role']]['id'])
+                    menage.setdefault(personne['role'], []).append(personne_id)
             api_data.setdefault('menages', {}).setdefault(logement_principal_id, {}).update(menage)
 
     return api_data, None

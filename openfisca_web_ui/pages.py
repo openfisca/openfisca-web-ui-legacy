@@ -195,10 +195,10 @@ def make_personne_in_logement_principal_group(personnes_choices):
             Select(
                 control_attributes = {'class': 'form-control'},
                 choices = (
-                    (u'personne_de_référence', u'Personne de référence'),
+                    (u'personne_de_reference', u'Personne de référence'),
                     (u'conjoint', u'Conjoint de la personne de référence'),
-                    (u'enfant', u'Enfant de la personne de référence ou de son conjoint'),
-                    (u'autre', u'Autre'),
+                    (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
+                    (u'autres', u'Autre'),
                     ),
                 name = u'role',
                 ),
