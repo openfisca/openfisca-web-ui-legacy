@@ -31,7 +31,6 @@ import datetime
 from korma.base import Button
 from korma.choice import Select
 from korma.condition import Condition
-from korma.date import DateTime
 from korma.group import Group
 from korma.text import Number, Text
 
@@ -105,9 +104,8 @@ aria-hidden="true">
 name="{self.full_name}" type="button">{self.label}</button>'''
             ),
         Text(label = u'Prénom'),
-        DateTime(
+        questions.FrenchDate(
             label = u'Date de naissance',
-            max = datetime.datetime.now().date(),
             name = 'birth',
             ),
         Number(
