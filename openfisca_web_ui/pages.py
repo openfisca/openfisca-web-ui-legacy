@@ -86,7 +86,7 @@ aria-hidden="true">
       <div class="modal-body">
         <div class="form-horizontal">
           {{self[prenom].html}}
-          {{self[salaire].html}}
+          {{self[sali].html}}
           {{self[statmarit].html}}
         </div>
       </div>
@@ -108,10 +108,12 @@ name="{self.full_name}" type="button" value="{self.label}">'''
         Date(
             label = u'Date de naissance',
             max = datetime.datetime.now().date(),
+            name = 'birth',
             ),
         Number(
             label = u'Salaire',
             min = 0,
+            name = 'sali',
             step = 1,
             ),
         Select(
@@ -175,6 +177,7 @@ def make_personne_in_logement_principal_group(personnes_choices):
     return Group(
         name = u'personne_in_logement_principal',
         questions = [
+            questions.Hidden(name = 'logement_principal_id'),
             Select(
                 control_attributes = {'class': 'form-control'},
                 choices = (
@@ -297,6 +300,7 @@ def page_form(ctx, page_name):
                     Number(
                         control_attributes = {'class': 'form-control'},
                         label = u'Loyer',
+                        step = 1,
                         ),
                     Text(
                         control_attributes = {'class': 'form-control'},

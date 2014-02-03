@@ -55,9 +55,22 @@ def api_data_to_korma_data(api_data, state = None):
         return None, None
     if state is None:
         state = default_state
+
+    # Build artificially false "foyer fiscaux" and "menages"
+    if api_data.get('menages') is None:
+        api_data['menages'] = {unicode(uuid.uuid4()): {'personne_de_reference': api_data.get('individus', {}).keys()}}
+    if api_data.get('foyers_fiscaux') is None:
+        api_data['foyers_fiscaux'] = {}
+        for famille_id, famille in api_data.get('familles', {}).iteritems():
+            api_data['foyers_fiscaux'][unicode(uuid.uuid4())] = {
+                'declarants': famille.get('parents', []),
+                'personne_a_charges': famille.get('enfants', []),
+            }
+
     korma_data = {
         'familles': [],
         'declaration_impots': [],
+        'logements_principaux': [],
         }
     for famille_id, famille in api_data.get('familles', {}).iteritems():
         korma_famille = {
@@ -75,7 +88,7 @@ def api_data_to_korma_data(api_data, state = None):
         korma_data['familles'].append(korma_famille)
 
     for declaration_impot_id, declaration_impot in api_data.get('foyers_fiscaux', {}).iteritems():
-        korma_declaration_import = {
+        korma_declaration_impot = {
             'personnes': [],
             }
         for role in ['declarants', 'personne_a_charges']:
@@ -86,10 +99,30 @@ def api_data_to_korma_data(api_data, state = None):
                     'role': role,
                     }
                 personne_in_declaration_impots['prenom_condition']['prenom'] = declaration_impot[role][idx]
-                korma_declaration_import['personnes'].append(
+                korma_declaration_impot['personnes'].append(
                     {'personne_in_declaration_impots': personne_in_declaration_impots}
                     )
-        korma_data['declaration_impots'].append(korma_declaration_import)
+        korma_data['declaration_impots'].append(korma_declaration_impot)
+
+    for menage_id, menage in api_data.get('menages', {}).iteritems():
+        korma_menage = dict(
+            (key, value)
+            for key, value in menage.iteritems()
+            if key not in ['personne_de_reference']
+            )
+        korma_menage['personnes'] = []
+        for idx, personne_id in enumerate(menage.get('personne_de_reference', [])):
+            personne_in_logement_principal = {
+                'logement_principal_id': menage_id,
+                'prenom_condition': dict(api_data.get('individus', {}).iteritems()),
+                'role': 'personne_de_reference',
+                }
+            personne_in_logement_principal['prenom_condition']['prenom'] = menage['personne_de_reference'][idx]
+            korma_menage['personnes'].append(
+                {'personne_in_logement_principal': personne_in_logement_principal}
+                )
+            korma_data.setdefault('logements_principaux', []).append({'logement_principal': korma_menage})
+
     return korma_data, None
 
 
@@ -320,8 +353,7 @@ def korma_to_api(korma_data, state = None):
                 )
             personnes.add(
                 korma_foyer_fiscal['personne']['prenom']
-                if korma_foyer_fiscal['personne']['prenom'] != 'new'
-                else new_person_id
+                if korma_foyer_fiscal['personne']['prenom'] != 'new' else new_person_id
                 )
             api_data.setdefault('foyers_fiscaux', {}).setdefault(
                 korma_foyer_fiscal['id'] or new_foyer_fiscal_id, {})[korma_foyer_fiscal['role']] = list(personnes)
@@ -330,14 +362,18 @@ def korma_to_api(korma_data, state = None):
         for korma_logement_principal in korma_data['logement_principal']:
             if korma_logement_principal['id'] is None and new_logement_principal_id is None:
                 new_logement_principal_id = unicode(uuid.uuid4()).replace('-', '')
-            personnes = set(
-                api_data.setdefault('menages', {}).get(
-                    korma_logement_principal['id'] or new_logement_principal_id, {}).get('occupants', [])
-                )
+            logement_id = korma_logement_principal['id'] or new_logement_principal_id
+            personnes = set(api_data.setdefault('menages', {}).get(logement_id, {}).get('personne_de_reference', []))
             for personne in korma_logement_principal['personnes']:
                 personnes.add(personne['id'] if personne['id'] != 'new' else new_person_id)
-            api_data.setdefault('menages', {}).setdefault(
-                korma_logement_principal['id'] or new_logement_principal_id, {})['occupants'] = list(personnes)
+            api_data_menages = dict(
+                (key, value)
+                for key, value in korma_logement_principal.iteritems()
+                if key not in ('id', 'personnes')
+                )
+            api_data_menages['personne_de_reference'] = list(personnes)
+            api_data.setdefault('menages', {})[logement_id] = api_data_menages
+
     return api_data, None
 
 

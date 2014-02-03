@@ -208,7 +208,7 @@ def make_router():
     """Return a WSGI application that searches requests to controllers."""
     global router
     routings = [
-        (('GET', 'POST'), '^/?$', index),
+        ('GET', '^/?$', index),
         ('GET', '^/all-questions?$', all_questions),
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
