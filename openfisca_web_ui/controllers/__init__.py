@@ -138,11 +138,11 @@ def form(req):
         errors = None
         if session.user is not None and session.user.api_data is not None:
             korma_data = conv.check(conv.api_data_to_korma_data(session.user.api_data, state = ctx))
-            page_form.fill(korma_data or {})
+            korma_values = conv.check(page_form.root_data_to_str(korma_data))
+            page_form.fill(korma_values or {})
     else:
         params = req.params
         korma_inputs = variabledecode.variable_decode(params)
-        page_form.fill(korma_inputs)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
         page_form.fill(korma_data or {})
         if errors is None:
