@@ -29,12 +29,23 @@
 import datetime
 import logging
 import os
-import uuid
 
 from formencode import variabledecode
 from korma.group import Group
 
-from .. import contexts, conf, conv, matplotlib_helpers, model, pages, templates, urls, wsgihelpers
+from .. import (
+    contexts,
+    conf,
+    conv,
+    matplotlib_helpers,
+    model,
+    pages,
+    questions,
+    templates,
+    urls,
+    uuidhelpers,
+    wsgihelpers,
+    )
 from . import accounts, sessions, simulations
 
 
@@ -101,11 +112,11 @@ def ensure_session(ctx):
     session = ctx.session
     if session is None:
         session = ctx.session = model.Session()
-        session.token = unicode(uuid.uuid4())
+        session.token = uuidhelpers.generate_uuid()
     if session.user is None:
         user = model.Account()
-        user._id = unicode(uuid.uuid4())
-        user.api_key = unicode(uuid.uuid4())
+        user._id = uuidhelpers.generate_uuid()
+        user.api_key = uuidhelpers.generate_uuid()
         user.compute_words()
         session.user_id = user._id
         user.save(ctx, safe = True)

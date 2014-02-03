@@ -32,7 +32,6 @@ from itertools import chain
 import json
 import re
 import requests
-import uuid
 
 from biryani1.baseconv import *  # NOQA
 from biryani1.bsonconv import *  # NOQA
@@ -40,6 +39,8 @@ from biryani1.datetimeconv import *  # NOQA
 from biryani1.objectconv import *  # NOQA
 from biryani1.jsonconv import *  # NOQA
 from biryani1.states import default_state, State  # NOQA
+
+from . import uuidhelpers
 
 
 N_ = lambda message: message
@@ -64,15 +65,15 @@ def api_data_to_korma_data(api_data, state = None):
             menage['conjoint'] = personne_ids.pop()
         if len(personne_ids) > 0:
             menage['enfants'] = personne_ids
-        api_data['menages'] = {unicode(uuid.uuid4()): menage}
+        api_data['menages'] = {uuidhelpers.generate_uuid(): menage}
 
     if api_data.get('foyers_fiscaux') is None:
         api_data['foyers_fiscaux'] = {}
         for famille_id, famille in api_data.get('familles', {}).iteritems():
-            api_data['foyers_fiscaux'][unicode(uuid.uuid4())] = {
+            api_data['foyers_fiscaux'][uuidhelpers.generate_uuid()] = {
                 'declarants': famille.get('parents', []),
                 'personnes_a_charge': famille.get('enfants', []),
-            }
+                }
 
     korma_data = {
         'familles': [],
@@ -341,15 +342,15 @@ def korma_to_api(korma_data, state = None):
         return None, None
     if state is None:
         state = default_state
-    new_person_id = unicode(uuid.uuid4()).replace('-', '')
-    new_famille_id = unicode(uuid.uuid4()).replace('-', '')
-    new_foyer_fiscal_id = unicode(uuid.uuid4()).replace('-', '')
-    new_logement_principal_id = unicode(uuid.uuid4()).replace('-', '')
+    new_person_id = uuidhelpers.generate_uuid()
+    new_famille_id = uuidhelpers.generate_uuid()
+    new_foyer_fiscal_id = uuidhelpers.generate_uuid()
+    new_logement_principal_id = uuidhelpers.generate_uuid()
 
     api_data = state.session.user.api_data or {}
     for korma_personne in korma_data['personnes']:
         if korma_personne['id'] == 'new':
-            new_person_id = unicode(uuid.uuid4()).replace('-', '')
+            new_person_id = uuidhelpers.generate_uuid()
             api_data.setdefault('individus', {})[new_person_id] = korma_personne[korma_personne['id']]
             del api_data['individus'][new_person_id]['edit']
         else:

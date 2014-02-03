@@ -39,7 +39,7 @@ import requests
 import webob
 import webob.multidict
 
-from .. import conf, contexts, conv, model, paginations, templates, urls, wsgihelpers
+from .. import conf, contexts, conv, model, paginations, templates, urls, uuidhelpers, wsgihelpers
 
 
 inputs_to_account_admin_data = conv.struct(
@@ -160,7 +160,7 @@ def admin_edit(req):
         if errors is None:
             account.set_attributes(**data)
             if account.api_key is None:
-                account.api_key = unicode(uuid.uuid4())
+                account.api_key = uuidhelpers.generate_uuid()
             account.compute_words()
             account.save(ctx, safe = True)
 
@@ -568,8 +568,8 @@ def login(req):
         )
     if user is None:
         user = model.Account()
-        user._id = unicode(uuid.uuid4())
-        user.api_key = unicode(uuid.uuid4())
+        user._id = uuidhelpers.generate_uuid()
+        user.api_key = uuidhelpers.generate_uuid()
         user.email = verification_data['email']
         user.full_name = verification_data['email']
         user.slug = strings.slugify(user.full_name)
