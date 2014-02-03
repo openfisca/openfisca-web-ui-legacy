@@ -140,10 +140,10 @@ rel="stylesheet">
 
 
 <%def name="scripts()" filter="trim">
+    <script src="${urls.get_url(ctx, u'/bower/requirejs/require.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/jquery/jquery.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/bootstrap/dist/js/bootstrap.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/typeahead.js/dist/typeahead.js')}"></script>
-    <script src="${urls.get_url(ctx, u'/bower/requirejs/require.js')}"></script>
     <script src="${urls.get_url(ctx, u'/js/site.js')}"></script>
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.

@@ -47,25 +47,36 @@ bootstrap_control_inner_html_template = u'''
 bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
 
 
-make_prenoms_condition = lambda personnes_choices: Condition(
+horizontal_bootstrap_control_inner_html_template = u'''
+<label class="control-label col-sm-2" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-10">{self.control_html}</div>'''
+
+
+make_prenoms_condition = lambda name, personnes_choices: Condition(
     base_question = Select(
         control_attributes = {'class': 'form-control'},
         choices = personnes_choices,
-        label = u'Prénom',
+        name = 'prenom',
         ),
     conditional_questions = {
-        person_idx: make_personne_group(person_idx, prenom)
-        for person_idx, prenom in personnes_choices
+        personne_id: make_personne_group(personne_id, prenom)
+        for personne_id, prenom in personnes_choices
         },
+    name = name,
     )
 
 
-make_personne_group = lambda uuid, prenom: Group(
+make_personne_group = lambda personne_id, prenom: Group(
     children_attributes = {
-        'inner_html_template': bootstrap_control_inner_html_template,
+        '_control_attributes': {'class': 'form-control'},
+        '_inner_html_template': horizontal_bootstrap_control_inner_html_template,
+        '_outer_html_template': bootstrap_group_outer_html_template,
         },
-    inner_html_template = u'''
-<div class="modal fade" id="{{self.full_name}}-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    name = personne_id,
+    outer_html_template = u'''
+{{self[edit].html}}
+<div class="modal fade" id="{{self.full_name}}-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -73,35 +84,37 @@ make_personne_group = lambda uuid, prenom: Group(
         <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
       </div>
       <div class="modal-body">
-        {{self[prenom].html}}
-        {{self[salaire].html}}
-        {{self[statmarit].html}}
+        <div class="form-horizontal">
+          {{self[prenom].html}}
+          {{self[salaire].html}}
+          {{self[statmarit].html}}
+        </div>
       </div>
       <div class="modal-footer">
         <input class="btn btn-primary" type="submit" value="Valider">
       </div>
     </div>
   </div>
-</div>'''.format(prenom = prenom, uuid = uuid),
-    name = uuid,
+</div>'''.format(prenom = prenom, personne_id = personne_id),
     questions = [
-        Text(
-            control_attributes = {'class': 'form-control'},
-            label = u'Prénom',
+        Button(
+            label = u'Éditer',
+            name = u'edit',
+            outer_html_template = u'''
+<input class="btn btn-primary" data-target="#{self.parent.full_name_as_selector}-modal" data-toggle="modal"
+name="{self.full_name}" type="button" value="{self.label}">'''
             ),
+        Text(label = u'Prénom'),
         Date(
-            control_attributes = {'class': 'form-control'},
             label = u'Date de naissance',
             max = datetime.datetime.now().date(),
             ),
         Number(
-            control_attributes = {'class': 'form-control'},
             label = u'Salaire',
             min = 0,
             step = 1,
             ),
         Select(
-            control_attributes = {'class': 'form-control'},
             choices = [
                 u'Marié',
                 u'Célibataire',
@@ -131,17 +144,7 @@ def make_personne_in_declaration_impots_group(personnes_choices):
                     ),
                 label = u'Rôle',
                 ),
-            make_prenoms_condition(personnes_choices),
-            Button(
-                control_attributes = {
-                    'class': 'btn btn-primary',
-                    'data-target': '#myModal-new',
-                    'data-toggle': 'modal',
-                },
-                inner_html_template = bootstrap_control_inner_html_template,
-                label = u'Éditer',
-                outer_html_template = u'<div class="col-sm-offset-6 col-sm-10">{self.inner_html}</div>',
-                ),
+            make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
             ],
         )
 
@@ -149,24 +152,21 @@ def make_personne_in_declaration_impots_group(personnes_choices):
 def make_personne_in_famille_group(personnes_choices):
     return Group(
         name = u'personne_in_famille',
+        outer_html_template = u'''
+{self[famille_id].html}
+<div class="form-inline personne-row">
+  {self[role].html}
+  {self[prenom_condition].html}
+</div>
+''',
         questions = [
             questions.Hidden(name = 'famille_id'),
             Select(
                 control_attributes = {'class': 'form-control'},
                 choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
-                label = u'Rôle',
+                name = u'role',
                 ),
-            make_prenoms_condition(personnes_choices),
-            Button(
-                control_attributes = {
-                    'class': 'btn btn-primary',
-                    'data-target': '#myModal-new',
-                    'data-toggle': 'modal',
-                },
-                inner_html_template = bootstrap_control_inner_html_template,
-                label = u'Éditer',
-                outer_html_template = u'<div class="col-sm-offset-6 col-sm-10">{self.inner_html}</div>',
-                ),
+            make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
             ],
         )
 
@@ -185,16 +185,7 @@ def make_personne_in_logement_principal_group(personnes_choices):
                     ),
                 label = u'Rôle',
                 ),
-            make_prenoms_condition(personnes_choices),
-            Button(
-                control_attributes = {
-                    'class': 'btn btn-primary',
-                    'data-target': '#myModal-new',
-                    'data-toggle': 'modal',
-                },
-                inner_html_template = bootstrap_control_inner_html_template,
-                label = u'Éditer',
-                ),
+            make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
             ],
         )
 

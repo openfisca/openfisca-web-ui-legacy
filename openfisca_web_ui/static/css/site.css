@@ -7,17 +7,17 @@
     word-wrap: break-word;
 }
 
-.korma button.add {
-    margin: 1em;
-}
-
 .korma input[type="submit"] {
-    margin: 1em;
+    margin: 1em 0;
 }
 
 .nav-tabs {
     margin-top: 20px;
     margin-bottom: 30px;
+}
+
+.personne-row {
+    margin: 1em 0;
 }
 
 .repeated-group {

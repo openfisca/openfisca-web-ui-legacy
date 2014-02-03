@@ -70,9 +70,8 @@ from openfisca_web_ui import pages
     <%parent:scripts/>
     <script>
 requirejs.config({
-  paths : {
+  paths: {
     domReady: '/bower/requirejs-domready/domReady',
-    jquery: '/bower/jquery/jquery',
     modernizr: '/bower/modernizr/modernizr',
     myClass: '/bower/my-class/my.class'
   }
