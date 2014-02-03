@@ -352,8 +352,10 @@ def korma_to_api(korma_data, state = None):
         if korma_personne['id'] == 'new':
             new_person_id = unicode(uuid.uuid4()).replace('-', '')
             api_data.setdefault('individus', {})[new_person_id] = korma_personne[korma_personne['id']]
+            del api_data['individus'][new_person_id]['edit']
         else:
             api_data.setdefault('individus', {})[korma_personne['id']].update(korma_personne[korma_personne['id']])
+            del api_data['individus'][korma_personne['id']]['edit']
 
     if korma_data.get('familles'):
         for korma_famille in korma_data['familles']:
