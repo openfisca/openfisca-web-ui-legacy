@@ -46,8 +46,23 @@ from openfisca_web_ui import pages
 
 
 <%def name="container_content()" filter="trim">
-    <h1>${req.urlvars['page_data']['title']}</h1>
     <%self:tabs/>
+    <div class="row">
+        <div class="col-sm-6">
+            <form class="korma form" method="POST" role="form">
+                ${page_form.html | n}
+                <p><input class="btn btn-success" type="submit" value="Valider"></p>
+            </form>
+        </div>
+
+        <div class="col-sm-6">
+% if errors:
+            <pre class="alert alert-warning">${errors | n, js, h}</pre>
+% else:
+            <img class="waterfall-img" src="/image/waterfall.png" alt="Graphique">
+% endif
+        </div>
+    </div>
 </%def>
 
 

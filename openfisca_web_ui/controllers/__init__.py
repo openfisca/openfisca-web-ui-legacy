@@ -156,7 +156,7 @@ def form(req):
         )(session.user.api_data, state = ctx)
     return templates.render(
         ctx,
-        '/{}.mako'.format(page_data['name']),
+        '/form.mako',
         errors = errors or {},
         page_form = page_form,
         )
