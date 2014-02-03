@@ -105,7 +105,11 @@ def all_questions(req):
                 session.user.api_data.setdefault(
                     api_data_key_by_entity[data['entity']],
                     {},
-                    ).setdefault(data['idx'], {}).update(korma_data.get('all_questions'))
+                    ).setdefault(data['idx'], {}).update({
+                        key: value
+                        for key, value in korma_data.get('all_questions').iteritems()
+                        if key not in (u'entity', u'idx')
+                    })
             session.user.save(ctx, safe = True)
             return wsgihelpers.redirect(ctx, location = '/famille')
     return templates.render(
