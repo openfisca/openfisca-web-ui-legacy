@@ -402,11 +402,22 @@ def make_question(question_info):
                 name = question_info['name'],
                 )
         else:
-            return Text(label = question_label, name = question_info['name'])
+            return Text(
+                label = question_label,
+                name = question_info['name'],
+                )
     elif question_info['@type'] == 'Float':
-        return Number(label = question_label, name = question_info['name'], step = 0.01)
+        return Number(
+            label = question_label,
+            name = question_info['name'],
+            step = 0.01,
+            )
     elif question_info['@type'] == 'Integer':
-        return Number(label = question_label, name = question_info['name'], step = 1)
+        return Number(
+            label = question_label,
+            name = question_info['name'],
+            step = 1,
+            )
 
 
 def setup():
