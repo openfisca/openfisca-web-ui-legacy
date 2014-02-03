@@ -27,6 +27,7 @@
 
 
 import collections
+import copy
 import datetime
 from itertools import chain
 import json
@@ -62,16 +63,6 @@ def api_data_to_korma_data(api_data, state = None):
         return None, None
     if state is None:
         state = default_state
-
-    # Build artificially false "foyer fiscaux" and "menages"
-    if api_data.get('menages') is None:
-        personne_ids = api_data.get('individus', {}).keys()
-        menage = {'personne_de_reference': personne_ids.pop()}
-        if len(personne_ids) > 0:
-            menage['conjoint'] = personne_ids.pop()
-        if len(personne_ids) > 0:
-            menage['enfants'] = personne_ids
-        api_data['menages'] = {uuidhelpers.generate_uuid(): menage}
 
     if api_data.get('foyers_fiscaux') is None:
         api_data['foyers_fiscaux'] = {}
@@ -185,6 +176,25 @@ api_data_to_simulation_output = pipe(api_data_to_api_post_content, api_post_cont
 
 
 date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[:6])))
+
+
+def complete_api_data(api_data, state = None):
+    if api_data is None:
+        return None, None
+    if state is None:
+        state = default_state
+
+    # Build artificially false "foyer fiscaux" and "menages"
+    api_data = copy.deepcopy(api_data)
+    if api_data.get('menages') is None:
+        personne_ids = api_data.get('individus', {}).keys()
+        menage = {'personne_de_reference': personne_ids.pop()}
+        if len(personne_ids) > 0:
+            menage['conjoint'] = personne_ids.pop()
+        if len(personne_ids) > 0:
+            menage['enfants'] = personne_ids
+        api_data['menages'] = {uuidhelpers.generate_uuid(): menage}
+    return api_data, None
 
 
 datetime_to_date = function(lambda value: value.date())

@@ -149,7 +149,9 @@ def form(req):
     if req.method == 'GET':
         errors = None
         if session.user is not None and session.user.api_data is not None:
-            korma_data = conv.check(conv.api_data_to_korma_data(session.user.api_data, state = ctx))
+            korma_data = conv.check(
+                conv.pipe(conv.complete_api_data, conv.api_data_to_korma_data)(session.user.api_data, state = ctx)
+                )
             korma_values = conv.check(page_form.root_data_to_str(korma_data))
             page_form.fill(korma_values or {})
     else:
@@ -190,9 +192,10 @@ def image(req):
     ctx = contexts.Ctx(req)
     ensure_session(ctx)
     session = ctx.session
-    if session.user.korma_data is None:
-        session.user.korma_data = {}
+    if session.user.api_data is None:
+        session.user.api_data = {}
     simulation_output, errors = conv.pipe(
+        conv.complete_api_data,
         conv.user_data_to_api_data,
         conv.api_data_to_simulation_output,
         )(session.user.api_data, state = ctx)
