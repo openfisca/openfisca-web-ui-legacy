@@ -31,7 +31,7 @@ import datetime
 from korma.base import Button
 from korma.choice import Select
 from korma.condition import Condition
-from korma.date import Date
+from korma.date import DateTime
 from korma.group import Group
 from korma.text import Number, Text
 
@@ -85,6 +85,7 @@ aria-hidden="true">
       <div class="modal-body">
         <div class="form-horizontal">
           {{self[prenom].html}}
+          {{self[birth].html}}
           {{self[sali].html}}
           {{self[statmarit].html}}
         </div>
@@ -104,7 +105,7 @@ aria-hidden="true">
 name="{self.full_name}" type="button">{self.label}</button>'''
             ),
         Text(label = u'Prénom'),
-        Date(
+        DateTime(
             label = u'Date de naissance',
             max = datetime.datetime.now().date(),
             name = 'birth',
