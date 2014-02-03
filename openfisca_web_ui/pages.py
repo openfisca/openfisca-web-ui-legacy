@@ -88,7 +88,9 @@ aria-hidden="true">
         </div>
       </div>
       <div class="modal-footer">
-        <input class="btn btn-primary" type="submit" value="Valider">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <a class="btn btn-success" href="/all-questions?entity=ind&idx={personne_id}">Plus de détails</a>
+        <button type="submit" class="btn btn-primary">Valider</button>
       </div>
     </div>
   </div>
@@ -255,7 +257,7 @@ def page_form(ctx, page_name):
                 outer_html_template = u'''
 <div class="repeated-group">
   {self.inner_html}
-  <a class="btn btn-primary" href="/all-questions?entity=foy&idx={self.parent_data[declaration_impots][index]}">
+  <a class="btn btn-primary btn-all-question" href="/all-questions?entity=foy">
     Plus de détails
   </a>
 </div>''',
@@ -269,7 +271,7 @@ def page_form(ctx, page_name):
                 outer_html_template = u'''
 <div class="repeated-group">
   {self.inner_html}
-  <a class="btn btn-primary" href="/all-questions?entity=fam&idx={self.parent_data[familles][index]}">
+  <a class="btn btn-primary btn-all-question" href="/all-questions?entity=fam">
     Plus de détails
   </a>
 </div>''',
@@ -281,7 +283,7 @@ def page_form(ctx, page_name):
                 '_outer_html_template': u'''
 <div class="repeated-group">
   {self.inner_html}
-  <a class="btn btn-primary" href="/all-questions?entity=men&idx={self.parent_data[logements_principaux][index]}">
+  <a class="btn btn-primary btn-all-question" href="/all-questions?entity=men">
     Plus de détails
   </a>
 </div>''',

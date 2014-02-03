@@ -10,4 +10,9 @@ require(['domReady!', 'jquery', './config', 'korma/helpers'], function(doc, $, c
 
   console.log('rootQuestion', rootQuestion);
 
+  $('.btn-all-question').each(function() {
+    $this = $(this);
+    var id = $this.parent().find("input[type='hidden'][name$='id']");
+    $this.attr('href', $this.attr('href') + '&idx=' + id.val());
+  });
 });

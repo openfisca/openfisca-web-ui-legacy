@@ -40,6 +40,7 @@ from .. import (
     matplotlib_helpers,
     model,
     pages,
+    questions,
     templates,
     urls,
     uuidhelpers,
@@ -65,40 +66,46 @@ def all_questions(req):
         'idx': req.params.get('idx') or None,
         }
     data, errors = conv.struct({
-        'idx': conv.anything_to_int,
-        'entities': conv.test_in(['fam', 'foy', 'ind', 'men']),
+        'idx': conv.cleanup_line,
+        'entity': conv.test_in(['fam', 'foy', 'ind', 'men']),
         })(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.redirect(ctx, location = '/famille')
+
+    questions_list = model.questions_by_entity.get(data['entity'], []) if model.questions_by_entity is not None else []
+    questions_list.append(questions.Hidden(name = 'idx', value=data['idx']))
+    questions_list.append(questions.Hidden(name = 'entity', value=data['entity']))
     page_form = Group(
         children_attributes = {
-            '_inner_html_template': pages.bootstrap_control_inner_html_template,
-            '_outer_html_template': pages.bootstrap_group_outer_html_template,
+            '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
             },
         name = u'all_questions',
-        questions = model.questions_by_entity[data['entity']] if model.questions_by_entity is not None else [],
+        questions = questions_list,
         )
     if req.method == 'GET':
         errors = None
+        if session.user is not None and session.user.api_data is not None:
+            page_form.fill({'all_questions': session.user.api_data.get('individus', {}).get(data['idx'], {})})
     else:
         params = req.params
+        from pprint import pprint
+        pprint(params)
         korma_inputs = variabledecode.variable_decode(params)
-        page_form.fill(korma_inputs)
         korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
         if errors is None:
-            session.user.korma_data.setdefault('all_questions', {}).update(korma_data)
+            api_data_key_by_entity = {
+                'fam': 'familles',
+                'foy': 'foyers_fiscaux',
+                'ind': 'individus',
+                'men': 'menages',
+                }
+            if data['entity'] in api_data_key_by_entity:
+                session.user.api_data.setdefault(
+                    api_data_key_by_entity[data['entity']],
+                    {},
+                    ).setdefault(data['idx'], {}).update(korma_data.get('all_questions'))
             session.user.save(ctx, safe = True)
-            simulation_output, errors = conv.pipe(
-                conv.korma_data_to_api_data,
-                conv.api_data_to_simulation_output,
-                )(session.user.korma_data, state = ctx)
-            if errors is None:
-                trees = simulation_output['value']
-                matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))
-#                matplotlib_helpers.create_bareme_png(
-#                    trees,
-#                    simulation_output,
-#                    filename = u'bareme_{}.png'.format(session.token),
-#                    )
-                return wsgihelpers.redirect(ctx, location = '')
+            return wsgihelpers.redirect(ctx, location = '/famille')
     return templates.render(
         ctx,
         '/all-questions.mako',
@@ -219,7 +226,7 @@ def make_router():
     global router
     routings = [
         ('GET', '^/?$', index),
-        ('GET', '^/all-questions?$', all_questions),
+        (('GET', 'POST'), '^/all-questions?$', all_questions),
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
