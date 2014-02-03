@@ -33,7 +33,6 @@ from korma.choice import Select
 from korma.condition import Condition
 from korma.date import Date
 from korma.group import Group
-from korma.repeat import Repeat
 from korma.text import Number, Text
 
 from . import conv, questions
@@ -101,8 +100,8 @@ aria-hidden="true">
             label = u'Éditer',
             name = u'edit',
             outer_html_template = u'''
-<input class="btn btn-primary" data-target="#{self.parent.full_name_as_selector}-modal" data-toggle="modal"
-name="{self.full_name}" type="button" value="{self.label}">'''
+<button class="btn btn-primary" data-target="#{self.parent.full_name_as_selector}-modal" data-toggle="modal"
+name="{self.full_name}" type="button">{self.label}</button>'''
             ),
         Text(label = u'Prénom'),
         Date(
@@ -135,6 +134,13 @@ name="{self.full_name}" type="button" value="{self.label}">'''
 def make_personne_in_declaration_impots_group(personnes_choices):
     return Group(
         name = u'personne_in_declaration_impots',
+        outer_html_template = u'''
+{self[declaration_impot_id].html}
+<div class="form-inline personne-row">
+  {self[role].html}
+  {self[prenom_condition].html}
+</div>
+''',
         questions = [
             questions.Hidden(name = 'declaration_impot_id'),
             Select(
@@ -144,7 +150,7 @@ def make_personne_in_declaration_impots_group(personnes_choices):
                     (u'declarants', u'Conjoint'),
                     (u'personnes_a_charge', u'Personne à charge'),
                     ),
-                label = u'Rôle',
+                name = u'role',
                 ),
             make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
             ],
@@ -176,6 +182,13 @@ def make_personne_in_famille_group(personnes_choices):
 def make_personne_in_logement_principal_group(personnes_choices):
     return Group(
         name = u'personne_in_logement_principal',
+        outer_html_template = u'''
+{self[logement_principal_id].html}
+<div class="form-inline personne-row">
+  {self[role].html}
+  {self[prenom_condition].html}
+</div>
+''',
         questions = [
             questions.Hidden(name = 'logement_principal_id'),
             Select(
@@ -186,7 +199,7 @@ def make_personne_in_logement_principal_group(personnes_choices):
                     (u'enfant', u'Enfant de la personne de référence ou de son conjoint'),
                     (u'autre', u'Autre'),
                     ),
-                label = u'Rôle',
+                name = u'role',
                 ),
             make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
             ],
@@ -238,9 +251,9 @@ def page_form(ctx, page_name):
     assert ctx.session is not None
     personnes_choices = build_personnes_choices(ctx)
     page_form_by_page_name = {
-        'declaration_impots': Repeat(
+        'declaration_impots': questions.Repeat(
             name = u'declaration_impots',
-            template_question = Repeat(
+            template_question = questions.Repeat(
                 name = u'personnes',
                 outer_html_template = u'''
 <div class="repeated-group">
@@ -252,9 +265,9 @@ def page_form(ctx, page_name):
                 template_question = make_personne_in_declaration_impots_group(personnes_choices=personnes_choices),
                 ),
             ),
-        'famille': Repeat(
+        'famille': questions.Repeat(
             name = u'familles',
-            template_question = Repeat(
+            template_question = questions.Repeat(
                 name = u'personnes',
                 outer_html_template = u'''
 <div class="repeated-group">
@@ -266,7 +279,7 @@ def page_form(ctx, page_name):
                 template_question = make_personne_in_famille_group(personnes_choices=personnes_choices),
                 ),
             ),
-        'logement_principal': Repeat(
+        'logement_principal': questions.Repeat(
             children_attributes = {
                 '_outer_html_template': u'''
 <div class="repeated-group">
@@ -306,7 +319,7 @@ def page_form(ctx, page_name):
                         control_attributes = {'class': 'form-control'},
                         label = u'Localité',
                         ),
-                    Repeat(
+                    questions.Repeat(
                         name = u'personnes',
                         template_question = make_personne_in_logement_principal_group(
                             personnes_choices=personnes_choices),

@@ -26,9 +26,10 @@
 """Korma questions adapted to MongoDB"""
 
 
+from korma import helpers
 from korma.base import Input
 from korma.date import Date
-from korma import helpers
+from korma.repeat import Repeat as KormaRepeat
 
 from . import conv
 
@@ -56,3 +57,7 @@ class MongoDate(Date):
     @property
     def default_input_to_data(self):
         return conv.pipe(super(MongoDate, self).default_input_to_data, conv.date_to_datetime)
+
+
+Repeat = lambda *args, **kwargs: KormaRepeat(add_button_classes = u'add btn', add_button_label = u'Ajouter', *args,
+                                             **kwargs)
