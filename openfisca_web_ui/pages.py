@@ -26,8 +26,6 @@
 """Pages meta-data"""
 
 
-import datetime
-
 from korma.base import Button
 from korma.choice import Select
 from korma.condition import Condition
