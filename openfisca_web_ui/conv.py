@@ -390,7 +390,7 @@ def korma_to_api(korma_data, state = None):
         for korma_logement_principal in korma_data['logement_principal']:
             menage = dict(
                 (key, value)
-                for key, value in korma_data.iteritems()
+                for key, value in korma_logement_principal.iteritems()
                 if key not in ['personnes', 'localite']
                 )
             for personne in korma_logement_principal.get('personnes'):
