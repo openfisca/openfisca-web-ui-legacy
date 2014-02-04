@@ -186,6 +186,29 @@ def complete_api_data(api_data, state = None):
 
     # Build artificially false "foyer fiscaux" and "menages"
     api_data = copy.deepcopy(api_data)
+    if api_data.get('individus') is None:
+        api_data['individus'] = {
+            uuidhelpers.generate_uuid(): {
+                u'birth': datetime.datetime(1984, 1, 1, 0, 0),
+                u'prenom': u'Personne1',
+                u'sali': 25000,
+                u'statmarit': u'celibataire',
+                }
+            }
+    if api_data.get('familles') is None:
+        personne_ids = api_data.get('individus', {}).keys()
+        famille = {'parents': [personne_ids.pop()]}
+        if len(personne_ids) > 0:
+            menage['parents'].append(personne_ids.pop())
+        if len(personne_ids) > 0:
+            menage['enfants'] = personne_ids
+        api_data['familles'] = {uuidhelpers.generate_uuid(): famille}
+    if api_data.get('foyers_fiscaux') is None:
+        for famille_id, famille in api_data.get('familles').iteritems():
+            api_data.setdefault('foyers_fiscaux', {})[uuidhelpers.generate_uuid()] = {
+                'declarants': famille.get('parents', []),
+                'personnes_a_charge': famille.get('enfants', []),
+                }
     if api_data.get('menages') is None:
         personne_ids = api_data.get('individus', {}).keys()
         menage = {'personne_de_reference': personne_ids.pop()}

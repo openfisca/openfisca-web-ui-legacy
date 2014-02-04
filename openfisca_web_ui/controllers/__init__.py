@@ -176,6 +176,7 @@ def form(req):
         session.user.api_data = {}
     session.user.api_data['validate'] = True
     simulation_output, errors = conv.pipe(
+        conv.complete_api_data,
         conv.user_data_to_api_data,
         conv.api_data_to_simulation_output,
         )(session.user.api_data, state = ctx)
