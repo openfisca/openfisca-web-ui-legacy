@@ -46,7 +46,7 @@ from . import uuidhelpers
 
 N_ = lambda message: message
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
-uuid_re = re.compile(ur'[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$')
+uuid_re = re.compile(ur'[\da-f]{32}$')
 
 
 def debug(value, state = None):
