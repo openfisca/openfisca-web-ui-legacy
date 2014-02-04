@@ -261,6 +261,7 @@ $(function () {
     user = model.get_user(ctx)
 %>\
         % if user is not None:
+                <li><a href="${user.get_admin_url(ctx, 'reset')}">${_(u'Reset')}</a></li>
                 <li class="active"><a href="${user.get_admin_url(ctx)}"><span class="glyphicon glyphicon-user"></span>
                     ${u'[anonyme]' if user.email is None else user.email}</a></li>
         % endif

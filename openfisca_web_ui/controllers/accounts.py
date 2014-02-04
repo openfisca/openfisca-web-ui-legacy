@@ -235,6 +235,31 @@ def admin_view(req):
 
 
 @wsgihelpers.wsgify
+def admin_reset(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+    user = model.get_user(ctx)
+    if user is None:
+        return wsgihelpers.unauthorized(ctx,
+            explanation = ctx._("Deletion unauthorized"),
+            message = ctx._("You can not delete an account."),
+            title = ctx._('Operation denied'),
+            )
+    if user._id != account._id and not user.admin:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("Reset forbidden"),
+            message = ctx._("You can not reset an account."),
+            title = ctx._('Operation denied'),
+            )
+
+    if user.api_data is not None:
+        user.api_data = None
+        user.save(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = '/')
+
+
+@wsgihelpers.wsgify
 def api1_delete(req):
     ctx = contexts.Ctx(req)
     headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
@@ -634,6 +659,7 @@ def route_admin(environ, start_response):
         ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
+        ('GET', '^/reset/?$', admin_reset),
         )
     return router(environ, start_response)
 
