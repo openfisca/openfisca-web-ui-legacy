@@ -46,6 +46,9 @@ from openfisca_web_ui import pages
 
 
 <%def name="container_content()" filter="trim">
+% if errors:
+    <pre class="alert alert-error">${errors | n, js, h}</pre>
+% endif
     <%self:tabs/>
     <div class="row">
         <div class="col-sm-6">
@@ -56,8 +59,8 @@ from openfisca_web_ui import pages
         </div>
 
         <div class="col-sm-6">
-% if errors:
-            <pre class="alert alert-warning">${errors | n, js, h}</pre>
+% if simulation_errors:
+            <pre class="alert alert-warning">${simulation_errors | n, js, h}</pre>
 % else:
             <img class="waterfall-img" src="/image/waterfall.png" alt="Graphique">
 % endif
