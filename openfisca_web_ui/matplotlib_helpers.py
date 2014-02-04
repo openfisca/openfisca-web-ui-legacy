@@ -27,6 +27,7 @@
 
 
 import collections
+from cStringIO import StringIO
 import operator
 import os
 
@@ -106,7 +107,7 @@ def iter_nodes_from_tree(node, code = None):
         yield code, node
 
 
-def create_waterfall_png(trees, filename = 'waterfall.png'):
+def create_waterfall_png(trees):
     bar_width = 0.8
     title = u'Revenu annuel'
     tree = trees[0]
@@ -163,11 +164,14 @@ def create_waterfall_png(trees, filename = 'waterfall.png'):
     ax.set_xticks(numpy.arange(len(names)) + bar_width / 2)
     ax.set_xlim(xlim)
 
-    figure.savefig(os.path.join(conf['static_files_dir'], filename))
+    image_data = StringIO()
+    figure.savefig(image_data, format = 'png')
     pyplot.close(figure)
+    image_data.seek(0)
+    return image_data
 
 
-def create_bareme_png(trees, simulation, filename = 'bareme.png'):
+def create_bareme_png(trees, simulation):
     title = u'Variation du revenu disponible' if simulation.get('reform') else u'Revenu disponible'
     tree = trees[0]
     ylabel = u'Revenu disponible (en € par an)'
@@ -189,5 +193,8 @@ def create_bareme_png(trees, simulation, filename = 'bareme.png'):
 
     draw_node(ax, tree, [0] * len(x_values), x_values)
     draw_legend(ax)
-    figure.savefig(os.path.join(conf['static_files_dir'], filename))
+    image_data = StringIO()
+    figure.savefig(image_data, format = 'png')
     pyplot.close(figure)
+    image_data.seek(0)
+    return image_data

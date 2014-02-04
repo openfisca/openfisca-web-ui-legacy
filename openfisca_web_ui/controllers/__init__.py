@@ -206,21 +206,13 @@ def image(req):
             }
         image_name = conv.check(conv.test_in(['bareme', 'waterfall'])(params['name']))
         trees = simulation_output['value']
+        image_stringio = None
         if image_name == 'waterfall':
-            matplotlib_helpers.create_waterfall_png(trees, filename = u'waterfall_{}.png'.format(session.token))
+            image_stringio = matplotlib_helpers.create_waterfall_png(trees)
         elif image_name == 'bareme':
-            matplotlib_helpers.create_bareme_png(
-                trees,
-                simulation_output,
-                filename = u'bareme_{}.png'.format(session.token),
-                )
-        image_filename = os.path.join(
-            conf['static_files_dir'],
-            '{}_{}.png'.format(image_name, session.token),
-            )
+            image_stringio = matplotlib_helpers.create_bareme_png(trees, simulation_output)
         req.response.content_type = 'image/jpeg'
-        with open(image_filename, 'r') as img:
-            req.response.write(img.read())
+        req.response.write(image_stringio.read())
         return
     return wsgihelpers.no_content(ctx)
 
