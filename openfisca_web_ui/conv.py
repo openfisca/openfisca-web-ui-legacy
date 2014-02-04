@@ -210,12 +210,22 @@ def complete_api_data(api_data, state = None):
                 'personnes_a_charge': famille.get('enfants', []),
                 }
     if api_data.get('menages') is None:
-        personne_ids = api_data.get('individus', {}).keys()
-        menage = {'personne_de_reference': personne_ids.pop()}
-        if len(personne_ids) > 0:
-            menage['conjoint'] = personne_ids.pop()
-        if len(personne_ids) > 0:
-            menage['enfants'] = personne_ids
+        parent_ids = []
+        enfants_ids = []
+        if api_data.get('familles') is not None:
+            for famille in api_data['familles'].itervalues():
+                parent_ids.extend(famille.get('parents', []))
+                enfants_ids.extend(famille.get('enfants', []))
+        else:
+            parent_ids = api_data.get('individus').keys()
+        menage = {'personne_de_reference': parent_ids.pop()}
+        if len(parent_ids) > 0:
+            menage['conjoint'] = parent_ids.pop()
+        if len(parent_ids) > 0:
+            menage['enfants'] = parent_ids
+        if len(enfants_ids) > 0:
+            menage.setdefault('enfants', []).extend(enfants_ids)
+
         api_data['menages'] = {uuidhelpers.generate_uuid(): menage}
     return api_data, None
 
