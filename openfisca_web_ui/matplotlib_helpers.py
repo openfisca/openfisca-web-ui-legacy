@@ -89,7 +89,7 @@ def draw_node(ax, node, base_values, x_values, code = None):
             ax.plot(x_values, node['values'], color = color, label = node['description'], linewidth = 2)
         else:
             area = ax.fill_between(x_values, map(operator.add, base_values, node['values']), base_values,
-                color = color, edgecolor = 'black', linewidth = 0.2, picker = True)
+                                   color = color, edgecolor = 'black', linewidth = 0.2, picker = True)
             area.set_label(node['description'])
     for child_code, child in (node.get('children') or {}).iteritems():
         draw_node(ax, child, base_values, x_values, code = child_code)
