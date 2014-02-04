@@ -28,7 +28,6 @@
 
 import datetime
 import logging
-import os
 
 from formencode import variabledecode
 from korma.group import Group
@@ -40,7 +39,6 @@ from .. import (
     matplotlib_helpers,
     model,
     pages,
-    questions,
     templates,
     urls,
     uuidhelpers,

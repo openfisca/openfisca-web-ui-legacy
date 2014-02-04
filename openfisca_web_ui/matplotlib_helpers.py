@@ -29,7 +29,6 @@
 import collections
 from cStringIO import StringIO
 import operator
-import os
 
 import matplotlib
 # This is a hack to use matlplotlib without X
@@ -39,8 +38,6 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrow, Rectangle
 from matplotlib import pyplot
 import numpy
-
-from . import conf
 
 
 waterfall_image_resolution = (1200, 900)
