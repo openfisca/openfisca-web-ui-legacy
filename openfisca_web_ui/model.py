@@ -142,9 +142,13 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
         return value, None
 
 
-class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
-    collection_name = u'simulations'
+class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
+    author_id = None
+    collection_name = u'legislations'
+    datetime_begin = None
+    datetime_end = None
     description = None
+    json = None
     slug = None
     title = None
 
@@ -173,11 +177,11 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
 
     @classmethod
     def get_admin_class_full_url(cls, ctx, *path, **query):
-        return urls.get_full_url(ctx, 'admin', 'simulations', *path, **query)
+        return urls.get_full_url(ctx, 'admin', 'legislations', *path, **query)
 
     @classmethod
     def get_admin_class_url(cls, ctx, *path, **query):
-        return urls.get_url(ctx, 'admin', 'simulations', *path, **query)
+        return urls.get_url(ctx, 'admin', 'legislations', *path, **query)
 
     def get_admin_full_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
@@ -191,11 +195,11 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
 
     @classmethod
     def get_class_full_url(cls, ctx, *path, **query):
-        return urls.get_full_url(ctx, 'simulations', *path, **query)
+        return urls.get_full_url(ctx, 'legislations', *path, **query)
 
     @classmethod
     def get_class_url(cls, ctx, *path, **query):
-        return urls.get_url(ctx, 'simulations', *path, **query)
+        return urls.get_url(ctx, 'legislations', *path, **query)
 
     def get_full_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
@@ -239,9 +243,9 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
                     as_class = collections.OrderedDict,
                     ).limit(2))
                 if not instances:
-                    return value, state._(u"No simulation with ID, slug or words: {0}").format(value)
+                    return value, state._(u"No legislation with ID, slug or words: {0}").format(value)
                 if len(instances) > 1:
-                    return value, state._(u"Too much simulations with words: {0}").format(u' '.join(words))
+                    return value, state._(u"Too much legislations with words: {0}").format(u' '.join(words))
                 self = instances[0]
             return self, None
         return id_or_slug_or_words_to_instance
@@ -457,9 +461,9 @@ def setup():
     Account.ensure_index('updated')
     Account.ensure_index('words')
 
-#    Simulation.ensure_index('slug', unique = True)
-    Simulation.ensure_index('updated')
-    Simulation.ensure_index('words')
+#    Legislation.ensure_index('slug', unique = True)
+    Legislation.ensure_index('updated')
+    Legislation.ensure_index('words')
 
     Session.ensure_index('expiration')
     Session.ensure_index('token', unique = True)

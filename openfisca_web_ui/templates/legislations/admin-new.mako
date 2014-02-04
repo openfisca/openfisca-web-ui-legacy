@@ -24,34 +24,45 @@
 
 
 <%!
-from openfisca_web_ui import model, urls
+from openfisca_web_ui import conf, model, urls
 %>
 
 
 <%inherit file="/site.mako"/>
-<%namespace name="view" file="admin-view.mako"/>
+<%namespace name="edit" file="admin-edit.mako"/>
 
 
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
-            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_(u"Simulations")}</a></li>
-            <li><a href="${simulation.get_admin_url(ctx)}">${simulation.get_title(ctx)}</a></li>
-            <li class="active">${_(u'Delete')}</li>
+            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
+            <li class="active">${_(u'New')}</li>
 </%def>
 
 
 <%def name="container_content()" filter="trim">
-        <h2>${_(u'Deletion of {}').format(simulation.get_title(ctx))}</h2>
-        <p class="confirm">${_(u"Are you sure that you want to delete this simulation?")}</p>
-        <form method="post" action="${simulation.get_admin_url(ctx, 'delete')}">
-            <%view:view_fields/>
-            <button class="btn btn-danger" name="submit" type="submit"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</button>
+        <form action="${model.Legislation.get_admin_class_url(ctx, 'new')}" method="post" role="form">
+            <%edit:hidden_fields/>
+            <fieldset>
+                <legend>${_(u"Creation of Legislation")}</legend>
+                <%self:error_alert/>
+                <%edit:form_fields/>
+                <button class="btn btn-primary" name="submit" type="submit"><span class="glyphicon glyphicon-ok"></span> ${_('Create')}</button>
+            </fieldset>
         </form>
 </%def>
 
 
+<%def name="css()" filter="trim">
+        <%edit:css/>
+</%def>
+
+
+<%def name="scripts()" filter="trim">
+        <%edit:scripts/>
+</%def>
+
+
 <%def name="title_content()" filter="trim">
-${_(u'Delete')} - ${simulation.get_title(ctx)} - ${parent.title_content()}
+${_(u'New Legislation')} - ${parent.title_content()}
 </%def>
 

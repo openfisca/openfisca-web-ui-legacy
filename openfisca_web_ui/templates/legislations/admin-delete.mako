@@ -24,45 +24,34 @@
 
 
 <%!
-from openfisca_web_ui import conf, model, urls
+from openfisca_web_ui import model, urls
 %>
 
 
 <%inherit file="/site.mako"/>
-<%namespace name="edit" file="admin-edit.mako"/>
+<%namespace name="view" file="admin-view.mako"/>
 
 
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
-            <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_(u"Simulations")}</a></li>
-            <li class="active">${_(u'New')}</li>
+            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
+            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
+            <li><a href="${legislation.get_admin_url(ctx)}">${legislation.get_title(ctx)}</a></li>
+            <li class="active">${_(u'Delete')}</li>
 </%def>
 
 
 <%def name="container_content()" filter="trim">
-        <form action="${model.Simulation.get_admin_class_url(ctx, 'new')}" method="post" role="form">
-            <%edit:hidden_fields/>
-            <fieldset>
-                <legend>${_(u"Creation of Simulation")}</legend>
-                <%self:error_alert/>
-                <%edit:form_fields/>
-                <button class="btn btn-primary" name="submit" type="submit"><span class="glyphicon glyphicon-ok"></span> ${_('Create')}</button>
-            </fieldset>
+        <h2>${_(u'Deletion of {}').format(legislation.get_title(ctx))}</h2>
+        <p class="confirm">${_(u"Are you sure that you want to delete this legislation?")}</p>
+        <form method="post" action="${legislation.get_admin_url(ctx, 'delete')}">
+            <%view:view_fields/>
+            <button class="btn btn-danger" name="submit" type="submit"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</button>
         </form>
 </%def>
 
 
-<%def name="css()" filter="trim">
-        <%edit:css/>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-        <%edit:scripts/>
-</%def>
-
-
 <%def name="title_content()" filter="trim">
-${_(u'New Simulation')} - ${parent.title_content()}
+${_(u'Delete')} - ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
 

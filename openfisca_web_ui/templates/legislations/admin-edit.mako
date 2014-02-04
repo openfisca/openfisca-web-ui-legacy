@@ -34,17 +34,17 @@ from openfisca_web_ui import conf, model, urls
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
             <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_(u"Simulations")}</a></li>
-            <li><a href="${simulation.get_admin_url(ctx)}">${simulation.get_title(ctx)}</a></li>
+            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
+            <li><a href="${legislation.get_admin_url(ctx)}">${legislation.get_title(ctx)}</a></li>
             <li class="active">${_(u'Edit')}</li>
 </%def>
 
 
 <%def name="container_content()" filter="trim">
-        <form action="${simulation.get_admin_url(ctx, 'edit')}" method="post" role="form">
+        <form action="${legislation.get_admin_url(ctx, 'edit')}" method="post" role="form">
             <%self:hidden_fields/>
             <fieldset>
-                <legend>${_(u'Edition of %s') % simulation.get_title(ctx)}</legend>
+                <legend>${_(u'Edition of %s') % legislation.get_title(ctx)}</legend>
                 <%self:error_alert/>
                 <%self:form_fields/>
                 <button class="btn btn-primary" name="submit" type="submit"><span class="glyphicon glyphicon-ok"></span> ${_('Save')}</button>
@@ -75,6 +75,39 @@ from openfisca_web_ui import conf, model, urls
                     <span class="help-block">${error}</span>
     % endif
                 </div>
+<%
+    error = errors.get('datetime_begin') if errors is not None else None
+%>\
+                <div class="form-group${' has-error' if error else ''}">
+                    <label for="datetime_begin">${_("Begin Date")}</label>
+                    <input class="form-control" id="datetime_begin" name="datetime_begin" type="date" value="${
+                        inputs['datetime_begin'] or ''}">
+    % if error:
+                    <span class="help-block">${error}</span>
+    % endif
+                </div>
+<%
+    error = errors.get('datetime_end') if errors is not None else None
+%>\
+                <div class="form-group${' has-error' if error else ''}">
+                    <label for="datetime_end">${_("End Date")}</label>
+                    <input class="form-control" id="datetime_end" name="datetime_end" type="date" value="${
+                        inputs['datetime_end'] or ''}">
+    % if error:
+                    <span class="help-block">${error}</span>
+    % endif
+                </div>
+<%
+    error = errors.get('json') if errors is not None else None
+%>\
+                <div class="form-group${' has-error' if error else ''}">
+                    <label for="json">${_("Legislation's JSON")}</label>
+                    <textarea class="form-control" id="json" name="json">${
+                        inputs['json'] or ''}</textarea>
+    % if error:
+                    <span class="help-block">${error}</span>
+    % endif
+                </div>
 </%def>
 
 
@@ -83,6 +116,6 @@ from openfisca_web_ui import conf, model, urls
 
 
 <%def name="title_content()" filter="trim">
-${_(u'Edit')} - ${simulation.get_title(ctx)} - ${parent.title_content()}
+${_(u'Edit')} - ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
 

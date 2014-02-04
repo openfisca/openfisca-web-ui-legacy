@@ -29,7 +29,7 @@
 import logging
 
 from .. import auth, contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
-from . import accounts, form, sessions, simulations
+from . import accounts, form, sessions, legislations
 
 
 log = logging.getLogger(__name__)
@@ -80,9 +80,9 @@ def make_router():
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
-        (None, '^/admin/simulations(?=/|$)', simulations.route_admin_class),
+        (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
-        (None, '^/api/1/simulations(?=/|$)', simulations.route_api1_class),
+        (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         ('POST', '^/login/?$', accounts.login),
         ('POST', '^/logout/?$', accounts.logout),
         ]

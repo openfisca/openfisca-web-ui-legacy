@@ -23,10 +23,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""Controllers for simulations"""
+"""Controllers for legislations"""
 
 
 import collections
+import datetime
 import logging
 import re
 
@@ -37,9 +38,16 @@ import webob.multidict
 from .. import contexts, conv, model, paginations, templates, urls, wsgihelpers
 
 
-inputs_to_simulation_data = conv.struct(
+inputs_to_legislation_data = conv.struct(
     dict(
+        author_id = conv.input_to_uuid,
+        datetime_begin = conv.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
+        datetime_end = conv.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
         description = conv.cleanup_text,
+        json = conv.pipe(
+            conv.cleanup_line,
+            conv.not_none,
+            ),
         title = conv.pipe(
             conv.cleanup_line,
             conv.not_none,
@@ -53,43 +61,43 @@ log = logging.getLogger(__name__)
 @wsgihelpers.wsgify
 def admin_delete(req):
     ctx = contexts.Ctx(req)
-    simulation = ctx.node
+    legislation = ctx.node
 
     if not model.is_admin(ctx):
         return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a simulation."),
+            message = ctx._("You can not delete a legislation."),
             title = ctx._('Operation denied'),
             )
 
     if req.method == 'POST':
-        simulation.delete(ctx, safe = True)
-        return wsgihelpers.redirect(ctx, location = model.Simulation.get_admin_class_url(ctx))
-    return templates.render(ctx, '/simulations/admin-delete.mako', simulation = simulation)
+        legislation.delete(ctx, safe = True)
+        return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
+    return templates.render(ctx, '/legislations/admin-delete.mako', legislation = legislation)
 
 
 @wsgihelpers.wsgify
 def admin_edit(req):
     ctx = contexts.Ctx(req)
-    simulation = ctx.node
+    legislation = ctx.node
 
     if not model.is_admin(ctx):
         return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a simulation."),
+            message = ctx._("You can not delete a legislation."),
             title = ctx._('Operation denied'),
             )
 
     if req.method == 'GET':
         errors = None
         inputs = dict(
-            description = simulation.description,
-            title = simulation.title,
+            description = legislation.description,
+            title = legislation.title,
             )
     else:
         assert req.method == 'POST'
-        inputs = extract_simulation_inputs_from_params(ctx, req.POST)
-        data, errors = inputs_to_simulation_data(inputs, state = ctx)
+        inputs = extract_legislation_inputs_from_params(ctx, req.POST)
+        data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
                 conv.input_to_slug,
@@ -98,23 +106,23 @@ def admin_edit(req):
             if error is not None:
                 errors = dict(title = error)
         if errors is None:
-            if model.Simulation.find(
+            if model.Legislation.find(
                     dict(
-                        _id = {'$ne': simulation._id},
+                        _id = {'$ne': legislation._id},
                         slug = data['slug'],
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(email = ctx._('A simulation with the same name already exists.'))
+                errors = dict(email = ctx._('A legislation with the same name already exists.'))
         if errors is None:
-            simulation.set_attributes(**data)
-            simulation.compute_words()
-            simulation.save(ctx, safe = True)
+            legislation.set_attributes(**data)
+            legislation.compute_words()
+            legislation.save(ctx, safe = True)
 
-            # View simulation.
-            return wsgihelpers.redirect(ctx, location = simulation.get_admin_url(ctx))
-    return templates.render(ctx, '/simulations/admin-edit.mako', errors = errors, inputs = inputs,
-        simulation = simulation)
+            # View legislation.
+            return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
+    return templates.render(ctx, '/legislations/admin-edit.mako', errors = errors, inputs = inputs,
+        legislation = legislation)
 
 
 @wsgihelpers.wsgify
@@ -149,7 +157,7 @@ def admin_index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Simulation search error: {}').format(errors))
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
 
     criteria = {}
     if data['term'] is not None:
@@ -157,15 +165,15 @@ def admin_index(req):
             re.compile(u'^{}'.format(re.escape(word)))
             for word in data['term']
             ]}
-    cursor = model.Simulation.find(criteria, as_class = collections.OrderedDict)
+    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
     pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
     if data['sort'] == 'slug':
         cursor.sort([('slug', pymongo.ASCENDING)])
     elif data['sort'] == 'updated':
         cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
-    simulations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
-    return templates.render(ctx, '/simulations/admin-index.mako', data = data, errors = errors,
-        simulations = simulations, inputs = inputs, pager = pager)
+    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+    return templates.render(ctx, '/legislations/admin-index.mako', data = data, errors = errors,
+        legislations = legislations, inputs = inputs, pager = pager)
 
 
 @wsgihelpers.wsgify
@@ -176,18 +184,19 @@ def admin_new(req):
     if user is None:
         return wsgihelpers.unauthorized(ctx,
             explanation = ctx._("Creation unauthorized"),
-            message = ctx._("You can not create a simulation."),
+            message = ctx._("You can not create a legislation."),
             title = ctx._('Operation denied'),
             )
 
-    simulation = model.Simulation()
+    legislation = model.Legislation()
     if req.method == 'GET':
         errors = None
-        inputs = extract_simulation_inputs_from_params(ctx)
+        inputs = extract_legislation_inputs_from_params(ctx)
     else:
         assert req.method == 'POST'
-        inputs = extract_simulation_inputs_from_params(ctx, req.POST)
-        data, errors = inputs_to_simulation_data(inputs, state = ctx)
+        inputs = extract_legislation_inputs_from_params(ctx, req.POST)
+        inputs['author_id'] = user._id
+        data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
                 conv.input_to_slug,
@@ -196,30 +205,30 @@ def admin_new(req):
             if error is not None:
                 errors = dict(title = error)
         if errors is None:
-            if model.Simulation.find(
+            if model.Legislation.find(
                     dict(
                         slug = data['slug'],
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(full_name = ctx._('A simulation with the same name already exists.'))
+                errors = dict(full_name = ctx._('A legislation with the same name already exists.'))
         if errors is None:
-            simulation.set_attributes(**data)
-            simulation.compute_words()
-            simulation.save(ctx, safe = True)
+            legislation.set_attributes(**data)
+            legislation.compute_words()
+            legislation.save(ctx, safe = True)
 
-            # View simulation.
-            return wsgihelpers.redirect(ctx, location = simulation.get_admin_url(ctx))
-    return templates.render(ctx, '/simulations/admin-new.mako', errors = errors, inputs = inputs,
-        simulation = simulation)
+            # View legislation.
+            return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
+    return templates.render(ctx, '/legislations/admin-new.mako', errors = errors, inputs = inputs,
+        legislation = legislation)
 
 
 @wsgihelpers.wsgify
 def admin_view(req):
     ctx = contexts.Ctx(req)
-    simulation = ctx.node
+    legislation = ctx.node
 
-    return templates.render(ctx, '/simulations/admin-view.mako', simulation = simulation)
+    return templates.render(ctx, '/legislations/admin-view.mako', legislation = legislation)
 
 
 @wsgihelpers.wsgify
@@ -238,7 +247,7 @@ def api1_typeahead(req):
             ),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Simulation search error: {}').format(errors))
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
 
     criteria = {}
     if data['q'] is not None:
@@ -246,21 +255,24 @@ def api1_typeahead(req):
             re.compile(u'^{}'.format(re.escape(word)))
             for word in data['q']
             ]}
-    cursor = model.Simulation.get_collection().find(criteria, ['title'])
+    cursor = model.Legislation.get_collection().find(criteria, ['title'])
     return wsgihelpers.respond_json(ctx,
         [
-            simulation_attributes['title']
-            for simulation_attributes in cursor.limit(10)
+            legislation_attributes['title']
+            for legislation_attributes in cursor.limit(10)
             ],
         headers = headers,
         )
 
 
-def extract_simulation_inputs_from_params(ctx, params = None):
+def extract_legislation_inputs_from_params(ctx, params = None):
     if params is None:
         params = webob.multidict.MultiDict()
     return dict(
+        datetime_begin = params.get('datetime_begin'),
+        datetime_end = params.get('datetime_end'),
         description = params.get('description'),
+        json = params.get('json'),
         title = params.get('title'),
         )
 
@@ -296,7 +308,7 @@ def index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Simulation search error: {}').format(errors))
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
 
     criteria = {}
     if data['term'] is not None:
@@ -304,14 +316,14 @@ def index(req):
             re.compile(u'^{}'.format(re.escape(word)))
             for word in data['term']
             ]}
-    cursor = model.Simulation.find(criteria, as_class = collections.OrderedDict)
+    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
     pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
     if data['sort'] == 'slug':
         cursor.sort([('slug', pymongo.ASCENDING)])
     elif data['sort'] == 'updated':
         cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
-    simulations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
-    return templates.render(ctx, '/simulations/index.mako', data = data, errors = errors, simulations = simulations,
+    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+    return templates.render(ctx, '/legislations/index.mako', data = data, errors = errors, legislations = legislations,
         inputs = inputs, pager = pager)
 
 
@@ -319,16 +331,16 @@ def route_admin(environ, start_response):
     req = webob.Request(environ)
     ctx = contexts.Ctx(req)
 
-    simulation, error = conv.pipe(
+    legislation, error = conv.pipe(
         conv.input_to_slug,
         conv.not_none,
-        model.Simulation.id_or_words_to_instance,
+        model.Legislation.id_or_words_to_instance,
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Simulation Error: {}').format(error))(
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation Error: {}').format(error))(
             environ, start_response)
 
-    ctx.node = simulation
+    ctx.node = legislation
 
     router = urls.make_router(
         ('GET', '^/?$', admin_view),

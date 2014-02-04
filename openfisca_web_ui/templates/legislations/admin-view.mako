@@ -36,33 +36,33 @@ from openfisca_web_ui import model, texthelpers, urls
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
             <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_(u"Simulations")}</a></li>
-            <li class="active">${simulation.get_title(ctx)}</li>
+            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
+            <li class="active">${legislation.get_title(ctx)}</li>
 </%def>
 
 
 <%def name="container_content()" filter="trim">
-        <h2>${simulation.get_title(ctx)}</h2>
+        <h2>${legislation.get_title(ctx)}</h2>
         <%self:view_fields/>
         <div class="btn-toolbar">
-            <a class="btn btn-default" href="${simulation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
-            <a class="btn btn-danger"  href="${simulation.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
+            <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+            <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
         </div>
 </%def>
 
 
 <%def name="title_content()" filter="trim">
-${simulation.get_title(ctx)} - ${parent.title_content()}
+${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
 
 
 <%def name="view_fields()" filter="trim">
         <div class="row">
             <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Title"))}</b></div>
-            <div class="col-sm-10">${simulation.title}</div>
+            <div class="col-sm-10">${legislation.title}</div>
         </div>
 <%
-    value = simulation.description
+    value = legislation.description
 %>\
     % if value is not None:
         <div class="row">
@@ -84,7 +84,7 @@ ${simulation.get_title(ctx)} - ${parent.title_content()}
         </div>
     % endif
 <%
-    value = simulation.updated
+    value = legislation.updated
 %>\
     % if value is not None:
         <div class="row">
@@ -93,7 +93,7 @@ ${simulation.get_title(ctx)} - ${parent.title_content()}
         </div>
     % endif
 <%
-    value = simulation.published
+    value = legislation.published
 %>\
     % if value is not None:
         <div class="row">

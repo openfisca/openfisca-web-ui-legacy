@@ -227,7 +227,7 @@ $(function () {
         <div class="collapse navbar-collapse navbar-topbar-collapse">
             <ul class="nav navbar-nav">
                 <%self:topbar_dropdown_admin/>
-                <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_('Simulations')}</a></li>
+                <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
             </ul>
             <%self:topbar_user/>
         </div>
@@ -248,7 +248,7 @@ $(function () {
                         <li><a href="${model.Account.get_admin_class_url(ctx)}">${_('Accounts')}</a></li>
                         <li><a href="${model.Session.get_admin_class_url(ctx)}">${_('Sessions')}</a></li>
         % endif
-                        <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_('Simulations')}</a></li>
+                        <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
                     </ul>
                 </li>
     % endif
