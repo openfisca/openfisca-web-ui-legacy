@@ -26,25 +26,10 @@
 """Root controllers"""
 
 
-import datetime
 import logging
 
-from formencode import variabledecode
-from korma.group import Group
-
-from .. import (
-    contexts,
-    conf,
-    conv,
-    matplotlib_helpers,
-    model,
-    pages,
-    templates,
-    urls,
-    uuidhelpers,
-    wsgihelpers,
-    )
-from . import accounts, sessions, simulations
+from .. import auth, contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
+from . import accounts, form, sessions, simulations
 
 
 log = logging.getLogger(__name__)
@@ -52,145 +37,9 @@ router = None
 
 
 @wsgihelpers.wsgify
-def all_questions(req):
-    ctx = contexts.Ctx(req)
-    ensure_session(ctx)
-    session = ctx.session
-    if model.column_by_name is None:
-        model.init_api_columns_and_prestations()
-
-    inputs = {
-        'entity': req.params.get('entity') or None,
-        'idx': req.params.get('idx') or None,
-        }
-    data, errors = conv.struct({
-        'idx': conv.cleanup_line,
-        'entity': conv.test_in(['fam', 'foy', 'ind', 'men']),
-        })(inputs, state = ctx)
-    if errors is not None:
-        return wsgihelpers.redirect(ctx, location = '/famille')
-
-    questions_list = model.questions_by_entity.get(data['entity'], []) if model.questions_by_entity is not None else []
-    page_form = Group(
-        children_attributes = {
-            '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-            },
-        outer_html_template = u'''
-{{self.inner_html}}
-<input name="entity" type="hidden" value="{data[entity]}">
-<input name="idx" type="hidden" value="{data[idx]}">
-'''.format(data=data),
-        name = u'all_questions',
-        questions = questions_list,
-        )
-    api_data_key_by_entity = {
-        'fam': 'familles',
-        'foy': 'foyers_fiscaux',
-        'ind': 'individus',
-        'men': 'menages',
-        }
-    if req.method == 'GET':
-        errors = None
-        if session.user is not None and session.user.api_data is not None:
-            page_form.fill({'all_questions': session.user.api_data.get(api_data_key_by_entity[data['entity']], {}).get(
-                data['idx'], {})})
-    else:
-        params = req.params
-        korma_inputs = variabledecode.variable_decode(params)
-        korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
-        if errors is None:
-            if data['entity'] in api_data_key_by_entity:
-                session.user.api_data.setdefault(
-                    api_data_key_by_entity[data['entity']],
-                    {},
-                    ).setdefault(data['idx'], {}).update({
-                        key: value
-                        for key, value in korma_data.get('all_questions').iteritems()
-                        if key not in (u'entity', u'idx')
-                    })
-            session.user.save(ctx, safe = True)
-            return wsgihelpers.redirect(ctx, location = '/famille')
-    return templates.render(
-        ctx,
-        '/all-questions.mako',
-        errors = errors or {},
-        page_form = page_form,
-        )
-
-
-def ensure_session(ctx):
-    session = ctx.session
-    if session is None:
-        session = ctx.session = model.Session()
-        session.token = uuidhelpers.generate_uuid()
-    if session.user is None:
-        user = model.Account()
-        user._id = uuidhelpers.generate_uuid()
-        user.api_key = uuidhelpers.generate_uuid()
-        user.compute_words()
-        session.user_id = user._id
-        user.save(ctx, safe = True)
-        session.user = user
-    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-    session.save(ctx, safe = True)
-    if ctx.req.cookies.get(conf['cookie']) != session.token:
-        ctx.req.response.set_cookie(conf['cookie'], session.token, httponly = True)  # , secure = req.scheme == 'https')
-
-
-@wsgihelpers.wsgify
-def form(req):
-    ctx = contexts.Ctx(req)
-    ensure_session(ctx)
-    session = ctx.session
-    page_data = req.urlvars['page_data']
-    page_form = pages.page_form(ctx, page_data['name'])
-    if req.method == 'GET':
-        errors = None
-        if session.user is not None and session.user.api_data is not None:
-            korma_data = conv.check(
-                conv.pipe(conv.complete_api_data, conv.api_data_to_korma_data)(session.user.api_data, state = ctx)
-                )
-            korma_values = conv.check(page_form.root_data_to_str(korma_data))
-            page_form.fill(korma_values or {})
-    else:
-        params = req.params
-        korma_inputs = variabledecode.variable_decode(params)
-        korma_data, errors = page_form.root_input_to_data(korma_inputs, state = ctx)
-        page_form.fill(korma_data or {})
-        if errors is None:
-            korma_personnes = conv.check(page_data['korma_data_to_personnes'](korma_data, state = ctx))
-            korma_entities = conv.check(page_data['korma_data_to_page_entities'](korma_data, state = ctx))
-            api_data = conv.check(conv.korma_to_api(
-                {
-                    page_data['entities']: korma_entities,
-                    'personnes': korma_personnes,
-                    },
-                state = ctx,
-                ))
-            session.user.api_data = api_data
-            session.user.save(ctx, safe = True)
-            return wsgihelpers.redirect(ctx, location = '')
-    if session.user.api_data is None:
-        session.user.api_data = {}
-    session.user.api_data['validate'] = True
-    simulation_output, simulation_errors = conv.pipe(
-        conv.complete_api_data,
-        conv.user_data_to_api_data,
-        conv.api_data_to_simulation_output,
-        )(session.user.api_data, state = ctx)
-    return templates.render(
-        ctx,
-        '/form.mako',
-        errors = errors or {},
-        simulation_errors = simulation_errors or {},
-        page_form = page_form,
-        )
-
-
-@wsgihelpers.wsgify
 def image(req):
     ctx = contexts.Ctx(req)
-    ensure_session(ctx)
+    auth.ensure_session(ctx)
     session = ctx.session
     if session.user.api_data is None:
         session.user.api_data = {}
@@ -227,7 +76,7 @@ def make_router():
     global router
     routings = [
         ('GET', '^/?$', index),
-        (('GET', 'POST'), '^/all-questions?$', all_questions),
+        (('GET', 'POST'), '^/all-questions?$', form.all_questions),
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
@@ -239,7 +88,7 @@ def make_router():
         ]
     for page_data in pages.pages_data:
         routings.append(
-            (('GET', 'POST'), '^/{slug}/?$'.format(slug=page_data['slug']), form, {'page_data': page_data})
+            (('GET', 'POST'), '^/{slug}/?$'.format(slug=page_data['slug']), form.form, {'page_data': page_data})
             )
     router = urls.make_router(*routings)
     return router
