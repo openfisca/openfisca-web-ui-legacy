@@ -403,12 +403,17 @@ def korma_to_api(korma_data, state = None):
     if korma_data.get('familles'):
         for korma_famille in korma_data['familles']:
             korma_famille_id = korma_famille['id'] or new_famille_id
+            personne_id = korma_famille['personne']['prenom'] \
+                if korma_famille['personne']['prenom'] != 'new' else new_person_id
+            for famille in api_data.get('familles', {}).itervalues():
+                for role in ['parents', 'enfants']:
+                    if personne_id in famille.get(role, []):
+                        famille[role].remove(personne_id)
+                        break
             personnes = set(
                 api_data.setdefault('familles', {}).get(korma_famille_id, {}).get(korma_famille['role'], [])
                 )
-            personnes.add(
-                korma_famille['personne']['prenom'] if korma_famille['personne']['prenom'] != 'new' else new_person_id
-                )
+            personnes.add(personne_id)
             api_data.setdefault('familles', {}).setdefault(korma_famille_id, {})[korma_famille['role']] = list(
                 personnes
                 )
@@ -416,14 +421,18 @@ def korma_to_api(korma_data, state = None):
     if korma_data.get('declaration_impots'):
         for korma_foyer_fiscal in korma_data['declaration_impots']:
             korma_foyer_fiscal_id = korma_foyer_fiscal['id'] or new_foyer_fiscal_id
+            personne_id = korma_foyer_fiscal['personne']['prenom'] \
+                if korma_foyer_fiscal['personne']['prenom'] != 'new' else new_person_id
+            for declaration_impot in api_data.get('foyers_fiscaux', {}).itervalues():
+                for role in ['declarants', 'personnes_a_charge']:
+                    if personne_id in declaration_impot.get(role, []):
+                        declaration_impot[role].remove(personne_id)
+                        break
             personnes = set(
                 api_data.setdefault('foyers_fiscaux', {}).get(korma_foyer_fiscal_id, {}).get(
                     korma_foyer_fiscal['role'], [])
                 )
-            personnes.add(
-                korma_foyer_fiscal['personne']['prenom']
-                if korma_foyer_fiscal['personne']['prenom'] != 'new' else new_person_id
-                )
+            personnes.add(personne_id)
             api_data.setdefault('foyers_fiscaux', {}).setdefault(
                 korma_foyer_fiscal_id,
                 {},
@@ -440,6 +449,15 @@ def korma_to_api(korma_data, state = None):
                 logement_principal_id = personne.get('logement_principal_id') or new_logement_principal_id
                 personne_id = new_person_id \
                     if personne['prenom_condition']['id'] == 'new' else personne['prenom_condition']['id']
+                for menage in api_data.get('menages', {}).itervalues():
+                    for role in ['conjoint', 'personne_de_reference']:
+                        if personne_id == menage.get(role):
+                            del menage[role]
+                            break
+                    for role in ['enfants', 'autres']:
+                        if personne_id in menage.get(role, []):
+                            menage[role].remove(personne_id)
+                            break
                 if personne['role'] in [u'conjoint', u'personne_de_reference']:
                     menage[personne['role']] = personne_id
                 if personne['role'] in ['enfants', 'autres']:
