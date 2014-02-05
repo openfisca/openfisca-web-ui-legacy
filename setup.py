@@ -71,6 +71,7 @@ setup(
         'matplotlib >= 1.3.1',
         'numpy >= 1.7.1',
         'pymongo >= 2.2',
+        'requests',
         'WebError >= 0.10',
         'WebOb >= 1.1',
         ],
