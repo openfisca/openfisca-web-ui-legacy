@@ -24,7 +24,7 @@
 
 
 <%!
-from openfisca_web_ui import model, texthelpers, urls
+from openfisca_web_ui import model, urls
 %>
 
 
@@ -98,7 +98,7 @@ ${account.get_title(ctx)} - ${parent.title_content()}
                 </ul>
                 <div class="tab-content">
                     <div class="active tab-pane" id="about-view">
-                        ${texthelpers.clean_html(value) | n}
+                        ${value | n}
                     </div>
                     <div class="tab-pane" id="about-source">
                         <pre class="break-word">${value}</pre>

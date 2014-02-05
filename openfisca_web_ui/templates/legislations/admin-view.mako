@@ -26,7 +26,7 @@
 <%!
 import collections
 
-from openfisca_web_ui import model, texthelpers, urls
+from openfisca_web_ui import model, urls
 %>
 
 
@@ -62,7 +62,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             <div class="col-sm-10">${legislation.title}</div>
         </div>
 <%
-    value = legislation.description
+    value = legislation.json
 %>\
     % if value is not None:
         <div class="row">
@@ -74,10 +74,10 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                 </ul>
                 <div class="tab-content">
                     <div class="active tab-pane" id="description-view">
-                        ${texthelpers.clean_html(value) | n}
+                        ${legislation.description}
                     </div>
                     <div class="tab-pane" id="description-source">
-                        <pre class="break-word">${value}</pre>
+                        <pre class="break-word">${value | n, js, h}</pre>
                     </div>
                 </div>
             </div>

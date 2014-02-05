@@ -24,7 +24,7 @@
 
 
 <%!
-from openfisca_web_ui import model, texthelpers, urls
+from openfisca_web_ui import model, urls
 %>
 
 
@@ -78,10 +78,10 @@ from openfisca_web_ui import model, texthelpers, urls
                     <td>
                         <h4><a href="${legislation.get_admin_url(ctx)}">${legislation.title}</a></h4>
 <%
-            description_text = texthelpers.textify_html(legislation.description)
+            description_text = legislation.description
 %>\
             % if description_text:
-                        ${texthelpers.truncate(description_text, length = 180, whole_word = True)}
+                        ${description_text}
             % endif
                     </td>
                     <td>${legislation.updated.split('T')[0]}</td>

@@ -36,7 +36,7 @@ from korma.checkbox import Checkbox
 from korma.choice import Radio, Select
 from korma.text import Number, Text
 
-from . import conf, conv, objects, texthelpers, urls, wsgihelpers
+from . import conf, conv, objects, urls, wsgihelpers
 
 
 column_by_name = None
@@ -169,7 +169,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
             fragment
             for fragment in (
                 self._id,
-                texthelpers.textify_html(self.description),
+                self.description,
                 self.title,
                 )
             if fragment is not None

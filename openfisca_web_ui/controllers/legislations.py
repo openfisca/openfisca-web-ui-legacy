@@ -46,6 +46,7 @@ inputs_to_legislation_data = conv.struct(
         description = conv.cleanup_text,
         json = conv.pipe(
             conv.cleanup_line,
+            conv.make_input_to_json(),
             conv.not_none,
             ),
         title = conv.pipe(
@@ -91,9 +92,12 @@ def admin_edit(req):
     if req.method == 'GET':
         errors = None
         inputs = dict(
+            datetime_begin = datetime.datetime.strftime(legislation.datetime_begin, u'%d-%m-%Y'),
+            datetime_end = datetime.datetime.strftime(legislation.datetime_end, u'%d-%m-%Y'),
             description = legislation.description,
+            json = legislation.json,
             title = legislation.title,
-            )
+        )
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)

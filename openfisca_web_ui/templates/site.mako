@@ -75,7 +75,7 @@ rel="stylesheet">
 
 <%def name="error_alert()" filter="trim">
     % if errors:
-                <div class="alert alert-block alert-error">
+                <div class="alert alert-danger">
                     <h4 class="alert-heading">${_('Error!')}</h4>
         % if '' in errors:
 <%

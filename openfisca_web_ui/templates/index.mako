@@ -28,7 +28,7 @@ import collections
 
 import pymongo
 
-from openfisca_web_ui import model, texthelpers, urls
+from openfisca_web_ui import model, urls
 %>
 
 

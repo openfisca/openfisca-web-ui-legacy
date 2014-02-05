@@ -24,6 +24,8 @@
 
 
 <%!
+import datetime
+
 from openfisca_web_ui import conf, model, urls
 %>
 
@@ -103,9 +105,9 @@ from openfisca_web_ui import conf, model, urls
                 <div class="form-group${' has-error' if error else ''}">
                     <label for="json">${_("Legislation's JSON")}</label>
                     <textarea class="form-control" id="json" name="json">${
-                        inputs['json'] or ''}</textarea>
+                        inputs['json'] or '' | n, js, h}</textarea>
     % if error:
-                    <span class="help-block">${error}</span>
+                    <pre class="help-block alert-danger">${error | n, js, h}</pre>
     % endif
                 </div>
 </%def>
