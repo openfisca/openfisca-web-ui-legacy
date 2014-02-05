@@ -43,7 +43,8 @@ def image(req):
     session = ctx.session
     if session.user.api_data is None:
         session.user.api_data = {}
-    simulation_output, simulation_errors = conv.simulation.user_api_data_to_simulation_output(session.user.api_data, state = ctx)
+    simulation_output, simulation_errors = conv.simulation.user_api_data_to_simulation_output(
+        session.user.api_data, state = ctx)
     if simulation_errors is None:
         params = {
             'name': req.urlvars.get('name'),

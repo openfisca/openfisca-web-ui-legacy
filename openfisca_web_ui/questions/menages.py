@@ -34,7 +34,7 @@ from . import html, individus
 from .base import Hidden, Repeat
 
 
-def make_personne_in_menage_group(build_prenom_select_choices):
+def make_personne_in_menage_group(prenom_select_choices):
     return Group(
         name = u'personne_in_menage',
         outer_html_template = u'''
@@ -57,12 +57,12 @@ def make_personne_in_menage_group(build_prenom_select_choices):
                 name = u'role',
                 ),
             individus.make_prenoms_condition(name = u'prenom_condition',
-                                             build_prenom_select_choices = build_prenom_select_choices),
+                                             prenom_select_choices = prenom_select_choices),
             ],
         )
 
 
-make_menages_repeat = lambda build_prenom_select_choices: Repeat(
+make_menages_repeat = lambda prenom_select_choices: Repeat(
     children_attributes = {
         '_outer_html_template': u'''
 <div class="repeated-group">
@@ -103,7 +103,7 @@ make_menages_repeat = lambda build_prenom_select_choices: Repeat(
             Repeat(
                 name = u'personnes',
                 template_question = make_personne_in_menage_group(
-                    build_prenom_select_choices = build_prenom_select_choices),
+                    prenom_select_choices = prenom_select_choices),
                 ),
             ]
         ),

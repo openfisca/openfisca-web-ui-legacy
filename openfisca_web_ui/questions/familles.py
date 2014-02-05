@@ -33,7 +33,7 @@ from . import individus
 from .base import Hidden, Repeat
 
 
-def make_personne_in_famille_group(build_prenom_select_choices):
+def make_personne_in_famille_group(prenom_select_choices):
     return Group(
         name = u'personne_in_famille',
         outer_html_template = u'''
@@ -51,12 +51,12 @@ def make_personne_in_famille_group(build_prenom_select_choices):
                 name = u'role',
                 ),
             individus.make_prenoms_condition(name = u'prenom_condition',
-                                             build_prenom_select_choices = build_prenom_select_choices),
+                                             prenom_select_choices = prenom_select_choices),
             ],
         )
 
 
-make_familles_repeat = lambda build_prenom_select_choices: Repeat(
+make_familles_repeat = lambda prenom_select_choices: Repeat(
     add_button_label = u'Ajouter une famille',
     name = u'familles',
     template_question = Repeat(
@@ -67,6 +67,6 @@ make_familles_repeat = lambda build_prenom_select_choices: Repeat(
   {self.inner_html}
   <a class="btn btn-primary btn-all-questions" href="/TODO/all-questions?entity=familles">Plus de détails</a>
 </div>''',
-        template_question = make_personne_in_famille_group(build_prenom_select_choices = build_prenom_select_choices),
+        template_question = make_personne_in_famille_group(prenom_select_choices = prenom_select_choices),
         ),
     )

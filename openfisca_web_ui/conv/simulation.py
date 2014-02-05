@@ -34,7 +34,7 @@ from biryani1.baseconv import function, pipe
 from biryani1.states import default_state
 import requests
 
-from . import api, base
+from . import api
 
 
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj

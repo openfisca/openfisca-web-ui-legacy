@@ -37,16 +37,16 @@ from .base import FrenchDate
 
 
 def build_prenom_select_choices(ctx):
-    build_prenom_select_choices = []
+    prenom_select_choices = []
     if ctx.session.user is not None:
         api_data = ctx.session.user.api_data
         if api_data is not None:
             api_personnes = api_data.get('individus')
             if api_personnes is not None:
                 for api_personne_id, api_personne in api_personnes.iteritems():
-                    build_prenom_select_choices.append((api_personne_id, api_personne.get('prenom')))
-    build_prenom_select_choices.append(('new', u'Nouvelle personne'))
-    return build_prenom_select_choices
+                    prenom_select_choices.append((api_personne_id, api_personne.get('prenom')))
+    prenom_select_choices.append(('new', u'Nouvelle personne'))
+    return prenom_select_choices
 
 
 make_personne_group = lambda personne_id, prenom: Group(
@@ -117,15 +117,15 @@ name="{self.full_name}" type="button">{self.label}</button>'''
     )
 
 
-make_prenoms_condition = lambda name, build_prenom_select_choices: Condition(
+make_prenoms_condition = lambda name, prenom_select_choices: Condition(
     base_question = Select(
         control_attributes = {'class': 'form-control'},
-        choices = build_prenom_select_choices,
+        choices = prenom_select_choices,
         name = 'id',
         ),
     conditional_questions = {
         personne_id: make_personne_group(personne_id, prenom)
-        for personne_id, prenom in build_prenom_select_choices
+        for personne_id, prenom in prenom_select_choices
         },
     name = name,
     )

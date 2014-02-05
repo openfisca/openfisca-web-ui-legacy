@@ -33,7 +33,7 @@ from . import individus
 from .base import Hidden, Repeat
 
 
-def make_personne_in_foyer_fiscal_group(build_prenom_select_choices):
+def make_personne_in_foyer_fiscal_group(prenom_select_choices):
     return Group(
         name = u'personne_in_foyer_fiscal',
         outer_html_template = u'''
@@ -55,12 +55,12 @@ def make_personne_in_foyer_fiscal_group(build_prenom_select_choices):
                 name = u'role',
                 ),
             individus.make_prenoms_condition(name = u'prenom_condition',
-                                             build_prenom_select_choices = build_prenom_select_choices),
+                                             prenom_select_choices = prenom_select_choices),
             ],
         )
 
 
-make_foyers_fiscaux_repeat = lambda build_prenom_select_choices: Repeat(
+make_foyers_fiscaux_repeat = lambda prenom_select_choices: Repeat(
     name = u'declaration_impots',
     template_question = Repeat(
         name = u'personnes',
@@ -70,6 +70,6 @@ make_foyers_fiscaux_repeat = lambda build_prenom_select_choices: Repeat(
   <a class="btn btn-primary btn-all-questions" href="/TODO/all-questions?entity=foyers_fiscaux">Plus de détails</a>
 </div>''',
         template_question = make_personne_in_foyer_fiscal_group(
-            build_prenom_select_choices = build_prenom_select_choices),
+            prenom_select_choices = prenom_select_choices),
         ),
     )
