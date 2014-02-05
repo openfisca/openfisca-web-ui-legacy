@@ -67,22 +67,3 @@ from openfisca_web_ui import pages
         </div>
     </div>
 </%def>
-
-
-<%def name="scripts()" filter="trim">
-    <%parent:scripts/>
-    <script>
-requirejs.config({
-  paths: {
-    domReady: '/bower/requirejs-domready/domReady',
-    modernizr: '/bower/modernizr/modernizr',
-    myClass: '/bower/my-class/my.class'
-  }
-});
-define(
-  'config',
-${page_form.full_javascript_config | n, js}
-);
-require(['/js/main.js']);
-    </script>
-</%def>

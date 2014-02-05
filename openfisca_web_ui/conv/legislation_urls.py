@@ -26,28 +26,7 @@
 """Conversion functions related to legislation URLs and year"""
 
 
-from itertools import chain
-
-from biryani1.baseconv import cleanup_line, function, noop, pipe, rename_item, struct, test_in, uniform_sequence
+from biryani1.baseconv import function
 
 
-korma_data_to_api_data = pipe(
-    function(lambda item: item.get('legislation_urls')),
-    )
-
-
-#famille_korma_data_to_personnes = pipe(
-#    function(lambda item: item.get('familles')),
-#    uniform_sequence(
-#        pipe(
-#            function(lambda item: item.get('personnes')),
-#            uniform_sequence(
-#                pipe(
-#                    function(lambda item: item.get('personne_in_famille', {}).get('prenom_condition')),
-#                    rename_item('prenom', 'id'),
-#                    ),
-#                ),
-#            ),
-#        ),
-#    function(lambda lists: list(chain.from_iterable(lists))),
-#    )
+korma_data_to_page_api_data = function(lambda item: item.get('legislation_urls'))

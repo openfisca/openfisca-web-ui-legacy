@@ -26,50 +26,66 @@
 """Korma questions related to foyers fiscaux"""
 
 
+from korma.base import Button
 from korma.choice import Select
 from korma.group import Group
 
-from . import individus
+from .. import uuidhelpers
+from ..conv import base
 from .base import Hidden, Repeat
 
 
-def make_personne_in_foyer_fiscal_group(prenom_select_choices):
-    return Group(
-        name = u'personne_in_foyer_fiscal',
-        outer_html_template = u'''
-{self[declaration_impot_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[prenom_condition].html}
-</div>
-''',
-        questions = [
-            Hidden(name = 'declaration_impot_id'),
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = (
-                    (u'declarants', u'Déclarant'),
-                    (u'declarants', u'Conjoint'),
-                    (u'personnes_a_charge', u'Personne à charge'),
-                    ),
-                name = u'role',
-                ),
-            individus.make_prenoms_condition(name = u'prenom_condition',
-                                             prenom_select_choices = prenom_select_choices),
-            ],
-        )
+def default_value(familles):
+    return {
+        uuidhelpers.generate_uuid(): base.without_none_values({
+            'declarants': famille.get('parents'),
+            'personnes_a_charge': famille.get('enfants'),
+            })
+        for famille_id, famille in familles.iteritems()
+        }
 
 
 make_foyers_fiscaux_repeat = lambda prenom_select_choices: Repeat(
-    name = u'declaration_impots',
+    name = u'foyers_fiscaux',
     template_question = Repeat(
-        name = u'personnes',
+        name = u'personnes_in_foyer_fiscal',
         outer_html_template = u'''
 <div class="repeated-group">
   {self.inner_html}
   <a class="btn btn-primary btn-all-questions" href="/TODO/all-questions?entity=foyers_fiscaux">Plus de détails</a>
 </div>''',
-        template_question = make_personne_in_foyer_fiscal_group(
-            prenom_select_choices = prenom_select_choices),
+        template_question = Group(
+            name = u'personne_in_foyer_fiscal',
+            outer_html_template = u'''
+{self[foyer_fiscal_id].html}
+<div class="form-inline personne-row">
+  {self[role].html}
+  {self[id].html}
+  {self[edit].html}
+</div>''',
+            questions = [
+                Hidden(name = 'foyer_fiscal_id'),
+                Select(
+                    control_attributes = {'class': 'form-control'},
+                    choices = (
+                        (u'declarants', u'Déclarant'),
+                        (u'declarants', u'Conjoint'),
+                        (u'personnes_a_charge', u'Personne à charge'),
+                        ),
+                    name = u'role',
+                    ),
+                Select(
+                    control_attributes = {'class': 'form-control'},
+                    choices = prenom_select_choices,
+                    name = 'id',
+                    ),
+                Button(
+                    label = u'Éditer',
+                    name = u'edit',
+                    outer_html_template = u'<button class="btn btn-primary" data-toggle="modal" type="button">\
+{self.label}</button>',
+                    ),
+                ],
+            ),
         ),
     )

@@ -35,5 +35,5 @@ bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html
 
 
 horizontal_bootstrap_control_inner_html_template = u'''
-<label class="control-label col-sm-2" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">{self.control_html}</div>'''
+<label class="control-label col-sm-4" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-8">{self.control_html}</div>'''

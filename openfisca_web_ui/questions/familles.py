@@ -29,44 +29,86 @@
 from korma.choice import Select
 from korma.group import Group
 
-from . import individus
+from .. import uuidhelpers
 from .base import Hidden, Repeat
 
 
-def make_personne_in_famille_group(prenom_select_choices):
-    return Group(
-        name = u'personne_in_famille',
-        outer_html_template = u'''
+def default_value(individu_ids):
+    famille = {'parents': individu_ids[:2]}
+    if len(individu_ids) > 2:
+        famille['enfants'] = individu_ids[2:]
+    return {uuidhelpers.generate_uuid(): famille}
+
+
+def make_familles_repeat(prenom_select_choices):
+    from .. import model, questions
+    return Repeat(
+        add_button_label = u'Ajouter une famille',
+        name = u'familles',
+        template_question = Group(
+            name = u'individus_and_categories',
+            outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
+            questions = [
+                Repeat(
+                    add_button_label = u'Ajouter un membre',
+                    name = u'individus',
+                    template_question = Group(
+                        name = u'individu',
+                        outer_html_template = u'''
+<h3>Famille {self.parent_data[individus][index]}</h3>
 {self[famille_id].html}
 <div class="form-inline personne-row">
-  {self[role].html}
-  {self[prenom_condition].html}
+  <a href="#" type="button" data-toggle="collapse" data-target="#individu"><span class="glyphicon
+glyphicon-chevron-down"></span></a>
+  {self[role].html} <span class="prenom">PRÉNOM</span>
 </div>
-''',
-        questions = [
-            Hidden(name = 'famille_id'),
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
-                name = u'role',
-                ),
-            individus.make_prenoms_condition(name = u'prenom_condition',
-                                             prenom_select_choices = prenom_select_choices),
-            ],
-        )
-
-
-make_familles_repeat = lambda prenom_select_choices: Repeat(
-    add_button_label = u'Ajouter une famille',
-    name = u'familles',
-    template_question = Repeat(
-        add_button_label = u'Ajouter un membre',
-        name = u'personnes',
-        outer_html_template = u'''
-<div class="repeated-group">
-  {self.inner_html}
-  <a class="btn btn-primary btn-all-questions" href="/TODO/all-questions?entity=familles">Plus de détails</a>
+<div id="individu" class="collapse in">
+  <div class="form-horizontal">
+    {self[categories].html}
+  </div>
 </div>''',
-        template_question = make_personne_in_famille_group(prenom_select_choices = prenom_select_choices),
-        ),
-    )
+                        questions = [
+                            Hidden(name = 'famille_id'),
+                            Select(
+                                control_attributes = {'class': 'form-control'},
+                                choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
+                                name = u'role',
+                                ),
+                            Group(
+                                name = u'categories',
+                                questions = [
+                                    Group(
+                                        children_attributes = {
+                                            '_control_attributes': {'class': 'form-control'},
+                                            '_inner_html_template': questions.html.
+                                            horizontal_bootstrap_control_inner_html_template,
+                                            '_outer_html_template': questions.html.bootstrap_group_outer_html_template,
+                                            },
+                                        name = u'main',
+                                        questions = questions.individus.group_questions,
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ),
+                Group(
+                    name = u'categories',
+                    outer_html_template = u'''
+<fieldset>
+  <legend>Plus de précisions sur la famille</legend>
+  <div class="form-horizontal">{self.inner_html}</div>
+</fieldset>''',
+                    questions = [
+                        Group(
+                            children_attributes = {
+                                '_outer_html_template': questions.html.bootstrap_group_outer_html_template,
+                                },
+                            name = u'main',
+                            questions = model.entity_questions(entity=u'familles'),
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        )

@@ -26,12 +26,25 @@
 """Korma questions adapted to MongoDB"""
 
 
+from biryani1.baseconv import cleanup_line, pipe
 from korma.base import Input
+from korma.checkbox import Checkbox as KormaCheckbox
 from korma.date import Date
 from korma import helpers
 from korma.repeat import Repeat as KormaRepeat
 
-from .. import conv
+from ..conv import base
+
+
+Checkbox = lambda *args, **kwargs: \
+    KormaCheckbox(
+        inner_html_template = u'''
+<div class="col-sm-offset-4 col-sm-8">
+  <div class="checkbox">
+    <label>{self.control_html} {self.label}</label>
+  </div>
+</div>''',
+        *args, **kwargs)
 
 
 class Hidden(Input):
@@ -46,17 +59,17 @@ class Hidden(Input):
 
     @property
     def default_input_to_data(self):
-        return conv.cleanup_line
+        return cleanup_line
 
 
 class MongoDate(Date):
     @property
     def data_to_str(self):
-        return conv.pipe(conv.datetime_to_date, super(MongoDate, self).data_to_str)
+        return pipe(base.datetime_to_date, super(MongoDate, self).data_to_str)
 
     @property
     def default_input_to_data(self):
-        return conv.pipe(super(MongoDate, self).default_input_to_data, conv.date_to_datetime)
+        return pipe(super(MongoDate, self).default_input_to_data, base.date_to_datetime)
 
 
 FrenchDate = lambda *args, **kwargs: MongoDate(format=u'%d/%m/%Y', placeholder=u'dd/mm/yyyy', *args, **kwargs)

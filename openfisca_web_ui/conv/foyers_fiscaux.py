@@ -28,47 +28,21 @@
 
 from itertools import chain
 
-from biryani1.baseconv import cleanup_line, function, noop, pipe, rename_item, struct, test_in, uniform_sequence
+from biryani1.baseconv import function, pipe, rename_item, uniform_sequence
 
 
-korma_data_to_api_data = pipe(
-    function(lambda item: item.get('declaration_impots')),
+korma_data_to_page_api_data = pipe(
+    function(lambda item: item.get('foyers_fiscaux')),
     uniform_sequence(
         pipe(
-            function(lambda item: item.get('personnes')),
+            function(lambda item: item.get('personnes_in_foyer_fiscal')),
             uniform_sequence(
                 pipe(
-                    function(lambda item: item.get('personne_in_declaration_impots')),
-                    struct(
-                        {
-                            'declaration_impot_id': cleanup_line,
-                            'role': test_in([u'declarants', u'personnes_a_charge']),
-                            'prenom_condition': noop,
-                            },
-                        default = noop,
-                        ),
-                    rename_item('prenom_condition', 'personne'),
-                    rename_item('declaration_impot_id', 'id'),
+                    function(lambda item: item.get('personne_in_foyer_fiscal')),
+                    rename_item('foyer_fiscal_id', 'id'),
                     ),
                 ),
             ),
         ),
     function(lambda lists: list(chain.from_iterable(lists))),
     )
-
-
-#declaration_impot_korma_data_to_personnes = pipe(
-#    function(lambda item: item.get('declaration_impots')),
-#    uniform_sequence(
-#        pipe(
-#            function(lambda item: item.get('personnes')),
-#            uniform_sequence(
-#                pipe(
-#                    function(lambda item: item.get('personne_in_declaration_impots', {}).get('prenom_condition')),
-#                    rename_item('prenom', 'id'),
-#                    ),
-#                ),
-#            ),
-#        ),
-#    function(lambda lists: list(chain.from_iterable(lists))),
-#    )

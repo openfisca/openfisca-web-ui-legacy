@@ -26,38 +26,73 @@
 """Korma questions related to individus"""
 
 
-from korma.base import Button
+import datetime
+
 from korma.choice import Select
-from korma.condition import Condition
 from korma.group import Group
 from korma.text import Number, Text
 
+from .. import uuidhelpers
 from . import html
 from .base import FrenchDate
 
 
-def build_prenom_select_choices(ctx):
+def build_prenom_select_choices(user_api_data):
     prenom_select_choices = []
-    if ctx.session.user is not None:
-        api_data = ctx.session.user.api_data
-        if api_data is not None:
-            api_personnes = api_data.get('individus')
-            if api_personnes is not None:
-                for api_personne_id, api_personne in api_personnes.iteritems():
-                    prenom_select_choices.append((api_personne_id, api_personne.get('prenom')))
-    prenom_select_choices.append(('new', u'Nouvelle personne'))
+    if user_api_data is not None:
+        individus = user_api_data.get('individus')
+        if individus is not None:
+            for individu_id, individu in individus.iteritems():
+                prenom_select_choices.append((individu_id, individu.get('prenom')))
     return prenom_select_choices
 
 
-make_personne_group = lambda personne_id, prenom: Group(
+def default_value():
+    return {
+        uuidhelpers.generate_uuid(): {
+            u'birth': datetime.datetime(1984, 1, 1, 0, 0),
+            u'prenom': u'Personne 1',
+            u'sali': 25000,
+            u'statmarit': u'celibataire',
+            }
+        }
+
+
+group_questions = [
+    Text(label = u'Prénom'),
+    FrenchDate(
+        label = u'Date de naissance',
+        name = u'birth',
+        ),
+    Number(
+        label = u'Salaire',
+        min = 0,
+        name = u'sali',
+        step = 1,
+        ),
+    Select(
+        choices = [
+            u'Marié',
+            u'Célibataire',
+            u'Divorcé',
+            u'Veuf',
+            u'Pacsé',
+            u'Jeune veuf',
+            ],
+        label = u'Statut marital',
+        name = u'statmarit',
+        ),
+    ]
+
+
+make_individu_group = lambda individu_id, prenom: Group(
     children_attributes = {
         '_control_attributes': {'class': 'form-control'},
         '_inner_html_template': html.horizontal_bootstrap_control_inner_html_template,
         '_outer_html_template': html.bootstrap_group_outer_html_template,
         },
-    name = personne_id,
+    name = individu_id,
     outer_html_template = u'''
-{{self[edit].html}}
 <div class="modal fade" id="{{self.full_name}}-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
 aria-hidden="true">
   <div class="modal-dialog">
@@ -67,65 +102,19 @@ aria-hidden="true">
         <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
       </div>
       <div class="modal-body">
-        <div class="form-horizontal">
-          {{self[prenom].html}}
-          {{self[birth].html}}
-          {{self[sali].html}}
-          {{self[statmarit].html}}
-        </div>
+          <div class="form-horizontal">
+            {{self[prenom].html}}
+            {{self[birth].html}}
+            {{self[sali].html}}
+            {{self[statmarit].html}}
+          </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
-        <a class="btn btn-success" href="/all-questions?entity=individus&id={personne_id}">Plus de détails</a>
-        <button type="submit" class="btn btn-primary">Valider</button>
+        <a class="btn btn-primary" href="/all-questions?entity=individus&id={individu_id}">Plus de détails</a>
+        <button type="submit" class="btn btn-success">Valider</button>
       </div>
     </div>
   </div>
-</div>'''.format(prenom = prenom, personne_id = personne_id),
-    questions = [
-        Button(
-            label = u'Éditer',
-            name = u'edit',
-            outer_html_template = u'''
-<button class="btn btn-primary" data-target="#{self.parent.full_name_as_selector}-modal" data-toggle="modal"
-name="{self.full_name}" type="button">{self.label}</button>'''
-            ),
-        Text(label = u'Prénom'),
-        FrenchDate(
-            label = u'Date de naissance',
-            name = 'birth',
-            ),
-        Number(
-            label = u'Salaire',
-            min = 0,
-            name = 'sali',
-            step = 1,
-            ),
-        Select(
-            choices = [
-                u'Marié',
-                u'Célibataire',
-                u'Divorcé',
-                u'Veuf',
-                u'Pacsé',
-                u'Jeune veuf',
-                ],
-            label = u'Statut marital',
-            name = 'statmarit',
-            ),
-        ],
-    )
-
-
-make_prenoms_condition = lambda name, prenom_select_choices: Condition(
-    base_question = Select(
-        control_attributes = {'class': 'form-control'},
-        choices = prenom_select_choices,
-        name = 'id',
-        ),
-    conditional_questions = {
-        personne_id: make_personne_group(personne_id, prenom)
-        for personne_id, prenom in prenom_select_choices
-        },
-    name = name,
+</div>'''.format(individu_id = individu_id, prenom = prenom),
+    questions = group_questions,
     )

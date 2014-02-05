@@ -26,54 +26,24 @@
 """Conversion functions related to menages"""
 
 
-from biryani1.baseconv import cleanup_line, function, noop, pipe, rename_item, struct, test_in, uniform_sequence
+from biryani1.baseconv import cleanup_line, function, noop, pipe, rename_item, struct, uniform_sequence
 
 
-korma_data_to_api_data = pipe(
-    function(lambda item: item.get('logements_principaux')),
+korma_data_to_page_api_data = pipe(
+    function(lambda item: item.get('menages')),
     uniform_sequence(
         pipe(
-            function(lambda item: item.get('logement_principal')),
+            function(lambda item: item.get('menage')),
             struct(
                 {
                     'localite': cleanup_line,
                     'loyer': noop,
-                    'personnes': uniform_sequence(
-                        pipe(
-                            function(lambda item: item.get('personne_in_logement_principal')),
-                            struct(
-                                {
-                                    'logement_principal_id': cleanup_line,
-                                    'role': test_in([u'personne_de_reference', u'conjoint', u'enfants', u'autres']),
-                                    'prenom_condition': rename_item('prenom', 'id'),
-                                    },
-                                default = noop
-                                ),
-                            ),
-                        ),
+                    'personnes_in_menage': uniform_sequence(function(lambda item: item.get('personne_in_menage'))),
                     'so': cleanup_line,
                     },
                 default = noop,
                 ),
-            rename_item('logement_principal_id', 'id'),
+            rename_item('menage_id', 'id'),
             ),
         ),
     )
-
-
-#menage_korma_data_to_personnes = pipe(
-#    function(lambda item: item.get('logements_principaux')),
-#    uniform_sequence(
-#        pipe(
-#            function(lambda item: item.get('logement_principal')),
-#            function(lambda item: item.get('personnes')),
-#            uniform_sequence(
-#                pipe(
-#                    function(lambda item: item.get('personne_in_logement_principal', {}).get('prenom_condition')),
-#                    rename_item('prenom', 'id'),
-#                    ),
-#                ),
-#            ),
-#        ),
-#    function(lambda lists: list(chain.from_iterable(lists))),
-#    )

@@ -26,40 +26,36 @@
 """Korma questions related to menages"""
 
 
+from korma.base import Button
 from korma.choice import Select
 from korma.group import Group
 from korma.text import Number, Text
 
-from . import html, individus
+from .. import uuidhelpers
+from . import html
 from .base import Hidden, Repeat
 
 
-def make_personne_in_menage_group(prenom_select_choices):
-    return Group(
-        name = u'personne_in_menage',
-        outer_html_template = u'''
-{self[logement_principal_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[prenom_condition].html}
-</div>
-''',
-        questions = [
-            Hidden(name = 'logement_principal_id'),
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = (
-                    (u'personne_de_reference', u'Personne de référence'),
-                    (u'conjoint', u'Conjoint de la personne de référence'),
-                    (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
-                    (u'autres', u'Autre'),
-                    ),
-                name = u'role',
-                ),
-            individus.make_prenoms_condition(name = u'prenom_condition',
-                                             prenom_select_choices = prenom_select_choices),
-            ],
-        )
+def default_value(individu_ids, familles=None):
+    parent_ids = []
+    enfants_ids = []
+    if familles is None:
+        parent_ids = individu_ids
+    else:
+        for famille in familles.itervalues():
+            if famille.get('parents'):
+                parent_ids.extend(famille['parents'])
+            if famille.get('enfants'):
+                enfants_ids.extend(famille['enfants'])
+    menage = {}
+    for role in ['personne_de_reference', 'conjoint']:
+        if len(parent_ids) > 0:
+            menage[role] = parent_ids.pop()
+    if len(parent_ids) > 0:
+        menage['enfants'] = parent_ids
+    if len(enfants_ids) > 0:
+        menage.setdefault('enfants', []).extend(enfants_ids)
+    return {uuidhelpers.generate_uuid(): menage}
 
 
 make_menages_repeat = lambda prenom_select_choices: Repeat(
@@ -70,12 +66,12 @@ make_menages_repeat = lambda prenom_select_choices: Repeat(
   <a class="btn btn-primary btn-all-question" href="/TODO/all-questions?entity=menages">Plus de détails</a>
 </div>''',
         },
-    name = 'logements_principaux',
+    name = 'menages',
     template_question = Group(
         children_attributes = {
             '_outer_html_template': html.bootstrap_group_outer_html_template,
             },
-        name = 'logement_principal',
+        name = 'menage',
         questions = [
             Select(
                 control_attributes = {'class': 'form-control'},
@@ -101,9 +97,41 @@ make_menages_repeat = lambda prenom_select_choices: Repeat(
                 label = u'Localité',
                 ),
             Repeat(
-                name = u'personnes',
-                template_question = make_personne_in_menage_group(
-                    prenom_select_choices = prenom_select_choices),
+                name = u'personnes_in_menage',
+                template_question = Group(
+                    name = u'personne_in_menage',
+                    outer_html_template = u'''
+{self[menage_id].html}
+<div class="form-inline personne-row">
+  {self[role].html}
+  {self[id].html}
+  {self[edit].html}
+</div>''',
+                    questions = [
+                        Hidden(name = 'menage_id'),
+                        Select(
+                            control_attributes = {'class': 'form-control'},
+                            choices = (
+                                (u'personne_de_reference', u'Personne de référence'),
+                                (u'conjoint', u'Conjoint de la personne de référence'),
+                                (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
+                                (u'autres', u'Autre'),
+                                ),
+                            name = u'role',
+                            ),
+                        Select(
+                            control_attributes = {'class': 'form-control'},
+                            choices = prenom_select_choices,
+                            name = 'id',
+                            ),
+                        Button(
+                            label = u'Éditer',
+                            name = u'edit',
+                            outer_html_template = u'<button class="btn btn-primary" data-toggle="modal" type="button">\
+{self.label}</button>',
+                            ),
+                        ],
+                    ),
                 ),
             ]
         ),

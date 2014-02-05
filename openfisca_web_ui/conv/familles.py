@@ -26,49 +26,35 @@
 """Conversion functions related to familles"""
 
 
-from itertools import chain
+from itertools import chain, groupby
 
-from biryani1.baseconv import cleanup_line, function, noop, pipe, rename_item, struct, test_in, uniform_sequence
+from biryani1.baseconv import function, pipe, uniform_sequence
 
 
-korma_data_to_api_data = pipe(
-    function(lambda item: item.get('familles')),
+korma_data_to_page_api_data = pipe(
+    function(lambda values: values.get('familles')),
     uniform_sequence(
         pipe(
-            function(lambda item: item.get('personnes')),
-            uniform_sequence(
-                pipe(
-                    function(lambda item: item.get('personne_in_famille')),
-                    struct(
-                        {
-                            'famille_id': cleanup_line,
-                            'role': test_in(['parents', 'enfants']),
-                            'prenom_condition': noop,
-                            },
-                        default = noop,
-                        ),
-                    rename_item('prenom_condition', 'personne'),
-                    rename_item('famille_id', 'id'),
+            function(lambda values: values.get('personnes_in_famille')),
+            pipe(
+                uniform_sequence(
+                    function(lambda values: values.get('personne_in_famille')),
+                    ),
+                function(
+                    lambda values: [
+                        (
+                            famille_id,
+                            {
+                                role: map(lambda value: value['id'], individu)
+                                for role, individu in groupby(individus, lambda value: value['role'])
+                                }
+                            )
+                        for famille_id, individus in groupby(values, lambda value: value['famille_id'])
+                        ]
                     ),
                 ),
             ),
         ),
-    function(lambda lists: list(chain.from_iterable(lists))),
+    function(lambda values: chain.from_iterable(values)),
+    function(dict),
     )
-
-
-#famille_korma_data_to_personnes = pipe(
-#    function(lambda item: item.get('familles')),
-#    uniform_sequence(
-#        pipe(
-#            function(lambda item: item.get('personnes')),
-#            uniform_sequence(
-#                pipe(
-#                    function(lambda item: item.get('personne_in_famille', {}).get('prenom_condition')),
-#                    rename_item('prenom', 'id'),
-#                    ),
-#                ),
-#            ),
-#        ),
-#    function(lambda lists: list(chain.from_iterable(lists))),
-#    )

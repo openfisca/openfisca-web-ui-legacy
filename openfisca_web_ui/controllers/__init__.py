@@ -58,8 +58,9 @@ def image(req):
             image_stringio = matplotlib_helpers.create_bareme_png(trees, simulation_output)
         req.response.content_type = 'image/png'
         req.response.write(image_stringio.read())
-        return
-    return wsgihelpers.no_content(ctx)
+    else:
+        log.error(simulation_errors)
+        return wsgihelpers.no_content(ctx)
 
 
 @wsgihelpers.wsgify
@@ -83,10 +84,8 @@ def make_router():
         ('POST', '^/logout/?$', accounts.logout),
         ]
     for page_data in pages.pages_data:
-        routings.extend([
+        routings.append(
             (('GET', 'POST'), '^/{slug}/?$'.format(slug=page_data['slug']), form.form, {'page_data': page_data}),
-            (('GET', 'POST'), '^/{slug}/(?P<id>)/?$'.format(slug=page_data['slug']), form.all_questions,
-             {'page_data': page_data}),
-            ])
+            )
     router = urls.make_router(*routings)
     return router

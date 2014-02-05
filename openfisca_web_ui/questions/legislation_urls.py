@@ -55,19 +55,3 @@ def make_legislation_urls_group(legislation_urls_and_descriptions):
                 ),
             ],
         )
-#
-#
-#make_familles_repeat = lambda prenom_select_choices: Repeat(
-#    add_button_label = u'Ajouter une famille',
-#    name = u'familles',
-#    template_question = Repeat(
-#        add_button_label = u'Ajouter un membre',
-#        name = u'personnes',
-#        outer_html_template = u'''
-#<div class="repeated-group">
-#  {self.inner_html}
-#  <a class="btn btn-primary btn-all-questions" href="/TODO/all-questions?entity=familles">Plus de détails</a>
-#</div>''',
-#        template_question = make_personne_in_famille_group(prenom_select_choices = prenom_select_choices),
-#        ),
-#    )

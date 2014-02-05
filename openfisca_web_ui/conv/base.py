@@ -48,7 +48,6 @@ def debug(value, state = None):
     pprint(value)
     return value, None
 
-
 input_to_uuid = pipe(
     cleanup_line,
     test(uuid_re.match, error = N_(u'Invalid UUID format')),
@@ -68,3 +67,6 @@ def method(method_name, *args, **kwargs):
             return value, None
         return getattr(value, method_name)(state or default_state, *args, **kwargs)
     return method_converter
+
+
+without_none_values = lambda mapping: dict((key, value) for key, value in mapping.iteritems() if value is not None)

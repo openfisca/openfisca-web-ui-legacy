@@ -33,11 +33,10 @@ import re
 import requests
 
 from biryani1 import strings
-from korma.checkbox import Checkbox
 from korma.choice import Radio, Select
 from korma.text import Number, Text
 
-from . import conf, conv, objects, urls, wsgihelpers
+from . import conf, conv, objects, questions, urls, wsgihelpers
 
 
 column_by_name = None
@@ -367,8 +366,15 @@ def fetch_api_columns_and_prestations():
     if response.ok:
         column_by_name = response.json()['columns']
         questions_by_entity = {}
+        entity_by_column_entity = {
+            u'fam': u'familles',
+            u'foy': u'foyers_fiscaux',
+            u'ind': u'individus',
+            u'men': u'menages',
+            }
         for name, column in column_by_name.iteritems():
-            questions_by_entity.setdefault(column.get('entity'), []).append(make_question(column))
+            entity = entity_by_column_entity[column['entity']]
+            questions_by_entity.setdefault(entity, []).append(make_question(column))
 
 
 def get_user(ctx, check = False):
@@ -400,7 +406,7 @@ def is_admin(ctx, check = False):
 def make_question(question_info):
     question_label = conv.check(conv.decode_str()(question_info.get('label')))
     if question_info['@type'] == 'Boolean':
-        return Checkbox(
+        return questions.base.Checkbox(
             label = question_label,
             name = question_info['name'],
             value = question_info.get('default'),

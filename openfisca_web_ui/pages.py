@@ -33,7 +33,7 @@ pages_data = [
     {
         'entity': 'familles',
         'form_factory': questions.familles.make_familles_repeat,
-        'korma_data_to_page_entities': conv.familles.korma_data_to_api_data,
+        'korma_data_to_page_api_data': conv.familles.korma_data_to_page_api_data,
         'name': 'famille',
         'slug': 'famille',
         'title': u'Famille',
@@ -41,7 +41,7 @@ pages_data = [
     {
         'entity': 'foyers_fiscaux',
         'form_factory': questions.foyers_fiscaux.make_foyers_fiscaux_repeat,
-        'korma_data_to_page_entities': conv.foyers_fiscaux.korma_data_to_api_data,
+        'korma_data_to_page_api_data': conv.foyers_fiscaux.korma_data_to_page_api_data,
         'name': 'declaration_impots',
         'slug': 'declaration-impots',
         'title': u'Déclaration d\'impôts',
@@ -49,7 +49,7 @@ pages_data = [
     {
         'entity': 'menages',
         'form_factory': questions.menages.make_menages_repeat,
-        'korma_data_to_page_entities': conv.menages.korma_data_to_api_data,
+        'korma_data_to_page_api_data': conv.menages.korma_data_to_page_api_data,
         'name': 'logement_principal',
         'slug': 'logement-principal',
         'title': u'Logement principal',
@@ -57,7 +57,7 @@ pages_data = [
     {
         'entity': 'legislation_url',
         'form_factory': questions.legislation_urls.make_legislation_urls_group,
-        'korma_data_to_page_entities': conv.legislation_urls.korma_data_to_api_data,
+        'korma_data_to_page_api_data': conv.legislation_urls.korma_data_to_page_api_data,
         'name': 'legislation_url',
         'slug': 'legislation-url',
         'title': u'Legislations',

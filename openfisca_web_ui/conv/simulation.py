@@ -70,9 +70,6 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
 api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
 
 
-api_data_to_simulation_output = pipe(api_data_to_api_post_content, api_post_content_to_simulation_output)
-
-
 def user_api_data_to_api_data(user_data, state = None):
     if user_data is None:
         return None, None
@@ -99,7 +96,8 @@ def user_api_data_to_api_data(user_data, state = None):
 
 
 user_api_data_to_simulation_output = pipe(
-    api.complete_api_data,
+    api.fill_user_api_data,
     user_api_data_to_api_data,
-    api_data_to_simulation_output,
+    api_data_to_api_post_content,
+    api_post_content_to_simulation_output,
     )
