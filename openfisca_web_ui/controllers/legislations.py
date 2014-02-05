@@ -28,14 +28,16 @@
 
 import collections
 import datetime
+import json
 import logging
 import re
+import requests
 
 import pymongo
 import webob
 import webob.multidict
 
-from .. import contexts, conv, model, paginations, templates, urls, wsgihelpers
+from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
 inputs_to_legislation_data = conv.struct(
@@ -109,6 +111,27 @@ def admin_edit(req):
                 )(data['title'], state = ctx)
             if error is not None:
                 errors = dict(title = error)
+        if errors is None:
+            try:
+                response = requests.post(
+                    conf['api.legislations.url'],
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'User-Agent': conf['app_name'],
+                        },
+                    data = json.dumps(dict(value = data['json'])),
+                    )
+            except requests.exceptions.ConnectionError:
+                error = ctx._('Unable to connect to API, url: {}').format(conf['api.url'])
+            if not response.ok:
+                try:
+                    error = response.json(object_pairs_hook = collections.OrderedDict)
+                except ValueError as exc:
+                    error = unicode(exc)
+            if error is not None:
+                errors = dict(json = error)
+            else:
+                legislation.json = response.json(object_pairs_hook = collections.OrderedDict)
         if errors is None:
             if model.Legislation.find(
                     dict(
@@ -208,6 +231,27 @@ def admin_new(req):
                 )(data['title'], state = ctx)
             if error is not None:
                 errors = dict(title = error)
+        if errors is None:
+            try:
+                response = requests.post(
+                    conf['api.legislations.url'],
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'User-Agent': conf['app_name'],
+                        },
+                    data = json.dumps(dict(value = data['json'])),
+                    )
+            except requests.exceptions.ConnectionError:
+                error = ctx._('Unable to connect to API, url: {}').format(conf['api.url'])
+            if not response.ok:
+                try:
+                    error = response.json(object_pairs_hook = collections.OrderedDict)
+                except ValueError as exc:
+                    error = unicode(exc)
+            if error is not None:
+                errors = dict(json = error)
+            else:
+                legislation.json = response.json(object_pairs_hook = collections.OrderedDict)
         if errors is None:
             if model.Legislation.find(
                     dict(
