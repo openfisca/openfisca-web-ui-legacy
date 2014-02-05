@@ -169,7 +169,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
         self.words = sorted(set(strings.slugify(u'-'.join(
             fragment
             for fragment in (
-                self._id,
+                unicode(self._id),
                 self.description,
                 self.title,
                 )
