@@ -49,8 +49,8 @@ def load_environment(global_conf, app_conf):
     conf.update(strings.deep_decode(app_conf))
     conf.update(conv.check(conv.struct(
         {
-            'api.url': conv.cleanup_line,
-            'api.fields.url': conv.cleanup_line,
+            'api.urls.fields': conv.cleanup_line,
+            'api.urls.simulate': conv.cleanup_line,
             'app_conf': conv.set_value(app_conf),
             'app_dir': conv.set_value(app_dir),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('Openfisca')),
@@ -106,7 +106,7 @@ def load_environment(global_conf, app_conf):
     # Load MongoDB database.
     db = pymongo.Connection(conf['database.host'], conf['database.port'])[conf['database.name']]
     model.init(db)
-    model.init_api_columns_and_prestations()
+    model.fetch_api_columns_and_prestations()
 
     # Create the Mako TemplateLookup, with the default auto-escaping.
     templates.dirs = [os.path.join(app_dir, 'templates')]

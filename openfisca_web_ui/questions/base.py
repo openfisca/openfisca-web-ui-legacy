@@ -31,7 +31,7 @@ from korma.date import Date
 from korma import helpers
 from korma.repeat import Repeat as KormaRepeat
 
-from . import conv
+from .. import conv
 
 
 class Hidden(Input):
@@ -62,5 +62,6 @@ class MongoDate(Date):
 FrenchDate = lambda *args, **kwargs: MongoDate(format=u'%d/%m/%Y', placeholder=u'dd/mm/yyyy', *args, **kwargs)
 
 
-Repeat = lambda *args, **kwargs: KormaRepeat(add_button_classes = u'add btn', add_button_label = u'Ajouter', *args,
-                                             **kwargs)
+Repeat = lambda add_button_label = u'Ajouter', *args, **kwargs: \
+    KormaRepeat(add_button_classes = u'add btn', add_button_label = add_button_label, javascript_add_button=False,
+                *args, **kwargs)

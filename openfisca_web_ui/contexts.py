@@ -28,6 +28,7 @@
 
 import gettext
 
+from biryani1.states import State
 import webob
 
 from . import conf, conv
@@ -36,7 +37,7 @@ from . import conf, conv
 __all__ = ['Ctx', 'null_ctx']
 
 
-class Ctx(conv.State):
+class Ctx(State):
     _parent = None
     default_values = dict(
         _lang = None,
@@ -189,7 +190,7 @@ class Ctx(conv.State):
             else:
                 from . import model
                 session, error = conv.pipe(
-                    conv.input_to_uuid,
+                    conv.base.input_to_uuid,
                     conv.not_none,
                     model.Session.uuid_to_instance,
                     )(self.req.cookies.get(conf['cookie']), state = self)

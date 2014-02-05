@@ -43,12 +43,8 @@ def image(req):
     session = ctx.session
     if session.user.api_data is None:
         session.user.api_data = {}
-    simulation_output, errors = conv.pipe(
-        conv.complete_api_data,
-        conv.user_data_to_api_data,
-        conv.api_data_to_simulation_output,
-        )(session.user.api_data, state = ctx)
-    if errors is None:
+    simulation_output, simulation_errors = conv.simulation.user_api_data_to_simulation_output(session.user.api_data, state = ctx)
+    if simulation_errors is None:
         params = {
             'name': req.urlvars.get('name'),
             }
@@ -59,7 +55,7 @@ def image(req):
             image_stringio = matplotlib_helpers.create_waterfall_png(trees)
         elif image_name == 'bareme':
             image_stringio = matplotlib_helpers.create_bareme_png(trees, simulation_output)
-        req.response.content_type = 'image/jpeg'
+        req.response.content_type = 'image/png'
         req.response.write(image_stringio.read())
         return
     return wsgihelpers.no_content(ctx)
@@ -68,7 +64,7 @@ def image(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    raise wsgihelpers.redirect(ctx, location = '/famille')
+    return wsgihelpers.redirect(ctx, location = '/famille')
 
 
 def make_router():
@@ -76,7 +72,6 @@ def make_router():
     global router
     routings = [
         ('GET', '^/?$', index),
-        (('GET', 'POST'), '^/all-questions?$', form.all_questions),
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
@@ -87,8 +82,10 @@ def make_router():
         ('POST', '^/logout/?$', accounts.logout),
         ]
     for page_data in pages.pages_data:
-        routings.append(
-            (('GET', 'POST'), '^/{slug}/?$'.format(slug=page_data['slug']), form.form, {'page_data': page_data})
-            )
+        routings.extend([
+            (('GET', 'POST'), '^/{slug}/?$'.format(slug=page_data['slug']), form.form, {'page_data': page_data}),
+            (('GET', 'POST'), '^/{slug}/(?P<id>)/?$'.format(slug=page_data['slug']), form.all_questions,
+             {'page_data': page_data}),
+            ])
     router = urls.make_router(*routings)
     return router

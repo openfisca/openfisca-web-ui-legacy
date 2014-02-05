@@ -26,305 +26,32 @@
 """Pages meta-data"""
 
 
-from korma.base import Button
-from korma.choice import Select
-from korma.condition import Condition
-from korma.group import Group
-from korma.text import Number, Text
-
 from . import conv, questions
-
-
-bootstrap_control_inner_html_template = u'''
-<label class="control-label" for="{self.full_name}">{self.label}</label>
-{self.control_html}'''
-
-
-bootstrap_group_outer_html_template = u'<div class="form-group">{self.inner_html}</div>'
-
-
-horizontal_bootstrap_control_inner_html_template = u'''
-<label class="control-label col-sm-2" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-10">{self.control_html}</div>'''
-
-
-make_prenoms_condition = lambda name, personnes_choices: Condition(
-    base_question = Select(
-        control_attributes = {'class': 'form-control'},
-        choices = personnes_choices,
-        name = 'prenom',
-        ),
-    conditional_questions = {
-        personne_id: make_personne_group(personne_id, prenom)
-        for personne_id, prenom in personnes_choices
-        },
-    name = name,
-    )
-
-
-make_personne_group = lambda personne_id, prenom: Group(
-    children_attributes = {
-        '_control_attributes': {'class': 'form-control'},
-        '_inner_html_template': horizontal_bootstrap_control_inner_html_template,
-        '_outer_html_template': bootstrap_group_outer_html_template,
-        },
-    name = personne_id,
-    outer_html_template = u'''
-{{self[edit].html}}
-<div class="modal fade" id="{{self.full_name}}-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
-      </div>
-      <div class="modal-body">
-        <div class="form-horizontal">
-          {{self[prenom].html}}
-          {{self[birth].html}}
-          {{self[sali].html}}
-          {{self[statmarit].html}}
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
-        <a class="btn btn-success" href="/all-questions?entity=ind&idx={personne_id}">Plus de détails</a>
-        <button type="submit" class="btn btn-primary">Valider</button>
-      </div>
-    </div>
-  </div>
-</div>'''.format(prenom = prenom, personne_id = personne_id),
-    questions = [
-        Button(
-            label = u'Éditer',
-            name = u'edit',
-            outer_html_template = u'''
-<button class="btn btn-primary" data-target="#{self.parent.full_name_as_selector}-modal" data-toggle="modal"
-name="{self.full_name}" type="button">{self.label}</button>'''
-            ),
-        Text(label = u'Prénom'),
-        questions.FrenchDate(
-            label = u'Date de naissance',
-            name = 'birth',
-            ),
-        Number(
-            label = u'Salaire',
-            min = 0,
-            name = 'sali',
-            step = 1,
-            ),
-        Select(
-            choices = [
-                u'Marié',
-                u'Célibataire',
-                u'Divorcé',
-                u'Veuf',
-                u'Pacsé',
-                u'Jeune veuf',
-                ],
-            label = u'Statut marital',
-            name = 'statmarit',
-            ),
-        ],
-    )
-
-
-def make_personne_in_declaration_impots_group(personnes_choices):
-    return Group(
-        name = u'personne_in_declaration_impots',
-        outer_html_template = u'''
-{self[declaration_impot_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[prenom_condition].html}
-</div>
-''',
-        questions = [
-            questions.Hidden(name = 'declaration_impot_id'),
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = (
-                    (u'declarants', u'Déclarant'),
-                    (u'declarants', u'Conjoint'),
-                    (u'personnes_a_charge', u'Personne à charge'),
-                    ),
-                name = u'role',
-                ),
-            make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
-            ],
-        )
-
-
-def make_personne_in_famille_group(personnes_choices):
-    return Group(
-        name = u'personne_in_famille',
-        outer_html_template = u'''
-{self[famille_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[prenom_condition].html}
-</div>
-''',
-        questions = [
-            questions.Hidden(name = 'famille_id'),
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
-                name = u'role',
-                ),
-            make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
-            ],
-        )
-
-
-def make_personne_in_logement_principal_group(personnes_choices):
-    return Group(
-        name = u'personne_in_logement_principal',
-        outer_html_template = u'''
-{self[logement_principal_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[prenom_condition].html}
-</div>
-''',
-        questions = [
-            questions.Hidden(name = 'logement_principal_id'),
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = (
-                    (u'personne_de_reference', u'Personne de référence'),
-                    (u'conjoint', u'Conjoint de la personne de référence'),
-                    (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
-                    (u'autres', u'Autre'),
-                    ),
-                name = u'role',
-                ),
-            make_prenoms_condition(name = u'prenom_condition', personnes_choices = personnes_choices),
-            ],
-        )
 
 
 pages_data = [
     {
+        'entity': 'familles',
+        'form_factory': questions.familles.make_familles_repeat,
+        'korma_data_to_page_entities': conv.familles.korma_data_to_api_data,
         'name': 'famille',
         'slug': 'famille',
         'title': u'Famille',
-        'korma_data_to_personnes': conv.famille_korma_data_to_personnes,
-        'korma_data_to_page_entities': conv.famille_korma_data_to_familles,
-        'entities': 'familles',
         },
     {
+        'entity': 'foyers_fiscaux',
+        'form_factory': questions.foyers_fiscaux.make_foyers_fiscaux_repeat,
+        'korma_data_to_page_entities': conv.foyers_fiscaux.korma_data_to_api_data,
         'name': 'declaration_impots',
         'slug': 'declaration-impots',
         'title': u'Déclaration d\'impôts',
-        'korma_data_to_personnes': conv.declaration_impot_korma_data_to_personnes,
-        'korma_data_to_page_entities': conv.declaration_impot_korma_data_to_declaration_impots,
-        'entities': 'declaration_impots',
         },
     {
+        'entity': 'menages',
+        'form_factory': questions.menages.make_menages_repeat,
+        'korma_data_to_page_entities': conv.menages.korma_data_to_api_data,
         'name': 'logement_principal',
         'slug': 'logement-principal',
         'title': u'Logement principal',
-        'korma_data_to_personnes': conv.menage_korma_data_to_personnes,
-        'korma_data_to_page_entities': conv.menage_korma_data_to_menages,
-        'entities': 'logement_principal',
         },
     ]
-
-
-def build_personnes_choices(ctx):
-    personnes_choices = []
-    if ctx.session.user is not None:
-        api_data = ctx.session.user.api_data
-        if api_data is not None:
-            api_personnes = api_data.get('individus')
-            if api_personnes is not None:
-                for api_personne_id, api_personne in api_personnes.iteritems():
-                    personnes_choices.append((api_personne_id, api_personne.get('prenom') or u'Inconnu'))
-    personnes_choices.append(('new', u'Nouvelle personne'))
-    return personnes_choices
-
-
-def page_form(ctx, page_name):
-    assert ctx.session is not None
-    personnes_choices = build_personnes_choices(ctx)
-    page_form_by_page_name = {
-        'declaration_impots': questions.Repeat(
-            name = u'declaration_impots',
-            template_question = questions.Repeat(
-                name = u'personnes',
-                outer_html_template = u'''
-<div class="repeated-group">
-  {self.inner_html}
-  <a class="btn btn-primary btn-all-question" href="/all-questions?entity=foy">
-    Plus de détails
-  </a>
-</div>''',
-                template_question = make_personne_in_declaration_impots_group(personnes_choices=personnes_choices),
-                ),
-            ),
-        'famille': questions.Repeat(
-            name = u'familles',
-            template_question = questions.Repeat(
-                name = u'personnes',
-                outer_html_template = u'''
-<div class="repeated-group">
-  {self.inner_html}
-  <a class="btn btn-primary btn-all-question" href="/all-questions?entity=fam">
-    Plus de détails
-  </a>
-</div>''',
-                template_question = make_personne_in_famille_group(personnes_choices=personnes_choices),
-                ),
-            ),
-        'logement_principal': questions.Repeat(
-            children_attributes = {
-                '_outer_html_template': u'''
-<div class="repeated-group">
-  {self.inner_html}
-  <a class="btn btn-primary btn-all-question" href="/all-questions?entity=men">
-    Plus de détails
-  </a>
-</div>''',
-                },
-            name = 'logements_principaux',
-            template_question = Group(
-                children_attributes = {
-                    '_outer_html_template': bootstrap_group_outer_html_template,
-                    },
-                name = 'logement_principal',
-                questions = [
-                    Select(
-                        control_attributes = {'class': 'form-control'},
-                        choices = [
-                            u'Non renseigné',
-                            u'Accédant à la propriété',
-                            u'Propriétaire (non accédant) du logement',
-                            u'Locataire d\'un logement HLM',
-                            u'Locataire ou sous-locataire d\'un logement loué vide non-HLM',
-                            u'Locataire ou sous-locataire d\'un logement loué meublé ou d\'une chambre d\'hôtel',
-                            u'Logé gratuitement par des parents, des amis ou l\'employeur',
-                            ],
-                        label = u'Statut d\'occupation',
-                        name = u'so',
-                        ),
-                    Number(
-                        control_attributes = {'class': 'form-control'},
-                        label = u'Loyer',
-                        step = 1,
-                        ),
-                    Text(
-                        control_attributes = {'class': 'form-control'},
-                        label = u'Localité',
-                        ),
-                    questions.Repeat(
-                        name = u'personnes',
-                        template_question = make_personne_in_logement_principal_group(
-                            personnes_choices=personnes_choices),
-                        ),
-                    ]
-                ),
-            ),
-        }
-    return page_form_by_page_name[page_name]

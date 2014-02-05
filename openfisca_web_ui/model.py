@@ -27,6 +27,7 @@
 
 
 import collections
+import copy
 import datetime
 import re
 import requests
@@ -346,6 +347,30 @@ def configure(ctx):
     pass
 
 
+def entity_questions(entity):
+    global questions_by_entity
+    if questions_by_entity is None:
+        fetch_api_columns_and_prestations()
+    assert questions_by_entity is not None, u'questions_by_entity is still None after fetch_api_columns_and_prestations'
+    return copy.copy(questions_by_entity.get(entity))
+
+
+def fetch_api_columns_and_prestations():
+    global column_by_name
+    global questions_by_entity
+    try:
+        response = requests.get(conf['api.urls.fields'])
+    except requests.exceptions.ConnectionError:
+        return
+    except requests.exceptions.HTTPError:
+        return
+    if response.ok:
+        column_by_name = response.json()['columns']
+        questions_by_entity = {}
+        for name, column in column_by_name.iteritems():
+            questions_by_entity.setdefault(column.get('entity'), []).append(make_question(column))
+
+
 def get_user(ctx, check = False):
     user = ctx.user
     if user is UnboundLocalError:
@@ -358,22 +383,6 @@ def get_user(ctx, check = False):
 
 def init(db):
     objects.Wrapper.db = db
-
-
-def init_api_columns_and_prestations():
-    global column_by_name
-    global questions_by_entity
-    try:
-        response = requests.get(conf['api.fields.url'])
-    except requests.exceptions.ConnectionError:
-        return
-    except requests.exceptions.HTTPError:
-        return
-    if response.ok:
-        column_by_name = response.json()['columns']
-        questions_by_entity = {}
-        for name, column in column_by_name.iteritems():
-            questions_by_entity.setdefault(column.get('entity'), []).append(make_question(column))
 
 
 def is_admin(ctx, check = False):

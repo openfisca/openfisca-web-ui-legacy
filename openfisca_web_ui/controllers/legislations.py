@@ -42,7 +42,7 @@ from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihe
 
 inputs_to_legislation_data = conv.struct(
     dict(
-        author_id = conv.input_to_uuid,
+        author_id = conv.base.input_to_uuid,
         datetime_begin = conv.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
         datetime_end = conv.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
         description = conv.cleanup_text,

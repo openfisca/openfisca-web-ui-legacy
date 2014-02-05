@@ -46,8 +46,8 @@ from openfisca_web_ui import pages
 
 
 <%def name="container_content()" filter="trim">
-% if errors:
-    <pre class="alert alert-error">${errors | n, js, h}</pre>
+% if korma_errors:
+    <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
     <%self:tabs/>
     <div class="row">
