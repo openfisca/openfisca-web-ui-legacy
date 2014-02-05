@@ -114,7 +114,7 @@ def admin_edit(req):
         if errors is None:
             try:
                 response = requests.post(
-                    conf['api.legislations.url'],
+                    conf['api.urls.legislations'],
                     headers = {
                         'Content-Type': 'application/json',
                         'User-Agent': conf['app_name'],
@@ -122,7 +122,7 @@ def admin_edit(req):
                     data = json.dumps(dict(value = data['json'])),
                     )
             except requests.exceptions.ConnectionError:
-                error = ctx._('Unable to connect to API, url: {}').format(conf['api.url'])
+                error = ctx._('Unable to connect to API, url: {}').format(conf['api.urls.legislations'])
             if not response.ok:
                 try:
                     error = response.json(object_pairs_hook = collections.OrderedDict)
@@ -234,7 +234,7 @@ def admin_new(req):
         if errors is None:
             try:
                 response = requests.post(
-                    conf['api.legislations.url'],
+                    conf['api.urls.legislations'],
                     headers = {
                         'Content-Type': 'application/json',
                         'User-Agent': conf['app_name'],
@@ -242,7 +242,7 @@ def admin_new(req):
                     data = json.dumps(dict(value = data['json'])),
                     )
             except requests.exceptions.ConnectionError:
-                error = ctx._('Unable to connect to API, url: {}').format(conf['api.url'])
+                error = ctx._('Unable to connect to API, url: {}').format(conf['api.urls.legislations'])
             if not response.ok:
                 try:
                     error = response.json(object_pairs_hook = collections.OrderedDict)
