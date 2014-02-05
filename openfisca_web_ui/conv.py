@@ -218,9 +218,10 @@ def complete_api_data(api_data, state = None):
                 enfants_ids.extend(famille.get('enfants', []))
         else:
             parent_ids = api_data.get('individus').keys()
-        menage = {'personne_de_reference': parent_ids.pop()}
-        if len(parent_ids) > 0:
-            menage['conjoint'] = parent_ids.pop()
+        menage = {}
+        for role in ['personne_de_reference', 'conjoint']:
+            if len(parent_ids) > 0:
+                menage[role] = parent_ids.pop()
         if len(parent_ids) > 0:
             menage['enfants'] = parent_ids
         if len(enfants_ids) > 0:
