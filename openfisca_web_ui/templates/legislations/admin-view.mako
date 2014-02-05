@@ -45,6 +45,7 @@ from openfisca_web_ui import model, urls
         <h2>${legislation.get_title(ctx)}</h2>
         <%self:view_fields/>
         <div class="btn-toolbar">
+            <a class="btn btn-success" href="${legislation.get_api1_url(ctx, 'json')}">${_(u'JSON')}</a>
             <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
             <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
         </div>

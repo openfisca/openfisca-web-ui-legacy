@@ -280,6 +280,21 @@ def admin_view(req):
 
 
 @wsgihelpers.wsgify
+def api1_json(req):
+    ctx = contexts.Ctx(req)
+    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
+    assert req.method == 'GET'
+    legislation, error = conv.pipe(
+        conv.input_to_slug,
+        conv.not_none,
+        model.Legislation.make_id_or_slug_or_words_to_instance(),
+        )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
+    if error is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(error))
+    return wsgihelpers.respond_json(ctx, legislation.json)
+
+
+@wsgihelpers.wsgify
 def api1_typeahead(req):
     ctx = contexts.Ctx(req)
     headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
@@ -382,7 +397,7 @@ def route_admin(environ, start_response):
     legislation, error = conv.pipe(
         conv.input_to_slug,
         conv.not_none,
-        model.Legislation.id_or_words_to_instance,
+        model.Legislation.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
         return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation Error: {}').format(error))(
@@ -410,5 +425,6 @@ def route_admin_class(environ, start_response):
 def route_api1_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/typeahead/?$', api1_typeahead),
+        ('GET', '^/(?P<id_or_slug_or_words>[^/]+)/json?$', api1_json),
         )
     return router(environ, start_response)
