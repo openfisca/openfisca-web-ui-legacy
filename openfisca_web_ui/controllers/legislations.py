@@ -37,23 +37,25 @@ import pymongo
 import webob
 import webob.multidict
 
+from biryani1.baseconv import cleanup_text, input_to_slug, not_none, pipe
+
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
 inputs_to_legislation_data = conv.struct(
     dict(
         author_id = conv.base.input_to_uuid,
-        datetime_begin = conv.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
-        datetime_end = conv.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
-        description = conv.cleanup_text,
-        json = conv.pipe(
-            conv.cleanup_line,
+        datetime_begin = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
+        datetime_end = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
+        description = cleanup_text,
+        json = pipe(
+            conv.base.cleanup_line,
             conv.make_input_to_json(),
             conv.not_none,
             ),
         title = conv.pipe(
-            conv.cleanup_line,
-            conv.not_none,
+            conv.base.cleanup_line,
+            not_none,
             ),
         ),
     default = 'drop',
@@ -178,7 +180,7 @@ def admin_index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.input_to_words,
+                term = conv.base.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -208,7 +210,7 @@ def admin_new(req):
     ctx = contexts.Ctx(req)
 
     user = model.get_user(ctx)
-    if user is None:
+    if user is None or user.email is None:
         return wsgihelpers.unauthorized(ctx,
             explanation = ctx._("Creation unauthorized"),
             message = ctx._("You can not create a legislation."),
@@ -282,11 +284,10 @@ def admin_view(req):
 @wsgihelpers.wsgify
 def api1_json(req):
     ctx = contexts.Ctx(req)
-    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
     assert req.method == 'GET'
-    legislation, error = conv.pipe(
-        conv.input_to_slug,
-        conv.not_none,
+    legislation, error = pipe(
+        input_to_slug,
+        not_none,
         model.Legislation.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:

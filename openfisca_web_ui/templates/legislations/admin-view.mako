@@ -81,6 +81,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                         <pre class="break-word">${value | n, js, h}</pre>
                     </div>
                 </div>
+                <hr>
             </div>
         </div>
     % endif
