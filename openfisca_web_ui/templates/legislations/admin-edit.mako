@@ -82,8 +82,8 @@ from openfisca_web_ui import conf, model, urls
 %>\
                 <div class="form-group${' has-error' if error else ''}">
                     <label for="datetime_begin">${_("Begin Date")}</label>
-                    <input class="form-control" id="datetime_begin" name="datetime_begin" type="date" value="${
-                        inputs['datetime_begin'] or ''}">
+                    <input class="form-control" id="datetime_begin" name="datetime_begin" placeholder="dd-mm-yyyy"
+                        type="text" value="${inputs['datetime_begin'] or ''}">
     % if error:
                     <span class="help-block">${error}</span>
     % endif
@@ -93,8 +93,8 @@ from openfisca_web_ui import conf, model, urls
 %>\
                 <div class="form-group${' has-error' if error else ''}">
                     <label for="datetime_end">${_("End Date")}</label>
-                    <input class="form-control" id="datetime_end" name="datetime_end" type="date" value="${
-                        inputs['datetime_end'] or ''}">
+                    <input class="form-control" id="datetime_end" name="datetime_end" placeholder="dd-mm-yyyy"
+                        type="text" value="${inputs['datetime_end'] or ''}">
     % if error:
                     <span class="help-block">${error}</span>
     % endif
