@@ -54,4 +54,12 @@ pages_data = [
         'slug': 'logement-principal',
         'title': u'Logement principal',
         },
+    {
+        'entity': 'legislation_url',
+        'form_factory': questions.legislation_urls.make_legislation_urls_group,
+        'korma_data_to_page_entities': conv.legislation_urls.korma_data_to_api_data,
+        'name': 'legislation_url',
+        'slug': 'legislation-url',
+        'title': u'Legislations',
+        },
     ]

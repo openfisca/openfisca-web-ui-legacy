@@ -1,1 +1,1 @@
-from . import base, familles, foyers_fiscaux, html, individus, menages  # NOQA
+from . import base, familles, foyers_fiscaux, html, individus, legislation_urls, menages  # NOQA

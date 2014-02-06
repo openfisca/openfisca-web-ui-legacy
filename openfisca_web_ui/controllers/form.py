@@ -89,8 +89,16 @@ def form(req):
     auth.ensure_session(ctx)
     session = ctx.session
     page_data = req.urlvars['page_data']
-    prenom_select_choices = questions.individus.build_prenom_select_choices(ctx)
-    page_form = page_data['form_factory'](prenom_select_choices)
+    page_form = None
+    if page_data['slug'] in ['famille', 'declaration-impots', 'logement-principal']:
+        prenom_select_choices = questions.individus.build_prenom_select_choices(ctx)
+        page_form = page_data['form_factory'](prenom_select_choices)
+    else:
+        legislation_urls_and_descriptions = (
+            (legislation.get_api1_url(ctx, 'json'), legislation.title)
+            for legislation in model.Legislation.find()
+            )
+        page_form = page_data['form_factory'](legislation_urls_and_descriptions)
     if req.method == 'GET':
         korma_errors = None
         simulation_errors = None
