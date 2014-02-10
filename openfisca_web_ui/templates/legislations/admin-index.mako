@@ -91,9 +91,14 @@ from openfisca_web_ui import model, urls
         </table>
         <%self:pagination object_class="${model.Legislation}" pager="${pager}"/>
     % endif
+<%
+    user = model.get_user(ctx)
+%>\
+    % if user is not None and user.email is not None:
         <div class="btn-toolbar">
             <a class="btn btn-default" href="${model.Legislation.get_admin_class_url(ctx, 'new')}">${_(u'New')}</a>
         </div>
+    % endif
 </%def>
 
 
