@@ -54,7 +54,12 @@ from openfisca_web_ui import pages
             <%self:tabs/>
             <form class="korma form" method="POST" role="form">
                 ${page_form.html | n}
-                <p><input class="btn btn-success" type="submit" value="Valider"></p>
+                <p>
+                    <input class="btn btn-success" type="submit" value="Valider">
+                    <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
+                        ${_(u'Reset')}
+                    </button>
+                </p>
             </form>
         </div>
 
@@ -64,6 +69,23 @@ from openfisca_web_ui import pages
 % else:
             <img class="waterfall-img" src="/image/waterfall.png" alt="Graphique">
 % endif
+        </div>
+    </div>
+
+    <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Effacer la simulation ?</h4>
+                </div>
+                <div class="modal-body">
+                    <a class="btn btn-danger btn-reset" href="${ctx.user.get_admin_url(ctx, 'reset')}">
+                        ${_(u'Yes')}
+                    </a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
+                </div>
+            </div>
         </div>
     </div>
 </%def>
