@@ -35,13 +35,13 @@ from openfisca_web_ui import pages
 
 
 <%def name="tabs()" filter="trim">
-    <ul class="nav nav-tabs">
+            <ul class="nav nav-tabs">
     % for page_data in pages.pages_data:
-      <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
-        <a href="${u'/{}'.format(page_data['slug'])}">${page_data['title']}</a>
-      </li>
+                <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
+                    <a href="${u'/{}'.format(page_data['slug'])}">${page_data['title']}</a>
+                </li>
     % endfor
-    </ul>
+            </ul>
 </%def>
 
 
@@ -49,9 +49,9 @@ from openfisca_web_ui import pages
 % if korma_errors:
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
-    <%self:tabs/>
     <div class="row">
         <div class="col-sm-6">
+            <%self:tabs/>
             <form class="korma form" method="POST" role="form">
                 ${page_form.html | n}
                 <p><input class="btn btn-success" type="submit" value="Valider"></p>
