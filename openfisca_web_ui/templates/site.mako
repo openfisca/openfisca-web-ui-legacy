@@ -226,32 +226,11 @@ $(function () {
         </div>
         <div class="collapse navbar-collapse navbar-topbar-collapse">
             <ul class="nav navbar-nav">
-                <%self:topbar_dropdown_admin/>
                 <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
             </ul>
             <%self:topbar_user/>
         </div>
     </nav>
-</%def>
-
-
-<%def name="topbar_dropdown_admin()" filter="trim">
-<%
-    is_admin = model.is_admin(ctx)
-    user = model.get_user(ctx)
-%>\
-    % if is_admin or user is not None:
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">${_('Administration')} <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-        % if is_admin:
-                        <li><a href="${model.Account.get_admin_class_url(ctx)}">${_('Accounts')}</a></li>
-                        <li><a href="${model.Session.get_admin_class_url(ctx)}">${_('Sessions')}</a></li>
-        % endif
-                        <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
-                    </ul>
-                </li>
-    % endif
 </%def>
 
 
