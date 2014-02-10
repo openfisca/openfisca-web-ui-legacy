@@ -12,6 +12,10 @@
     padding-left: 10px;
 }
 
+.collapse-node-toggle:hover {
+    text-decoration: none;
+}
+
 .korma input[type="submit"] {
     margin: 1em 0;
 }

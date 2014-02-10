@@ -67,10 +67,10 @@ from openfisca_web_ui import model, urls
             node_slug = strings.slugify(node_title)
 %>\
                         <p>
-                            <a href="#" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
+                            <a href="#" class="collapse-node-toggle" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
                                 <span class="glyphicon glyphicon-chevron-right"></span>
+                                ${node_title}
                             </a>
-                            ${node_title}
                         </p>
                         <div id="node-${node_slug}" class="collapse collapse-node">
                             <%self:render_legislation_node node="${node['children'][node_name]}"/>
@@ -135,18 +135,25 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
         <div class="row">
             <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Content"))}</b></div>
             <div class="col-sm-10">
+<%
+        user = model.get_user(ctx)
+%>\
+        % if user is not None and user.email is not None:
                 <ul class="nav nav-tabs">
                     <li class="active"><a data-toggle="tab" href="#description-view">${_(u"View")}</a></li>
                     <li><a data-toggle="tab" href="#description-source">${_(u"Source")}</a></li>
                 </ul>
                 <div class="tab-content">
                     <div class="active tab-pane" id="description-view">
+        % endif
                         <%self:render_legislation_node node="${value}"/>
+        % if user is not None and user.email is not None:
                     </div>
                     <div class="tab-pane" id="description-source">
                         <pre class="break-word">${value | n, js, h}</pre>
                     </div>
                 </div>
+        % endif
                 <hr>
             </div>
         </div>

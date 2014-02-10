@@ -31,5 +31,16 @@ $(function() {
         name: 'tag',
         remote: '/api/1/tags/typeahead?q=%QUERY'
     });
+
+    $('.collapse-node-toggle').on('click', function() {
+      var $span = $(this).find('span');
+      if ($span.hasClass('glyphicon-chevron-right')) {
+        $span.removeClass('glyphicon-chevron-right');
+        $span.addClass('glyphicon-chevron-down');
+      } else {
+        $span.removeClass('glyphicon-chevron-down');
+        $span.addClass('glyphicon-chevron-right');
+      }
+    });
 });
 
