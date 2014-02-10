@@ -382,6 +382,10 @@ def fetch_api_columns_and_prestations():
             questions_by_entity.setdefault(entity, []).append(make_question(column))
 
 
+def find_category(column_name):
+    return u'main'
+
+
 def get_user(ctx, check = False):
     user = ctx.user
     if user is UnboundLocalError:

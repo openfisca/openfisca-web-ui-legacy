@@ -47,15 +47,17 @@ def build_prenom_select_choices(user_api_data):
     return prenom_select_choices
 
 
+# TODO move to simulation.py?
+default_values = {
+    u'birth': datetime.datetime(1984, 1, 1, 0, 0),
+    u'prenom': u'Personne 1',
+    u'sali': 25000,
+    u'statmarit': u'celibataire',
+    }
+
+
 def default_value():
-    return {
-        uuidhelpers.generate_uuid(): {
-            u'birth': datetime.datetime(1984, 1, 1, 0, 0),
-            u'prenom': u'Personne 1',
-            u'sali': 25000,
-            u'statmarit': u'celibataire',
-            }
-        }
+    return {uuidhelpers.generate_uuid(): default_values}
 
 
 group_questions = [

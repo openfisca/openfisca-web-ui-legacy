@@ -32,51 +32,6 @@ from formencode import variabledecode
 from .. import auth, contexts, conv, model, questions, templates, wsgihelpers
 
 
-#@wsgihelpers.wsgify
-#def all_questions(req):
-#    ctx = contexts.Ctx(req)
-#    auth.ensure_session(ctx)
-#    session = ctx.session
-#    id_, error = conv.base.input_to_uuid(req.urlvars['id'])
-#    if error is not None:
-#        return wsgihelpers.bad_request(ctx, explanation = error)
-#    page_data = req.urlvars['page_data']
-#    entity = page_data['entity']
-#    entity_questions = model.entity_questions(entity)
-#    if not entity_questions:
-#        return wsgihelpers.not_found(ctx, explanation = ctx._('No questions'))
-#    page_entity_form = Group(
-#        children_attributes = {
-#            '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-#            },
-#        name = u'questions',
-#        questions = entity_questions,
-#        )
-#    user_api_data = session.user.api_data if session.user is not None else None
-#    if user_api_data is None:
-#        user_api_data = {}
-#    if req.method == 'GET':
-#        errors = None
-#        page_entity_form.fill({'questions': user_api_data.get(entity, {}).get(id_, {})})
-#    else:
-#        params = req.params
-#        korma_inputs = variabledecode.variable_decode(params)
-#        korma_data, korma_errors = page_entity_form.root_input_to_data(korma_inputs, state = ctx)
-#        if korma_errors is None:
-#            user_api_data.setdefault(entity, {}).setdefault(id_, {}).update(korma_data)
-#            session.user.api_data = user_api_data
-#            session.user.save(ctx, safe = True)
-#            # TODO change redirect location according to coming page
-#            return wsgihelpers.redirect(ctx, location = '/famille')
-#    return templates.render(
-#        ctx,
-#        '/form.mako',
-#        korma_errors = {},
-#        page_entity_form = page_entity_form,
-#        simulation_errors = {},
-#        )
-
-
 @wsgihelpers.wsgify
 def form(req):
     ctx = contexts.Ctx(req)
@@ -95,13 +50,11 @@ def form(req):
             for legislation in model.Legislation.find()
             )
         page_form = page_data['form_factory'](legislation_urls_and_descriptions)
-    from pprint import pprint
-    print req.method
     if req.method == 'GET':
         korma_errors = None
         korma_values = check(
             pipe(
-                conv.api.api_data_to_korma_data,
+                page_data['api_data_to_page_korma_data'],
                 page_form.root_data_to_str,
                 )(user_api_data, state = ctx)
             )
@@ -109,22 +62,16 @@ def form(req):
     else:
         params = req.params
         korma_inputs = variabledecode.variable_decode(params)
-        print '#' * 88, 'korma_inputs'
-        pprint(korma_inputs)
         korma_data, korma_errors = page_form.root_input_to_data(korma_inputs, state = ctx)
-        print '#' * 88, 'korma_data'
-        pprint(korma_data)
         if korma_errors is None:
-            page_api_data = conv.check(page_data['korma_data_to_page_api_data'](korma_data, state = ctx))
-            print '#' * 88, 'page_api_data'
-            pprint(user_api_data[page_data['entity']])
+            page_api_data = check(page_data['korma_data_to_page_api_data'](korma_data, state = ctx))
             if page_api_data is not None:
                 user_api_data.update(page_api_data)
                 session.user.api_data = user_api_data
                 session.user.save(ctx, safe = True)
             return wsgihelpers.redirect(ctx, location = '')
         else:
-            page_form.fill(korma_data, korma_errors)
+            page_form.fill(korma_inputs, korma_errors)
     user_api_data['validate'] = True
     _, simulation_errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
     return templates.render(

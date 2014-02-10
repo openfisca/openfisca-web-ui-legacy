@@ -34,7 +34,7 @@ from biryani1.baseconv import function, pipe
 from biryani1.states import default_state
 import requests
 
-from . import api
+from .. import questions
 
 
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
@@ -70,6 +70,37 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
 api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
 
 
+def fill_user_api_data(values, state = None):
+    """Compute missing values for API consistency and fill user API data with them."""
+    from .. import model
+    if values is None:
+        return None, None
+    if state is None:
+        state = default_state
+    individus = questions.individus.default_value() if values.get('individus') is None else values['individus']
+    for individu_id, individu in individus.iteritems():
+        if individu.get(u'birth') is None:
+            individu[u'birth'] = questions.individus.default_values['birth']
+    new_values = {u'individus': individus}
+    individu_ids = individus.keys()
+    familles = questions.familles.default_value(individu_ids=individu_ids) if values.get('familles') is None \
+        else values['familles']
+    new_values['familles'] = familles
+    foyers_fiscaux = questions.foyers_fiscaux.default_value(familles=familles) if values.get('foyers_fiscaux') is None \
+        else values['foyers_fiscaux']
+    new_values['foyers_fiscaux'] = foyers_fiscaux
+    menages = questions.menages.default_value(familles=familles, individu_ids=individu_ids) \
+        if values.get('menages') is None else values['menages']
+    new_values['menages'] = menages
+    if values.get('legislation_url') is None:
+        legislation = model.Legislation.find_one()
+        if legislation is not None:
+            new_values['legislation_url'] = legislation.get_api1_full_url(state, 'json')
+    if values.get('year') is None:
+        new_values['year'] = 2013
+    return new_values, None
+
+
 def user_api_data_to_api_data(user_data, state = None):
     if user_data is None:
         return None, None
@@ -90,13 +121,14 @@ def user_api_data_to_api_data(user_data, state = None):
             for key, value in user_data['individus'][individu_id].iteritems()
             )
         individu['id'] = individu_id
-        del individu['prenom']
+        if 'prenom' in individu:
+            del individu['prenom']
         api_data['individus'].append(individu)
     return {'scenarios': [api_data]}, None
 
 
 user_api_data_to_simulation_output = pipe(
-    api.fill_user_api_data,
+    fill_user_api_data,
     user_api_data_to_api_data,
     api_data_to_api_post_content,
     api_post_content_to_simulation_output,

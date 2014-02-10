@@ -31,6 +31,7 @@ from . import conv, questions
 
 pages_data = [
     {
+        'api_data_to_page_korma_data': conv.familles.api_data_to_page_korma_data,
         'entity': 'familles',
         'form_factory': questions.familles.make_familles_repeat,
         'korma_data_to_page_api_data': conv.familles.korma_data_to_page_api_data,
@@ -39,6 +40,7 @@ pages_data = [
         'title': u'Famille',
         },
     {
+#        'api_data_to_page_korma_data': conv.foyers_fiscaux.api_data_to_page_korma_data,
         'entity': 'foyers_fiscaux',
         'form_factory': questions.foyers_fiscaux.make_foyers_fiscaux_repeat,
         'korma_data_to_page_api_data': conv.foyers_fiscaux.korma_data_to_page_api_data,
@@ -47,6 +49,7 @@ pages_data = [
         'title': u'Déclaration d\'impôts',
         },
     {
+#        'api_data_to_page_korma_data': conv.menages.api_data_to_page_korma_data,
         'entity': 'menages',
         'form_factory': questions.menages.make_menages_repeat,
         'korma_data_to_page_api_data': conv.menages.korma_data_to_page_api_data,
@@ -55,6 +58,7 @@ pages_data = [
         'title': u'Logement principal',
         },
     {
+#        'api_data_to_page_korma_data': conv.legislation_urls.api_data_to_page_korma_data,
         'entity': 'legislation_url',
         'form_factory': questions.legislation_urls.make_legislation_urls_group,
         'korma_data_to_page_api_data': conv.legislation_urls.korma_data_to_page_api_data,

@@ -46,21 +46,25 @@ def make_familles_repeat(prenom_select_choices):
         add_button_label = u'Ajouter une famille',
         name = u'familles',
         template_question = Group(
-            name = u'individus_and_categories',
-            outer_html_template = u'<div class="repeated-group">{self.inner_html}</div>',
+            name = u'famille',
+            outer_html_template = u'''
+<div class="repeated-group">
+  <legend>Famille {self.parent_data[familles][index]}</legend>
+  {self.inner_html}
+</div>''',
             questions = [
+                Hidden(name = 'id'),
                 Repeat(
                     add_button_label = u'Ajouter un membre',
                     name = u'individus',
                     template_question = Group(
                         name = u'individu',
                         outer_html_template = u'''
-<h3>Famille {self.parent_data[individus][index]}</h3>
-{self[famille_id].html}
+{self[id].html}
 <div class="form-inline personne-row">
   <a href="#" type="button" data-toggle="collapse" data-target="#individu"><span class="glyphicon
 glyphicon-chevron-down"></span></a>
-  {self[role].html} <span class="prenom">PRÉNOM</span>
+  {self[role].html} <span class="prenom"></span>
 </div>
 <div id="individu" class="collapse in">
   <div class="form-horizontal">
@@ -68,7 +72,7 @@ glyphicon-chevron-down"></span></a>
   </div>
 </div>''',
                         questions = [
-                            Hidden(name = 'famille_id'),
+                            Hidden(name = 'id'),
                             Select(
                                 control_attributes = {'class': 'form-control'},
                                 choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
@@ -95,10 +99,8 @@ glyphicon-chevron-down"></span></a>
                 Group(
                     name = u'categories',
                     outer_html_template = u'''
-<fieldset>
-  <legend>Plus de précisions sur la famille</legend>
-  <div class="form-horizontal">{self.inner_html}</div>
-</fieldset>''',
+<h4>Plus de précisions sur la famille</h4>
+<div class="form-horizontal">{self.inner_html}</div>''',
                     questions = [
                         Group(
                             children_attributes = {
