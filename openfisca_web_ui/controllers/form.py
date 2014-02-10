@@ -51,14 +51,11 @@ def form(req):
             )
         page_form = page_data['form_factory'](legislation_urls_and_descriptions)
     if req.method == 'GET':
-        korma_errors = None
-        korma_values = check(
-            pipe(
-                page_data['api_data_to_page_korma_data'],
-                page_form.root_data_to_str,
-                )(user_api_data, state = ctx)
-            )
-        page_form.fill(korma_values)
+        korma_values, korma_errors = pipe(
+            page_data['api_data_to_page_korma_data'],
+            page_form.root_data_to_str,
+            )(user_api_data, state = ctx)
+        page_form.fill(korma_values, korma_errors)
     else:
         params = req.params
         korma_inputs = variabledecode.variable_decode(params)

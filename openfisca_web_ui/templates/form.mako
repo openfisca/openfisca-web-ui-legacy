@@ -54,7 +54,7 @@ from openfisca_web_ui import pages
             <%self:tabs/>
             <form class="korma form" method="POST" role="form">
                 ${page_form.html | n}
-                <p>
+                <p class="buttons">
                     <input class="btn btn-success" type="submit" value="Valider">
                     <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
                         ${_(u'Reset')}
@@ -88,4 +88,17 @@ from openfisca_web_ui import pages
             </div>
         </div>
     </div>
+</%def>
+
+
+<%def name="scripts()" filter="trim">
+<%parent:scripts/>
+<script>
+$('body').on('keypress', 'input', function(evt) {
+  if (evt.keyCode == 13) {
+    evt.preventDefault();
+    $("form").submit();
+  }
+});
+</script>
 </%def>

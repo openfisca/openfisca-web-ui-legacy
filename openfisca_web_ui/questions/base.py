@@ -72,7 +72,8 @@ class MongoDate(Date):
         return pipe(super(MongoDate, self).default_input_to_data, base.date_to_datetime)
 
 
-FrenchDate = lambda *args, **kwargs: MongoDate(format=u'%d/%m/%Y', placeholder=u'dd/mm/yyyy', *args, **kwargs)
+FrenchDate = lambda placeholder = u'dd/mm/yyyy', *args, **kwargs: \
+    MongoDate(format=u'%d/%m/%Y', placeholder=placeholder, *args, **kwargs)
 
 
 Repeat = lambda add_button_label = u'Ajouter', *args, **kwargs: \

@@ -31,57 +31,6 @@ from biryani1.states import default_state
 from .. import uuidhelpers
 
 
-#{
-#    u'familles': [
-#        {
-#            u'famille': {
-#                u'categories': {u'main': {u'ass_mat': True,
-#                                           u'empl_dir': False,
-#                                           u'gar_dom': False,
-#                                           u'inactif': False,
-#                                           u'opt_colca': False,
-#                                           u'partiel1': False,
-#                                           u'partiel2': False}},
-#                u'id': None,
-#                u'individus': [
-#                    {
-#                        u'individu': {
-#                            u'categories': {
-#                                u'main': {
-#                                    u'birth': None,
-#                                    u'prenom': None,
-#                                    u'sali': None,
-#                                    u'statmarit': u'marie'
-#                                }
-#                            },
-#                            'id': None,
-#                            u'role': u'parents',
-#                        }
-#                    }
-#                ]
-#            }
-#        }
-#    ]
-#}
-
-
-#{
-#    "familles": {
-#        'f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0ff00': {
-#            "ass_mat": True,
-#            "parents": ["ff23bab9df6242cb88eac2f9df58edf4"],
-#        },
-#    },
-#    "individus": {
-#        'ff23bab9df6242cb88eac2f9df58edf4': {
-#            "sali": 25000,
-#            "statmarit": "celibataire",
-#            "birth": "1984-01-01T00:00:00",
-#        },
-#    },
-#}
-
-
 def korma_data_to_page_api_data(values, state = None):
     if values is None:
         return None, None

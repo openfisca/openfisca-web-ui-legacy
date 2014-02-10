@@ -16,24 +16,8 @@
     text-decoration: none;
 }
 
-.korma input[type="submit"] {
-    margin: 1em 0;
-}
-
 .nav-tabs {
-    margin-top: 20px;
     margin-bottom: 30px;
-}
-
-.personne-row {
-    margin: 1em 0;
-}
-
-.repeated-group {
-    border: 1px solid LightGray;
-    border-radius: 1em;
-    margin-bottom: 1em;
-    padding: 1em;
 }
 
 .waterfall-img {

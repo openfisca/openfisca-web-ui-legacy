@@ -37,17 +37,6 @@ from . import html
 from .base import FrenchDate
 
 
-def build_prenom_select_choices(user_api_data):
-    prenom_select_choices = []
-    if user_api_data is not None:
-        individus = user_api_data.get('individus')
-        if individus is not None:
-            for individu_id, individu in individus.iteritems():
-                prenom_select_choices.append((individu_id, individu.get('prenom')))
-    return prenom_select_choices
-
-
-# TODO move to simulation.py?
 default_values = {
     u'birth': datetime.datetime(1984, 1, 1, 0, 0),
     u'prenom': u'Personne 1',
@@ -60,16 +49,28 @@ def default_value():
     return {uuidhelpers.generate_uuid(): default_values}
 
 
+def build_prenom_select_choices(user_api_data):
+    prenom_select_choices = []
+    if user_api_data is not None:
+        individus = user_api_data.get('individus')
+        if individus is not None:
+            for individu_id, individu in individus.iteritems():
+                prenom_select_choices.append((individu_id, individu.get('prenom')))
+    return prenom_select_choices
+
+
 group_questions = [
-    Text(label = u'Prénom'),
+    Text(label = u'Prénom', placeholder = u'Prénom inconnu'),
     FrenchDate(
         label = u'Date de naissance',
         name = u'birth',
+        placeholder = default_values['birth'].strftime(u'%d/%m/%Y'),
         ),
     Number(
         label = u'Salaire',
         min = 0,
         name = u'sali',
+        placeholder = default_values['sali'],
         step = 1,
         ),
     Select(
@@ -83,6 +84,7 @@ group_questions = [
             ],
         label = u'Statut marital',
         name = u'statmarit',
+        value = default_values['statmarit'],
         ),
     ]
 

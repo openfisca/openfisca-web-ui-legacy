@@ -79,8 +79,9 @@ def fill_user_api_data(values, state = None):
         state = default_state
     individus = questions.individus.default_value() if values.get('individus') is None else values['individus']
     for individu_id, individu in individus.iteritems():
-        if individu.get(u'birth') is None:
-            individu[u'birth'] = questions.individus.default_values['birth']
+        for key, value in questions.individus.default_values.iteritems():
+            if individu.get(key) is None:
+                individu[key] = value
     new_values = {u'individus': individus}
     individu_ids = individus.keys()
     familles = questions.familles.default_value(individu_ids=individu_ids) if values.get('familles') is None \
