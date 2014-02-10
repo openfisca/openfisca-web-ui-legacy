@@ -31,6 +31,10 @@ from itertools import chain
 from biryani1.baseconv import function, pipe, rename_item, uniform_sequence
 
 
+def api_data_to_page_korma_data(values, state = None):
+    return {}, None
+
+
 korma_data_to_page_api_data = pipe(
     function(lambda item: item.get('foyers_fiscaux')),
     uniform_sequence(

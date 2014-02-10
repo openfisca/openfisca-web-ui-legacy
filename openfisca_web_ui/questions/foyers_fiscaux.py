@@ -46,25 +46,13 @@ def default_value(familles):
 
 
 make_foyers_fiscaux_repeat = lambda prenom_select_choices: Repeat(
+    add_button_label = u'Ajouter une déclaration d\'impôts',
     name = u'foyers_fiscaux',
     template_question = Repeat(
-        name = u'personnes_in_foyer_fiscal',
-        outer_html_template = u'''
-<div class="repeated-group">
-  {self.inner_html}
-  <a class="btn btn-primary btn-all-questions" href="/TODO/all-questions?entity=foyers_fiscaux">Plus de détails</a>
-</div>''',
+        name = u'individus',
         template_question = Group(
-            name = u'personne_in_foyer_fiscal',
-            outer_html_template = u'''
-{self[foyer_fiscal_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[id].html}
-  {self[edit].html}
-</div>''',
+            name = u'individu',
             questions = [
-                Hidden(name = 'foyer_fiscal_id'),
                 Select(
                     control_attributes = {'class': 'form-control'},
                     choices = (
@@ -78,12 +66,6 @@ make_foyers_fiscaux_repeat = lambda prenom_select_choices: Repeat(
                     control_attributes = {'class': 'form-control'},
                     choices = prenom_select_choices,
                     name = 'id',
-                    ),
-                Button(
-                    label = u'Éditer',
-                    name = u'edit',
-                    outer_html_template = u'<button class="btn btn-primary" data-toggle="modal" type="button">\
-{self.label}</button>',
                     ),
                 ],
             ),

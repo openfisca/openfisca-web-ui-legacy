@@ -31,6 +31,42 @@ from biryani1.states import default_state
 from .. import uuidhelpers
 
 
+def api_data_to_page_korma_data(values, state = None):
+    from .. import model
+
+    def build_categories(columns):
+        categories = {}
+        for column_name, column_value in columns.iteritems():
+            category = model.find_category(column_name)
+            categories.setdefault(category, {})[column_name] = column_value
+        return categories
+
+    if values is None:
+        return None, None
+    if state is None:
+        state = default_state
+    new_familles = []
+    if values.get('familles') is not None:
+        for famille_id, famille in values['familles'].iteritems():
+            new_famille = {
+                u'id': famille_id,
+                u'individus': [],
+                }
+            for role in ('parents', 'enfants'):
+                if famille.get(role) is not None:
+                    for individu_id in famille[role]:
+                        new_individu = {
+                            u'categories': build_categories(columns=values['individus'][individu_id]),
+                            u'id': individu_id,
+                            u'role': role,
+                            }
+                        new_famille['individus'].append({u'individu': new_individu})
+            famille_columns = {key: value for key, value in famille.iteritems() if key not in ('parents', 'enfants')}
+            new_famille[u'categories'] = build_categories(columns=famille_columns)
+            new_familles.append({u'famille': new_famille})
+    return {u'familles': new_familles}, None
+
+
 def korma_data_to_page_api_data(values, state = None):
     if values is None:
         return None, None
@@ -70,39 +106,3 @@ def korma_data_to_page_api_data(values, state = None):
         u'familles': familles,
         u'individus': individus,
         }, None
-
-
-def api_data_to_page_korma_data(values, state = None):
-    from .. import model
-
-    def build_categories(columns):
-        categories = {}
-        for column_name, column_value in columns.iteritems():
-            category = model.find_category(column_name)
-            categories.setdefault(category, {})[column_name] = column_value
-        return categories
-
-    if values is None:
-        return None, None
-    if state is None:
-        state = default_state
-    new_familles = []
-    if values.get('familles') is not None:
-        for famille_id, famille in values['familles'].iteritems():
-            new_famille = {
-                u'id': famille_id,
-                u'individus': [],
-                }
-            for role in ('parents', 'enfants'):
-                if famille.get(role) is not None:
-                    for individu_id in famille[role]:
-                        new_individu = {
-                            u'categories': build_categories(columns=values['individus'][individu_id]),
-                            u'id': individu_id,
-                            u'role': role,
-                            }
-                        new_famille['individus'].append({u'individu': new_individu})
-            famille_columns = {key: value for key, value in famille.iteritems() if key not in ('parents', 'enfants')}
-            new_famille[u'categories'] = build_categories(columns=famille_columns)
-            new_familles.append({u'famille': new_famille})
-    return {u'familles': new_familles}, None

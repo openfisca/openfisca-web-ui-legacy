@@ -29,7 +29,7 @@
 import logging
 
 from .. import auth, contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
-from . import accounts, form, sessions, legislations
+from . import accounts, form, legislations, sessions, urls
 
 
 log = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def image(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    return wsgihelpers.redirect(ctx, location = '/famille')
+    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'familles'))
 
 
 def make_router():
