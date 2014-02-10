@@ -7,6 +7,11 @@
     word-wrap: break-word;
 }
 
+.collapse-node {
+    border-left: 3px solid #2A6496;
+    padding-left: 10px;
+}
+
 .korma input[type="submit"] {
     margin: 1em 0;
 }

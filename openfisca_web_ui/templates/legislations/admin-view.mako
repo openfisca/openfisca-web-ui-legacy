@@ -26,6 +26,8 @@
 <%!
 import collections
 
+from biryani1 import strings
+
 from openfisca_web_ui import model, urls
 %>
 
@@ -52,6 +54,54 @@ from openfisca_web_ui import model, urls
 </%def>
 
 
+<%def name="render_legislation_node(node)" filter="trim">
+    % if node.get('@type') == 'Node':
+        % for node_name in node['children']:
+<%
+            node_title = node['children'][node_name].get('description')
+            node_slug = strings.slugify(node_title)
+%>\
+                        <p>
+                            <a href="#" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            </a>
+                            ${node_title}
+                        </p>
+                        <div id="node-${node_slug}" class="collapse collapse-node">
+                            <%self:render_legislation_node node="${node['children'][node_name]}"/>
+                        </div>
+        % endfor
+    % elif node.get('@type') == 'Scale':
+        <%self:render_legislation_scale scale="${node}"/>
+    % elif node.get('@type') == 'Parameter':
+        <%self:render_legislation_parameter parameter="${node['values']}"/>
+    % endif
+</%def>
+
+
+<%def name="render_legislation_scale(scale)" filter="trim">
+    <table class="table table-stripped">
+        <tr>
+            <th>Seuil</th>
+            <th>Assiette</th>
+            <th>Taux</th>
+        </tr>
+    % for slice in scale.get('slices'):
+        <tr>
+            <td>${slice['threshold'][-1].get('value') if slice.get('threshold') else ''}</td>
+            <td>${slice['base'][-1].get('value') if slice.get('base') else ''}</td>
+            <td>${slice['rate'][-1].get('value') if slice.get('rate') else ''}</td>
+        </tr>
+    % endfor
+    </table>
+</%def>
+
+
+<%def name="render_legislation_parameter(parameter)" filter="trim">
+    ${parameter[-1].get('value')}
+</%def>
+
+
 <%def name="title_content()" filter="trim">
 ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
@@ -63,11 +113,22 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             <div class="col-sm-10">${legislation.title}</div>
         </div>
 <%
-    value = legislation.json
+    value = legislation.description
 %>\
     % if value is not None:
         <div class="row">
             <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Description"))}</b></div>
+            <div class="col-sm-10">
+                ${legislation.description}
+            </div>
+        </div>
+    % endif
+<%
+    value = legislation.json
+%>\
+    % if value is not None:
+        <div class="row">
+            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Content"))}</b></div>
             <div class="col-sm-10">
                 <ul class="nav nav-tabs">
                     <li class="active"><a data-toggle="tab" href="#description-view">${_(u"View")}</a></li>
@@ -75,7 +136,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                 </ul>
                 <div class="tab-content">
                     <div class="active tab-pane" id="description-view">
-                        ${legislation.description}
+                        <%self:render_legislation_node node="${value}"/>
                     </div>
                     <div class="tab-pane" id="description-source">
                         <pre class="break-word">${value | n, js, h}</pre>
