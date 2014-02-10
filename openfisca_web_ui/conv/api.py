@@ -93,6 +93,7 @@ def api_data_to_korma_data(api_data, state = None):
 
 def fill_user_api_data(values, state = None):
     """Compute missing values for API consistency and fill user API data with them."""
+    from .. import model
     if values is None:
         return None, None
     if state is None:
@@ -108,6 +109,12 @@ def fill_user_api_data(values, state = None):
     if values.get('menages') is None:
         new_values['menages'] = questions.menages.default_value(familles=new_values['familles'],
                                                                 individu_ids=individu_ids)
+    if values.get('legislation_url') is None:
+        legislation = model.Legislation.find_one()
+        if legislation is not None:
+            new_values['legislation_url'] = legislation.get_api1_full_url(state, 'json')
+    if values.get('year') is None:
+        new_values['year'] = 2013
     return new_values, None
 
 

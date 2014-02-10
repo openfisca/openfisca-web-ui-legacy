@@ -81,8 +81,8 @@ def user_api_data_to_api_data(user_data, state = None):
         'foyers_fiscaux': user_data.get('foyers_fiscaux', {}).values(),
         'menages': user_data.get('menages', {}).values(),
         'individus': [],
-        # TODO(rsoufflet) Year must be configurable
-        'year': 2006,
+        'legislation_url': user_data.get('legislation_url'),
+        'year': user_data.get('year', 2013),
         }
     for individu_id in user_data.get('individus', {}).iterkeys():
         individu = dict(

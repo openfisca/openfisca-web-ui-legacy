@@ -193,6 +193,11 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
             return None
         return self.get_admin_class_url(ctx, self.slug or self._id, *path, **query)
 
+    def get_api1_full_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return urls.get_full_url(ctx, 'api', '1', 'legislations', self.slug or self._id, *path, **query)
+
     def get_api1_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
             return None
