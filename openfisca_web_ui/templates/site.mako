@@ -240,16 +240,15 @@ $(function () {
     user = model.get_user(ctx)
 %>\
         % if user is not None:
-                <li><a href="${user.get_admin_url(ctx, 'reset')}">${_(u'Reset')}</a></li>
-                <li class="active"><a href="${user.get_admin_url(ctx)}"><span class="glyphicon glyphicon-user"></span>
-                    ${u'[anonyme]' if user.email is None else user.email}</a></li>
+            % if user.email is not None:
+                <li class="active">
+                    <a href="${user.get_admin_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
+                </li>
+                <li><a class="sign-out" href="#" title="${_(u'Sign out')}">${_(u'Sign out')}</a></li>
+            % else:
+                <li><a class="sign-in" href="#" title="${_(u'Save this situation')}">${_(u'Sign in')}</a></li>
+            % endif
         % endif
-        % if user is None or user.email is None:
-                <li><a class="sign-in" href="#" title="${_(u'Sign in with Persona')}">${_(u'Sign in')}</a></li>
-        % else:
-                <li><a class="sign-out" href="#" title="${_(u'Sign out from Persona')}">${_(u'Sign out')}</a></li>
-        % endif
-
             </ul>
 </%def>
 
