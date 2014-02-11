@@ -95,8 +95,12 @@ def admin_delete(req):
             )
 
     if req.method == 'POST':
-        account.delete(ctx, safe = True)
-        return wsgihelpers.redirect(ctx, location = model.Account.get_admin_class_url(ctx))
+        if user._id != account._id:
+            account.delete(ctx, safe = True)
+            return wsgihelpers.redirect(ctx, location = model.Account.get_admin_class_url(ctx))
+        else:
+            account.delete(ctx, safe = True)
+            return wsgihelpers.redirect(ctx, location = '/')
     return templates.render(ctx, '/accounts/admin-delete.mako', account = account)
 
 
@@ -534,6 +538,26 @@ def api1_typeahead(req):
         )
 
 
+@wsgihelpers.wsgify
+def email_delete(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+    user = model.get_user(ctx)
+    if user is None or user._id != account._id:
+        return wsgihelpers.unauthorized(ctx,
+            explanation = ctx._("Deletion unauthorized"),
+            message = ctx._("You can not delete an account."),
+            title = ctx._('Operation denied'),
+            )
+    account.email = None
+    account.full_name = None
+    account.slug = None
+    account.compute_words()
+    account.save(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = '/')
+
+
 def extract_account_inputs_from_params(ctx, params = None):
     if params is None:
         params = webob.multidict.MultiDict()
@@ -585,59 +609,57 @@ def login(req):
             explanation = ctx._(u'Error while verifying authentication assertion'),
             )
 
-    user = model.Account.find_one(
+    registered_account = model.Account.find_one(
         dict(
             email = verification_data['email'],
             ),
         as_class = collections.OrderedDict,
         )
-    if user is None:
-        user = model.Account()
-        user._id = uuidhelpers.generate_uuid()
-        user.api_key = uuidhelpers.generate_uuid()
+    session = ctx.session
+    if registered_account is None:
+        if session is None:
+            ctx.session = session = model.Session()
+            session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+        user = session.user
+        if user is None:
+            user = model.Account()
+            user._id = uuidhelpers.generate_uuid()
+            user.api_key = uuidhelpers.generate_uuid()
         user.email = verification_data['email']
         user.full_name = verification_data['email']
         user.slug = strings.slugify(user.full_name)
         user.compute_words()
         user.save(ctx, safe = True)
-    ctx.user = user
-
-    session = ctx.session
-    if session is None:
-        ctx.session = session = model.Session()
-        session.token = unicode(uuid.uuid4())
-    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-    session.user_id = user._id
+        ctx.user = user
+        session.user_id = user._id
+        session.user = user
+    else:
+        session.user_id = registered_account._id
+        session.user = registered_account
+    session.token = uuidhelpers.generate_uuid()
     session.save(ctx, safe = True)
 
-    if req.cookies.get(conf['cookie']) != session.token:
-        req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
-    return 'Login succeeded.'
+    req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
+    return wsgihelpers.respond_json(
+        ctx,
+        dict(
+            existingAccount = registered_account is not None,
+            rejectUrl = session.user.get_admin_url(ctx, 'reject-cnil'),
+            )
+        )
 
 
 @wsgihelpers.wsgify
 def logout(req):
     ctx = contexts.Ctx(req)
-
     assert req.method == 'POST'
-
     session = ctx.session
     if session is not None:
-        session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-        if session.user_id is not None:
-            del session.user_id
-        session.save(ctx, safe = True)
-        if req.cookies.get(conf['cookie']) != session.token:
-            req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
+        session.delete(ctx, safe = True)
+        ctx.session = None
+        if req.cookies.get(conf['cookie']) is not None:
+            req.response.delete_cookie(conf['cookie'])
     return 'Logout succeeded.'
-
-#    session = ctx.session
-#    if session is not None:
-#        session.delete(ctx, safe = True)
-#        ctx.session = None
-#        if req.cookies.get(conf['cookie']) is not None:
-#            req.req.response.delete_cookie(conf['cookie'])
-#    return 'Logout succeeded.'
 
 
 def route_admin(environ, start_response):
@@ -659,6 +681,7 @@ def route_admin(environ, start_response):
         ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
+        ('POST', '^/reject-cnil/?$', email_delete),
         ('GET', '^/reset/?$', admin_reset),
         )
     return router(environ, start_response)

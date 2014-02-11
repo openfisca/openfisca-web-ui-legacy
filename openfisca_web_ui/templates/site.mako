@@ -61,6 +61,36 @@ ${conf['app_name']}
 </%def>
 
 
+<%def name="cnil_modal()" filter="trim">
+    <div class="modal fade bs-modal-lg" id="cnil-modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a class="close" href="/">&times;</a>
+                    <h4 class="modal-title">Enregistrement de votre situation</h4>
+                </div>
+                <div class="modal-body">
+                    Text d'exemple à remplacer par le texte concernant la CNIL
+                </div>
+<%
+    user = model.get_user(ctx)
+    if user is None:
+        return ''
+%>\
+                <form method="post" action="/">
+                    <div class="modal-footer">
+                        <a class="btn btn-success" href="/">Accepter</a>
+                        <button class="btn btn-danger" name="submit" type="submit">
+                            <span class="glyphicon glyphicon-trash"></span>Supprimer mon compte
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
 <%def name="container_content()" filter="trim">
 </%def>
 
@@ -168,7 +198,16 @@ navigator.id.watch({
                 assertion: assertion
             },
             success: function(res, status, xhr) {
-                window.location.reload();
+                if (!res.existingAccount) {
+                    $form = $("#cnil-modal").find('form');
+                    $form.attr('action', res.rejectUrl);
+                    $("#cnil-modal").modal('show');
+                    $form.on('submit', function() {
+                        navigator.id.logout();
+                    });
+                } else {
+                    window.location.reload();
+                }
             },
             error: function(xhr, status, err) {
                 navigator.id.logout();
@@ -273,6 +312,7 @@ user = model.get_user(ctx)
 <body>
     <%self:topbar/>
     <%self:body_content/>
+    <%self:cnil_modal/>
     <%self:scripts/>
     <%self:trackers/>
 </body>
