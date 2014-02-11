@@ -67,7 +67,7 @@ group_questions = [
         placeholder = default_values['birth'].strftime(u'%d/%m/%Y'),
         ),
     Number(
-        label = u'Salaire',
+        label = u'Salaire annuel',
         min = 0,
         name = u'sali',
         placeholder = default_values['sali'],
