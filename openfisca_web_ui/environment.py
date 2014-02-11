@@ -55,6 +55,7 @@ def load_environment(global_conf, app_conf):
             'app_conf': conv.set_value(app_conf),
             'app_dir': conv.set_value(app_dir),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('Openfisca')),
+            'auth.enable': conv.pipe(conv.guess_bool, conv.default(True)),
             'biryani1_i18n_dir': conv.pipe(
                 conv.default(os.path.normpath(os.path.join(app_dir, '..', '..', 'biryani1', 'biryani1', 'i18n'))),
                 conv.test(os.path.exists),

@@ -145,9 +145,11 @@ rel="stylesheet">
     <script src="${urls.get_url(ctx, u'/bower/bootstrap/dist/js/bootstrap.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/typeahead.js/dist/typeahead.js')}"></script>
     <script src="${urls.get_url(ctx, u'/js/site.js')}"></script>
+% if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
     <script src="https://login.persona.org/include.js"></script>
+% endif
     <script>
 <%
     user = model.get_user(ctx)
@@ -155,6 +157,7 @@ rel="stylesheet">
 var currentUser = ${user.email if user is not None else None | n, js};
 
 
+% if conf['auth.enable']:
 navigator.id.watch({
     loggedInUser: currentUser,
     onlogin: function (assertion) {
@@ -186,6 +189,7 @@ navigator.id.watch({
         });
     }
 });
+% endif
 
 
 $(function () {
@@ -235,21 +239,21 @@ $(function () {
 
 
 <%def name="topbar_user()" filter="trim">
-            <ul class="nav navbar-nav navbar-right">
 <%
-    user = model.get_user(ctx)
-%>\
-        % if user is not None:
-            % if user.email is not None:
+user = model.get_user(ctx)
+%>
+% if conf['auth.enable'] and user is not None:
+            <ul class="nav navbar-nav navbar-right">
+    % if user.email is None:
+                <li><a class="sign-in" href="#" title="${_(u'Save this situation')}">${_(u'Sign in')}</a></li>
+    % else:
                 <li class="active">
                     <a href="${user.get_admin_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
                 </li>
                 <li><a class="sign-out" href="#" title="${_(u'Sign out')}">${_(u'Sign out')}</a></li>
-            % else:
-                <li><a class="sign-in" href="#" title="${_(u'Save this situation')}">${_(u'Sign in')}</a></li>
-            % endif
-        % endif
+    % endif
             </ul>
+% endif
 </%def>
 
 
