@@ -28,13 +28,11 @@
 
 import datetime
 
-from korma.choice import Select
-from korma.group import Group
-from korma.text import Number, Text
+#from korma.choice import Select
+#from korma.text import Number, Text
 
 from .. import uuidhelpers
-from . import html
-from .base import FrenchDate
+#from .base import FrenchDate
 
 
 default_values = {
@@ -57,68 +55,3 @@ def build_prenom_select_choices(user_api_data):
             for individu_id, individu in individus.iteritems():
                 prenom_select_choices.append((individu_id, individu.get('prenom')))
     return prenom_select_choices
-
-
-group_questions = [
-    Text(label = u'Prénom', placeholder = u'Prénom inconnu'),
-    FrenchDate(
-        label = u'Date de naissance',
-        name = u'birth',
-        placeholder = default_values['birth'].strftime(u'%d/%m/%Y'),
-        ),
-    Number(
-        label = u'Salaire annuel',
-        min = 0,
-        name = u'sali',
-        placeholder = default_values['sali'],
-        step = 1,
-        ),
-    Select(
-        choices = [
-            u'Marié',
-            u'Célibataire',
-            u'Divorcé',
-            u'Veuf',
-            u'Pacsé',
-            u'Jeune veuf',
-            ],
-        label = u'Statut marital',
-        name = u'statmarit',
-        value = default_values['statmarit'],
-        ),
-    ]
-
-
-make_individu_group = lambda individu_id, prenom: Group(
-    children_attributes = {
-        '_control_attributes': {'class': 'form-control'},
-        '_inner_html_template': html.horizontal_bootstrap_control_inner_html_template,
-        '_outer_html_template': html.bootstrap_group_outer_html_template,
-        },
-    name = individu_id,
-    outer_html_template = u'''
-<div class="modal fade" id="{{self.full_name}}-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">{prenom}</h4>
-      </div>
-      <div class="modal-body">
-          <div class="form-horizontal">
-            {{self[prenom].html}}
-            {{self[birth].html}}
-            {{self[sali].html}}
-            {{self[statmarit].html}}
-          </div>
-      </div>
-      <div class="modal-footer">
-        <a class="btn btn-primary" href="/all-questions?entity=individus&id={individu_id}">Plus de détails</a>
-        <button type="submit" class="btn btn-success">Valider</button>
-      </div>
-    </div>
-  </div>
-</div>'''.format(individu_id = individu_id, prenom = prenom),
-    questions = group_questions,
-    )

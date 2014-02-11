@@ -27,6 +27,7 @@
 
 
 import datetime
+import logging
 import re
 
 from biryani1.baseconv import cleanup_line, empty_to_none, function, input_to_slug, pipe, test
@@ -34,7 +35,21 @@ from biryani1.states import default_state
 
 
 N_ = lambda message: message
+log = logging.getLogger(__name__)
 uuid_re = re.compile(ur'[\da-f]{32}$')
+
+
+def build_categories(columns, entity_name):
+    from .. import model
+    categories = {}
+    for column_name, column_value in columns.iteritems():
+        category_name = model.find_category_name(column_name = column_name, entity_name = entity_name)
+        if category_name is None:
+            log.error(u'Could not find category name from column_name: {!r} within entity: {!r}'.format(
+                column_name, entity_name))
+        else:
+            categories.setdefault(category_name, {})[column_name] = column_value
+    return categories
 
 
 date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[:6])))

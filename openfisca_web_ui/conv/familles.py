@@ -29,40 +29,34 @@
 from biryani1.states import default_state
 
 from .. import uuidhelpers
+from . import base
 
 
 def api_data_to_page_korma_data(values, state = None):
-    from .. import model
-
-    def build_categories(columns):
-        categories = {}
-        for column_name, column_value in columns.iteritems():
-            category = model.find_category(column_name)
-            categories.setdefault(category, {})[column_name] = column_value
-        return categories
-
     if values is None:
         return None, None
     if state is None:
         state = default_state
     new_familles = []
     if values.get('familles') is not None:
+        roles = ('parents', 'enfants')
         for famille_id, famille in values['familles'].iteritems():
             new_famille = {
                 u'id': famille_id,
                 u'individus': [],
                 }
-            for role in ('parents', 'enfants'):
+            for role in roles:
                 if famille.get(role) is not None:
                     for individu_id in famille[role]:
                         new_individu = {
-                            u'categories': build_categories(columns=values['individus'][individu_id]),
+                            u'categories': base.build_categories(
+                                columns=values['individus'][individu_id], entity_name = u'individus'),
                             u'id': individu_id,
                             u'role': role,
                             }
                         new_famille['individus'].append({u'individu': new_individu})
-            famille_columns = {key: value for key, value in famille.iteritems() if key not in ('parents', 'enfants')}
-            new_famille[u'categories'] = build_categories(columns=famille_columns)
+            columns = {key: value for key, value in famille.iteritems() if key not in roles}
+            new_famille[u'categories'] = base.build_categories(columns = columns, entity_name = u'familles')
             new_familles.append({u'famille': new_famille})
     return {u'familles': new_familles}, None
 
@@ -72,15 +66,12 @@ def korma_data_to_page_api_data(values, state = None):
         return None, None
     if state is None:
         state = default_state
-    individus = {}
-    familles = {}
+    new_individus = {}
+    new_familles = {}
     for famille_group_values in values['familles']:
         famille = famille_group_values['famille']
         new_famille_id = uuidhelpers.generate_uuid() if famille['id'] is None else famille['id']
-        new_famille = {
-            u'enfants': [],
-            u'parents': [],
-            }
+        new_famille = {}
         if famille['categories'] is not None:
             for category in famille['categories'].itervalues():
                 new_famille.update(category)
@@ -91,18 +82,18 @@ def korma_data_to_page_api_data(values, state = None):
             if individu['categories'] is not None:
                 for category in individu['categories'].itervalues():
                     new_individu.update(category)
-            individus[new_individu_id] = new_individu
+            new_individus[new_individu_id] = new_individu
             new_famille.setdefault(individu['role'], []).append(new_individu_id)
         if famille.get('add'):
             new_individu_id = uuidhelpers.generate_uuid()
-            individus[new_individu_id] = {}
+            new_individus[new_individu_id] = {}
             new_individu_role = u'parents' if len(new_famille[u'parents']) < 2 else u'enfants'
             new_famille.setdefault(new_individu_role, []).append(new_individu_id)
-        familles[new_famille_id] = new_famille
+        new_familles[new_famille_id] = new_famille
     if values.get('add'):
         new_famille_id = uuidhelpers.generate_uuid()
-        familles[new_famille_id] = {}
+        new_familles[new_famille_id] = {}
     return {
-        u'familles': familles,
-        u'individus': individus,
+        u'familles': new_familles,
+        u'individus': new_individus,
         }, None

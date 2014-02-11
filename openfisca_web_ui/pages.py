@@ -49,7 +49,7 @@ pages_data = [
         'title': u'Déclarations d\'impôts',
         },
     {
-#        'api_data_to_page_korma_data': conv.menages.api_data_to_page_korma_data,
+        'api_data_to_page_korma_data': conv.menages.api_data_to_page_korma_data,
         'entity': 'menages',
         'form_factory': questions.menages.make_menages_repeat,
         'korma_data_to_page_api_data': conv.menages.korma_data_to_page_api_data,
@@ -58,7 +58,7 @@ pages_data = [
         'title': u'Logements principaux',
         },
     {
-#        'api_data_to_page_korma_data': conv.legislation_urls.api_data_to_page_korma_data,
+        'api_data_to_page_korma_data': conv.legislation_urls.api_data_to_page_korma_data,
         'entity': 'legislation_url',
         'form_factory': questions.legislation_urls.make_legislation_urls_group,
         'korma_data_to_page_api_data': conv.legislation_urls.korma_data_to_page_api_data,

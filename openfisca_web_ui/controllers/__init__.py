@@ -29,7 +29,7 @@
 import logging
 
 from .. import auth, contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
-from . import accounts, form, legislations, sessions, urls
+from . import accounts, form, legislations, sessions
 
 
 log = logging.getLogger(__name__)

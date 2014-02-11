@@ -26,14 +26,11 @@
 """Korma questions related to menages"""
 
 
-from korma.base import Button
 from korma.choice import Select
 from korma.group import Group
-from korma.text import Number, Text
 
 from .. import uuidhelpers
-from . import html
-from .base import Hidden, Repeat
+from . import base
 
 
 def default_value(individu_ids, familles=None):
@@ -58,81 +55,77 @@ def default_value(individu_ids, familles=None):
     return {uuidhelpers.generate_uuid(): menage}
 
 
-make_menages_repeat = lambda prenom_select_choices: Repeat(
-    children_attributes = {
-        '_outer_html_template': u'''
-<div class="repeated-group">
-  {self.inner_html}
-  <a class="btn btn-primary btn-all-question" href="/TODO/all-questions?entity=menages">Plus de détails</a>
-</div>''',
-        },
-    name = 'menages',
-    template_question = Group(
-        children_attributes = {
-            '_outer_html_template': html.bootstrap_group_outer_html_template,
-            },
-        name = 'menage',
-        questions = [
-            Select(
-                control_attributes = {'class': 'form-control'},
-                choices = [
-                    u'Non renseigné',
-                    u'Accédant à la propriété',
-                    u'Propriétaire (non accédant) du logement',
-                    u'Locataire d\'un logement HLM',
-                    u'Locataire ou sous-locataire d\'un logement loué vide non-HLM',
-                    u'Locataire ou sous-locataire d\'un logement loué meublé ou d\'une chambre d\'hôtel',
-                    u'Logé gratuitement par des parents, des amis ou l\'employeur',
-                    ],
-                label = u'Statut d\'occupation',
-                name = u'so',
-                ),
-            Number(
-                control_attributes = {'class': 'form-control'},
-                label = u'Loyer',
-                step = 1,
-                ),
-            Text(
-                control_attributes = {'class': 'form-control'},
-                label = u'Localité',
-                ),
-            Repeat(
-                name = u'personnes_in_menage',
-                template_question = Group(
-                    name = u'personne_in_menage',
-                    outer_html_template = u'''
-{self[menage_id].html}
-<div class="form-inline personne-row">
-  {self[role].html}
-  {self[id].html}
-  {self[edit].html}
-</div>''',
-                    questions = [
-                        Hidden(name = 'menage_id'),
-                        Select(
-                            control_attributes = {'class': 'form-control'},
-                            choices = (
-                                (u'personne_de_reference', u'Personne de référence'),
-                                (u'conjoint', u'Conjoint de la personne de référence'),
-                                (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
-                                (u'autres', u'Autre'),
+def make_menages_repeat(prenom_select_choices):
+    class MenageGroup(Group):
+        @property
+        def outer_html(self):
+            index = self.parent_data['menages']['index']
+            return u'''
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapse-menage-{self[id].value}"
+title="afficher / masquer">Logement principal {formatted_index}</a>
+    </h4>
+  </div>
+  <div id="collapse-menage-{self[id].value}" class="panel-collapse collapse in">
+    <div class="panel-body">
+      {self.inner_html}
+    </div>
+  </div>
+</div>'''.format(formatted_index = index + 1, self = self)
+
+    return base.Repeat(
+        add_button_label = u'Ajouter un logement principal',
+        name = u'menages',
+        template_question = MenageGroup(
+            name = u'menage',
+            questions = [
+                base.Hidden(name = 'id'),
+                base.Repeat(
+                    name = u'individus',
+                    add_button_label = u'Ajouter un membre',
+                    template_question = Group(
+                        children_attributes = {
+                            '_control_attributes': {'class': 'form-control'},
+                            },
+                        name = u'individu',
+                        outer_html_template = u'<div class="form-inline"><p>{self.inner_html}</p></div>',
+                        questions = [
+                            Select(
+                                choices = (
+                                    (u'personne_de_reference', u'Personne de référence'),
+                                    (u'conjoint', u'Conjoint de la personne de référence'),
+                                    (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
+                                    (u'autres', u'Autre'),
+                                    ),
+                                name = u'role',
                                 ),
-                            name = u'role',
-                            ),
-                        Select(
-                            control_attributes = {'class': 'form-control'},
-                            choices = prenom_select_choices,
-                            name = 'id',
-                            ),
-                        Button(
-                            label = u'Éditer',
-                            name = u'edit',
-                            outer_html_template = u'<button class="btn btn-primary" data-toggle="modal" type="button">\
-{self.label}</button>',
-                            ),
-                        ],
+                            Select(
+                                choices = prenom_select_choices,
+                                name = 'id',
+                                ),
+                            ],
+                        ),
                     ),
-                ),
-            ]
-        ),
-    )
+                Group(
+                    name = u'categories',
+                    outer_html_template = u'''
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
+href="#collapse-menage-{self.parent[id].value}-categories" title="affcher / masquer">Plus de précisions</a>
+    </h4>
+  </div>
+  <div id="collapse-menage-{self.parent[id].value}-categories" class="panel-collapse collapse">
+    <div class="panel-body">
+      {self.inner_html}
+    </div>
+  </div>
+</div>''',
+                    questions = base.make_categories_groups(entity=u'menages'),
+                    ),
+                ],
+            ),
+        )

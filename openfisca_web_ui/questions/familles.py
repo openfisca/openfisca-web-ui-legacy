@@ -30,7 +30,7 @@ from korma.choice import Select
 from korma.group import Group
 
 from .. import uuidhelpers
-from .base import Hidden, Repeat
+from . import base
 
 
 def default_value(individu_ids):
@@ -41,8 +41,6 @@ def default_value(individu_ids):
 
 
 def make_familles_repeat(prenom_select_choices):
-    from .. import model, questions
-
     class FamilleGroup(Group):
         @property
         def outer_html(self):
@@ -84,22 +82,25 @@ title="afficher / masquer">{prenom}</a>
       </div>
     </div>
   </div>
-</div>'''.format(prenom = self['categories']['main']['prenom'].value or u'Prénom inconnu', self = self)
+</div>'''.format(
+                prenom = self['categories']['principal']['prenom'].value or u'Prénom inconnu',
+                self = self,
+                )
 
-    return Repeat(
+    return base.Repeat(
         add_button_label = u'Ajouter une famille',
         name = u'familles',
         template_question = FamilleGroup(
             name = u'famille',
             questions = [
-                Hidden(name = 'id'),
-                Repeat(
+                base.Hidden(name = 'id'),
+                base.Repeat(
                     add_button_label = u'Ajouter un membre',
                     name = u'individus',
                     template_question = IndividuGroup(
                         name = u'individu',
                         questions = [
-                            Hidden(name = 'id'),
+                            base.Hidden(name = 'id'),
                             Select(
                                 control_attributes = {'class': 'form-control input-sm'},
                                 choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),
@@ -107,18 +108,7 @@ title="afficher / masquer">{prenom}</a>
                                 ),
                             Group(
                                 name = u'categories',
-                                questions = [
-                                    Group(
-                                        children_attributes = {
-                                            '_control_attributes': {'class': 'form-control'},
-                                            '_inner_html_template': questions.html.
-                                            horizontal_bootstrap_control_inner_html_template,
-                                            '_outer_html_template': questions.html.bootstrap_group_outer_html_template,
-                                            },
-                                        name = u'main',
-                                        questions = questions.individus.group_questions,
-                                        ),
-                                    ],
+                                questions = base.make_categories_groups(entity=u'individus'),
                                 ),
                             ],
                         ),
@@ -129,25 +119,17 @@ title="afficher / masquer">{prenom}</a>
 <div class="panel panel-default">
   <div class="panel-heading">
     <h4 class="panel-title">
-      <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse-categories"
-title="affcher / masquer">Plus de précisions sur la famille</a>
+      <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
+href="#collapse-famille-{self.parent[id].value}-categories" title="affcher / masquer">Plus de précisions</a>
     </h4>
   </div>
-  <div id="collapse-categories" class="panel-collapse collapse">
+  <div id="collapse-famille-{self.parent[id].value}-categories" class="panel-collapse collapse">
     <div class="panel-body">
       {self.inner_html}
     </div>
   </div>
 </div>''',
-                    questions = [
-                        Group(
-                            children_attributes = {
-                                '_outer_html_template': questions.html.bootstrap_group_outer_html_template,
-                                },
-                            name = u'main',
-                            questions = model.entity_questions(entity=u'familles'),
-                            ),
-                        ],
+                    questions = base.make_categories_groups(entity=u'familles'),
                     ),
                 ],
             ),

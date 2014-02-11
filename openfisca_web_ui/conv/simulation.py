@@ -122,8 +122,6 @@ def user_api_data_to_api_data(user_data, state = None):
             for key, value in user_data['individus'][individu_id].iteritems()
             )
         individu['id'] = individu_id
-        if 'prenom' in individu:
-            del individu['prenom']
         api_data['individus'].append(individu)
     return {'scenarios': [api_data]}, None
 

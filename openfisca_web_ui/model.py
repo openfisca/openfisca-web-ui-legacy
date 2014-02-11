@@ -27,20 +27,16 @@
 
 
 import collections
-import copy
 import datetime
 import re
 import requests
 
 from biryani1 import strings
-from korma.choice import Radio, Select
-from korma.text import Number, Text
 
-from . import conf, conv, objects, questions, urls, wsgihelpers
+from . import conf, conv, objects, urls, wsgihelpers
 
 
-column_by_name = None
-questions_by_entity = None
+_fields_api_data = None
 
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
@@ -351,17 +347,8 @@ def configure(ctx):
     pass
 
 
-def entity_questions(entity):
-    global questions_by_entity
-    if questions_by_entity is None:
-        fetch_api_columns_and_prestations()
-    assert questions_by_entity is not None, u'questions_by_entity is still None after fetch_api_columns_and_prestations'
-    return copy.copy(questions_by_entity.get(entity))
-
-
-def fetch_api_columns_and_prestations():
-    global column_by_name
-    global questions_by_entity
+def fetch_fields_api_data():
+    global _fields_api_data
     try:
         response = requests.get(conf['api.urls.fields'])
     except requests.exceptions.ConnectionError:
@@ -369,21 +356,22 @@ def fetch_api_columns_and_prestations():
     except requests.exceptions.HTTPError:
         return
     if response.ok:
-        column_by_name = response.json()['columns']
-        questions_by_entity = {}
-        entity_by_column_entity = {
-            u'fam': u'familles',
-            u'foy': u'foyers_fiscaux',
-            u'ind': u'individus',
-            u'men': u'menages',
-            }
-        for name, column in column_by_name.iteritems():
-            entity = entity_by_column_entity[column['entity']]
-            questions_by_entity.setdefault(entity, []).append(make_question(column))
+        _fields_api_data = response.json()
 
 
-def find_category(column_name):
-    return u'main'
+def fields_api_data():
+    if _fields_api_data is None:
+        fetch_fields_api_data()
+    assert _fields_api_data is not None
+    return _fields_api_data
+
+
+def find_category_name(column_name, entity_name):
+    entity_categories = fields_api_data()['columns_tree'][entity_name]['children']
+    for entity_category in entity_categories:
+        if column_name in entity_category['children']:
+            return strings.slugify(entity_category['label'])
+    return None
 
 
 def get_user(ctx, check = False):
@@ -410,47 +398,6 @@ def is_admin(ctx, check = False):
             raise wsgihelpers.forbidden(ctx, message = ctx._(u"You must be an administrator to access this page."))
         return False
     return True
-
-
-def make_question(question_info):
-    question_label = conv.check(conv.decode_str()(question_info.get('label')))
-    if question_info['@type'] == 'Boolean':
-        return questions.base.Checkbox(
-            label = question_label,
-            name = question_info['name'],
-            value = question_info.get('default'),
-            )
-    elif question_info['@type'] == 'Enumeration':
-        labels = question_info.get('labels', [])
-        if len(labels) > 3:
-            return Select(
-                choices = question_info['labels'].iteritems(),
-                label = question_label,
-                name = question_info['name'],
-                )
-        elif len(labels) > 0:
-            return Radio(
-                choices = question_info['labels'].iteritems() if question_info.get('labels') else [],
-                label = question_label,
-                name = question_info['name'],
-                )
-        else:
-            return Text(
-                label = question_label,
-                name = question_info['name'],
-                )
-    elif question_info['@type'] == 'Float':
-        return Number(
-            label = question_label,
-            name = question_info['name'],
-            step = 0.01,
-            )
-    elif question_info['@type'] == 'Integer':
-        return Number(
-            label = question_label,
-            name = question_info['name'],
-            step = 1,
-            )
 
 
 def setup():

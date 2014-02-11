@@ -26,24 +26,57 @@
 """Conversion functions related to menages"""
 
 
-from biryani1.baseconv import cleanup_line, function, noop, pipe, rename_item, struct, uniform_sequence
+from biryani1.states import default_state
+
+from .. import uuidhelpers
+from . import base
 
 
-korma_data_to_page_api_data = pipe(
-    function(lambda item: item.get('menages')),
-    uniform_sequence(
-        pipe(
-            function(lambda item: item.get('menage')),
-            struct(
-                {
-                    'localite': cleanup_line,
-                    'loyer': noop,
-                    'personnes_in_menage': uniform_sequence(function(lambda item: item.get('personne_in_menage'))),
-                    'so': cleanup_line,
-                    },
-                default = noop,
-                ),
-            rename_item('menage_id', 'id'),
-            ),
-        ),
-    )
+def api_data_to_page_korma_data(values, state = None):
+    if values is None:
+        return None, None
+    if state is None:
+        state = default_state
+    new_menages = []
+    if values.get('menages') is not None:
+        roles = (u'personne_de_reference', u'conjoint', u'enfants', u'autres')
+        for menage_id, menage in values['menages'].iteritems():
+            new_menage = {
+                u'id': menage_id,
+                u'individus': [],
+                }
+            for role in roles:
+                if menage.get(role) is not None:
+                    for individu_id in menage[role]:
+                        new_individu = {
+                            u'id': individu_id,
+                            u'role': role,
+                            }
+                        new_menage['individus'].append({u'individu': new_individu})
+            columns = {key: value for key, value in menage.iteritems() if key not in roles}
+            new_menage[u'categories'] = base.build_categories(columns = columns, entity_name = u'menages')
+            new_menages.append({u'menage': new_menage})
+    return {u'menages': new_menages}, None
+
+
+def korma_data_to_page_api_data(values, state = None):
+    if values is None:
+        return None, None
+    if state is None:
+        state = default_state
+    new_menages = {}
+    for menage_group_values in values['menages']:
+        menage = menage_group_values['menage']
+        new_menage_id = uuidhelpers.generate_uuid() if menage['id'] is None else menage['id']
+        new_menage = {}
+        if menage['categories'] is not None:
+            for category in menage['categories'].itervalues():
+                new_menage.update(category)
+        for individu_group_values in menage['individus']:
+            individu = individu_group_values['individu']
+            new_menage.setdefault(individu['role'], []).append(individu['id'])
+        new_menages[new_menage_id] = new_menage
+    if values.get('add'):
+        new_menage_id = uuidhelpers.generate_uuid()
+        new_menages[new_menage_id] = {}
+    return {u'menages': new_menages}, None

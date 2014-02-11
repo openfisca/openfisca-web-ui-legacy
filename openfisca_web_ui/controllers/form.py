@@ -41,8 +41,9 @@ def form(req):
     user_api_data = session.user.api_data if session.user is not None else None
     if user_api_data is None:
         user_api_data = {}
-    prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)
-    if page_data['slug'] in ['famille', 'declaration-impots', 'logement-principal']:
+    # TODO remove this 'if'
+    if page_data['slug'] in ['familles', 'declarations-impots', 'logements-principaux']:
+        prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)
         page_form = page_data['form_factory'](prenom_select_choices)
     else:
         legislation_urls_and_descriptions = (

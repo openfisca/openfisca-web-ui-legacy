@@ -26,27 +26,57 @@
 """Conversion functions related to foyers fiscaux"""
 
 
-from itertools import chain
+from biryani1.states import default_state
 
-from biryani1.baseconv import function, pipe, rename_item, uniform_sequence
+from .. import uuidhelpers
+from . import base
 
 
 def api_data_to_page_korma_data(values, state = None):
-    return {}, None
+    if values is None:
+        return None, None
+    if state is None:
+        state = default_state
+    new_foyers_fiscaux = []
+    if values.get('foyers_fiscaux') is not None:
+        roles = ('declarants', 'personnes_a_charge')
+        for foyer_fiscal_id, foyer_fiscal in values['foyers_fiscaux'].iteritems():
+            new_foyer_fiscal = {
+                u'id': foyer_fiscal_id,
+                u'individus': [],
+                }
+            for role in roles:
+                if foyer_fiscal.get(role) is not None:
+                    for individu_id in foyer_fiscal[role]:
+                        new_individu = {
+                            u'id': individu_id,
+                            u'role': role,
+                            }
+                        new_foyer_fiscal['individus'].append({u'individu': new_individu})
+            columns = {key: value for key, value in foyer_fiscal.iteritems() if key not in roles}
+            new_foyer_fiscal[u'categories'] = base.build_categories(columns = columns, entity_name = u'foyers_fiscaux')
+            new_foyers_fiscaux.append({u'foyer_fiscal': new_foyer_fiscal})
+    return {u'foyers_fiscaux': new_foyers_fiscaux}, None
 
 
-korma_data_to_page_api_data = pipe(
-    function(lambda item: item.get('foyers_fiscaux')),
-    uniform_sequence(
-        pipe(
-            function(lambda item: item.get('personnes_in_foyer_fiscal')),
-            uniform_sequence(
-                pipe(
-                    function(lambda item: item.get('personne_in_foyer_fiscal')),
-                    rename_item('foyer_fiscal_id', 'id'),
-                    ),
-                ),
-            ),
-        ),
-    function(lambda lists: list(chain.from_iterable(lists))),
-    )
+def korma_data_to_page_api_data(values, state = None):
+    if values is None:
+        return None, None
+    if state is None:
+        state = default_state
+    new_foyers_fiscaux = {}
+    for foyer_fiscal_group_values in values['foyers_fiscaux']:
+        foyer_fiscal = foyer_fiscal_group_values['foyer_fiscal']
+        new_foyer_fiscal_id = uuidhelpers.generate_uuid() if foyer_fiscal['id'] is None else foyer_fiscal['id']
+        new_foyer_fiscal = {}
+        if foyer_fiscal['categories'] is not None:
+            for category in foyer_fiscal['categories'].itervalues():
+                new_foyer_fiscal.update(category)
+        for individu_group_values in foyer_fiscal['individus']:
+            individu = individu_group_values['individu']
+            new_foyer_fiscal.setdefault(individu['role'], []).append(individu['id'])
+        new_foyers_fiscaux[new_foyer_fiscal_id] = new_foyer_fiscal
+    if values.get('add'):
+        new_foyer_fiscal_id = uuidhelpers.generate_uuid()
+        new_foyers_fiscaux[new_foyer_fiscal_id] = {}
+    return {u'foyers_fiscaux': new_foyers_fiscaux}, None
