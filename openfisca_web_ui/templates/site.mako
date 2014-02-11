@@ -79,9 +79,11 @@ ${conf['app_name']}
 %>\
                 <form method="post" action="/">
                     <div class="modal-footer">
-                        <a class="btn btn-success" href="/">Accepter</a>
+                        <a class="btn btn-success" href="/">
+                            <span class="glyphicon glyphicon-ok"></span> Accepter
+                        </a>
                         <button class="btn btn-danger" name="submit" type="submit">
-                            <span class="glyphicon glyphicon-trash"></span>Supprimer mon compte
+                            <span class="glyphicon glyphicon-remove"></span> Refuser
                         </button>
                     </form>
                 </div>
