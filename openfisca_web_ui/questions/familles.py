@@ -50,10 +50,10 @@ def make_familles_repeat(prenom_select_choices):
             return u'''
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <div class="panel-title">
+    <h4 class="panel-title">
       <a data-toggle="collapse" data-parent="#accordion" href="#collapse-famille-{self[id].value}"
 title="afficher / masquer">Famille {formatted_index}</a>
-    </div>
+    </h4>
   </div>
   <div id="collapse-famille-{self[id].value}" class="panel-collapse collapse in">
     <div class="panel-body">
@@ -70,11 +70,11 @@ title="afficher / masquer">Famille {formatted_index}</a>
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="form-inline">
-      <div class="panel-title">
+      <h4 class="panel-title">
         {self[role].html}
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
+        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
 title="afficher / masquer">{prenom}</a>
-      </div>
+      </h4>
     </div>
   </div>
   <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse">
@@ -128,11 +128,10 @@ title="afficher / masquer">{prenom}</a>
                     outer_html_template = u'''
 <div class="panel panel-default">
   <div class="panel-heading">
-    <div class="panel-title">
-      <a data-toggle="collapse" data-parent="#accordion" href="#collapse-categories" title="affcher / masquer">
-        Plus de précisions sur la famille
-      </a>
-    </div>
+    <h4 class="panel-title">
+      <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse-categories"
+title="affcher / masquer">Plus de précisions sur la famille</a>
+    </h4>
   </div>
   <div id="collapse-categories" class="panel-collapse collapse">
     <div class="panel-body">
