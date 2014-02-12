@@ -151,48 +151,51 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
 def make_question(column):
     question_label = column.get('label')
     if column['@type'] == 'Boolean':
-        return BootstrapCheckbox(
+        question = BootstrapCheckbox(
             label = question_label,
             name = column['name'],
-            value = column.get('default'),
             )
     elif column['@type'] == 'Enumeration':
         labels = column.get('labels', [])
         if len(labels) > 3:
-            return BootstrapSelect(
+            question = BootstrapSelect(
                 choices = column['labels'].iteritems(),
                 label = question_label,
                 name = column['name'],
                 )
         elif len(labels) > 0:
-            return Radio(
+            question = Radio(
                 choices = column['labels'].iteritems() if column.get('labels') else [],
                 label = question_label,
                 name = column['name'],
                 )
         else:
-            return BootstrapText(
+            question = BootstrapText(
                 label = question_label,
                 name = column['name'],
                 )
     elif column['@type'] == 'Float':
-        return BootstrapNumber(
+        question = BootstrapNumber(
             label = question_label,
             name = column['name'],
             )
     elif column['@type'] == 'Integer':
-        return BootstrapNumber(
+        question = BootstrapNumber(
             label = question_label,
             name = column['name'],
             step = 1,
             )
     elif column['@type'] == 'String':
-        return BootstrapText(
+        question = BootstrapText(
             label = question_label,
             name = column['name'],
             )
     elif column['@type'] == 'Date':
-        return BootstrapFrenchDate(
+        question = BootstrapFrenchDate(
             label = question_label,
             name = column['name'],
             )
+    default = column.get('default')
+    if default is not None:
+        question.value = unicode(default)
+    return question
