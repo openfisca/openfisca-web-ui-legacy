@@ -44,4 +44,4 @@ def ensure_session(ctx):
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
     if ctx.req.cookies.get(conf['cookie']) != session.token:
-        ctx.req.response.set_cookie(conf['cookie'], session.token, httponly = True)  # , secure = req.scheme == 'https')
+        ctx.req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = ctx.req.scheme == 'https')

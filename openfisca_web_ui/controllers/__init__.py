@@ -39,8 +39,9 @@ router = None
 @wsgihelpers.wsgify
 def image(req):
     ctx = contexts.Ctx(req)
-    auth.ensure_session(ctx)
     session = ctx.session
+    if session is None or session.user is None:
+        raise wsgihelpers.no_content(ctx)
     if session.user.api_data is None:
         session.user.api_data = {}
     simulation_output, simulation_errors = conv.simulation.user_api_data_to_simulation_output(
