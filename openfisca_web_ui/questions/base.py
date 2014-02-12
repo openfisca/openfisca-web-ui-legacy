@@ -179,7 +179,6 @@ def make_question(column):
         return BootstrapNumber(
             label = question_label,
             name = column['name'],
-            step = 0.01,
             )
     elif column['@type'] == 'Integer':
         return BootstrapNumber(
