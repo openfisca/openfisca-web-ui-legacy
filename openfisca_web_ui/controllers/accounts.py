@@ -31,7 +31,6 @@ import datetime
 import json
 import logging
 import re
-import uuid
 
 from biryani1 import strings
 import pymongo
