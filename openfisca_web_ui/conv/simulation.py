@@ -79,7 +79,7 @@ def fill_user_api_data(values, state = None):
         state = default_state
     individus = questions.individus.default_value() if values.get('individus') is None else values['individus']
     for individu_id, individu in individus.iteritems():
-        for key, value in questions.individus.default_values.iteritems():
+        for key, value in questions.individus.build_default_values().iteritems():
             if individu.get(key) is None:
                 individu[key] = value
     new_values = {u'individus': individus}

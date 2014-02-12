@@ -46,7 +46,7 @@ def api_data_to_page_korma_data(values, state = None):
                 u'individus': [],
                 }
             for role in roles:
-                if foyer_fiscal.get(role) is not None:
+                if role in foyer_fiscal:
                     for individu_id in foyer_fiscal[role]:
                         new_individu = {
                             u'id': individu_id,
@@ -72,9 +72,14 @@ def korma_data_to_page_api_data(values, state = None):
         if foyer_fiscal['categories'] is not None:
             for category in foyer_fiscal['categories'].itervalues():
                 new_foyer_fiscal.update(category)
-        for individu_group_values in foyer_fiscal['individus']:
-            individu = individu_group_values['individu']
-            new_foyer_fiscal.setdefault(individu['role'], []).append(individu['id'])
+        if foyer_fiscal['individus'] is not None:
+            for individu_group_values in foyer_fiscal['individus']:
+                individu = individu_group_values['individu']
+                new_foyer_fiscal.setdefault(individu['role'], []).append(individu['id'])
+        if foyer_fiscal.get('add'):
+            new_individu_role = u'declarants' if len(new_foyer_fiscal.get(u'declarants') or []) < 2 \
+                else u'personnes_a_charge'
+            new_foyer_fiscal.setdefault(new_individu_role, []).append(None)
         new_foyers_fiscaux[new_foyer_fiscal_id] = new_foyer_fiscal
     if values.get('add'):
         new_foyer_fiscal_id = uuidhelpers.generate_uuid()

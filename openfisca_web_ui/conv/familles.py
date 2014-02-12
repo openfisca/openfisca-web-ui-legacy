@@ -28,7 +28,7 @@
 
 from biryani1.states import default_state
 
-from .. import uuidhelpers
+from .. import questions, uuidhelpers
 from . import base
 
 
@@ -68,28 +68,31 @@ def korma_data_to_page_api_data(values, state = None):
         state = default_state
     new_individus = {}
     new_familles = {}
-    for famille_group_values in values['familles']:
-        famille = famille_group_values['famille']
-        new_famille_id = uuidhelpers.generate_uuid() if famille['id'] is None else famille['id']
-        new_famille = {}
-        if famille['categories'] is not None:
-            for category in famille['categories'].itervalues():
-                new_famille.update(category)
-        for individu_group_values in famille['individus']:
-            individu = individu_group_values['individu']
-            new_individu_id = uuidhelpers.generate_uuid() if individu['id'] is None else individu['id']
-            new_individu = {}
-            if individu['categories'] is not None:
-                for category in individu['categories'].itervalues():
-                    new_individu.update(category)
-            new_individus[new_individu_id] = new_individu
-            new_famille.setdefault(individu['role'], []).append(new_individu_id)
-        if famille.get('add'):
-            new_individu_id = uuidhelpers.generate_uuid()
-            new_individus[new_individu_id] = {}
-            new_individu_role = u'parents' if len(new_famille[u'parents']) < 2 else u'enfants'
-            new_famille.setdefault(new_individu_role, []).append(new_individu_id)
-        new_familles[new_famille_id] = new_famille
+    if values['familles'] is not None:
+        for famille_group_values in values['familles']:
+            famille = famille_group_values['famille']
+            new_famille_id = uuidhelpers.generate_uuid() if famille['id'] is None else famille['id']
+            new_famille = {}
+            if famille['categories'] is not None:
+                for category in famille['categories'].itervalues():
+                    new_famille.update(category)
+            if famille['individus'] is not None:
+                for individu_group_values in famille['individus']:
+                    individu = individu_group_values['individu']
+                    new_individu_id = uuidhelpers.generate_uuid() if individu['id'] is None else individu['id']
+                    new_individu = {}
+                    if individu['categories'] is not None:
+                        for category in individu['categories'].itervalues():
+                            new_individu.update(category)
+                    new_individus[new_individu_id] = new_individu
+                    new_famille.setdefault(individu['role'], []).append(new_individu_id)
+            if famille.get('add'):
+                new_individu_id = uuidhelpers.generate_uuid()
+                new_individus[new_individu_id] = questions.individus.build_default_values(
+                    existing_individus_count=len(famille['individus']))
+                new_individu_role = u'parents' if len(new_famille.get(u'parents') or []) < 2 else u'enfants'
+                new_famille.setdefault(new_individu_role, []).append(new_individu_id)
+            new_familles[new_famille_id] = new_famille
     if values.get('add'):
         new_famille_id = uuidhelpers.generate_uuid()
         new_familles[new_famille_id] = {}

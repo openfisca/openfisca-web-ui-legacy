@@ -29,7 +29,7 @@
 from biryani1.baseconv import check, pipe
 from formencode import variabledecode
 
-from .. import auth, contexts, conv, model, questions, templates, wsgihelpers
+from .. import auth, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
 
 
 @wsgihelpers.wsgify
@@ -40,7 +40,11 @@ def form(req):
     page_data = req.urlvars['page_data']
     user_api_data = session.user.api_data if session.user is not None else None
     if user_api_data is None:
-        user_api_data = {}
+        individu_id = uuidhelpers.generate_uuid()
+        user_api_data = {
+            u'familles': questions.familles.default_value(individu_ids = [individu_id]),
+            u'individus': {individu_id: questions.individus.build_default_values()},
+            }
     # TODO remove this 'if'
     if page_data['slug'] in ['familles', 'declarations-impots', 'logements-principaux']:
         prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)

@@ -32,6 +32,9 @@ from .. import uuidhelpers
 from . import base
 
 
+singleton_roles = (u'personne_de_reference', u'conjoint')
+
+
 def api_data_to_page_korma_data(values, state = None):
     if values is None:
         return None, None
@@ -46,8 +49,9 @@ def api_data_to_page_korma_data(values, state = None):
                 u'individus': [],
                 }
             for role in roles:
-                if menage.get(role) is not None:
-                    for individu_id in menage[role]:
+                if role in menage:
+                    individu_ids = [menage[role]] if role in singleton_roles else menage[role]
+                    for individu_id in individu_ids:
                         new_individu = {
                             u'id': individu_id,
                             u'role': role,
@@ -60,6 +64,13 @@ def api_data_to_page_korma_data(values, state = None):
 
 
 def korma_data_to_page_api_data(values, state = None):
+    def add_to(new_menage, role, value):
+        if role in singleton_roles:
+            assert role not in new_menage
+            new_menage[role] = value
+        else:
+            new_menage.setdefault(role, []).append(value)
+
     if values is None:
         return None, None
     if state is None:
@@ -72,9 +83,18 @@ def korma_data_to_page_api_data(values, state = None):
         if menage['categories'] is not None:
             for category in menage['categories'].itervalues():
                 new_menage.update(category)
-        for individu_group_values in menage['individus']:
-            individu = individu_group_values['individu']
-            new_menage.setdefault(individu['role'], []).append(individu['id'])
+        if menage['individus'] is not None:
+            for individu_group_values in menage['individus']:
+                individu = individu_group_values['individu']
+                add_to(new_menage = new_menage, role = individu['role'], value = individu['id'])
+        if menage.get('add'):
+            if new_menage.get('personne_de_reference') is None:
+                new_individu_role = u'personne_de_reference'
+            elif new_menage.get('conjoint') is None:
+                new_individu_role = u'conjoint'
+            else:
+                new_individu_role = u'enfants'
+            add_to(new_menage = new_menage, role = new_individu_role, value = None)
         new_menages[new_menage_id] = new_menage
     if values.get('add'):
         new_menage_id = uuidhelpers.generate_uuid()

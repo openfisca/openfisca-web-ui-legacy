@@ -28,7 +28,7 @@
 
 import logging
 
-from .. import auth, contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
+from .. import contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
 from . import accounts, form, legislations, sessions
 
 

@@ -28,23 +28,20 @@
 
 import datetime
 
-#from korma.choice import Select
-#from korma.text import Number, Text
-
 from .. import uuidhelpers
-#from .base import FrenchDate
 
 
-default_values = {
-    u'birth': datetime.datetime(1984, 1, 1, 0, 0),
-    u'prenom': u'Personne 1',
-    u'sali': 25000,
-    u'statmarit': u'celibataire',
-    }
+def build_default_values(existing_individus_count=0):
+    return {
+        u'birth': datetime.datetime(1984, 1, 1, 0, 0),
+        u'prenom': u'Personne {}'.format(existing_individus_count + 1),
+        u'sali': 25000,
+        u'statmarit': u'2',  # celibataire
+        }
 
 
 def default_value():
-    return {uuidhelpers.generate_uuid(): default_values}
+    return {uuidhelpers.generate_uuid(): build_default_values()}
 
 
 def build_prenom_select_choices(user_api_data):

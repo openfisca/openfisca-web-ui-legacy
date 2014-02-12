@@ -61,35 +61,33 @@ title="afficher / masquer">Famille {formatted_index}</a>
   </div>
 </div>'''.format(formatted_index = index + 1, self = self)
 
-    class IndividuGroup(Group):
-        @property
-        def outer_html(self):
-            return u'''
+    IndividuGroup = lambda *args, **kwargs: \
+        Group(
+            outer_html_template = u'''
 {self[id].html}
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="form-inline">
       <h4 class="panel-title">
         {self[role].html}
-        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
-title="afficher / masquer">{prenom}</a>
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
+title="afficher / masquer">{self[categories][principal][prenom].value}</a>
       </h4>
     </div>
   </div>
-  <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse">
+  <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse in">
     <div class="panel-body">
       <div class="form-horizontal">
         {self[categories].html}
       </div>
     </div>
   </div>
-</div>'''.format(
-                prenom = self['categories']['principal']['prenom'].value or u'Prénom inconnu',
-                self = self,
-                )
+</div>''',
+        *args, **kwargs)
 
     return base.Repeat(
         add_button_label = u'Ajouter une famille',
+        count = 0,
         name = u'familles',
         template_question = FamilleGroup(
             name = u'famille',
@@ -97,6 +95,7 @@ title="afficher / masquer">{prenom}</a>
                 Hidden(name = 'id'),
                 base.Repeat(
                     add_button_label = u'Ajouter un membre',
+                    count = 0,
                     name = u'individus',
                     template_question = IndividuGroup(
                         name = u'individu',
