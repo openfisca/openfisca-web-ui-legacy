@@ -77,6 +77,7 @@ def make_router():
         ('GET', '^/?$', index),
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
+        (None, '^/accounts(?=/|$)', accounts.route_user_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),

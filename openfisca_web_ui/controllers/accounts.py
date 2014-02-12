@@ -80,9 +80,9 @@ def accept_or_reject_cnil(req):
     account = ctx.node
     params = req.params
 
+    session = ctx.session
+    user = session.user
     if not ('accept' in req.params and conv.check(conv.guess_bool(params.get('accept-checkbox'))) is True):
-        session = ctx.session
-        user = session.user
         if user is None or user._id != account._id:
             return wsgihelpers.unauthorized(ctx,
                 explanation = ctx._("Deletion unauthorized"),
@@ -646,7 +646,8 @@ def login(req):
         ctx,
         dict(
             existingAccount = registered_account is not None,
-            cnilUrl = session.user.get_admin_url(ctx, 'accept-or-reject-cnil'),
+            cnilUrl = session.user.get_user_url(ctx, 'accept-or-reject-cnil'),
+            accountUrl = session.user.get_user_url(ctx),
             )
         )
 
@@ -683,7 +684,6 @@ def route_admin(environ, start_response):
         ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
-        ('POST', '^/accept-or-reject-cnil/?$', accept_or_reject_cnil),
         ('GET', '^/reset/?$', admin_reset),
         )
     return router(environ, start_response)
@@ -737,3 +737,185 @@ def route_api1_class(environ, start_response):
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_api1),
         )
     return router(environ, start_response)
+
+
+def route_user_class(environ, start_response):
+    router = urls.make_router(
+        ('GET', '^/?$', user_view),
+        ('POST', '^/accept-or-reject-cnil/?$', accept_or_reject_cnil),
+        (('GET', 'POST'), '^/delete/?$', user_delete),
+        ('GET', '^/edit/?$', user_edit),
+        ('POST', '^/save/?$', user_save_api_data),
+        ('GET', '^/simulations/(?P<slug>[^/]+)/use/?$', user_simulation_use),
+        (('GET', 'POST'), '^/simulations/(?P<slug>[^/]+)/edit/?$', user_simulation_edit),
+        ('DELETE', '^/simulations/(?P<slug>[^/]+)/delete/?$', user_simulation_delete),
+        )
+    return router(environ, start_response)
+
+
+@wsgihelpers.wsgify
+def user_delete(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None or session.user is None:
+        return wsgihelpers.unauthorized(ctx,
+            explanation = ctx._("Deletion unauthorized"),
+            message = ctx._("You can not delete an account."),
+            title = ctx._('Operation denied'),
+            )
+
+    if req.method == 'POST':
+        session.user.delete(ctx, safe = True)
+        return wsgihelpers.redirect(ctx, location = '/')
+    return templates.render(ctx, '/accounts/user-delete.mako', account = session.user)
+
+
+@wsgihelpers.wsgify
+def user_edit(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+    user = model.get_user(ctx)
+    if user is None:
+        return wsgihelpers.unauthorized(ctx,
+            explanation = ctx._("Edition unauthorized"),
+            message = ctx._("You can not edit an account."),
+            title = ctx._('Operation denied'),
+            )
+    if user._id != account._id:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("Edition forbidden"),
+            message = ctx._("You can not edit an account."),
+            title = ctx._('Operation denied'),
+            )
+
+    if req.method == 'GET':
+        errors = None
+        inputs = dict(
+            email = account.email,
+            full_name = account.full_name,
+            )
+#    else:
+#        assert req.method == 'POST'
+#        inputs = extract_account_inputs_from_params(ctx, req.POST)
+#        if model.is_admin(ctx):
+#            data, errors = inputs_to_account_admin_data(inputs, state = ctx)
+#        else:
+#            data, errors = inputs_to_account_data(inputs, state = ctx)
+#        if errors is None:
+#            data['slug'], error = conv.pipe(
+#                conv.input_to_slug,
+#                conv.not_none,
+#                )(data['full_name'], state = ctx)
+#            if error is not None:
+#                errors = dict(full_name = error)
+#        if errors is None:
+#            if model.Account.find(
+#                    dict(
+#                        _id = {'$ne': account._id},
+#                        email = data['email'],
+#                        ),
+#                    as_class = collections.OrderedDict,
+#                    ).count() > 0:
+#                errors = dict(email = ctx._('An account with the same email already exists.'))
+#            if model.Account.find(
+#                    dict(
+#                        _id = {'$ne': account._id},
+#                        slug = data['slug'],
+#                        ),
+#                    as_class = collections.OrderedDict,
+#                    ).count() > 0:
+#                errors = dict(full_name = ctx._('An account with the same name already exists.'))
+#        if errors is None:
+#            account.set_attributes(**data)
+#            if account.api_key is None:
+#                account.api_key = uuidhelpers.generate_uuid()
+#            account.compute_words()
+#            account.save(ctx, safe = True)
+#
+#            # View account.
+#            return wsgihelpers.redirect(ctx, location = account.get_admin_url(ctx))
+    return templates.render(ctx, '/accounts/admin-edit.mako', account = account, errors = errors, inputs = inputs)
+
+
+@wsgihelpers.wsgify
+def user_view(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+    session = ctx.session
+    if session is None or session.user is None:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("View forbidden"),
+            message = ctx._("You can not view an account."),
+            title = ctx._('Operation denied'),
+            )
+    return templates.render(ctx, '/accounts/user-view.mako', account = session.user)
+
+
+@wsgihelpers.wsgify
+def user_save_api_data(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+    session = ctx.session
+    if session is None or session.user is None:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("View forbidden"),
+            message = ctx._("You can not view an account."),
+            title = ctx._('Operation denied'),
+            )
+
+    params = req.params
+    inputs = {
+        'api_data_name': params.get('api-data-name'),
+        'api_data_name_radio': params.get('api-data-name-radio'),
+        }
+    data, errors = conv.pipe(
+        conv.struct({
+            'api_data_name': conv.cleanup_line,
+            'api_data_name_radio': conv.cleanup_line,
+            }),
+        )(inputs, state = ctx)
+    if errors is None:
+        if session.user.saved_api_data is None:
+            session.user.saved_api_data = {}
+        name =  data.get('api_data_name') or data.get('api_data_name_radio')
+        session.user.saved_api_data[name] = session.user.api_data
+        session.user.save(ctx, safe = True)
+        return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
+    return wsgihelpers.bad_request(ctx, explanation = errors)
+
+
+@wsgihelpers.wsgify
+def user_simulation_use(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+    session = ctx.session
+    if session is None or session.user is None:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("User simulations forbidden"),
+            message = ctx._("You can not view this simulation."),
+            title = ctx._('Operation denied'),
+            )
+
+    simulation_slug = req.urlvars.get('slug')
+    for simulation_name, simulation_data in session.user.saved_api_data.iteritems(): 
+        if simulation_slug == strings.slugify(simulation_name):
+            session.user.api_data = simulation_data
+            session.user.save(ctx, safe = True)
+            break
+    return wsgihelpers.redirect(ctx, location = '/')
+
+
+@wsgihelpers.wsgify
+def user_simulation_edit(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node
+
+
+@wsgihelpers.wsgify
+def user_simulation_delete(req):
+    ctx = contexts.Ctx(req)
+    account = ctx.node

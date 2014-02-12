@@ -31,6 +31,8 @@
 <%!
 import urlparse
 
+from biryani1 import strings
+
 from openfisca_web_ui import conf, model, urls
 %>
 
@@ -74,7 +76,7 @@ ${conf['app_name']}
                         Text d'exemple à remplacer par le texte concernant la CNIL
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox" name="accept-checkbox">*
+                                <input type="checkbox" name="accept-checkbox">
                                 J'ai pris connaissance des informations ci-dessus
                             </label>
                         </div>
@@ -220,7 +222,7 @@ navigator.id.watch({
                         navigator.id.logout();
                     });
                 } else {
-                    window.location.reload();
+                    window.location = res.accountUrl;
                 }
             },
             error: function(xhr, status, err) {
@@ -265,6 +267,56 @@ $(function () {
 </%def>
 
 
+<%def name="save_api_data_modal()" filter="trim">
+<%
+    user = model.get_user(ctx)
+    if user is None:
+        return ''
+%>\
+    <div class="modal fade bs-modal-lg" id="save-api-data-modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form class="form-horizontal" method="post" action="${user.get_user_url(ctx, 'save')}">
+                    <div class="modal-header">
+                        <a class="close" href="/">&times;</a>
+                        <h4 class="modal-title">Enregistrement de cette situation</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h5>Écraser des données existantes ?</h5>
+        % if user.saved_api_data is not None:
+            % for api_data_name in user.saved_api_data.iterkeys():
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="api-data-name-radio" \
+value="${strings.slugify(api_data_name)}">${api_data_name}
+                            </label>
+                        </div>
+            % endfor
+        % endif
+                        <div class="radio">
+                            <label>
+                                <input data-toggle="collapse" data-target="#new-simulation-name" \
+name="api-data-name-radio" type="radio">Nouvelle simulation
+                            </label>
+                        </div>
+                        <div class="form-group collapse" id="new-simulation-name">
+                            <label class="col-sm-2 control-label">Nom :</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="api-data-name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
 <%def name="title_content()" filter="trim">
 <%self:brand/>
 </%def>
@@ -298,10 +350,17 @@ user = model.get_user(ctx)
 % if conf['auth.enable'] and user is not None:
             <ul class="nav navbar-nav navbar-right">
     % if user.email is None:
-                <li><a class="sign-in" href="#" title="${_(u'Save this situation')}">${_(u'Sign in')}</a></li>
+                <li><a class="navbar-brand sign-in" href="#" title="${_(u'Save this situation')}">
+                    <span class="label label-success">${_(u'Save my situation')}</span>
+                </a></li>
+                <li><a class="sign-in" href="#" title="${_(u'Retrieve saved situations')}">${_(u'Sign in')}</a></li>
     % else:
+                <li><a class="save-situation" href="#" data-toggle="modal" data-target="#save-api-data-modal" \
+title="${_(u'Save this situation')}">
+                    <span class="label label-success">${_(u'Save my situation')}</span>
+                </a></li>
                 <li class="active">
-                    <a href="${user.get_admin_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
+                    <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
                 </li>
                 <li><a class="sign-out" href="#" title="${_(u'Sign out')}">${_(u'Sign out')}</a></li>
     % endif
@@ -327,6 +386,7 @@ user = model.get_user(ctx)
     <%self:topbar/>
     <%self:body_content/>
     <%self:cnil_modal/>
+    <%self:save_api_data_modal/>
     <%self:scripts/>
     <%self:trackers/>
 </body>
