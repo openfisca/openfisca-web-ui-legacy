@@ -65,28 +65,40 @@ ${conf['app_name']}
     <div class="modal fade bs-modal-lg" id="cnil-modal" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
-                <div class="modal-header">
-                    <a class="close" href="/">&times;</a>
-                    <h4 class="modal-title">Enregistrement de votre situation</h4>
-                </div>
-                <div class="modal-body">
-                    Text d'exemple à remplacer par le texte concernant la CNIL
-                </div>
+                <form method="post" action="/">
+                    <div class="modal-header">
+                        <a class="close" href="/">&times;</a>
+                        <h4 class="modal-title">Enregistrement de votre situation</h4>
+                    </div>
+                    <div class="modal-body">
+                        Text d'exemple à remplacer par le texte concernant la CNIL
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="accept-checkbox">*
+                                J'ai pris connaissance des informations ci-dessus
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="stats-checkbox">
+                                J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
+                            </label>
+                        </div>
+                    </div>
 <%
     user = model.get_user(ctx)
     if user is None:
         return ''
 %>\
-                <form method="post" action="/">
                     <div class="modal-footer">
-                        <a class="btn btn-success" href="/">
+                        <button class="btn btn-success" name="accept" type="submit">
                             <span class="glyphicon glyphicon-ok"></span> Accepter
-                        </a>
-                        <button class="btn btn-danger" name="submit" type="submit">
+                        </button>
+                        <button class="btn btn-danger" name="reject" type="submit">
                             <span class="glyphicon glyphicon-remove"></span> Refuser
                         </button>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -202,9 +214,9 @@ navigator.id.watch({
             success: function(res, status, xhr) {
                 if (!res.existingAccount) {
                     $form = $("#cnil-modal").find('form');
-                    $form.attr('action', res.rejectUrl);
+                    $form.attr('action', res.cnilUrl);
                     $("#cnil-modal").modal('show');
-                    $form.on('submit', function() {
+                    $form.find("button[name='reject']").on('click', function() {
                         navigator.id.logout();
                     });
                 } else {

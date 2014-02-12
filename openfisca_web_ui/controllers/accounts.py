@@ -75,6 +75,30 @@ log = logging.getLogger(__name__)
 
 
 @wsgihelpers.wsgify
+def accept_or_reject_cnil(req):
+    ctx = contexts.Ctx(req)
+    params = req.params
+
+    print ctx.req.cookies.get(conf['cookie'])
+
+    if not ('accept' in req.params and conv.check(conv.guess_bool(params.get('accept-checkbox'))) is True):
+        session = ctx.session
+        user = session.user
+        if user is None or user._id != account._id:
+            return wsgihelpers.unauthorized(ctx,
+                explanation = ctx._("Deletion unauthorized"),
+                message = ctx._("You can not delete an account."),
+                title = ctx._('Operation denied'),
+                )
+        user.email = None
+        user.full_name = None
+        user.slug = None
+        user.compute_words()
+        user.save(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = '/')
+
+
+@wsgihelpers.wsgify
 def admin_delete(req):
     ctx = contexts.Ctx(req)
     account = ctx.node
@@ -537,26 +561,6 @@ def api1_typeahead(req):
         )
 
 
-@wsgihelpers.wsgify
-def email_delete(req):
-    ctx = contexts.Ctx(req)
-    account = ctx.node
-
-    user = model.get_user(ctx)
-    if user is None or user._id != account._id:
-        return wsgihelpers.unauthorized(ctx,
-            explanation = ctx._("Deletion unauthorized"),
-            message = ctx._("You can not delete an account."),
-            title = ctx._('Operation denied'),
-            )
-    account.email = None
-    account.full_name = None
-    account.slug = None
-    account.compute_words()
-    account.save(ctx, safe = True)
-    return wsgihelpers.redirect(ctx, location = '/')
-
-
 def extract_account_inputs_from_params(ctx, params = None):
     if params is None:
         params = webob.multidict.MultiDict()
@@ -615,10 +619,10 @@ def login(req):
         as_class = collections.OrderedDict,
         )
     session = ctx.session
+    if session is None:
+        ctx.session = session = model.Session()
+        session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     if registered_account is None:
-        if session is None:
-            ctx.session = session = model.Session()
-            session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
         user = session.user
         if user is None:
             user = model.Account()
@@ -643,7 +647,7 @@ def login(req):
         ctx,
         dict(
             existingAccount = registered_account is not None,
-            rejectUrl = session.user.get_admin_url(ctx, 'reject-cnil'),
+            cnilUrl = session.user.get_admin_url(ctx, 'accept-or-reject-cnil'),
             )
         )
 
@@ -680,7 +684,7 @@ def route_admin(environ, start_response):
         ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
-        ('POST', '^/reject-cnil/?$', email_delete),
+        ('POST', '^/accept-or-reject-cnil/?$', accept_or_reject_cnil),
         ('GET', '^/reset/?$', admin_reset),
         )
     return router(environ, start_response)
