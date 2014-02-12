@@ -26,6 +26,7 @@
 """Korma questions related to familles"""
 
 
+from korma.base import Hidden
 from korma.choice import Select
 from korma.group import Group
 
@@ -93,14 +94,14 @@ title="afficher / masquer">{prenom}</a>
         template_question = FamilleGroup(
             name = u'famille',
             questions = [
-                base.Hidden(name = 'id'),
+                Hidden(name = 'id'),
                 base.Repeat(
                     add_button_label = u'Ajouter un membre',
                     name = u'individus',
                     template_question = IndividuGroup(
                         name = u'individu',
                         questions = [
-                            base.Hidden(name = 'id'),
+                            Hidden(name = 'id'),
                             Select(
                                 control_attributes = {'class': 'form-control input-sm'},
                                 choices = ((u'parents', u'Parent'), (u'enfants', u'Enfant')),

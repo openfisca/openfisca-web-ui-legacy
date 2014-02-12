@@ -26,6 +26,7 @@
 """Korma questions related to menages"""
 
 
+from korma.base import Hidden
 from korma.choice import Select
 from korma.group import Group
 
@@ -81,7 +82,7 @@ title="afficher / masquer">Logement principal {formatted_index}</a>
         template_question = MenageGroup(
             name = u'menage',
             questions = [
-                base.Hidden(name = 'id'),
+                Hidden(name = 'id'),
                 base.Repeat(
                     name = u'individus',
                     add_button_label = u'Ajouter un membre',

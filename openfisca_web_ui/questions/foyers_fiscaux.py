@@ -26,6 +26,7 @@
 """Korma questions related to foyers fiscaux"""
 
 
+from korma.base import Hidden
 from korma.choice import Select
 from korma.group import Group
 
@@ -70,7 +71,7 @@ title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
         template_question = FoyerFiscalGroup(
             name = u'foyer_fiscal',
             questions = [
-                base.Hidden(name = 'id'),
+                Hidden(name = 'id'),
                 base.Repeat(
                     name = u'individus',
                     add_button_label = u'Ajouter un membre',
