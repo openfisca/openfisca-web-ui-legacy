@@ -28,10 +28,8 @@
 
 import logging
 
-from biryani1.baseconv import cleanup_line, pipe
-from korma import helpers
-from korma.base import Input
-from korma.checkbox import Checkbox as KormaCheckbox
+from biryani1.baseconv import pipe
+from korma.checkbox import Checkbox
 from korma.choice import Radio, Select
 from korma.date import Date
 from korma.group import Group
@@ -39,14 +37,26 @@ from korma.repeat import Repeat as KormaRepeat
 from korma.text import Number, Text
 
 from ..conv import base
-from . import html
 
 
 log = logging.getLogger(__name__)
 
 
-Checkbox = lambda *args, **kwargs: \
-    KormaCheckbox(
+bootstrap_horizontal_form_control = u'''
+<label class="control-label col-sm-4" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-8">{self.control_html}</div>'''
+
+
+bootstrapize = lambda question_class, *args, **kwargs: \
+    question_class(
+        control_attributes = {'class': u'form-control'},
+        inner_html_template = bootstrap_horizontal_form_control,
+        *args,
+        **kwargs)
+
+
+BootstrapCheckbox = lambda *args, **kwargs: \
+    Checkbox(
         inner_html_template = u'''
 <div class="col-sm-offset-4 col-sm-8">
   <div class="checkbox">
@@ -56,19 +66,13 @@ Checkbox = lambda *args, **kwargs: \
         *args, **kwargs)
 
 
-class Hidden(Input):
-    type = u'hidden'
+BootstrapNumber = lambda *args, **kwargs: bootstrapize(Number, *args, **kwargs)
 
-    @property
-    def control_attributes(self):
-        return helpers.merge_mappings(
-            super(Hidden, self).control_attributes,
-            {u'value': self.value},
-        )
 
-    @property
-    def default_input_to_data(self):
-        return cleanup_line
+BootstrapSelect = lambda *args, **kwargs: bootstrapize(Select, *args, **kwargs)
+
+
+BootstrapText = lambda *args, **kwargs: bootstrapize(Text, *args, **kwargs)
 
 
 class MongoDate(Date):
@@ -83,6 +87,9 @@ class MongoDate(Date):
 
 FrenchDate = lambda placeholder = u'dd/mm/yyyy', *args, **kwargs: \
     MongoDate(format=u'%d/%m/%Y', placeholder=placeholder, *args, **kwargs)
+
+
+BootstrapFrenchDate = lambda *args, **kwargs: bootstrapize(FrenchDate, *args, **kwargs)
 
 
 Repeat = lambda add_button_label = u'Ajouter', *args, **kwargs: \
@@ -132,7 +139,7 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
         categories_groups.append(
             PanelGroup(
                 children_attributes = {
-                    '_outer_html_template': html.bootstrap_group_outer_html_template,
+                    '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
                     },
                 label = entity_category['label'],
                 questions = group_questions,
@@ -144,7 +151,7 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
 def make_question(column):
     question_label = column.get('label')
     if column['@type'] == 'Boolean':
-        return Checkbox(
+        return BootstrapCheckbox(
             label = question_label,
             name = column['name'],
             value = column.get('default'),
@@ -152,7 +159,7 @@ def make_question(column):
     elif column['@type'] == 'Enumeration':
         labels = column.get('labels', [])
         if len(labels) > 3:
-            return Select(
+            return BootstrapSelect(
                 choices = column['labels'].iteritems(),
                 label = question_label,
                 name = column['name'],
@@ -164,29 +171,29 @@ def make_question(column):
                 name = column['name'],
                 )
         else:
-            return Text(
+            return BootstrapText(
                 label = question_label,
                 name = column['name'],
                 )
     elif column['@type'] == 'Float':
-        return Number(
+        return BootstrapNumber(
             label = question_label,
             name = column['name'],
             step = 0.01,
             )
     elif column['@type'] == 'Integer':
-        return Number(
+        return BootstrapNumber(
             label = question_label,
             name = column['name'],
             step = 1,
             )
     elif column['@type'] == 'String':
-        return Text(
+        return BootstrapText(
             label = question_label,
             name = column['name'],
             )
     elif column['@type'] == 'Date':
-        return FrenchDate(
+        return BootstrapFrenchDate(
             label = question_label,
             name = column['name'],
             )
