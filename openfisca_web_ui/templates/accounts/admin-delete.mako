@@ -51,7 +51,18 @@ from openfisca_web_ui import model, urls
 </%def>
 
 
+<%def name="scripts()" filter="trim">
+    <%parent:scripts/>
+    <script>
+$(function () {
+    $("button[name='submit']").on('click', function() {
+        navigator.id.logout();
+    });
+});
+    </script>
+</%def>
+
+
 <%def name="title_content()" filter="trim">
 ${_(u'Delete')} - ${account.get_title(ctx)} - ${parent.title_content()}
 </%def>
-

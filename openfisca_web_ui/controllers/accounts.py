@@ -77,9 +77,8 @@ log = logging.getLogger(__name__)
 @wsgihelpers.wsgify
 def accept_or_reject_cnil(req):
     ctx = contexts.Ctx(req)
+    account = ctx.node
     params = req.params
-
-    print ctx.req.cookies.get(conf['cookie'])
 
     if not ('accept' in req.params and conv.check(conv.guess_bool(params.get('accept-checkbox'))) is True):
         session = ctx.session
