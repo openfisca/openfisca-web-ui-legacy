@@ -841,7 +841,6 @@ def user_edit(req):
 @wsgihelpers.wsgify
 def user_view(req):
     ctx = contexts.Ctx(req)
-    account = ctx.node
 
     session = ctx.session
     if session is None or session.user is None:
@@ -856,7 +855,6 @@ def user_view(req):
 @wsgihelpers.wsgify
 def user_save_api_data(req):
     ctx = contexts.Ctx(req)
-    account = ctx.node
 
     session = ctx.session
     if session is None or session.user is None:
@@ -880,7 +878,7 @@ def user_save_api_data(req):
     if errors is None:
         if session.user.saved_api_data is None:
             session.user.saved_api_data = {}
-        name =  data.get('api_data_name') or data.get('api_data_name_radio')
+        name = data.get('api_data_name') or data.get('api_data_name_radio')
         session.user.saved_api_data[name] = session.user.api_data
         session.user.save(ctx, safe = True)
         return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
@@ -890,7 +888,6 @@ def user_save_api_data(req):
 @wsgihelpers.wsgify
 def user_simulation_use(req):
     ctx = contexts.Ctx(req)
-    account = ctx.node
 
     session = ctx.session
     if session is None or session.user is None:
@@ -901,7 +898,7 @@ def user_simulation_use(req):
             )
 
     simulation_slug = req.urlvars.get('slug')
-    for simulation_name, simulation_data in session.user.saved_api_data.iteritems(): 
+    for simulation_name, simulation_data in session.user.saved_api_data.iteritems():
         if simulation_slug == strings.slugify(simulation_name):
             session.user.api_data = simulation_data
             session.user.save(ctx, safe = True)
@@ -912,10 +909,10 @@ def user_simulation_use(req):
 @wsgihelpers.wsgify
 def user_simulation_edit(req):
     ctx = contexts.Ctx(req)
-    account = ctx.node
+    pass
 
 
 @wsgihelpers.wsgify
 def user_simulation_delete(req):
     ctx = contexts.Ctx(req)
-    account = ctx.node
+    pass
