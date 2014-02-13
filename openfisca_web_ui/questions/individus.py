@@ -26,18 +26,11 @@
 """Korma questions related to individus"""
 
 
-import datetime
-
 from .. import uuidhelpers
 
 
 def build_default_values(existing_individus_count=0):
-    return {
-        u'birth': datetime.datetime(1984, 1, 1, 0, 0),
-        u'prenom': u'Personne {}'.format(existing_individus_count + 1),
-        u'sali': 25000,
-        u'statmarit': u'2',  # celibataire
-        }
+    return {u'prenom': u'Personne {}'.format(existing_individus_count + 1)}
 
 
 def default_value():

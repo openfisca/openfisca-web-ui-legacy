@@ -26,9 +26,10 @@
 """Korma questions and factories"""
 
 
+import datetime
 import logging
 
-from biryani1.baseconv import pipe
+from biryani1.baseconv import check, guess_bool, pipe
 from korma.checkbox import Checkbox
 from korma.choice import Radio, Select
 from korma.date import Date
@@ -51,8 +52,7 @@ bootstrapize = lambda question_class, *args, **kwargs: \
     question_class(
         control_attributes = {'class': u'form-control'},
         inner_html_template = bootstrap_horizontal_form_control,
-        *args,
-        **kwargs)
+        *args, **kwargs)
 
 
 BootstrapCheckbox = lambda *args, **kwargs: \
@@ -69,10 +69,25 @@ BootstrapCheckbox = lambda *args, **kwargs: \
 BootstrapNumber = lambda *args, **kwargs: bootstrapize(Number, *args, **kwargs)
 
 
+BootstrapRadio = lambda *args, **kwargs: \
+    Radio(
+        inner_html_template = u'''
+<label class="control-label col-sm-4" for="{self.full_name}">{self.label}</label>
+<div class="col-sm-8">
+  {self.control_html}
+</div>''',
+        *args, **kwargs)
+
+
 BootstrapSelect = lambda *args, **kwargs: bootstrapize(Select, *args, **kwargs)
 
 
 BootstrapText = lambda *args, **kwargs: bootstrapize(Text, *args, **kwargs)
+
+
+custom_column_default_values = {
+    u'birth': datetime.datetime(1984, 1, 1, 0, 0),
+    }
 
 
 class MongoDate(Date):
@@ -85,7 +100,7 @@ class MongoDate(Date):
         return pipe(super(MongoDate, self).default_input_to_data, base.date_to_datetime)
 
 
-FrenchDate = lambda placeholder = u'dd/mm/yyyy', *args, **kwargs: \
+FrenchDate = lambda placeholder = u'jj/mm/aaaa', *args, **kwargs: \
     MongoDate(format=u'%d/%m/%Y', placeholder=placeholder, *args, **kwargs)
 
 
@@ -151,21 +166,18 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
 def make_question(column):
     question_label = column.get('label')
     if column['@type'] == 'Boolean':
-        question = BootstrapCheckbox(
+        question = BootstrapRadio(
+            choices = ((False, u'Non'), (True, u'Oui')),
+            input_to_data = guess_bool,
             label = question_label,
             name = column['name'],
             )
     elif column['@type'] == 'Enumeration':
-        labels = column.get('labels', [])
-        if len(labels) > 3:
+        labels = column.get('labels')
+        if labels is not None:
             question = BootstrapSelect(
+                add_first_empty_value = True,
                 choices = column['labels'].iteritems(),
-                label = question_label,
-                name = column['name'],
-                )
-        elif len(labels) > 0:
-            question = Radio(
-                choices = column['labels'].iteritems() if column.get('labels') else [],
                 label = question_label,
                 name = column['name'],
                 )
@@ -196,6 +208,8 @@ def make_question(column):
             name = column['name'],
             )
     default = column.get('default')
+    if default is None:
+        default = custom_column_default_values.get(column['name'])
     if default is not None:
-        question.value = unicode(default)
+        question.placeholder = check(question.data_to_str(default))
     return question
