@@ -779,6 +779,7 @@ def user_view(req):
 
     if session.user.simulations is None:
         simulation = model.Simulation(
+            author_id = session.user._id,
             title = conf['api_data.main.name'],
             slug = strings.slugify(conf['api_data.main.name']),
             api_data = session.user.api_data,

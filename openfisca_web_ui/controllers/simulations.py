@@ -77,10 +77,10 @@ def edit(req):
 
 def route(environ, start_response):
     router = urls.make_router(
-        (None, '^/(?P<id_or_slug>[^/]+)/delete(?=/|$)', delete),
-        (None, '^/(?P<id_or_slug>[^/]+)/edit(?=/|$)', edit),
-        (None, '^/save(?=/|$)', save),
-        (None, '^/(?P<id_or_slug>[^/]+)/use(?=/|$)', use),
+        ('POST', '^/save/?$', save),
+        ('DELETE', '^/(?P<id_or_slug>[^/]+)/delete/?$', delete),
+        ('GET', '^/(?P<id_or_slug>[^/]+)/edit/?$', edit),
+        ('GET', '^/(?P<id_or_slug>[^/]+)/use/?$', use),
         )
     return router(environ, start_response)
 
@@ -107,7 +107,7 @@ def save(req):
             'title': conv.cleanup_line,
             'id': conv.first_match(
                 conv.test(lambda id: id == 'new'),
-                model.Simulation.make_id_or_slug_or_words_to_instance(),
+                model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id),
                 ),
             }),
         conv.rename_item('id', 'simulation'),
@@ -116,14 +116,18 @@ def save(req):
         simulation = data['simulation']
         if simulation == 'new':
             simulation = model.Simulation(
+                author_id = session.user._id,
                 title = data['title'],
                 slug = strings.slugify(data['title']),
                 )
-        if session.user.simulations is None:
-            session.user.simulations = [simulation._id]
         simulation.api_data = session.user.api_data
         simulation.save(ctx, safe = True)
-        session.user.save(ctx, safe = True)
+        if session.user.simulations is None:
+            session.user.simulations = [simulation._id]
+            session.user.save(ctx, safe = True)
+        elif simulation._id not in session.user.simulations:
+            session.user.simulations.append(simulation._id)
+            session.user.save(ctx, safe = True)
         return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
     return wsgihelpers.bad_request(ctx, explanation = errors)
 
@@ -141,9 +145,11 @@ def use(req):
             )
 
     id_or_slug = req.urlvars.get('id_or_slug')
-    simulation = conv.check(model.Simulation.make_id_or_slug_or_words_to_instance()(id_or_slug, state = ctx))
+    simulation = conv.check(
+        model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
+        )
     if simulation is None or simulation._id not in session.user.simulations:
-        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug)),
+        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
     session.user.api_data = simulation.api_data
     session.user.save(ctx, safe = True)

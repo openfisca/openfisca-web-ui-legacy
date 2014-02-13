@@ -347,6 +347,7 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
 
 class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     api_data = None
+    author_id = None
     collection_name = 'simulations'
     description = None
     slug = None
@@ -397,7 +398,7 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
         return self.full_name or self.slug or self.email or self._id
 
     @classmethod
-    def make_id_or_slug_or_words_to_instance(cls):
+    def make_id_or_slug_or_words_to_instance(cls, user_id = None):
         def id_or_slug_or_words_to_instance(value, state = None):
             if value is None:
                 return value, None
@@ -405,9 +406,9 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
                 state = conv.default_state
             id, error = conv.str_to_object_id(value, state = state)
             if error is None:
-                self = cls.find_one(id, as_class = collections.OrderedDict)
+                self = cls.find_one(dict(id = id, author_id = user_id), as_class = collections.OrderedDict)
             else:
-                self = cls.find_one(dict(slug = value), as_class = collections.OrderedDict)
+                self = cls.find_one(dict(slug = value, author_id = user_id), as_class = collections.OrderedDict)
             if self is None:
                 words = sorted(set(value.split(u'-')))
                 instances = list(cls.find(
