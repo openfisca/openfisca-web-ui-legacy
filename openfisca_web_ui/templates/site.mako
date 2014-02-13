@@ -93,7 +93,7 @@ ${conf['app_name']}
         return ''
 %>\
                     <div class="modal-footer">
-                        <button class="btn btn-success" name="accept" type="submit">
+                        <button class="btn btn-success btn-accept-cnil" disabled="disabled" name="accept" type="submit">
                             <span class="glyphicon glyphicon-ok"></span> Accepter
                         </button>
                         <button class="btn btn-danger" name="reject" type="submit">
@@ -259,6 +259,14 @@ $(function () {
 
     $('.sign-out').click(function() {
         navigator.id.logout();
+    });
+
+    $("input[name='accept-checkbox']").on('change', function(evt) {
+        if (this.checked) {
+            $('.btn-accept-cnil').removeAttr('disabled');
+        } else {
+            $('.btn-accept-cnil').attr('disabled', 'disabled');
+        }
     });
 });
     </script>

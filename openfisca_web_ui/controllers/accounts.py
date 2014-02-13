@@ -81,15 +81,9 @@ def accept_or_reject_cnil(req):
     params = req.params
 
     session = ctx.session
-    assert session is not None
+    assert session is not None and session.user is not None
     user = session.user
     if not ('accept' in req.params and conv.check(conv.guess_bool(params.get('accept-checkbox'))) is True):
-        if user is None or user._id != account._id:
-            return wsgihelpers.unauthorized(ctx,
-                explanation = ctx._("Deletion unauthorized"),
-                message = ctx._("You can not delete an account."),
-                title = ctx._('Operation denied'),
-                )
         user.email = None
         user.full_name = None
         user.slug = None
