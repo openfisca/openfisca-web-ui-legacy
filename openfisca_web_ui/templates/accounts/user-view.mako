@@ -38,6 +38,35 @@ from openfisca_web_ui import model, urls
             <a class="btn btn-default" href="${account.get_user_url(ctx, 'edit')}">${_(u'Edit')}</a>
             <a class="btn btn-danger"  href="${account.get_user_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
         </div>
+
+        <%self:modals/>
+</%def>
+
+
+<%def name="modals()" filter="trim">
+    % for simulation in simulations:
+        <%self:modals_delete simulation="${simulation}"/>
+    % endfor
+</%def>
+
+
+<%def name="modals_delete(simulation)" filter="trim">
+    <div class="modal fade bs-modal-lg" id="${u'delete-{}-modal'.format(simulation.slug)}" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Supprimer la simulation ${simulation.title} ?</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="${simulation.get_url(ctx, 'delete')}">
+                        <button type="submit" class="btn btn-danger">${_(u'Yes')}</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </%def>
 
 

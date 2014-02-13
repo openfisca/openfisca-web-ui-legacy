@@ -33,8 +33,8 @@ from .. import contexts, conv, model, urls, wsgihelpers
 
 @wsgihelpers.wsgify
 def delete(req):
-    raise NotImplemented
     ctx = contexts.Ctx(req)
+    assert req.method == 'POST'
 
     session = ctx.session
     if session is None or session.user is None:
@@ -44,13 +44,17 @@ def delete(req):
             title = ctx._('Operation denied'),
             )
 
-    simulation_slug = conv.check(conv.input_to_slug(req.urlvars.get('slug'), state = ctx))
-    for simulation_name, simulation_data in session.user.simulations.iteritems():
-        if simulation_slug == strings.slugify(simulation_name):
-            session.user.api_data = simulation_data
-            session.user.save(ctx, safe = True)
-            break
-    return wsgihelpers.redirect(ctx, location = '/')
+    id_or_slug = req.urlvars.get('id_or_slug')
+    simulation = conv.check(
+        model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
+        )
+    if simulation is None or simulation._id not in session.user.simulations:
+        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
+
+    session.user.simulations.remove(simulation._id)
+    session.user.save(ctx, safe = True)
+    simulation.delete(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
 
 @wsgihelpers.wsgify
@@ -78,7 +82,7 @@ def edit(req):
 def route(environ, start_response):
     router = urls.make_router(
         ('POST', '^/save/?$', save),
-        ('DELETE', '^/(?P<id_or_slug>[^/]+)/delete/?$', delete),
+        ('POST', '^/(?P<id_or_slug>[^/]+)/delete/?$', delete),
         ('GET', '^/(?P<id_or_slug>[^/]+)/edit/?$', edit),
         ('GET', '^/(?P<id_or_slug>[^/]+)/use/?$', use),
         )
