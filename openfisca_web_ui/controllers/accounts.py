@@ -897,7 +897,7 @@ def user_simulation_use(req):
             title = ctx._('Operation denied'),
             )
 
-    simulation_slug = req.urlvars.get('slug')
+    simulation_slug = conv.check(conv.input_to_slug(req.urlvars.get('slug'), state = ctx))
     for simulation_name, simulation_data in session.user.saved_api_data.iteritems():
         if simulation_slug == strings.slugify(simulation_name):
             session.user.api_data = simulation_data
