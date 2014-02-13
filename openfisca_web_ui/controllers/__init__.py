@@ -29,7 +29,7 @@
 import logging
 
 from .. import contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
-from . import accounts, form, legislations, sessions
+from . import accounts, form, legislations, sessions, simulations
 
 
 log = logging.getLogger(__name__)
@@ -82,6 +82,7 @@ def make_router():
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
+        (None, '^/simulations(?=/|$)', simulations.route),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
         ]

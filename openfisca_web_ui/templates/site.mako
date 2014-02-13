@@ -270,56 +270,6 @@ $(function () {
 </%def>
 
 
-<%def name="save_api_data_modal()" filter="trim">
-<%
-    user = model.get_user(ctx)
-    if user is None:
-        return ''
-%>\
-    <div class="modal fade bs-modal-lg" id="save-api-data-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <form class="form-horizontal" method="post" action="${user.get_user_url(ctx, 'save')}">
-                    <div class="modal-header">
-                        <a class="close" href="/">&times;</a>
-                        <h4 class="modal-title">Enregistrement de cette situation</h4>
-                    </div>
-                    <div class="modal-body">
-                        <h5>Écraser des données existantes ?</h5>
-        % if user.saved_api_data is not None:
-            % for api_data_name in user.saved_api_data.iterkeys():
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="api-data-name-radio" \
-value="${strings.slugify(api_data_name)}">${api_data_name}
-                            </label>
-                        </div>
-            % endfor
-        % endif
-                        <div class="radio">
-                            <label>
-                                <input data-toggle="collapse" data-target="#new-simulation-name" \
-name="api-data-name-radio" type="radio">Nouvelle simulation
-                            </label>
-                        </div>
-                        <div class="form-group collapse" id="new-simulation-name">
-                            <label class="col-sm-2 control-label">Nom :</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="api-data-name">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</%def>
-
-
 <%def name="title_content()" filter="trim">
 <%self:brand/>
 </%def>
@@ -389,7 +339,6 @@ title="${_(u'Save this situation')}">
     <%self:topbar/>
     <%self:body_content/>
     <%self:cnil_modal/>
-    <%self:save_api_data_modal/>
     <%self:scripts/>
     <%self:trackers/>
 </body>

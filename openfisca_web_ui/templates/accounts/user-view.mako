@@ -57,7 +57,7 @@ ${account.get_title(ctx)} - ${parent.title_content()}
         </div>
     % endif
 <%
-    value = account.saved_api_data
+    value = account.simulations
 %>\
     % if value is not None:
         <div class="row">
@@ -68,19 +68,13 @@ ${account.get_title(ctx)} - ${parent.title_content()}
                         <th>Name</th>
                         <th>Action</th>
                     </tr>
-        % for api_data_name, api_data in value.iteritems():
+        % for simulation in simulations:
                     <tr>
-                        <td>${api_data_name}</td>
+                        <td>${simulation.title}</td>
                         <td>
-                            <a class="btn btn-success" \
-href="${account.get_user_url(ctx, 'simulations', api_data_name, 'use')}">Utiliser
-                            </a>
-                            <a class="btn btn-default" href="${account.get_user_url(ctx, api_data_name, 'edit')}">
-                                Éditer
-                            </a>
-                            <a class="btn btn-danger" href="${account.get_user_url(ctx, api_data_name, 'delete')}">
-                                Supprimer
-                            </a>
+                            <a class="btn btn-success" href="${simulation.get_url(ctx, 'use')}">Utiliser</a>
+                            <a class="btn btn-default" href="${simulation.get_url(ctx, 'edit')}">Éditer</a>
+                            <a class="btn btn-danger" href="${simulation.get_url(ctx, 'delete')}">Supprimer</a>
                         </td>
                     </tr>
         % endfor

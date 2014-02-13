@@ -47,7 +47,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     description = None
     email = None
     full_name = None
-    saved_api_data = None
+    simulations = None
     slug = None
 
     @classmethod
@@ -343,6 +343,101 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
         if self is None:
             return value, state._(u"No session with UUID {0}").format(value)
         return self, None
+
+
+class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
+    api_data = None
+    collection_name = 'simulations'
+    description = None
+    slug = None
+    title = None
+
+    @classmethod
+    def bson_to_json(cls, value, state = None):
+        if value is None:
+            return value, None
+        value = value.copy()
+        if value.get('draft_id') is not None:
+            value['draft_id'] = unicode(value['draft_id'])
+        id = value.pop('_id', None)
+        if id is not None:
+            value['id'] = unicode(id)
+        return value, None
+
+    def compute_words(self):
+        self.words = sorted(set(strings.slugify(u'-'.join(
+            fragment
+            for fragment in (
+                self._id,
+                self.description,
+                self.title,
+                )
+            if fragment is not None
+            )).split(u'-'))) or None
+
+    @classmethod
+    def get_class_url(cls, ctx, *path, **query):
+        return urls.get_url(ctx, 'simulations', *path, **query)
+
+    @classmethod
+    def get_class_full_url(cls, ctx, *path, **query):
+        return urls.get_full_url(ctx, 'simulations', *path, **query)
+
+    def get_full_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return urls.get_full_url(ctx, 'simulations', self.slug or self._id, *path, **query)
+
+    def get_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return urls.get_url(ctx, 'simulations', self.slug or self._id, *path, **query)
+
+    def get_title(self, ctx):
+        return self.full_name or self.slug or self.email or self._id
+
+    @classmethod
+    def make_id_or_slug_or_words_to_instance(cls):
+        def id_or_slug_or_words_to_instance(value, state = None):
+            if value is None:
+                return value, None
+            if state is None:
+                state = conv.default_state
+            id, error = conv.str_to_object_id(value, state = state)
+            if error is None:
+                self = cls.find_one(id, as_class = collections.OrderedDict)
+            else:
+                self = cls.find_one(dict(slug = value), as_class = collections.OrderedDict)
+            if self is None:
+                words = sorted(set(value.split(u'-')))
+                instances = list(cls.find(
+                    dict(
+                        words = {'$all': [
+                            re.compile(u'^{}'.format(re.escape(word)))
+                            for word in words
+                            ]},
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).limit(2))
+                if not instances:
+                    return value, state._(u"No account with ID, slug or words: {0}").format(value)
+                if len(instances) > 1:
+                    return value, state._(u"Too much accounts with words: {0}").format(u' '.join(words))
+                self = instances[0]
+            return self, None
+        return id_or_slug_or_words_to_instance
+
+    def turn_to_json_attributes(self, state):
+        value, error = conv.object_to_clean_dict(self, state = state)
+        if error is not None:
+            return value, error
+        if value.get('draft_id') is not None:
+            value['draft_id'] = unicode(value['draft_id'])
+        id = value.pop('_id', None)
+        if id is not None:
+            value['id'] = unicode(id)
+        value.pop('api_key', None)
+        return value, None
 
 
 class Status(objects.Mapper, objects.Wrapper):

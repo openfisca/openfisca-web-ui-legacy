@@ -83,4 +83,5 @@ def form(req):
         korma_errors = korma_errors or {},
         page_form = page_form,
         simulation_errors = simulation_errors or {},
+        simulations = list(model.Simulation.find({'_id': {'$in': session.user.simulations or []}})),
         )
