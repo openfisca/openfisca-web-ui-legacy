@@ -45,8 +45,48 @@ from openfisca_web_ui import model, urls
 
 <%def name="modals()" filter="trim">
     % for simulation in simulations:
+        <%self:modals_edit simulation="${simulation}"/>
+    % endfor
+    % for simulation in simulations:
         <%self:modals_delete simulation="${simulation}"/>
     % endfor
+</%def>
+
+
+<%def name="modals_edit(simulation)" filter="trim">
+    <div class="modal fade bs-modal-lg" id="${u'edit-{}-modal'.format(simulation.slug)}" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Editer la simulation ${simulation.title}</h4>
+                </div>
+                <form class="form-horizontal" method="POST" action="${simulation.get_url(ctx, 'edit')}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Nom :</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="title" value="${simulation.title}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Description :</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" name="description">\
+${simulation.description or ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" name="submit" type="submit">
+                            <span class="glyphicon glyphicon-ok"></span> Enregistrer
+                        </button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </%def>
 
 
@@ -92,18 +132,22 @@ ${account.get_title(ctx)} - ${parent.title_content()}
         <div class="row">
             <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Description"))}</b></div>
             <div class="col-sm-10">
-                <table class="table table-stripped">
+                <table class="table table-striped">
                     <tr>
                         <th>Name</th>
+                        <th>Description</th>
                         <th>Action</th>
                     </tr>
         % for simulation in simulations:
                     <tr>
                         <td>${simulation.title}</td>
+                        <td>${simulation.description or ''}</td>
                         <td>
                             <a class="btn btn-success" href="${simulation.get_url(ctx, 'use')}">Utiliser</a>
-                            <a class="btn btn-default" href="${simulation.get_url(ctx, 'edit')}">Éditer</a>
-                            <a class="btn btn-danger" href="${simulation.get_url(ctx, 'delete')}">Supprimer</a>
+                            <a class="btn btn-default" href="#" data-toggle="modal" \
+data-target="#${u'edit-{}-modal'.format(simulation.slug)}">Éditer</a>
+                            <a class="btn btn-danger" href="#" data-toggle="modal" \
+data-target="#${u'delete-{}-modal'.format(simulation.slug)}">Supprimer</a>
                         </td>
                     </tr>
         % endfor

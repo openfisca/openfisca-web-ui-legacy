@@ -59,8 +59,8 @@ def delete(req):
 
 @wsgihelpers.wsgify
 def edit(req):
-    raise NotImplemented
     ctx = contexts.Ctx(req)
+    assert req.method == 'POST'
 
     session = ctx.session
     if session is None or session.user is None:
@@ -70,20 +70,37 @@ def edit(req):
             title = ctx._('Operation denied'),
             )
 
-    simulation_slug = conv.check(conv.input_to_slug(req.urlvars.get('slug'), state = ctx))
-    for simulation_name, simulation_data in session.user.simulations.iteritems():
-        if simulation_slug == strings.slugify(simulation_name):
-            session.user.api_data = simulation_data
-            session.user.save(ctx, safe = True)
-            break
-    return wsgihelpers.redirect(ctx, location = '/')
+    params = req.params
+    inputs = {
+        'title': params.get('title'),
+        'description': params.get('description'),
+        'id_or_slug': req.urlvars.get('id_or_slug'),
+        }
+    data, errors = conv.pipe(
+        conv.struct({
+            'title': conv.cleanup_line,
+            'description': conv.cleanup_line,
+            'id_or_slug': model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id),
+            }),
+        conv.rename_item('id_or_slug', 'simulation'),
+        )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = errors)
+    if data['simulation'] is None or data['simulation']._id not in session.user.simulations:
+        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
+
+    data['simulation'].title = data['title']
+    data['simulation'].slug = strings.slugify(data['title'])
+    data['simulation'].description = data['description']
+    data['simulation'].save(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
 
 def route(environ, start_response):
     router = urls.make_router(
         ('POST', '^/save/?$', save),
         ('POST', '^/(?P<id_or_slug>[^/]+)/delete/?$', delete),
-        ('GET', '^/(?P<id_or_slug>[^/]+)/edit/?$', edit),
+        ('POST', '^/(?P<id_or_slug>[^/]+)/edit/?$', edit),
         ('GET', '^/(?P<id_or_slug>[^/]+)/use/?$', use),
         )
     return router(environ, start_response)
