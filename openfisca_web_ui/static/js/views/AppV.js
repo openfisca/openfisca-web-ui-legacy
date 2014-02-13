@@ -1,12 +1,12 @@
 define([
+	'underscore',
+	'backbone',
+
 	'DetailChartV',
 	'LocatingChartV',
 
-	'jquery',
-	'underscore',
-	'backbone'
 	],
-	function (DetailChartV, LocatingChartV) {
+	function (_, Backbone, DetailChartV, LocatingChartV) {
 
 		var appV,
 			AppV = Backbone.View.extend({

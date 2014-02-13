@@ -50,7 +50,7 @@ from openfisca_web_ui import model, pages
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
     <%self:tabs/>
-    <form class="korma form" method="POST" role="form">
+    <form class="korma form" id="simulation" method="POST" role="form">
         ${page_form.html | n}
         <p class="buttons">
             <input class="btn btn-success" type="submit" value="Valider">
@@ -128,17 +128,4 @@ type="radio" value="new">
             </div>
         </div>
     </div>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-<%parent:scripts/>
-<script>
-$('body').on('keypress', 'input', function(evt) {
-  if (evt.keyCode == 13) {
-    evt.preventDefault();
-    $("form").submit();
-  }
-});
-</script>
 </%def>

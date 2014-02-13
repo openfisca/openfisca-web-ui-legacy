@@ -1,11 +1,12 @@
 define([
-	'd3',
-	'helpers',
-
 	'jquery',
 	'underscore',
-	'backbone'
-	], function (d3, helpers) {
+	'backbone',
+	'd3',
+
+	'helpers',
+
+	], function ($, _, Backbone, d3, helpers) {
 		'use strict';
 
 		var WaterfallChart = Backbone.View.extend({

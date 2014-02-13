@@ -1,10 +1,8 @@
 define([
-	'appV',
-
-	'jquery',
-	'underscore',
 	'backbone',
-], function (appV, a, b, c) {
+
+	'appV'
+], function (Backbone, appV) {
 
 	var router = null,
 		Router = Backbone.Router.extend({

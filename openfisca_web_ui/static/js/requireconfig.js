@@ -1,45 +1,33 @@
 require.config({
     urlArgs: "bust=" +  (new Date()).getTime(),
     paths: {
-
-        /* Libs */
-        'domReady': 'libs/domReady',
-        'jquery': 'libs/jquery-1.9.1.min',
-        'underscore': 'libs/underscore-min',
-        'backbone': 'libs/backbone-min',
-        'backbone.DeepModel': 'libs/backbone-deep-model',
-        'handlebars': 'libs/handlebars.runtime-1.0.rc.1.min',
+        /* Bower components */
+        'backbone': '/bower/backbone/backbone',
+        'backbone.DeepModel': '/bower/backbone-deep-model/distribution/deep-model',
+        'bootstrap': '/bower/bootstrap/dist/js/bootstrap',
+        'd3': '/bower/d3/d3',
+        'domReady': '/bower/requirejs-domready/domReady',
+        'handlebars': '/bower/handlebars/handlebars.amd',
+        'jquery': '/bower/jquery/jquery.min',
         'templates': '../templates/templates',
-        'bootstrap': '//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min',
-        'd3': 'libs/d3.v3.min',
+        'underscore': '/bower/underscore/underscore',
 
         /* App */
-        'app': 'app',
-        'router': 'router',
+        'app': '/js/app',
+        'router': '/js/router',
 
         /* Views */
-        'appV': 'views/AppV',
-        'DetailChartV': 'views/DetailChartV',
-        'LocatingChartV': 'views/LocatingChartV',
-        'AggregateChart': 'views/modals/AggregateChart',
-        'WaterfallChart': 'views/modals/WaterfallChart',
+        'appV': '/js/views/AppV',
+        'DetailChartV': '/js/views/DetailChartV',
+        'LocatingChartV': '/js/views/LocatingChartV',
+        'AggregateChart': '/js/views/modals/AggregateChart',
+        'WaterfallChart': '/js/views/modals/WaterfallChart',
 
         /* Models */
-        'DetailChartM': 'models/DetailChartM',
-        'LocatingChartM': 'models/LocatingChartM',
-
+        'DetailChartM': '/js/models/DetailChartM',
+        'LocatingChartM': '/js/models/LocatingChartM',
 
         /* Modules */
-        'helpers': 'modules/helpers'
-    },
-    shim: {
-        'jquery':               { exports: '$' },
-        'underscore':           { exports: '_' },
-        'handlebars':           { exports: 'Handlebars' },
-        'bootstrap':            { exports: 'Bootstrap', deps: ['jquery'] },
-        'templates':            { exports: 'templates', deps: ['handlebars'] },
-        'backbone':             { exports: 'Backbone', deps: ['jquery', 'underscore'] },
-        'backbone.DeepModel':   { exports: 'DeepModel', deps: ['backbone'] },
-        'd3':                   { exports: 'd3' }
+        'helpers': '/js/modules/helpers'
     }
 });
