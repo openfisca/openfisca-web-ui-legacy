@@ -83,7 +83,7 @@ def make_router():
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         ('POST', '^/login/?$', accounts.login),
-        ('POST', '^/logout/?$', accounts.logout),
+        (('GET', 'POST'), '^/logout/?$', accounts.logout),
         ]
     for page_data in pages.pages_data:
         routings.append(

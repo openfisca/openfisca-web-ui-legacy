@@ -202,7 +202,6 @@ rel="stylesheet">
 %>\
 var currentUser = ${user.email if user is not None else None | n, js};
 
-
 % if conf['auth.enable']:
 navigator.id.watch({
     loggedInUser: currentUser,
@@ -232,16 +231,20 @@ navigator.id.watch({
         });
     },
     onlogout: function () {
-        $.ajax({
-            type: 'POST',
-            url: '/logout',
-            success: function(res, status, xhr) {
-                window.location.reload();
-            },
-            error: function(xhr, status, err) {
-                alert(${_(u"Logout failure: ") | n, js} + err);
-            }
-        });
+        if (window.location.pathname == '/logout') {
+            window.location.href = '/';
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: '/logout',
+                success: function(res, status, xhr) {
+                    window.location.reload();
+                },
+                error: function(xhr, status, err) {
+                    alert(${_(u"Logout failure: ") | n, js} + err);
+                }
+            });
+        }
     }
 });
 % endif

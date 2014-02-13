@@ -81,6 +81,7 @@ def accept_or_reject_cnil(req):
     params = req.params
 
     session = ctx.session
+    assert session is not None
     user = session.user
     if not ('accept' in req.params and conv.check(conv.guess_bool(params.get('accept-checkbox'))) is True):
         if user is None or user._id != account._id:
@@ -655,14 +656,13 @@ def login(req):
 @wsgihelpers.wsgify
 def logout(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'POST'
     session = ctx.session
     if session is not None:
         session.delete(ctx, safe = True)
         ctx.session = None
         if req.cookies.get(conf['cookie']) is not None:
             req.response.delete_cookie(conf['cookie'])
-    return 'Logout succeeded.'
+    return 'Logout successful' if req.is_xhr else templates.render(ctx, '/logout.mako')
 
 
 def route_admin(environ, start_response):
@@ -766,7 +766,7 @@ def user_delete(req):
 
     if req.method == 'POST':
         session.user.delete(ctx, safe = True)
-        return wsgihelpers.redirect(ctx, location = '/')
+        return wsgihelpers.redirect(ctx, location = '/logout')
     return templates.render(ctx, '/accounts/user-delete.mako', account = session.user)
 
 
