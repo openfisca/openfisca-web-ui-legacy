@@ -27,7 +27,9 @@
 
 
 <%def name="container_content()" filter="trim">
-    <p class="label label-warning">Déconnexion en cours</p>
+    <div class="alert alert-block alert-success">
+        <p>Déconnexion en cours</p>
+    </div>
 </%def>
 
 
