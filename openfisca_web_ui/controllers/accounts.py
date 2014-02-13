@@ -647,7 +647,7 @@ def login(req):
         dict(
             existingAccount = registered_account is not None,
             cnilUrl = session.user.get_user_url(ctx, 'accept-or-reject-cnil'),
-            accountUrl = session.user.get_user_url(ctx),
+            accountUrl = session.user.get_user_url(ctx) if len(session.user.saved_api_data or []) > 1 else '/',
             )
         )
 
