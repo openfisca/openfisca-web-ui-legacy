@@ -45,8 +45,9 @@ def form(req):
             u'familles': questions.familles.default_value(individu_ids = [individu_id]),
             u'individus': {individu_id: questions.individus.build_default_values()},
             }
-    # TODO remove this 'if'
-    if page_data['slug'] in ['familles', 'declarations-impots', 'logements-principaux']:
+    if page_data['slug'] == 'familles':
+        page_form = page_data['form_factory']()
+    elif page_data['slug'] in ('declarations-impots', 'logements-principaux'):
         prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)
         page_form = page_data['form_factory'](prenom_select_choices)
     else:

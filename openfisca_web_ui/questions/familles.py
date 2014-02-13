@@ -41,7 +41,7 @@ def default_value(individu_ids):
     return {uuidhelpers.generate_uuid(): famille}
 
 
-def make_familles_repeat(prenom_select_choices):
+def make_familles_repeat():
     class FamilleGroup(Group):
         @property
         def outer_html(self):
