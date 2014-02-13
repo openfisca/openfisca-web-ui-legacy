@@ -186,7 +186,8 @@ rel="stylesheet">
 
 
 <%def name="scripts()" filter="trim">
-    <script src="${urls.get_url(ctx, u'/bower/requirejs/require.js')}"></script>
+    <script data-main="js/main" src="${urls.get_url(ctx, u'/bower/requirejs/require.js')}"></script>
+    <script src="${urls.get_url(ctx, u'/js/requireconfig.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/jquery/jquery.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/bootstrap/dist/js/bootstrap.js')}"></script>
     <script src="${urls.get_url(ctx, u'/bower/typeahead.js/dist/typeahead.js')}"></script>

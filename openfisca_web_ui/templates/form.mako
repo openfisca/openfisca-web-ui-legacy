@@ -49,28 +49,16 @@ from openfisca_web_ui import model, pages
 % if korma_errors:
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
-    <div class="row">
-        <div class="col-sm-6">
-            <%self:tabs/>
-            <form class="korma form" method="POST" role="form">
-                ${page_form.html | n}
-                <p class="buttons">
-                    <input class="btn btn-success" type="submit" value="Valider">
-                    <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
-                        ${_(u'Reset')}
-                    </button>
-                </p>
-            </form>
-        </div>
-
-        <div class="col-sm-6">
-% if simulation_errors:
-            <pre class="alert alert-warning">${simulation_errors | n, js, h}</pre>
-% else:
-            <img class="waterfall-img" src="/image/waterfall.png" alt="Graphique">
-% endif
-        </div>
-    </div>
+    <%self:tabs/>
+    <form class="korma form" method="POST" role="form">
+        ${page_form.html | n}
+        <p class="buttons">
+            <input class="btn btn-success" type="submit" value="Valider">
+            <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
+                ${_(u'Reset')}
+            </button>
+        </p>
+    </form>
 
     <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -80,7 +68,7 @@ from openfisca_web_ui import model, pages
                     <h4 class="modal-title">Effacer la simulation ?</h4>
                 </div>
                 <div class="modal-body">
-                    <a class="btn btn-danger btn-reset" href="${ctx.user.get_admin_url(ctx, 'reset')}">
+                    <a class="btn btn-danger btn-reset" href="TODO">
                         ${_(u'Yes')}
                     </a>
                     <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
@@ -109,13 +97,15 @@ from openfisca_web_ui import model, pages
                     </div>
                     <div class="modal-body">
                         <h5>Écraser des données existantes ?</h5>
-        % for simulation in simulations:
+% if simulations is not None:
+    % for simulation in simulations:
                         <div class="radio">
                             <label>
                                 <input type="radio" name="id" value="${simulation._id}">${simulation.title}
                             </label>
                         </div>
-        % endfor
+    % endfor
+% endif
                         <div class="radio">
                             <label>
                                 <input data-toggle="collapse" data-target="#new-simulation-name" name="id" \

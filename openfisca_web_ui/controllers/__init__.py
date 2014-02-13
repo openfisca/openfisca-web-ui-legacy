@@ -28,7 +28,7 @@
 
 import logging
 
-from .. import contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
+from .. import contexts, conv, matplotlib_helpers, pages, templates, urls, wsgihelpers
 from . import accounts, form, legislations, sessions, simulations
 
 
@@ -67,7 +67,7 @@ def image(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'familles'))
+    return templates.render(ctx, '/index.mako')
 
 
 def make_router():
