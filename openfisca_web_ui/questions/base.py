@@ -43,6 +43,9 @@ from ..conv import base
 log = logging.getLogger(__name__)
 
 
+bootstrap_form_group = u'<div class="form-group">{self.inner_html}</div>'
+
+
 bootstrap_horizontal_form_control = u'''
 <label class="control-label col-sm-4" for="{self.full_name}">{self.label}</label>
 <div class="col-sm-8">{self.control_html}</div>'''
@@ -153,9 +156,7 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
                     group_questions.append(question)
         categories_groups.append(
             PanelGroup(
-                children_attributes = {
-                    '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                    },
+                children_attributes = {'_outer_html_template': bootstrap_form_group},
                 label = entity_category['label'],
                 questions = group_questions,
                 )

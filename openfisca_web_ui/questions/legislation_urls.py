@@ -23,31 +23,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""Korma questions related to legislation URLs and year"""
+"""Korma questions related to legislation URLs and simulation year"""
 
 
-from korma.choice import Radio
 from korma.group import Group
-from korma.text import Number
+
+from . import base
 
 
 def make_legislation_urls_group(legislation_urls_and_descriptions):
     return Group(
+        children_attributes = {'_outer_html_template': base.bootstrap_form_group},
         name = u'legislation_urls',
         outer_html_template = u'''
-<div class="form-inline personne-row">
-  {self[legislation_url].html}
-  <br>
-  {self[year].html}
-</div>
-''',
+<div class="form-horizontal">
+  {self.inner_html}
+</div>''',
         questions = [
-            Radio(
-                control_attributes = {'class': 'form-control'},
+            base.BootstrapRadio(
                 choices = legislation_urls_and_descriptions,
+                label = u'URL de la législation',
                 name = u'legislation_url',
                 ),
-            Number(
+            base.BootstrapNumber(
                 label = u'Année de la simulation',
                 name = 'year',
                 step = 1,
