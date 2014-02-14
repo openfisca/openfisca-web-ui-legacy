@@ -38,7 +38,8 @@ from openfisca_web_ui import model, urls
             <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#edit-new-modal">
                 ${_('New simulation')}
             </a>
-            <a class="btn btn-danger pull-right"  href="${account.get_user_url(ctx, 'delete')}">
+
+            <a class="btn btn-danger pull-right" href="#" data-toggle="modal" data-target="#delete-user-modal">
                 <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}
             </a>
         </div>
@@ -58,6 +59,7 @@ from openfisca_web_ui import model, urls
     % for simulation in simulations:
         <%self:modals_delete simulation="${simulation}"/>
     % endfor
+        <%self:modals_delete_user/>
 </%def>
 
 
@@ -108,6 +110,26 @@ ${simulation.description or ''}</textarea>
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="${simulation.get_url(ctx, 'delete')}">
+                        <button type="submit" class="btn btn-danger">${_(u'Yes')}</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
+<%def name="modals_delete_user()" filter="trim">
+    <div class="modal fade bs-modal-lg" id="delete-user-modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">${_(u"Are you sure that you want to delete this account?")}</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="${account.get_user_url(ctx, 'delete')}">
                         <button type="submit" class="btn btn-danger">${_(u'Yes')}</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
                     </form>

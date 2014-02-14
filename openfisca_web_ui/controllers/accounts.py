@@ -745,7 +745,7 @@ def route_user_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_view),
         ('POST', '^/accept-or-reject-cnil/?$', accept_or_reject_cnil),
-        (('GET', 'POST'), '^/delete/?$', user_delete),
+        ('POST', '^/delete/?$', user_delete),
         )
     return router(environ, start_response)
 
@@ -761,10 +761,9 @@ def user_delete(req):
             title = ctx._('Operation denied'),
             )
 
-    if req.method == 'POST':
-        session.user.delete(ctx, safe = True)
-        return wsgihelpers.redirect(ctx, location = '/logout')
-    return templates.render(ctx, '/accounts/user-delete.mako', account = session.user)
+    assert req.method == 'POST'
+    session.user.delete(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = '/logout')
 
 
 @wsgihelpers.wsgify
