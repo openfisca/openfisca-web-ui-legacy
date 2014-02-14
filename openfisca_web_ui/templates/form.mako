@@ -56,6 +56,11 @@ from openfisca_web_ui import model, pages
                 ${page_form.html | n}
                 <p class="buttons">
                     <input class="btn btn-success" type="submit" value="Valider">
+    % if ctx.user is None or ctx.user.email is None:
+                    <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
+                        ${_(u'Save my simulation')}
+                    </a>
+    % endif
                     <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
                         ${_(u'Reset')}
                     </button>

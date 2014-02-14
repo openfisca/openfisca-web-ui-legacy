@@ -322,9 +322,6 @@ user = model.get_user(ctx)
 % if conf['auth.enable'] and user is not None:
             <ul class="nav navbar-nav navbar-right">
     % if user.email is None:
-                <li><a class="navbar-brand sign-in" href="#" title="${_(u'Save this simulation')}">
-                    <span class="label label-success">${_(u'Save my simulation')}</span>
-                </a></li>
                 <li><a class="sign-in" href="#" title="${_(u'Retrieve saved simulations')}">${_(u'Sign in')}</a></li>
     % else:
                 <li class="active">
