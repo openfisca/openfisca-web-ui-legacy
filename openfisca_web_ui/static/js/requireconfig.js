@@ -30,5 +30,15 @@ require.config({
         /* Modules */
         'auth': '/js/auth',
         'helpers': '/js/modules/helpers'
+    },
+    shim: {
+        'jquery':               { exports: '$' },
+        'underscore':           { exports: '_' },
+        'handlebars':           { exports: 'Handlebars' },
+        'bootstrap':            { exports: 'Bootstrap', deps: ['jquery'] },
+        'templates':            { exports: 'templates', deps: ['handlebars'] },
+        'backbone':             { exports: 'Backbone', deps: ['jquery', 'underscore'] },
+        'backbone.DeepModel':   { exports: 'DeepModel', deps: ['backbone'] },
+        'd3':                   { exports: 'd3' }
     }
 });
