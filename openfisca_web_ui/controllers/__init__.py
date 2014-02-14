@@ -28,40 +28,12 @@
 
 import logging
 
-from .. import contexts, conv, matplotlib_helpers, pages, templates, urls, wsgihelpers
+from .. import contexts, conv, pages, templates, urls, wsgihelpers
 from . import accounts, form, legislations, sessions, simulations
 
 
 log = logging.getLogger(__name__)
 router = None
-
-
-@wsgihelpers.wsgify
-def image(req):
-    ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None or session.user is None:
-        raise wsgihelpers.no_content(ctx)
-    if session.user.api_data is None:
-        session.user.api_data = {}
-    simulation_output, simulation_errors = conv.simulation.user_api_data_to_simulation_output(
-        session.user.api_data, state = ctx)
-    if simulation_errors is None:
-        params = {
-            'name': req.urlvars.get('name'),
-            }
-        image_name = conv.check(conv.test_in(['bareme', 'waterfall'])(params['name']))
-        trees = simulation_output['value']
-        image_stringio = None
-        if image_name == 'waterfall':
-            image_stringio = matplotlib_helpers.create_waterfall_png(trees)
-        elif image_name == 'bareme':
-            image_stringio = matplotlib_helpers.create_bareme_png(trees, simulation_output)
-        req.response.content_type = 'image/png'
-        req.response.write(image_stringio.read())
-    else:
-        log.error(simulation_errors)
-        return wsgihelpers.no_content(ctx)
 
 
 @wsgihelpers.wsgify
@@ -75,13 +47,13 @@ def make_router():
     global router
     routings = [
         ('GET', '^/?$', index),
-        ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/accounts(?=/|$)', accounts.route_user_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
+        (None, '^/api/1/simulate$', simulate),
         (None, '^/simulations(?=/|$)', simulations.route),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
@@ -92,3 +64,15 @@ def make_router():
             )
     router = urls.make_router(*routings)
     return router
+
+
+@wsgihelpers.wsgify
+def simulate(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    user_api_data = session.user.api_data if session.user is not None else None
+    if user_api_data is None:
+        user_api_data = {}
+    output, errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
+    data = {'output': output, 'errors': errors}
+    return wsgihelpers.respond_json(ctx, data)

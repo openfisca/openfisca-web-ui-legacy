@@ -195,6 +195,11 @@ ${conf['app_name']}
     user = model.get_user(ctx)
 %>\
 define('appconfig', {
+    api: {
+        urls: {
+            simulate: ${urls.get_url(ctx, 'api/1/simulate') | n, js}
+        }
+    },
     auth: {
         currentUser: ${user.email if user is not None else None | n, js},
         enable: ${conf['auth.enable'] | n, js}

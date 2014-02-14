@@ -13,7 +13,7 @@ define([
 			events: {},
 
 			/* Properties */
-			model: new DetailChartM,
+			model: new DetailChartM(),
 			views: [],
 
 			/* Settings */
@@ -33,7 +33,6 @@ define([
 			/* Settings */
 
 			initialize: function (parent) {
-
 				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
 
 				console.info('WaterfallChartV initialized');
@@ -42,17 +41,13 @@ define([
 				this.height = parent.height;
 				this.width = parent.width;
 
-				this.setData(this.model.get('groupedDatas.all'));
-
-				this.updateScales();
-
-				this.buildBars();
-				this.buildLegend();
-
-				this.listenTo(this.model, 'change:datas', this.render);
+				this.listenTo(this.model, 'change:groupedDatas.all', this.render);
 			},
 			render: function () {
-
+				this.setData(this.model.get('groupedDatas.all'));
+				this.updateScales();
+				this.buildBars();
+				this.buildLegend();
 				return this;
 			},
 
@@ -146,7 +141,7 @@ define([
 			this.svg.append("g")
 				.attr("class", "x axis")
 				.call(this.xAxis)
-					.append('rect').append('g')
+					.append('rect').append('g');
 			}
 });
 return WaterfallChartV;

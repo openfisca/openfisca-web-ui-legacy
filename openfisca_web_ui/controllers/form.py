@@ -79,7 +79,9 @@ def form(req):
     _, simulation_errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
     simulations = None if session.user.simulations is None else \
         list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
-    if req.is_xhr:
+    if req.is_xhr or req.params.get('tab-content-only'):
+        if simulation_errors is not None:
+            req.response.status = 400
         return templates.render_def(
             ctx,
             '/form.mako',

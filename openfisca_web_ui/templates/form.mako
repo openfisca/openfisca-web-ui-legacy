@@ -42,14 +42,14 @@ from openfisca_web_ui import model, pages
 
 
 <%def name="container_content()" filter="trim">
+    <%self:tabs/>
 % if korma_errors:
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
-    <%self:tabs/>
-    <form class="korma form" id="simulation" method="POST" role="form">
+    <form class="korma form" method="POST" role="form">
         ${page_form.html | n}
         <p class="buttons">
-            <input class="btn btn-success" type="submit" value="Valider">
+            <input class="btn btn-success" type="submit" value="Simuler">
             <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
                 ${_(u'Reset')}
             </button>

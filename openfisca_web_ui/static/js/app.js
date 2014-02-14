@@ -1,30 +1,26 @@
 define([
-	'jquery',
+	'bootstrap',
 
 	'auth',
 	'appV',
+	'FormV',
 	'router',
 	'appconfig'
 	],
-	function ($, auth, appV, Router, appconfig) {
+	function (bootstrap, auth, appV, FormV, Router, appconfig) {
 
 		var App = function () {};
 		App.prototype = {
 			init: function () {
 				this.router = Router.init();
 				this.view = appV;
-				$.get('/familles', function(data) {
-					$('#form-wrapper').html(data);
-					$('input').on('keypress', function(evt) {
-						if (evt.keyCode == 13) {
-							evt.preventDefault();
-							$("form#simulation").submit();
-						}
-					});
-				});
+				this.initForm();
 				if (appconfig.auth.enable) {
 					auth.init(appconfig.auth);
 				}
+			},
+			initForm: function() {
+				this.formV = new FormV();
 			}
 		};
 

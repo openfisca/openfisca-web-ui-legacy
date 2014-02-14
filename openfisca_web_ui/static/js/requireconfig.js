@@ -19,11 +19,13 @@ require.config({
         /* Views */
         'appV': '/js/views/AppV',
         'CnilModal': '/js/views/CnilModal',
+        'FormV': '/js/views/FormV',
         'LocatingChartV': '/js/views/LocatingChartV',
         'AggregateChartV': '/js/views/modals/AggregateChartV',
         'WaterfallChartV': '/js/views/WaterfallChartV',
 
         /* Models */
+        'backendServiceM': '/js/models/backendServiceM',
         'DetailChartM': '/js/models/DetailChartM',
         'LocatingChartM': '/js/models/LocatingChartM',
 
