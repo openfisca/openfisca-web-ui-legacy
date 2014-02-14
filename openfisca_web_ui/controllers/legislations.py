@@ -429,3 +429,73 @@ def route_api1_class(environ, start_response):
         ('GET', '^/(?P<id_or_slug_or_words>[^/]+)/json?$', api1_json),
         )
     return router(environ, start_response)
+
+
+def route_user(environ, start_response):
+    router = urls.make_router(
+        ('GET', '^/?$', user_index),
+        ('GET', '^/(?P<id_or_slug>[^/]+)$', user_view),
+        )
+    return router(environ, start_response)
+
+
+@wsgihelpers.wsgify
+def user_index(req):
+    ctx = contexts.Ctx(req)
+
+    params = req.GET
+    inputs = dict(
+        advanced_search = params.get('advanced_search'),
+        page = params.get('page'),
+        sort = params.get('sort'),
+        term = params.get('term'),
+        )
+    data, errors = conv.pipe(
+        conv.struct(
+            dict(
+                advanced_search = conv.guess_bool,
+                page = conv.pipe(
+                    conv.input_to_int,
+                    conv.test_greater_or_equal(1),
+                    conv.default(1),
+                    ),
+                sort = conv.pipe(
+                    conv.cleanup_line,
+                    conv.test_in(['slug', 'updated']),
+                    ),
+                term = conv.base.input_to_words,
+                ),
+            ),
+        conv.rename_item('page', 'page_number'),
+        )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+    criteria = {}
+    if data['term'] is not None:
+        criteria['words'] = {'$all': [
+            re.compile(u'^{}'.format(re.escape(word)))
+            for word in data['term']
+            ]}
+    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
+    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
+    if data['sort'] == 'slug':
+        cursor.sort([('slug', pymongo.ASCENDING)])
+    elif data['sort'] == 'updated':
+        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
+    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+    return templates.render(ctx, '/legislations/user-index.mako', data = data, errors = errors,
+        legislations = legislations, inputs = inputs, pager = pager)
+
+
+@wsgihelpers.wsgify
+def user_view(req):
+    ctx = contexts.Ctx(req)
+    assert req.method == 'GET'
+    legislation, error = pipe(
+        input_to_slug,
+        not_none,
+        model.Legislation.make_id_or_slug_or_words_to_instance(),
+        )(req.urlvars.get('id_or_slug'), state = ctx)
+    if error is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(error))
+    return templates.render(ctx, '/legislations/user-view.mako', legislation = legislation)

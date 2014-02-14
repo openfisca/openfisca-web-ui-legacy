@@ -234,6 +234,19 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
         return self._user
 
     @classmethod
+    def get_user_class_full_url(cls, ctx, *path, **query):
+        return urls.get_full_url(ctx, 'legislations', *path, **query)
+
+    @classmethod
+    def get_user_class_url(cls, ctx, *path, **query):
+        return urls.get_url(ctx, 'legislations', *path, **query)
+
+    def get_user_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return self.get_user_class_url(ctx, self.slug or self._id, *path, **query)
+
+    @classmethod
     def make_id_or_slug_or_words_to_instance(cls):
         def id_or_slug_or_words_to_instance(value, state = None):
             if value is None:
