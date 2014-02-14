@@ -3,7 +3,6 @@ require.config({
     paths: {
         /* Bower components */
         'backbone': '/bower/backbone/backbone',
-        'backbone.DeepModel': '/bower/backbone-deep-model/distribution/deep-model',
         'bootstrap': '/bower/bootstrap/dist/js/bootstrap',
         'd3': '/bower/d3/d3',
         'domReady': '/bower/requirejs-domready/domReady',
@@ -40,7 +39,6 @@ require.config({
         'bootstrap':            { exports: 'Bootstrap', deps: ['jquery'] },
         'templates':            { exports: 'templates', deps: ['handlebars'] },
         'backbone':             { exports: 'Backbone', deps: ['jquery', 'underscore'] },
-        'backbone.DeepModel':   { exports: 'DeepModel', deps: ['backbone'] },
         'd3':                   { exports: 'd3' }
     }
 });

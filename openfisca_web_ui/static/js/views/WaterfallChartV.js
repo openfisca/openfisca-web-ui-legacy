@@ -35,19 +35,20 @@ define([
 			initialize: function (parent) {
 				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
 
-				console.info('WaterfallChartV initialized');
+				console.log('WaterfallChartV initialized');
 
 				this.svg = parent.svg;
 				this.height = parent.height;
 				this.width = parent.width;
 
-				this.listenTo(this.model, 'change:groupedDatas.all', this.render);
+				this.listenTo(this.model, 'change:groupedDatasAll', this.render);
 			},
 			render: function () {
-				this.setData(this.model.get('groupedDatas.all'));
+			    console.log('WaterfallChartV.render');
+				this.setData(this.model.get('groupedDatasAll'));
 				this.updateScales();
 				this.buildBars();
-				this.buildLegend();
+//				this.buildLegend();
 				return this;
 			},
 
@@ -115,35 +116,34 @@ define([
 			},
 			buildLegend: function () {
 
-			var that = this;
+				var that = this;
 
-			this.xAxis = d3.svg.axis()
-				.scale(this.scales.x)
-				.orient("bottom");
+				this.xAxis = d3.svg.axis()
+					.scale(this.scales.x)
+					.orient("bottom");
 
-			this.yAxis = d3.svg.axis()
-				.scale(this.scales.y)
-				.orient("left")
-				.tickFormat(d3.format(".9s"));
+				this.yAxis = d3.svg.axis()
+					.scale(this.scales.y)
+					.orient("left")
+					.tickFormat(d3.format(".9s"));
 
 
-			d3.select(this.el)
-				.attr("class", "y axis")
-				.attr('height', that.height)
-				.call(this.yAxis)
-					.append("text")
-						.attr("transform", "rotate(-90)")
-						.attr("y", 6)
-						.attr("dy", ".71em")
-						.style("text-anchor", "end")
-						.text("Revenu disponible");
+				d3.select(this.el)
+					.attr("class", "y axis")
+					.attr('height', that.height)
+					.call(this.yAxis)
+						.append("text")
+							.attr("transform", "rotate(-90)")
+							.attr("y", 6)
+							.attr("dy", ".71em")
+							.style("text-anchor", "end")
+							.text("Revenu disponible");
 
-			this.svg.append("g")
-				.attr("class", "x axis")
-				.call(this.xAxis)
-					.append('rect').append('g');
+				this.svg.append("g")
+					.attr("class", "x axis")
+					.call(this.xAxis)
+						.append('rect').append('g');
 			}
+		});
+	return WaterfallChartV;
 });
-return WaterfallChartV;
-}
-);

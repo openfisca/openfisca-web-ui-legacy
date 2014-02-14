@@ -43,10 +43,10 @@ define([
 						alert('Wrong simulation params');
 					} else {
 						var result = data.output.value[0];
-						if (result) {
-							this.set('apiData', result);
-						} else {
+						if (_.isUndefined(result)) {
 							alert('Could not retrieve simulation result');
+						} else {
+							this.set('apiData', result);
 						}
 					}
 				})

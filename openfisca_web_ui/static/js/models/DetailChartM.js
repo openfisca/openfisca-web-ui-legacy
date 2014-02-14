@@ -1,16 +1,18 @@
 define([
+	'jquery',
 	'underscore',
-	'backbone.DeepModel',
+	'backbone',
 
 	'backendServiceM'
 	],
-	function (_, Backbone, backendServiceM) {
-		var DetailChartM = Backbone.DeepModel.extend({
+	function ($, _, Backbone, backendServiceM) {
+		var DetailChartM = Backbone.Model.extend({
 			events: {},
 			defaults: {
 				source: {},
 				datas: {},
-				groupedDatas: {}
+				groupedDatasAll: {},
+				groupedDatasPositive: {}
 			},
 			backendServiceM: backendServiceM,
 			initialize: function () {
@@ -72,11 +74,11 @@ define([
 					});
 				};
 				doIt(this.get('datas').children);
-				this.set({'groupedDatas.positive': groupedDatas});
+				this.set({'groupedDatasPositive': groupedDatas});
 				return groupedDatas;
 			},
 			groupByAll: function () {
-				var groupedDatas = jQuery.extend(true, {}, this.get('datas'));
+				var groupedDatas = $.extend(true, {}, this.get('datas'));
 					groupedDatas.children = [];
 					doIt = function (obj) {
 					_.each(obj, function (el, name) {
@@ -85,7 +87,7 @@ define([
 					});
 				};
 				doIt(this.get('datas').children);
-				this.set({'groupedDatas.all': groupedDatas});
+				this.set({'groupedDatasAll': groupedDatas});
 				return groupedDatas;
 			}
 		});
