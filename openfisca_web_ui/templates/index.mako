@@ -27,6 +27,12 @@
 
 
 <%def name="container_content()" filter="trim">
-<div id="form-wrapper"></div>
-<div id="chart-wrapper"></div>
+<div class="row">
+  <div class="col-sm-4">
+    <div id="form-wrapper"></div>
+  </div>
+  <div class="col-sm-8">
+    <div id="chart-wrapper"></div>
+  </div>
+</div>
 </%def>
