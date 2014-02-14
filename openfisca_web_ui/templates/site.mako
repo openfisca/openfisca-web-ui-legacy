@@ -39,7 +39,6 @@ from openfisca_web_ui import conf, model, urls
 
 <%def name="body_content()" filter="trim">
     <div class="container"><div class="row">
-        <%self:breadcrumb/>
         <%self:container_content/>
         <%self:footer/>
     </div></div>

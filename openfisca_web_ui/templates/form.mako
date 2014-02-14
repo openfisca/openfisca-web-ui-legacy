@@ -30,10 +30,6 @@ from openfisca_web_ui import model, pages
 <%inherit file="site.mako"/>
 
 
-<%def name="breadcrumb()" filter="trim">
-</%def>
-
-
 <%def name="tabs()" filter="trim">
             <ul class="nav nav-tabs">
     % for page_data in pages.pages_data:
