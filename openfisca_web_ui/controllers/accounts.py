@@ -88,6 +88,9 @@ def accept_or_reject_cnil(req):
         user.slug = None
         user.compute_words()
         user.save(ctx, safe = True)
+    if conv.check(conv.guess_bool(params.get('stats-checkbox'))):
+        user.stats_agreements = True
+        user.save(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = '/')
 
 
