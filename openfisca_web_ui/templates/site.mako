@@ -150,7 +150,7 @@ rel="stylesheet">
             <%self:footer_service/>
             <p>
                 ${_('{0}:').format(_('Software'))}
-                <a href="https://github.com/openfisca" rel="external">OpenFisca</a>
+                <a href="http://www.openfisca.fr" rel="external">OpenFisca</a>
                 &mdash;
                 <span>Copyright © 2011, 2012, 2013, 2014 OpenFisca Team</span>
                 &mdash;
