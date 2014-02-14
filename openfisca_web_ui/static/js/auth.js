@@ -49,11 +49,11 @@ define([
                 }
             });
 
-            $('.sign-in').on('click', function() {
+            $(document).on('click', '.sign-in', function () {
                 navigator.id.request();
             });
 
-            $('.sign-out').on('click', function() {
+            $(document).on('click', '.sign-out', function() {
                 navigator.id.logout();
             });
         }
