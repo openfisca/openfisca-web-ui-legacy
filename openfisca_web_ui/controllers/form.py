@@ -79,24 +79,14 @@ def form(req):
     _, simulation_errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
     simulations = None if session.user.simulations is None else \
         list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
-    if req.is_xhr or req.params.get('tab-content-only'):
-        if simulation_errors is not None:
-            req.response.status = 400
-        return templates.render_def(
-            ctx,
-            '/form.mako',
-            'container_content',
-            korma_errors = korma_errors or {},
-            page_form = page_form,
-            simulations = simulations,
-            simulation_errors = simulation_errors or {},
-            )
-    else:
-        return templates.render(
-            ctx,
-            '/form.mako',
-            korma_errors = korma_errors or {},
-            page_form = page_form,
-            simulations = simulations,
-            simulation_errors = simulation_errors or {},
-            )
+    if simulation_errors is not None:
+        req.response.status = 400
+    return templates.render_def(
+        ctx,
+        '/form.mako',
+        'container_content',
+        korma_errors = korma_errors or {},
+        page_form = page_form,
+        simulations = simulations,
+        simulation_errors = simulation_errors or {},
+        )

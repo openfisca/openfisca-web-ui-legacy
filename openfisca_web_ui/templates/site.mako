@@ -197,6 +197,7 @@ ${conf['app_name']}
 define('appconfig', {
     api: {
         urls: {
+            form: ${urls.get_url(ctx, 'api/1/form') | n, js},
             simulate: ${urls.get_url(ctx, 'api/1/simulate') | n, js}
         }
     },

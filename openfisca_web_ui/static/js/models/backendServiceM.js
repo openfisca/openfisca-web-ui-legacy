@@ -10,22 +10,22 @@ define([
 				apiData: {},
 				formData: {}
 			},
-			simulateUrlPath: appconfig.api.urls.simulate,
-			startTabUrlPath: '/familles',
-			currentTabUrlPath: null,
+			urlPaths: appconfig.api.urls,
+			startTabName: 'familles',
+			currentTabName: null,
 
 			initialize: function () {
-				this.fetchForm(this.startTabUrlPath);
+				this.fetchForm(this.startTabName);
 			},
-			fetchForm: function(tabUrlPath) {
+			fetchForm: function(tabName) {
 				$.ajax({
 					context: this,
-					url: tabUrlPath
+					url: this.urlPaths.form + '/' + tabName
 				})
 				.done(function(data) {
 					console.log('fetchForm done');
 					this.set('formData', data);
-					this.currentTabUrlPath = tabUrlPath;
+					this.currentTabName = tabName;
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.log('fetchForm fail');
@@ -35,7 +35,7 @@ define([
 			simulate: function() {
 				$.ajax({
 					context: this,
-					url: this.simulateUrlPath
+					url: this.urlPaths.simulate
 				})
 				.done(function(data) {
 					console.log('simulate done');
@@ -57,10 +57,10 @@ define([
 			},
 			validateForm: function(data, callback) {
 				$.ajax({
-					url: this.currentTabUrlPath,
+					context: this,
 					data: data,
 					type: 'POST',
-					context: this,
+					url: this.urlPaths.form + '/' + this.currentTabName
 				})
 				.done(function(data) {
 					console.log('validateForm done');

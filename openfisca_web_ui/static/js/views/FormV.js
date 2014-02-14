@@ -21,8 +21,8 @@ define([
 			},
 			changeTab: function(evt) {
 				evt.preventDefault();
-				var linkHref = $(evt.target).attr('href');
-				this.model.fetchForm(linkHref);
+				var tabName = $(evt.target).data('tab-name');
+				this.model.fetchForm(tabName);
 			},
 			render: function () {
 				console.log('FormV.render');
