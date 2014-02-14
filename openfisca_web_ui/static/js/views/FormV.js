@@ -9,7 +9,7 @@ define([
 		var FormV = Backbone.View.extend({
 			events: {
 				'keypress input': 'submit',
-				'submit': 'submit',
+				'click :input[type="submit"]': 'submit',
 				'click .nav-tabs a': 'changeTab',
 			},
 			model: backendServiceM,
@@ -22,7 +22,7 @@ define([
 			changeTab: function(evt) {
 				evt.preventDefault();
 				var tabName = $(evt.target).data('tab-name');
-				this.model.fetchForm(tabName);
+				this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
 			},
 			render: function () {
 				console.log('FormV.render');
@@ -31,11 +31,20 @@ define([
 				return this;
 			},
 			submit: function(evt) {
-				if (_.isUndefined(evt.keyCode) || evt.keyCode == 13) {
-					evt.preventDefault();
-					var $form = this.$el.find('form');
-					this.model.validateForm($form.serialize(), this.model.simulate);
+				if (evt.type == 'keypress' && evt.keyCode !== 13) {
+					return;
 				}
+				evt.preventDefault();
+				var $form = this.$el.find('form');
+				var formDataStr = $form.serialize();
+				if (evt.type == 'click') {
+					// Add clicked button to form data.
+					var $button = $(evt.target);
+					var name = $button.attr('name');
+					var value = $button.attr('value');
+					formDataStr += '&' + name + '=' + value;
+				}
+				this.model.validateForm(formDataStr, $.proxy(this.model.simulate, this.model));
 			}
 		});
 		return FormV;

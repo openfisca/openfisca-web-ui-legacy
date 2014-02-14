@@ -1,9 +1,10 @@
 define([
 	'jquery',
+	'underscore',
 	'backbone',
 	'appconfig'
 	],
-	function ($, Backbone, appconfig) {
+	function ($, _, Backbone, appconfig) {
 		var BackendServiceM = Backbone.Model.extend({
 			events: {},
 			defaults: {
@@ -15,9 +16,9 @@ define([
 			currentTabName: null,
 
 			initialize: function () {
-				this.fetchForm(this.startTabName);
+				this.fetchForm(this.startTabName, $.proxy(this.simulate, this));
 			},
-			fetchForm: function(tabName) {
+			fetchForm: function(tabName, callback) {
 				$.ajax({
 					context: this,
 					url: this.urlPaths.form + '/' + tabName
@@ -25,11 +26,15 @@ define([
 				.done(function(data) {
 					console.log('fetchForm done');
 					this.set('formData', data);
-					this.currentTabName = tabName;
+					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.log('fetchForm fail');
 					console.error(jqXHR, textStatus, errorThrown);
+					this.set('formData', jqXHR.responseText);
+				})
+				.always(function() {
+					this.currentTabName = tabName;
 				});
 			},
 			simulate: function() {
@@ -40,11 +45,11 @@ define([
 				.done(function(data) {
 					console.log('simulate done');
 					if (data.errors) {
-						alert('Wrong simulation params');
+						console.error('Wrong simulation params');
 					} else {
 						var result = data.output.value[0];
 						if (_.isUndefined(result)) {
-							alert('Could not retrieve simulation result');
+							console.error('Could not retrieve simulation result');
 						} else {
 							this.set('apiData', result);
 						}
@@ -52,7 +57,7 @@ define([
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error('simulate fail', jqXHR, textStatus, errorThrown);
-					alert('Simulation error');
+					console.error('Simulation error');
 				});
 			},
 			validateForm: function(data, callback) {
@@ -65,11 +70,11 @@ define([
 				.done(function(data) {
 					console.log('validateForm done');
 					this.set('formData', data);
-					$.proxy(callback, this)();
+					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error('validateForm fail', jqXHR, textStatus, errorThrown);
-					this.set('formData', data);
+					this.set('formData', jqXHR.responseText);
 				});
 			}
 		});
