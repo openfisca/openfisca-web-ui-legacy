@@ -19,10 +19,9 @@ require.config({
         /* Views */
         'appV': '/js/views/AppV',
         'CnilModal': '/js/views/CnilModal',
-        'DetailChartV': '/js/views/DetailChartV',
         'LocatingChartV': '/js/views/LocatingChartV',
         'AggregateChart': '/js/views/modals/AggregateChart',
-        'WaterfallChart': '/js/views/modals/WaterfallChart',
+        'WaterfallChart': '/js/views/WaterfallChart',
 
         /* Models */
         'DetailChartM': '/js/models/DetailChartM',

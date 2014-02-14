@@ -4,18 +4,17 @@ define([
 	'backbone',
 	'd3',
 
+	'DetailChartM',
 	'helpers',
-
-	], function ($, _, Backbone, d3, helpers) {
+	], function ($, _, Backbone, d3, DetailChartM, helpers) {
 		'use strict';
 
-		var WaterfallChart = Backbone.View.extend({
+		var DetailChartV = Backbone.View.extend({
+			events: {},
 
-			title: '',
-
-			currentDataSet: {},
-			bars: {},
-			stopValues: {},
+			/* Properties */
+			model: new DetailChartM,
+			views: [],
 
 			/* Settings */
 			padding: {
@@ -25,25 +24,38 @@ define([
 				left: 0,
 			},
 
-			initialize: function (options) { var options = options || {};
+			title: '',
 
-				if(_.isUndefined(options.parent) && !_.isObject(options.parent)) console.error('Missing or invalid options.parent in WaterfallChart constructor');
-				this.parent = options.parent;
+			currentDataSet: {},
+			bars: {},
+			stopValues: {},
 
-				this.width = this.parent.width - (this.padding.left + this.padding.right);
-				this.height = this.parent.height - (this.padding.top + this.padding.bottom);
-				this.model = this.parent.model;
-				this.setElement(this.parent.el);
+			/* Settings */
 
-				this.title = options.title || this.title;
+			initialize: function (parent) {
 
-				this.setData(this.model.get(options.datakey));
+				if(_.isUndefined(parent)) console.error('Missing parent object in DetailChartV constructor');
+
+				console.info('DetailChartV initialized');
+
+				this.svg = parent.svg;
+				this.height = parent.height;
+				this.width = parent.width;
+
+				this.setData(this.model.get('groupedDatas.all'));
 
 				this.updateScales();
 
 				this.buildBars();
-				// this.buildLegend();
+				this.buildLegend();
+
+				this.listenTo(this.model, 'change:datas', this.render);
 			},
+			render: function () {
+
+				return this;
+			},
+
 			setData: function (data) {
 				/* Set stopvalues */
 				var children = data.children,
@@ -84,7 +96,7 @@ define([
 			},
 			buildBars: function () {
 				var that = this;
-				d3.select(this.el).selectAll('rect')
+				this.svg.selectAll('rect')
 					.data(this.currentDataSet.children)
 					.enter()
 						.append('rect')
@@ -108,34 +120,35 @@ define([
 			},
 			buildLegend: function () {
 
-				var that = this;
+			var that = this;
 
-				this.xAxis = d3.svg.axis()
-				    .scale(this.scales.x)
-				    .orient("bottom");
+			this.xAxis = d3.svg.axis()
+				.scale(this.scales.x)
+				.orient("bottom");
 
-				this.yAxis = d3.svg.axis()
-				    .scale(this.scales.y)
-				    .orient("left")
-				    .tickFormat(d3.format(".2s"));
+			this.yAxis = d3.svg.axis()
+				.scale(this.scales.y)
+				.orient("left")
+				.tickFormat(d3.format(".9s"));
 
 
-				d3.select(this.el)
-			      .attr("class", "y axis")
-			      .attr('height', that.height)
-			      .call(this.yAxis)
-			    .append("text")
-			      .attr("transform", "rotate(-90)")
-			      .attr("y", 6)
-			      .attr("dy", ".71em")
-			      .style("text-anchor", "end")
-			      .text("Revenu disponible");
+			d3.select(this.el)
+				.attr("class", "y axis")
+				.attr('height', that.height)
+				.call(this.yAxis)
+					.append("text")
+						.attr("transform", "rotate(-90)")
+						.attr("y", 6)
+						.attr("dy", ".71em")
+						.style("text-anchor", "end")
+						.text("Revenu disponible");
 
-			      d3.select(this.el).append("g")
-			      .attr("class", "x axis")
-			      .call(this.xAxis)
-			},
-		});
-		return WaterfallChart;
-
+			this.svg.append("g")
+				.attr("class", "x axis")
+				.call(this.xAxis)
+					.append('rect').append('g')
+			}
 });
+return DetailChartV;
+}
+);
