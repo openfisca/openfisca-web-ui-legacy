@@ -777,10 +777,15 @@ def user_view(req):
             )
 
     if session.user.simulations is None:
+        simulation_date = datetime.datetime.strptime(session.user.published.split('.')[0], u'%Y-%m-%dT%H:%M:%S')
+        simulation_title = u'Ma simulation du {} à {}'.format(
+            datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
+            datetime.datetime.strftime(simulation_date, u'%H:%M'),
+            )
         simulation = model.Simulation(
             author_id = session.user._id,
-            title = conf['api_data.main.name'],
-            slug = strings.slugify(conf['api_data.main.name']),
+            title = simulation_title,
+            slug = strings.slugify(simulation_title),
             api_data = session.user.api_data,
             )
         simulation.save(ctx, safe = True)

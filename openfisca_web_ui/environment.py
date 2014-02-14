@@ -49,7 +49,6 @@ def load_environment(global_conf, app_conf):
     conf.update(strings.deep_decode(app_conf))
     conf.update(conv.check(conv.struct(
         {
-            'api_data.main.name': conv.cleanup_line,
             'api.urls.fields': conv.cleanup_line,
             'api.urls.legislations': conv.cleanup_line,
             'api.urls.simulate': conv.cleanup_line,
