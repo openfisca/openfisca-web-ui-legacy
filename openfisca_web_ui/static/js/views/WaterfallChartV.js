@@ -18,7 +18,7 @@ define([
 
 			/* Settings */
 			padding: {
-				top: 0,
+				top: 30,
 				right: 0,
 				bottom: 0,
 				left: 0,
@@ -125,24 +125,24 @@ define([
 				this.yAxis = d3.svg.axis()
 					.scale(this.scales.y)
 					.orient("left")
-					.tickFormat(d3.format(".9s"));
+					.tickFormat(d3.format(".1s"));
 
-
-				d3.select(this.el)
-					.attr("class", "y axis")
-					.attr('height', that.height)
-					.call(this.yAxis)
-						.append("text")
-							.attr("transform", "rotate(-90)")
-							.attr("y", 6)
-							.attr("dy", ".71em")
-							.style("text-anchor", "end")
-							.text("Revenu disponible");
 
 				this.svg.append("g")
-					.attr("class", "x axis")
+					.attr("class", "y_axis")
+					.attr('height', that.height)
+					.call(this.yAxis)
+						// .append("text")
+						// 	.attr("transform", "rotate(-90)")
+						// 	.attr("y", 6)
+						// 	.attr("dy", ".71em")
+						// 	.style("text-anchor", "end")
+						// 	.text("Revenu disponible");
+
+				this.svg.append("g")
+					.attr("class", "x_axis")
+					.attr("transform", "translate(0," + that.height - 20 + ")")
 					.call(this.xAxis)
-						.append('rect').append('g');
 			}
 		});
 	return WaterfallChartV;

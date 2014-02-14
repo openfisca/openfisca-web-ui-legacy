@@ -20,8 +20,13 @@
 
         <div id="chart-wrapper"></div>
 
-        <script data-main="js/main.js" src="js/libs/require.min.js"></script>
+        <script data-main="js/main.js" src="bower/requirejs/require.js"></script>
         <script src="js/requireconfig.js"></script>
+        <script>
+            define('appconfig', {
+                auth: {}
+            });
+        </script>
         
     </body>
 </html>

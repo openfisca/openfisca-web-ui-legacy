@@ -12,3 +12,4 @@
 /openfisca_web_ui/static/bareme*.png
 /openfisca_web_ui/static/bower/
 /openfisca_web_ui/static/waterfall*.png
+.DS_Store
