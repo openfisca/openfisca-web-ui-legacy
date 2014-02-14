@@ -1,18 +1,14 @@
 require([
     'domReady',
 
-    'app',
-    'js/auth',
-    'appconfig'
-], function(domReady, app, auth, appconfig) {
+    'app'
+], function(domReady, app) {
 
     $.noConflict();
     _.noConflict();
     Backbone.noConflict();
+    // TODO call noConflict with other libs (d3)
 
     app.init();
-    if (appconfig.auth.enable) {
-        auth.init(appconfig.auth);
-    }
 
 });

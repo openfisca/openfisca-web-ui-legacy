@@ -18,6 +18,7 @@ require.config({
 
         /* Views */
         'appV': '/js/views/AppV',
+        'CnilModal': '/js/views/CnilModal',
         'DetailChartV': '/js/views/DetailChartV',
         'LocatingChartV': '/js/views/LocatingChartV',
         'AggregateChart': '/js/views/modals/AggregateChart',
@@ -28,6 +29,7 @@ require.config({
         'LocatingChartM': '/js/models/LocatingChartM',
 
         /* Modules */
+        'auth': '/js/auth',
         'helpers': '/js/modules/helpers'
     }
 });

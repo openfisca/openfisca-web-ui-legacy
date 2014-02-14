@@ -1,4 +1,8 @@
-define(['jquery'], function($) {
+define([
+    'jquery',
+
+    'CnilModal'
+], function($, CnilModal) {
 
     var Auth = function () {};
     Auth.prototype = {
@@ -14,12 +18,7 @@ define(['jquery'], function($) {
                         },
                         success: function(res, status, xhr) {
                             if (!res.existingAccount) {
-                                $form = $("#cnil-modal").find('form');
-                                $form.attr('action', res.cnilUrl);
-                                $("#cnil-modal").modal('show');
-                                $form.find("button[name='reject']").on('click', function() {
-                                    navigator.id.logout();
-                                });
+                                CnilModal.init(res.cnilUrl);
                             } else {
                                 window.location = res.accountUrl;
                             }
@@ -56,15 +55,6 @@ define(['jquery'], function($) {
 
             $('.sign-out').on('click', function() {
                 navigator.id.logout();
-            });
-
-            $("input[name='accept-checkbox']").on('change', function() {
-                var $button = $('.btn-accept-cnil');
-                if (this.checked) {
-                    $button.removeAttr('disabled');
-                } else {
-                    $button.attr('disabled', 'disabled');
-                }
             });
         }
     };

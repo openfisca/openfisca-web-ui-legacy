@@ -1,10 +1,12 @@
 define([
 	'jquery',
 
+	'auth',
 	'appV',
 	'router',
+	'appconfig'
 	],
-	function ($, appV, Router) {
+	function ($, auth, appV, Router, appconfig) {
 
 		var App = function () {};
 		App.prototype = {
@@ -20,6 +22,9 @@ define([
 						}
 					});
 				});
+				if (appconfig.auth.enable) {
+					auth.init(appconfig.auth);
+				}
 			}
 		};
 
