@@ -316,10 +316,6 @@ user = model.get_user(ctx)
                 </a></li>
                 <li><a class="sign-in" href="#" title="${_(u'Retrieve saved situations')}">${_(u'Sign in')}</a></li>
     % else:
-                <li><a class="save-situation" href="#" data-toggle="modal" data-target="#save-api-data-modal" \
-title="${_(u'Save this situation')}">
-                    <span class="label label-success">${_(u'Save my situation')}</span>
-                </a></li>
                 <li class="active">
                     <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
                 </li>
