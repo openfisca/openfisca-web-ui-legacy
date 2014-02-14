@@ -35,8 +35,9 @@ from openfisca_web_ui import model, urls
         <h2>${account.get_title(ctx)}</h2>
         <%self:view_fields/>
         <div class="btn-toolbar">
-            <a class="btn btn-danger"  href="${account.get_user_url(ctx, 'delete')}">
-                <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}</a>
+            <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#edit-new-modal">
+                ${_('New simulation')}
+            </a>
             <a class="btn btn-danger pull-right"  href="${account.get_user_url(ctx, 'delete')}">
                 <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}
             </a>
@@ -50,6 +51,10 @@ from openfisca_web_ui import model, urls
     % for simulation in simulations:
         <%self:modals_edit simulation="${simulation}"/>
     % endfor
+<%
+    simulation = model.Simulation(slug = 'new', title = '')
+%>\
+        <%self:modals_edit simulation="${simulation}"/>
     % for simulation in simulations:
         <%self:modals_delete simulation="${simulation}"/>
     % endfor

@@ -80,12 +80,33 @@ def edit(req):
         conv.struct({
             'title': conv.cleanup_line,
             'description': conv.cleanup_line,
-            'id_or_slug': model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id),
+            'id_or_slug': conv.first_match(
+                conv.test(lambda id: id == 'new'),
+                model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id),
+                ),
             }),
         conv.rename_item('id_or_slug', 'simulation'),
         )(inputs, state = ctx)
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = errors)
+
+    if data['simulation'] == 'new':
+        data['simulation'] = model.Simulation(
+            author_id = session.user._id,
+            description = data['description'],
+            title = data['title'],
+            slug = strings.slugify(data['title']),
+            )
+        data['simulation'].api_data = None
+        data['simulation'].save(ctx, safe = True)
+        if session.user.simulations is None:
+            session.user.simulations = [data['simulation']._id]
+            session.user.save(ctx, safe = True)
+        elif data['simulation']._id not in session.user.simulations:
+            session.user.simulations.append(data['simulation']._id)
+            session.user.save(ctx, safe = True)
+        return wsgihelpers.redirect(ctx, location = '/')
+
     if data['simulation'] is None or data['simulation']._id not in session.user.simulations:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(data['id_or_slug']))
 
