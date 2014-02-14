@@ -25,14 +25,11 @@
 
 import datetime
 
-from . import conf, model, uuidhelpers
+from . import model, uuidhelpers
 
 
-def ensure_session(ctx):
+def ensure_user(ctx):
     session = ctx.session
-    if session is None:
-        session = ctx.session = model.Session()
-        session.token = uuidhelpers.generate_uuid()
     if session.user is None:
         user = model.Account()
         user._id = uuidhelpers.generate_uuid()
@@ -43,5 +40,3 @@ def ensure_session(ctx):
         session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(ctx, safe = True)
-    if ctx.req.cookies.get(conf['cookie']) != session.token:
-        ctx.req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = ctx.req.scheme == 'https')

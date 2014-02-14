@@ -26,14 +26,38 @@
 """Root controllers"""
 
 
+import datetime
 import logging
 
-from .. import contexts, conv, matplotlib_helpers, pages, urls, wsgihelpers
+from .. import contexts, conf, conv, matplotlib_helpers, model, pages, templates, urls, uuidhelpers, wsgihelpers
 from . import accounts, form, legislations, sessions, simulations
 
 
 log = logging.getLogger(__name__)
 router = None
+
+
+@wsgihelpers.wsgify
+def accept_cookies(req):
+    ctx = contexts.Ctx(req)
+    if req.method == 'POST':
+        if 'reject' in req.params:
+            return templates.render(ctx, '/reject-cookies.mako')
+        session = ctx.session
+        if session is None:
+            session = ctx.session = model.Session()
+            session.token = uuidhelpers.generate_uuid()
+        session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+        session.save(ctx, safe = True)
+        if ctx.req.cookies.get(conf['cookie']) != session.token:
+            ctx.req.response.set_cookie(
+                conf['cookie'],
+                session.token,
+                httponly = True,
+                secure = ctx.req.scheme == 'https',
+                )
+        return wsgihelpers.redirect(ctx, location = '/')
+    return templates.render(ctx, '/accept-cookies.mako')
 
 
 @wsgihelpers.wsgify
@@ -67,6 +91,8 @@ def image(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
+    if ctx.session is None:
+        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'familles'))
 
 
@@ -75,6 +101,7 @@ def make_router():
     global router
     routings = [
         ('GET', '^/?$', index),
+        (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
         ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/accounts(?=/|$)', accounts.route_user_class),

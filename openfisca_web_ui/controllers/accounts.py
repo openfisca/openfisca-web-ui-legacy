@@ -77,7 +77,6 @@ log = logging.getLogger(__name__)
 @wsgihelpers.wsgify
 def accept_or_reject_cnil(req):
     ctx = contexts.Ctx(req)
-    account = ctx.node
     params = req.params
 
     session = ctx.session
