@@ -87,7 +87,7 @@ def edit(req):
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = errors)
     if data['simulation'] is None or data['simulation']._id not in session.user.simulations:
-        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
+        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(data['id_or_slug']))
 
     data['simulation'].title = data['title']
     data['simulation'].slug = strings.slugify(data['title'])
