@@ -69,7 +69,6 @@ def duplicate(req):
             title = ctx._('Operation denied'),
             )
 
-    params = req.params
     id_or_slug = req.urlvars.get('id_or_slug')
     simulation = conv.check(
         model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
