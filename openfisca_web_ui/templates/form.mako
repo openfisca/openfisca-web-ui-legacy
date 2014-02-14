@@ -105,7 +105,7 @@ from openfisca_web_ui import model, pages
                 <form class="form-horizontal" method="post" action="${model.Simulation.get_class_url(ctx, 'save')}">
                     <div class="modal-header">
                         <a class="close" href="/">&times;</a>
-                        <h4 class="modal-title">Enregistrement de cette situation</h4>
+                        <h4 class="modal-title">Enregistrement de cette simulation</h4>
                     </div>
                     <div class="modal-body">
                         <h5>Écraser des données existantes ?</h5>

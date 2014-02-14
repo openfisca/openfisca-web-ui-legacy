@@ -70,7 +70,7 @@ ${conf['app_name']}
                 <form method="post" action="/">
                     <div class="modal-header">
                         <a class="close" href="/">&times;</a>
-                        <h4 class="modal-title">Enregistrement de votre situation</h4>
+                        <h4 class="modal-title">Enregistrement de votre simulation</h4>
                     </div>
                     <div class="modal-body">
                         Text d'exemple à remplacer par le texte concernant la CNIL
@@ -322,10 +322,10 @@ user = model.get_user(ctx)
 % if conf['auth.enable'] and user is not None:
             <ul class="nav navbar-nav navbar-right">
     % if user.email is None:
-                <li><a class="navbar-brand sign-in" href="#" title="${_(u'Save this situation')}">
-                    <span class="label label-success">${_(u'Save my situation')}</span>
+                <li><a class="navbar-brand sign-in" href="#" title="${_(u'Save this simulation')}">
+                    <span class="label label-success">${_(u'Save my simulation')}</span>
                 </a></li>
-                <li><a class="sign-in" href="#" title="${_(u'Retrieve saved situations')}">${_(u'Sign in')}</a></li>
+                <li><a class="sign-in" href="#" title="${_(u'Retrieve saved simulations')}">${_(u'Sign in')}</a></li>
     % else:
                 <li class="active">
                     <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
