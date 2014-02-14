@@ -29,6 +29,7 @@
 import collections
 import datetime
 import json
+import logging
 
 from biryani1.baseconv import function, pipe
 from biryani1.states import default_state
@@ -38,6 +39,7 @@ from .. import questions
 
 
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
+log = logging.getLogger(__name__)
 
 
 def api_post_content_to_simulation_output(api_post_content, state = None):
@@ -56,12 +58,13 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
             data = api_post_content,
             )
     except requests.exceptions.ConnectionError:
-        return api_post_content, state._('Unable to connect to API, url: {}').format(conf['api.urls.simulate'])
+        return api_post_content, state._('Unable to connect to simulate API, url: {}').format(conf['api.urls.simulate'])
     if not response.ok:
         try:
             response_data = response.json(object_pairs_hook = collections.OrderedDict)
         except ValueError as exc:
-            return api_post_content, unicode(exc)
+            log.exception(exc)
+            return api_post_content, state._(u'Unable to decode JSON data of simulate API response')
         return api_post_content, response_data.get('error')
     simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
     return simulation_output, None
