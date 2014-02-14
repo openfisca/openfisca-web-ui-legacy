@@ -629,7 +629,6 @@ def login(req):
         user.slug = strings.slugify(user.full_name)
         user.compute_words()
         user.save(ctx, safe = True)
-        ctx.user = user
         session.user_id = user._id
         session.user = user
     else:

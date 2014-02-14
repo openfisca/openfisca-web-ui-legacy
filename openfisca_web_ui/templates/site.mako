@@ -182,6 +182,9 @@ ${conf['app_name']}
 </%def>
 
 
+<%def name="page_scripts()"></%def>
+
+
 <%def name="scripts()" filter="trim">
     <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script src="${urls.get_url(ctx, u'js/requireconfig.js')}"></script>
@@ -207,6 +210,7 @@ define('appconfig', {
     }
 });
 require(['${urls.get_url(ctx, u'js/main.js')}']);
+<%self:page_scripts/>
     </script>
 </%def>
 

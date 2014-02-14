@@ -23,6 +23,11 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+<%!
+from openfisca_web_ui import urls
+%>
+
+
 <%inherit file="site.mako"/>
 
 
@@ -48,17 +53,6 @@
 </%def>
 
 
-<%def name="scripts()" filter="trim">
-    <%parent:scripts/>
-    <script>
-$(function () {
-    $("input[name='accept-checkbox']").on('change', function(evt) {
-        if (this.checked) {
-            $('.btn-accept-cookie').removeAttr('disabled');
-        } else {
-            $('.btn-accept-cookie').attr('disabled', 'disabled');
-        }
-    });
-});
-    </script>
+<%def name="page_scripts()">
+require(['${urls.get_url(ctx, u'js/AcceptCookies.js')}']);
 </%def>

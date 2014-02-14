@@ -52,7 +52,10 @@ from openfisca_web_ui import model, pages
         ${page_form.html | n}
         <p class="buttons">
             <input class="btn btn-success" type="submit" value="${_(u'Simulate')}">
-% if ctx.user is None or ctx.user.email is None:
+<%
+user = model.get_user(ctx)
+%>\
+% if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
                 ${_(u'Save my simulation')}
             </a>

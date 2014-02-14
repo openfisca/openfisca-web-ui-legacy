@@ -65,6 +65,27 @@ def index(req):
     ctx = contexts.Ctx(req)
     if conf['cookie'] not in req.cookies:
         return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
+    session = ctx.session
+    if session is None:
+        session = ctx.session = model.Session()
+        session.token = uuidhelpers.generate_uuid()
+    if session.user is None:
+        user = model.Account()
+        user._id = uuidhelpers.generate_uuid()
+        user.api_key = uuidhelpers.generate_uuid()
+        user.compute_words()
+        session.user_id = user._id
+        user.save(ctx, safe = True)
+        session.user = user
+    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+    session.save(ctx, safe = True)
+    if ctx.req.cookies.get(conf['cookie']) != session.token:
+        ctx.req.response.set_cookie(
+            conf['cookie'],
+            session.token,
+            httponly = True,
+            secure = ctx.req.scheme == 'https',
+            )
     return templates.render(ctx, '/index.mako')
 
 
