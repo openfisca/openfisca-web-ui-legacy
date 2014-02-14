@@ -8,7 +8,7 @@ define([
 	],
 	function (d3, helpers) {
 
-		var AggregateChart = Backbone.View.extend({
+		var AggregateChartV = Backbone.View.extend({
 			events: {},
 
 
@@ -43,13 +43,13 @@ define([
 				this.title = (_.isString(args.title)) ? args.title: this.title;
 
 				if(!_.isUndefined(args.parent)) this.parent = args.parent;
-				else console.error('Missing parent element arg in AggregateChart constructor');
+				else console.error('Missing parent element arg in AggregateChartV constructor');
 
 				if(!_.isUndefined(args.sortKey)) this.sortKey = args.sortKey;
-				else console.error('Missing sortKey (data key) arg in AggregateChart constructor');
+				else console.error('Missing sortKey (data key) arg in AggregateChartV constructor');
 
 				if(!_.isUndefined(args.bubbles)) this.bubbles = args.bubbles;
-				else console.error('Missing sortKey (data key) arg in AggregateChart constructor');
+				else console.error('Missing sortKey (data key) arg in AggregateChartV constructor');
 
 				this.width = this.parent.width;
 				this.height = this.parent.height;
@@ -117,7 +117,7 @@ define([
 				return this;
 			}
 		});
-		return AggregateChart;
+		return AggregateChartV;
 	}
 );
 

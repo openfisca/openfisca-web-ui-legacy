@@ -9,7 +9,7 @@ define([
 	], function ($, _, Backbone, d3, DetailChartM, helpers) {
 		'use strict';
 
-		var DetailChartV = Backbone.View.extend({
+		var WaterfallChartV = Backbone.View.extend({
 			events: {},
 
 			/* Properties */
@@ -34,9 +34,9 @@ define([
 
 			initialize: function (parent) {
 
-				if(_.isUndefined(parent)) console.error('Missing parent object in DetailChartV constructor');
+				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
 
-				console.info('DetailChartV initialized');
+				console.info('WaterfallChartV initialized');
 
 				this.svg = parent.svg;
 				this.height = parent.height;
@@ -149,6 +149,6 @@ define([
 					.append('rect').append('g')
 			}
 });
-return DetailChartV;
+return WaterfallChartV;
 }
 );
