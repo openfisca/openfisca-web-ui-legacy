@@ -37,6 +37,9 @@ from openfisca_web_ui import model, urls
         <div class="btn-toolbar">
             <a class="btn btn-danger"  href="${account.get_user_url(ctx, 'delete')}">
                 <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}</a>
+            <a class="btn btn-danger pull-right"  href="${account.get_user_url(ctx, 'delete')}">
+                <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}
+            </a>
         </div>
 
         <%self:modals/>
@@ -116,44 +119,28 @@ ${account.get_title(ctx)} - ${parent.title_content()}
 
 
 <%def name="view_fields()" filter="trim">
-<%
-    value = account.email
-%>\
-    % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Email"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
-    % endif
-<%
-    value = account.simulations
-%>\
-    % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Description"))}</b></div>
-            <div class="col-sm-10">
-                <table class="table table-striped">
-                    <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Action</th>
-                    </tr>
-        % for simulation in simulations:
-                    <tr>
-                        <td>${simulation.title}</td>
-                        <td>${simulation.description or ''}</td>
-                        <td>
-                            <a class="btn btn-success" href="${simulation.get_url(ctx, 'use')}">Utiliser</a>
-                            <a class="btn btn-default" href="#" data-toggle="modal" \
+    <table class="table table-striped">
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+    % for simulation in simulations:
+        <tr>
+            <td><span class="glyphicon glyphicon-ok"></span></td>
+            <td><a href="${simulation.get_url(ctx, 'use')}">${simulation.title}</a></td>
+            <td>${simulation.description or ''}</td>
+            <td>
+                <a class="btn btn-primary" href="#" data-toggle="modal" \
 data-target="#${u'edit-{}-modal'.format(simulation.slug)}">Éditer</a>
-                            <a class="btn btn-danger" href="#" data-toggle="modal" \
-data-target="#${u'delete-{}-modal'.format(simulation.slug)}">Supprimer</a>
-                        </td>
-                    </tr>
-        % endfor
-                </table>
-            </div>
-        </div>
-    % endif
+                <a class="btn btn-danger" href="#" data-toggle="modal" \
+data-target="#${u'delete-{}-modal'.format(simulation.slug)}">
+                    <span class="glyphicon glyphicon-trash"></span> Supprimer
+                </a>
+            </td>
+        </tr>
+    % endfor
+    </table>
 </%def>
 
