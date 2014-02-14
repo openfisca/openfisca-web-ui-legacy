@@ -29,14 +29,36 @@
 <%def name="container_content()" filter="trim">
     <form method="post">
         <p>
-            Pour fonctionner, ce site a besoin d'utiliser des cookies.<br>
-            Acceptez-vous l'utilisation de ces cookies ?
+            Pour fonctionner, ce site a besoin d'utiliser des cookies.
+            <br>
         </p>
-        <button class="btn btn-success" name="accept" type="submit">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="accept-checkbox">
+                J'ai pris connaissance des informations ci-dessus
+            </label>
+        </div>
+        <button class="btn btn-success btn-accept-cookie" disabled="disabled" name="accept" type="submit">
             <span class="glyphicon glyphicon-ok"></span> Accepter
         </button>
         <button class="btn btn-danger" name="reject" type="submit">
             <span class="glyphicon glyphicon-remove"></span> Refuser
         </button>
     </form>
+</%def>
+
+
+<%def name="scripts()" filter="trim">
+    <%parent:scripts/>
+    <script>
+$(function () {
+    $("input[name='accept-checkbox']").on('change', function(evt) {
+        if (this.checked) {
+            $('.btn-accept-cookie').removeAttr('disabled');
+        } else {
+            $('.btn-accept-cookie').attr('disabled', 'disabled');
+        }
+    });
+});
+    </script>
 </%def>

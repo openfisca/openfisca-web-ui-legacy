@@ -41,7 +41,7 @@ router = None
 def accept_cookies(req):
     ctx = contexts.Ctx(req)
     if req.method == 'POST':
-        if 'reject' in req.params:
+        if not ('accept' in req.params and conv.check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
             return templates.render(ctx, '/reject-cookies.mako')
         session = ctx.session
         if session is None:
