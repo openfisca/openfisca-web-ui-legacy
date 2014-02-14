@@ -654,7 +654,13 @@ def logout(req):
         session.delete(ctx, safe = True)
         ctx.session = None
         if req.cookies.get(conf['cookie']) is not None:
-            req.response.delete_cookie(conf['cookie'])
+            # Generate new cookie to "save" user agreement on cookie policy
+            req.response.set_cookie(
+                conf['cookie'],
+                uuidhelpers.generate_uuid(),
+                httponly = True,
+                secure = req.scheme == 'https',
+                )
     return 'Logout successful' if req.is_xhr else templates.render(ctx, '/logout.mako')
 
 

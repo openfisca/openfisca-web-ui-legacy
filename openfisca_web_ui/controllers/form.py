@@ -29,17 +29,17 @@
 from biryani1.baseconv import check, pipe
 from formencode import variabledecode
 
-from .. import auth, contexts, conv, model, questions, templates, urls, uuidhelpers, wsgihelpers
+from .. import auth, conf, contexts, conv, model, questions, templates, urls, uuidhelpers, wsgihelpers
 
 
 @wsgihelpers.wsgify
 def form(req):
     ctx = contexts.Ctx(req)
-    session = ctx.session
-    if ctx.session is None:
+    if conf['cookie'] not in req.cookies:
         return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
     auth.ensure_user(ctx)
 
+    session = ctx.session
     page_data = req.urlvars['page_data']
     user_api_data = session.user.api_data if session.user is not None else None
     if user_api_data is None:

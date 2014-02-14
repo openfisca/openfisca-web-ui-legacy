@@ -91,7 +91,7 @@ def image(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    if ctx.session is None:
+    if conf['cookie'] not in req.cookies:
         return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'familles'))
 
