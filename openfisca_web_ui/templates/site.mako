@@ -296,11 +296,22 @@ $(function () {
         </div>
         <div class="collapse navbar-collapse navbar-topbar-collapse">
             <ul class="nav navbar-nav">
-                <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
+                <%self:topbar_links/>
             </ul>
             <%self:topbar_user/>
         </div>
     </nav>
+</%def>
+
+
+<%def name="topbar_links()" filter="trim">
+<%
+user = model.get_user(ctx)
+%>
+    % if user is not None and user.email is not None:
+                <li><a href="${user.get_user_url(ctx)}">${_('My simulations')}</a></li>
+    % endif
+                <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
 </%def>
 
 
