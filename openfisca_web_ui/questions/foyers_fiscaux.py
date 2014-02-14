@@ -26,7 +26,7 @@
 """Korma questions related to foyers fiscaux"""
 
 
-from korma.base import Hidden
+from korma.base import Button, Hidden
 from korma.choice import Select
 from korma.group import Group
 
@@ -92,6 +92,11 @@ title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
                             Select(
                                 choices = prenom_select_choices,
                                 name = 'id',
+                                ),
+                            Button(
+                                control_attributes = {'class': 'btn', 'type': 'submit'},
+                                label = u'Supprimer',
+                                name = 'delete',
                                 ),
                             ],
                         ),

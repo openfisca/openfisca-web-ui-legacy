@@ -29,7 +29,7 @@
 import datetime
 import logging
 
-from .. import contexts, conf, conv, matplotlib_helpers, model, pages, templates, urls, uuidhelpers, wsgihelpers
+from .. import contexts, conf, conv, model, pages, templates, urls, uuidhelpers, wsgihelpers
 from . import accounts, form, legislations, sessions, simulations
 
 
@@ -61,39 +61,11 @@ def accept_cookies(req):
 
 
 @wsgihelpers.wsgify
-def image(req):
-    ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None or session.user is None:
-        raise wsgihelpers.no_content(ctx)
-    if session.user.api_data is None:
-        session.user.api_data = {}
-    simulation_output, simulation_errors = conv.simulation.user_api_data_to_simulation_output(
-        session.user.api_data, state = ctx)
-    if simulation_errors is None:
-        params = {
-            'name': req.urlvars.get('name'),
-            }
-        image_name = conv.check(conv.test_in(['bareme', 'waterfall'])(params['name']))
-        trees = simulation_output['value']
-        image_stringio = None
-        if image_name == 'waterfall':
-            image_stringio = matplotlib_helpers.create_waterfall_png(trees)
-        elif image_name == 'bareme':
-            image_stringio = matplotlib_helpers.create_bareme_png(trees, simulation_output)
-        req.response.content_type = 'image/png'
-        req.response.write(image_stringio.read())
-    else:
-        log.error(simulation_errors)
-        return wsgihelpers.no_content(ctx)
-
-
-@wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
     if conf['cookie'] not in req.cookies:
         return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
-    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'familles'))
+    return templates.render(ctx, '/index.mako')
 
 
 def make_router():
@@ -102,13 +74,13 @@ def make_router():
     routings = [
         ('GET', '^/?$', index),
         (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
-        ('GET', '^/image/(?P<name>bareme|waterfall).png/?$', image),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/accounts(?=/|$)', accounts.route_user_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
+        (None, '^/api/1/simulate$', simulate),
         (None, '^/legislations(?=/|$)', legislations.route_user),
         (None, '^/simulations(?=/|$)', simulations.route),
         ('POST', '^/login/?$', accounts.login),
@@ -116,7 +88,20 @@ def make_router():
         ]
     for page_data in pages.pages_data:
         routings.append(
-            (('GET', 'POST'), '^/{slug}/?$'.format(slug=page_data['slug']), form.form, {'page_data': page_data}),
+            (('GET', 'POST'), '^/api/1/form/{slug}/?$'.format(slug=page_data['slug']), form.form,
+             {'page_data': page_data}),
             )
     router = urls.make_router(*routings)
     return router
+
+
+@wsgihelpers.wsgify
+def simulate(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    user_api_data = session.user.api_data if session.user is not None else None
+    if user_api_data is None:
+        user_api_data = {}
+    output, errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
+    data = {'output': output, 'errors': errors}
+    return wsgihelpers.respond_json(ctx, data)

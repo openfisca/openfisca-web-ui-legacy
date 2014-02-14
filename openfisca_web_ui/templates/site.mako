@@ -38,11 +38,10 @@ from openfisca_web_ui import conf, model, urls
 
 
 <%def name="body_content()" filter="trim">
-    <div class="container"><div class="row">
-        <%self:breadcrumb/>
+    <div class="container">
         <%self:container_content/>
         <%self:footer/>
-    </div></div>
+    </div>
 </%def>
 
 
@@ -112,10 +111,8 @@ ${conf['app_name']}
 
 
 <%def name="css()" filter="trim">
-    <link href="${urls.get_url(ctx, u'/bower/bootstrap/dist/css/bootstrap.css')}" media="screen"
-rel="stylesheet">
-    <link href="${urls.get_url(ctx, u'/css/typeahead.css')}" media="screen" rel="stylesheet">
-    <link href="${urls.get_url(ctx, u'/css/site.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'bower/bootstrap/dist/css/bootstrap.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
 </%def>
 
 
@@ -171,8 +168,8 @@ rel="stylesheet">
 
 <%def name="ie_scripts()" filter="trim">
     <!--[if lt IE 9]>
-    <script src="${urls.get_url(ctx, u'/bower/html5shiv/src/html5shiv.js')}"></script>
-    <script src="${urls.get_url(ctx, u'/bower/respond/respond.src.js')}"></script>
+    <script src="${urls.get_url(ctx, u'bower/html5shiv/src/html5shiv.js')}"></script>
+    <script src="${urls.get_url(ctx, u'bower/respond/respond.src.js')}"></script>
     <![endif]-->
 </%def>
 
@@ -186,11 +183,8 @@ rel="stylesheet">
 
 
 <%def name="scripts()" filter="trim">
-    <script src="${urls.get_url(ctx, u'/bower/requirejs/require.js')}"></script>
-    <script src="${urls.get_url(ctx, u'/bower/jquery/jquery.js')}"></script>
-    <script src="${urls.get_url(ctx, u'/bower/bootstrap/dist/js/bootstrap.js')}"></script>
-    <script src="${urls.get_url(ctx, u'/bower/typeahead.js/dist/typeahead.js')}"></script>
-    <script src="${urls.get_url(ctx, u'/js/site.js')}"></script>
+    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
+    <script src="${urls.get_url(ctx, u'js/requireconfig.js')}"></script>
 % if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
@@ -200,75 +194,19 @@ rel="stylesheet">
 <%
     user = model.get_user(ctx)
 %>\
-var currentUser = ${user.email if user is not None else None | n, js};
-
-% if conf['auth.enable']:
-navigator.id.watch({
-    loggedInUser: currentUser,
-    onlogin: function (assertion) {
-        $.ajax({
-            type: 'POST',
-            url: '/login',
-            data: {
-                assertion: assertion
-            },
-            success: function(res, status, xhr) {
-                if (!res.existingAccount) {
-                    $form = $("#cnil-modal").find('form');
-                    $form.attr('action', res.cnilUrl);
-                    $("#cnil-modal").modal('show');
-                    $form.find("button[name='reject']").on('click', function() {
-                        navigator.id.logout();
-                    });
-                } else {
-                    window.location = res.accountUrl;
-                }
-            },
-            error: function(xhr, status, err) {
-                navigator.id.logout();
-                alert(${_(u"Login failure: ") | n, js} + err);
-            }
-        });
-    },
-    onlogout: function () {
-        if (window.location.pathname == '/logout') {
-            window.location.href = '/';
-        } else {
-            $.ajax({
-                type: 'POST',
-                url: '/logout',
-                success: function(res, status, xhr) {
-                    window.location.reload();
-                },
-                error: function(xhr, status, err) {
-                    alert(${_(u"Logout failure: ") | n, js} + err);
-                }
-            });
+define('appconfig', {
+    api: {
+        urls: {
+            form: ${urls.get_url(ctx, 'api/1/form') | n, js},
+            simulate: ${urls.get_url(ctx, 'api/1/simulate') | n, js}
         }
+    },
+    auth: {
+        currentUser: ${user.email if user is not None else None | n, js},
+        enable: ${conf['auth.enable'] | n, js}
     }
 });
-% endif
-
-
-$(function () {
-    $('.dropdown-toggle').dropdown();
-
-    $('.sign-in').click(function() {
-        navigator.id.request();
-    });
-
-    $('.sign-out').click(function() {
-        navigator.id.logout();
-    });
-
-    $("input[name='accept-checkbox']").on('change', function(evt) {
-        if (this.checked) {
-            $('.btn-accept-cnil').removeAttr('disabled');
-        } else {
-            $('.btn-accept-cnil').attr('disabled', 'disabled');
-        }
-    });
-});
+require(['${urls.get_url(ctx, u'js/main.js')}']);
     </script>
 </%def>
 
@@ -318,7 +256,7 @@ user = model.get_user(ctx)
 <%def name="topbar_user()" filter="trim">
 <%
 user = model.get_user(ctx)
-%>
+%>\
 % if conf['auth.enable'] and user is not None:
             <ul class="nav navbar-nav navbar-right">
     % if user.email is None:

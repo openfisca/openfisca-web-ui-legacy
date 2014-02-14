@@ -30,15 +30,11 @@ from openfisca_web_ui import model, pages
 <%inherit file="site.mako"/>
 
 
-<%def name="breadcrumb()" filter="trim">
-</%def>
-
-
 <%def name="tabs()" filter="trim">
             <ul class="nav nav-tabs">
     % for page_data in pages.pages_data:
                 <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
-                    <a href="${u'/{}'.format(page_data['slug'])}">${page_data['title']}</a>
+                    <a data-tab-name="${page_data['slug']}" href="#">${page_data['title']}</a>
                 </li>
     % endfor
             </ul>
@@ -46,36 +42,29 @@ from openfisca_web_ui import model, pages
 
 
 <%def name="container_content()" filter="trim">
+    <%self:tabs/>
+
 % if korma_errors:
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
-    <div class="row">
-        <div class="col-sm-6">
-            <%self:tabs/>
-            <form class="korma form" method="POST" role="form">
-                ${page_form.html | n}
-                <p class="buttons">
-                    <input class="btn btn-success" type="submit" value="Valider">
-    % if ctx.user is None or ctx.user.email is None:
-                    <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
-                        ${_(u'Save my simulation')}
-                    </a>
-    % endif
-                    <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
-                        ${_(u'Reset')}
-                    </button>
-                </p>
-            </form>
-        </div>
-
-        <div class="col-sm-6">
 % if simulation_errors:
-            <pre class="alert alert-warning">${simulation_errors | n, js, h}</pre>
-% else:
-            <img class="waterfall-img" src="/image/waterfall.png" alt="Graphique">
+    <pre class="alert alert-error">${simulation_errors | n, js, h}</pre>
 % endif
-        </div>
-    </div>
+
+    <form class="korma form" method="POST" role="form">
+        ${page_form.html | n}
+        <p class="buttons">
+            <input class="btn btn-success" type="submit" value="${_(u'Simulate')}">
+% if ctx.user is None or ctx.user.email is None:
+            <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
+                ${_(u'Save my simulation')}
+            </a>
+% endif
+            <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog">
+                ${_(u'Reset')}
+            </button>
+        </p>
+    </form>
 
     <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -85,7 +74,7 @@ from openfisca_web_ui import model, pages
                     <h4 class="modal-title">Effacer la simulation ?</h4>
                 </div>
                 <div class="modal-body">
-                    <a class="btn btn-danger btn-reset" href="${ctx.user.get_admin_url(ctx, 'reset')}">
+                    <a class="btn btn-danger btn-reset" href="TODO">
                         ${_(u'Yes')}
                     </a>
                     <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
@@ -114,13 +103,15 @@ from openfisca_web_ui import model, pages
                     </div>
                     <div class="modal-body">
                         <h5>Écraser des données existantes ?</h5>
-        % for simulation in simulations:
+% if simulations is not None:
+    % for simulation in simulations:
                         <div class="radio">
                             <label>
                                 <input type="radio" name="id" value="${simulation._id}">${simulation.title}
                             </label>
                         </div>
-        % endfor
+    % endfor
+% endif
                         <div class="radio">
                             <label>
                                 <input data-toggle="collapse" data-target="#new-simulation-name" name="id" \
@@ -143,17 +134,4 @@ type="radio" value="new">
             </div>
         </div>
     </div>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-<%parent:scripts/>
-<script>
-$('body').on('keypress', 'input', function(evt) {
-  if (evt.keyCode == 13) {
-    evt.preventDefault();
-    $("form").submit();
-  }
-});
-</script>
 </%def>

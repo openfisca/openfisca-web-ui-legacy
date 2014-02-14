@@ -1,13 +1,14 @@
-require(['domReady!', 'jquery', './config', 'korma/helpers'], function(doc, $, config, helpers) {
+require([
+    'domReady',
 
-  console.log('config', config);
+    'app'
+], function(domReady, app) {
 
-  var rootQuestion = helpers.factory({
-    $rootElement: $('form.korma'),
-    config: config.rootQuestion,
-    parent: null
-  });
+    $.noConflict();
+//    _.noConflict();
+//    Backbone.noConflict();
+    // TODO call noConflict with other libs (d3)
 
-  console.log('rootQuestion', rootQuestion);
+    app.init();
 
 });

@@ -16,6 +16,10 @@
     text-decoration: none;
 }
 
+.container {
+    width: 90%;
+}
+
 .nav-tabs {
     margin-bottom: 30px;
 }
@@ -46,3 +50,4 @@ img.media-object {
     margin-left: 0.33em;
     margin-right: 1em;
 }
+

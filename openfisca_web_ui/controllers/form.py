@@ -80,11 +80,16 @@ def form(req):
             page_form.fill(korma_inputs, korma_errors)
     user_api_data['validate'] = True
     _, simulation_errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
-    return templates.render(
+    simulations = None if session.user.simulations is None else \
+        list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
+    if simulation_errors is not None:
+        req.response.status = 400
+    return templates.render_def(
         ctx,
         '/form.mako',
+        'container_content',
         korma_errors = korma_errors or {},
         page_form = page_form,
+        simulations = simulations,
         simulation_errors = simulation_errors or {},
-        simulations = list(model.Simulation.find({'_id': {'$in': session.user.simulations or []}})),
         )
