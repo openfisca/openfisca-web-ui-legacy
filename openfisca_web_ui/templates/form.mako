@@ -47,9 +47,6 @@ from openfisca_web_ui import model, pages
 % if korma_errors:
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
 % endif
-% if simulation_errors:
-    <pre class="alert alert-error">${simulation_errors | n, js, h}</pre>
-% endif
 
     <form class="korma form" method="POST" role="form">
         ${page_form.html | n}
@@ -65,6 +62,10 @@ from openfisca_web_ui import model, pages
             </button>
         </p>
     </form>
+
+% if simulation_errors:
+    <pre class="alert alert-error">${simulation_errors | n, js, h}</pre>
+% endif
 
     <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
         <div class="modal-dialog modal-sm">
