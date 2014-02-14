@@ -58,6 +58,40 @@ def delete(req):
 
 
 @wsgihelpers.wsgify
+def duplicate(req):
+    ctx = contexts.Ctx(req)
+
+    session = ctx.session
+    if session is None or session.user is None:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("View forbidden"),
+            message = ctx._("You can not view an account."),
+            title = ctx._('Operation denied'),
+            )
+
+    params = req.params
+    id_or_slug = req.urlvars.get('id_or_slug')
+    simulation = conv.check(
+        model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
+        )
+    if simulation is None or simulation._id not in session.user.simulations:
+        return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
+
+    del simulation._id
+    simulation.description = u'Copie de la simulation {}'.format(simulation.title)
+    simulation.title = u'{} « (Copie) »'.format(simulation.title)
+    simulation.slug = strings.slugify(simulation.title)
+    simulation.save(ctx, safe = True)
+    if session.user.simulations is None:
+        session.user.simulations = [simulation._id]
+        session.user.save(ctx, safe = True)
+    elif simulation._id not in session.user.simulations:
+        session.user.simulations.append(simulation._id)
+        session.user.save(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
+
+
+@wsgihelpers.wsgify
 def edit(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'POST'
@@ -121,6 +155,7 @@ def route(environ, start_response):
     router = urls.make_router(
         ('POST', '^/save/?$', save),
         ('POST', '^/(?P<id_or_slug>[^/]+)/delete/?$', delete),
+        ('GET', '^/(?P<id_or_slug>[^/]+)/duplicate/?$', duplicate),
         ('POST', '^/(?P<id_or_slug>[^/]+)/edit/?$', edit),
         ('GET', '^/(?P<id_or_slug>[^/]+)/use/?$', use),
         )
