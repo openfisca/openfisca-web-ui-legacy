@@ -77,7 +77,7 @@ def form(req):
         else:
             page_form.fill(korma_inputs, korma_errors)
     user_api_data['validate'] = True
-    _, simulation_errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
+    _, simulation_errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
     simulations = None if session.user.simulations is None else \
         list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
     if simulation_errors is not None:

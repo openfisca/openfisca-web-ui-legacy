@@ -30,7 +30,7 @@ import datetime
 import logging
 
 from .. import contexts, conf, conv, model, pages, templates, urls, uuidhelpers, wsgihelpers
-from . import accounts, form, legislations, sessions, simulations
+from . import accounts, forms, legislations, sessions, simulations
 
 
 log = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ def make_router():
         ]
     for page_data in pages.pages_data:
         routings.append(
-            (('GET', 'POST'), '^/api/1/form/{slug}/?$'.format(slug=page_data['slug']), form.form,
+            (('GET', 'POST'), '^/api/1/form/{slug}/?$'.format(slug=page_data['slug']), forms.form,
              {'page_data': page_data}),
             )
     router = urls.make_router(*routings)
@@ -123,6 +123,6 @@ def simulate(req):
     user_api_data = session.user.api_data if session.user is not None else None
     if user_api_data is None:
         user_api_data = {}
-    output, errors = conv.simulation.user_api_data_to_simulation_output(user_api_data, state = ctx)
+    output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
     data = {'output': output, 'errors': errors}
     return wsgihelpers.respond_json(ctx, data)
