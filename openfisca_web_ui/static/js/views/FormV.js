@@ -41,8 +41,10 @@ define([
 					// Add clicked button to form data.
 					var $button = $(evt.target);
 					var name = $button.attr('name');
-					var value = $button.attr('value');
-					formDataStr += '&' + name + '=' + value;
+					if ( ! _.isUndefined(name)) {
+						var value = $button.attr('value');
+						formDataStr += '&' + name + '=' + value;
+					}
 				}
 				this.model.validateForm(formDataStr, $.proxy(this.model.simulate, this.model));
 			}
