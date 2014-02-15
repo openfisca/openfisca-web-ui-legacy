@@ -30,4 +30,4 @@ import uuid
 
 
 def generate_uuid():
-    return unicode(uuid.uuid4()).replace('-', '')
+    return unicode(uuid.uuid4().hex)
