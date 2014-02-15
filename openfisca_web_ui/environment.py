@@ -82,6 +82,11 @@ def load_environment(global_conf, app_conf):
                 conv.function(lambda log_level: getattr(logging, log_level.upper())),
                 ),
             'package_name': conv.default('openfisca-web-ui'),
+            'persona.url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
+                    full = True),
+                conv.default(u'https://login.persona.org/'),
+                ),
             'piwik.site_id': conv.input_to_int,
             'piwik.url': conv.make_input_to_url(full = True, error_if_fragment = True, error_if_path = True,
                 error_if_query = True),
