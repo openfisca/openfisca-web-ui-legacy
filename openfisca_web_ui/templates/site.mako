@@ -29,6 +29,7 @@
 
 
 <%!
+import datetime
 import urlparse
 
 from biryani1 import strings
@@ -152,10 +153,13 @@ rel="stylesheet">
                 ${_('{0}:').format(_('Software'))}
                 <a href="https://github.com/openfisca" rel="external">OpenFisca</a>
                 &mdash;
-                <span>Copyright © 2011, 2012, 2013, 2014 OpenFisca Team</span>
+                <span>${_(u'Copyright © {} OpenFisca Team').format(u', '.join(
+                    unicode(year)
+                    for year in range(2011, datetime.date.today().year + 1)
+                    ))}</span>
                 &mdash;
                 <a href="http://www.gnu.org/licenses/agpl.html" rel="external">${_(
-                    'GNU Affero General Public License')}</a>
+                    u'GNU Affero General Public License')}</a>
             </p>
         </footer>
 </%def>
