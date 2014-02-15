@@ -244,16 +244,17 @@ def admin_new(req):
                     data = json.dumps(dict(value = data['json'])),
                     )
             except requests.exceptions.ConnectionError:
-                error = ctx._('Unable to connect to API, url: {}').format(conf['api.urls.legislations'])
-            if not response.ok:
-                try:
-                    error = response.json(object_pairs_hook = collections.OrderedDict)
-                except ValueError as exc:
-                    error = unicode(exc)
-            if error is not None:
-                errors = dict(json = error)
-            else:
-                legislation.json = response.json(object_pairs_hook = collections.OrderedDict)
+                errors = dict(title = ctx._('Unable to connect to API, url: {}').format(conf['api.urls.legislations']))
+            if errors is None:
+                if not response.ok:
+                    try:
+                        error = response.json(object_pairs_hook = collections.OrderedDict)
+                    except ValueError as exc:
+                        error = unicode(exc)
+                if error is not None:
+                    errors = dict(json = error)
+                else:
+                    legislation.json = response.json(object_pairs_hook = collections.OrderedDict)
         if errors is None:
             if model.Legislation.find(
                     dict(
