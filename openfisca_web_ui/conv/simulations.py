@@ -42,6 +42,9 @@ json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime)
 log = logging.getLogger(__name__)
 
 
+api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
+
+
 def api_post_content_to_simulation_output(api_post_content, state = None):
     from .. import conf
     if api_post_content is None:
@@ -68,9 +71,6 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
         return api_post_content, response_data.get('error')
     simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
     return simulation_output, None
-
-
-api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
 
 
 def fill_user_api_data(values, state = None):

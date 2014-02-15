@@ -63,6 +63,7 @@ def debug(value, state = None):
     pprint(value)
     return value, None
 
+
 input_to_uuid = pipe(
     cleanup_line,
     test(uuid_re.match, error = N_(u'Invalid UUID format')),
