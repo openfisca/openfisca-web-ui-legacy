@@ -44,10 +44,3 @@ img.media-object {
     /* symbol for "collapsed" panels */
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
-
-.radio-label {
-    font-weight: normal;
-    margin-left: 0.33em;
-    margin-right: 1em;
-}
-

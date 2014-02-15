@@ -77,9 +77,7 @@ title="afficher / masquer">{self[categories][principal][prenom].value}</a>
   </div>
   <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse in">
     <div class="panel-body">
-      <div class="form-horizontal">
-        {self[categories].html}
-      </div>
+      {self[categories].html}
     </div>
   </div>
 </div>''',

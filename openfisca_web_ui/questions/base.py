@@ -46,15 +46,9 @@ log = logging.getLogger(__name__)
 bootstrap_form_group = u'<div class="form-group">{self.inner_html}</div>'
 
 
-bootstrap_horizontal_form_control = u'''
-<label class="control-label col-sm-4" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-8">{self.control_html}</div>'''
-
-
 bootstrapize = lambda question_class, *args, **kwargs: \
     question_class(
         control_attributes = {'class': u'form-control'},
-        inner_html_template = bootstrap_horizontal_form_control,
         *args, **kwargs)
 
 
@@ -72,14 +66,15 @@ BootstrapCheckbox = lambda *args, **kwargs: \
 BootstrapNumber = lambda *args, **kwargs: bootstrapize(Number, *args, **kwargs)
 
 
-BootstrapRadio = lambda *args, **kwargs: \
-    Radio(
-        inner_html_template = u'''
-<label class="control-label col-sm-4" for="{self.full_name}">{self.label}</label>
-<div class="col-sm-8">
-  {self.control_html}
-</div>''',
-        *args, **kwargs)
+class BootstrapRadio(Radio):
+    _inner_html_template = u'''
+<label for="{self.full_name}">{self.label}</label>
+<div>{self.control_html}</div>
+'''
+
+    def item_html(self, label, value):
+        input_ = u'<input{attributes}>'.format(attributes=self.format_attributes(self.item_attributes(value)))
+        return u'<label class="radio-inline">{input} {label}</label>'.format(input=input_, label=label)
 
 
 BootstrapSelect = lambda *args, **kwargs: bootstrapize(Select, *args, **kwargs)
@@ -131,9 +126,7 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
   </div>
   <div id="collapse-{self.full_name}" class="panel-collapse collapse{collapse_in_class}">
     <div class="panel-body">
-      <div class="form-horizontal">
-        {self.questions_html}
-      </div>
+      {self.questions_html}
     </div>
   </div>
 </div>'''.format(
