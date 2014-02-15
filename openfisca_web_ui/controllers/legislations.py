@@ -307,7 +307,7 @@ def api1_typeahead(req):
         )
     data, errors = conv.struct(
         dict(
-            q = conv.input_to_words,
+            q = conv.base.input_to_words,
             ),
         )(inputs, state = ctx)
     if errors is not None:
@@ -366,7 +366,7 @@ def index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.input_to_words,
+                term = conv.base.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
