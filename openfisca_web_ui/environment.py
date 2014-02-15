@@ -49,9 +49,18 @@ def load_environment(global_conf, app_conf):
     conf.update(strings.deep_decode(app_conf))
     conf.update(conv.check(conv.struct(
         {
-            'api.urls.fields': conv.cleanup_line,
-            'api.urls.legislations': conv.cleanup_line,
-            'api.urls.simulate': conv.cleanup_line,
+            'api.urls.fields': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.urls.legislations': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.urls.simulate': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
             'app_conf': conv.set_value(app_conf),
             'app_dir': conv.set_value(app_dir),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('Openfisca')),
