@@ -265,11 +265,6 @@ $(function () {
 </%def>
 
 
-<%def name="scripts_bootstrap()" filter="trim">
-    <script src="${urlparse.urljoin(conf['bootstrap'], 'js/bootstrap.min.js')}"></script>
-</%def>
-
-
 <%def name="save_api_data_modal()" filter="trim">
 <%
     user = model.get_user(ctx)
@@ -329,10 +324,10 @@ name="api-data-name-radio" type="radio">Nouvelle simulation
     <nav class="navbar navbar-default navbar-fixed-default navbar-inverse" role="navigation">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-topbar-collapse">
-            <span class="sr-only">${_(u'Toggle navigation')}</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+                <span class="sr-only">${_(u'Toggle navigation')}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/"><%self:brand/> <span class="label label-warning">pre-alpha</span></a>
         </div>
