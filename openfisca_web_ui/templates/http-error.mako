@@ -61,4 +61,3 @@ import pprint
 <%def name="title_content()" filter="trim">
 ${title} - ${parent.title_content()}
 </%def>
-

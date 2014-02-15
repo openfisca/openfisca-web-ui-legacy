@@ -29,6 +29,7 @@
 
 
 <%!
+import datetime
 import urlparse
 
 from biryani1 import strings
@@ -149,10 +150,13 @@ ${conf['app_name']}
                 ${_('{0}:').format(_('Software'))}
                 <a href="http://www.openfisca.fr" rel="external">OpenFisca</a>
                 &mdash;
-                <span>Copyright © 2011, 2012, 2013, 2014 OpenFisca Team</span>
+                <span>${_(u'Copyright © {} OpenFisca Team').format(u', '.join(
+                    unicode(year)
+                    for year in range(2011, datetime.date.today().year + 1)
+                    ))}</span>
                 &mdash;
                 <a href="http://www.gnu.org/licenses/agpl.html" rel="external">${_(
-                    'GNU Affero General Public License')}</a>
+                    u'GNU Affero General Public License')}</a>
             </p>
         </footer>
 </%def>
@@ -191,7 +195,7 @@ ${conf['app_name']}
 % if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
-    <script src="https://login.persona.org/include.js"></script>
+	<script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
     <script>
 <%
@@ -215,11 +219,6 @@ require(['${urls.get_url(ctx, u'js/main.js')}']);
 </%def>
 
 
-<%def name="scripts_bootstrap()" filter="trim">
-    <script src="${urlparse.urljoin(conf['bootstrap'], 'js/bootstrap.min.js')}"></script>
-</%def>
-
-
 <%def name="title_content()" filter="trim">
 <%self:brand/>
 </%def>
@@ -229,10 +228,10 @@ require(['${urls.get_url(ctx, u'js/main.js')}']);
     <nav class="navbar navbar-default navbar-fixed-default navbar-inverse" role="navigation">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-topbar-collapse">
-            <span class="sr-only">${_(u'Toggle navigation')}</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+                <span class="sr-only">${_(u'Toggle navigation')}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/"><%self:brand/> <span class="label label-warning">pre-alpha</span></a>
         </div>
