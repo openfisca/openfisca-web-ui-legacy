@@ -10,7 +10,7 @@ define([
 			currentTabName: null,
 			el: '#form-wrapper',
 			events: {
-				'keypress input': 'submit',
+				'keypress :input': 'submit',
 				'click :input[type="submit"]': 'submit',
 				'click .nav-tabs a': 'changeTab',
 			},
