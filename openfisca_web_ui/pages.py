@@ -64,6 +64,6 @@ pages_data = [
         'korma_data_to_page_api_data': conv.legislation_urls.korma_data_to_page_api_data,
         'name': 'legislation_url',
         'slug': 'legislation-url',
-        'title': u'Legislations',
+        'title': u'Législations',
         },
     ]

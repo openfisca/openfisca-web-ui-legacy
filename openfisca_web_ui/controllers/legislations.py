@@ -71,7 +71,7 @@ def admin_delete(req):
     if not model.is_admin(ctx):
         return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a legislation."),
+            message = ctx._("You must  be an administrator to delete a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -88,8 +88,8 @@ def admin_edit(req):
 
     if not model.is_admin(ctx):
         return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a legislation."),
+            explanation = ctx._("Edition forbidden"),
+            message = ctx._("You must  be an administrator to edit a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -157,7 +157,7 @@ def admin_edit(req):
 @wsgihelpers.wsgify
 def admin_index(req):
     ctx = contexts.Ctx(req)
-#    model.is_admin(ctx, check = True)
+    model.is_admin(ctx, check = True)
 
     assert req.method == 'GET'
     params = req.GET
@@ -209,11 +209,10 @@ def admin_index(req):
 def admin_new(req):
     ctx = contexts.Ctx(req)
 
-    user = model.get_user(ctx)
-    if user is None or user.email is None:
+    if not model.is_admin(ctx):
         return wsgihelpers.unauthorized(ctx,
             explanation = ctx._("Creation unauthorized"),
-            message = ctx._("You can not create a legislation."),
+            message = ctx._("You must  be an administrator to create a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -224,7 +223,7 @@ def admin_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = user._id
+        inputs['author_id'] = model.get_user(ctx)._id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -278,6 +277,7 @@ def admin_new(req):
 def admin_view(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
+    model.is_admin(ctx, check = True)
 
     return templates.render(ctx, '/legislations/admin-view.mako', legislation = legislation)
 
@@ -342,54 +342,54 @@ def extract_legislation_inputs_from_params(ctx, params = None):
         )
 
 
-@wsgihelpers.wsgify
-def index(req):
-    ctx = contexts.Ctx(req)
+#@wsgihelpers.wsgify
+#def index(req):
+#    ctx = contexts.Ctx(req)
 
-    assert req.method == 'GET'
-    params = req.GET
-    inputs = dict(
-        advanced_search = params.get('advanced_search'),
-        page = params.get('page'),
-        sort = params.get('sort'),
-        term = params.get('term'),
-        )
-    data, errors = conv.pipe(
-        conv.struct(
-            dict(
-                advanced_search = conv.guess_bool,
-                page = conv.pipe(
-                    conv.input_to_int,
-                    conv.test_greater_or_equal(1),
-                    conv.default(1),
-                    ),
-                sort = conv.pipe(
-                    conv.cleanup_line,
-                    conv.test_in(['slug', 'updated']),
-                    ),
-                term = conv.base.input_to_words,
-                ),
-            ),
-        conv.rename_item('page', 'page_number'),
-        )(inputs, state = ctx)
-    if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+#    assert req.method == 'GET'
+#    params = req.GET
+#    inputs = dict(
+#        advanced_search = params.get('advanced_search'),
+#        page = params.get('page'),
+#        sort = params.get('sort'),
+#        term = params.get('term'),
+#        )
+#    data, errors = conv.pipe(
+#        conv.struct(
+#            dict(
+#                advanced_search = conv.guess_bool,
+#                page = conv.pipe(
+#                    conv.input_to_int,
+#                    conv.test_greater_or_equal(1),
+#                    conv.default(1),
+#                    ),
+#                sort = conv.pipe(
+#                    conv.cleanup_line,
+#                    conv.test_in(['slug', 'updated']),
+#                    ),
+#                term = conv.base.input_to_words,
+#                ),
+#            ),
+#        conv.rename_item('page', 'page_number'),
+#        )(inputs, state = ctx)
+#    if errors is not None:
+#        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
 
-    criteria = {}
-    if data['term'] is not None:
-        criteria['words'] = {'$all': [
-            re.compile(u'^{}'.format(re.escape(word)))
-            for word in data['term']
-            ]}
-    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
-    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
-    if data['sort'] == 'slug':
-        cursor.sort([('slug', pymongo.ASCENDING)])
-    elif data['sort'] == 'updated':
-        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
-    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
-    return templates.render(ctx, '/legislations/index.mako', data = data, errors = errors, legislations = legislations,
-        inputs = inputs, pager = pager)
+#    criteria = {}
+#    if data['term'] is not None:
+#        criteria['words'] = {'$all': [
+#            re.compile(u'^{}'.format(re.escape(word)))
+#            for word in data['term']
+#            ]}
+#    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
+#    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
+#    if data['sort'] == 'slug':
+#        cursor.sort([('slug', pymongo.ASCENDING)])
+#    elif data['sort'] == 'updated':
+#        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
+#    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+#    return templates.render(ctx, '/legislations/index.mako', data = data, errors = errors, legislations = legislations,
+#        inputs = inputs, pager = pager)
 
 
 def route_admin(environ, start_response):

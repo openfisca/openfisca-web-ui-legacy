@@ -31,12 +31,7 @@ from openfisca_web_ui import conf, model, urls
 <%inherit file="/site.mako"/>
 
 
-<%def name="breadcrumb_content()" filter="trim">
-            <%parent:breadcrumb_content/>
-            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Account.get_admin_class_url(ctx)}">${_(u"Accounts")}</a></li>
-            <li><a href="${account.get_admin_url(ctx)}">${account.get_title(ctx)}</a></li>
-            <li class="active">${_(u'Edit')}</li>
+<%def name="breadcrumb()" filter="trim">
 </%def>
 
 

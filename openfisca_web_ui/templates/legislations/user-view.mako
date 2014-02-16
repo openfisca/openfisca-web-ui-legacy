@@ -35,6 +35,10 @@ from openfisca_web_ui import model, urls
 <%inherit file="/site.mako"/>
 
 
+<%def name="breadcrumb()" filter="trim">
+</%def>
+
+
 <%def name="container_content()" filter="trim">
         <h2>${legislation.get_title(ctx)}</h2>
         <%self:view_fields/>

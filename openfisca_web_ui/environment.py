@@ -102,6 +102,10 @@ def load_environment(global_conf, app_conf):
             # Whether this application serves its own static files.
             'static_files': conv.pipe(conv.guess_bool, conv.default(True)),
             'static_files_dir': conv.default(os.path.join(app_dir, 'static')),
+            'www.url': conv.pipe(
+                conv.make_input_to_url(full = True),
+                conv.default(u'http://www.openfisca.fr/'),
+                ),
             },
         default = 'drop',
         ))(conf))

@@ -34,6 +34,10 @@ from openfisca_web_ui import model, urls
 <%namespace name="object" file="/object-admin-index.mako"/>
 
 
+<%def name="breadcrumb()" filter="trim">
+</%def>
+
+
 <%def name="container_content()" filter="trim">
         <%self:search_form/>
     % if pager.item_count == 0:

@@ -60,24 +60,24 @@ def environment_setter(app):
     return set_environment
 
 
-def language_detector(app):
-    """WSGI middleware that detect language symbol in requested URL or otherwise in Accept-Language header."""
-    def detect_language(environ, start_response):
-        req = webob.Request(environ)
-        ctx = contexts.Ctx(req)
-        match = lang_re.match(req.path_info)
-        if match is None:
-            ctx.lang = [
-                req.accept_language.best_match([('fr-FR', 1), ('fr', 1), ('en-US', 1), ('en', 1)],
-                    default_match = 'fr').split('-', 1)[0],
-                ]
-        else:
-            ctx.lang = [match.group('lang')]
-            req.script_name += req.path_info[:match.end()]
-            req.path_info = req.path_info[match.end():]
-        return app(req.environ, start_response)
+#def language_detector(app):
+#    """WSGI middleware that detect language symbol in requested URL or otherwise in Accept-Language header."""
+#    def detect_language(environ, start_response):
+#        req = webob.Request(environ)
+#        ctx = contexts.Ctx(req)
+#        match = lang_re.match(req.path_info)
+#        if match is None:
+#            ctx.lang = [
+#                req.accept_language.best_match([('fr-FR', 1), ('fr', 1), ('en-US', 1), ('en', 1)],
+#                    default_match = 'fr').split('-', 1)[0],
+#                ]
+#        else:
+#            ctx.lang = [match.group('lang')]
+#            req.script_name += req.path_info[:match.end()]
+#            req.path_info = req.path_info[match.end():]
+#        return app(req.environ, start_response)
 
-    return detect_language
+#    return detect_language
 
 
 def make_app(global_conf, **app_conf):
@@ -100,7 +100,7 @@ def make_app(global_conf, **app_conf):
 
     # Init request-dependant environment
     app = environment_setter(app)
-    app = language_detector(app)
+#    app = language_detector(app)
 
     # Repair badly encoded query in request URL.
     app = request_query_encoding_fixer(app)
