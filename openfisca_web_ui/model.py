@@ -507,8 +507,13 @@ def init(db):
 
 def is_admin(ctx, check = False):
     user = get_user(ctx)
-    if user is None or not user.admin:
-        if user is not None and Account.find_one(dict(admin = True), []) is None:
+    if user is None or user.email is None:
+        if check:
+            raise wsgihelpers.forbidden(ctx,
+                message = ctx._(u"You must be authenticated as an administrator to access this page."))
+        return False
+    if not user.admin:
+        if Account.find_one(dict(admin = True), []) is None:
             # Whem there is no admin, every logged user is an admin.
             return True
         if check:

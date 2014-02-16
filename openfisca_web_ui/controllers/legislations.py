@@ -71,7 +71,7 @@ def admin_delete(req):
     if not model.is_admin(ctx):
         return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a legislation."),
+            message = ctx._("You must  be an administrator to delete a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -88,8 +88,8 @@ def admin_edit(req):
 
     if not model.is_admin(ctx):
         return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a legislation."),
+            explanation = ctx._("Edition forbidden"),
+            message = ctx._("You must  be an administrator to edit a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -157,7 +157,7 @@ def admin_edit(req):
 @wsgihelpers.wsgify
 def admin_index(req):
     ctx = contexts.Ctx(req)
-#    model.is_admin(ctx, check = True)
+    model.is_admin(ctx, check = True)
 
     assert req.method == 'GET'
     params = req.GET
@@ -209,11 +209,10 @@ def admin_index(req):
 def admin_new(req):
     ctx = contexts.Ctx(req)
 
-    user = model.get_user(ctx)
-    if user is None or user.email is None:
+    if not model.is_admin(ctx):
         return wsgihelpers.unauthorized(ctx,
             explanation = ctx._("Creation unauthorized"),
-            message = ctx._("You can not create a legislation."),
+            message = ctx._("You must  be an administrator to create a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -224,7 +223,7 @@ def admin_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = user._id
+        inputs['author_id'] = model.get_user(cxt)._id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -277,6 +276,7 @@ def admin_new(req):
 def admin_view(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
+    model.is_admin(ctx, check = True)
 
     return templates.render(ctx, '/legislations/admin-view.mako', legislation = legislation)
 

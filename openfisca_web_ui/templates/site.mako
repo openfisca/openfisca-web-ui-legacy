@@ -246,8 +246,18 @@ require(['${urls.get_url(ctx, u'js/main.js')}']);
 
 
 <%def name="topbar_links()" filter="trim">
+    % if model.is_admin(ctx):
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">${_('Administration')} <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="${model.Account.get_admin_class_url(ctx)}">${_('Accounts')}</a></li>
+                <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
+##                <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_('Simulations')}</a></li>
+            </ul>
+        </li>
+    % endif
 <%
-user = model.get_user(ctx)
+    user = model.get_user(ctx)
 %>
     % if user is not None and user.email is not None:
                 <li><a href="${user.get_user_url(ctx)}">${_('My simulations')}</a></li>
@@ -258,21 +268,22 @@ user = model.get_user(ctx)
 
 
 <%def name="topbar_user()" filter="trim">
+    % if conf['auth.enable']:
 <%
-user = model.get_user(ctx)
+        user = model.get_user(ctx)
 %>\
-% if conf['auth.enable'] and user is not None:
             <ul class="nav navbar-nav navbar-right">
-    % if user.email is None:
-                <li><a class="sign-in" href="#" title="${_(u'Retrieve saved simulations')}">${_(u'Sign in')}</a></li>
-    % else:
+        % if user is None or user.email is None:
+                <li><a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">${
+                        _(u'Sign in')}</a></li>
+        % else:
                 <li class="active">
                     <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
                 </li>
                 <li><a class="sign-out" href="#" title="${_(u'Sign out')}">${_(u'Sign out')}</a></li>
-    % endif
+        % endif
             </ul>
-% endif
+    % endif
 </%def>
 
 
