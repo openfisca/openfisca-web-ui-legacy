@@ -24,17 +24,29 @@ define([
 					url: this.urlPaths.form + '/' + tabName
 				})
 				.done(function(data) {
-					console.log('fetchForm done');
 					this.set('formData', data);
 					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.log('fetchForm fail');
 					console.error(jqXHR, textStatus, errorThrown);
-					this.set('formData', jqXHR.responseText);
 				})
 				.always(function() {
 					this.currentTabName = tabName;
+				});
+			},
+			saveForm: function(data, callback) {
+				$.ajax({
+					context: this,
+					data: data,
+					type: 'POST',
+					url: this.urlPaths.form + '/' + this.currentTabName
+				})
+				.done(function(data) {
+					this.set('formData', data);
+					callback();
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.error('saveForm fail', jqXHR, textStatus, errorThrown);
 				});
 			},
 			simulate: function() {
@@ -43,7 +55,6 @@ define([
 					url: this.urlPaths.simulate
 				})
 				.done(function(data) {
-					console.log('simulate done');
 					if (data.errors) {
 						console.error('Wrong simulation params');
 					} else {
@@ -57,24 +68,6 @@ define([
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error('simulate fail', jqXHR, textStatus, errorThrown);
-					console.error('Simulation error');
-				});
-			},
-			validateForm: function(data, callback) {
-				$.ajax({
-					context: this,
-					data: data,
-					type: 'POST',
-					url: this.urlPaths.form + '/' + this.currentTabName
-				})
-				.done(function(data) {
-					console.log('validateForm done');
-					this.set('formData', data);
-					callback();
-				})
-				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('validateForm fail', jqXHR, textStatus, errorThrown);
-					this.set('formData', jqXHR.responseText);
 				});
 			}
 		});

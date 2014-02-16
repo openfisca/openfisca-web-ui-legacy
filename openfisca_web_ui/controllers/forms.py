@@ -74,15 +74,13 @@ def form(req):
                 user_api_data.update(page_api_data)
                 session.user.api_data = user_api_data
                 session.user.save(ctx, safe = True)
-            return wsgihelpers.redirect(ctx, location = '')
+            return wsgihelpers.no_content(ctx)
         else:
             page_form.fill(korma_inputs, korma_errors)
     user_api_data['validate'] = True
     _, simulation_errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
     simulations = None if session.user is None or session.user.simulations is None else \
         list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
-    if simulation_errors is not None:
-        req.response.status = 400
     return templates.render_def(
         ctx,
         '/form.mako',

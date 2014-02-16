@@ -16,16 +16,21 @@ define([
 			el: '#form-wrapper',
 
 			initialize: function () {
-				console.log('FormV.initialize');
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
 			changeTab: function(evt) {
 				evt.preventDefault();
 				var tabName = $(evt.target).data('tab-name');
-				this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
+				if (tabName === this.model.currentTabName) {
+					return;
+				}
+				var $form = this.$el.find('form');
+				var formDataStr = $form.serialize();
+				this.model.saveForm(formDataStr, $.proxy(function() {
+					this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
+				}, this));
 			},
 			render: function () {
-				console.log('FormV.render');
 				var data = this.model.get('formData');
 				this.$el.html(data);
 				return this;
@@ -46,7 +51,7 @@ define([
 						formDataStr += '&' + name + '=' + value;
 					}
 				}
-				this.model.validateForm(formDataStr, $.proxy(this.model.simulate, this.model));
+				this.model.saveForm(formDataStr, $.proxy(this.model.simulate, this.model));
 			}
 		});
 		return FormV;
