@@ -50,22 +50,26 @@ def accept_cookies(req):
             session.token = uuidhelpers.generate_uuid()
         session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
         session.save(ctx, safe = True)
+        response = wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
         if ctx.req.cookies.get(conf['cookie']) != session.token:
-            ctx.req.response.set_cookie(
+            response.set_cookie(
                 conf['cookie'],
                 session.token,
                 httponly = True,
                 secure = ctx.req.scheme == 'https',
                 )
-        return wsgihelpers.redirect(ctx, location = '/')
+        return response
     return templates.render(ctx, '/accept-cookies.mako')
 
 
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
+
+    # If cookie is present (even when session is obsolete), consider that cookies have been accepted by user.
     if conf['cookie'] not in req.cookies:
         return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
+
     session = ctx.session
     if session is None:
         session = ctx.session = model.Session()
@@ -73,7 +77,6 @@ def index(req):
     if session.user is None:
         user = model.Account()
         user._id = uuidhelpers.generate_uuid()
-        user.api_key = uuidhelpers.generate_uuid()
         user.compute_words()
         session.user_id = user._id
         user.save(ctx, safe = True)
