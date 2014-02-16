@@ -112,6 +112,39 @@ ${conf['app_name']}
 </%def>
 
 
+<%def name="cookie_modal()" filter="trim">
+    <div class="modal fade bs-modal-lg" id="cookie-modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form method="post" action="/accept-cookies">
+                    <div class="modal-header">
+                        <a class="close" href="/">&times;</a>
+                        <h4 class="modal-title">Politique d'utilisation des cookies</h4>
+                    </div>
+                    <div class="modal-body">
+                        Pour fonctionner, ce site a besoin d'utiliser des cookies.
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="accept-checkbox">
+                                J'ai pris connaissance des informations ci-dessus
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success btn-accept-cookie" disabled="disabled" name="accept" type="submit">
+                            <span class="glyphicon glyphicon-ok"></span> Accepter
+                        </button>
+                        <button class="btn btn-danger" name="reject" type="submit">
+                            <span class="glyphicon glyphicon-remove"></span> Refuser
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
 <%def name="css()" filter="trim">
     <link href="${urls.get_url(ctx, u'bower/bootstrap/dist/css/bootstrap.css')}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
@@ -212,7 +245,8 @@ define('appconfig', {
     auth: {
         currentUser: ${user.email if user is not None else None | n, js},
         enable: ${conf['auth.enable'] | n, js}
-    }
+    },
+    cookieModal: ${display_cookie_modal is True if 'display_cookie_modal' in locals() else False | n, js}
 });
 require(['${urls.get_url(ctx, u'js/main.js')}']);
 <%self:page_scripts/>
@@ -305,6 +339,7 @@ require(['${urls.get_url(ctx, u'js/main.js')}']);
     <%self:topbar/>
     <%self:body_content/>
     <%self:cnil_modal/>
+    <%self:cookie_modal/>
     <%self:scripts/>
     <%self:trackers/>
 </body>

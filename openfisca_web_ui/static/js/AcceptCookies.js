@@ -1,14 +1,14 @@
 require([
     'domReady',
-    'jquery'
-], function(domReady, $) {
+    'jquery',
 
-    $("input[name='accept-checkbox']").on('change', function(evt) {
-        if (this.checked) {
-            $('.btn-accept-cookie').removeAttr('disabled');
-        } else {
-            $('.btn-accept-cookie').attr('disabled', 'disabled');
-        }
-    });
+    'appconfig',
+    'CookieModal'
+], function(domReady, $, appconfig, CookieModal) {
+
+    if (appconfig.cookieModal === true) {
+      CookieModal.init();
+    }
+
 
 });

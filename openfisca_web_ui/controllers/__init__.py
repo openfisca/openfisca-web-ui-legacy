@@ -40,26 +40,25 @@ router = None
 @wsgihelpers.wsgify
 def accept_cookies(req):
     ctx = contexts.Ctx(req)
-    if req.method == 'POST':
-        if not ('accept' in req.params and conv.check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
-            # User doesn't accept the use of cookies => Bye bye.
-            return wsgihelpers.redirect(ctx, location = conf['www.url'])
-        session = ctx.session
-        if session is None:
-            session = ctx.session = model.Session()
-            session.token = uuidhelpers.generate_uuid()
-        session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-        session.save(ctx, safe = True)
-        response = wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
-        if ctx.req.cookies.get(conf['cookie']) != session.token:
-            response.set_cookie(
-                conf['cookie'],
-                session.token,
-                httponly = True,
-                secure = ctx.req.scheme == 'https',
-                )
-        return response
-    return templates.render(ctx, '/accept-cookies.mako')
+    assert req.method == 'POST'
+    if not ('accept' in req.params and conv.check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
+        # User doesn't accept the use of cookies => Bye bye.
+        return wsgihelpers.redirect(ctx, location = conf['www.url'])
+    session = ctx.session
+    if session is None:
+        session = ctx.session = model.Session()
+        session.token = uuidhelpers.generate_uuid()
+    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+    session.save(ctx, safe = True)
+    response = wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
+    if ctx.req.cookies.get(conf['cookie']) != session.token:
+        response.set_cookie(
+            conf['cookie'],
+            session.token,
+            httponly = True,
+            secure = ctx.req.scheme == 'https',
+            )
+    return response
 
 
 @wsgihelpers.wsgify
@@ -68,7 +67,7 @@ def index(req):
 
     # If cookie is present (even when session is obsolete), consider that cookies have been accepted by user.
     if conf['cookie'] not in req.cookies:
-        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'accept-cookies'))
+        return templates.render(ctx, '/index.mako', display_cookie_modal = True)
 
     session = ctx.session
     if session is None:
@@ -124,7 +123,7 @@ def make_router():
 def simulate(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    user_api_data = session.user.api_data if session.user is not None else None
+    user_api_data = session.user.api_data if session is not None and session.user is not None else None
     if user_api_data is None:
         user_api_data = {}
     output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)

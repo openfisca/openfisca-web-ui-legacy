@@ -23,6 +23,10 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+<%!
+from openfisca_web_ui import urls
+%>
+
 <%inherit file="site.mako"/>
 
 
@@ -39,4 +43,9 @@
     <div id="chart-wrapper"></div>
   </div>
 </div>
+</%def>
+
+
+<%def name="page_scripts()">
+require(['${urls.get_url(ctx, u'js/AcceptCookies.js')}']);
 </%def>

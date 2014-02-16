@@ -18,6 +18,7 @@ require.config({
         /* Views */
         'appV': '/js/views/AppV',
         'CnilModal': '/js/views/CnilModal',
+        'CookieModal': '/js/views/CookieModal',
         'FormV': '/js/views/FormV',
         'LocatingChartV': '/js/views/LocatingChartV',
         'AggregateChartV': '/js/views/modals/AggregateChartV',

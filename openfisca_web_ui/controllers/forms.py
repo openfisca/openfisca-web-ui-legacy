@@ -37,7 +37,7 @@ def form(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
     if session is None:
-        return wsgihelpers.unauthorized(ctx)
+        session = model.Session()
     user_api_data = session.user.api_data if session.user is not None else None
     if user_api_data is None:
         individu_id = uuidhelpers.generate_uuid()
@@ -79,7 +79,7 @@ def form(req):
             page_form.fill(korma_inputs, korma_errors)
     user_api_data['validate'] = True
     _, simulation_errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
-    simulations = None if session.user.simulations is None else \
+    simulations = None if session.user is None or session.user.simulations is None else \
         list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
     if simulation_errors is not None:
         req.response.status = 400
