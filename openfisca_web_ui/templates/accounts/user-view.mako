@@ -159,7 +159,8 @@ ${account.get_title(ctx)} - ${parent.title_content()}
         </tr>
     % for simulation in simulations:
         <tr>
-            <td><span class="glyphicon glyphicon-ok"></span></td>
+            <td>${'<span class="glyphicon glyphicon-ok"></span>' \
+                if simulation._id == account.simulation_id else u' ' | n}</td>
             <td><a href="${simulation.get_url(ctx, 'use')}">${simulation.title}</a></td>
             <td>${simulation.description or ''}</td>
             <td>

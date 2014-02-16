@@ -52,6 +52,8 @@ def delete(req):
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
     session.user.simulations.remove(simulation._id)
+    if session.user.simulation_id == simulation._id:
+        session.user.simulation_id = session.user.simulations[0] if len(session.user.simulations) > 0 else None
     session.user.save(ctx, safe = True)
     simulation.delete(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
@@ -83,6 +85,7 @@ def duplicate(req):
     simulation.save(ctx, safe = True)
     if session.user.simulations is None:
         session.user.simulations = [simulation._id]
+        session.user.simulation_id = simulation._id
         session.user.save(ctx, safe = True)
     elif simulation._id not in session.user.simulations:
         session.user.simulations.append(simulation._id)
@@ -134,6 +137,7 @@ def edit(req):
         data['simulation'].save(ctx, safe = True)
         if session.user.simulations is None:
             session.user.simulations = [data['simulation']._id]
+            session.user.simulation_id = simulation._id
             session.user.save(ctx, safe = True)
         elif data['simulation']._id not in session.user.simulations:
             session.user.simulations.append(data['simulation']._id)
@@ -200,6 +204,7 @@ def save(req):
         simulation.save(ctx, safe = True)
         if session.user.simulations is None:
             session.user.simulations = [simulation._id]
+            session.user.simulation_id = simulation._id
             session.user.save(ctx, safe = True)
         elif simulation._id not in session.user.simulations:
             session.user.simulations.append(simulation._id)
@@ -228,5 +233,6 @@ def use(req):
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
     session.user.api_data = simulation.api_data
+    session.user.simulation_id = simulation._id
     session.user.save(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = '/')

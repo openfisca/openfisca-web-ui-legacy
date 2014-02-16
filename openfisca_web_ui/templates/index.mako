@@ -24,7 +24,7 @@
 
 
 <%!
-from openfisca_web_ui import urls
+from openfisca_web_ui import model, urls
 %>
 
 <%inherit file="site.mako"/>

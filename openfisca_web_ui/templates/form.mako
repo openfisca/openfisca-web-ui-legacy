@@ -35,6 +35,17 @@ from openfisca_web_ui import model, pages
 
 
 <%def name="container_content()" filter="trim">
+<%
+    user = model.get_user(ctx)
+%>\
+    % if simulations is not None and len(simulations) > 1:
+        % for simulation in simulations:
+            % if simulation._id == user.simulation_id:
+<h1>${simulation.title}</h1>
+            % endif
+        % endfor
+    % endif
+
     <%self:tabs/>
 
     % if korma_errors:
@@ -46,9 +57,6 @@ from openfisca_web_ui import model, pages
         <p class="buttons">
             <input class="btn btn-success" title="${_(u'Launch this simulation')}" type="submit" value="${_(
                     u'Simulate')}">
-<%
-    user = model.get_user(ctx)
-%>\
     % if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
                 ${_(u'Save')}
