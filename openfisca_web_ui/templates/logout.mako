@@ -26,6 +26,10 @@
 <%inherit file="site.mako"/>
 
 
+<%def name="breadcrumb()" filter="trim">
+</%def>
+
+
 <%def name="container_content()" filter="trim">
     <div class="alert alert-block alert-success">
         <p>Déconnexion en cours</p>

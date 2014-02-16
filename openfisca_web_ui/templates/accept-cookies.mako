@@ -31,6 +31,11 @@ from openfisca_web_ui import urls
 <%inherit file="site.mako"/>
 
 
+<%def name="breadcrumb()" filter="trim">
+</%def>
+
+
+
 <%def name="container_content()" filter="trim">
     <form method="post">
         <p>

@@ -30,23 +30,16 @@ from openfisca_web_ui import model, pages
 <%inherit file="site.mako"/>
 
 
-<%def name="tabs()" filter="trim">
-            <ul class="nav nav-tabs">
-    % for page_data in pages.pages_data:
-                <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
-                    <a data-tab-name="${page_data['slug']}" href="#">${page_data['title']}</a>
-                </li>
-    % endfor
-            </ul>
+<%def name="breadcrumb()" filter="trim">
 </%def>
 
 
 <%def name="container_content()" filter="trim">
     <%self:tabs/>
 
-% if korma_errors:
+    % if korma_errors:
     <pre class="alert alert-error">${korma_errors | n, js, h}</pre>
-% endif
+    % endif
 
     <form class="korma form" method="POST" role="form">
         ${page_form.html | n}
@@ -54,13 +47,13 @@ from openfisca_web_ui import model, pages
             <input class="btn btn-success" title="${_(u'Launch this simulation')}" type="submit" value="${_(
                     u'Simulate')}">
 <%
-user = model.get_user(ctx)
+    user = model.get_user(ctx)
 %>\
-% if user is None or user.email is None:
+    % if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
                 ${_(u'Save')}
             </a>
-% endif
+    % endif
             <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#reset-dialog" title="${_(
                     u'Reset this simulation')}">
                 ${_(u'Reset')}
@@ -68,9 +61,9 @@ user = model.get_user(ctx)
         </p>
     </form>
 
-% if simulation_errors:
+    % if simulation_errors:
     <pre class="alert alert-error">${simulation_errors | n, js, h}</pre>
-% endif
+    % endif
 
     <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -109,15 +102,15 @@ user = model.get_user(ctx)
                     </div>
                     <div class="modal-body">
                         <h5>Écraser des données existantes ?</h5>
-% if simulations is not None:
-    % for simulation in simulations:
+    % if simulations is not None:
+        % for simulation in simulations:
                         <div class="radio">
                             <label>
                                 <input type="radio" name="id" value="${simulation._id}">${simulation.title}
                             </label>
                         </div>
-    % endfor
-% endif
+        % endfor
+    % endif
                         <div class="radio">
                             <label>
                                 <input data-toggle="collapse" data-target="#new-simulation-name" name="id" \
@@ -140,4 +133,15 @@ type="radio" value="new">
             </div>
         </div>
     </div>
+</%def>
+
+
+<%def name="tabs()" filter="trim">
+            <ul class="nav nav-tabs">
+    % for page_data in pages.pages_data:
+                <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
+                    <a data-tab-name="${page_data['slug']}" href="#">${page_data['title']}</a>
+                </li>
+    % endfor
+            </ul>
 </%def>

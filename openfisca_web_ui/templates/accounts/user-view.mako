@@ -31,6 +31,10 @@ from openfisca_web_ui import model, urls
 <%inherit file="/site.mako"/>
 
 
+<%def name="breadcrumb()" filter="trim">
+</%def>
+
+
 <%def name="container_content()" filter="trim">
         <h2>${account.get_title(ctx)}</h2>
         <%self:view_fields/>
@@ -60,43 +64,6 @@ from openfisca_web_ui import model, urls
         <%self:modals_delete simulation="${simulation}"/>
     % endfor
         <%self:modals_delete_user/>
-</%def>
-
-
-<%def name="modals_edit(simulation)" filter="trim">
-    <div class="modal fade bs-modal-lg" id="${u'edit-{}-modal'.format(simulation.slug)}" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Editer la simulation ${simulation.title}</h4>
-                </div>
-                <form class="form-horizontal" method="POST" action="${simulation.get_url(ctx, 'edit')}">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Nom :</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="title" value="${simulation.title}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Description :</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control" name="description">\
-${simulation.description or ''}</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success" name="submit" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> Enregistrer
-                        </button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Annuler</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </%def>
 
 
@@ -134,6 +101,43 @@ ${simulation.description or ''}</textarea>
                         <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
+<%def name="modals_edit(simulation)" filter="trim">
+    <div class="modal fade bs-modal-lg" id="${u'edit-{}-modal'.format(simulation.slug)}" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Editer la simulation ${simulation.title}</h4>
+                </div>
+                <form class="form-horizontal" method="POST" action="${simulation.get_url(ctx, 'edit')}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Nom :</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="title" value="${simulation.title}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Description :</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" name="description">\
+${simulation.description or ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" name="submit" type="submit">
+                            <span class="glyphicon glyphicon-ok"></span> Enregistrer
+                        </button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Annuler</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
