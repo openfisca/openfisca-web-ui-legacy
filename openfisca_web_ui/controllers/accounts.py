@@ -767,6 +767,7 @@ def user_view(req):
             )
         simulation.save(ctx, safe = True)
         session.user.simulations = [simulation._id]
+        session.user.simulation_id = simulation._id
         session.user.save(ctx, safe = True)
     simulations = list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
     return templates.render(ctx, '/accounts/user-view.mako', account = session.user, simulations = simulations)

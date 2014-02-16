@@ -35,6 +35,10 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
+<div class="alert alert-warning">
+    <strong>Attention</strong> : Ce simulateur est en cours de développement.<br>
+    Les données que vous saisissez pourront être effacées et les valeurs des simulations peuvent comporter des erreurs.
+</div>
 <div class="row">
   <div class="col-sm-4">
     <div id="form-wrapper"></div>
