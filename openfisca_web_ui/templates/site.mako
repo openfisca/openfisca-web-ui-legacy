@@ -196,7 +196,7 @@ ${conf['app_name']}
 % if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
-	<script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
+    <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
     <script>
 <%
