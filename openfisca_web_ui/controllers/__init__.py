@@ -95,10 +95,10 @@ def make_router():
     routings = [
         ('GET', '^/?$', index),
         (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
-        (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/accounts(?=/|$)', accounts.route_user_class),
-        (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
+        (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
+        (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/simulate$', simulate),
