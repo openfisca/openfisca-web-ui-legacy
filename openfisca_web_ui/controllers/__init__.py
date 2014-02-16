@@ -99,7 +99,7 @@ def make_router():
     routings = [
         ('GET', '^/?$', index),
         (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
-        (None, '^/accounts(?=/|$)', accounts.route_user_class),
+        (None, '^/accounts(?=/|$)', accounts.route_user),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),

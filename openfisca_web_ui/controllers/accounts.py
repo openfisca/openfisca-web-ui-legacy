@@ -716,7 +716,7 @@ def route_api1_class(environ, start_response):
     return router(environ, start_response)
 
 
-def route_user_class(environ, start_response):
+def route_user(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_view),
         ('POST', '^/accept-or-reject-cnil/?$', accept_or_reject_cnil),
