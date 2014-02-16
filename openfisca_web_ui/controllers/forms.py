@@ -52,6 +52,7 @@ def form(req):
         prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)
         page_form = page_data['form_factory'](prenom_select_choices)
     else:
+        assert page_data['slug'] == 'legislation-url', page_data['slug']
         legislation_urls_and_descriptions = (
             (legislation.get_api1_url(ctx, 'json'), legislation.title)
             for legislation in model.Legislation.find()
