@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2014-02-16 08:17+0100\n"
-"PO-Revision-Date: 2014-02-16 08:22+0100\n"
+"PO-Revision-Date: 2014-02-16 08:32+0100\n"
 "Last-Translator: Emmanuel Raviart <emmanuel@openfisca.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
@@ -32,11 +32,11 @@ msgstr "Trop de compte sont associés au nom simplifié {0}"
 
 #: openfisca_web_ui/model.py:273
 msgid "No legislation with ID, slug or words: {0}"
-msgstr "Aucune legislation n'a été trouvé avec cet ID ou ce nom : {0}"
+msgstr "Aucune législation n'a été trouvée avec cet ID ou ce nom : {0}"
 
 #: openfisca_web_ui/model.py:275
 msgid "Too much legislations with words: {0}"
-msgstr "Trop de legislation avec les mots : {0}"
+msgstr "Trop de législations avec les mots : {0}"
 
 #: openfisca_web_ui/model.py:320
 msgid "Session {0}"
@@ -233,7 +233,7 @@ msgstr "Erreur de compte : {}"
 #: openfisca_web_ui/controllers/legislations.py:74
 #: openfisca_web_ui/controllers/legislations.py:92
 msgid "You can not delete a legislation."
-msgstr "Vous ne pouvez pas supprimer une legislation."
+msgstr "Vous ne pouvez pas supprimer une législation."
 
 #: openfisca_web_ui/controllers/legislations.py:127
 #: openfisca_web_ui/controllers/legislations.py:247
@@ -264,7 +264,7 @@ msgstr "Vous ne pouvez pas créer un élément."
 
 #: openfisca_web_ui/controllers/legislations.py:404
 msgid "Legislation Error: {}"
-msgstr "Erreur dans la legislation : {}"
+msgstr "Erreur dans la législation : {}"
 
 #: openfisca_web_ui/controllers/sessions.py:48
 msgid "You can not delete a session."
@@ -407,7 +407,7 @@ msgstr "Mes simulations"
 #: openfisca_web_ui/templates/legislations/admin-view.mako:41
 #: openfisca_web_ui/templates/legislations/user-index.mako:131
 msgid "Legislations"
-msgstr "Legislations"
+msgstr "Législations"
 
 #: openfisca_web_ui/templates/site.mako:256
 msgid "About"
@@ -612,7 +612,7 @@ msgstr "Supprimer ce compte"
 
 #: openfisca_web_ui/templates/legislations/admin-delete.mako:46
 msgid "Are you sure that you want to delete this legislation?"
-msgstr "Êtes-vous sûr de vouloir supprimer cette legislation ?"
+msgstr "Êtes-vous sûr de vouloir supprimer cette législation ?"
 
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:63
 #: openfisca_web_ui/templates/legislations/admin-index.mako:62
@@ -634,32 +634,32 @@ msgstr "Date de fin"
 
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:106
 msgid "Legislation's JSON"
-msgstr "JSON de la legislation"
+msgstr "JSON de la législation"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:44
 #: openfisca_web_ui/templates/legislations/user-index.mako:40
 msgid "No legislation found"
-msgstr "Aucune legislation n'a été trouvée"
+msgstr "Aucune législation n'a été trouvée"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:48
 #: openfisca_web_ui/templates/legislations/user-index.mako:44
 msgid "Legislation {0} of {1}"
-msgstr "Legislation {0} sur {1}"
+msgstr "Législation {0} sur {1}"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:50
 #: openfisca_web_ui/templates/legislations/user-index.mako:46
 msgid "Legislation {0} - {1} of {2}"
-msgstr "Legislations {0} à {1} sur {2}"
+msgstr "Législations {0} à {1} sur {2}"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:53
 #: openfisca_web_ui/templates/legislations/user-index.mako:49
 msgid "Single legislation"
-msgstr "Legislation unique"
+msgstr "Législation unique"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:55
 #: openfisca_web_ui/templates/legislations/user-index.mako:51
 msgid "{} legislations"
-msgstr "{} legislations"
+msgstr "{} législations"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:99
 #: openfisca_web_ui/templates/legislations/admin-new.mako:38
