@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-02-16 08:17+0100\n"
-"PO-Revision-Date: 2014-02-16 08:32+0100\n"
+"POT-Creation-Date: 2014-02-16 10:18+0100\n"
+"PO-Revision-Date: 2014-02-16 10:20+0100\n"
 "Last-Translator: Emmanuel Raviart <emmanuel@openfisca.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
@@ -302,7 +302,6 @@ msgid "Invalid UUID format"
 msgstr "Format d'UUID incorrect"
 
 #: openfisca_web_ui/conv/simulations.py:64
-#| msgid "Unable to connect to API, url: {}"
 msgid "Unable to connect to simulate API, url: {}"
 msgstr "Impossible de contacter l'API \"simulate\", url : {}"
 
@@ -312,29 +311,41 @@ msgstr ""
 "Impossible de décoder les données JSON retournées par l'API \"simulate\""
 
 #: openfisca_web_ui/templates/form.mako:54
-#| msgid "New simulation"
+#| msgid "Save this simulation"
+msgid "Launch this simulation"
+msgstr "Lancer cette simulation"
+
+#: openfisca_web_ui/templates/form.mako:54
 msgid "Simulate"
 msgstr "Simuler"
 
-#: openfisca_web_ui/templates/form.mako:59
-msgid "Save this simulation"
-msgstr "Sauvegarder la simulation"
-
 #: openfisca_web_ui/templates/form.mako:60
-msgid "Save my simulation"
-msgstr "Sauvegarder ma simulation"
+msgid "Save this simulation"
+msgstr "Enregistrer cette simulation"
+
+#: openfisca_web_ui/templates/form.mako:61
+#: openfisca_web_ui/templates/accounts/admin-edit.mako:50
+#: openfisca_web_ui/templates/accounts/user-edit.mako:50
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:52
+msgid "Save"
+msgstr "Enregistrer"
 
 #: openfisca_web_ui/templates/form.mako:64
+#| msgid "Save this simulation"
+msgid "Reset this simulation"
+msgstr "Réinitialiser cette simulation"
+
+#: openfisca_web_ui/templates/form.mako:66
 msgid "Reset"
 msgstr "Remise à zero"
 
-#: openfisca_web_ui/templates/form.mako:82
+#: openfisca_web_ui/templates/form.mako:84
 #: openfisca_web_ui/templates/accounts/user-view.mako:113
 #: openfisca_web_ui/templates/accounts/user-view.mako:133
 msgid "Yes"
 msgstr "Oui"
 
-#: openfisca_web_ui/templates/form.mako:84
+#: openfisca_web_ui/templates/form.mako:86
 #: openfisca_web_ui/templates/accounts/user-view.mako:114
 #: openfisca_web_ui/templates/accounts/user-view.mako:134
 msgid "No"
@@ -493,12 +504,6 @@ msgstr "Éditer"
 #, python-format
 msgid "Edition of %s"
 msgstr "Édition de %s"
-
-#: openfisca_web_ui/templates/accounts/admin-edit.mako:50
-#: openfisca_web_ui/templates/accounts/user-edit.mako:50
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:52
-msgid "Save"
-msgstr "Enregistrer"
 
 #: openfisca_web_ui/templates/accounts/admin-edit.mako:61
 #: openfisca_web_ui/templates/accounts/admin-index.mako:61
@@ -807,3 +812,6 @@ msgstr "Identifiant utilisateur"
 
 #~ msgid "Logout failure: "
 #~ msgstr "Erreur de déconnexion :"
+
+#~ msgid "Save my simulation"
+#~ msgstr "Sauvegarder ma simulation"
