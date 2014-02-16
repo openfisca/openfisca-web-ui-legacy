@@ -91,7 +91,7 @@ def accept_or_reject_cnil(req):
     if conv.check(conv.guess_bool(params.get('stats-checkbox'))):
         user.stats_agreements = True
         user.save(ctx, safe = True)
-    return wsgihelpers.redirect(ctx, location = urls.get_url(cxt))
+    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
 @wsgihelpers.wsgify
@@ -246,7 +246,7 @@ def admin_reset(req):
     account = ctx.node
 
     if not model.is_admin(ctx):
-         return wsgihelpers.forbidden(ctx,
+        return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Reset forbidden"),
             message = ctx._("You must  be an administrator reset an account."),
             title = ctx._('Operation denied'),

@@ -29,7 +29,7 @@
 from biryani1.baseconv import check, pipe
 from formencode import variabledecode
 
-from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
+from .. import contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
 
 
 @wsgihelpers.wsgify

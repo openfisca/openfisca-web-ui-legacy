@@ -223,7 +223,7 @@ def admin_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = model.get_user(cxt)._id
+        inputs['author_id'] = model.get_user(ctx)._id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
