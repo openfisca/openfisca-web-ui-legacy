@@ -263,7 +263,7 @@ require(['${urls.get_url(ctx, u'js/main.js')}']);
     % if user is not None and user.email is not None:
                 <li><a href="${user.get_user_url(ctx)}">${_('My simulations')}</a></li>
     % endif
-                <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
+                <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
                 <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
 </%def>
 
