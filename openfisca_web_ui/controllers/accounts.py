@@ -91,7 +91,7 @@ def accept_or_reject_cnil(req):
     if conv.check(conv.guess_bool(params.get('stats-checkbox'))):
         user.stats_agreements = True
         user.save(ctx, safe = True)
-    return wsgihelpers.redirect(ctx, location = '/')
+    return wsgihelpers.redirect(ctx, location = urls.get_url(cxt))
 
 
 @wsgihelpers.wsgify
@@ -738,7 +738,7 @@ def user_delete(req):
 
     assert req.method == 'POST'
     session.user.delete(ctx, safe = True)
-    return wsgihelpers.redirect(ctx, location = '/logout')
+    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
 
 
 @wsgihelpers.wsgify
