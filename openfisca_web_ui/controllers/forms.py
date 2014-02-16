@@ -35,10 +35,9 @@ from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, w
 @wsgihelpers.wsgify
 def form(req):
     ctx = contexts.Ctx(req)
-    if conf['cookie'] not in req.cookies:
-        return wsgihelpers.unauthorized(ctx)
     session = ctx.session
-    page_data = req.urlvars['page_data']
+    if session is None:
+        return wsgihelpers.unauthorized(ctx)
     user_api_data = session.user.api_data if session.user is not None else None
     if user_api_data is None:
         individu_id = uuidhelpers.generate_uuid()
@@ -46,6 +45,7 @@ def form(req):
             u'familles': questions.familles.default_value(individu_ids = [individu_id]),
             u'individus': {individu_id: questions.individus.build_default_values()},
             }
+    page_data = req.urlvars['page_data']
     if page_data['slug'] == 'familles':
         page_form = page_data['form_factory']()
     elif page_data['slug'] in ('declarations-impots', 'logements-principaux'):
