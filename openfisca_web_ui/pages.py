@@ -57,13 +57,13 @@ pages_data = [
         'slug': 'logements-principaux',
         'title': u'Logements principaux',
         },
-    {
-        'api_data_to_page_korma_data': conv.legislation_urls.api_data_to_page_korma_data,
-        'entity': 'legislation_url',
-        'form_factory': questions.legislation_urls.make_legislation_urls_group,
-        'korma_data_to_page_api_data': conv.legislation_urls.korma_data_to_page_api_data,
-        'name': 'legislation_url',
-        'slug': 'legislation-url',
-        'title': u'Législations',
-        },
+#    {
+#        'api_data_to_page_korma_data': conv.legislation_urls.api_data_to_page_korma_data,
+#        'entity': 'legislation_url',
+#        'form_factory': questions.legislation_urls.make_legislation_urls_group,
+#        'korma_data_to_page_api_data': conv.legislation_urls.korma_data_to_page_api_data,
+#        'name': 'legislation_url',
+#        'slug': 'legislation-url',
+#        'title': u'Législations',
+#        },
     ]
