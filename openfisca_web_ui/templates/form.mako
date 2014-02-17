@@ -66,57 +66,6 @@ href="${user.get_user_url(ctx, 'reset') if user  is not None else '/'}">
             </div>
         </div>
     </div>
-    <%self:save_api_data_modal/>
-</%def>
-
-
-<%def name="save_api_data_modal()" filter="trim">
-<%
-    user = model.get_user(ctx)
-    if user is None:
-        return ''
-%>\
-    <div class="modal fade bs-modal-lg" id="save-api-data-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <form class="form-horizontal" method="post" action="${model.Simulation.get_class_url(ctx, 'save')}">
-                    <div class="modal-header">
-                        <a class="close" href="/">&times;</a>
-                        <h4 class="modal-title">Enregistrement de cette simulation</h4>
-                    </div>
-                    <div class="modal-body">
-                        <h5>Écraser des données existantes ?</h5>
-    % if simulations is not None:
-        % for simulation in simulations:
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="id" value="${simulation._id}">${simulation.title}
-                            </label>
-                        </div>
-        % endfor
-    % endif
-                        <div class="radio">
-                            <label>
-                                <input data-toggle="collapse" data-target="#new-simulation-name" name="id" \
-type="radio" value="new">
-                                Nouvelle simulation
-                            </label>
-                        </div>
-                        <div class="form-group collapse" id="new-simulation-name">
-                            <label class="col-sm-2 control-label">Nom :</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="title">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </%def>
 
 
