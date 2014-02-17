@@ -27,6 +27,7 @@
 from openfisca_web_ui import model, urls
 %>
 
+
 <%inherit file="site.mako"/>
 
 
@@ -36,7 +37,7 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
 <div class="alert alert-warning">
-    <strong>Attention</strong> : Ce simulateur est en cours de développement.<br>
+    <strong>Attention</strong> : ce simulateur est en cours de développement.<br>
     Les données que vous saisissez pourront être effacées et les valeurs des simulations peuvent comporter des erreurs.
 </div>
 <div class="row">
