@@ -8,8 +8,7 @@ define([
 	],
 	function (_, Backbone, d3, WaterfallChartV, LocatingChartV) {
 
-		var appV,
-			AppV = Backbone.View.extend({
+		var AppV = Backbone.View.extend({
 			events: {},
 			el: '#chart-wrapper',
 
@@ -44,7 +43,7 @@ define([
 				return this;
 			}
 		});
-		appV = new AppV();
+		var appV = new AppV();
 		return appV;
 	}
 );

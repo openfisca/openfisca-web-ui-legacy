@@ -16,12 +16,12 @@ require.config({
         'router': '/js/router',
 
         /* Views */
-        'appV': '/js/views/AppV',
+        'AggregateChartV': '/js/views/modals/AggregateChartV',
         'AcceptCnilConditionsModalV': '/js/views/AcceptCnilConditionsModalV',
         'AcceptCookiesModalV': '/js/views/AcceptCookiesModalV',
+        'appV': '/js/views/appV',
         'FormV': '/js/views/FormV',
         'LocatingChartV': '/js/views/LocatingChartV',
-        'AggregateChartV': '/js/views/modals/AggregateChartV',
         'WaterfallChartV': '/js/views/WaterfallChartV',
 
         /* Models */
