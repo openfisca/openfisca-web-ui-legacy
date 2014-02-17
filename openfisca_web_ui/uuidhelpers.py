@@ -26,6 +26,7 @@
 """Helpers to handle uuid"""
 
 
+import os
 import subprocess
 import time
 import uuid
@@ -38,7 +39,7 @@ def generate_uuid():
 
 
 def get_git_last_commit_sha():
-    return subprocess.check_output(['git', 'rev-parse', '--verify', 'HEAD'])
+    return subprocess.check_output(['git', 'rev-parse', '--verify', 'HEAD'], cwd=os.path.dirname(__file__))
 
 
 def url_bust():
