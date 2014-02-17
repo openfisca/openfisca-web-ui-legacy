@@ -107,6 +107,7 @@ def make_router():
         (None, '^/simulations(?=/|$)', simulations.route),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
+        ('GET', '^/terms/?$', terms),
         ]
     for page_data in pages.pages_data:
         routings.append(
@@ -127,3 +128,9 @@ def simulate(req):
     output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
     data = {'output': output, 'errors': errors}
     return wsgihelpers.respond_json(ctx, data)
+
+
+@wsgihelpers.wsgify
+def terms(req):
+    ctx = contexts.Ctx(req)
+    return templates.render(ctx, '/terms.mako')
