@@ -48,7 +48,7 @@ from openfisca_web_ui import conf, model, urls
                     </div>
                     <div class="modal-body">
                         <p>
-                            Vous pouvez consulter <a target="_blank" href="/terms">l'ensemble des conditions
+                            Vous pouvez consulter <a target="_blank" href="/terms">les conditions
                             générales d'utilisation ici</a>.
                         </p>
                         <div class="checkbox">
@@ -96,7 +96,7 @@ from openfisca_web_ui import conf, model, urls
                             Pour fonctionner, ce site a besoin d'utiliser des cookies.
                         </p>
                         <p>
-                            Vous pouvez consulter <a target="_blank" href="/terms">l'ensemble des conditions
+                            Vous pouvez consulter <a target="_blank" href="/terms">les conditions
                             générales d'utilisation ici</a>.
                         </p>
                         <div class="checkbox">
