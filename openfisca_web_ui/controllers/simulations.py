@@ -137,7 +137,7 @@ def edit(req):
         data['simulation'].save(ctx, safe = True)
         if session.user.simulations is None:
             session.user.simulations = [data['simulation']._id]
-            session.user.simulation_id = simulation._id
+            session.user.simulation_id = data['simulation']._id
             session.user.save(ctx, safe = True)
         elif data['simulation']._id not in session.user.simulations:
             session.user.simulations.append(data['simulation']._id)
