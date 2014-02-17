@@ -32,14 +32,6 @@ from openfisca_web_ui import model, pages
 <%
     user = model.get_user(ctx)
 %>\
-    % if simulations is not None and len(simulations) > 1:
-        % for simulation in simulations:
-            % if simulation._id == user.simulation_id:
-<h1>${simulation.title}</h1>
-            % endif
-        % endfor
-    % endif
-
     <%self:tabs/>
     % if simulation_errors:
     <pre class="alert alert-error">${simulation_errors | n, js, h}</pre>
@@ -77,7 +69,6 @@ href="${user.get_admin_url(ctx, 'reset') if user  is not None else '/'}">
             </div>
         </div>
     </div>
-
     <%self:save_api_data_modal/>
 </%def>
 

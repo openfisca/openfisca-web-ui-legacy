@@ -36,10 +36,20 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
+<%
+user = model.get_user(ctx)
+%>\
 <div class="alert alert-warning">
     <strong>Attention</strong> : ce simulateur est en cours de développement.<br>
     Les données que vous saisissez pourront être effacées et les valeurs des simulations peuvent comporter des erreurs.
 </div>
+    % if user is not None and simulations is not None and len(simulations) > 1:
+        % for simulation in simulations:
+            % if simulation._id == user.simulation_id:
+<h1>${simulation.title}</h1>
+            % endif
+        % endfor
+    % endif
 <div class="row">
   <div class="col-sm-4">
     <div id="form-wrapper"></div>

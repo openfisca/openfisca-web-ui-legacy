@@ -64,8 +64,8 @@ def accept_cookies(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
+    session = ctx.session
     if conf['cookie'] in req.cookies:
-        session = ctx.session
         if session is None:
             session = ctx.session = model.Session()
             session.token = uuidhelpers.generate_uuid()
@@ -85,7 +85,9 @@ def index(req):
                 httponly = True,
                 secure = ctx.req.scheme == 'https',
                 )
-    return templates.render(ctx, '/index.mako')
+    user_simulations = None if session.user is None or session.user.simulations is None else \
+        list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
+    return templates.render(ctx, '/index.mako', simulations = user_simulations)
 
 
 def make_router():
