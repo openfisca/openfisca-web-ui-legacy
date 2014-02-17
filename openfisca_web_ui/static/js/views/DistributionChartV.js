@@ -11,6 +11,10 @@ define([
 
 		var DistributionChartV = Backbone.View.extend({
 
+			events: {
+				'click circle.parent': 'hoverParentCircle'
+			},
+
 			/* Settings */
 			model: new DistributionChartM,
 			views: [],
@@ -52,18 +56,18 @@ define([
 				var that = this;
 
 				var defineFictiveDataGroup = function (datas) {
-					datas.distribution = {};
 
-					if(_.isUndefined(datas.children)) datas.distribution.fictive = false;
-					else that.currentDataSetContainer.push(datas);
+					if(_.isUndefined(datas.distribution)) datas.distribution = {};
 
 					_.each(datas.children, function (data) {
-						if(datas.children.length == 1) datas.distribution.fictive = true;
-						else data.distribution = datas.distribution.fictive = false;
+						data.distribution = {};
+						if(datas.children.length == 1) data.distribution.fictive = true;
+						else data.distribution.fictive = false;
 						defineFictiveDataGroup(data);
 					});
 				};
 				defineFictiveDataGroup(this.currentDataSet);
+				console.log(this.currentDataSet);
 			},
 			buildLayoutGlobal: function () {
 				var that = this,
@@ -80,22 +84,23 @@ define([
 					.padding(this.packPadding)
 				}
 
-				var nodes = this.pack.nodes(datas),
-					containerNodes = this.pack.nodes(containerDatas);
+				var nodes = this.pack.nodes(datas);
 
-				this.circles = this.g.selectAll("circle")
-					.data(nodes)
-				// this.paths = this.g.selectAll("path")
-				// 	.data(containerNodes)
+				this.circles = this.g.selectAll('circle')
+					.data(nodes);
+				this.paths = this.g.selectAll('path')
+					.data(nodes);
+				this.texts = this.g.selectAll('text')
+					.data(nodes);
 
-				/* Append / enter */
+
+				/* Circles */
 				this.circles
 					.enter().append("svg:circle")
-						.attr("class", function(d) { return d.children ? "parent" : "child"; })
 						.attr("cx", function(d) { return d.x; })
 						.attr("cy", function(d) { return d.y; })
 						.attr("r", function(d) {
-							return 0;
+							return d.children ? d.r: 0;
 						})
 						.attr('fill', function (d) {
 							if(!d.children) {
@@ -111,145 +116,144 @@ define([
 						.attr('stroke-dasharray', function (d) {
 							return d.children ? '10,10' : 'none';
 						})
-						.attr('class', function (d) {
-							return d.name;
-						});
+						.attr('opacity', 0)
 
-				// this.paths
-				// 	.enter().append('svg:path')
-				// 	.attr("fill", function(d, i) { return 'none'; })
-				//     .attr('stroke', 'blue')
-				// 	.attr("d", function (d) {
-				// 		console.log(d);
-				// 		return d3.svg.arc()
-				// 		    .innerRadius(d.r*1.03)
-				// 		    .outerRadius(d.r*1.03)
-				// 		    .startAngle(5)
-				// 		    .endAngle(10);
-				// 	})
-				// 	.attr('transform', function (d) { return 'translate('+d.x+','+d.y+')'; });
+				this.circles
+					.attr("class", function(d) { return d.children ? "parent" : "child"; })
 
-				/* Update / transition */
 				this.circles
 					.transition()
 					.duration(1000)
-					.attr("r", function(d) {
-						console.log('transition');
-						return d.r - ((!_.isUndefined(d.distribution) && d.distribution.fictive == true && !d.children) ? 3:0);
-					})
+					.attr("r", function(d) { return d.r - ((d.distribution.fictive == true && !d.children) ? 5:0); })
 					.attr("cx", function(d) { return d.x; })
 					.attr("cy", function(d) { return d.y; })
-					.attr('stroke', function (d) {
-						return d.children ? '#666' : 'none';
+					.attr('stroke', function (d) { return d.children ? '#666' : 'none'; })
+					.attr('fill', function (d) {
+						if(!d.children) {
+							if(d._value > 0) return '#5cb85c';
+							else return '#C11137';
+						}
+						else return '#FFF';
 					})
-					.attr('stroke-dasharray', function (d) {
-						return d.children ? '10,10' : 'none';
-					})
+					.attr('stroke-dasharray', function (d) { return d.children ? '10,10' : 'none'; })
+					.attr('fill-opacity', function (d) { return (d3.select(this).attr('class') == 'parent')? 0: 1; })
+					.attr("opacity", 1);
 
-				/* Delete / exit */
 				this.circles.exit()
 					.transition()
 						.duration(1000)
-						.attr('x', function (d, i, a) {
-							return that.width*3;
+						.attr('opacity', 0)
+						.each('end', function () {
+							this.remove();
+						});
+
+
+				/* Paths */
+
+				this.paths.exit()
+					.transition()
+						.duration(1000)
+						.attr('opacity', 0)
+						.each('end', function () {
+							this.remove();
+						});
+
+				this.paths
+					.enter().append('svg:path')
+					.attr("stroke", function(d, i) { return 'blue'; })
+					.attr('d', function (d) {
+						var arc = d3.svg.arc()
+						    .innerRadius(d.r*1.03)
+						    .outerRadius(d.r*1.03)
+						    .startAngle(5)
+						    .endAngle(10);
+						return arc();
+					})
+					.attr('transform', function (d) { return 'translate('+d.x+','+d.y+')'; });
+
+				this.paths
+					.attr('id', function (d, i) { return 'path-parent-'+i; })
+
+				this.paths
+					.transition()
+						.duration(1000)
+						.attr('d', function (d, i) {
+							var arc = d3.svg.arc()
+							    .innerRadius(d.r*1.02)
+							    .outerRadius(d.r*1.02)
+							    .startAngle(5)
+							    .endAngle(10);
+							return arc();
 						})
 						.attr('opacity', 0)
+						.attr('transform', function (d) { return 'translate('+d.x+','+d.y+')'; });
 
+				/* Texts */
 
+				console.log(this.texts[0].length, nodes.length);
+				this.texts.exit()
+					.transition()
+						.duration(1000)
+						.attr('opacity', 0)
+						.each('end', function () {
+							this.remove();
+						});
 
-
-						// .each(function (d, i) {
-						// 	/* move */
-						// 	if(_.isUndefined(d.distribution)) d.distribution = {fictive: false};
-
-						// 	if(!d.children || d.r < 30 || d.distribution.fictive) return;
-
-						// 	var arc = d3.svg.arc()
-						// 		    .innerRadius(d.r*1.03)
-						// 		    .outerRadius(d.r*1.03)
-						// 		    .startAngle(5)
-						// 		    .endAngle(10);
-
-						// 	d.distribution.path = that.g.append('path')
-						// 		.attr('id', 'path-0-'+i)
-						// 		.attr("fill", function(d, i){
-						// 	        return 'none';
-						// 	    })
-						// 	    .attr('stroke', 'none')
-						// 		.attr("d", arc)
-						// 		.attr('transform', function (_d) {
-						// 			return 'translate('+d.x+','+d.y+')';
-						// 		});
-
-						// 	var textSize = 8 + Math.sqrt(d.r);
-						// 	d.distribution.text = that.g.append('text')
-						// 	  .append("textPath")
-						// 	  .attr('class', 'text-path-0-'+i)
-						// 	  .attr("xlink:href",'#path-0-'+i)
-						// 	  .attr('font-size', textSize+'px')
-						// 	  .attr('fill', '#444')
-						// 	  .attr('opacity', 0)
-						// 	  .text(function(){return d.name;})
-						// });
-
-
+				this.textsPaths =
+					this.texts
+						.enter()
+						.append('svg:text')
+						.append('svg:textPath')
+						.attr('display', function (d) {
+							return (d.distribution.fictive || !d.children) ? 'none': 'block';
+						})
+						.attr("xlink:href", function (d, i) {
+							return '#path-parent-'+i;
+						})
+						.attr('font-size', function (d, i) {
+							var fs = 8 + Math.sqrt(d.r);
+							return fs+'px';
+						})
+						.attr('fill', '#222')
+						.attr('opacity', 0)
+						.text(function(d){ return d.name; });
 				
-					// .each('start', function (d, i) {
+				this.textsPaths
+					.attr('id', function (d, i) { return 'text-parent-'+i; })
 
-					// 	var dis = d.distribution || {};
+				this.textsPaths
+					.transition()
+						.duration(1000)
+						.attr('font-size', function (d, i) {
+								var fs = 8 + Math.sqrt(d.r);
+								console.log(fs);
+								return fs+'px';
+						})
+						.attr('opacity', function (d, i) {
+							console.log('transition :',i, 'opacity :', (d.distribution.fictive || !d.children)?0: 0.3)
+							return (d.distribution.fictive || !d.children) ? 0: 0.3;
+						});
 
-					// 	if(!_.isUndefined(dis.path)) dis.path.remove();
-					// 	if(!_.isUndefined(dis.text)) dis.text.remove();
-
-					// 	console.log(dis);
-					// })
-					// .each('end', function (d, i) {
-					// 	/* move */
-
-					// 		if(_.isUndefined(d.distribution)) d.distribution = {fictive: false};
-					// 		if(!d.children || d.r < 30 || d.distribution.fictive) return;
-
-					// 		var arc = d3.svg.arc()
-					// 			.innerRadius(d.r*1.03)
-					// 			.outerRadius(d.r*1.03)
-					// 			.startAngle(5)
-					// 			.endAngle(10);
-
-					// 		d.distribution.path = that.g.append('path')
-					// 			.attr('id', 'path-0-'+i)
-					// 			.attr("fill", function(d, i){
-					// 		        return 'none';
-					// 		    })
-					// 			.attr('stroke', 'none')
-					// 		    .attr("d", arc)
-					// 			.attr('transform', function (_d) {
-					// 				return 'translate('+d.x+','+d.y+')';
-					// 			});
-
-					// 		var textSize = 8 + Math.sqrt(d.r);
-					// 		d.distribution.text = that.g.append('text')
-					// 		  .append("textPath")
-					// 		  .attr('class', 'text-path-0-'+i)
-					// 		  .attr("xlink:href",'#path-0-'+i)
-					// 		  .attr('font-size', textSize+'px')
-					// 		  .attr('fill', '#444')
-					// 		  .attr('opacity', 1)
-					// 		  .text(function(){return d.name;})
-					// });
-
-
-					
-							// .each('end', function (d) {
-							// 	if(!_.isUndefined(d.distribution.path))
-							// 		d.distribution.path.transition().duration(500)
-							// 			.attr('opacity', 0).each(function () {this.remove()});
-
-							// 	if(!_.isUndefined(d.distribution.text))
-							// 		d.distribution.text.transition().duration(500)
-							// 			.attr('opacity', 0).each(function () {this.remove()});
-
-							// 	this.remove();
-							// });
+				this.globalLayoutEvents();
+			},
+			globalLayoutEvents: function () {
+				var that = this;
+				// this.circles
+				// .filter(function (d) { return d.children; })
+				// .on('mouseover', function (d, i) {
+				// 	d3.select('#text-parent-'+i)
+				// 		.transition()
+				// 			.duration(200)
+				// 			.attr('opacity', 1)
+				// 			.attr('font-size', 15 + Math.sqrt(d.r));
+				// })
+				// .on('mouseout', function (d, i) {
+				// 	d3.select('#text-parent-'+i)
+				// 		.transition()
+				// 			.duration(200)
+				// 			.attr('opacity', 0.3)
+				// 			.attr('font-size', 8 + Math.sqrt(d.r));
+				// });
 			},
 			buildLayoutPositive: function () {
 				this.packs = [];

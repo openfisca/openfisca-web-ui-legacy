@@ -13,11 +13,9 @@ define([
 		var AppV = Backbone.View.extend({
 			events: {},
 			el: '#chart-wrapper',
-
 			width: null,
 			height: null,
 			charts: {},
-			
 			initialize: function () {
 				console.info('AppView initialized');
 				this.svg = d3.select(this.el).append('svg');

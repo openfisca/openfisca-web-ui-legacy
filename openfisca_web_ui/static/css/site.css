@@ -56,12 +56,15 @@ img.media-object {
 }
 
 /* SVG */
-.x-axis {
+#chart-wrapper .x-axis {
 }
-.y-axis path {
-  display: none;
+#chart-wrapper .y-axis path {
+    display: none;
 }
-.y-axis line {
+#chart-wrapper .domain {
+    display: none;
+}
+#chart-wrapper .y-axis line {
   stroke: #777;
   stroke-dasharray: 2,2;
 }
