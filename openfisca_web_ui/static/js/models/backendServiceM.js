@@ -43,7 +43,9 @@ define([
 				})
 				.done(function(data) {
 					if (data !== null) {
-						console.error('simulate API validation error', data);
+						var errorMessage = 'simulate API validation error';
+						console.error(errorMessage, data);
+						alert(errorMessage);
 					}
 					this.set('formData', data);
 					callback();
@@ -59,7 +61,9 @@ define([
 				})
 				.done(function(data) {
 					if (data.errors) {
-						console.error('simulation error', data);
+						var errorMessage = 'simulation error';
+						console.error(errorMessage, data);
+						alert(errorMessage);
 					} else {
 						var result = data.output.value[0];
 						if (_.isUndefined(result)) {
