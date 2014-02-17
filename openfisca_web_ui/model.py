@@ -489,7 +489,7 @@ def find_category_name(column_name, entity_name):
     entity_categories = fields_api_data()['columns_tree'][entity_name]['children']
     for entity_category in entity_categories:
         if column_name in entity_category['children']:
-            return strings.slugify(entity_category['label'])
+            return strings.slugify(entity_category['label'], separator = '_')
     return None
 
 
