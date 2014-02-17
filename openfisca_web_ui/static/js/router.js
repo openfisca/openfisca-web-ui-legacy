@@ -7,23 +7,29 @@ define([
 	var router = null,
 		Router = Backbone.Router.extend({
 		routes: {
-			'!/vue-d-ensemble': 'detailChart',
+			'!/vue-d-ensemble': 'waterfallChart',
 			'!/se-situer': 'locatingChart',
+			'!/repartition': 'distributionChart',
 
 			// '*path': 'error404',
-			'': 'detailChart'
+			'': 'waterfallChart'
 		},
 		initialize: function () {
 			Backbone.history.start();
 		},
-		detailChart: function () {
+		waterfallChart: function () {
 			appV.render({
-				chart: 'detail'
+				chart: 'waterfall'
 			});
 		},
 		locatingChart: function () {
 			appV.render({
 				chart: 'locating'
+			});
+		},
+		distributionChart: function () {
+			appV.render({
+				chart: 'distribution'
 			});
 		},
 		error404: function () {

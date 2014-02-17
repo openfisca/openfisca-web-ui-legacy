@@ -54,6 +54,7 @@ define([
 					url: this.urlPaths.simulate
 				})
 				.done(function(data) {
+					console.log('simulate done');
 					if (data.errors) {
 						console.error('Wrong simulation params');
 					} else {

@@ -44,3 +44,14 @@ img.media-object {
     /* symbol for "collapsed" panels */
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
+
+/* SVG */
+.x-axis {
+}
+.y-axis path {
+  display: none;
+}
+.y-axis line {
+  stroke: #777;
+  stroke-dasharray: 2,2;
+}

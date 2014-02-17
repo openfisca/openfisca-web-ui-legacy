@@ -23,11 +23,13 @@ require.config({
         'FormV': '/js/views/FormV',
         'LocatingChartV': '/js/views/LocatingChartV',
         'WaterfallChartV': '/js/views/WaterfallChartV',
+        'DistributionChartV': '/js/views/DistributionChartV',
 
         /* Models */
         'backendServiceM': '/js/models/backendServiceM',
         'DetailChartM': '/js/models/DetailChartM',
         'LocatingChartM': '/js/models/LocatingChartM',
+        'DistributionChartM': '/js/models/DistributionChartM',
 
         /* Modules */
         'auth': '/js/auth',
