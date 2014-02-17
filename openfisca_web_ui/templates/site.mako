@@ -89,7 +89,7 @@ from openfisca_web_ui import conf, model, urls
                     </div>
                     <div class="modal-body">
                         <p>
-                            Ce simulateur vous permet d'obtenir une estimation informationnelle mais ne vous permet en
+                            Ce simulateur vous permet d'obtenir une estimation de votre situation mais ne vous permet en
                             aucun cas de faire valoir un droit.
                         </p>
                         <p>

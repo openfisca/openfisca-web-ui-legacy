@@ -40,13 +40,13 @@
         d'offrir un service de simulation de la situation socio-fiscale des ménages.
     </p>
 
-    <h2>Collecte et utilisation des informations personnelles :</h2>
+    <h2>Collecte et utilisation des informations personnelles</h2>
 
     <p>
         L'utilisation de la plateforme Openfisca est facultative.<br>
         Voici comment vous pouvez être amené à fournir ces données et les types de données que vous pourriez soumettre.
         <dl>
-            <dt>Simulation :</dt>
+            <dt>Simulation</dt>
             <dd>
                 Lors de l'utilisation de la plateforme Openfisca, nous vous inviterons à communiquer différents
                 types d'informations. Vous seul pouvez choisir et décider de fournir des données personnelles à
@@ -54,7 +54,7 @@
                 fournies sont précises et complètes, meilleure est la simulation. Le défaut de réponse aux questions
                 aura pour seule conséquence de rendre la simulation moins précise.
             </dd>
-            <dt>Nous contacter :</dt>
+            <dt>Nous contacter</dt>
             <dd>
                 Si vous souhaitez communiquez avec nous, pour nous signaler un dysfonctionnement, pour bénéficier
                 d'une aide, ou simplement pour nous faire part de vos observations, une adresse électronique est
@@ -65,33 +65,33 @@
         </dl>
     </p>
 
-    <h2>Droit des personnes :</h2>
+    <h2>Droit des personnes</h2>
 
     <p>
         Vous bénéficiez, à tout moment, d'un droit d'accès, de rectification, de modification, et de suppression de
         l'ensemble des données collectées depuis l'interface de votre compte.<br>
-        Par ailleurs, vous bénéficiez d'un droit de délivrance d'une copie format électronique depuis la plateforme.
+        Par ailleurs, vous pouvez obtenir depuis la plateforme une copie au format électronique des données collectées.
     </p>
 
-    <h2>Destinataire des données :</h2>
+    <h2>Destinataire des données</h2>
 
     <p>
-        Ce simulateur a pour but de vous fournir une simulation socio-fiscale uniquement destiné à votre information
-        personnelle.
+        Ce simulateur vous permet d'obtenir une estimation de votre situation mais ne vous permet en aucun cas de faire
+        valoir un droit.
     </p>
 
-    <h2>Responsable du traitement :</h2>
+    <h2>Responsable du traitement</h2>
 
     <p>
         La collecte des données est mise en place par Etalab, mission placée sous l'autorité du Premier ministre et
         rattachée au secrétaire général du Gouvernement.
     </p>
 
-    <h2>Conservation des données :</h2>
+    <h2>Conservation des données</h2>
 
     <p>
         Afin de vous permettre une réutilisation des données saisies d'une année sur l'autre, vos données seront
-        conservées pendant sept cents vingt-neuf jours (729) jours (soit deux (2) ans moins un (1) jour).
+        conservées pendant deux ans.
     </p>
 </article>
 </%def>
