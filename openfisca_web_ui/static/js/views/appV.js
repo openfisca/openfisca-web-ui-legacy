@@ -26,10 +26,17 @@ define([
 					.attr('width', this.width)
 					.attr('height', this.height);
 
-				this.$el.prepend('<div id="chart-menu"><ul class="nav nav-tabs">' +
-					'<li class="active"><a data-target="waterfall" data-toggle="tab" href="#!/vue-d-ensemble">Waterfall</a></li>' +
-					'<li><a data-target="repartition" data-toggle="tab" href="#!/repartition">Répartition</a></li>' +
-					'</ul></div>');
+				this.$el.prepend('\
+<div id="chart-menu">\
+	<ul class="nav nav-tabs">\
+		<li class="active">\
+			<a data-target="cascade" data-toggle="tab" href="#!/cascade">Cascade</a>\
+		</li>\
+		<li>\
+			<a data-target="repartition" data-toggle="tab" href="#!/repartition">Répartition</a>\
+		</li>\
+	</ul>\
+</div>');
 				this.$el.find('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
 					var href = $(evt.target).attr('href');
 					window.location.hash = href;

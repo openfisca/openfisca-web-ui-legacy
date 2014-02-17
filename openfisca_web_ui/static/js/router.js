@@ -7,7 +7,7 @@ define([
 	var router = null,
 		Router = Backbone.Router.extend({
 		routes: {
-			'!/vue-d-ensemble': 'waterfallChart',
+			'!/cascade': 'waterfallChart',
 			'!/se-situer': 'locatingChart',
 			'!/repartition': 'distributionChart',
 
