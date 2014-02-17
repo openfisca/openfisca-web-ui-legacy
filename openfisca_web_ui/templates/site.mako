@@ -61,11 +61,6 @@ from openfisca_web_ui import conf, model, urls
                             </label>
                         </div>
                     </div>
-<%
-    user = model.get_user(ctx)
-    if user is None:
-        return ''
-%>\
                     <div class="modal-footer">
                         <button class="btn btn-success" disabled="disabled" name="accept" type="submit">
                             <span class="glyphicon glyphicon-ok"></span> Accepter
