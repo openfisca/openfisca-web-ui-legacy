@@ -86,7 +86,7 @@ title="afficher / masquer">{self[categories][principal][prenom].value}</a>
   </div>
 </div>'''.format(
     in_class = u' in' if is_last_individu else '',
-    link_classes = '' if is_last_individu else u'class="collapsed"',
+    link_classes = '' if is_last_individu else u' class="collapsed"',
     self = self,
     )
 
