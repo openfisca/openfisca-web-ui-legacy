@@ -49,8 +49,8 @@ from openfisca_web_ui import model, pages
     <form class="korma form" method="POST" role="form">
         ${page_form.html | n}
         <p class="buttons">
-            <input class="btn btn-success" title="${_(u'Launch this simulation')}" type="submit" value="${_(
-                    u'Simulate')}">
+##            <input class="btn btn-success" title="${_(u'Launch this simulation')}" type="submit" value="${_(
+##                    u'Simulate')}">
     % if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
                 ${_(u'Save')}
