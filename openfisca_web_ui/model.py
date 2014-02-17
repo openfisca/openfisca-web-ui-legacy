@@ -51,7 +51,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     simulation_id = None
     simulations = None
     slug = None
-    stats_agreements = None
+    stats_accepted = None
 
     @classmethod
     def bson_to_json(cls, value, state = None):

@@ -56,7 +56,7 @@ from openfisca_web_ui import conf, model, urls
                         </div>
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox" name="stats-checkbox">
+                                <input type="checkbox" name="accept-stats-checkbox">
                                 J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
                             </label>
                         </div>
