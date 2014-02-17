@@ -78,16 +78,22 @@ log = logging.getLogger(__name__)
 def accept_cnil_conditions(req):
     ctx = contexts.Ctx(req)
     params = req.params
-
     session = ctx.session
     assert session is not None and session.user is not None
     user = session.user
     if 'accept' in req.params:
         if conv.check(conv.guess_bool(params.get('accept-checkbox'))):
             user.cnil_conditions_accepted = True
-        if conv.check(conv.guess_bool(params.get('stats-checkbox'))):
-            user.stats_agreements = True
-        user.save(ctx, safe = True)
+        if conv.check(conv.guess_bool(params.get('accept-stats-checkbox'))):
+            user.stats_accepted = True
+    else:
+        user.cnil_conditions_accepted = None
+        user.email = None
+        user.full_name = None
+        user.slug = None
+        user.stats_accepted = None
+    user.compute_words()
+    user.save(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
