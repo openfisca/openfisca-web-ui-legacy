@@ -165,11 +165,11 @@ ${account.get_title(ctx)} - ${parent.title_content()}
             <td>${simulation.description or ''}</td>
             <td>
                 <a class="btn btn-primary" href="#" data-toggle="modal" \
-data-target="#${u'edit-{}-modal'.format(simulation.slug)}">Éditer</a>
-                <a class="btn btn-primary" href="${simulation.get_url(ctx, 'duplicate')}">Copier</a>
+data-target="#${u'edit-{}-modal'.format(simulation.slug)}">${_('Edit')}</a>
+                <a class="btn btn-primary" href="${simulation.get_url(ctx, 'duplicate')}">${_('Duplicate')}</a>
                 <a class="btn btn-danger" href="#" data-toggle="modal" \
 data-target="#${u'delete-{}-modal'.format(simulation.slug)}">
-                    <span class="glyphicon glyphicon-trash"></span> Supprimer
+                    <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
                 </a>
             </td>
         </tr>
