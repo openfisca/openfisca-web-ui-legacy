@@ -41,11 +41,11 @@ user = model.get_user(ctx)
 %>\
 <div class="alert alert-warning">
     <p>
-        <strong>Attention</strong> : ce simulateur est en cours de développement.
+        <strong>Attention</strong> : ce simulateur est en cours de développement.
     </p>
     <p>
         Les données que vous saisissez ne sont pas protégées et pourront être effacées à tout moment.
-        <strong>Ne saississez pas de données personelles</strong>
+        <strong>Ne saississez pas de données personnelles.</strong>
     </p>
     <p>
         Les résultats des simulations peuvent comporter des erreurs.
