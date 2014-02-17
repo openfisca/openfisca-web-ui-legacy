@@ -14,18 +14,15 @@ define([
 			events: {},
 			el: '#chart-wrapper',
 
-			width: 980,
-			height: 800,
+			width: null,
+			height: null,
 			charts: {},
 			
 			initialize: function () {
 				console.info('AppView initialized');
-
-				/* Init svg */
-				this.svg = d3.select(this.el).append('svg')
-					.attr('width', this.width)
-					.attr('height', this.height);
-
+				this.svg = d3.select(this.el).append('svg');
+				$(window).on('resize', $.proxy(this.updateDimensions, this));
+				this.updateDimensions();
 				this.$el.prepend('\
 <div id="chart-menu">\
 	<ul class="nav nav-tabs">\
@@ -70,6 +67,13 @@ define([
 				console.log(this.chart.$el);
 				this.chart.remove();
 				this.chart.model.destroy();
+			},
+			updateDimensions: function() {
+				this.width = this.$el.width();
+				this.height = this.width * 0.66;
+				this.$el.find('svg')
+					.attr('width', this.width)
+					.attr('height', this.height);
 			}
 		});
 		var appV = new AppV();
