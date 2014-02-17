@@ -27,14 +27,8 @@
 from openfisca_web_ui import model, pages
 %>
 
-<%inherit file="site.mako"/>
 
-
-<%def name="breadcrumb()" filter="trim">
-</%def>
-
-
-<%def name="container_content()" filter="trim">
+<%def name="form()" filter="trim">
 <%
     user = model.get_user(ctx)
 %>\

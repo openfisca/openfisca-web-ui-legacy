@@ -84,7 +84,7 @@ def form(req):
     return templates.render_def(
         ctx,
         '/form.mako',
-        'container_content',
+        'form',
         korma_errors = korma_errors or {},
         page_form = page_form,
         simulations = simulations,
