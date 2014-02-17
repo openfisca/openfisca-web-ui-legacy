@@ -30,7 +30,7 @@ define([
 					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error(jqXHR, textStatus, errorThrown);
+					console.error(jqXHR, textStatus, errorThrown, jqXHR.responseText);
 				});
 			},
 			saveForm: function(tabName, data, callback) {
@@ -45,7 +45,7 @@ define([
 					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('saveForm fail', jqXHR, textStatus, errorThrown);
+					console.error('saveForm fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
 				});
 			},
 			simulate: function() {
@@ -66,7 +66,7 @@ define([
 					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('simulate fail', jqXHR, textStatus, errorThrown);
+					console.error('simulate fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
 				});
 			}
 		});
