@@ -243,24 +243,6 @@ def admin_view(req):
     return templates.render(ctx, '/accounts/admin-view.mako', account = account)
 
 
-@wsgihelpers.wsgify
-def admin_reset(req):
-    ctx = contexts.Ctx(req)
-    account = ctx.node
-
-    if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Reset forbidden"),
-            message = ctx._("You must  be an administrator reset an account."),
-            title = ctx._('Operation denied'),
-            )
-
-    if account.api_data is not None:
-        account.api_data = None
-        account.save(ctx, safe = True)
-    return wsgihelpers.redirect(ctx, location = account.get_admin_url(ctx))
-
-
 #@wsgihelpers.wsgify
 #def api1_delete(req):
 #    ctx = contexts.Ctx(req)
@@ -662,7 +644,6 @@ def route_admin(environ, start_response):
         ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
-        ('GET', '^/reset/?$', admin_reset),
         )
     return router(environ, start_response)
 
@@ -722,6 +703,7 @@ def route_user(environ, start_response):
         ('GET', '^/?$', user_view),
         ('POST', '^/accept-cnil-conditions/?$', accept_cnil_conditions),
         ('POST', '^/delete/?$', user_delete),
+        ('GET', '^/reset/?$', user_reset),
         )
     return router(environ, start_response)
 
@@ -740,6 +722,23 @@ def user_delete(req):
     assert req.method == 'POST'
     session.user.delete(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
+
+
+@wsgihelpers.wsgify
+def user_reset(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None or session.user is None:
+        return wsgihelpers.unauthorized(ctx,
+            explanation = ctx._("Deletion unauthorized"),
+            message = ctx._("You can not delete an account."),
+            title = ctx._('Operation denied'),
+            )
+
+    if session.user.api_data is not None:
+        session.user.api_data = None
+        session.user.save(ctx, safe = True)
+    return wsgihelpers.redirect(ctx, location = '/')
 
 
 @wsgihelpers.wsgify

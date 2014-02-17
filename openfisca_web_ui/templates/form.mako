@@ -61,7 +61,7 @@ from openfisca_web_ui import model, pages
                 </div>
                 <div class="modal-body">
                     <a class="btn btn-danger btn-reset" \
-href="${user.get_admin_url(ctx, 'reset') if user  is not None else '/'}">
+href="${user.get_user_url(ctx, 'reset') if user  is not None else '/'}">
                         ${_(u'Yes')}
                     </a>
                     <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
