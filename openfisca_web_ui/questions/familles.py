@@ -61,7 +61,6 @@ title="afficher / masquer">Famille {formatted_index}</a>
   </div>
 </div>'''.format(formatted_index = index + 1, self = self)
 
-
     class IndividuGroup(Group):
         @property
         def outer_html(self):
@@ -85,11 +84,10 @@ title="afficher / masquer">{self[categories][principal][prenom].value}</a>
     </div>
   </div>
 </div>'''.format(
-    in_class = u' in' if is_last_individu else '',
-    link_classes = '' if is_last_individu else u' class="collapsed"',
-    self = self,
-    )
-
+                in_class = u' in' if is_last_individu else '',
+                link_classes = '' if is_last_individu else u' class="collapsed"',
+                self = self,
+                )
 
     return base.Repeat(
         add_button_label = u'Ajouter une famille',
