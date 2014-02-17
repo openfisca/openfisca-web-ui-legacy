@@ -40,8 +40,13 @@ from openfisca_web_ui import model, urls
 user = model.get_user(ctx)
 %>\
 <div class="alert alert-warning">
-    <strong>Attention</strong> : ce simulateur est en cours de développement.<br>
-    Les données que vous saisissez pourront être effacées et les valeurs des simulations peuvent comporter des erreurs.
+    <strong>Attention</strong> : ce simulateur est en cours de développement.
+    <p>
+        Les données que vous saisissez ne sont pas protégées et pourront être effacées à tout moment.
+    </p>
+    <p>
+        Les résultats des simulations peuvent comporter des erreurs.
+    </p>
 </div>
     % if user is not None and simulations is not None and len(simulations) > 1:
         % for simulation in simulations:

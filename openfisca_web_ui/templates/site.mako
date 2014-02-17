@@ -47,17 +47,20 @@ from openfisca_web_ui import conf, model, urls
                         <h4 class="modal-title">Enregistrement de votre simulation</h4>
                     </div>
                     <div class="modal-body">
-                        Text d'exemple à remplacer par le texte concernant la CNIL
+                        <p>
+                            Vous pouvez consulter <a target="_blank" href="/terms">l'ensemble des conditions
+                            générales d'utilisation ici</a>.
+                        </p>
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des informations ci-dessus
+                                J'ai pris connaissance des conditions générales d'utilisation
                             </label>
                         </div>
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" name="accept-stats-checkbox">
-                                J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
+                                J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
                             </label>
                         </div>
                     </div>
@@ -82,14 +85,24 @@ from openfisca_web_ui import conf, model, urls
             <div class="modal-content">
                 <form method="post" action="/accept-cookies">
                     <div class="modal-header">
-                        <h4 class="modal-title">Politique d'utilisation des cookies</h4>
+                        <h4 class="modal-title">Conditions générales d'utilisation <small>(CGU)</small></h4>
                     </div>
                     <div class="modal-body">
-                        Pour fonctionner, ce site a besoin d'utiliser des cookies.
+                        <p>
+                            Ce simulateur vous permet d'obtenir une estimation informationnelle mais ne vous permet en
+                            aucun cas de faire valoir un droit.
+                        </p>
+                        <p>
+                            Pour fonctionner, ce site a besoin d'utiliser des cookies.
+                        </p>
+                        <p>
+                            Vous pouvez consulter <a target="_blank" href="/terms">l'ensemble des conditions
+                            générales d'utilisation ici</a>.
+                        </p>
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des informations ci-dessus
+                                J'ai pris connaissance des conditions générales d'utilisation
                             </label>
                         </div>
                     </div>
@@ -296,6 +309,7 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     % endif
                 <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
                 <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
+                <li><a href="/terms">${_('Terms of use')}</a></li>
 </%def>
 
 
