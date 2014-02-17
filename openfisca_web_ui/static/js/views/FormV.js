@@ -10,9 +10,10 @@ define([
 			currentTabName: null,
 			el: '#form-wrapper',
 			events: {
-				'keypress :input': 'submit',
+				'change :input': 'submit',
 				'click :input[type="submit"]': 'submit',
 				'click .nav-tabs a': 'changeTab',
+				'keypress :input': 'submit'
 			},
 			model: backendServiceM,
 
