@@ -61,27 +61,35 @@ title="afficher / masquer">Famille {formatted_index}</a>
   </div>
 </div>'''.format(formatted_index = index + 1, self = self)
 
-    IndividuGroup = lambda *args, **kwargs: \
-        Group(
-            outer_html_template = u'''
+
+    class IndividuGroup(Group):
+        @property
+        def outer_html(self):
+            index = self.parent_data['individus']['index']
+            is_last_individu = index == self.parent.questions_count - 1
+            return u'''
 {self[id].html}
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="form-inline">
       <h4 class="panel-title">
         {self[role].html}
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
+        <a{link_classes} data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
 title="afficher / masquer">{self[categories][principal][prenom].value}</a>
       </h4>
     </div>
   </div>
-  <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse in">
+  <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse{in_class}">
     <div class="panel-body">
       {self[categories].html}
     </div>
   </div>
-</div>''',
-        *args, **kwargs)
+</div>'''.format(
+    in_class = u' in' if is_last_individu else '',
+    link_classes = '' if is_last_individu else u'class="collapsed"',
+    self = self,
+    )
+
 
     return base.Repeat(
         add_button_label = u'Ajouter une famille',
