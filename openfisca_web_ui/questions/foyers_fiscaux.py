@@ -26,9 +26,10 @@
 """Korma questions related to foyers fiscaux"""
 
 
-from korma.base import Button, Hidden
+from korma.base import Button
 from korma.choice import Select
 from korma.group import Group
+from korma.text import Hidden
 
 from .. import uuidhelpers
 from . import base

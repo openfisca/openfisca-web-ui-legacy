@@ -26,9 +26,9 @@
 """Korma questions related to familles"""
 
 
-from korma.base import Hidden
 from korma.choice import Select
 from korma.group import Group
+from korma.text import Hidden
 
 from .. import uuidhelpers
 from . import base
