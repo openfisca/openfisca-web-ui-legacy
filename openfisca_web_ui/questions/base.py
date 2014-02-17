@@ -158,6 +158,10 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
 
 
 def make_question(column):
+    default = column.get('default')
+    if default is None:
+        default = custom_column_default_values.get(column['name'])
+    default_str = lambda question: check(question.data_to_str(default))
     question_label = column.get('label')
     if column['@type'] == 'Boolean':
         question = BootstrapRadio(
@@ -180,30 +184,30 @@ def make_question(column):
                 label = question_label,
                 name = column['name'],
                 )
+            question.placeholder = default_str(question)
     elif column['@type'] == 'Float':
         question = BootstrapNumber(
             label = question_label,
             name = column['name'],
             )
+        question.placeholder = default_str(question)
     elif column['@type'] == 'Integer':
         question = BootstrapNumber(
             label = question_label,
             name = column['name'],
             step = 1,
             )
+        question.placeholder = default_str(question)
     elif column['@type'] == 'String':
         question = BootstrapText(
             label = question_label,
             name = column['name'],
             )
+        question.placeholder = default_str(question)
     elif column['@type'] == 'Date':
         question = BootstrapFrenchDate(
             label = question_label,
             name = column['name'],
             )
-    default = column.get('default')
-    if default is None:
-        default = custom_column_default_values.get(column['name'])
-    if default is not None:
-        question.placeholder = check(question.data_to_str(default))
+        question.placeholder = default_str(question)
     return question
