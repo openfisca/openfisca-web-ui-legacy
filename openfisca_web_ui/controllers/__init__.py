@@ -85,9 +85,7 @@ def index(req):
                 httponly = True,
                 secure = ctx.req.scheme == 'https',
                 )
-    user_simulations = None if session is None or session.user is None or session.user.simulations is None else \
-        list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
-    return templates.render(ctx, '/index.mako', simulations = user_simulations)
+    return templates.render(ctx, '/index.mako')
 
 
 def make_router():

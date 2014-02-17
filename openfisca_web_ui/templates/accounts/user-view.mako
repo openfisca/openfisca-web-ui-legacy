@@ -53,16 +53,23 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="modals()" filter="trim">
-    % for simulation in simulations:
+<%
+user = model.get_user(ctx)
+%>
+    % if user is not None:
+        % for simulation in user.simulations:
         <%self:modals_edit simulation="${simulation}"/>
-    % endfor
+        % endfor
+    % endif
 <%
     simulation = model.Simulation(slug = 'new', title = '')
 %>\
         <%self:modals_edit simulation="${simulation}"/>
-    % for simulation in simulations:
+    % if user is not None:
+        % for simulation in user.simulations:
         <%self:modals_delete simulation="${simulation}"/>
-    % endfor
+        % endfor
+    % endif
         <%self:modals_delete_user/>
 </%def>
 
@@ -157,10 +164,14 @@ ${account.get_title(ctx)} - ${parent.title_content()}
             <th>Description</th>
             <th>Action</th>
         </tr>
-    % for simulation in simulations:
+<%
+user = model.get_user(ctx)
+%>
+    % if user is not None:
+        % for simulation in user.simulations:
         <tr>
             <td>${'<span class="glyphicon glyphicon-ok"></span>' \
-                if simulation._id == account.simulation_id else u' ' | n}</td>
+                if simulation._id == account.current_simulation_id else u' ' | n}</td>
             <td><a href="${simulation.get_url(ctx, 'use')}">${simulation.title}</a></td>
             <td>${simulation.description or ''}</td>
             <td>
@@ -173,7 +184,8 @@ data-target="#${u'delete-{}-modal'.format(simulation.slug)}">
                 </a>
             </td>
         </tr>
-    % endfor
+        % endfor
+    % endif
     </table>
 </%def>
 

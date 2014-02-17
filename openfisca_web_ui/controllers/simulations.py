@@ -48,12 +48,13 @@ def delete(req):
     simulation = conv.check(
         model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
         )
-    if simulation is None or simulation._id not in session.user.simulations:
+    if simulation is None or simulation._id not in session.user.simulations_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
-    session.user.simulations.remove(simulation._id)
-    if session.user.simulation_id == simulation._id:
-        session.user.simulation_id = session.user.simulations[0] if len(session.user.simulations) > 0 else None
+    session.user.simulations_id.remove(simulation._id)
+    if session.user.current_simulation_id == simulation._id:
+        session.user.current_simulation_id = session.user.simulations_id[0] \
+            if len(session.user.simulations_id) > 0 else None
     session.user.save(ctx, safe = True)
     simulation.delete(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
@@ -75,7 +76,7 @@ def duplicate(req):
     simulation = conv.check(
         model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
         )
-    if simulation is None or simulation._id not in session.user.simulations:
+    if simulation is None or simulation._id not in session.user.simulations_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
     del simulation._id
@@ -83,12 +84,12 @@ def duplicate(req):
     simulation.title = u'{} « (Copie) »'.format(simulation.title)
     simulation.slug = strings.slugify(simulation.title)
     simulation.save(ctx, safe = True)
-    if session.user.simulations is None:
-        session.user.simulations = [simulation._id]
-        session.user.simulation_id = simulation._id
+    if session.user.simulations_id is None:
+        session.user.simulations_id = [simulation._id]
+        session.user.current_simulation_id = simulation._id
         session.user.save(ctx, safe = True)
-    elif simulation._id not in session.user.simulations:
-        session.user.simulations.append(simulation._id)
+    elif simulation._id not in session.user.simulations_id:
+        session.user.simulations_id.append(simulation._id)
         session.user.save(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
@@ -135,16 +136,16 @@ def edit(req):
             )
         data['simulation'].api_data = None
         data['simulation'].save(ctx, safe = True)
-        if session.user.simulations is None:
-            session.user.simulations = [data['simulation']._id]
-            session.user.simulation_id = data['simulation']._id
+        if session.user.simulations_id is None:
+            session.user.simulations_id = [data['simulation']._id]
+            session.user.current_simulation_id = data['simulation']._id
             session.user.save(ctx, safe = True)
-        elif data['simulation']._id not in session.user.simulations:
-            session.user.simulations.append(data['simulation']._id)
+        elif data['simulation']._id not in session.user.simulations_id:
+            session.user.simulations_id.append(data['simulation']._id)
             session.user.save(ctx, safe = True)
         return wsgihelpers.redirect(ctx, location = '/')
 
-    if data['simulation'] is None or data['simulation']._id not in session.user.simulations:
+    if data['simulation'] is None or data['simulation']._id not in session.user.simulations_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(data['id_or_slug']))
 
     data['simulation'].title = data['title']
@@ -202,12 +203,12 @@ def save(req):
                 )
         simulation.api_data = session.user.api_data
         simulation.save(ctx, safe = True)
-        if session.user.simulations is None:
-            session.user.simulations = [simulation._id]
-            session.user.simulation_id = simulation._id
+        if session.user.simulations_id is None:
+            session.user.simulations_id = [simulation._id]
+            session.user.current_simulation_id = simulation._id
             session.user.save(ctx, safe = True)
-        elif simulation._id not in session.user.simulations:
-            session.user.simulations.append(simulation._id)
+        elif simulation._id not in session.user.simulations_id:
+            session.user.simulations_id.append(simulation._id)
             session.user.save(ctx, safe = True)
         return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
     return wsgihelpers.bad_request(ctx, explanation = errors)
@@ -229,10 +230,10 @@ def use(req):
     simulation = conv.check(
         model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
         )
-    if simulation is None or simulation._id not in session.user.simulations:
+    if simulation is None or simulation._id not in session.user.simulations_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
     session.user.api_data = simulation.api_data
-    session.user.simulation_id = simulation._id
+    session.user.current_simulation_id = simulation._id
     session.user.save(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = '/')

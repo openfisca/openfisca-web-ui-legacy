@@ -48,8 +48,8 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     collection_name = 'accounts'
     email = None
     full_name = None
-    simulation_id = None
-    simulations = None
+    simulations_id = None
+    current_simulation_id = None
     slug = None
     stats_accepted = None
 
@@ -134,6 +134,10 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
                 self = instances[0]
             return self, None
         return id_or_slug_or_words_to_instance
+
+    @property
+    def simulations(self):
+        return list(Simulation.find({'_id': {'$in': self.simulations_id}})) if self.simulations_id else None
 
     def turn_to_json_attributes(self, state):
         value, error = conv.object_to_clean_dict(self, state = state)

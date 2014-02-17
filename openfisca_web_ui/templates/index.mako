@@ -51,9 +51,9 @@ user = model.get_user(ctx)
         Les résultats des simulations peuvent comporter des erreurs.
     </p>
 </div>
-    % if user is not None and simulations is not None and len(simulations) > 1:
-        % for simulation in simulations:
-            % if simulation._id == user.simulation_id:
+    % if user is not None and user.simulations is not None and len(user.simulations) > 1:
+        % for simulation in user.simulations:
+            % if simulation._id == user.current_simulation_id:
 <h1>${simulation.title}</h1>
             % endif
         % endfor

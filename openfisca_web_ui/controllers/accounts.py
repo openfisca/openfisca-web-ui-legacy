@@ -602,7 +602,7 @@ def login(req):
     return wsgihelpers.respond_json(
         ctx,
         dict(
-            accountUrl = session.user.get_user_url(ctx) if len(session.user.simulations or []) > 1 else '/',
+            accountUrl = session.user.get_user_url(ctx) if len(session.user.simulations_id or []) > 1 else '/',
             )
         )
 
@@ -753,7 +753,7 @@ def user_view(req):
             title = ctx._('Operation denied'),
             )
 
-    if session.user.simulations is None:
+    if session.user.simulations_id is None:
         simulation_date = datetime.datetime.strptime(session.user.published.split('.')[0], u'%Y-%m-%dT%H:%M:%S')
         simulation_title = u'Ma simulation du {} à {}'.format(
             datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
@@ -766,8 +766,7 @@ def user_view(req):
             api_data = session.user.api_data,
             )
         simulation.save(ctx, safe = True)
-        session.user.simulations = [simulation._id]
-        session.user.simulation_id = simulation._id
+        session.user.simulations_id = [simulation._id]
+        session.user.current_simulation_id = simulation._id
         session.user.save(ctx, safe = True)
-    simulations = list(model.Simulation.find({'_id': {'$in': session.user.simulations}}))
-    return templates.render(ctx, '/accounts/user-view.mako', account = session.user, simulations = simulations)
+    return templates.render(ctx, '/accounts/user-view.mako', account = session.user)
