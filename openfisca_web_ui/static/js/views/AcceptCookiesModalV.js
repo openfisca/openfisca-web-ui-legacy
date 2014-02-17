@@ -9,7 +9,11 @@ define([
 			},
 
 			initialize: function () {
-				this.$el.modal('show');
+				this.$el.modal({
+					backdrop: 'static',
+					keyboard: false,
+					show: true
+				});
 				this.updateAcceptButton();
 			},
 			updateAcceptButton: function(evt) {

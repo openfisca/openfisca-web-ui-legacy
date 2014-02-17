@@ -44,7 +44,6 @@ from openfisca_web_ui import conf, model, urls
             <div class="modal-content">
                 <form method="post" action="${user.get_user_url(ctx, 'accept-cnil-conditions')}">
                     <div class="modal-header">
-                        <a class="close" href="/">&times;</a>
                         <h4 class="modal-title">Enregistrement de votre simulation</h4>
                     </div>
                     <div class="modal-body">
