@@ -7,28 +7,31 @@ define([
 	],
 	function ($, _, Backbone, backendServiceM) {
 		var FormV = Backbone.View.extend({
+			currentTabName: null,
+			el: '#form-wrapper',
 			events: {
 				'keypress input': 'submit',
 				'click :input[type="submit"]': 'submit',
 				'click .nav-tabs a': 'changeTab',
 			},
 			model: backendServiceM,
-			el: '#form-wrapper',
 
 			initialize: function () {
+				this.currentTabName = this.model.startTabName;
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
 			changeTab: function(evt) {
 				evt.preventDefault();
 				var tabName = $(evt.target).data('tab-name');
-				if (tabName === this.model.currentTabName) {
+				if (tabName === this.currentTabName) {
 					return;
 				}
 				var $form = this.$el.find('form');
 				var formDataStr = $form.serialize();
-				this.model.saveForm(formDataStr, $.proxy(function() {
+				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
 					this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
 				}, this));
+				this.currentTabName = tabName;
 			},
 			render: function () {
 				var data = this.model.get('formData');
@@ -51,7 +54,9 @@ define([
 						formDataStr += '&' + name + '=' + value;
 					}
 				}
-				this.model.saveForm(formDataStr, $.proxy(this.model.simulate, this.model));
+				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
+					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
+				}, this));
 			}
 		});
 		return FormV;

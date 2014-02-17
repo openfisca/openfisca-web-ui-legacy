@@ -6,22 +6,24 @@ define([
 	],
 	function ($, _, Backbone, appconfig) {
 		var BackendServiceM = Backbone.Model.extend({
-			events: {},
 			defaults: {
 				apiData: {},
 				formData: {}
 			},
-			urlPaths: appconfig.api.urls,
+			events: {},
 			startTabName: 'familles',
-			currentTabName: null,
+			urlPaths: appconfig.api.urls,
 
 			initialize: function () {
 				this.fetchForm(this.startTabName, $.proxy(this.simulate, this));
 			},
+			buildFormPath: function(tabName) {
+				return this.urlPaths.form + '/' + tabName;
+			},
 			fetchForm: function(tabName, callback) {
 				$.ajax({
 					context: this,
-					url: this.urlPaths.form + '/' + tabName
+					url: this.buildFormPath(tabName)
 				})
 				.done(function(data) {
 					this.set('formData', data);
@@ -29,17 +31,14 @@ define([
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error(jqXHR, textStatus, errorThrown);
-				})
-				.always(function() {
-					this.currentTabName = tabName;
 				});
 			},
-			saveForm: function(data, callback) {
+			saveForm: function(tabName, data, callback) {
 				$.ajax({
 					context: this,
 					data: data,
 					type: 'POST',
-					url: this.urlPaths.form + '/' + this.currentTabName
+					url: this.buildFormPath(tabName)
 				})
 				.done(function(data) {
 					this.set('formData', data);
