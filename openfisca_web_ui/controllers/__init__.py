@@ -110,10 +110,10 @@ def make_router():
         ('GET', '^/terms/?$', terms),
         ]
     for page_data in pages.pages_data:
-        routings.append(
-            (('GET', 'POST'), '^/api/1/form/{slug}/?$'.format(slug=page_data['slug']), forms.form,
-             {'page_data': page_data}),
-            )
+        routings.extend([
+            ('GET', '^/api/1/form/{slug}/?$'.format(slug=page_data['slug']), forms.get, {'page_data': page_data}),
+            ('POST', '^/api/1/form/{slug}/?$'.format(slug=page_data['slug']), forms.post, {'page_data': page_data}),
+            ])
     router = urls.make_router(*routings)
     return router
 

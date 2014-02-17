@@ -16,6 +16,7 @@ define([
 				'keypress :input': 'submit'
 			},
 			model: backendServiceM,
+			submitTriggered: false,
 
 			initialize: function () {
 				this.currentTabName = this.model.startTabName;
@@ -29,14 +30,19 @@ define([
 				}
 				var $form = this.$el.find('form');
 				var formDataStr = $form.serialize();
-				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
-					this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
-				}, this));
+				this.model.saveForm(
+					this.currentTabName,
+					formDataStr,
+					$.proxy(function() {
+						this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
+					}, this)
+				);
 				this.currentTabName = tabName;
 			},
 			render: function () {
 				var data = this.model.get('formData');
 				this.$el.html(data);
+				this.submitTriggered = false;
 				return this;
 			},
 			submit: function(evt) {
@@ -44,6 +50,10 @@ define([
 					return;
 				}
 				evt.preventDefault();
+				if (this.submitTriggered) {
+					return;
+				}
+				this.submitTriggered = true;
 				var $form = this.$el.find('form');
 				var formDataStr = $form.serialize();
 				if (evt.type == 'click') {
@@ -55,9 +65,13 @@ define([
 						formDataStr += '&' + name + '=' + value;
 					}
 				}
-				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
-					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
-				}, this));
+				this.model.saveForm(
+					this.currentTabName,
+					formDataStr,
+					$.proxy(function() {
+						this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
+					}, this)
+				);
 			}
 		});
 		return FormV;

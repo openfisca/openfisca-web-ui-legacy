@@ -37,10 +37,14 @@ define([
 				$.ajax({
 					context: this,
 					data: data,
+					dataType: 'json',
 					type: 'POST',
 					url: this.buildFormPath(tabName)
 				})
 				.done(function(data) {
+					if (data !== null) {
+						console.error('simulate API validation error', data);
+					}
 					this.set('formData', data);
 					callback();
 				})
@@ -54,13 +58,12 @@ define([
 					url: this.urlPaths.simulate
 				})
 				.done(function(data) {
-					console.log('simulate done');
 					if (data.errors) {
-						console.error('Wrong simulation params');
+						console.error('simulation error', data);
 					} else {
 						var result = data.output.value[0];
 						if (_.isUndefined(result)) {
-							console.error('Could not retrieve simulation result');
+							console.error('result is undefined', data);
 						} else {
 							this.set('apiData', result);
 						}
