@@ -75,21 +75,18 @@ log = logging.getLogger(__name__)
 
 
 @wsgihelpers.wsgify
-def accept_or_reject_cnil(req):
+def accept_cnil_conditions(req):
     ctx = contexts.Ctx(req)
     params = req.params
 
     session = ctx.session
     assert session is not None and session.user is not None
     user = session.user
-    if not ('accept' in req.params and conv.check(conv.guess_bool(params.get('accept-checkbox'))) is True):
-        user.email = None
-        user.full_name = None
-        user.slug = None
-        user.compute_words()
-        user.save(ctx, safe = True)
-    if conv.check(conv.guess_bool(params.get('stats-checkbox'))):
-        user.stats_agreements = True
+    if 'accept' in req.params:
+        if conv.check(conv.guess_bool(params.get('accept-checkbox'))):
+            user.cnil_conditions_accepted = True
+        if conv.check(conv.guess_bool(params.get('stats-checkbox'))):
+            user.stats_agreements = True
         user.save(ctx, safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
@@ -617,8 +614,6 @@ def login(req):
     return wsgihelpers.respond_json(
         ctx,
         dict(
-            existingAccount = registered_account is not None,
-            cnilUrl = session.user.get_user_url(ctx, 'accept-or-reject-cnil'),
             accountUrl = session.user.get_user_url(ctx) if len(session.user.simulations or []) > 1 else '/',
             )
         )
@@ -719,7 +714,7 @@ def route_api1_class(environ, start_response):
 def route_user(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_view),
-        ('POST', '^/accept-or-reject-cnil/?$', accept_or_reject_cnil),
+        ('POST', '^/accept-cnil-conditions/?$', accept_cnil_conditions),
         ('POST', '^/delete/?$', user_delete),
         )
     return router(environ, start_response)

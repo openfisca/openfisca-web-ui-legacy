@@ -1,8 +1,6 @@
 define([
-    'jquery',
-
-    'CnilModal'
-], function($, CnilModal) {
+    'jquery'
+], function($) {
 
     var Auth = function () {};
     Auth.prototype = {
@@ -17,11 +15,7 @@ define([
                             assertion: assertion
                         },
                         success: function(res, status, xhr) {
-                            if (!res.existingAccount) {
-                                CnilModal.init(res.cnilUrl);
-                            } else {
-                                window.location = res.accountUrl;
-                            }
+                            window.location.href = res.accountUrl;
                         },
                         error: function(xhr, status, err) {
                             navigator.id.logout();

@@ -1,13 +1,15 @@
 define([
 	'bootstrap',
 
-	'auth',
+	'AcceptCnilConditionsModalV',
+	'AcceptCookiesModalV',
 	'appV',
+	'auth',
 	'FormV',
 	'router',
 	'appconfig'
 	],
-	function (bootstrap, auth, appV, FormV, Router, appconfig) {
+	function (bootstrap, AcceptCnilConditionsModalV, AcceptCookiesModalV, appV, auth, FormV, Router, appconfig) {
 
 		var App = function () {};
 		App.prototype = {
@@ -17,6 +19,12 @@ define([
 				this.initForm();
 				if (appconfig.auth.enable) {
 					auth.init(appconfig.auth);
+				}
+				if (appconfig.displayAcceptCookiesModal) {
+					this.acceptCookiesModalV = new AcceptCookiesModalV();
+				}
+				else if (appconfig.displayAcceptCnilConditionsModal) {
+					this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
 				}
 			},
 			initForm: function() {

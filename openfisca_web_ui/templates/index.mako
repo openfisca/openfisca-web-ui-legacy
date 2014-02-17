@@ -48,8 +48,3 @@ from openfisca_web_ui import model, urls
   </div>
 </div>
 </%def>
-
-
-<%def name="page_scripts()">
-require(['${urls.get_url(ctx, u'js/AcceptCookies.js')}']);
-</%def>

@@ -64,31 +64,28 @@ def accept_cookies(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-
     # If cookie is present (even when session is obsolete), consider that cookies have been accepted by user.
-    if conf['cookie'] not in req.cookies:
-        return templates.render(ctx, '/index.mako', display_cookie_modal = True)
-
-    session = ctx.session
-    if session is None:
-        session = ctx.session = model.Session()
-        session.token = uuidhelpers.generate_uuid()
-    if session.user is None:
-        user = model.Account()
-        user._id = uuidhelpers.generate_uuid()
-        user.compute_words()
-        session.user_id = user._id
-        user.save(ctx, safe = True)
-        session.user = user
-    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-    session.save(ctx, safe = True)
-    if ctx.req.cookies.get(conf['cookie']) != session.token:
-        ctx.req.response.set_cookie(
-            conf['cookie'],
-            session.token,
-            httponly = True,
-            secure = ctx.req.scheme == 'https',
-            )
+    if conf['cookie'] in req.cookies:
+        session = ctx.session
+        if session is None:
+            session = ctx.session = model.Session()
+            session.token = uuidhelpers.generate_uuid()
+        if session.user is None:
+            user = model.Account()
+            user._id = uuidhelpers.generate_uuid()
+            user.compute_words()
+            session.user_id = user._id
+            user.save(ctx, safe = True)
+            session.user = user
+        session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+        session.save(ctx, safe = True)
+        if ctx.req.cookies.get(conf['cookie']) != session.token:
+            ctx.req.response.set_cookie(
+                conf['cookie'],
+                session.token,
+                httponly = True,
+                secure = ctx.req.scheme == 'https',
+                )
     return templates.render(ctx, '/index.mako')
 
 

@@ -38,6 +38,82 @@ from openfisca_web_ui import conf, model, urls
 %>
 
 
+<%def name="accept_cnil_conditions_modal(user)" filter="trim">
+    <div class="modal fade bs-modal-lg" id="accept-cnil-conditions-modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form method="post" action="${user.get_user_url(ctx, 'accept-cnil-conditions')}">
+                    <div class="modal-header">
+                        <a class="close" href="/">&times;</a>
+                        <h4 class="modal-title">Enregistrement de votre simulation</h4>
+                    </div>
+                    <div class="modal-body">
+                        Text d'exemple à remplacer par le texte concernant la CNIL
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="accept-checkbox">
+                                J'ai pris connaissance des informations ci-dessus
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="stats-checkbox">
+                                J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
+                            </label>
+                        </div>
+                    </div>
+<%
+    user = model.get_user(ctx)
+    if user is None:
+        return ''
+%>\
+                    <div class="modal-footer">
+                        <button class="btn btn-success" disabled="disabled" name="accept" type="submit">
+                            <span class="glyphicon glyphicon-ok"></span> Accepter
+                        </button>
+                        <button class="btn btn-danger" name="reject" type="button">
+                            <span class="glyphicon glyphicon-remove"></span> Refuser
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
+<%def name="accept_cookies_modal()" filter="trim">
+    <div class="modal fade bs-modal-lg" id="accept-cookies-modal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form method="post" action="/accept-cookies">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Politique d'utilisation des cookies</h4>
+                    </div>
+                    <div class="modal-body">
+                        Pour fonctionner, ce site a besoin d'utiliser des cookies.
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="accept-checkbox">
+                                J'ai pris connaissance des informations ci-dessus
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" disabled="disabled" name="accept" type="submit">
+                            <span class="glyphicon glyphicon-ok"></span> Accepter
+                        </button>
+                        <a class="btn btn-danger" href="${conf['www.url']}">
+                            <span class="glyphicon glyphicon-remove"></span> Refuser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
 <%def name="body_content()" filter="trim">
     <div class="container">
         <%self:breadcrumb/>
@@ -64,84 +140,7 @@ ${conf['app_name']}
 </%def>
 
 
-<%def name="cnil_modal()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="cnil-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <form method="post" action="/">
-                    <div class="modal-header">
-                        <a class="close" href="/">&times;</a>
-                        <h4 class="modal-title">Enregistrement de votre simulation</h4>
-                    </div>
-                    <div class="modal-body">
-                        Text d'exemple à remplacer par le texte concernant la CNIL
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des informations ci-dessus
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="stats-checkbox">
-                                J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
-                            </label>
-                        </div>
-                    </div>
-<%
-    user = model.get_user(ctx)
-    if user is None:
-        return ''
-%>\
-                    <div class="modal-footer">
-                        <button class="btn btn-success btn-accept-cnil" disabled="disabled" name="accept" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> Accepter
-                        </button>
-                        <button class="btn btn-danger" name="reject" type="submit">
-                            <span class="glyphicon glyphicon-remove"></span> Refuser
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</%def>
-
-
 <%def name="container_content()" filter="trim">
-</%def>
-
-
-<%def name="cookie_modal()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="cookie-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <form method="post" action="/accept-cookies">
-                    <div class="modal-header">
-                        <a class="close" href="/">&times;</a>
-                        <h4 class="modal-title">Politique d'utilisation des cookies</h4>
-                    </div>
-                    <div class="modal-body">
-                        Pour fonctionner, ce site a besoin d'utiliser des cookies.
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des informations ci-dessus
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success btn-accept-cookie" disabled="disabled" name="accept" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> Accepter
-                        </button>
-                        <button class="btn btn-danger" name="reject" type="submit">
-                            <span class="glyphicon glyphicon-remove"></span> Refuser
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </%def>
 
 
@@ -233,22 +232,26 @@ ${conf['app_name']}
 % endif
     <script>
 <%
-    user = model.get_user(ctx)
+user = model.get_user(ctx)
+appconfig = {
+    'api': {
+        'urls': {
+            'form': urls.get_url(ctx, 'api/1/form'),
+            'simulate': urls.get_url(ctx, 'api/1/simulate'),
+            },
+        },
+    'auth': {
+        'currentUser': user.email if user is not None else None,
+        'enable': conf['auth.enable'],
+        },
+    }
+if conf['cookie'] not in req.cookies:
+    appconfig['displayAcceptCookiesModal'] = True
+elif user is not None:
+    appconfig['displayAcceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
 %>\
-define('appconfig', {
-    api: {
-        urls: {
-            form: ${urls.get_url(ctx, 'api/1/form') | n, js},
-            simulate: ${urls.get_url(ctx, 'api/1/simulate') | n, js}
-        }
-    },
-    auth: {
-        currentUser: ${user.email if user is not None else None | n, js},
-        enable: ${conf['auth.enable'] | n, js}
-    },
-    cookieModal: ${display_cookie_modal is True if 'display_cookie_modal' in locals() else False | n, js}
-});
-require(['${urls.get_url(ctx, u'js/main.js')}']);
+define('appconfig', ${appconfig | n, js});
+require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
 <%self:page_scripts/>
     </script>
 </%def>
@@ -338,8 +341,11 @@ require(['${urls.get_url(ctx, u'js/main.js')}']);
 <body>
     <%self:topbar/>
     <%self:body_content/>
-    <%self:cnil_modal/>
-    <%self:cookie_modal/>
+% if conf['cookie'] not in req.cookies:
+    <%self:accept_cookies_modal/>
+% elif ctx.session is not None and ctx.session.user is not None:
+    <%self:accept_cnil_conditions_modal user="${ctx.session.user}"/>
+% endif
     <%self:scripts/>
     <%self:trackers/>
 </body>

@@ -43,8 +43,9 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     admin = False
     api_data = None
     api_key = None
-    collection_name = 'accounts'
     description = None
+    cnil_conditions_accepted = None
+    collection_name = 'accounts'
     email = None
     full_name = None
     simulation_id = None
