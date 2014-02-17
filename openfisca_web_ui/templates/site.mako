@@ -34,7 +34,7 @@ import urlparse
 
 from biryani1 import strings
 
-from openfisca_web_ui import conf, model, urls
+from openfisca_web_ui import conf, model, urls, uuidhelpers
 %>
 
 
@@ -231,7 +231,54 @@ ${conf['app_name']}
 
 <%def name="scripts()" filter="trim">
     <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
-    <script src="${urls.get_url(ctx, u'js/requireconfig.js')}"></script>
+    <script>
+<%
+requireconfig = {
+    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
+    'paths': {
+        # Bower components
+        'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
+        'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
+        'd3': urls.get_url(ctx, u'bower/d3/d3'),
+        'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
+        'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
+        'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
+
+        # App
+        'app': urls.get_url(ctx, u'js/app'),
+        'router': urls.get_url(ctx, u'js/router'),
+
+        # Views
+        'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
+        'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
+        'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
+        'appV': urls.get_url(ctx, u'js/views/appV'),
+        'FormV': urls.get_url(ctx, u'js/views/FormV'),
+        'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
+        'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
+        'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
+
+        # Models
+        'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
+        'DetailChartM': urls.get_url(ctx, u'js/models/DetailChartM'),
+        'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
+        'DistributionChartM': urls.get_url(ctx, u'js/models/DistributionChartM'),
+
+        # Modules
+        'auth': urls.get_url(ctx, u'js/auth'),
+        'helpers': urls.get_url(ctx, 'js/modules/helpers')
+        },
+    'shim': {
+        'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
+        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
+        'd3': {'exports': 'd3'},
+        'jquery': {'exports': '$'},
+        'underscore': {'exports': '_'},
+        },
+    }
+%>\
+require.config(${requireconfig | n, js});
+    </script>
 % if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.

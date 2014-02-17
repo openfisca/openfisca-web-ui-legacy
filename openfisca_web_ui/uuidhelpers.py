@@ -26,8 +26,20 @@
 """Helpers to handle uuid"""
 
 
+import subprocess
+import time
 import uuid
+
+from . import conf
 
 
 def generate_uuid():
     return unicode(uuid.uuid4().hex)
+
+
+def get_git_last_commit_sha():
+    return subprocess.check_output(['git', 'rev-parse', '--verify', 'HEAD'])
+
+
+def url_bust():
+    return time.time() if conf['debug'] else get_git_last_commit_sha()
