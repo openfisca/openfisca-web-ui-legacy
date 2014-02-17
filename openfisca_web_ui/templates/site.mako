@@ -309,7 +309,7 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     % endif
                 <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
                 <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
-                <li><a href="/terms">${_('Terms of use')}</a></li>
+                <li><a href="/terms" title="${_('Terms of use')}">${_('CGU')}</a></li>
 </%def>
 
 
