@@ -64,7 +64,6 @@ def accept_cookies(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
-    # If cookie is present (even when session is obsolete), consider that cookies have been accepted by user.
     if conf['cookie'] in req.cookies:
         session = ctx.session
         if session is None:
