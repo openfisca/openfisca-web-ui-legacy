@@ -67,7 +67,7 @@ define([
 				this.chart.model.destroy();
 			},
 			updateDimensions: function() {
-				this.width = this.$el.width();
+				this.width = Math.min(this.$el.width(), 1000);
 				this.height = this.width * 0.66;
 				this.$el.find('svg')
 					.attr('width', this.width)
