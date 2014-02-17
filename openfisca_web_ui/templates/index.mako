@@ -45,7 +45,7 @@ user = model.get_user(ctx)
     </p>
     <p>
         Les données que vous saisissez ne sont pas protégées et pourront être effacées à tout moment.
-        <strong>Ne saississez pas de données personnelles.</strong>
+        <strong>Ne saisissez pas de données personnelles.</strong>
     </p>
     <p>
         Les résultats des simulations peuvent comporter des erreurs.
