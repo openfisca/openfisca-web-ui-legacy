@@ -11,7 +11,6 @@ define([
 			model: new LocatingChartM,
 			
 			initialize: function () {
-				console.log('LocatingChartV initialized');
 			},
 			render: function () {
 

@@ -43,13 +43,13 @@ define([
 				this.title = (_.isString(args.title)) ? args.title: this.title;
 
 				if(!_.isUndefined(args.parent)) this.parent = args.parent;
-				else console.error('Missing parent element arg in AggregateChartV constructor');
+//				else console.error('Missing parent element arg in AggregateChartV constructor');
 
 				if(!_.isUndefined(args.sortKey)) this.sortKey = args.sortKey;
-				else console.error('Missing sortKey (data key) arg in AggregateChartV constructor');
+//				else console.error('Missing sortKey (data key) arg in AggregateChartV constructor');
 
 				if(!_.isUndefined(args.bubbles)) this.bubbles = args.bubbles;
-				else console.error('Missing sortKey (data key) arg in AggregateChartV constructor');
+//				else console.error('Missing sortKey (data key) arg in AggregateChartV constructor');
 
 				this.width = this.parent.width;
 				this.height = this.parent.height;
@@ -84,19 +84,15 @@ define([
 							x: (Math.floor(dataGroupIndex%that.divisions.width)) * (that.width / that.divisions.width),
 							y: (Math.floor(dataGroupIndex/that.divisions.width)) * (that.height / that.divisions.height)
 						};
-						console.log(d);
 					});
 
 					dataGroupIndex++;
 				});
 
 
-				console.log(this.datas);
-
 				// console.log(d3.layout.pack()
 				// 			.nodes(data));
 		
-					console.log(this.datas.positive);
 					var layout = d3.layout.pack()
 							.nodes(this.datas)
 							.size([that.width, that.height])

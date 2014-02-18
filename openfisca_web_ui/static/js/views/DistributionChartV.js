@@ -34,8 +34,6 @@ define([
 			d_bubbles: undefined,
 
 			initialize: function (parent) {
-				console.info('DistributionChartV initialized');
-
 				this.g = parent.svg.append('g').attr('id', 'distribution-chart');
 				this.setElement(this.g[0]);
 
@@ -67,7 +65,6 @@ define([
 					});
 				};
 				defineFictiveDataGroup(this.currentDataSet);
-				console.log(this.currentDataSet);
 			},
 			buildLayoutGlobal: function () {
 				var that = this,
@@ -190,7 +187,6 @@ define([
 
 				/* Texts */
 
-				console.log(this.texts[0].length, nodes.length);
 				this.texts.exit()
 					.transition()
 						.duration(1000)
@@ -226,11 +222,9 @@ define([
 						.duration(1000)
 						.attr('font-size', function (d, i) {
 								var fs = 8 + Math.sqrt(d.r);
-								console.log(fs);
 								return fs+'px';
 						})
 						.attr('opacity', function (d, i) {
-							console.log('transition :',i, 'opacity :', (d.distribution.fictive || !d.children)?0: 0.3)
 							return (d.distribution.fictive || !d.children) ? 0: 0.3;
 						});
 

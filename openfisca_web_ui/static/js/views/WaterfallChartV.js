@@ -45,9 +45,7 @@ define([
 			/* Settings */
 
 			initialize: function (parent) {
-				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
-
-				console.log('WaterfallChartV initialized');
+//				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
 
 				this.g = parent.svg.append('g').attr('id', 'waterfall-chart');
 				this.setElement(this.g[0]);
@@ -180,7 +178,6 @@ define([
 							}
 						});
 
-				console.log(this.bars);
 				this.bars.exit()
 					.transition()
 						.duration(1000)
@@ -283,7 +280,6 @@ define([
 								.attr('font-weight', 'bold')
 								.text(function () { 
 									var v = d3.round(barData.waterfall.endValue);
-									console.log(v);
 									return v
 								});
 
@@ -374,7 +370,6 @@ define([
 					.attr('text-anchor', 'end')
 					.text(function (d) { return d; });
 
-				console.log(this.legendTextObject);
 				this.legendTextObject
 					.exit().transition().duration(50).remove();
 			},

@@ -18,7 +18,6 @@ define([
 			},
 			backendServiceM: backendServiceM,
 			initialize: function () {
-				console.info('DistributionChartM initialized');
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
 			},
 			parse: function () {

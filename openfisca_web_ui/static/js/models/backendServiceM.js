@@ -30,7 +30,6 @@ define([
 					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error(jqXHR, textStatus, errorThrown, jqXHR.responseText);
 				});
 			},
 			saveForm: function(tabName, data, callback) {
@@ -44,14 +43,12 @@ define([
 				.done(function(data) {
 					if (data !== null) {
 						var errorMessage = 'simulate API validation error';
-						console.error(errorMessage, data);
 						alert(errorMessage);
 					}
 					this.set('formData', data);
 					callback();
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('saveForm fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
 				});
 			},
 			simulate: function() {
@@ -62,19 +59,16 @@ define([
 				.done(function(data) {
 					if (data.errors) {
 						var errorMessage = 'simulation error';
-						console.error(errorMessage, data);
 						alert(errorMessage);
 					} else {
 						var result = data.output.value[0];
 						if (_.isUndefined(result)) {
-							console.error('result is undefined', data);
 						} else {
 							this.set('apiData', result);
 						}
 					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('simulate fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
 				});
 			}
 		});

@@ -16,7 +16,6 @@ define([
 			},
 			backendServiceM: backendServiceM,
 			initialize: function () {
-				console.info('DetailChartM initialized');
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
 			},
 			parse: function () {

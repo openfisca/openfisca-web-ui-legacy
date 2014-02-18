@@ -17,7 +17,6 @@ define([
 			height: null,
 			charts: {},
 			initialize: function () {
-				console.info('AppView initialized');
 				this.svg = d3.select(this.el).append('svg');
 				$(window).on('resize', $.proxy(this.updateDimensions, this));
 				this.updateDimensions();
@@ -55,14 +54,13 @@ define([
 						this.chart = new DistributionChartV(this);
 
 						break;
-					default:
-						console.error('_Error : No chart selected when called AppV.render');
+//					default:
+//						console.error('_Error : No chart selected when called AppV.render');
 				};
 				return this;
 			},
 			outTransition: function () {
 				this.$el.find('svg').text('');
-				console.log(this.chart.$el);
 				this.chart.remove();
 				this.chart.model.destroy();
 			},
