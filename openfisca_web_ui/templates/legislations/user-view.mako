@@ -56,8 +56,8 @@ from openfisca_web_ui import model, urls
             node_slug = strings.slugify(node_title)
 %>\
                         <p>
-                            <a href="#" class="collapse-node-toggle" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
-                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
+                                <span></span>
                                 ${node_title}
                             </a>
                         </p>

@@ -24,18 +24,26 @@ article.cgu h2{
     padding-bottom: 0px;
 }
 
-
 .break-word {
     word-wrap: break-word;
 }
 
 .collapse-node {
     border-left: 3px solid #2A6496;
-    padding-left: 10px;
+    padding-left: 15px;
+    margin-left: 6px;
 }
-
 .collapse-node-toggle:hover {
     text-decoration: none;
+}
+.collapse-node-toggle > span:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+}
+.collapse-node-toggle.collapsed > span:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
 .container {
