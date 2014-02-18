@@ -75,12 +75,7 @@ def get(req):
         page_form.root_data_to_str,
         )(user_api_data, state = ctx)
     page_form.fill(korma_values, korma_errors)
-    return templates.render_def(
-        ctx,
-        '/form.mako',
-        'form',
-        page_form = page_form,
-        )
+    return templates.render_def(ctx, '/form.mako', 'form', page_form = page_form)
 
 
 @wsgihelpers.wsgify
@@ -104,8 +99,7 @@ def post(req):
             current_simulation.api_data = user_api_data
             current_simulation.save(safe = True)
             session.user.save(safe = True)
+        return wsgihelpers.no_content(ctx)
     else:
         page_form.fill(korma_inputs, korma_errors)
-    user_api_data['validate'] = True
-    _, simulation_errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
-    return wsgihelpers.respond_json(ctx, simulation_errors)
+        return templates.render_def(ctx, '/form.mako', 'form', page_form = page_form)

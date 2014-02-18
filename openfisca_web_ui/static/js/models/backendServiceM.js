@@ -8,7 +8,7 @@ define([
 		var BackendServiceM = Backbone.Model.extend({
 			defaults: {
 				apiData: {},
-				formData: {}
+				formData: null
 			},
 			events: {},
 			startTabName: 'familles',
@@ -27,7 +27,9 @@ define([
 				})
 				.done(function(data) {
 					this.set('formData', data);
-					callback();
+					if ( ! _.isUndefined(callback)) {
+						callback();
+					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 				});
@@ -40,13 +42,11 @@ define([
 					type: 'POST',
 					url: this.buildFormPath(tabName)
 				})
-				.done(function(data) {
-					if (data !== null) {
-						var errorMessage = 'simulate API validation error';
-						alert(errorMessage);
-					}
+				.done(function(data, textStatus, jqXHR) {
 					this.set('formData', data);
-					callback();
+					if ( ! _.isUndefined(callback)) {
+						callback();
+					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 				});
@@ -58,12 +58,11 @@ define([
 				})
 				.done(function(data) {
 					if (data.errors) {
-						var errorMessage = 'simulation error';
+						var errorMessage = 'Simulation error';
 						alert(errorMessage);
 					} else {
 						var result = data.output.value[0];
-						if (_.isUndefined(result)) {
-						} else {
+						if ( ! _.isUndefined(result)) {
 							this.set('apiData', result);
 						}
 					}

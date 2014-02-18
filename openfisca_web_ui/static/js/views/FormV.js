@@ -40,9 +40,10 @@ define([
 				this.currentTabName = tabName;
 			},
 			render: function () {
-				var data = this.model.get('formData');
-				this.$el.html(data);
-				this.submitTriggered = false;
+				var formData = this.model.get('formData');
+				if ( ! _.isUndefined(formData)) {
+					this.$el.html(formData);
+				}
 				return this;
 			},
 			submit: function(evt) {
@@ -53,7 +54,6 @@ define([
 				if (this.submitTriggered) {
 					return;
 				}
-				this.submitTriggered = true;
 				var $form = this.$el.find('form');
 				var formDataStr = $form.serialize();
 				if (evt.type == 'click') {
@@ -65,13 +65,11 @@ define([
 						formDataStr += '&' + name + '=' + value;
 					}
 				}
-				this.model.saveForm(
-					this.currentTabName,
-					formDataStr,
-					$.proxy(function() {
-						this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
-					}, this)
-				);
+				this.submitTriggered = true;
+				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
+					this.submitTriggered = false;
+					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
+				}, this));
 			}
 		});
 		return FormV;
