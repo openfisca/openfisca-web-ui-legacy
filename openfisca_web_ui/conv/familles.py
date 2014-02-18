@@ -32,6 +32,9 @@ from .. import questions, uuidhelpers
 from . import base
 
 
+roles = ('parents', 'enfants')
+
+
 def api_data_to_page_korma_data(values, state = None):
     if values is None:
         return None, None
@@ -39,7 +42,7 @@ def api_data_to_page_korma_data(values, state = None):
         state = default_state
     new_familles = []
     if values.get('familles') is not None:
-        roles = ('parents', 'enfants')
+        global roles
         for famille_id, famille in values['familles'].iteritems():
             new_famille = {
                 u'id': famille_id,

@@ -31,19 +31,7 @@ from korma.choice import Select
 from korma.group import Group
 from korma.text import Hidden
 
-from .. import uuidhelpers
 from . import base
-
-
-def default_value(familles):
-    from .. import conv
-    return {
-        uuidhelpers.generate_uuid(): conv.base.without_none_values({
-            'declarants': famille.get('parents'),
-            'personnes_a_charge': famille.get('enfants'),
-            })
-        for famille_id, famille in familles.iteritems()
-        }
 
 
 def make_foyers_fiscaux_repeat(prenom_select_choices):

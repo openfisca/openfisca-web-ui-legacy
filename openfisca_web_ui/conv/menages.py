@@ -32,6 +32,7 @@ from .. import uuidhelpers
 from . import base
 
 
+roles = (u'personne_de_reference', u'conjoint', u'enfants', u'autres')
 singleton_roles = (u'personne_de_reference', u'conjoint')
 
 
@@ -42,7 +43,7 @@ def api_data_to_page_korma_data(values, state = None):
         state = default_state
     new_menages = []
     if values.get('menages') is not None:
-        roles = (u'personne_de_reference', u'conjoint', u'enfants', u'autres')
+        global roles, singleton_roles
         for menage_id, menage in values['menages'].iteritems():
             new_menage = {
                 u'id': menage_id,
@@ -65,6 +66,7 @@ def api_data_to_page_korma_data(values, state = None):
 
 def korma_data_to_page_api_data(values, state = None):
     def add_to(new_menage, role, value):
+        global singleton_roles
         if role in singleton_roles:
             assert role not in new_menage
             new_menage[role] = value

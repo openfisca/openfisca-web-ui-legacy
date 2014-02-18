@@ -32,6 +32,9 @@ from .. import uuidhelpers
 from . import base
 
 
+roles = ('declarants', 'personnes_a_charge')
+
+
 def api_data_to_page_korma_data(values, state = None):
     if values is None:
         return None, None
@@ -39,7 +42,7 @@ def api_data_to_page_korma_data(values, state = None):
         state = default_state
     new_foyers_fiscaux = []
     if values.get('foyers_fiscaux') is not None:
-        roles = ('declarants', 'personnes_a_charge')
+        global roles
         for foyer_fiscal_id, foyer_fiscal in values['foyers_fiscaux'].iteritems():
             new_foyer_fiscal = {
                 u'id': foyer_fiscal_id,
