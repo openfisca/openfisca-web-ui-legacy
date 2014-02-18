@@ -13,15 +13,16 @@ define([
                         url: '/login',
                         data: {
                             assertion: assertion
-                        },
-                        success: function(res, status, xhr) {
-                            window.location.href = res.accountUrl;
-                        },
-                        error: function(xhr, status, err) {
-                            navigator.id.logout();
-                            // TODO translate string
-                            alert("Login failure: " + err);
                         }
+                    })
+                    .done(function(data) {
+                        window.location.href = data.accountUrl;
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        console.error('onlogin fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+                        navigator.id.logout();
+                        // TODO translate string
+                        alert("Login failure");
                     });
                 },
                 onlogout: function () {
@@ -30,14 +31,15 @@ define([
                     } else {
                         $.ajax({
                             type: 'POST',
-                            url: '/logout',
-                            success: function(res, status, xhr) {
-                                window.location.reload();
-                            },
-                            error: function(xhr, status, err) {
-                                // TODO translate string
-                                alert("Logout failure: " + err);
-                            }
+                            url: '/logout'
+                        })
+                        .done(function() {
+                            window.location.reload();
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            console.error('onlogout fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+                            // TODO translate string
+                            alert("Logout failure");
                         });
                     }
                 }
