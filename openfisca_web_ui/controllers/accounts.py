@@ -734,10 +734,10 @@ def user_reset(req):
             message = ctx._("You can not delete an account."),
             title = ctx._('Operation denied'),
             )
-
-    if session.user.current_api_data is not None:
-        session.user.current_api_data = None
-        session.user.save(safe = True)
+    current_simulation = session.user.current_simulation
+    if current_simulation is not None:
+        current_simulation.api_data = None
+        current_simulation.save(safe = True)
     return wsgihelpers.redirect(ctx, location = '/')
 
 
