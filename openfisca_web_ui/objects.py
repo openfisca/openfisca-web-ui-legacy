@@ -32,7 +32,7 @@ import datetime
 from bson import objectid
 import pymongo
 
-from . import contexts, conv
+from . import conv
 
 
 # Level-1 Classes
@@ -279,30 +279,28 @@ class Wrapper(object):
 class SmartWrapper(Wrapper):
     draft_id = None
 
-    def after_delete(self, ctx, old_bson):
+    def after_delete(self, old_bson):
         pass
 
-    def after_upsert(self, ctx, old_bson, bson):
+    def after_upsert(self, old_bson, bson):
         pass
 
-    def before_upsert(self, ctx, old_bson, bson):
+    def before_upsert(self, old_bson, bson):
         pass
 
-    def delete(self, ctx, *args, **kwargs):
-        assert isinstance(ctx, contexts.Ctx)
+    def delete(self, *args, **kwargs):
         id = self._id
         assert id is not None
         old_bson = self.get_collection().find_one(id, as_class = collections.OrderedDict)
         if old_bson is not None:
             self.remove(id, *args, **kwargs)
-            self.after_delete(ctx, old_bson)
+            self.after_delete(old_bson)
         del self._id  # Mark as deleted.
         return id
 
-    def save(self, ctx, *args, **kwargs):
+    def save(self, *args, **kwargs):
         # Override the dafault save method to return True when bson has changed and False otherwise.
         # Since to_bson may return a copy of account's __dict__, we need to add _id to original object.
-        assert isinstance(ctx, contexts.Ctx)
         bson = self.to_bson() or {}
         collection = self.get_collection()
         id = bson.get('_id')
@@ -313,11 +311,11 @@ class SmartWrapper(Wrapper):
             if bson == old_bson:
                 return False
         self.draft_id = bson['draft_id'] = objectid.ObjectId()
-        self.before_upsert(ctx, old_bson, bson)
+        self.before_upsert(old_bson, bson)
         collection.save(bson, *args, **kwargs)
         if id is None:
             self._id = bson['_id']
-        self.after_upsert(ctx, old_bson, bson)
+        self.after_upsert(old_bson, bson)
         return True
 
 
@@ -329,7 +327,7 @@ class ActivityStreamWrapper(SmartWrapper):
     updated = None
     words = None
 
-    def before_upsert(self, ctx, old_bson, bson):
+    def before_upsert(self, old_bson, bson):
         self.updated = bson['updated'] = updated = datetime.datetime.utcnow().isoformat() + 'Z'
         if self.published is None:
             self.published = bson['published'] = updated

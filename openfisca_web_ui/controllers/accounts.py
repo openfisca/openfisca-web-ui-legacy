@@ -93,7 +93,7 @@ def accept_cnil_conditions(req):
         user.slug = None
         user.stats_accepted = None
     user.compute_words()
-    user.save(ctx, safe = True)
+    user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
@@ -110,7 +110,7 @@ def admin_delete(req):
             )
 
     if req.method == 'POST':
-        account.delete(ctx, safe = True)
+        account.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Account.get_admin_class_url(ctx))
     return templates.render(ctx, '/accounts/admin-delete.mako', account = account)
 
@@ -172,7 +172,7 @@ def admin_edit(req):
             if account.api_key is None:
                 account.api_key = uuidhelpers.generate_uuid()
             account.compute_words()
-            account.save(ctx, safe = True)
+            account.save(safe = True)
 
             # View account.
             return wsgihelpers.redirect(ctx, location = account.get_admin_url(ctx))
@@ -589,14 +589,14 @@ def login(req):
         user.full_name = verification_data['email']
         user.slug = strings.slugify(user.full_name)
         user.compute_words()
-        user.save(ctx, safe = True)
+        user.save(safe = True)
         session.user_id = user._id
         session.user = user
     else:
         session.user_id = registered_account._id
         session.user = registered_account
     session.token = uuidhelpers.generate_uuid()
-    session.save(ctx, safe = True)
+    session.save(safe = True)
 
     req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
     return wsgihelpers.respond_json(
@@ -612,7 +612,7 @@ def logout(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
     if session is not None:
-        session.delete(ctx, safe = True)
+        session.delete(safe = True)
         ctx.session = None
         if req.cookies.get(conf['cookie']) is not None:
             # Generate new cookie to "save" user agreement on cookie policy
@@ -720,7 +720,7 @@ def user_delete(req):
             )
 
     assert req.method == 'POST'
-    session.user.delete(ctx, safe = True)
+    session.user.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
 
 
@@ -735,9 +735,9 @@ def user_reset(req):
             title = ctx._('Operation denied'),
             )
 
-    if session.user.api_data is not None:
-        session.user.api_data = None
-        session.user.save(ctx, safe = True)
+    if session.user.current_api_data is not None:
+        session.user.current_api_data = None
+        session.user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = '/')
 
 
@@ -752,21 +752,4 @@ def user_view(req):
             message = ctx._("You can not view an account."),
             title = ctx._('Operation denied'),
             )
-
-    if session.user.simulations_id is None:
-        simulation_date = datetime.datetime.strptime(session.user.published.split('.')[0], u'%Y-%m-%dT%H:%M:%S')
-        simulation_title = u'Ma simulation du {} à {}'.format(
-            datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
-            datetime.datetime.strftime(simulation_date, u'%H:%M'),
-            )
-        simulation = model.Simulation(
-            author_id = session.user._id,
-            title = simulation_title,
-            slug = strings.slugify(simulation_title),
-            api_data = session.user.api_data,
-            )
-        simulation.save(ctx, safe = True)
-        session.user.simulations_id = [simulation._id]
-        session.user.current_simulation_id = simulation._id
-        session.user.save(ctx, safe = True)
     return templates.render(ctx, '/accounts/user-view.mako', account = session.user)

@@ -41,7 +41,6 @@ _fields_api_data = None
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     admin = False
-    api_data = None
     api_key = None
     description = None
     cnil_conditions_accepted = None
@@ -76,6 +75,19 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
                 )
             if fragment is not None
             )).split(u'-'))) or None
+
+    @property
+    def current_api_data(self):
+        assert self.current_simulation is not None
+        return self.current_simulation.api_data
+
+    @property
+    def current_simulation(self):
+        return Simulation.find_one(self.current_simulation_id) if self.current_simulation_id is not None else None
+
+    @current_simulation.setter
+    def current_simulation(self, simulation):
+        self.current_simulation_id = simulation._id
 
     @classmethod
     def get_admin_class_full_url(cls, ctx, *path, **query):
@@ -332,7 +344,7 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
                 dict(expiration = {'$lt': datetime.datetime.utcnow()}),
                 as_class = collections.OrderedDict,
                 ):
-            self.delete(ctx)
+            self.delete()
 
     def to_bson(self):
         self_bson = self.__dict__.copy()
@@ -346,8 +358,9 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
         return self._user
 
     @user.setter
-    def user(self, value):
-        self._user = value
+    def user(self, user):
+        self._user = user
+        self.user_id = user._id
 
     @classmethod
     def uuid_to_instance(cls, value, state = None):

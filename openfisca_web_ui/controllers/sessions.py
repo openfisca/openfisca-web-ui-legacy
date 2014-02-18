@@ -50,7 +50,7 @@ def admin_delete(req):
             )
 
     if req.method == 'POST':
-        session.delete(ctx, safe = True)
+        session.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Session.get_admin_class_url(ctx))
     return templates.render(ctx, '/sessions/admin-delete.mako', session = session)
 

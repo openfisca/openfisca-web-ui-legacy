@@ -76,7 +76,7 @@ def admin_delete(req):
             )
 
     if req.method == 'POST':
-        legislation.delete(ctx, safe = True)
+        legislation.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
     return templates.render(ctx, '/legislations/admin-delete.mako', legislation = legislation)
 
@@ -146,7 +146,7 @@ def admin_edit(req):
         if errors is None:
             legislation.set_attributes(**data)
             legislation.compute_words()
-            legislation.save(ctx, safe = True)
+            legislation.save(safe = True)
 
             # View legislation.
             return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
@@ -265,7 +265,7 @@ def admin_new(req):
         if errors is None:
             legislation.set_attributes(**data)
             legislation.compute_words()
-            legislation.save(ctx, safe = True)
+            legislation.save(safe = True)
 
             # View legislation.
             return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))

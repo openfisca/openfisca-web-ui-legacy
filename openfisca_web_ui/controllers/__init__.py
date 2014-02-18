@@ -29,6 +29,8 @@
 import datetime
 import logging
 
+from biryani1 import strings
+
 from .. import contexts, conf, conv, model, pages, templates, urls, uuidhelpers, wsgihelpers
 from . import accounts, forms, legislations, sessions, simulations
 
@@ -49,7 +51,7 @@ def accept_cookies(req):
         session = ctx.session = model.Session()
         session.token = uuidhelpers.generate_uuid()
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-    session.save(ctx, safe = True)
+    session.save(safe = True)
     response = wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
     if ctx.req.cookies.get(conf['cookie']) != session.token:
         response.set_cookie(
@@ -73,11 +75,23 @@ def index(req):
             user = model.Account()
             user._id = uuidhelpers.generate_uuid()
             user.compute_words()
-            session.user_id = user._id
-            user.save(ctx, safe = True)
+            simulation_date = datetime.datetime.utcnow()
+            simulation_title = u'Ma simulation du {} à {}'.format(
+                datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
+                datetime.datetime.strftime(simulation_date, u'%H:%M'),
+                )
+            simulation = model.Simulation(
+                author_id = user._id,
+                title = simulation_title,
+                slug = strings.slugify(simulation_title),
+                )
+            simulation.save(safe = True)
+            user.current_simulation = simulation
+            user.simulations_id = [simulation._id]
+            user.save(safe = True)
             session.user = user
         session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-        session.save(ctx, safe = True)
+        session.save(safe = True)
         if ctx.req.cookies.get(conf['cookie']) != session.token:
             ctx.req.response.set_cookie(
                 conf['cookie'],
@@ -120,7 +134,7 @@ def make_router():
 def simulate(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    user_api_data = session.user.api_data if session is not None and session.user is not None else None
+    user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
     if user_api_data is None:
         user_api_data = {}
     output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)

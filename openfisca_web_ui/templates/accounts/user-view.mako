@@ -56,7 +56,7 @@ from openfisca_web_ui import model, urls
 <%
 user = model.get_user(ctx)
 %>
-    % if user is not None:
+    % if user is not None and user.simulations is not None:
         % for simulation in user.simulations:
         <%self:modals_edit simulation="${simulation}"/>
         % endfor

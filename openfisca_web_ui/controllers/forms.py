@@ -65,7 +65,7 @@ def get(req):
     session = ctx.session
     if session is None:
         session = model.Session()
-    user_api_data = session.user.api_data if session.user is not None else None
+    user_api_data = session.user.current_api_data if session.user is not None else None
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
     page_data = req.urlvars['page_data']
@@ -89,7 +89,7 @@ def post(req):
     session = ctx.session
     if session is None:
         session = model.Session()
-    user_api_data = session.user.api_data if session.user is not None else None
+    user_api_data = session.user.current_api_data if session.user is not None else None
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
     page_data = req.urlvars['page_data']
@@ -100,8 +100,10 @@ def post(req):
         page_api_data = check(page_data['korma_data_to_page_api_data'](korma_data, state = ctx))
         if page_api_data is not None:
             user_api_data.update(page_api_data)
-            session.user.api_data = user_api_data
-            session.user.save(ctx, safe = True)
+            current_simulation = session.user.current_simulation
+            current_simulation.api_data = user_api_data
+            current_simulation.save(safe = True)
+            session.user.save(safe = True)
     else:
         page_form.fill(korma_inputs, korma_errors)
     user_api_data['validate'] = True
