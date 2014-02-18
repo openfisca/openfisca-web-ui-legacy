@@ -25,7 +25,7 @@ define([
 			padding: {
 				top: 50,
 				right: 0,
-				bottom: 30,
+				bottom: 90,
 				left: 50,
 			},
 			margin: {
@@ -46,6 +46,8 @@ define([
 
 			initialize: function (parent) {
 //				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
+
+				// console.log('WaterfallChartV initialized');
 
 				this.g = parent.svg.append('g').attr('id', 'waterfall-chart');
 				this.setElement(this.g[0]);
@@ -88,26 +90,28 @@ define([
 
 				this.updateScales();
 			},
-			updateScales: function (args) { var args = args || {};
-				var that = this,
+			updateScales: function (args) {
+				var args = args || {},
+					that = this,
 					currentDataSetValues = _.map(this.currentDataSet.children, function (data) {
 						return [data.waterfall.startValue, data.waterfall.endValue];
 				});
-				if(!_.isUndefined(args.yValues)) {
-					this.scales = {
-						x: d3.scale.ordinal()
-							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-							.domain(that.currentDataSet.children.map(function(d) {
-								return d.name;
-						})),
-						y: d3.scale.linear()
-							.domain([
-								d3.min(args.yValues),
-								d3.max(args.yValues)
-						]).range([that.height - that.padding.bottom, that.padding.top])
-					};
-				}
-				else {
+
+				// if(!_.isUndefined(args.yValues)) {
+				// 	this.scales = {
+				// 		x: d3.scale.ordinal()
+				// 			.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
+				// 			.domain(that.currentDataSet.children.map(function(d) {
+				// 				return d.name;
+				// 		})),
+				// 		y: d3.scale.linear()
+				// 			.domain([
+				// 				d3.min(args.yValues),
+				// 				d3.max(args.yValues)
+				// 		]).range([that.height - that.padding.bottom, that.padding.top])
+				// 	};
+				// }
+				// else {
 					/* Set scales */
 					this.scales = {
 						x: d3.scale.ordinal()
@@ -121,7 +125,7 @@ define([
 									d3.max(currentDataSetValues, function (d) { return d3.max(d);})
 						]).range([that.height - that.padding.bottom, that.padding.top])
 					};
-				}
+				// }
 
 				var magnitude = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
 				this.prefix = d3.formatPrefix(magnitude);
@@ -305,6 +309,7 @@ define([
 								.attr('font-weight', 'bold')
 								.text(function () { 
 									var v = d3.round(barData.waterfall.endValue);
+									// console.log(v);
 									return v
 								});
 
@@ -387,6 +392,19 @@ define([
 				this.legendTextObject = this.g.selectAll('.legendText_y')
 					.data(legendTextSplited)
 
+				this.g.selectAll('.x-axis .tick text')
+					.attr('transform', function (d) {
+						var el = d3.select(this),
+							_dim = this.getBBox();
+
+						var deltax = _dim.width/2,
+							x = _dim.x+_dim.width,
+							y = _dim.y;
+
+						return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
+				});
+
+
 				this.legendTextObject
 					.enter().append('svg:text')
 					.attr('class', 'legendText_y')
@@ -434,6 +452,19 @@ define([
 							return 'translate(0,' + pos + ')';
 						})
 						.call(this.xAxis);
+
+
+				this.g.selectAll('.x-axis .tick text')
+					.attr('transform', function (d) {
+						var el = d3.select(this),
+							_dim = this.getBBox();
+
+						var deltax = _dim.width/2,
+							x = _dim.x+_dim.width,
+							y = _dim.y;
+
+						return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
+				});
 
 				var legendTextSplited = this.legendText.split('\n');
 				this.legendTextObject = this.g.selectAll('.legendText_y')
