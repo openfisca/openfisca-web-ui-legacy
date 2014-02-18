@@ -142,6 +142,7 @@ def edit(req):
             session.user.save(safe = True)
         elif data['simulation']._id not in session.user.simulations_id:
             session.user.simulations_id.append(data['simulation']._id)
+            session.user.current_simulation_id = data['simulation']._id
             session.user.save(safe = True)
         return wsgihelpers.redirect(ctx, location = '/')
 
