@@ -29,7 +29,7 @@
 from biryani1.baseconv import check, pipe
 from formencode import variabledecode
 
-from .. import contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
+from .. import contexts, model, questions, templates, uuidhelpers, wsgihelpers
 
 
 def build_page_form(ctx, page_data, user_api_data):
