@@ -56,12 +56,11 @@ define([
 				this.listenTo(this.model, 'change:groupedDatasAll', this.render);
 				if(!_.isEmpty(this.model.get('groupedDatasAll'))) this.render();
 			},
-			render: function () {
+			render: function (args) {
 
-				this.setData(this.model.get('groupedDatasAll'));
-
-				this.updateScales();
-
+				var args = args || {};
+				if(args.getDatas || _.isUndefined(args.getDatas)) this.setData(this.model.get('groupedDatasAll'));
+				
 				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) this.buildLegend();
 				else this.updateLegend();
 
@@ -86,29 +85,45 @@ define([
 					};
 					baseHeight += d.value;
 				});
+
+				this.updateScales();
 			},
-			updateScales: function () {
+			updateScales: function (args) { var args = args || {};
 				var that = this,
-					currentDataSetValues = _.map(this.currentDataSet.children, function (data) {
+					currentDataSetValues = (_.map(this.currentDataSet.children, function (data) {
 						return [data.waterfall.startValue, data.waterfall.endValue];
 				});
-
-				/* Set scales */
-				this.scales = {
-					x: d3.scale.ordinal()
-						.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-						.domain(that.currentDataSet.children.map(function(d) {
-							return d.name;
-					})),
-					y: d3.scale.linear()
+				if(!_.isUndefined(args.yValues)) {
+					this.scales = {
+						x: d3.scale.ordinal()
+							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
+							.domain(that.currentDataSet.children.map(function(d) {
+								return d.name;
+						})),
+						y: d3.scale.linear()
 							.domain([
-								d3.min(currentDataSetValues, function (d) { return d3.min(d);}),
-								d3.max(currentDataSetValues, function (d) { return d3.max(d);})
-					]).range([that.height - that.padding.bottom, that.padding.top])
-				};
+								d3.min(args.yValues),
+								d3.max(args.yValues)
+						]).range([that.height - that.padding.bottom, that.padding.top])
+					};
+				}
+				else {
+					/* Set scales */
+					this.scales = {
+						x: d3.scale.ordinal()
+							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
+							.domain(that.currentDataSet.children.map(function(d) {
+								return d.name;
+						})),
+						y: d3.scale.linear()
+								.domain([
+									d3.min(currentDataSetValues, function (d) { return d3.min(d);}),
+									d3.max(currentDataSetValues, function (d) { return d3.max(d);})
+						]).range([that.height - that.padding.bottom, that.padding.top])
+					};
+				}
 
 				var magnitude = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
-
 				this.prefix = d3.formatPrefix(magnitude);
 				switch(this.prefix.symbol) {
 					case 'G':
@@ -177,10 +192,10 @@ define([
 								that.activeBars.on('mouseover', null);
 								that.activeBars.on('mouseout', null);
 								that.activeBars.remove();
-								that.evolutionLabel.transition().duration(100).remove();
-								that.incomeLine.transition().duration(100).remove();
-								that.incomeText.transition().duration(100).remove();
 							}
+							if(!_.isUndefined(that.evolutionLabel)) that.evolutionLabel.transition().duration(100).remove();
+							if(!_.isUndefined(that.incomeLine)) that.incomeLine.transition().duration(100).remove();
+							if(!_.isUndefined(that.incomeText)) that.incomeText.transition().duration(100).remove();
 						})
 						.each('end',function (d, i) {
 							if(!_.isUndefined(args.endTransitionCallback) && i==0) {
@@ -325,6 +340,9 @@ define([
 								.transition().duration(100)
 								.attr('opacity', 0)
 								.remove();
+						})
+						.on('click', function (d) {
+							that.updateScales({ yValues: [barAttrs.y, barAttrs.y+barAttrs]})
 						});
 
 				this.activeBars.moveToFront();
