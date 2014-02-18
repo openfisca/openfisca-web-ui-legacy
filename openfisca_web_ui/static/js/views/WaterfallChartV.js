@@ -347,7 +347,7 @@ define([
 								.remove();
 						})
 						.on('click', function (d) {
-							that.updateScales({ yValues: [barAttrs.y, barAttrs.y+barAttrs]})
+//							that.updateScales({ yValues: [barAttrs.y, barAttrs.y+barAttrs]})
 						});
 
 				this.activeBars.moveToFront();
