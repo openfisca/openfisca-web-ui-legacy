@@ -89,22 +89,26 @@ from openfisca_web_ui import conf, model, urls, uuidhelpers
                     </div>
                     <div class="modal-body">
                         <p>
-                            Ce simulateur vous permet d'obtenir une estimation de votre situation mais ne vous permet en
-                            aucun cas de faire valoir un droit.
+                            Le simulateur Openfisca permet d'obtenir une estimation de la situation socio-fiscale de
+                            votre ménage.<br>
+                            La simulation est effectuée à partir des textes juridiques applicables et des éléments
+                            saisis en ligne. Elle ne constitue en aucune façon une déclaration de revenus.
                         </p>
                         <p>
-                            Pour fonctionner, ce site a besoin d'utiliser des cookies.
-                        </p>
-                        <p>
-                            Vous pouvez consulter <a target="_blank" href="/terms">les conditions
-                            générales d'utilisation ici</a>.
+                            Les montants, obtenus à partir des <strong>renseignements inscrits sous votre seule
+                            responsabilité, n'ont qu’une valeur indicative</strong>. Ainsi, les montants de vos impôts
+                            calculés lors de votre déclaration de revenus peuvent être différents.
                         </p>
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des conditions générales d'utilisation
+                                J'ai pris connaissance des
+                                <a target="_blank" href="/terms">conditions générales d'utilisation</a>.
                             </label>
                         </div>
+                        <p class="cookie-text">
+                            Pour fonctionner, ce site a besoin d'utiliser des cookies.
+                        </p>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-success" disabled="disabled" name="accept" type="submit">

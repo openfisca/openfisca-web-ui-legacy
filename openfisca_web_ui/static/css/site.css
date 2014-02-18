@@ -13,6 +13,18 @@ article.cgu h2{
     font-size: 1.6em;
 }
 
+#accept-cookies-modal .cookie-text {
+    font-size: 0.9em;
+    color: #999;
+    padding-top: 20px;
+    margin-bottom: 20px;
+}
+
+#accept-cookies-modal .modal-body {
+    padding-bottom: 0px;
+}
+
+
 .break-word {
     word-wrap: break-word;
 }
