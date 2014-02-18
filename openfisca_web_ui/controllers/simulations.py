@@ -26,6 +26,8 @@
 """Controllers for simulations"""
 
 
+import datetime
+
 from biryani1 import strings
 
 from .. import contexts, conv, model, urls, wsgihelpers
@@ -52,11 +54,26 @@ def delete(req):
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
     session.user.simulations_id.remove(simulation._id)
-    if session.user.current_simulation_id == simulation._id:
-        session.user.current_simulation_id = session.user.simulations_id[0] \
-            if len(session.user.simulations_id) > 0 else None
+    if len(session.user.simulations_id) == 0:
+        simulation.delete(safe = True)
+        simulation_date = datetime.datetime.utcnow()
+        simulation_title = u'Ma simulation du {} à {}'.format(
+            datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
+            datetime.datetime.strftime(simulation_date, u'%H:%M'),
+            )
+        simulation = model.Simulation(
+            author_id = session.user._id,
+            title = simulation_title,
+            slug = strings.slugify(simulation_title),
+            )
+        simulation.save(safe = True)
+        session.user.current_simulation = simulation
+        session.user.simulations_id = [simulation._id]
+    elif session.user.current_simulation_id == simulation._id:
+        session.user.current_simulation = simulation
+        session.user.current_simulation = session.user.simulations[0]
+        simulation.delete(safe = True)
     session.user.save(safe = True)
-    simulation.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
 
