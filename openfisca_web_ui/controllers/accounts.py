@@ -746,10 +746,6 @@ def user_view(req):
     ctx = contexts.Ctx(req)
 
     session = ctx.session
-    if session is None or session.user is None:
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("View forbidden"),
-            message = ctx._("You can not view an account."),
-            title = ctx._('Operation denied'),
-            )
+    if session is None or session.user is None or session.user.email is None:
+        return wsgihelpers.redirect(ctx, location = '/')
     return templates.render(ctx, '/accounts/user-view.mako', account = session.user)
