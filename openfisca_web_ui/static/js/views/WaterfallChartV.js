@@ -90,7 +90,7 @@ define([
 			},
 			updateScales: function (args) { var args = args || {};
 				var that = this,
-					currentDataSetValues = (_.map(this.currentDataSet.children, function (data) {
+					currentDataSetValues = _.map(this.currentDataSet.children, function (data) {
 						return [data.waterfall.startValue, data.waterfall.endValue];
 				});
 				if(!_.isUndefined(args.yValues)) {
