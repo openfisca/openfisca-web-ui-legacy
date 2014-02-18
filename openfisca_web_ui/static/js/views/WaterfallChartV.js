@@ -172,6 +172,16 @@ define([
 							if(d.value > 0) return '#5cb85c';
 							else return '#C11137';
 						})
+						.each('start', function (d) {
+							if(!_.isUndefined(that.activeBars)) {
+								that.activeBars.on('mouseover', null);
+								that.activeBars.on('mouseout', null);
+								that.activeBars.remove();
+								that.evolutionLabel.transition().duration(100).remove();
+								that.incomeLine.transition().duration(100).remove();
+								that.incomeText.transition().duration(100).remove();
+							}
+						})
 						.each('end',function (d, i) {
 							if(!_.isUndefined(args.endTransitionCallback) && i==0) {
 								args.endTransitionCallback.call(that);
