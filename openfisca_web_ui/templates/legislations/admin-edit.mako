@@ -99,16 +99,40 @@ from openfisca_web_ui import conf, model, urls
                     <span class="help-block">${error}</span>
     % endif
                 </div>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#legislation-url">${_(u"URL")}</a></li>
+                    <li><a data-toggle="tab" href="#legislation-json">${_(u"Source")}</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="active tab-pane" id="legislation-url">
+<%
+    error = errors.get('url') if errors is not None else None
+%>\
+                        <div class="form-group${' has-error' if error else ''}">
+                            <label for="url">${_("Legislation's URL")}</label>
+                            <input class="form-control" id="url" name="url" type="text" value="${inputs['url'] or ''}">
+    % if error:
+                            <pre class="help-block alert-danger">${error | n, js, h}</pre>
+    % endif
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="legislation-json">
 <%
     error = errors.get('json') if errors is not None else None
 %>\
-                <div class="form-group${' has-error' if error else ''}">
-                    <label for="json">${_("Legislation's JSON")}</label>
-                    <textarea class="form-control" id="json" name="json">${
-                        inputs['json'] or '' | n, js, h}</textarea>
+                        <div class="form-group${' has-error' if error else ''}">
+                            <label for="json">${_("Legislation's JSON")}</label>
+        % if inputs['json']:
+                            <textarea class="form-control" id="json" name="json">${
+                                inputs['json'] | n, js, h}</textarea>
+        % else:
+                            <textarea class="form-control" id="json" name="json"></textarea>
+        % endif
     % if error:
-                    <pre class="help-block alert-danger">${error | n, js, h}</pre>
+                            <pre class="help-block alert-danger">${error | n, js, h}</pre>
     % endif
+                        </div>
+                    </div>
                 </div>
 </%def>
 

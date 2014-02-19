@@ -42,23 +42,26 @@ from biryani1.baseconv import cleanup_text, input_to_slug, not_none, pipe
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
-inputs_to_legislation_data = conv.struct(
-    dict(
-        author_id = conv.base.input_to_uuid,
-        datetime_begin = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
-        datetime_end = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
-        description = cleanup_text,
-        json = pipe(
-            conv.base.cleanup_line,
-            conv.make_input_to_json(),
-            conv.not_none,
+inputs_to_legislation_data = conv.pipe(
+    conv.struct(
+        dict(
+            author_id = conv.base.input_to_uuid,
+            datetime_begin = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
+            datetime_end = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
+            description = cleanup_text,
+            json = pipe(
+                conv.cleanup_line,
+                conv.make_input_to_json(),
+                ),
+            url = conv.make_input_to_url(full = True),
+            title = conv.pipe(
+                conv.base.cleanup_line,
+                not_none,
+                ),
             ),
-        title = conv.pipe(
-            conv.base.cleanup_line,
-            not_none,
-            ),
+        default = 'drop',
         ),
-    default = 'drop',
+    conv.test(lambda struct: struct.get('url') is not None or struct.get('json') is not None),
     )
 log = logging.getLogger(__name__)
 
@@ -113,7 +116,7 @@ def admin_edit(req):
                 )(data['title'], state = ctx)
             if error is not None:
                 errors = dict(title = error)
-        if errors is None:
+        if errors is None and data['json'] is not None:
             try:
                 response = requests.post(
                     conf['api.urls.legislations'],
@@ -232,7 +235,7 @@ def admin_new(req):
                 )(data['title'], state = ctx)
             if error is not None:
                 errors = dict(title = error)
-        if errors is None:
+        if errors is None and data['json'] is not None:
             try:
                 response = requests.post(
                     conf['api.urls.legislations'],
@@ -339,6 +342,7 @@ def extract_legislation_inputs_from_params(ctx, params = None):
         description = params.get('description'),
         json = params.get('json'),
         title = params.get('title'),
+        url = params.get('url'),
         )
 
 
