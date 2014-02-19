@@ -8,56 +8,54 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-02-17 17:03+0100\n"
+"POT-Creation-Date: 2014-02-19 18:38+0100\n"
 "PO-Revision-Date: 2014-02-17 17:04+0100\n"
 "Last-Translator: Romain Soufflet <romain.soufflet@data.gouv.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"X-Generator: Poedit 1.5.4\n"
-"Language: FR\n"
 
-#: openfisca_web_ui/model.py:131 openfisca_web_ui/model.py:444
+#: openfisca_web_ui/model.py:143 openfisca_web_ui/model.py:457
 msgid "No account with ID, slug or words: {0}"
 msgstr ""
-"Aucun compte avec l'ID, le nom simplifié ou indexé par les mots suivant n'a "
-"été trouvé : {0}"
+"Aucun compte avec l'ID, le nom simplifié ou indexé par les mots suivant "
+"n'a été trouvé : {0}"
 
-#: openfisca_web_ui/model.py:133 openfisca_web_ui/model.py:446
+#: openfisca_web_ui/model.py:145 openfisca_web_ui/model.py:459
 msgid "Too much accounts with words: {0}"
 msgstr "Trop de compte sont associés au nom simplifié {0}"
 
-#: openfisca_web_ui/model.py:279
+#: openfisca_web_ui/model.py:291
 msgid "No legislation with ID, slug or words: {0}"
 msgstr "Aucune législation n'a été trouvée avec cet ID ou ce nom : {0}"
 
-#: openfisca_web_ui/model.py:281
+#: openfisca_web_ui/model.py:293
 msgid "Too much legislations with words: {0}"
 msgstr "Trop de législations avec les mots : {0}"
 
-#: openfisca_web_ui/model.py:326
+#: openfisca_web_ui/model.py:338
 msgid "Session {0}"
 msgstr "Session {0}"
 
-#: openfisca_web_ui/model.py:327
+#: openfisca_web_ui/model.py:339
 #: openfisca_web_ui/templates/sessions/admin-index.mako:47
 msgid "Session {0} of {1}"
 msgstr "Session {0} sur {1}"
 
-#: openfisca_web_ui/model.py:364
+#: openfisca_web_ui/model.py:377
 msgid "No session with UUID {0}"
 msgstr "Aucune session de jeton {0}"
 
-#: openfisca_web_ui/model.py:519
+#: openfisca_web_ui/model.py:532
 msgid "You must be authenticated as an administrator to access this page."
 msgstr ""
-"Vous devez être authentifié en tant qu'administrateur pour accéder à cette "
-"page."
+"Vous devez être authentifié en tant qu'administrateur pour accéder à "
+"cette page."
 
-#: openfisca_web_ui/model.py:526
+#: openfisca_web_ui/model.py:539
 msgid "You must be an administrator to access this page."
 msgstr "Vous devez être un administrateur pour accéder à cette page."
 
@@ -132,16 +130,14 @@ msgstr "Vous devez être un administrateur pour supprimer un compte."
 #: openfisca_web_ui/controllers/accounts.py:240
 #: openfisca_web_ui/controllers/accounts.py:719
 #: openfisca_web_ui/controllers/accounts.py:735
-#: openfisca_web_ui/controllers/accounts.py:753
 #: openfisca_web_ui/controllers/legislations.py:75
 #: openfisca_web_ui/controllers/legislations.py:93
 #: openfisca_web_ui/controllers/legislations.py:216
 #: openfisca_web_ui/controllers/sessions.py:49
-#: openfisca_web_ui/controllers/simulations.py:44
-#: openfisca_web_ui/controllers/simulations.py:72
-#: openfisca_web_ui/controllers/simulations.py:107
-#: openfisca_web_ui/controllers/simulations.py:178
-#: openfisca_web_ui/controllers/simulations.py:226
+#: openfisca_web_ui/controllers/simulations.py:46
+#: openfisca_web_ui/controllers/simulations.py:89
+#: openfisca_web_ui/controllers/simulations.py:124
+#: openfisca_web_ui/controllers/simulations.py:196
 msgid "Operation denied"
 msgstr "Opération refusée"
 
@@ -164,8 +160,8 @@ msgstr "Un compte avec le même nom existe déjà."
 
 #: openfisca_web_ui/controllers/accounts.py:168
 msgid ""
-"You can't promote this account to be an administrator, because you aren't an "
-"administrator yourself."
+"You can't promote this account to be an administrator, because you aren't"
+" an administrator yourself."
 msgstr ""
 "Vous ne pouvez pas donner les droits administrateur car vous n'êtes pas "
 "administrateur vous même."
@@ -176,9 +172,7 @@ msgid "Account search error: {}"
 msgstr "Erreur dans la recherche de comptes : {}"
 
 #: openfisca_web_ui/controllers/accounts.py:238
-#: openfisca_web_ui/controllers/accounts.py:751
-#: openfisca_web_ui/controllers/simulations.py:70
-#: openfisca_web_ui/controllers/simulations.py:176
+#: openfisca_web_ui/controllers/simulations.py:87
 msgid "View forbidden"
 msgstr "Visualisation interdite"
 
@@ -209,12 +203,6 @@ msgstr "Suppression non autorisée"
 #: openfisca_web_ui/controllers/accounts.py:734
 msgid "You can not delete an account."
 msgstr "Vous ne pouvez pas supprimer un compte."
-
-#: openfisca_web_ui/controllers/accounts.py:752
-#: openfisca_web_ui/controllers/simulations.py:71
-#: openfisca_web_ui/controllers/simulations.py:177
-msgid "You can not view an account."
-msgstr "Vous ne pouvez pas visualiser un compte."
 
 #: openfisca_web_ui/controllers/legislations.py:74
 msgid "You must  be an administrator to delete a legislation."
@@ -266,37 +254,52 @@ msgstr "Erreur de numéro de page : {}"
 msgid "Session Error: {}"
 msgstr "Erreur de session : {}"
 
-#: openfisca_web_ui/controllers/simulations.py:42
-#: openfisca_web_ui/controllers/simulations.py:105
-#: openfisca_web_ui/controllers/simulations.py:224
+#: openfisca_web_ui/controllers/simulations.py:44
+#: openfisca_web_ui/controllers/simulations.py:122
+#: openfisca_web_ui/controllers/simulations.py:194
 msgid "User simulations forbidden"
 msgstr "Accès interdit aux simulations utilisateurs"
 
-#: openfisca_web_ui/controllers/simulations.py:43
-#: openfisca_web_ui/controllers/simulations.py:106
-#: openfisca_web_ui/controllers/simulations.py:225
+#: openfisca_web_ui/controllers/simulations.py:45
+#: openfisca_web_ui/controllers/simulations.py:123
+#: openfisca_web_ui/controllers/simulations.py:195
 msgid "You can not view this simulation."
 msgstr "Vous ne pouvez pas voir cette simulation."
 
-#: openfisca_web_ui/controllers/simulations.py:52
-#: openfisca_web_ui/controllers/simulations.py:80
-#: openfisca_web_ui/controllers/simulations.py:149
-#: openfisca_web_ui/controllers/simulations.py:234
+#: openfisca_web_ui/controllers/simulations.py:54
+#: openfisca_web_ui/controllers/simulations.py:97
+#: openfisca_web_ui/controllers/simulations.py:167
+#: openfisca_web_ui/controllers/simulations.py:204
 msgid "Simulation {} not found"
 msgstr "Simulation {} non trouvée"
+
+#: openfisca_web_ui/controllers/simulations.py:88
+msgid "You can not view an account."
+msgstr "Vous ne pouvez pas visualiser un compte."
 
 #: openfisca_web_ui/conv/base.py:69
 msgid "Invalid UUID format"
 msgstr "Format d'UUID incorrect"
 
-#: openfisca_web_ui/conv/simulations.py:64
+#: openfisca_web_ui/conv/simulations.py:66
 msgid "Unable to connect to simulate API, url: {}"
 msgstr "Impossible de contacter l'API \"simulate\", url : {}"
 
-#: openfisca_web_ui/conv/simulations.py:70
+#: openfisca_web_ui/conv/simulations.py:72
 msgid "Unable to decode JSON data of simulate API response"
-msgstr ""
-"Impossible de décoder les données JSON retournées par l'API \"simulate\""
+msgstr "Impossible de décoder les données JSON retournées par l'API \"simulate\""
+
+#: openfisca_web_ui/questions/base.py:142
+msgid "Close"
+msgstr "Fermer"
+
+#: openfisca_web_ui/questions/base.py:143
+msgid "Validate"
+msgstr "Valider"
+
+#: openfisca_web_ui/questions/base.py:148
+msgid "Simulate"
+msgstr "Simuler"
 
 #: openfisca_web_ui/templates/form.mako:42
 msgid "Save this simulation"
@@ -318,30 +321,30 @@ msgid "Reset"
 msgstr "Remise à zero"
 
 #: openfisca_web_ui/templates/form.mako:62
-#: openfisca_web_ui/templates/accounts/user-view.mako:87
-#: openfisca_web_ui/templates/accounts/user-view.mako:107
+#: openfisca_web_ui/templates/accounts/user-view.mako:94
+#: openfisca_web_ui/templates/accounts/user-view.mako:114
 msgid "Yes"
 msgstr "Oui"
 
 #: openfisca_web_ui/templates/form.mako:64
-#: openfisca_web_ui/templates/accounts/user-view.mako:88
-#: openfisca_web_ui/templates/accounts/user-view.mako:108
+#: openfisca_web_ui/templates/accounts/user-view.mako:95
+#: openfisca_web_ui/templates/accounts/user-view.mako:115
 msgid "No"
 msgstr "Non"
 
-#: openfisca_web_ui/templates/site.mako:146
+#: openfisca_web_ui/templates/site.mako:150
 msgid "Home"
 msgstr "Accueil"
 
-#: openfisca_web_ui/templates/site.mako:163
+#: openfisca_web_ui/templates/site.mako:167
 msgid "Error!"
 msgstr "Erreur !"
 
-#: openfisca_web_ui/templates/site.mako:174
+#: openfisca_web_ui/templates/site.mako:178
 msgid "Please, correct the informations below."
 msgstr "Veuillez corriger les informations ci-dessous."
 
-#: openfisca_web_ui/templates/site.mako:190
+#: openfisca_web_ui/templates/site.mako:194
 #: openfisca_web_ui/templates/accounts/admin-view.mako:65
 #: openfisca_web_ui/templates/accounts/admin-view.mako:74
 #: openfisca_web_ui/templates/accounts/admin-view.mako:83
@@ -367,27 +370,27 @@ msgstr "Veuillez corriger les informations ci-dessous."
 msgid "{0}:"
 msgstr "{0} :"
 
-#: openfisca_web_ui/templates/site.mako:190
+#: openfisca_web_ui/templates/site.mako:194
 msgid "Software"
 msgstr "Logiciel"
 
-#: openfisca_web_ui/templates/site.mako:193
+#: openfisca_web_ui/templates/site.mako:197
 msgid "Copyright © {} OpenFisca Team"
 msgstr "Copyright © {} OpenFisca Team"
 
-#: openfisca_web_ui/templates/site.mako:198
+#: openfisca_web_ui/templates/site.mako:202
 msgid "GNU Affero General Public License"
 msgstr "Licence publique générale GNU Affero"
 
-#: openfisca_web_ui/templates/site.mako:276
+#: openfisca_web_ui/templates/site.mako:327
 msgid "Toggle navigation"
 msgstr "Basculer la navigation"
 
-#: openfisca_web_ui/templates/site.mako:296
+#: openfisca_web_ui/templates/site.mako:347
 msgid "Administration"
 msgstr "Administration"
 
-#: openfisca_web_ui/templates/site.mako:298
+#: openfisca_web_ui/templates/site.mako:349
 #: openfisca_web_ui/templates/accounts/admin-delete.mako:38
 #: openfisca_web_ui/templates/accounts/admin-edit.mako:37
 #: openfisca_web_ui/templates/accounts/admin-index.mako:37
@@ -396,8 +399,8 @@ msgstr "Administration"
 msgid "Accounts"
 msgstr "Comptes"
 
-#: openfisca_web_ui/templates/site.mako:299
-#: openfisca_web_ui/templates/site.mako:310
+#: openfisca_web_ui/templates/site.mako:350
+#: openfisca_web_ui/templates/site.mako:361
 #: openfisca_web_ui/templates/legislations/admin-delete.mako:38
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:39
 #: openfisca_web_ui/templates/legislations/admin-index.mako:37
@@ -408,31 +411,36 @@ msgstr "Comptes"
 msgid "Legislations"
 msgstr "Législations"
 
-#: openfisca_web_ui/templates/site.mako:308
+#: openfisca_web_ui/templates/site.mako:359
+#: openfisca_web_ui/templates/accounts/user-view.mako:44
 msgid "My simulations"
 msgstr "Mes simulations"
 
-#: openfisca_web_ui/templates/site.mako:311
+#: openfisca_web_ui/templates/site.mako:362
 msgid "About"
 msgstr "À propos"
 
-#: openfisca_web_ui/templates/site.mako:312
+#: openfisca_web_ui/templates/site.mako:363
+msgid "API"
+msgstr "API"
+
+#: openfisca_web_ui/templates/site.mako:364
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
-#: openfisca_web_ui/templates/site.mako:312
+#: openfisca_web_ui/templates/site.mako:364
 msgid "CGU"
 msgstr "CGU"
 
-#: openfisca_web_ui/templates/site.mako:323
+#: openfisca_web_ui/templates/site.mako:375
 msgid "Access to your account and your simulations"
 msgstr "Accéder à votre compte et à vos simulations"
 
-#: openfisca_web_ui/templates/site.mako:324
+#: openfisca_web_ui/templates/site.mako:376
 msgid "Sign in"
 msgstr "Connexion"
 
-#: openfisca_web_ui/templates/site.mako:329
+#: openfisca_web_ui/templates/site.mako:381
 msgid "Sign out"
 msgstr "Déconnexion"
 
@@ -455,7 +463,7 @@ msgstr "Administration"
 #: openfisca_web_ui/templates/accounts/admin-delete.mako:49
 #: openfisca_web_ui/templates/accounts/admin-delete.mako:55
 #: openfisca_web_ui/templates/accounts/admin-view.mako:49
-#: openfisca_web_ui/templates/accounts/user-view.mako:183
+#: openfisca_web_ui/templates/accounts/user-view.mako:199
 #: openfisca_web_ui/templates/legislations/admin-delete.mako:40
 #: openfisca_web_ui/templates/legislations/admin-delete.mako:49
 #: openfisca_web_ui/templates/legislations/admin-delete.mako:55
@@ -474,7 +482,7 @@ msgid "Deletion of {}"
 msgstr "Suppression de {}"
 
 #: openfisca_web_ui/templates/accounts/admin-delete.mako:46
-#: openfisca_web_ui/templates/accounts/user-view.mako:103
+#: openfisca_web_ui/templates/accounts/user-view.mako:110
 msgid "Are you sure that you want to delete this account?"
 msgstr "Êtes-vous sûr de vouloir supprimer ce compte ?"
 
@@ -482,7 +490,7 @@ msgstr "Êtes-vous sûr de vouloir supprimer ce compte ?"
 #: openfisca_web_ui/templates/accounts/admin-edit.mako:101
 #: openfisca_web_ui/templates/accounts/admin-view.mako:48
 #: openfisca_web_ui/templates/accounts/user-edit.mako:96
-#: openfisca_web_ui/templates/accounts/user-view.mako:179
+#: openfisca_web_ui/templates/accounts/user-view.mako:194
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:41
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:121
 #: openfisca_web_ui/templates/legislations/admin-view.mako:55
@@ -598,15 +606,31 @@ msgstr "Clé d'API"
 msgid "Published"
 msgstr "Publié"
 
-#: openfisca_web_ui/templates/accounts/user-view.mako:43
+#: openfisca_web_ui/templates/accounts/user-view.mako:40
+msgid "My account"
+msgstr "Mon compte"
+
+#: openfisca_web_ui/templates/accounts/user-view.mako:49
 msgid "New simulation"
 msgstr "Nouvelle simulation"
 
-#: openfisca_web_ui/templates/accounts/user-view.mako:47
+#: openfisca_web_ui/templates/accounts/user-view.mako:55
 msgid "Delete account"
 msgstr "Supprimer ce compte"
 
-#: openfisca_web_ui/templates/accounts/user-view.mako:180
+#: openfisca_web_ui/templates/accounts/user-view.mako:131
+msgid "New Simulation"
+msgstr "Nouvelle simulation"
+
+#: openfisca_web_ui/templates/accounts/user-view.mako:133
+msgid "Edit Simulation"
+msgstr "Éditer la simulation"
+
+#: openfisca_web_ui/templates/accounts/user-view.mako:192
+msgid "Use"
+msgstr "Utiliser"
+
+#: openfisca_web_ui/templates/accounts/user-view.mako:196
 msgid "Duplicate"
 msgstr "Dupliquer"
 
@@ -843,3 +867,4 @@ msgstr "Identifiant utilisateur"
 
 #~ msgid "You must  be an administrator reset an account."
 #~ msgstr "Vous devez être un administrateur pour remettre à zero un compte."
+
