@@ -10,7 +10,7 @@ define([
 			currentTabName: null,
 			el: '#form-wrapper',
 			events: {
-				'change :input': 'submit',
+//				'change :input': 'submit',
 				'click :input[type="submit"]': 'submit',
 				'click .nav-tabs a': 'changeTab',
 				'keypress :input': 'submit'
@@ -68,7 +68,8 @@ define([
 				this.submitTriggered = true;
 				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
 					this.submitTriggered = false;
-					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
+//					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
+					this.model.simulate();
 				}, this));
 			}
 		});

@@ -54,7 +54,9 @@ from openfisca_web_ui import model, urls
     % if user is not None and user.simulations is not None and len(user.simulations) > 1:
         % for simulation in user.simulations:
             % if simulation._id == user.current_simulation_id:
-        <h1>${simulation.title}</h1>
+        <div class="page-header">
+            <h1>${simulation.title}</h1>
+        </div>
             % endif
         % endfor
     % endif

@@ -111,49 +111,88 @@ Repeat = lambda add_button_label = u'Ajouter', *args, **kwargs: \
 
 
 def make_categories_groups(entity):
-    from .. import model
+    from .. import contexts, model
+
+    ctx = contexts.Ctx()
+
+    class ModalGroup(Group):
+        _outer_html_template = u'''
+<a href="#" class="list-group-item" data-toggle="modal" data-target="#modal-{self.full_name_as_selector}">
+  {self.label}
+</a>
+<div class="modal fade" id="modal-{self.full_name}" tabindex="-1" role="dialog" \
+aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="modal-label-{self.full_name}">{self.label}</h4>
+      </div>
+      <div class="modal-body">
+        {self.questions_html}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{self.messages[close]}</button>
+        <button type="submit" class="btn btn-primary" data-dismiss="modal">{self.messages[validate]}</button>
+      </div>
+    </div>
+  </div>
+</div>'''
+        messages = {
+            u'close': ctx._(u'Close'),
+            u'validate': ctx._(u'Validate'),
+            }
 
     class PanelGroup(Group):
+        messages = {
+            u'simulate': ctx._(u'Simulate'),
+            }
+
         @property
         def outer_html(self):
             return u'''
 <div class="panel panel-default">
   <div class="panel-heading">
     <h4 class="panel-title">
-      <a {link_class_attribute}data-toggle="collapse" data-parent="#accordion"
+      <a{link_class_attribute} data-toggle="collapse" data-parent="#accordion"
 href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.label}</a>
     </h4>
   </div>
   <div id="collapse-{self.full_name}" class="panel-collapse collapse{collapse_in_class}">
     <div class="panel-body">
       {self.questions_html}
+      <button class="btn btn-primary" type="submit">{self.messages[simulate]}</button>
     </div>
   </div>
 </div>'''.format(
                 collapse_in_class = u' in' if self.name() == u'principal' else '',
-                link_class_attribute = '' if self.name() == u'principal' else u'class="collapsed" ',
+                link_class_attribute = '' if self.name() == u'principal' else u' class="collapsed"  ',
                 self = self,
                 )
 
-    entity_categories = model.fields_api_data()['columns_tree'][entity]['children']
-    categories_groups = []
-    for entity_category in entity_categories:
-        group_questions = []
-        for column_name in entity_category['children']:
+    def build_category_questions(entity_category_children):
+        category_questions = []
+        for column_name in entity_category_children:
             column = model.fields_api_data()['columns'].get(column_name)
             if column is not None:
                 question = make_question(column)
                 if question is None:
                     log.error(u'Could not make question from column: {!r}'.format(column))
                 else:
-                    group_questions.append(question)
-        categories_groups.append(
-            PanelGroup(
-                children_attributes = {'_outer_html_template': bootstrap_form_group},
-                label = entity_category['label'],
-                questions = group_questions,
-                )
+                    category_questions.append(question)
+        return category_questions
+
+    entity_categories = model.fields_api_data()['columns_tree'][entity]['children']
+    categories_groups = []
+    for entity_category in entity_categories:
+        group_questions = build_category_questions(entity_category['children'])
+        category_group_class = PanelGroup if entity_category['label'] == u'Principal' else ModalGroup
+        category_group = category_group_class(
+            children_attributes = {'_outer_html_template': bootstrap_form_group},
+            label = entity_category['label'],
+            questions = group_questions,
             )
+        categories_groups.append(category_group)
     return categories_groups
 
 
