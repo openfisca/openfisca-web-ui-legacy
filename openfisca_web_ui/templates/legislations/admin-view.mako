@@ -24,15 +24,14 @@
 
 
 <%!
-import collections
-
-from biryani1 import strings
-
 from openfisca_web_ui import model, urls
 %>
 
 
 <%inherit file="/site.mako"/>
+
+
+<%namespace name="render_legislation" file="/legislations/render-legislation.mako"/>
 
 
 <%def name="breadcrumb_content()" filter="trim">
@@ -44,66 +43,30 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <h2>${legislation.get_title(ctx)}</h2>
-        <%self:view_fields/>
-        <div class="btn-toolbar">
-            <a class="btn btn-success" href="${legislation.get_api1_url(ctx, 'json')}">${_(u'JSON')}</a>
+        <div class="page-header">
+            <h1>${legislation.get_title(ctx)}</h1>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <%self:view_fields/>
+            </div>
 <%
     user = model.get_user(ctx)
 %>\
-    % if user is not None and user._id == legislation.author_id:
-            <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
-            <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
+    % if model.is_admin(ctx) or user is not None and user._id == legislation.author_id:
+            <div class="panel-footer">
+                <div class="btn-toolbar">
+                    <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+                    <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
+                </div>
+            </div>
     % endif
         </div>
 </%def>
 
 
-<%def name="render_legislation_node(node)" filter="trim">
-    % if node.get('@type') == 'Node':
-        % for node_name in node['children']:
-<%
-            node_title = node['children'][node_name].get('description')
-            node_slug = strings.slugify(node_title)
-%>\
-                        <p>
-                            <a href="#" class="collapse-node-toggle" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
-                                <span class="glyphicon glyphicon-chevron-right"></span>
-                                ${node_title}
-                            </a>
-                        </p>
-                        <div id="node-${node_slug}" class="collapse collapse-node">
-                            <%self:render_legislation_node node="${node['children'][node_name]}"/>
-                        </div>
-        % endfor
-    % elif node.get('@type') == 'Scale':
-        <%self:render_legislation_scale scale="${node}"/>
-    % elif node.get('@type') == 'Parameter':
-        <%self:render_legislation_parameter parameter="${node['values']}"/>
-    % endif
-</%def>
-
-
-<%def name="render_legislation_scale(scale)" filter="trim">
-    <table class="table table-stripped">
-        <tr>
-            <th>Seuil</th>
-            <th>Assiette</th>
-            <th>Taux</th>
-        </tr>
-    % for slice in scale.get('slices'):
-        <tr>
-            <td>${slice['threshold'][-1].get('value') if slice.get('threshold') else ''}</td>
-            <td>${slice['base'][-1].get('value') if slice.get('base') else ''}</td>
-            <td>${slice['rate'][-1].get('value') if slice.get('rate') else ''}</td>
-        </tr>
-    % endfor
-    </table>
-</%def>
-
-
-<%def name="render_legislation_parameter(parameter)" filter="trim">
-    ${parameter[-1].get('value')}
+<%def name="scripts()" filter="trim">
+    <%render_legislation:scripts/>
 </%def>
 
 
@@ -128,6 +91,14 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             </div>
         </div>
     % endif
+        <div class="row">
+            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("URL"))}</b></div>
+            <div class="col-sm-10">
+                <a href="${legislation.get_api1_url(ctx, 'json')}">
+                    ${legislation.get_api1_full_url(ctx, 'json')}
+                </a>
+            </div>
+        </div>
 <%
     value = legislation.json
 %>\
@@ -146,7 +117,15 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                 <div class="tab-content">
                     <div class="active tab-pane" id="description-view">
         % endif
-                        <%self:render_legislation_node node="${value}"/>
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-default btn-xs btn-toggle-open">
+                                ${_('Open all')}
+                            </button>
+                            <button type="button" class="btn btn-default btn-xs btn-toggle-close">
+                                ${_('Close all')}
+                            </button>
+                        </div>
+                        <%render_legislation:render_legislation_node node="${value}"/>
         % if user is not None and user.email is not None:
                     </div>
                     <div class="tab-pane" id="description-source">
