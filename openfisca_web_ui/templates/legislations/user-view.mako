@@ -24,11 +24,10 @@
 
 
 <%!
-import collections
 
 from biryani1 import strings
 
-from openfisca_web_ui import model, urls
+from openfisca_web_ui import model, urls, uuidhelpers
 %>
 
 
@@ -74,25 +73,54 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="render_legislation_scale(scale)" filter="trim">
-    <table class="table table-stripped">
-        <tr>
-            <th>Seuil</th>
-            <th>Assiette</th>
-            <th>Taux</th>
-        </tr>
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Seuil</th>
+                <th>Assiette</th>
+                <th>Taux</th>
+            </tr>
+        </thead>
+        <tbody>
     % for slice in scale.get('slices'):
-        <tr>
-            <td>${slice['threshold'][-1].get('value') if slice.get('threshold') else ''}</td>
-            <td>${slice['base'][-1].get('value') if slice.get('base') else ''}</td>
-            <td>${slice['rate'][-1].get('value') if slice.get('rate') else ''}</td>
-        </tr>
+            <tr>
+                <td>${slice['threshold'][-1].get('value') if slice.get('threshold') else ''}</td>
+                <td>${slice['base'][-1].get('value') if slice.get('base') else ''}</td>
+                <td>${slice['rate'][-1].get('value') if slice.get('rate') else ''}</td>
+            </tr>
     % endfor
+        </tbody>
     </table>
 </%def>
 
 
 <%def name="render_legislation_parameter(parameter)" filter="trim">
     ${parameter[-1].get('value')}
+</%def>
+
+
+<%def name="scripts()" filter="trim">
+    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
+    <script>
+<%
+requireconfig = {
+    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
+    'paths': {
+        # Bower components
+        'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
+        'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
+        'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
+        },
+    'shim': {
+        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
+        'jquery': {'exports': '$'},
+        },
+    }
+%>\
+require.config(${requireconfig | n, js});
+require([${urls.get_url(ctx, u'js/legislation.js') | n, js}]);
+<%self:page_scripts/>
+    </script>
 </%def>
 
 

@@ -492,11 +492,23 @@ def user_index(req):
 def user_view(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'GET'
-    legislation, error = pipe(
-        input_to_slug,
-        not_none,
-        model.Legislation.make_id_or_slug_or_words_to_instance(),
-        )(req.urlvars.get('id_or_slug'), state = ctx)
-    if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(error))
-    return templates.render(ctx, '/legislations/user-view.mako', legislation = legislation)
+    params = req.GET
+    inputs = {
+        'date': params.get('date'),
+        'legislation': req.urlvars.get('id_or_slug'),
+        }
+    data, errors = conv.struct({
+        'date': conv.pipe(
+            conv.cleanup_line,
+            conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+            conv.default(datetime.datetime.utcnow())
+            ),
+        'legislation': pipe(
+            input_to_slug,
+            not_none,
+            model.Legislation.make_id_or_slug_or_words_to_instance(),
+            ),
+        })(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+    return templates.render(ctx, '/legislations/user-view.mako', date = data['date'], legislation = data['legislation'])
