@@ -47,6 +47,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     collection_name = 'accounts'
     email = None
     full_name = None
+    scenarios = None
     simulations_id = None
     current_simulation_id = None
     slug = None
