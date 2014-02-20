@@ -63,9 +63,9 @@ def generate_default_user_api_data():
 def get(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    if session is None:
-        session = model.Session()
-    user_api_data = session.user.current_api_data if session.user is not None else None
+    user_api_data = None
+    if session is not None and session.user is not None:
+        user_api_data = session.user.current_api_data
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
     page_data = req.urlvars['page_data']
@@ -83,10 +83,11 @@ def post(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
     if session is None:
-        session = model.Session()
-    user_api_data = session.user.current_api_data if session.user is not None else None
+        return wsgihelpers.unauthorized(ctx)
+    assert session.user is not None
+    user_api_data = session.user.current_api_data
     if user_api_data is None:
-        user_api_data = generate_default_user_api_data()
+        user_api_data = {}
     page_data = req.urlvars['page_data']
     page_form = build_page_form(ctx, page_data, user_api_data)
     korma_inputs = variabledecode.variable_decode(req.params)
