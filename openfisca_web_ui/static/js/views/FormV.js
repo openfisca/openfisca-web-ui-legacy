@@ -7,45 +7,17 @@ define([
 	],
 	function ($, _, Backbone, backendServiceM) {
 		var FormV = Backbone.View.extend({
-			currentTabName: null,
-			el: '#form-wrapper',
+			currentTabName: 'familles',
+			el: 'form[name="situation"]',
 			events: {
 //				'change :input': 'submit',
 				'click :input[type="submit"]': 'submit',
-				'click .nav-tabs a': 'changeTab',
 				'keypress :input': 'submit'
 			},
 			model: backendServiceM,
 			submitTriggered: false,
 
-			initialize: function () {
-				this.currentTabName = this.model.startTabName;
-				this.listenTo(this.model, 'change:formData', this.render);
-			},
-			changeTab: function(evt) {
-				evt.preventDefault();
-				var tabName = $(evt.target).data('tab-name');
-				if (tabName === this.currentTabName) {
-					return;
-				}
-				var $form = this.$el.find('form');
-				var formDataStr = $form.serialize();
-				this.model.saveForm(
-					this.currentTabName,
-					formDataStr,
-					$.proxy(function() {
-						this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
-					}, this)
-				);
-				this.currentTabName = tabName;
-			},
-			render: function () {
-				var formData = this.model.get('formData');
-				if ( ! _.isUndefined(formData)) {
-					this.$el.html(formData);
-				}
-				return this;
-			},
+			initialize: function () { },
 			submit: function(evt) {
 				if (evt.type == 'keypress' && evt.keyCode !== 13) {
 					return;
@@ -54,22 +26,25 @@ define([
 				if (this.submitTriggered) {
 					return;
 				}
-				var $form = this.$el.find('form');
-				var formDataStr = $form.serialize();
+				var formDataStr = this.$el.serialize();
 				if (evt.type == 'click') {
 					// Add clicked button to form data.
 					var $button = $(evt.target);
-					var name = $button.attr('name');
-					if ( ! _.isUndefined(name)) {
+					var clickedButtonName = $button.attr('name');
+					if ( ! _.isUndefined(clickedButtonName)) {
 						var value = $button.attr('value');
-						formDataStr += '&' + name + '=' + value;
+						formDataStr += '&' + clickedButtonName + '=' + value;
 					}
 				}
 				this.submitTriggered = true;
-				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
+				this.model.saveForm(this.currentTabName, formDataStr, _.bind(function() {
 					this.submitTriggered = false;
-//					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
-					this.model.simulate();
+					if (evt.type === 'click' && clickedButtonName) {
+						// TODO Transform reload into fetchForm only.
+						window.location.reload();
+					} else {
+						this.model.simulate();
+					}
 				}, this));
 			}
 		});

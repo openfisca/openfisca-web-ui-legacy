@@ -503,6 +503,7 @@ def fields_api_data():
 
 
 def find_category_name(column_name, entity_name):
+    """For a given column, find its category name."""
     entity_categories = fields_api_data()['columns_tree'][entity_name]['children']
     for entity_category in entity_categories:
         if column_name in entity_category['children']:

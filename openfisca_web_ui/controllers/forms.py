@@ -26,28 +26,13 @@
 """Form controllers"""
 
 
+import datetime
+
 from biryani1.baseconv import check, pipe
+from biryani1 import strings
 from formencode import variabledecode
 
-from .. import contexts, model, questions, templates, uuidhelpers, wsgihelpers
-
-
-def build_page_form(ctx, page_data, user_api_data):
-    form_factory = page_data['form_factory']
-    page_slug = page_data['slug']
-    if page_slug == 'familles':
-        page_form = form_factory()
-    elif page_slug in ('declarations-impots', 'logements-principaux'):
-        prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)
-        page_form = form_factory(prenom_select_choices)
-    else:
-        assert page_slug == 'legislation-url', page_slug
-        legislation_urls_and_descriptions = (
-            (legislation.get_api1_url(ctx, 'json'), legislation.title)
-            for legislation in model.Legislation.find()
-            )
-        page_form = form_factory(legislation_urls_and_descriptions)
-    return page_form
+from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
 
 
 def generate_default_user_api_data():
@@ -63,19 +48,32 @@ def generate_default_user_api_data():
 def get(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
+
+    if conf['cookie'] in req.cookies:
+        update_session(ctx)
+        if ctx.req.cookies.get(conf['cookie']) != session.token:
+            ctx.req.response.set_cookie(
+                conf['cookie'],
+                session.token,
+                httponly = True,
+                secure = ctx.req.scheme == 'https',
+                )
+
     user_api_data = None
     if session is not None and session.user is not None:
         user_api_data = session.user.current_api_data
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
-    page_data = req.urlvars['page_data']
-    page_form = build_page_form(ctx, page_data, user_api_data)
+
+    root_question = questions.base.make_situation_form(user_api_data)
     korma_values, korma_errors = pipe(
-        page_data['api_data_to_page_korma_data'],
-        page_form.root_data_to_str,
+        conv.base.api_data_to_korma_data,
+        root_question.data_to_str,
         )(user_api_data, state = ctx)
-    page_form.fill(korma_values, korma_errors)
-    return templates.render_def(ctx, '/form.mako', 'form', page_form = page_form)
+    root_question.value = korma_values
+    root_question.error = korma_errors
+
+    return templates.render(ctx, '/index.mako', root_question = root_question)
 
 
 @wsgihelpers.wsgify
@@ -85,22 +83,48 @@ def post(req):
     if session is None:
         return wsgihelpers.unauthorized(ctx)
     assert session.user is not None
+
     user_api_data = session.user.current_api_data
     if user_api_data is None:
         user_api_data = {}
-    page_data = req.urlvars['page_data']
-    page_form = build_page_form(ctx, page_data, user_api_data)
-    korma_inputs = variabledecode.variable_decode(req.params)
-    korma_data, korma_errors = page_form.root_input_to_data(korma_inputs, state = ctx)
-    if korma_errors is None:
-        page_api_data = check(page_data['korma_data_to_page_api_data'](korma_data, state = ctx))
-        if page_api_data is not None:
-            user_api_data.update(page_api_data)
-            current_simulation = session.user.current_simulation
-            current_simulation.api_data = user_api_data
-            current_simulation.save(safe = True)
-            session.user.save(safe = True)
-        return wsgihelpers.no_content(ctx)
-    else:
-        page_form.fill(korma_inputs, korma_errors)
-        return templates.render_def(ctx, '/form.mako', 'form', page_form = page_form)
+
+    root_question = questions.base.make_situation_form(user_api_data)
+    inputs = variabledecode.variable_decode(req.params)
+    korma_data, korma_errors = root_question.root_input_to_data(inputs, state = ctx)
+    if korma_errors is not None:
+        return wsgihelpers.respond_json(ctx, {'errors': korma_errors})
+    api_data = check(conv.base.korma_data_to_api_data(korma_data, state = ctx))
+    if api_data is not None:
+        user_api_data.update(api_data)
+        current_simulation = session.user.current_simulation
+        current_simulation.api_data = user_api_data
+        current_simulation.save(safe = True)
+    return wsgihelpers.respond_json(ctx, None)
+
+
+def update_session(ctx):
+    session = ctx.session
+    if session is None:
+        session = ctx.session = model.Session()
+        session.token = uuidhelpers.generate_uuid()
+    if session.user is None:
+        user = model.Account()
+        user._id = uuidhelpers.generate_uuid()
+        user.compute_words()
+        simulation_date = datetime.datetime.utcnow()
+        simulation_title = u'Ma simulation du {} à {}'.format(
+            datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
+            datetime.datetime.strftime(simulation_date, u'%H:%M'),
+            )
+        simulation = model.Simulation(
+            author_id = user._id,
+            title = simulation_title,
+            slug = strings.slugify(simulation_title),
+            )
+        simulation.save(safe = True)
+        user.current_simulation = simulation
+        user.simulations_id = [simulation._id]
+        user.save(safe = True)
+        session.user = user
+    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+    session.save(safe = True)

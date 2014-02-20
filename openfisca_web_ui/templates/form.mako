@@ -23,21 +23,25 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-<%!
-from openfisca_web_ui import model, pages
-%>
-
-
-<%def name="form()" filter="trim">
-<%
-    user = model.get_user(ctx)
-%>\
-    <%self:tabs/>
-    <form class="korma form" method="POST" role="form">
-        ${page_form.html | n}
+<%def name="form(root_question, user)" filter="trim">
+    <form class="korma form" method="POST" name="situation" role="form">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#familles">Familles</a></li>
+            <li><a data-toggle="tab" href="#foyers-fiscaux">Déclarations d'impôts</a></li>
+            <li><a data-toggle="tab" href="#menages">Logements principaux</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="familles">
+                ${root_question['familles'].html | n}
+            </div>
+            <div class="tab-pane" id="foyers-fiscaux">
+                ${root_question['foyers_fiscaux'].html | n}
+            </div>
+            <div class="tab-pane" id="menages">
+                ${root_question['menages'].html | n}
+            </div>
+        </div>
         <p class="buttons">
-##            <input class="btn btn-success" title="${_(u'Launch this simulation')}" type="submit" value="${_(
-##                    u'Simulate')}">
     % if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
                 ${_(u'Save')}
@@ -54,27 +58,19 @@ from openfisca_web_ui import model, pages
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Effacer la simulation ?</h4>
+                    <h4 class="modal-title">${_(u'Reset this simulation?')}</h4>
                 </div>
                 <div class="modal-body">
+                    <p>${_(u'Data associated to this simulation will be deleted.')}</p>
+                </div>
+                <div class="modal-footer">
                     <a class="btn btn-danger btn-reset" \
-href="${user.get_user_url(ctx, 'reset') if user  is not None else '/'}">
-                        ${_(u'Yes')}
+href="${user.get_user_url(ctx, 'reset') if user is not None else '/'}">
+                        ${_(u'Reset')}
                     </a>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Cancel')}</button>
                 </div>
             </div>
         </div>
     </div>
-</%def>
-
-
-<%def name="tabs()" filter="trim">
-            <ul class="nav nav-tabs">
-    % for page_data in pages.pages_data:
-                <li${u' class="active"' if req.urlvars['page_data']['slug'] == page_data['slug'] else u'' | n}>
-                    <a data-tab-name="${page_data['slug']}" href="#">${page_data['title']}</a>
-                </li>
-    % endfor
-            </ul>
 </%def>

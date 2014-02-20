@@ -294,7 +294,7 @@ user = model.get_user(ctx)
 appconfig = {
     'api': {
         'urls': {
-            'form': urls.get_url(ctx, 'api/1/form'),
+            'form': urls.get_url(ctx, '/'),
             'simulate': urls.get_url(ctx, 'api/1/simulate'),
             },
         },

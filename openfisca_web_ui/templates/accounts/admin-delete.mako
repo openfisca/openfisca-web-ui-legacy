@@ -43,10 +43,12 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
         <h2>${_(u'Deletion of {}').format(account.get_title(ctx))}</h2>
-        <p class="confirm">${_(u"Are you sure that you want to delete this account?")}</p>
+        <p class="confirm">${_(u'Delete this account?')}</p>
         <form method="post" action="${account.get_admin_url(ctx, 'delete')}">
             <%view:view_fields/>
-            <button class="btn btn-danger" name="submit" type="submit"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</button>
+            <button class="btn btn-danger" name="submit" type="submit">
+                <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
+            </button>
         </form>
 </%def>
 

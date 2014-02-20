@@ -29,13 +29,13 @@
 from biryani1.states import default_state
 
 from .. import uuidhelpers
-from . import base
 
 
 roles = ('declarants', 'personnes_a_charge')
 
 
-def api_data_to_page_korma_data(values, state = None):
+def api_data_to_korma_data(values, state = None):
+    from . import base
     if values is None:
         return None, None
     if state is None:
@@ -62,7 +62,7 @@ def api_data_to_page_korma_data(values, state = None):
     return {u'foyers_fiscaux': new_foyers_fiscaux}, None
 
 
-def korma_data_to_page_api_data(values, state = None):
+def korma_data_to_api_data(values, state = None):
     if values is None:
         return None, None
     if state is None:

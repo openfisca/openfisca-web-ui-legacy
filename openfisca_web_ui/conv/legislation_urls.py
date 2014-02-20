@@ -29,6 +29,6 @@
 from biryani1.baseconv import function
 
 
-api_data_to_page_korma_data = function(lambda values: {'legislation_urls': values})
+api_data_to_korma_data = function(lambda values: {'legislation_urls': values})
 
-korma_data_to_page_api_data = function(lambda values: values.get('legislation_urls'))
+korma_data_to_api_data = function(lambda values: values.get('legislation_urls'))
