@@ -11,15 +11,10 @@ require([
     });
 
     $('.btn-toggle-open').on('click', function(evt) {
-        $('.collapse-node-toggle.collapsed').each(function(index, el) {
-            $(this).trigger('click');
-        });
+        $('.collapse-node').collapse('show');
     });
+
     $('.btn-toggle-close').on('click', function(evt) {
-        $('.collapse-node-toggle').each(function(index, el) {
-            if (! $(this).hasClass('collapsed')) {
-                $(this).trigger('click');
-            }
-        });
+        $('.collapse-node').collapse('hide');
     });
 });
