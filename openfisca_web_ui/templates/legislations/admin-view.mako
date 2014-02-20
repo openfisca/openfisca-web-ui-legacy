@@ -44,7 +44,7 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
         <div class="page-header">
-            <h1>${legislation.get_title(ctx)}</h1>
+            <h1>${_('Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
         </div>
         <div class="panel panel-default">
             <div class="panel-body">

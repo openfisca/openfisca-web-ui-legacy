@@ -261,10 +261,17 @@ def admin_new(req):
 @wsgihelpers.wsgify
 def admin_view(req):
     ctx = contexts.Ctx(req)
-    legislation = ctx.node
     model.is_admin(ctx, check = True)
-
-    return templates.render(ctx, '/legislations/admin-view.mako', legislation = legislation)
+    legislation = ctx.node
+    params = req.GET
+    date, error = conv.pipe(
+        conv.cleanup_line,
+        conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+        conv.default(datetime.datetime.utcnow())
+        )(params.get('date'), state = ctx)
+    if error is not None:
+        return wsgihelpers.bad_request(ctx, explanation = error)
+    return templates.render(ctx, '/legislations/admin-view.mako', date = data, legislation = data)
 
 
 @wsgihelpers.wsgify
