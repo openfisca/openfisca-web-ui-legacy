@@ -157,10 +157,11 @@ def fill_user_api_data(values, state = None):
     new_values['menages'] = menages
 
     # législations
-    if values.get('legislation_url') is None:
-        legislation = model.Legislation.find_one()
-        if legislation is not None:
-            new_values['legislation_url'] = legislation.get_api1_full_url(state, 'json')
+#    if values.get('legislation_url') is None:
+#        legislation = model.Legislation.find_one()
+#        if legislation is not None:
+#            new_values['legislation_url'] = legislation.get_api1_full_url(state, 'json')
+
     if values.get('year') is None:
         new_values['year'] = 2013
 
@@ -188,7 +189,7 @@ def user_api_data_to_api_data(user_data, state = None):
         'foyers_fiscaux': user_data.get('foyers_fiscaux', {}).values(),
         'menages': user_data.get('menages', {}).values(),
         'individus': [],
-        'legislation_url': user_data.get('legislation_url'),
+#        'legislation_url': user_data.get('legislation_url'),
         'year': user_data.get('year', 2013),
         }
     for individu_id in user_data.get('individus', {}).iterkeys():
