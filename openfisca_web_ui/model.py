@@ -173,6 +173,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
     json = None
     slug = None
     title = None
+    url = None
 
     @classmethod
     def bson_to_json(cls, value, state = None):

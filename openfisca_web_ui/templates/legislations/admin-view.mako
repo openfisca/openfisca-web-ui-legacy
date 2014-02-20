@@ -92,13 +92,25 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
         </div>
     % endif
         <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("URL"))}</b></div>
+            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Download URL"))}</b></div>
             <div class="col-sm-10">
                 <a href="${legislation.get_api1_url(ctx, 'json')}">
                     ${legislation.get_api1_full_url(ctx, 'json')}
                 </a>
             </div>
         </div>
+<%
+    value = legislation.url
+%>\
+    % if value is not None:
+        <div class="row">
+            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Source URL"))}</b></div>
+            <div class="col-sm-10">
+                <a href="${value}">${value}
+                </a>
+            </div>
+        </div>
+    % endif
 <%
     value = legislation.json
 %>\
