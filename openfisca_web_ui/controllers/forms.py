@@ -97,15 +97,18 @@ def get(req):
                 )
 
     user_api_data = None
-#    user_scenarios = None
+    settings_question = None
     if session is not None and session.user is not None:
         user_api_data = session.user.current_api_data
-#        user_scenarios = session.user.scenarios
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
-
-#    page_form = build_page_form(ctx, page_data, user_api_data)
-#    korma_values, korma_errors = build_page_korma_values(ctx, page_data, page_form, user_api_data, user_scenarios)
+    if session.user.email is not None:
+        settings_question = questions.legislations.make_legislations_repeat(session.user)
+        values, errors = pipe(
+            conv.legislations.scenarios_to_page_korma_data,
+            settings_question.root_data_to_str,
+            )(session.user.scenarios, state = ctx)
+        settings_question.fill(values, errors)
 
     root_question = questions.base.make_situation_form(user_api_data)
     values, errors = pipe(
@@ -117,7 +120,7 @@ def get(req):
 
     return templates.render_def(ctx, '/form.mako', 'form', root_question = root_question, user = session.user) \
         if req.is_xhr or req.params.get('xhr') \
-        else templates.render(ctx, '/index.mako', root_question = root_question)
+        else templates.render(ctx, '/index.mako', root_question = root_question, settings_question = settings_question)
 
 
 @wsgihelpers.wsgify
@@ -131,20 +134,6 @@ def post(req):
     user_api_data = session.user.current_api_data
     if user_api_data is None:
         user_api_data = {}
-
-#    page_form = build_page_form(ctx, page_data, user_api_data)
-#    korma_inputs = variabledecode.variable_decode(req.params)
-#    korma_data, korma_errors = page_form.root_input_to_data(korma_inputs, state = ctx)
-#    if korma_errors is None:
-#        page_api_data = check(page_data['korma_data_to_page_api_data'](korma_data, state = ctx))
-#        if page_api_data is not None:
-#            if page_data['slug'] in ('familles', 'declarations-impots', 'logements-principaux'):
-#                user_api_data.update(page_api_data)
-#                current_simulation = session.user.current_simulation
-#                current_simulation.api_data = user_api_data
-#                current_simulation.save(safe = True)
-#            else:
-#                session.user.scenarios = page_api_data
 
     root_question = questions.base.make_situation_form(user_api_data)
     inputs = variabledecode.variable_decode(req.params)

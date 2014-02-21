@@ -31,7 +31,9 @@ from korma.group import Group
 from . import base
 
 
-def make_legislations_repeat(simulations_id_and_name, legislations_id_and_name):
+def make_legislations_repeat(user):
+    from .. import model
+
     class LegislationGroup(Group):
         @property
         def outer_html(self):
@@ -48,6 +50,14 @@ def make_legislations_repeat(simulations_id_and_name, legislations_id_and_name):
   </div>
 </div>'''.format(formatted_index = index + 1, self = self)
 
+    simulations_id_and_name = (
+        (simulation._id, simulation.title)
+        for simulation in user.simulations
+        )
+    legislations_id_and_name = (
+        (legislation._id, legislation.title)
+        for legislation in model.Legislation.find()
+        )
     return base.Repeat(
         add_button_label = u'Ajouter un scénario',
         name = u'legislations',

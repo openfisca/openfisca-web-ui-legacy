@@ -30,8 +30,9 @@ import datetime
 import logging
 
 from biryani1.baseconv import check
+from formencode import variabledecode
 
-from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
+from .. import contexts, conf, conv, model, templates, questions, urls, uuidhelpers, wsgihelpers
 from . import accounts, forms, legislations, sessions, simulations
 
 
@@ -81,10 +82,40 @@ def make_router():
         (None, '^/simulations(?=/|$)', simulations.route),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
+        ('POST', '^/scenarios/?$', settings),
         ('GET', '^/terms/?$', terms),
         ]
     router = urls.make_router(*routings)
     return router
+
+
+@wsgihelpers.wsgify
+def settings(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None:
+        return wsgihelpers.unauthorized(ctx)
+    assert session.user is not None
+
+    settings_question = questions.legislations.make_legislations_repeat(session.user)
+    inputs = variabledecode.variable_decode(req.params)
+    data, errors = settings_question.root_input_to_data(inputs, state = ctx)
+    if errors is not None:
+        if req.is_xhr:
+            return wsgihelpers.respond_json(ctx, {'errors': errors})
+        else:
+            settings_question.fill(inputs, errors)
+            return templates.render(
+                ctx,
+                '/index.mako',
+                root_question = questions.base.make_situation_form(session.user.current_api_data or {}),
+                settings_question = settings_question,
+                )
+    scenarios = check(conv.legislations.korma_data_to_scenarios(data, state = ctx))
+    if scenarios is not None:
+        session.user.scenarios = scenarios
+        session.user.save(safe = True)
+    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
 @wsgihelpers.wsgify

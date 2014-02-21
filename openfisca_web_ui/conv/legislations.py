@@ -47,7 +47,7 @@ def scenarios_to_page_korma_data(scenarios, state = None):
         }, None
 
 
-def korma_data_to_page_api_data(values, state = None):
+def korma_data_to_scenarios(values, state = None):
     if values is None:
         return None, None
     if state is None:
