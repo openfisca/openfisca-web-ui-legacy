@@ -38,6 +38,9 @@ from openfisca_web_ui import conf, model, urls, uuidhelpers
 %>
 
 
+<%namespace file="requireconfig.mako" name="requireconfig"/>
+
+
 <%def name="accept_cnil_conditions_modal(user)" filter="trim">
     <div class="modal fade bs-modal-lg" id="accept-cnil-conditions-modal" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -122,6 +125,30 @@ from openfisca_web_ui import conf, model, urls, uuidhelpers
             </div>
         </div>
     </div>
+</%def>
+
+
+<%def name="appconfig_script()" filter="trim">
+<%
+user = model.get_user(ctx)
+appconfig = {
+    'api': {
+        'urls': {
+            'form': urls.get_url(ctx, '/'),
+            'simulate': urls.get_url(ctx, 'api/1/simulate'),
+            },
+        },
+    'auth': {
+        'currentUser': user.email if user is not None else None,
+        'enable': conf['auth.enable'],
+        },
+    }
+if conf['cookie'] not in req.cookies:
+    appconfig['displayAcceptCookiesModal'] = True
+elif user is not None:
+    appconfig['displayAcceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
+%>\
+define('appconfig', ${appconfig | n, js});
 </%def>
 
 
@@ -243,10 +270,6 @@ ${conf['app_name']}
 </%def>
 
 
-
-<%def name="page_scripts()"></%def>
-
-
 <%def name="settings_modal()" filter="trim">
     <div class="modal fade bs-modal-lg" id="settings-modal" role="dialog">
         <div class="modal-dialog">
@@ -270,82 +293,16 @@ ${conf['app_name']}
 
 
 <%def name="scripts()" filter="trim">
-    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
-    <script>
-<%
-requireconfig = {
-    'paths': {
-        # Bower components
-        'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
-        'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
-        'd3': urls.get_url(ctx, u'bower/d3/d3'),
-        'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
-        'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
-        'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
-
-        # App
-        'app': urls.get_url(ctx, u'js/app'),
-        'router': urls.get_url(ctx, u'js/router'),
-
-        # Views
-        'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
-        'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
-        'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
-        'appV': urls.get_url(ctx, u'js/views/appV'),
-        'FormV': urls.get_url(ctx, u'js/views/FormV'),
-        'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
-        'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
-        'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
-
-        # Models
-        'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
-        'DetailChartM': urls.get_url(ctx, u'js/models/DetailChartM'),
-        'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
-        'DistributionChartM': urls.get_url(ctx, u'js/models/DistributionChartM'),
-
-        # Modules
-        'auth': urls.get_url(ctx, u'js/auth'),
-        'helpers': urls.get_url(ctx, 'js/modules/helpers')
-        },
-    'shim': {
-        'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
-        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
-        'd3': {'exports': 'd3'},
-        'jquery': {'exports': '$'},
-        'underscore': {'exports': '_'},
-        },
-    }
-%>\
-require.config(${requireconfig | n, js});
-    </script>
 % if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
+    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
-<%
-user = model.get_user(ctx)
-appconfig = {
-    'api': {
-        'urls': {
-            'form': urls.get_url(ctx, '/'),
-            'simulate': urls.get_url(ctx, 'api/1/simulate'),
-            },
-        },
-    'auth': {
-        'currentUser': user.email if user is not None else None,
-        'enable': conf['auth.enable'],
-        },
-    }
-if conf['cookie'] not in req.cookies:
-    appconfig['displayAcceptCookiesModal'] = True
-elif user is not None:
-    appconfig['displayAcceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
-%>\
-define('appconfig', ${appconfig | n, js});
-require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
-<%self:page_scripts/>
+        <%requireconfig:requireconfig_script/>
+        <%self:appconfig_script/>
+        require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     </script>
 </%def>
 
