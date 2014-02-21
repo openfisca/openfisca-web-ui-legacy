@@ -38,7 +38,7 @@ def make_legislations_repeat(simulations_id_and_name, legislations_id_and_name):
             index = self.parent_data['legislations']['index']
             return u'''
 <div class="panel panel-primary">
-  <div class="panel-heading">
+  <div class="panel-heading panel-form">
     <h4 class="panel-title">
       <a href="#">Simulations et legislations</a>
     </h4>
