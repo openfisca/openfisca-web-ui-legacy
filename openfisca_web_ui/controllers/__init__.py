@@ -64,6 +64,17 @@ def accept_cookies(req):
     return response
 
 
+@wsgihelpers.wsgify
+def disclaimer_closed(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None:
+        return wsgihelpers.unauthorized(ctx)
+    session.disclaimer_closed = True
+    session.save(safe = True)
+    return wsgihelpers.no_content(ctx)
+
+
 def make_router():
     """Return a WSGI application that searches requests to controllers."""
     global router
@@ -76,6 +87,7 @@ def make_router():
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
+        (None, '^/api/1/disclaimer_closed$', disclaimer_closed),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/simulate$', simulate),
         (None, '^/legislations(?=/|$)', legislations.route_user),

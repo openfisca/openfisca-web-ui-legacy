@@ -55,6 +55,7 @@ requireconfig = {
         'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
         'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
         'appV': urls.get_url(ctx, u'js/views/appV'),
+        'disclaimerV': urls.get_url(ctx, u'js/views/disclaimerV'),
         'FormV': urls.get_url(ctx, u'js/views/FormV'),
         'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
         'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),

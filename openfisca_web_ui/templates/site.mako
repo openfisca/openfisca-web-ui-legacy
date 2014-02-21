@@ -142,6 +142,9 @@ appconfig = {
         'currentUser': user.email if user is not None else None,
         'enable': conf['auth.enable'],
         },
+    'disclaimer': {
+        'closedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
+        },
     }
 if conf['cookie'] not in req.cookies:
     appconfig['displayAcceptCookiesModal'] = True
@@ -154,6 +157,9 @@ define('appconfig', ${appconfig | n, js});
 
 <%def name="body_content()" filter="trim">
     <div class="container">
+    % if ctx.session is None or not ctx.session.disclaimer_closed:
+        <%self:disclaimer/>
+    % endif
         <%self:breadcrumb/>
         <%self:container_content/>
         <%self:footer/>
@@ -206,6 +212,24 @@ ${conf['app_name']}
         % endif
                 </div>
     % endif
+</%def>
+
+
+<%def name="disclaimer()" filter="trim">
+        <div class="alert alert-warning disclaimer">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <p>
+                <strong>Attention !</strong>
+                OpenFisca est un simulateur socio-fiscal à vocation pédagogique, en cours de développement :
+            </p>
+            <ul>
+                <li>Les données que vous saisissez ne sont pas protégées.</li>
+                <li>Les résultats des simulations peuvent comporter des erreurs.</li>
+            </ul>
+            <p>
+                <strong>Ne saisissez pas de données personnelles.</strong>
+            </p>
+        </div>
 </%def>
 
 
