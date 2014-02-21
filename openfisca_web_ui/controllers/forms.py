@@ -97,10 +97,10 @@ def get(req):
                 )
 
     user_api_data = None
-    user_scenarios = None
+#    user_scenarios = None
     if session is not None and session.user is not None:
         user_api_data = session.user.current_api_data
-        user_scenarios = session.user.scenarios
+#        user_scenarios = session.user.scenarios
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
 

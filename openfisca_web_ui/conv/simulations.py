@@ -68,7 +68,7 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
     if not response.ok:
         try:
             response_data = response.json(object_pairs_hook = collections.OrderedDict)
-        except ValueError as exc:
+        except ValueError:
             return api_post_content, state._(u'Unable to decode JSON data of simulate API response')
         return api_post_content, response_data.get('error')
     simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
