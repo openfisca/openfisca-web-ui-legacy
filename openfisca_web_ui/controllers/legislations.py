@@ -238,9 +238,9 @@ def admin_new(req):
             else:
                 legislation_json, error = conv.legislations.validate_legislation_json(data['json'], state = ctx)
             if error is not None:
-                errors = dict(json = error)
+                errors = dict(json = error) if data['url'] is None else dict(url = error)
             else:
-                legislation.json = legislation_json
+                data['json'] = legislation_json
         if errors is None:
             if model.Legislation.find(
                     dict(
@@ -267,9 +267,14 @@ def admin_view(req):
     legislation = ctx.node
     params = req.GET
     date, error = conv.pipe(
-        conv.cleanup_line,
-        conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
-        conv.default(datetime.datetime.utcnow())
+        conv.default(datetime.datetime.utcnow()),
+        conv.condition(
+            conv.test(lambda date: isinstance(date, basestring)),
+            conv.pipe(
+                conv.cleanup_line,
+                conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+                ),
+            ),
         )(params.get('date'), state = ctx)
     response = requests.post(
         conf['api.urls.legislations'],
@@ -279,7 +284,8 @@ def admin_view(req):
             },
         data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
         )
-    legislation.json = response.json()['dated_legislation']
+    legislation_json = response.json()
+    legislation.json = legislation_json.get('dated_legislation') or legislation_json.get('legislation')
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)
     return templates.render(ctx, '/legislations/admin-view.mako', date = date, legislation = legislation)

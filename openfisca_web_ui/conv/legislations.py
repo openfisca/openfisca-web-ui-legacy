@@ -77,7 +77,7 @@ def validate_legislation_json(json_dict, state = None):
                 'Content-Type': 'application/json',
                 'User-Agent': conf['app_name'],
                 },
-            data = json.dumps(dict(value = json_dict)),
+            data = json.dumps(dict(legislation = json_dict)),
             )
     except requests.exceptions.ConnectionError:
         return json_dict, state._('Unable to connect to API, url: {}').format(conf['api.urls.legislations'])
