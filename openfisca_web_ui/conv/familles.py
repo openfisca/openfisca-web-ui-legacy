@@ -28,14 +28,14 @@
 
 from biryani1.states import default_state
 
-from .. import questions, uuidhelpers
-from . import base
+from .. import uuidhelpers
 
 
 roles = ('parents', 'enfants')
 
 
-def api_data_to_page_korma_data(values, state = None):
+def api_data_to_korma_data(values, state = None):
+    from . import base
     if values is None:
         return None, None
     if state is None:
@@ -64,7 +64,8 @@ def api_data_to_page_korma_data(values, state = None):
     return {u'familles': new_familles}, None
 
 
-def korma_data_to_page_api_data(values, state = None):
+def korma_data_to_api_data(values, state = None):
+    from ..questions import individus
     if values is None:
         return None, None
     if state is None:
@@ -85,13 +86,13 @@ def korma_data_to_page_api_data(values, state = None):
                     new_individu_id = uuidhelpers.generate_uuid() if individu['id'] is None else individu['id']
                     new_individu = {}
                     if individu['categories'] is not None:
-                        for category in individu['categories'].itervalues():
+                        for category_name, category in individu['categories'].iteritems():
                             new_individu.update(category)
                     new_individus[new_individu_id] = new_individu
                     new_famille.setdefault(individu['role'], []).append(new_individu_id)
             if famille.get('add'):
                 new_individu_id = uuidhelpers.generate_uuid()
-                new_individus[new_individu_id] = questions.individus.build_default_values(
+                new_individus[new_individu_id] = individus.build_default_values(
                     existing_individus_count=len(famille['individus']))
                 new_individu_role = u'parents' if len(new_famille.get(u'parents') or []) < 2 else u'enfants'
                 new_famille.setdefault(new_individu_role, []).append(new_individu_id)

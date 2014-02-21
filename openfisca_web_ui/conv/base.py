@@ -30,13 +30,22 @@ import datetime
 import logging
 import re
 
-from biryani1.baseconv import cleanup_line, empty_to_none, function, input_to_slug, pipe, test
+from biryani1.baseconv import cleanup_line, empty_to_none, function, input_to_slug, merge, pipe, test
 from biryani1.states import default_state
+
+from . import familles, foyers_fiscaux, menages
 
 
 N_ = lambda message: message
 log = logging.getLogger(__name__)
 uuid_re = re.compile(ur'[\da-f]{32}$')
+
+
+api_data_to_korma_data = merge(
+    familles.api_data_to_korma_data,
+    foyers_fiscaux.api_data_to_korma_data,
+    menages.api_data_to_korma_data,
+    )
 
 
 def build_categories(columns, entity_name):
@@ -74,6 +83,16 @@ input_to_words = pipe(
     input_to_slug,
     function(lambda slug: sorted(set(slug.split(u'-')))),
     empty_to_none,
+    )
+
+
+korma_data_to_api_data = pipe(
+    function(lambda values: values.get('situation')),
+    merge(
+        familles.korma_data_to_api_data,
+        foyers_fiscaux.korma_data_to_api_data,
+        menages.korma_data_to_api_data,
+        ),
     )
 
 

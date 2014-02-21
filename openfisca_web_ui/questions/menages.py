@@ -57,6 +57,8 @@ def default_value(individu_ids, familles=None):
 
 
 def make_menages_repeat(prenom_select_choices):
+    from .. import conv
+
     class MenageGroup(Group):
         @property
         def outer_html(self):
@@ -104,6 +106,7 @@ title="afficher / masquer">Logement principal {formatted_index}</a>
                                 ),
                             Select(
                                 choices = prenom_select_choices,
+                                input_to_data = conv.base.input_to_uuid,
                                 name = 'id',
                                 ),
                             ],

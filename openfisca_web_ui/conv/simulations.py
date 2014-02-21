@@ -68,7 +68,6 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
         try:
             response_data = response.json(object_pairs_hook = collections.OrderedDict)
         except ValueError as exc:
-            log.exception(exc)
             return api_post_content, state._(u'Unable to decode JSON data of simulate API response')
         return api_post_content, response_data.get('error')
     simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
@@ -155,6 +154,7 @@ def fill_user_api_data(values, state = None):
     new_values['menages'] = menages
 
     if values.get('year') is None:
+        # FIXME Parametrize year.
         new_values['year'] = 2013
 
     return new_values, None
@@ -221,11 +221,21 @@ def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
     return {'scenarios': scenarios}, None
 
 
-user_api_data_to_simulation_output = pipe(
+user_api_data_to_api_data = pipe(
     fill_user_api_data,
     user_api_data_to_api_data,
+    )
+
+
+api_data_to_simulation_output = pipe(
     api_data_to_api_post_content,
     api_post_content_to_simulation_output,
+    )
+
+
+user_api_data_to_simulation_output = pipe(
+    user_api_data_to_api_data,
+    api_data_to_simulation_output,
     )
 
 

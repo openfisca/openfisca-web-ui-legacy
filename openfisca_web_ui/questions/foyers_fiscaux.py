@@ -35,6 +35,8 @@ from . import base
 
 
 def make_foyers_fiscaux_repeat(prenom_select_choices):
+    from .. import conv
+
     class FoyerFiscalGroup(Group):
         @property
         def outer_html(self):
@@ -80,6 +82,7 @@ title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
                                 ),
                             Select(
                                 choices = prenom_select_choices,
+                                input_to_data = conv.base.input_to_uuid,
                                 name = 'id',
                                 ),
                             Button(

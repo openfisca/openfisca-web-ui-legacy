@@ -238,7 +238,6 @@ ${conf['app_name']}
     <script>
 <%
 requireconfig = {
-    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
     'paths': {
         # Bower components
         'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
@@ -294,7 +293,7 @@ user = model.get_user(ctx)
 appconfig = {
     'api': {
         'urls': {
-            'form': urls.get_url(ctx, 'api/1/form'),
+            'form': urls.get_url(ctx, '/'),
             'simulate': urls.get_url(ctx, 'api/1/simulate'),
             },
         },

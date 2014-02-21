@@ -91,8 +91,8 @@ user = model.get_user(ctx)
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="${simulation.get_url(ctx, 'delete')}">
-                        <button type="submit" class="btn btn-danger">${_(u'Yes')}</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
+                        <button type="submit" class="btn btn-danger">${_(u'Delete')}</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Cancel')}</button>
                     </form>
                 </div>
             </div>
@@ -107,12 +107,12 @@ user = model.get_user(ctx)
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">${_(u"Are you sure that you want to delete this account?")}</h4>
+                    <h4 class="modal-title">${_(u'Delete this account?')}</h4>
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="${account.get_user_url(ctx, 'delete')}">
-                        <button type="submit" class="btn btn-danger">${_(u'Yes')}</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'No')}</button>
+                        <button type="submit" class="btn btn-danger">${_(u'Delete')}</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Cancel')}</button>
                     </form>
                 </div>
             </div>

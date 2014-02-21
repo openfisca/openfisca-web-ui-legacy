@@ -1,21 +1,16 @@
 require([
-    'domReady',
+	'domReady',
 
-    'app'
-], function(domReady, app) {
+	'app',
+	'helpers'
+], function(domReady, app, helpers) {
 
-    $.noConflict();
-//    _.noConflict();
-//    Backbone.noConflict();
-    // TODO call noConflict with other libs (d3)
+	$.noConflict();
+//	_.noConflict();
+//	Backbone.noConflict();
+	// TODO call noConflict with other libs (d3)
 
-	var alertFallback = false;
-	if (typeof console === "undefined" || typeof console.log === "undefined") {
-		console = {};
-		if (alertFallback) { console.log = function(msg) { alert(msg); }; }
-		else { console.log = function() {}; }
-	}
-
-    app.init();
+	helpers.installPolyfills();
+	app.init();
 
 });

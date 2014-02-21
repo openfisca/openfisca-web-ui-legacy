@@ -11,27 +11,26 @@ define([
 				formData: null
 			},
 			events: {},
-			startTabName: 'familles',
 			urlPaths: appconfig.api.urls,
 
 			initialize: function () {
-				this.fetchForm(this.startTabName, $.proxy(this.simulate, this));
-			},
-			buildFormPath: function(tabName) {
-				return this.urlPaths.form + '/' + tabName;
+				this.simulate();
 			},
 			fetchForm: function(tabName, callback) {
 				$.ajax({
 					context: this,
-					url: this.buildFormPath(tabName)
+					url: this.urlPaths.form
 				})
 				.done(function(data) {
 					this.set('formData', data);
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.error('fetchForm fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+				})
+				.always(function() {
 					if ( ! _.isUndefined(callback)) {
 						callback();
 					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown) {
 				});
 			},
 			saveForm: function(tabName, data, callback) {
@@ -40,15 +39,20 @@ define([
 					data: data,
 					dataType: 'json',
 					type: 'POST',
-					url: this.buildFormPath(tabName)
+					url: this.urlPaths.form
 				})
 				.done(function(data, textStatus, jqXHR) {
-					this.set('formData', data);
-					if ( ! _.isUndefined(callback)) {
-						callback();
+					if (data !== null && ! _.isUndefined(data.errors)) {
+						console.error('saveForm errors', data);
 					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.error(jqXHR, textStatus, errorThrown);
+				})
+				.always(function() {
+					if ( ! _.isUndefined(callback)) {
+						callback();
+					}
 				});
 			},
 			simulate: function() {
@@ -60,6 +64,7 @@ define([
 					if (data.errors) {
 						var errorMessage = 'Simulation error';
 						alert(errorMessage);
+						console.error(errorMessage, data)
 					} else {
 						var result = data.output.value[0];
 						if ( ! _.isUndefined(result)) {

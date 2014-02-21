@@ -109,7 +109,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('url') if errors is not None else None
 %>\
                         <div class="form-group${' has-error' if error else ''}">
-                            <label for="url">${_("Legislation's URL")}</label>
+                            <label for="url">${_('Legislation URL')}</label>
                             <input class="form-control" id="url" name="url" type="text" value="${inputs['url'] or ''}">
     % if error:
                             <pre class="help-block alert-danger">${error | n, js, h}</pre>
@@ -121,7 +121,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('json') if errors is not None else None
 %>\
                         <div class="form-group${' has-error' if error else ''}">
-                            <label for="json">${_("Legislation's JSON")}</label>
+                            <label for="json">${_('Legislation JSON')}</label>
         % if inputs['json']:
                             <textarea class="form-control" id="json" name="json">${
                                 inputs['json'] | n, js, h}</textarea>
