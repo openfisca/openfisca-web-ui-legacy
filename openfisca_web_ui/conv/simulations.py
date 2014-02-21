@@ -32,7 +32,7 @@ from itertools import chain
 import json
 import logging
 
-from biryani1.baseconv import condition, function, pipe, struct, test, uniform_sequence
+from biryani1.baseconv import condition, function, noop, pipe, struct, test, uniform_sequence
 from biryani1.states import default_state
 import requests
 
@@ -203,22 +203,25 @@ def scenarios_to_api_data(values, state = None):
     return pipe(
         uniform_sequence(
             pipe(
-                struct({
-                    'legislation': pipe(
-                        model.Legislation.make_id_or_slug_or_words_to_instance(),
-                        condition(
-                            test(lambda legislation: legislation.url is None),
-                            function(lambda legislation: legislation.get_api1_full_url(state, 'json')),
-                            function(lambda legislation: legislation.url),
+                struct(
+                    {
+                        'legislation': pipe(
+                            model.Legislation.make_id_or_slug_or_words_to_instance(),
+                            condition(
+                                test(lambda legislation: legislation.url is None),
+                                function(lambda legislation: legislation.get_api1_full_url(state, 'json')),
+                                function(lambda legislation: legislation.url),
+                                ),
                             ),
-                        ),
-                    'simulation': pipe(
-                        model.Simulation.make_id_or_slug_or_words_to_instance(),
-                        function(lambda simulation: simulation.api_data),
-                        fill_user_api_data,
-                        ),
-                    'year': function(lambda d: int(d.strftime('%Y'))),
-                    }),
+                        'simulation': pipe(
+                            model.Simulation.make_id_or_slug_or_words_to_instance(),
+                            function(lambda simulation: simulation.api_data),
+                            fill_user_api_data,
+                            ),
+                        },
+                    default = noop,
+                    drop_none_values = False,
+                    ),
                 function(lambda struct: dict(
                     (key, value)
                     for key, value in chain(

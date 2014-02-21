@@ -67,7 +67,7 @@ def make_legislations_repeat(user):
                 },
             name = u'legislation',
             questions = [
-                base.BootstrapFrenchDate(name = 'year', label = u'Année de simulation'),
+                base.BootstrapNumber(name = 'year', label = u'Année de simulation', step = 1),
                 base.BootstrapSelect(
                     add_first_empty_value = True,
                     choices = simulations_id_and_name,
