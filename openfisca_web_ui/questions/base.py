@@ -143,28 +143,6 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
             u'validate': ctx._(u'Validate'),
             }
 
-#    class PanelGroup(Group):
-#        @property
-#        def outer_html(self):
-#            return u'''
-#<div class="panel panel-default">
-#  <div class="panel-heading">
-#    <h4 class="panel-title">
-#      <a{link_class_attribute} data-toggle="collapse" data-parent="#accordion"
-#href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.label}</a>
-#    </h4>
-#  </div>
-#  <div id="collapse-{self.full_name}" class="panel-collapse collapse{collapse_in_class}">
-#    <div class="panel-body">
-#      {self.questions_html}
-#    </div>
-#  </div>
-#</div>'''.format(
-#                collapse_in_class = u' in' if self.name() == u'principal' else '',
-#                link_class_attribute = '' if self.name() == u'principal' else u' class="collapsed"  ',
-#                self = self,
-#                )
-
     def build_category_questions(entity_category_children):
         category_questions = []
         for column_name in entity_category_children:
