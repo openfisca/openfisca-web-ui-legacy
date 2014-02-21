@@ -73,7 +73,9 @@ def get(req):
     root_question.value = values
     root_question.error = errors
 
-    return templates.render(ctx, '/index.mako', root_question = root_question)
+    return templates.render_def(ctx, '/form.mako', 'form', root_question = root_question, user = session.user) \
+        if req.is_xhr or req.params.get('xhr') \
+        else templates.render(ctx, '/index.mako', root_question = root_question)
 
 
 @wsgihelpers.wsgify

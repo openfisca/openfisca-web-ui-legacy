@@ -8,12 +8,30 @@ define([
 		var BackendServiceM = Backbone.Model.extend({
 			defaults: {
 				apiData: {},
+				formData: null
 			},
 			events: {},
 			urlPaths: appconfig.api.urls,
 
 			initialize: function () {
 				this.simulate();
+			},
+			fetchForm: function(tabName, callback) {
+				$.ajax({
+					context: this,
+					url: this.urlPaths.form
+				})
+				.done(function(data) {
+					this.set('formData', data);
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.error('fetchForm fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+				})
+				.always(function() {
+					if ( ! _.isUndefined(callback)) {
+						callback();
+					}
+				});
 			},
 			saveForm: function(tabName, data, callback) {
 				$.ajax({
