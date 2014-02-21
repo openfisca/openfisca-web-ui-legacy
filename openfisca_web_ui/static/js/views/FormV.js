@@ -6,73 +6,75 @@ define([
 	'backendServiceM',
 	],
 	function ($, _, Backbone, backendServiceM) {
+
+		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
+
 		var FormV = Backbone.View.extend({
-			currentTabName: null,
-			el: '#form-wrapper',
+			currentTabName: 'familles',
+			el: 'form[name="situation"]',
 			events: {
-//				'change :input': 'submit',
-				'click :input[type="submit"]': 'submit',
-				'click .nav-tabs a': 'changeTab',
-				'keypress :input': 'submit'
+				'change :input': 'onInputChange',
+				'click :input[type="submit"]': 'onSubmitClicked',
+				'keypress :input': 'onKeyPress'
 			},
 			model: backendServiceM,
 			submitTriggered: false,
-
-			initialize: function () {
-				this.currentTabName = this.model.startTabName;
+			initialize: function() {
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
-			changeTab: function(evt) {
-				evt.preventDefault();
-				var tabName = $(evt.target).data('tab-name');
-				if (tabName === this.currentTabName) {
-					return;
+			onInputChange: function(evt) {
+				var $input = $(evt.target);
+				if ($input.parents('.main-category').length) {
+					var formDataStr = this.$el.serialize();
+					this.submit(formDataStr, false);
 				}
-				var $form = this.$el.find('form');
-				var formDataStr = $form.serialize();
-				this.model.saveForm(
-					this.currentTabName,
-					formDataStr,
-					$.proxy(function() {
-						this.model.fetchForm(tabName, $.proxy(this.model.simulate, this.model));
-					}, this)
-				);
-				this.currentTabName = tabName;
 			},
-			render: function () {
+			onKeyPress: function(evt) {
+				if (evt.keyCode === 13) {
+					evt.preventDefault();
+					var formDataStr = this.$el.serialize();
+					var doReloadForm = endsWith(evt.target.name, '.prenom');
+					this.submit(formDataStr, doReloadForm);
+				}
+			},
+			onSubmitClicked: function(evt) {
+				evt.preventDefault();
+				var doReloadForm = false;
+				var formDataStr = this.$el.serialize();
+				// Add clicked button to form data.
+				var $button = $(evt.target);
+				var name = $button.attr('name');
+				if ( ! _.isUndefined(name)) {
+					doReloadForm = true;
+					var value = $button.attr('value');
+					formDataStr += '&' + name + '=' + value;
+				}
+				this.submit(formDataStr, doReloadForm);
+			},
+			render: function() {
 				var formData = this.model.get('formData');
 				if ( ! _.isUndefined(formData)) {
 					this.$el.html(formData);
 				}
 				return this;
 			},
-			submit: function(evt) {
-				if (evt.type == 'keypress' && evt.keyCode !== 13) {
-					return;
-				}
-				evt.preventDefault();
+			submit: function(formDataStr, doReloadForm) {
 				if (this.submitTriggered) {
 					return;
 				}
-				var $form = this.$el.find('form');
-				var formDataStr = $form.serialize();
-				if (evt.type == 'click') {
-					// Add clicked button to form data.
-					var $button = $(evt.target);
-					var name = $button.attr('name');
-					if ( ! _.isUndefined(name)) {
-						var value = $button.attr('value');
-						formDataStr += '&' + name + '=' + value;
-					}
-				}
 				this.submitTriggered = true;
-				this.model.saveForm(this.currentTabName, formDataStr, $.proxy(function() {
+				this.model.saveForm(this.currentTabName, formDataStr, _.bind(function() {
 					this.submitTriggered = false;
-//					this.model.fetchForm(this.currentTabName, $.proxy(this.model.simulate, this.model));
-					this.model.simulate();
+					if (doReloadForm) {
+						this.model.fetchForm();
+					} else {
+						this.model.simulate();
+					}
 				}, this));
 			}
 		});
+
 		return FormV;
+
 	}
 );

@@ -143,33 +143,6 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
             u'validate': ctx._(u'Validate'),
             }
 
-    class PanelGroup(Group):
-        messages = {
-            u'simulate': ctx._(u'Simulate'),
-            }
-
-        @property
-        def outer_html(self):
-            return u'''
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h4 class="panel-title">
-      <a{link_class_attribute} data-toggle="collapse" data-parent="#accordion"
-href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.label}</a>
-    </h4>
-  </div>
-  <div id="collapse-{self.full_name}" class="panel-collapse collapse{collapse_in_class}">
-    <div class="panel-body">
-      {self.questions_html}
-      <button class="btn btn-primary" type="submit">{self.messages[simulate]}</button>
-    </div>
-  </div>
-</div>'''.format(
-                collapse_in_class = u' in' if self.name() == u'principal' else '',
-                link_class_attribute = '' if self.name() == u'principal' else u' class="collapsed"  ',
-                self = self,
-                )
-
     def build_category_questions(entity_category_children):
         category_questions = []
         for column_name in entity_category_children:
@@ -186,12 +159,19 @@ href="#collapse-{self.full_name_as_selector}" title="afficher / masquer">{self.l
     categories_groups = []
     for entity_category in entity_categories:
         group_questions = build_category_questions(entity_category['children'])
-        category_group_class = PanelGroup if entity_category['label'] == u'Principal' else ModalGroup
-        category_group = category_group_class(
-            children_attributes = {'_outer_html_template': bootstrap_form_group},
-            label = entity_category['label'],
-            questions = group_questions,
-            )
+        if entity_category['label'] == u'Principal':
+            category_group = Group(
+                children_attributes = {'_outer_html_template': bootstrap_form_group},
+                name = 'principal',
+                outer_html_template = u'<div class="main-category">{self.inner_html}</div>',
+                questions = group_questions,
+                )
+        else:
+            category_group = ModalGroup(
+                children_attributes = {'_outer_html_template': bootstrap_form_group},
+                label = entity_category['label'],
+                questions = group_questions,
+                )
         categories_groups.append(category_group)
     return categories_groups
 
@@ -250,3 +230,16 @@ def make_question(column):
             )
         question.placeholder = default_str(question)
     return question
+
+
+def make_situation_form(user_api_data):
+    from . import familles, foyers_fiscaux, individus, menages
+    prenom_select_choices = individus.build_prenom_select_choices(user_api_data)
+    return Group(
+        name = 'situation',
+        questions = [
+            familles.make_familles_repeat(),
+            foyers_fiscaux.make_foyers_fiscaux_repeat(prenom_select_choices),
+            menages.make_menages_repeat(prenom_select_choices),
+            ],
+        )

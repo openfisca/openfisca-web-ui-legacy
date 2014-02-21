@@ -47,6 +47,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     collection_name = 'accounts'
     email = None
     full_name = None
+    scenarios = None
     simulations_id = None
     current_simulation_id = None
     slug = None
@@ -173,6 +174,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
     json = None
     slug = None
     title = None
+    url = None
 
     @classmethod
     def bson_to_json(cls, value, state = None):
@@ -310,6 +312,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
 class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper):
     _user = UnboundLocalError
     collection_name = 'sessions'
+    disclaimer_closed = None
     expiration = None
     token = None  # the cookie token
     user_id = None
@@ -439,7 +442,7 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
                 state = conv.default_state
             id, error = conv.str_to_object_id(value, state = state)
             if error is None:
-                self = cls.find_one(dict(id = id, author_id = user_id), as_class = collections.OrderedDict)
+                self = cls.find_one(dict(_id = id), as_class = collections.OrderedDict)
             else:
                 self = cls.find_one(dict(slug = value, author_id = user_id), as_class = collections.OrderedDict)
             if self is None:
@@ -503,6 +506,7 @@ def fields_api_data():
 
 
 def find_category_name(column_name, entity_name):
+    """For a given column, find its category name."""
     entity_categories = fields_api_data()['columns_tree'][entity_name]['children']
     for entity_category in entity_categories:
         if column_name in entity_category['children']:

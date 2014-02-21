@@ -103,6 +103,7 @@ def admin_edit(req):
             datetime_end = datetime.datetime.strftime(legislation.datetime_end, u'%d-%m-%Y'),
             description = legislation.description,
             json = legislation.json,
+            url = legislation.url,
             title = legislation.title,
         )
     else:
@@ -116,27 +117,19 @@ def admin_edit(req):
                 )(data['title'], state = ctx)
             if error is not None:
                 errors = dict(title = error)
-        if errors is None and data['json'] is not None:
-            try:
-                response = requests.post(
-                    conf['api.urls.legislations'],
-                    headers = {
-                        'Content-Type': 'application/json',
-                        'User-Agent': conf['app_name'],
-                        },
-                    data = json.dumps(dict(value = data['json'])),
-                    )
-            except requests.exceptions.ConnectionError:
-                error = ctx._('Unable to connect to API, url: {}').format(conf['api.urls.legislations'])
-            if not response.ok:
-                try:
-                    error = response.json(object_pairs_hook = collections.OrderedDict)
-                except ValueError as exc:
-                    error = unicode(exc)
-            if error is not None:
-                errors = dict(json = error)
+        if errors is None:
+            legislation_json, error = None, None
+            if data['url'] is not None:
+                legislation_json, error = pipe(
+                    conv.legislations.retrieve_legislation,
+                    conv.legislations.validate_legislation_json,
+                    )(data['url'], state = ctx)
             else:
-                legislation.json = response.json(object_pairs_hook = collections.OrderedDict)
+                legislation_json, error = conv.legislations.validate_legislation_json(data['json'], state = ctx)
+            if error is not None:
+                errors = dict(json = error) if data['url'] is None else dict(url = error)
+            else:
+                data['json'] = legislation_json
         if errors is None:
             if model.Legislation.find(
                     dict(
@@ -235,28 +228,19 @@ def admin_new(req):
                 )(data['title'], state = ctx)
             if error is not None:
                 errors = dict(title = error)
-        if errors is None and data['json'] is not None:
-            try:
-                response = requests.post(
-                    conf['api.urls.legislations'],
-                    headers = {
-                        'Content-Type': 'application/json',
-                        'User-Agent': conf['app_name'],
-                        },
-                    data = json.dumps(dict(value = data['json'])),
-                    )
-            except requests.exceptions.ConnectionError:
-                errors = dict(title = ctx._('Unable to connect to API, url: {}').format(conf['api.urls.legislations']))
-            if errors is None:
-                if not response.ok:
-                    try:
-                        error = response.json(object_pairs_hook = collections.OrderedDict)
-                    except ValueError as exc:
-                        error = unicode(exc)
-                if error is not None:
-                    errors = dict(json = error)
-                else:
-                    legislation.json = response.json(object_pairs_hook = collections.OrderedDict)
+        if errors is None:
+            legislation_json, error = None, None
+            if data['json'] is None:
+                legislation_json, error = pipe(
+                    conv.legislations.retrieve_legislation,
+                    conv.legislations.validate_legislation_json,
+                    )(data['url'], state = ctx)
+            else:
+                legislation_json, error = conv.legislations.validate_legislation_json(data['json'], state = ctx)
+            if error is not None:
+                errors = dict(json = error) if data['url'] is None else dict(url = error)
+            else:
+                data['json'] = legislation_json
         if errors is None:
             if model.Legislation.find(
                     dict(
@@ -279,10 +263,32 @@ def admin_new(req):
 @wsgihelpers.wsgify
 def admin_view(req):
     ctx = contexts.Ctx(req)
-    legislation = ctx.node
     model.is_admin(ctx, check = True)
-
-    return templates.render(ctx, '/legislations/admin-view.mako', legislation = legislation)
+    legislation = ctx.node
+    params = req.GET
+    date, error = conv.pipe(
+        conv.default(datetime.datetime.utcnow()),
+        conv.condition(
+            conv.test(lambda date: isinstance(date, basestring)),
+            conv.pipe(
+                conv.cleanup_line,
+                conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+                ),
+            ),
+        )(params.get('date'), state = ctx)
+    response = requests.post(
+        conf['api.urls.legislations'],
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': conf['app_name'],
+            },
+        data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
+        )
+    legislation_json = response.json()
+    legislation.json = legislation_json.get('dated_legislation') or legislation_json.get('legislation')
+    if error is not None:
+        return wsgihelpers.bad_request(ctx, explanation = error)
+    return templates.render(ctx, '/legislations/admin-view.mako', date = date, legislation = legislation)
 
 
 @wsgihelpers.wsgify

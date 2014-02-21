@@ -57,13 +57,15 @@ def default_value(individu_ids, familles=None):
 
 
 def make_menages_repeat(prenom_select_choices):
+    from .. import conv
+
     class MenageGroup(Group):
         @property
         def outer_html(self):
             index = self.parent_data['menages']['index']
             return u'''
 <div class="panel panel-primary">
-  <div class="panel-heading">
+  <div class="panel-heading panel-form">
     <h4 class="panel-title">
       <a data-toggle="collapse" data-parent="#accordion" href="#collapse-menage-{self[id].value}"
 title="afficher / masquer">Logement principal {formatted_index}</a>
@@ -104,6 +106,7 @@ title="afficher / masquer">Logement principal {formatted_index}</a>
                                 ),
                             Select(
                                 choices = prenom_select_choices,
+                                input_to_data = conv.base.input_to_uuid,
                                 name = 'id',
                                 ),
                             ],
@@ -113,7 +116,7 @@ title="afficher / masquer">Logement principal {formatted_index}</a>
                     name = u'categories',
                     outer_html_template = u'''
 <div class="panel panel-default">
-  <div class="panel-heading">
+  <div class="panel-heading panel-form">
     <h4 class="panel-title">
       <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
 href="#collapse-menage-{self.parent[id].value}-categories" title="affcher / masquer">Plus de précisions</a>

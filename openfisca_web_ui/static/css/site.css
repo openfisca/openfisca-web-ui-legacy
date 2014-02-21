@@ -62,7 +62,7 @@ img.media-object {
     height: 100px;
 }
 
-.panel-heading a:after {
+.panel-form a:after {
     /* symbol for "opening" panels */
     font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
     content: "\e114";    /* adjust as needed, taken from bootstrap.css */
@@ -70,7 +70,7 @@ img.media-object {
     color: grey;         /* adjust as needed */
 }
 
-.panel-heading a.collapsed:after {
+.panel-form a.collapsed:after {
     /* symbol for "collapsed" panels */
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }

@@ -38,6 +38,9 @@ from openfisca_web_ui import conf, model, urls, uuidhelpers
 %>
 
 
+<%namespace file="requireconfig.mako" name="requireconfig"/>
+
+
 <%def name="accept_cnil_conditions_modal(user)" filter="trim">
     <div class="modal fade bs-modal-lg" id="accept-cnil-conditions-modal" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -125,8 +128,38 @@ from openfisca_web_ui import conf, model, urls, uuidhelpers
 </%def>
 
 
+<%def name="appconfig_script()" filter="trim">
+<%
+user = model.get_user(ctx)
+appconfig = {
+    'api': {
+        'urls': {
+            'form': urls.get_url(ctx, '/'),
+            'simulate': urls.get_url(ctx, 'api/1/simulate'),
+            },
+        },
+    'auth': {
+        'currentUser': user.email if user is not None else None,
+        'enable': conf['auth.enable'],
+        },
+    'disclaimer': {
+        'closedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
+        },
+    }
+if conf['cookie'] not in req.cookies:
+    appconfig['displayAcceptCookiesModal'] = True
+elif user is not None:
+    appconfig['displayAcceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
+%>\
+define('appconfig', ${appconfig | n, js});
+</%def>
+
+
 <%def name="body_content()" filter="trim">
     <div class="container">
+    % if ctx.session is None or not ctx.session.disclaimer_closed:
+        <%self:disclaimer/>
+    % endif
         <%self:breadcrumb/>
         <%self:container_content/>
         <%self:footer/>
@@ -182,6 +215,24 @@ ${conf['app_name']}
 </%def>
 
 
+<%def name="disclaimer()" filter="trim">
+        <div class="alert alert-warning disclaimer">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <p>
+                <strong>Attention !</strong>
+                OpenFisca est un simulateur socio-fiscal à vocation pédagogique, en cours de développement :
+            </p>
+            <ul>
+                <li>Les données que vous saisissez ne sont pas protégées.</li>
+                <li>Les résultats des simulations peuvent comporter des erreurs.</li>
+            </ul>
+            <p>
+                <strong>Ne saisissez pas de données personnelles.</strong>
+            </p>
+        </div>
+</%def>
+
+
 <%def name="feeds()" filter="trim">
 </%def>
 
@@ -230,87 +281,52 @@ ${conf['app_name']}
 </%def>
 
 
-<%def name="page_scripts()"></%def>
+<%def name="modals()" filter="trim">
+    % if conf['cookie'] not in req.cookies:
+    <%self:accept_cookies_modal/>
+    % elif ctx.session is not None and ctx.session.user is not None:
+        % if ctx.session.user.email is None:
+    <%self:accept_cnil_conditions_modal user="${ctx.session.user}"/>
+        % elif settings_question:
+    <%self:settings_modal/>
+        % endif
+    % endif
+</%def>
+
+
+<%def name="settings_modal()" filter="trim">
+    <div class="modal fade bs-modal-lg" id="settings-modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">${_('Settings')}</h4>
+                </div>
+                <form action="${urls.get_url(ctx, 'scenarios')}" class="korma form" method="POST" role="form">
+                    <div class="modal-body">
+                        ${settings_question.html | n}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">${_('Cancel')}</button>
+                        <button class="btn btn-success" type="submit">${_('Validate')}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</%def>
 
 
 <%def name="scripts()" filter="trim">
-    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
-    <script>
-<%
-requireconfig = {
-    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
-    'paths': {
-        # Bower components
-        'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
-        'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
-        'd3': urls.get_url(ctx, u'bower/d3/d3'),
-        'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
-        'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
-        'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
-
-        # App
-        'app': urls.get_url(ctx, u'js/app'),
-        'router': urls.get_url(ctx, u'js/router'),
-
-        # Views
-        'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
-        'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
-        'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
-        'appV': urls.get_url(ctx, u'js/views/appV'),
-        'FormV': urls.get_url(ctx, u'js/views/FormV'),
-        'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
-        'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
-        'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
-
-        # Models
-        'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
-        'DetailChartM': urls.get_url(ctx, u'js/models/DetailChartM'),
-        'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
-        'DistributionChartM': urls.get_url(ctx, u'js/models/DistributionChartM'),
-
-        # Modules
-        'auth': urls.get_url(ctx, u'js/auth'),
-        'helpers': urls.get_url(ctx, 'js/modules/helpers')
-        },
-    'shim': {
-        'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
-        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
-        'd3': {'exports': 'd3'},
-        'jquery': {'exports': '$'},
-        'underscore': {'exports': '_'},
-        },
-    }
-%>\
-require.config(${requireconfig | n, js});
-    </script>
 % if conf['auth.enable']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
+    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
-<%
-user = model.get_user(ctx)
-appconfig = {
-    'api': {
-        'urls': {
-            'form': urls.get_url(ctx, 'api/1/form'),
-            'simulate': urls.get_url(ctx, 'api/1/simulate'),
-            },
-        },
-    'auth': {
-        'currentUser': user.email if user is not None else None,
-        'enable': conf['auth.enable'],
-        },
-    }
-if conf['cookie'] not in req.cookies:
-    appconfig['displayAcceptCookiesModal'] = True
-elif user is not None:
-    appconfig['displayAcceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
-%>\
-define('appconfig', ${appconfig | n, js});
-require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
-<%self:page_scripts/>
+        <%requireconfig:requireconfig_script/>
+        <%self:appconfig_script/>
+        require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     </script>
 </%def>
 
@@ -321,7 +337,7 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
 
 
 <%def name="topbar()" filter="trim">
-    <nav class="navbar navbar-default navbar-fixed-default navbar-inverse" role="navigation">
+    <nav class="navbar navbar-default" role="navigation">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-topbar-collapse">
                 <span class="sr-only">${_(u'Toggle navigation')}</span>
@@ -348,7 +364,6 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
             <ul class="dropdown-menu">
                 <li><a href="${model.Account.get_admin_class_url(ctx)}">${_('Accounts')}</a></li>
                 <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
-##                <li><a href="${model.Simulation.get_admin_class_url(ctx)}">${_('Simulations')}</a></li>
             </ul>
         </li>
     % endif
@@ -356,12 +371,12 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     user = model.get_user(ctx)
 %>
     % if user is not None and user.email is not None:
-                <li><a href="${user.get_user_url(ctx)}">${_('My simulations')}</a></li>
+        <li><a href="${user.get_user_url(ctx)}">${_('My simulations')}</a></li>
     % endif
-                <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
-                <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
-                <li><a href="http://www.openfisca.fr/api">${_('API')}</a></li>
-                <li><a href="/terms" title="${_('Terms of use')}">${_('CGU')}</a></li>
+        <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
+        <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
+        <li><a href="http://www.openfisca.fr/api">${_('API')}</a></li>
+        <li><a href="/terms" title="${_('Terms of use')}">${_('CGU')}</a></li>
 </%def>
 
 
@@ -375,6 +390,11 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
                 <li><a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">${
                         _(u'Sign in')}</a></li>
         % else:
+                <li>
+                    <a data-toggle="modal" data-target="#settings-modal" href="#" title="${_('Settings')}">
+                        <span class="glyphicon glyphicon-cog"></span>
+                    </a>
+                </li>
                 <li class="active">
                     <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
                 </li>
@@ -399,13 +419,9 @@ require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     <%self:ie_scripts/>
 </head>
 <body>
+    <%self:modals/>
     <%self:topbar/>
     <%self:body_content/>
-% if conf['cookie'] not in req.cookies:
-    <%self:accept_cookies_modal/>
-% elif ctx.session is not None and ctx.session.user is not None:
-    <%self:accept_cnil_conditions_modal user="${ctx.session.user}"/>
-% endif
     <%self:scripts/>
     <%self:trackers/>
 </body>

@@ -31,23 +31,14 @@ from openfisca_web_ui import model, urls
 <%inherit file="site.mako"/>
 
 
+<%namespace file="form.mako" name="form"/>
+
+
 <%def name="breadcrumb()" filter="trim">
 </%def>
 
 
 <%def name="container_content()" filter="trim">
-        <div class="alert alert-warning">
-            <p>
-                <strong>Attention</strong> : OpenFisca est un simulateur socio-fiscal à vocation pédagogique, en cours de développement :
-            </p>
-            <ul>
-                <li>Les données que vous saisissez ne sont pas protégées.</li>
-                <li>Les résultats des simulations peuvent comporter des erreurs.</li>
-            </ul>
-            <p>
-                <strong>Ne saisissez pas de données personnelles.</strong>
-            </p>
-        </div>
 <%
     user = model.get_user(ctx)
 %>\
@@ -61,11 +52,11 @@ from openfisca_web_ui import model, urls
         % endfor
     % endif
         <div class="row">
-          <div class="col-sm-4">
-            <div id="form-wrapper"></div>
-          </div>
-          <div class="col-sm-8">
-            <div id="chart-wrapper"></div>
-          </div>
+            <div class="col-sm-4">
+                ${form.form(root_question=root_question, user=user)}
+            </div>
+            <div class="col-sm-8">
+                <div id="chart-wrapper"></div>
+            </div>
         </div>
 </%def>

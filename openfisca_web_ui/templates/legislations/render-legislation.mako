@@ -30,6 +30,59 @@ from openfisca_web_ui import urls, uuidhelpers
 %>
 
 
+<%def name="render_dated_legislation_node(node)" filter="trim">
+    % if node.get('@type') == 'Node':
+        % for node_name in node['children']:
+<%
+            node_title = node['children'][node_name].get('description')
+            node_slug = strings.slugify(node_title)
+%>\
+                        <p>
+                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+data-target="#node-${node_slug}">
+                                <span></span>
+                                ${node_title}
+                            </a>
+                        </p>
+                        <div id="node-${node_slug}" class="collapse collapse-node">
+                            <%self:render_dated_legislation_node node="${node['children'][node_name]}"/>
+                        </div>
+        % endfor
+    % elif node.get('@type') == 'Scale':
+        <%self:render_dated_legislation_scale scale="${node}"/>
+    % elif node.get('@type') == 'Parameter':
+        <%self:render_dated_legislation_parameter parameter="${node}"/>
+    % endif
+</%def>
+
+
+<%def name="render_dated_legislation_scale(scale)" filter="trim">
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Seuil</th>
+                <th>Assiette</th>
+                <th>Taux</th>
+            </tr>
+        </thead>
+        <tbody>
+    % for slice in scale.get('slices'):
+            <tr>
+                <td>${slice['threshold'] if slice.get('threshold') else ''}</td>
+                <td>${slice['base'] if slice.get('base') else ''}</td>
+                <td>${slice['rate'] if slice.get('rate') else ''}</td>
+            </tr>
+    % endfor
+        </tbody>
+    </table>
+</%def>
+
+
+<%def name="render_dated_legislation_parameter(parameter)" filter="trim">
+    ${parameter.get('value')}
+</%def>
+
+
 <%def name="render_legislation_node(node)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:
@@ -38,7 +91,8 @@ from openfisca_web_ui import urls, uuidhelpers
             node_slug = strings.slugify(node_title)
 %>\
                         <p>
-                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" data-target="#node-${node_slug}">
+                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+data-target="#node-${node_slug}">
                                 <span></span>
                                 ${node_title}
                             </a>

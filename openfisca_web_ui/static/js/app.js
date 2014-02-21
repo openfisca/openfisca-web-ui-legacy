@@ -5,18 +5,22 @@ define([
 	'AcceptCookiesModalV',
 	'appV',
 	'auth',
+	'disclaimerV',
 	'FormV',
 	'router',
 	'appconfig'
 	],
-	function (bootstrap, AcceptCnilConditionsModalV, AcceptCookiesModalV, appV, auth, FormV, Router, appconfig) {
+	function (bootstrap, AcceptCnilConditionsModalV, AcceptCookiesModalV, appV, auth, disclaimerV, FormV, Router,
+		appconfig) {
 
 		var App = function () {};
 		App.prototype = {
 			init: function () {
 				this.router = Router.init();
 				this.view = appV;
-				this.initForm();
+				// TODO add a condition to avoid loading simulation on each page.
+				disclaimerV.init(appconfig.disclaimer);
+				this.formV = new FormV();
 				if (appconfig.auth.enable) {
 					auth.init(appconfig.auth);
 				}
@@ -26,9 +30,6 @@ define([
 				else if (appconfig.displayAcceptCnilConditionsModal) {
 					this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
 				}
-			},
-			initForm: function() {
-				this.formV = new FormV();
 			}
 		};
 

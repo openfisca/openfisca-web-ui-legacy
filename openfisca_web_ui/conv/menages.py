@@ -29,14 +29,14 @@
 from biryani1.states import default_state
 
 from .. import uuidhelpers
-from . import base
 
 
 roles = (u'personne_de_reference', u'conjoint', u'enfants', u'autres')
 singleton_roles = (u'personne_de_reference', u'conjoint')
 
 
-def api_data_to_page_korma_data(values, state = None):
+def api_data_to_korma_data(values, state = None):
+    from . import base
     if values is None:
         return None, None
     if state is None:
@@ -64,7 +64,7 @@ def api_data_to_page_korma_data(values, state = None):
     return {u'menages': new_menages}, None
 
 
-def korma_data_to_page_api_data(values, state = None):
+def korma_data_to_api_data(values, state = None):
     def add_to(new_menage, role, value):
         global singleton_roles
         if role in singleton_roles:

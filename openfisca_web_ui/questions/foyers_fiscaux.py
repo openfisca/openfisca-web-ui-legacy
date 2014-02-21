@@ -35,13 +35,15 @@ from . import base
 
 
 def make_foyers_fiscaux_repeat(prenom_select_choices):
+    from .. import conv
+
     class FoyerFiscalGroup(Group):
         @property
         def outer_html(self):
             index = self.parent_data['foyers_fiscaux']['index']
             return u'''
 <div class="panel panel-primary">
-  <div class="panel-heading">
+  <div class="panel-heading panel-form">
     <h4 class="panel-title">
       <a data-toggle="collapse" data-parent="#accordion" href="#collapse-foyer-fiscal-{self[id].value}"
 title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
@@ -80,6 +82,7 @@ title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
                                 ),
                             Select(
                                 choices = prenom_select_choices,
+                                input_to_data = conv.base.input_to_uuid,
                                 name = 'id',
                                 ),
                             Button(
@@ -94,7 +97,7 @@ title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
                     name = u'categories',
                     outer_html_template = u'''
 <div class="panel panel-default">
-  <div class="panel-heading">
+  <div class="panel-heading panel-form">
     <h4 class="panel-title">
       <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
 href="#collapse-foyer-fiscal-{self.parent[id].value}-categories" title="affcher / masquer">Plus de précisions</a>
