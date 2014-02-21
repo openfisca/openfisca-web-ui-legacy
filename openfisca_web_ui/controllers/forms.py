@@ -85,9 +85,9 @@ def generate_default_user_api_data():
 def get(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
+    session = update_session(session)
 
     if conf['cookie'] in req.cookies:
-        session = update_session(session)
         if ctx.req.cookies.get(conf['cookie']) != session.token:
             ctx.req.response.set_cookie(
                 conf['cookie'],
@@ -102,7 +102,7 @@ def get(req):
         user_api_data = session.user.current_api_data
     if user_api_data is None:
         user_api_data = generate_default_user_api_data()
-    if session.user.email is not None:
+    if session.user is not None and session.user.email is not None:
         settings_question = questions.legislations.make_legislations_repeat(session.user)
         values, errors = pipe(
             conv.legislations.scenarios_to_page_korma_data,
