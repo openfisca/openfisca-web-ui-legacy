@@ -50,7 +50,7 @@ def get(req):
     session = ctx.session
 
     if conf['cookie'] in req.cookies:
-        update_session(ctx)
+        session = update_session(session)
         if ctx.req.cookies.get(conf['cookie']) != session.token:
             ctx.req.response.set_cookie(
                 conf['cookie'],
@@ -102,10 +102,9 @@ def post(req):
     return wsgihelpers.respond_json(ctx, None)
 
 
-def update_session(ctx):
-    session = ctx.session
+def update_session(session):
     if session is None:
-        session = ctx.session = model.Session()
+        session = model.Session()
         session.token = uuidhelpers.generate_uuid()
     if session.user is None:
         user = model.Account()
@@ -128,3 +127,4 @@ def update_session(ctx):
         session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(safe = True)
+    return session
