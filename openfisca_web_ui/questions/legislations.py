@@ -52,6 +52,9 @@ def make_legislations_repeat(simulations_id_and_name, legislations_id_and_name):
         add_button_label = u'Ajouter un scénario',
         name = u'legislations',
         template_question = LegislationGroup(
+            children_attributes = {
+                '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>'
+                },
             name = u'legislation',
             questions = [
                 base.BootstrapFrenchDate(name = 'year', label = u'Année de simulation'),
