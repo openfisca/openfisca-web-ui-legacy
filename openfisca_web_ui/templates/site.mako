@@ -238,7 +238,6 @@ ${conf['app_name']}
     <script>
 <%
 requireconfig = {
-    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
     'paths': {
         # Bower components
         'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
