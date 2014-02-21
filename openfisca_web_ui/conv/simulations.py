@@ -202,9 +202,19 @@ def user_api_data_to_api_data(user_data, state = None):
     return {'scenarios': [api_data]}, None
 
 
-user_api_data_to_simulation_output = pipe(
+user_api_data_to_api_data = pipe(
     fill_user_api_data,
     user_api_data_to_api_data,
+    )
+
+
+api_data_to_simulation_output = pipe(
     api_data_to_api_post_content,
     api_post_content_to_simulation_output,
+    )
+
+
+user_api_data_to_simulation_output = pipe(
+    user_api_data_to_api_data,
+    api_data_to_simulation_output,
     )

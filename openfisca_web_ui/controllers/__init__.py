@@ -29,6 +29,8 @@
 import datetime
 import logging
 
+from biryani1.baseconv import check
+
 from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
 from . import accounts, forms, legislations, sessions, simulations
 
@@ -41,7 +43,7 @@ router = None
 def accept_cookies(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'POST'
-    if not ('accept' in req.params and conv.check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
+    if not ('accept' in req.params and check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
         # User doesn't accept the use of cookies => Bye bye.
         return wsgihelpers.redirect(ctx, location = conf['www.url'])
     session = ctx.session
@@ -92,7 +94,10 @@ def simulate(req):
     user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
     if user_api_data is None:
         user_api_data = {}
-    output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
+    api_data = check(conv.simulations.user_api_data_to_api_data(user_api_data, state = ctx))
+    output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
+    if errors is not None:
+        log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
     data = {'output': output, 'errors': errors}
     return wsgihelpers.respond_json(ctx, data)
 
