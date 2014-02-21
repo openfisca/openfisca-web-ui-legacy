@@ -33,7 +33,6 @@ import requests
 from biryani1.baseconv import function, pipe, uniform_sequence
 from biryani1.states import default_state
 
-from . import base
 from .. import conf
 
 

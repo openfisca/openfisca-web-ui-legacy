@@ -31,7 +31,7 @@ import datetime
 import json
 import logging
 
-from biryani1.baseconv import function, pipe
+from biryani1.baseconv import condition, function, pipe, struct, test, uniform_sequence
 from biryani1.states import default_state
 import requests
 
@@ -77,8 +77,6 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
 
 def fill_user_api_data(values, state = None):
     """Compute missing values for API consistency and fill user API data with them."""
-    from .. import model
-
     if values is None:
         return None, None
     if state is None:
@@ -156,12 +154,6 @@ def fill_user_api_data(values, state = None):
                 last_menage.setdefault(role_in_menage, []).append(individu_id)
     new_values['menages'] = menages
 
-    # législations
-#    if values.get('legislation_url') is None:
-#        legislation = model.Legislation.find_one()
-#        if legislation is not None:
-#            new_values['legislation_url'] = legislation.get_api1_full_url(state, 'json')
-
     if values.get('year') is None:
         new_values['year'] = 2013
 
@@ -202,9 +194,76 @@ def user_api_data_to_api_data(user_data, state = None):
     return {'scenarios': [api_data]}, None
 
 
+def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
+    if scenarios_api_data is None:
+        return None, None
+    if state is None:
+        state = default_state
+
+    scenarios = []
+    for scenario_api_data in scenarios_api_data:
+        api_data = {
+            'familles': scenario_api_data.get('familles', {}).values(),
+            'foyers_fiscaux': scenario_api_data.get('foyers_fiscaux', {}).values(),
+            'menages': scenario_api_data.get('menages', {}).values(),
+            'individus': [],
+            'legislation_url': scenario_api_data.get('legislation_url'),
+            'year': scenario_api_data.get('year', 2013),
+            }
+        for individu_id in scenario_api_data.get('individus', {}).iterkeys():
+            individu = dict(
+                (key, value)
+                for key, value in scenario_api_data['individus'][individu_id].iteritems()
+                )
+            individu['id'] = individu_id
+            api_data['individus'].append(individu)
+        scenarios.append(api_data)
+    return {'scenarios': scenarios}, None
+
+
 user_api_data_to_simulation_output = pipe(
     fill_user_api_data,
     user_api_data_to_api_data,
     api_data_to_api_post_content,
     api_post_content_to_simulation_output,
     )
+
+
+def scenarios_to_simulation_output(values, state = None):
+    from itertools import chain
+    from .. import model
+    from . import base
+    return pipe(
+        uniform_sequence(
+            pipe(
+                struct({
+                    'legislation': pipe(
+                        model.Legislation.make_id_or_slug_or_words_to_instance(),
+                        condition(
+                            test(lambda legislation: legislation.url is None),
+                            function(lambda legislation: legislation.get_api1_full_url(state, 'json')),
+                            function(lambda legislation: legislation.url),
+                            ),
+                        base.debug,
+                        ),
+                    'simulation': pipe(
+                        model.Simulation.make_id_or_slug_or_words_to_instance(),
+                        function(lambda simulation: simulation.api_data),
+                        fill_user_api_data,
+                        ),
+                    'year': function(lambda d: int(d.strftime('%Y'))),
+                    }),
+                function(lambda struct: dict(
+                    (key, value)
+                    for key, value in chain(
+                        (struct['simulation'] or {}).iteritems(),
+                        [('legislation_url', struct['legislation']), ('year', struct['year'])],
+                        )
+                    )),
+                ),
+            ),
+        scenarios_api_data_to_api_data,
+        api_data_to_api_post_content,
+        api_post_content_to_simulation_output,
+        base.debug,
+        )(values, state = state)

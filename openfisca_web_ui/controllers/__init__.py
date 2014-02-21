@@ -134,11 +134,17 @@ def make_router():
 def simulate(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
-    if user_api_data is None:
-        user_api_data = {}
-    output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
-    data = {'output': output, 'errors': errors}
+    data = None
+    user_scenarios = session.user.scenarios if session is not None and session.user is not None else None
+    if user_scenarios is None:
+        user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
+        if user_api_data is None:
+            user_api_data = {}
+        output, errors = conv.simulations.user_api_data_to_simulation_output(user_api_data, state = ctx)
+        data = {'output': output, 'errors': errors}
+    else:
+        output, errors = conv.simulations.scenarios_to_simulation_output(user_scenarios, state = ctx)
+        data = {'output': output, 'errors': errors}
     return wsgihelpers.respond_json(ctx, data)
 
 

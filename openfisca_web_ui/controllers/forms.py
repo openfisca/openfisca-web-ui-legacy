@@ -104,7 +104,6 @@ def post(req):
         return wsgihelpers.unauthorized(ctx)
     assert session.user is not None
     user_api_data = session.user.current_api_data
-    user_scenarios = session.user.scenarios
     if user_api_data is None:
         user_api_data = {}
     page_data = req.urlvars['page_data']

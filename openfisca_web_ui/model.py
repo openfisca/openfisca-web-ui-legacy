@@ -441,7 +441,7 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
                 state = conv.default_state
             id, error = conv.str_to_object_id(value, state = state)
             if error is None:
-                self = cls.find_one(dict(id = id, author_id = user_id), as_class = collections.OrderedDict)
+                self = cls.find_one(dict(_id = id), as_class = collections.OrderedDict)
             else:
                 self = cls.find_one(dict(slug = value, author_id = user_id), as_class = collections.OrderedDict)
             if self is None:
