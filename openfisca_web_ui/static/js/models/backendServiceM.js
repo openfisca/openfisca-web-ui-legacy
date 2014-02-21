@@ -25,7 +25,7 @@ define([
 					this.set('formData', data);
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('fetchForm fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+					console.error('fetchForm fail', jqXHR, textStatus, errorThrown);
 				})
 				.always(function() {
 					if ( ! _.isUndefined(callback)) {
@@ -37,22 +37,20 @@ define([
 				$.ajax({
 					context: this,
 					data: data,
-					dataType: 'json',
 					type: 'POST',
 					url: this.urlPaths.form
 				})
 				.done(function(data, textStatus, jqXHR) {
 					if (data !== null && ! _.isUndefined(data.errors)) {
-						console.error('saveForm errors', data);
+						console.error('Errors in form', data.errors);
+						this.set('formData', data.formHtml);
+					}
+					if (! _.isUndefined(callback)) {
+						callback();
 					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error(jqXHR, textStatus, errorThrown);
-				})
-				.always(function() {
-					if ( ! _.isUndefined(callback)) {
-						callback();
-					}
 				});
 			},
 			simulate: function() {
@@ -73,6 +71,7 @@ define([
 					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.error(jqXHR, textStatus, errorThrown);
 				});
 			}
 		});

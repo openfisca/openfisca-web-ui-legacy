@@ -139,10 +139,12 @@ def post(req):
     inputs = variabledecode.variable_decode(req.params)
     data, errors = root_question.root_input_to_data(inputs, state = ctx)
     if errors is not None:
+        root_question.fill(inputs, errors)
         if req.is_xhr:
-            return wsgihelpers.respond_json(ctx, {'errors': errors})
+            form_html = templates.render_def(ctx, '/form.mako', 'form', root_question = root_question,
+                                             user = session.user)
+            return wsgihelpers.respond_json(ctx, {'errors': errors, 'formHtml': form_html})
         else:
-            root_question.fill(inputs, errors)
             return templates.render(ctx, '/index.mako', root_question = root_question)
     api_data = check(conv.base.korma_data_to_api_data(data, state = ctx))
     if api_data is not None:
