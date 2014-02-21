@@ -28,6 +28,7 @@
 
 import collections
 import datetime
+from itertools import chain
 import json
 import logging
 
@@ -170,30 +171,6 @@ def get_role_in_famille(individu_id, familles):
     return None
 
 
-def user_api_data_to_api_data(user_data, state = None):
-    if user_data is None:
-        return None, None
-    if state is None:
-        state = default_state
-
-    api_data = {
-        'familles': user_data.get('familles', {}).values(),
-        'foyers_fiscaux': user_data.get('foyers_fiscaux', {}).values(),
-        'menages': user_data.get('menages', {}).values(),
-        'individus': [],
-#        'legislation_url': user_data.get('legislation_url'),
-        'year': user_data.get('year', 2013),
-        }
-    for individu_id in user_data.get('individus', {}).iterkeys():
-        individu = dict(
-            (key, value)
-            for key, value in user_data['individus'][individu_id].iteritems()
-            )
-        individu['id'] = individu_id
-        api_data['individus'].append(individu)
-    return {'scenarios': [api_data]}, None
-
-
 def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
     if scenarios_api_data is None:
         return None, None
@@ -221,28 +198,8 @@ def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
     return {'scenarios': scenarios}, None
 
 
-user_api_data_to_api_data = pipe(
-    fill_user_api_data,
-    user_api_data_to_api_data,
-    )
-
-
-api_data_to_simulation_output = pipe(
-    api_data_to_api_post_content,
-    api_post_content_to_simulation_output,
-    )
-
-
-user_api_data_to_simulation_output = pipe(
-    user_api_data_to_api_data,
-    api_data_to_simulation_output,
-    )
-
-
-def scenarios_to_simulation_output(values, state = None):
-    from itertools import chain
+def scenarios_to_api_data(values, state = None):
     from .. import model
-    from . import base
     return pipe(
         uniform_sequence(
             pipe(
@@ -254,7 +211,6 @@ def scenarios_to_simulation_output(values, state = None):
                             function(lambda legislation: legislation.get_api1_full_url(state, 'json')),
                             function(lambda legislation: legislation.url),
                             ),
-                        base.debug,
                         ),
                     'simulation': pipe(
                         model.Simulation.make_id_or_slug_or_words_to_instance(),
@@ -273,7 +229,45 @@ def scenarios_to_simulation_output(values, state = None):
                 ),
             ),
         scenarios_api_data_to_api_data,
-        api_data_to_api_post_content,
-        api_post_content_to_simulation_output,
-        base.debug,
-        )(values, state = state)
+    )(values, state = state)
+
+
+def user_api_data_to_api_data(user_data, state = None):
+    if user_data is None:
+        return None, None
+    if state is None:
+        state = default_state
+
+    api_data = {
+        'familles': user_data.get('familles', {}).values(),
+        'foyers_fiscaux': user_data.get('foyers_fiscaux', {}).values(),
+        'menages': user_data.get('menages', {}).values(),
+        'individus': [],
+        'year': user_data.get('year', 2013),
+        }
+    for individu_id in user_data.get('individus', {}).iterkeys():
+        individu = dict(
+            (key, value)
+            for key, value in user_data['individus'][individu_id].iteritems()
+            )
+        individu['id'] = individu_id
+        api_data['individus'].append(individu)
+    return {'scenarios': [api_data]}, None
+
+
+user_api_data_to_api_data = pipe(
+    fill_user_api_data,
+    user_api_data_to_api_data,
+    )
+
+
+api_data_to_simulation_output = pipe(
+    api_data_to_api_post_content,
+    api_post_content_to_simulation_output,
+    )
+
+
+user_api_data_to_simulation_output = pipe(
+    user_api_data_to_api_data,
+    api_data_to_simulation_output,
+    )

@@ -97,12 +97,11 @@ def simulate(req):
         if user_api_data is None:
             user_api_data = {}
         api_data = check(conv.simulations.user_api_data_to_api_data(user_api_data, state = ctx))
-        output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
-        if errors is not None:
-            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
     else:
-        output, errors = conv.simulations.scenarios_to_simulation_output(user_scenarios, state = ctx)
-        # TODO add same log.error than above.
+        api_data = check(conv.simulations.scenarios_to_api_data(user_scenarios, state = ctx))
+    output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
+    if errors is not None:
+        log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
     data = {'output': output, 'errors': errors}
     return wsgihelpers.respond_json(ctx, data)
 
