@@ -13,7 +13,7 @@ define([
 			currentTabName: 'familles',
 			el: 'form[name="situation"]',
 			events: {
-//				'change :input': 'submit',
+				'change :input': 'submit',
 				'click :input[type="submit"]': 'onSubmitClicked',
 				'keypress :input': 'onKeyPress'
 			},
