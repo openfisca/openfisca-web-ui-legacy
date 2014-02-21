@@ -66,12 +66,12 @@ def get(req):
         user_api_data = generate_default_user_api_data()
 
     root_question = questions.base.make_situation_form(user_api_data)
-    korma_values, korma_errors = pipe(
+    values, errors = pipe(
         conv.base.api_data_to_korma_data,
         root_question.data_to_str,
         )(user_api_data, state = ctx)
-    root_question.value = korma_values
-    root_question.error = korma_errors
+    root_question.value = values
+    root_question.error = errors
 
     return templates.render(ctx, '/index.mako', root_question = root_question)
 
@@ -90,16 +90,23 @@ def post(req):
 
     root_question = questions.base.make_situation_form(user_api_data)
     inputs = variabledecode.variable_decode(req.params)
-    korma_data, korma_errors = root_question.root_input_to_data(inputs, state = ctx)
-    if korma_errors is not None:
-        return wsgihelpers.respond_json(ctx, {'errors': korma_errors})
-    api_data = check(conv.base.korma_data_to_api_data(korma_data, state = ctx))
+    data, errors = root_question.root_input_to_data(inputs, state = ctx)
+    if errors is not None:
+        if req.is_xhr:
+            return wsgihelpers.respond_json(ctx, {'errors': errors})
+        else:
+            root_question.fill(inputs, errors)
+            return templates.render(ctx, '/index.mako', root_question = root_question)
+    api_data = check(conv.base.korma_data_to_api_data(data, state = ctx))
     if api_data is not None:
         user_api_data.update(api_data)
         current_simulation = session.user.current_simulation
         current_simulation.api_data = user_api_data
         current_simulation.save(safe = True)
-    return wsgihelpers.respond_json(ctx, None)
+    if req.is_xhr:
+        return wsgihelpers.respond_json(ctx, None)
+    else:
+        return wsgihelpers.redirect(ctx, location = '')
 
 
 def update_session(session):
