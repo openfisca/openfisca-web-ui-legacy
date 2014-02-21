@@ -13,17 +13,23 @@ define([
 			currentTabName: 'familles',
 			el: 'form[name="situation"]',
 			events: {
-				'change :input': 'submit',
+				'change :input': 'onInputChange',
 				'click :input[type="submit"]': 'onSubmitClicked',
 				'keypress :input': 'onKeyPress'
 			},
 			model: backendServiceM,
 			submitTriggered: false,
-
 			initialize: function() {
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
-			onKeyPress: function (evt) {
+			onInputChange: function(evt) {
+				var $input = $(evt.target);
+				if ($input.parents('.main-category').length) {
+					var formDataStr = this.$el.serialize();
+					this.submit(formDataStr, false);
+				}
+			},
+			onKeyPress: function(evt) {
 				if (evt.keyCode === 13) {
 					evt.preventDefault();
 					var formDataStr = this.$el.serialize();
@@ -45,7 +51,7 @@ define([
 				}
 				this.submit(formDataStr, doReloadForm);
 			},
-			render: function () {
+			render: function() {
 				var formData = this.model.get('formData');
 				if ( ! _.isUndefined(formData)) {
 					this.$el.html(formData);

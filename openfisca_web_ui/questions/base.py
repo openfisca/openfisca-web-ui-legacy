@@ -163,10 +163,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
             category_group = Group(
                 children_attributes = {'_outer_html_template': bootstrap_form_group},
                 name = 'principal',
-                outer_html_template = u'''
-{{self.inner_html}}
-<p><button class="btn btn-default" type="submit">{validate}</button></p>
-'''.format(validate = ctx._(u'Validate')),
+                outer_html_template = u'<div class="main-category">{self.inner_html}</div>',
                 questions = group_questions,
                 )
         else:
