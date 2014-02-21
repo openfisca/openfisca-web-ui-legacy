@@ -28,8 +28,10 @@
 
 import collections
 import datetime
+import json
 import logging
 import re
+import requests
 
 import pymongo
 import webob
@@ -37,7 +39,7 @@ import webob.multidict
 
 from biryani1.baseconv import cleanup_text, input_to_slug, not_none, pipe
 
-from .. import contexts, conv, model, paginations, templates, urls, wsgihelpers
+from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
 inputs_to_legislation_data = conv.pipe(
@@ -269,9 +271,18 @@ def admin_view(req):
         conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
         conv.default(datetime.datetime.utcnow())
         )(params.get('date'), state = ctx)
+    response = requests.post(
+        conf['api.urls.legislations'],
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': conf['app_name'],
+            },
+        data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
+        )
+    legislation.json = response.json()['dated_legislation']
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)
-    return templates.render(ctx, '/legislations/admin-view.mako', date = data, legislation = data)
+    return templates.render(ctx, '/legislations/admin-view.mako', date = date, legislation = legislation)
 
 
 @wsgihelpers.wsgify

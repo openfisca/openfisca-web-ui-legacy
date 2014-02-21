@@ -47,17 +47,30 @@ from openfisca_web_ui import model, urls
             <h1>${_('Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
         </div>
         <div class="panel panel-default">
-            <div class="panel-body">
-                <%self:view_fields/>
+            <div class="panel-heading">
+                <h2 class="panel-title">${legislation.get_title(ctx)}</h2>
             </div>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <%self:view_fields/>
+                </li>
+                <li class="list-group-item">
+                    <%self:view_content/>
+                </li>
+            </ul>
 <%
     user = model.get_user(ctx)
 %>\
     % if model.is_admin(ctx) or user is not None and user._id == legislation.author_id:
             <div class="panel-footer">
                 <div class="btn-toolbar">
+                    <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}">
+                        ${_(u'View as JSON')}
+                    </a>
                     <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
-                    <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
+                    <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
+                        <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
+                    </a>
                 </div>
             </div>
     % endif
@@ -76,96 +89,58 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
 
 
 <%def name="view_fields()" filter="trim">
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Title"))}</b></div>
-            <div class="col-sm-10">${legislation.title}</div>
-        </div>
+        <dl class="dl-horizontal">
 <%
     value = legislation.description
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Description"))}</b></div>
-            <div class="col-sm-10">
-                ${legislation.description}
-            </div>
-        </div>
+            <dt>${_("Description")}</dt>
+            <dd>${legislation.description}</dd>
     % endif
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Download URL"))}</b></div>
-            <div class="col-sm-10">
-                <a href="${legislation.get_api1_url(ctx, 'json')}">
-                    ${legislation.get_api1_full_url(ctx, 'json')}
-                </a>
-            </div>
-        </div>
 <%
     value = legislation.url
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Source URL"))}</b></div>
-            <div class="col-sm-10">
-                <a href="${value}">${value}
-                </a>
-            </div>
-        </div>
-    % endif
-<%
-    value = legislation.json
-%>\
-    % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Content"))}</b></div>
-            <div class="col-sm-10">
-<%
-        user = model.get_user(ctx)
-%>\
-        % if user is not None and user.email is not None:
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#description-view">${_(u"View")}</a></li>
-                    <li><a data-toggle="tab" href="#description-source">${_(u"Source")}</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="active tab-pane" id="description-view">
-        % endif
-                        <div class="pull-right">
-                            <button type="button" class="btn btn-default btn-xs btn-toggle-open">
-                                ${_('Open all')}
-                            </button>
-                            <button type="button" class="btn btn-default btn-xs btn-toggle-close">
-                                ${_('Close all')}
-                            </button>
-                        </div>
-                        <%render_legislation:render_legislation_node node="${value}"/>
-        % if user is not None and user.email is not None:
-                    </div>
-                    <div class="tab-pane" id="description-source">
-                        <pre class="break-word">${value | n, js, h}</pre>
-                    </div>
-                </div>
-        % endif
-                <hr>
-            </div>
-        </div>
+            <dt>${_("Source URL")}</dt>
+            <dd><a href="${value}">${value}</a></dd>
     % endif
 <%
     value = legislation.updated
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Updated"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+            <dt>${_("Updated")}</dt>
+            <dd>${value}</dd>
     % endif
 <%
     value = legislation.published
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Published"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+            <dt>${_("Published")}</dt>
+            <dd>${value}</dd>
+        </dl>
     % endif
 </%def>
 
+
+<%def name="view_content()" filter="trim">
+<%
+    value = legislation.json
+%>\
+    % if value is not None:
+        <div class="row">
+            <div class="col-lg-8">
+            % if value.get('datesim'):
+                <%render_legislation:render_dated_legislation_node node="${value}"/>
+            % else:
+                <%render_legislation:render_legislation_node node="${value}"/>
+            % endif:
+##                <button type="button" class="btn btn-default btn-xs btn-toggle-open">
+##                    ${_('Open all')}
+##                </button>
+##                <button type="button" class="btn btn-default btn-xs btn-toggle-close">
+##                    ${_('Close all')}
+##                </button>
+            </div>
+        </div>
+    % endif
+</%def>

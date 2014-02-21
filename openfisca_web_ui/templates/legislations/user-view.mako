@@ -48,12 +48,23 @@ from openfisca_web_ui import model, urls, uuidhelpers
         </div>
 
         <div class="panel panel-default">
-            <div class="panel-body">
-                <%view:view_fields/>
+            <div class="panel-heading">
+                <h2 class="panel-title">${legislation.get_title(ctx)}</h2>
             </div>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <%view:view_fields/>
+                </li>
+                <li class="list-group-item">
+                    <%view:view_content/>
+                </li>
+            </ul>
             <div class="panel-footer">
                 <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">
-                    ${_(u'Duplicate and edit my own version')}
+                    ${_(u'Duplicate and edit copy')}
+                </a>
+                <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}" rel="external">
+                    ${_(u'View as JSON')}
                 </a>
             </div>
         </div>
