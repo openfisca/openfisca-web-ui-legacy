@@ -63,3 +63,9 @@ def index_appconfig(ctx):
             },
         }
     return appconfig
+
+
+def legislation_appconfig(ctx):
+    appconfig = base_appconfig(ctx)
+    appconfig['enabledModules']['legislation'] = True
+    return appconfig

@@ -28,6 +28,11 @@ define([
 						disclaimer.init(enabledModules.disclaimer);
 					});
 				}
+				if (enabledModules.legislation) {
+					require(['legislation'], function(legislation) {
+						legislation.init();
+					});
+				}
 				if (enabledModules.situationForm) {
 					require(['appV', 'router', 'SituationFormV'], function(appV, router, SituationFormV) {
 						this.router = router.init();

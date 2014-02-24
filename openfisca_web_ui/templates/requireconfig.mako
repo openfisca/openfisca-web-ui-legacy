@@ -58,6 +58,7 @@ requireconfig = {
         'auth': urls.get_url(ctx, u'js/views/auth'),
         'disclaimer': urls.get_url(ctx, u'js/views/disclaimer'),
         'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
+        'legislation': urls.get_url(ctx, u'js/views/legislation'),
         'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
         'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
         'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),

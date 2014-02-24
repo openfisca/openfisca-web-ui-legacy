@@ -38,6 +38,11 @@ from openfisca_web_ui import model, urls, uuidhelpers
 <%namespace name="view" file="admin-view.mako"/>
 
 
+<%def name="appconfig_script()" filter="trim">
+    <%render_legislation:appconfig_script/>
+</%def>
+
+
 <%def name="breadcrumb()" filter="trim">
 </%def>
 
@@ -68,11 +73,6 @@ from openfisca_web_ui import model, urls, uuidhelpers
                 </a>
             </div>
         </div>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-    <%render_legislation:scripts/>
 </%def>
 
 

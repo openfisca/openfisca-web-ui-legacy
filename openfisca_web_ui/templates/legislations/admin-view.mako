@@ -34,6 +34,11 @@ from openfisca_web_ui import model, urls
 <%namespace name="render_legislation" file="/legislations/render-legislation.mako"/>
 
 
+<%def name="appconfig_script()" filter="trim">
+    <%render_legislation:appconfig_script/>
+</%def>
+
+
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
             <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
@@ -75,11 +80,6 @@ from openfisca_web_ui import model, urls
             </div>
     % endif
         </div>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-    <%render_legislation:scripts/>
 </%def>
 
 

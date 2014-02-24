@@ -27,7 +27,13 @@
 from biryani1 import strings
 
 from openfisca_web_ui import urls, uuidhelpers
+from openfisca_web_ui.templates import helpers
 %>
+
+
+<%def name="appconfig_script()" filter="trim">
+define('appconfig', ${helpers.legislation_appconfig(ctx) | n, js});
+</%def>
 
 
 <%def name="render_dated_legislation_node(node)" filter="trim">
@@ -133,28 +139,4 @@ data-target="#node-${node_slug}">
 
 <%def name="render_legislation_parameter(parameter)" filter="trim">
     ${parameter[-1].get('value')}
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
-    <script>
-<%
-requireconfig = {
-    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
-    'paths': {
-        # Bower components
-        'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
-        'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
-        'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
-        },
-    'shim': {
-        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
-        'jquery': {'exports': '$'},
-        },
-    }
-%>\
-require.config(${requireconfig | n, js});
-require([${urls.get_url(ctx, u'js/legislation.js') | n, js}]);
-    </script>
 </%def>
