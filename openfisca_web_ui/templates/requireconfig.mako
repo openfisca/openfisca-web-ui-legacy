@@ -44,6 +44,7 @@ requireconfig = {
         'd3': urls.get_url(ctx, u'bower/d3/d3'),
         'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
         'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
+        'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
         'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
 
         # App
@@ -77,6 +78,7 @@ requireconfig = {
         'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
         'd3': {'exports': 'd3'},
         'jquery': {'exports': '$'},
+        'nvd3': {'exports': 'nv', 'deps': ['d3']},
         'underscore': {'exports': '_'},
         },
     }

@@ -1,7 +1,7 @@
 define([
 	'LocatingChartM',
 	'helpers',
-	'bower/nvd3/nv.d3',
+	'nvd3',
 
 	'jquery',
 	'underscore',
