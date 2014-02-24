@@ -32,9 +32,9 @@ define([
 				top: 0,
 				left: 0,
 				bottom: 0,
-				right: 50
+				right: 80
 			},
-			innerPadding: 20,
+			innerPadding: 10,
 
 			title: '',
 
@@ -47,9 +47,8 @@ define([
 			initialize: function (parent) {
 //				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
 
-				// console.log('WaterfallChartV initialized');
-
 				this.g = parent.svg.append('g').attr('id', 'waterfall-chart');
+
 				this.setElement(this.g[0]);
 
 				this.height = parent.height - this.margin.bottom - this.margin.top;
@@ -61,14 +60,20 @@ define([
 			render: function (args) {
 
 				var args = args || {};
-				if(args.getDatas || _.isUndefined(args.getDatas)) this.setData(this.model.get('groupedDatasAll'));
-				
-				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) this.buildLegend();
-				else this.updateLegend();
+				if(_.isUndefined(args.getDatas) || args.getDatas) this.setData(this.model.get('groupedDatasAll'));
 
 				this.buildBars({endTransitionCallback: this.buildActiveBars});
 
+				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) this.buildLegend();
+				else this.updateLegend();
+
 				return this;
+			},
+			_events: function () {
+				var that = this;
+				this.g.on('click', function (d) {
+					that.updateScales();		
+				});
 			},
 			setData: function (data) {
 				/* Set stopvalues */
@@ -90,6 +95,9 @@ define([
 
 				this.updateScales();
 			},
+			setViewAllButton: function () {
+
+			},
 			updateScales: function (args) {
 				var args = args || {},
 					that = this,
@@ -97,22 +105,11 @@ define([
 						return [data.waterfall.startValue, data.waterfall.endValue];
 				});
 
-				// if(!_.isUndefined(args.yValues)) {
-				// 	this.scales = {
-				// 		x: d3.scale.ordinal()
-				// 			.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-				// 			.domain(that.currentDataSet.children.map(function(d) {
-				// 				return d.name;
-				// 		})),
-				// 		y: d3.scale.linear()
-				// 			.domain([
-				// 				d3.min(args.yValues),
-				// 				d3.max(args.yValues)
-				// 		]).range([that.height - that.padding.bottom, that.padding.top])
-				// 	};
-				// }
-				// else {
-					/* Set scales */
+				if(!_.isUndefined(args.yValues)) {
+
+					var yMin = d3.min(args.yValues),
+						yMax = d3.max(args.yValues);
+
 					this.scales = {
 						x: d3.scale.ordinal()
 							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
@@ -120,14 +117,54 @@ define([
 								return d.name;
 						})),
 						y: d3.scale.linear()
-								.domain([
-									d3.min(currentDataSetValues, function (d) { return d3.min(d);}),
-									d3.max(currentDataSetValues, function (d) { return d3.max(d);})
-						]).range([that.height - that.padding.bottom, that.padding.top])
+							.domain([d3.min(args.yValues), d3.max(args.yValues)])
+							.range([that.height - that.padding.bottom, that.padding.top])
 					};
-				// }
 
-				var magnitude = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
+
+					if(_.isUndefined(this.backToGlobalScaleButton)) {
+						this.backToGlobalScaleButton = this.g.append('text')
+								.attr('class', 'back-to-global-scale-button')
+								.text('Retour à la globale')
+								.attr('x', function () {
+									return that.width/2;
+								})
+								.attr('y', function () {
+									return that.padding.top;
+								})
+								.attr('text-anchor', 'middle')
+								.on('click', function () {
+									that.updateScales();
+									that.render({getDatas: false});
+								});
+					}
+					
+
+				}
+				else {
+					/* Set scales */
+					var yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);}),
+						yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
+					this.scales = {
+						x: d3.scale.ordinal()
+							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
+							.domain(that.currentDataSet.children.map(function(d) {
+								return d.name;
+						})),
+						y: d3.scale.linear()
+							.domain([yMin, yMax])
+							.range([that.height - that.padding.bottom, that.padding.top])
+					};
+
+					if(!_.isUndefined(this.backToGlobalScaleButton)) {
+						this.backToGlobalScaleButton
+							.on('click', null)
+							.transition().duration(100)
+							.remove();
+						this.backToGlobalScaleButton = undefined;
+					}
+				}
+				var magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax);
 				this.prefix = d3.formatPrefix(magnitude);
 				switch(this.prefix.symbol) {
 					case 'G':
@@ -136,8 +173,13 @@ define([
 					case 'M':
 						this.legendText = 'En\nmillions\nd\'euros';
 						break;
-					default:
+					case 'k':
+						this.legendText = 'En\nmilliers\nd\'euros';
+						break;
+					case '':
 						this.legendText = 'En euros';
+					default:
+						this.legendText = '';
 				}
 			},
 			buildBars: function (args) {
@@ -217,6 +259,34 @@ define([
 						.each('end', function () {
 							this.remove();
 						});
+
+				if(_.isUndefined(this.bottomGradientProp) && _.isUndefined(this.topGradientProp)) {
+					this.bottomGradientProp = this.g.append("svg:defs").append("svg:linearGradient").attr("id", "bottomBorderGradient").attr("x1", "50%").attr("y1", "0").attr("x2", "50%").attr("y2", "100%").attr("spreadMethod", "pad");
+				this.bottomGradientProp.append("svg:stop").attr("offset", "0%").attr("stop-color", "#FFF").attr("stop-opacity", 0);
+				this.bottomGradientProp.append("svg:stop").attr("offset", "30%").attr("stop-color", "#FFF").attr("stop-opacity", 0.5);
+				this.bottomGradientProp.append("svg:stop").attr("offset", "100%").attr("stop-color", "#FFF").attr("stop-opacity", 1);
+
+				this.topGradientProp = this.g.append("svg:defs").append("svg:linearGradient").attr("id", "topBorderGradient").attr("x1", "50%").attr("y1", "0").attr("x2", "50%").attr("y2", "100%").attr("spreadMethod", "pad");
+				this.topGradientProp.append("svg:stop").attr("offset", "0%").attr("stop-color", "#FFF").attr("stop-opacity", 1);
+				this.topGradientProp.append("svg:stop").attr("offset", "70%").attr("stop-color", "#FFF").attr("stop-opacity", 0.5);
+				this.topGradientProp.append("svg:stop").attr("offset", "100%").attr("stop-color", "#FFF").attr("stop-opacity", 0);
+
+				this.g.append("svg:rect")
+					.attr("width", that.width+that.margin.right)
+					.attr("height", that.padding.bottom)
+					.attr("x", 0)
+					.attr("y", that.height - that.padding.bottom)
+					.style("fill", "url(#bottomBorderGradient)");
+
+				this.g.append("svg:rect")
+					.attr("width", that.width+that.margin.right)
+					.attr("height", that.padding.top)
+					.attr("x", 0)
+					.attr("y", 0)
+					.style("fill", "url(#topBorderGradient)");
+				}
+
+				if(!_.isUndefined(this.backToGlobalScaleButton)) this.backToGlobalScaleButton.moveToFront();
 			},
 			buildActiveBars: function () {
 				var that = this,
@@ -271,7 +341,7 @@ define([
 								.attr('text-anchor', 'middle')
 								.attr('fill', d3.select(this).attr('fill'))
 								.text(function () {
-									var v = d3.round(d.value);
+									var v = d3.round(that.prefix.scale(d.value), 2);
 									return ((d.value > 0)? '+': '') + v;
 								})
 								.attr('opacity', 0)
@@ -288,7 +358,6 @@ define([
 
 
 							that.incomeLine = that.g.append('line')
-
 								.attr('stroke', function () { return barAttrs.fill; })
 								.attr('stroke-width', function () {
 									return 2;
@@ -302,16 +371,41 @@ define([
 								.moveToFront();
 							
 							that.incomeText = that.g.append('text')
-								.attr('fill', '#333')
+								.attr('fill', d3.select(this).attr('fill'))
 								.attr('x', function () { return that.width + 5 })
 								.attr('y', function () {  return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
-								.attr('font-size', 16)
+								.attr('font-size', 15)
 								.attr('font-weight', 'bold')
 								.text(function () { 
-									var v = d3.round(barData.waterfall.endValue);
-									// console.log(v);
+									var v = d3.round(that.prefix.scale(barData.waterfall.endValue), 2);
 									return v
-								});
+							});
+
+							if(!_.isUndefined(d.parentNodes[0])) {
+								var parentNode = d.parentNodes[0].split(' ');
+								that.incomeLabel = that.g.selectAll('.income-label')
+									.data(parentNode);
+
+								that.incomeLabel
+									.enter()
+										.append('text')
+										.attr('class', 'income-label')
+										.attr('x', function () { return that.width + 5 })
+										.attr('font-size', 12)
+										.attr('font-weight', 'bold')
+										.attr('y', function (_d, _i) { 
+											var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
+											return barAttrs.y + lineHeight + _i * lineHeight + (barData.value < 0 ? (barAttrs.height) : 0);
+										})
+										.text(function (d) {
+											return d;
+										});
+
+								that.incomeLabel
+									.exit()
+										.transition().duration(100)
+										.remove();
+							}
 
 							that.incomeLine
 								.transition().duration(100)
@@ -345,9 +439,19 @@ define([
 								.transition().duration(100)
 								.attr('opacity', 0)
 								.remove();
+
+							if(!_.isUndefined(that.incomeLabel)) {
+								that.incomeLabel
+									.transition().duration(100)
+										.attr('opacity', 0)
+									.remove();
+							}
 						})
 						.on('click', function (d) {
-//							that.updateScales({ yValues: [barAttrs.y, barAttrs.y+barAttrs]})
+							var topV = d.waterfall.startValue - (d.value*3),
+								bottomV = d.waterfall.endValue + (d.value*3);
+							that.updateScales({ yValues: [topV, bottomV]});
+							that.render({getDatas: false});
 						});
 
 				this.activeBars.moveToFront();
@@ -376,6 +480,9 @@ define([
 
 				this.xAxis.scale(this.scales.x)
 				this.yAxis.scale(this.scales.y)
+					.tickFormat(function (d) {
+				        return that.prefix.scale(d); 
+				    })
 
 				this.yAxisLegend
 					.transition()
@@ -387,12 +494,8 @@ define([
 					.duration(1000)
 					.call(this.xAxis);
 
-
-				var legendTextSplited = this.legendText.split('\n');
-				this.legendTextObject = this.g.selectAll('.legendText_y')
-					.data(legendTextSplited)
-
-				this.g.selectAll('.x-axis .tick text')
+				this.g.select('.x-axis').moveToFront()
+				this.g.selectAll('.x-axis .tick text')					
 					.attr('transform', function (d) {
 						var el = d3.select(this),
 							_dim = this.getBBox();
@@ -402,22 +505,28 @@ define([
 							y = _dim.y;
 
 						return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
-				});
+					});
 
+
+				var legendTextSplited = this.legendText.split('\n');
+				this.legendTextObject = this.g.selectAll('.legendText_y')
+					.data(legendTextSplited)
 
 				this.legendTextObject
+					.text(function (d) { return d; })
 					.enter().append('svg:text')
-					.attr('class', 'legendText_y')
-					.attr('fill', '#333')
-					.attr('x', function (d) { return that.padding.left; })
-					.attr('y', function (d, i) {  return 10 + i*10; })
-					.attr('font-size', 12)
-					.attr('font-weight', 'normal')
-					.attr('text-anchor', 'end')
-					.text(function (d) { return d; });
+						.attr('class', 'legendText_y')
+						.attr('fill', '#333')
+						.attr('x', function (d) { return that.padding.left; })
+						.attr('y', function (d, i) {  return 10 + i*10; })
+						.attr('font-size', 12)
+						.attr('font-weight', 'normal')
+						.attr('text-anchor', 'end')
+						.text(function (d) { return d; });
 
-				this.legendTextObject
-					.exit().transition().duration(50).remove();
+				this.legendTextObject.moveToFront()
+
+				this.legendTextObject.exit().remove();
 			},
 			buildLegend: function () {
 
@@ -481,6 +590,9 @@ define([
 						.attr('text-anchor', 'end')
 						.text(function (d) { return d; });
 
+			},
+			_remove: function () {
+				
 			}
 		});
 	return WaterfallChartV;

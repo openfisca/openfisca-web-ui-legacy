@@ -14,14 +14,14 @@ define([
 				datasForBubbles: {},
 				groupedDatasAll: {},
 				groupedDatasAll: {},
-				groupedDatasPositive: {}
+				groupedDatasPositive: {},
 			},
 			backendServiceM: backendServiceM,
 			initialize: function () {
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
 			},
 			parse: function () {
-				this.set('source', this.backendServiceM.get('apiData'));
+				this.set('source', $.extend(true, {}, this.backendServiceM.get('apiData')));
 				this.clean();
 				this.groupByPositive();
 				this.groupByAll();

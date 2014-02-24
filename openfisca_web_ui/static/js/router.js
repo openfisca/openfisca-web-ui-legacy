@@ -19,17 +19,20 @@ define([
 		},
 		waterfallChart: function () {
 			appV.render({
-				chart: 'waterfall'
+				chart: 'waterfall',
+				fr_chart: 'cascade'
 			});
 		},
 		locatingChart: function () {
 			appV.render({
-				chart: 'locating'
+				chart: 'locating',
+				fr_chart: 'se-situer'
 			});
 		},
 		distributionChart: function () {
 			appV.render({
-				chart: 'distribution'
+				chart: 'distribution',
+				fr_chart: 'repartition'
 			});
 		},
 		error404: function () {

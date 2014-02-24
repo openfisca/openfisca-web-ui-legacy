@@ -19,16 +19,12 @@ define([
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
 			},
 			parse: function () {
-				this.set('source', this.backendServiceM.get('apiData'));
+				this.set('source', $.extend(true, {}, this.backendServiceM.get('apiData')));
 				this.clean();
+				this.set('datas', this.parse_setParentsNodes(this.get('datas')));
 				this.groupByPositive();
 				this.groupByAll();
 			},
-			/*
-				** Clean data **
-				- Delete objects with null value
-				- Create "value" property equal to values[0]
-			*/
 			clean: function () {
 				var json = this.get('source').children.revdisp;
 					json._id = 'revdisp';
@@ -88,6 +84,29 @@ define([
 				doIt(this.get('datas').children);
 				this.set({'groupedDatasAll': groupedDatas});
 				return groupedDatas;
+			},
+			parse_setParentsNodes: function (data) {
+				var that = this,
+					_data = $.extend(true, {}, data);
+
+				var doIt = function (loopData) {
+					var	loopDataChildren = loopData.children,
+						dataLength = Object._length(loopDataChildren);
+
+					_.each(loopDataChildren, function (loopDatum, i) {
+
+						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) { loopDatum.parentNodes = loopData.parentNodes;}
+						else { loopDatum.parentNodes = [];}
+
+						if(i == dataLength-1) {
+							loopDatum.parentNodes.push(loopData.description);
+						}
+
+						doIt(loopDatum);
+					})
+				}
+				doIt(_data);
+				return _data;
 			}
 		});
 		return DetailChartM;

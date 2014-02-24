@@ -222,9 +222,11 @@ define([
 						.duration(1000)
 						.attr('font-size', function (d, i) {
 								var fs = 8 + Math.sqrt(d.r);
+								// console.log(fs);
 								return fs+'px';
 						})
 						.attr('opacity', function (d, i) {
+							// console.log('transition :',i, 'opacity :', (d.distribution.fictive || !d.children)?0: 0.3)
 							return (d.distribution.fictive || !d.children) ? 0: 0.3;
 						});
 
@@ -267,6 +269,8 @@ define([
 				_.each(nodes, function () {
 					
 				}.bind(this));
+			},
+			_remove: function () {
 			}
 		});
 	return DistributionChartV;
