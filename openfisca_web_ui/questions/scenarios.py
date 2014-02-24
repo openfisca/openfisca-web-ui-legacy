@@ -23,7 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""Korma questions related to legislation URLs and simulation year"""
+"""Korma questions related to Scenarios (Year, Legislation and Simuation)"""
 
 
 from korma.group import Group
@@ -31,24 +31,18 @@ from korma.group import Group
 from . import base
 
 
-def make_legislations_repeat(user):
+def make_scenarios_repeat(user):
     from .. import model
 
-    class LegislationGroup(Group):
+    class ScenarioGroup(Group):
         @property
         def outer_html(self):
-            index = self.parent_data['legislations']['index']
+            index = self.parent_data['scenarios']['index']
             return u'''
-<div class="panel panel-primary">
-  <div class="panel-heading panel-form">
-    <h4 class="panel-title">
-      <a href="#">Simulations et legislations</a>
-    </h4>
-  </div>
-  <div class="panel-body">
-    {self.inner_html}
-  </div>
-</div>'''.format(formatted_index = index + 1, self = self)
+<li class="list-group-item">
+      {self.inner_html}
+</li>
+'''.format(formatted_index = index + 1, self = self)
 
     simulations_id_and_name = (
         (simulation._id, simulation.title)
@@ -60,24 +54,24 @@ def make_legislations_repeat(user):
         )
     return base.Repeat(
         add_button_label = u'Ajouter un scénario',
-        name = u'legislations',
-        template_question = LegislationGroup(
+        name = u'scenarios',
+        outer_html_template = u'<ul class="list-group">{self.inner_html}</ul>',
+        template_question = ScenarioGroup(
             children_attributes = {
-                '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>'
+                '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+#                '_label_attributes': {'class': 'sr-only'},
                 },
-            name = u'legislation',
+            name = u'scenario',
             questions = [
-                base.BootstrapNumber(name = 'year', label = u'Année de simulation', step = 1),
+                base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
                 base.BootstrapSelect(
                     add_first_empty_value = True,
                     choices = simulations_id_and_name,
-                    label = u'Simulation',
                     name = 'simulation',
                     ),
                 base.BootstrapSelect(
                     add_first_empty_value = True,
                     choices = legislations_id_and_name,
-                    label = u'Legislation',
                     name = 'legislation',
                     ),
                 ],
