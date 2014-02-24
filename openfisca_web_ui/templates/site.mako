@@ -34,7 +34,8 @@ import urlparse
 
 from biryani1 import strings
 
-from openfisca_web_ui import conf, model, urls, uuidhelpers
+from openfisca_web_ui import conf, model, urls
+from openfisca_web_ui.templates import helpers
 %>
 
 
@@ -129,29 +130,7 @@ from openfisca_web_ui import conf, model, urls, uuidhelpers
 
 
 <%def name="appconfig_script()" filter="trim">
-<%
-user = model.get_user(ctx)
-appconfig = {
-    'api': {
-        'urls': {
-            'form': urls.get_url(ctx, '/'),
-            'simulate': urls.get_url(ctx, 'api/1/simulate'),
-            },
-        },
-    'auth': {
-        'currentUser': user.email if user is not None else None,
-        'enable': conf['auth.enable'],
-        },
-    'disclaimer': {
-        'closedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
-        },
-    }
-if conf['cookie'] not in req.cookies:
-    appconfig['displayAcceptCookiesModal'] = True
-elif user is not None:
-    appconfig['displayAcceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
-%>\
-define('appconfig', ${appconfig | n, js});
+define('appconfig', ${helpers.base_appconfig(ctx) | n, js});
 </%def>
 
 

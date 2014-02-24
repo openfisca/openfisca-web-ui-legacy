@@ -1,34 +1,39 @@
 define([
 	'bootstrap',
 
-	'AcceptCnilConditionsModalV',
-	'AcceptCookiesModalV',
-	'appV',
-	'auth',
-	'disclaimerV',
-	'FormV',
-	'router',
 	'appconfig'
 	],
-	function (bootstrap, AcceptCnilConditionsModalV, AcceptCookiesModalV, appV, auth, disclaimerV, FormV, Router,
-		appconfig) {
-
+	function (bootstrap, appconfig) {
 		var App = function () {};
 		App.prototype = {
 			init: function () {
-				this.router = Router.init();
-				this.view = appV;
-				// TODO add a condition to avoid loading simulation on each page.
-				disclaimerV.init(appconfig.disclaimer);
-				this.formV = new FormV();
-				if (appconfig.auth.enable) {
-					auth.init(appconfig.auth);
+				var enabledModules = appconfig.enabledModules;
+				if (appconfig.acceptCookiesModal) {
+					require(['AcceptCookiesModalV'], function(AcceptCookiesModalV) {
+						this.acceptCookiesModalV = new AcceptCookiesModalV();
+					});
 				}
-				if (appconfig.displayAcceptCookiesModal) {
-					this.acceptCookiesModalV = new AcceptCookiesModalV();
+				else if (appconfig.acceptCnilConditionsModal) {
+					require(['AcceptCnilConditionsModalV'], function(AcceptCnilConditionsModalV) {
+						this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
+					});
 				}
-				else if (appconfig.displayAcceptCnilConditionsModal) {
-					this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
+				if (enabledModules.auth) {
+					require(['auth'], function(auth) {
+						auth.init(enabledModules.auth);
+					});
+				}
+				if (enabledModules.disclaimer) {
+					require(['disclaimer'], function(disclaimer) {
+						disclaimerV.init(enabledModules.disclaimer);
+					});
+				}
+				if (enabledModules.situationForm) {
+					require(['appV', 'router', 'SituationFormV'], function(appV, router, SituationFormV) {
+						this.router = router.init();
+						this.appV = appV;
+						this.situationFormV = new SituationFormV();
+					});
 				}
 			}
 		};

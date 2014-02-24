@@ -9,7 +9,7 @@ define([
 
 		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
 
-		var FormV = Backbone.View.extend({
+		var SituationFormV = Backbone.View.extend({
 			currentTabName: 'familles',
 			el: 'form[name="situation"]',
 			events: {
@@ -74,7 +74,7 @@ define([
 			}
 		});
 
-		return FormV;
+		return SituationFormV;
 
 	}
 );

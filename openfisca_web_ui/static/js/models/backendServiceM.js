@@ -5,6 +5,7 @@ define([
 	'appconfig'
 	],
 	function ($, _, Backbone, appconfig) {
+
 		var BackendServiceM = Backbone.Model.extend({
 			defaults: {
 				apiData: {},
@@ -75,7 +76,9 @@ define([
 				});
 			}
 		});
+
 		var backendServiceM = new BackendServiceM();
 		return backendServiceM;
+
 	}
 );

@@ -79,8 +79,8 @@ def make_router():
     """Return a WSGI application that searches requests to controllers."""
     global router
     routings = [
-        ('GET', '^/?$', forms.get),
-        ('POST', '^/?$', forms.post),
+        ('GET', '^/?$', forms.situation_form_get),
+        ('POST', '^/?$', forms.situation_form_post),
         (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
         (None, '^/accounts(?=/|$)', accounts.route_user),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),

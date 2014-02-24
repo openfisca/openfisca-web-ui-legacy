@@ -51,15 +51,16 @@ requireconfig = {
         'router': urls.get_url(ctx, u'js/router'),
 
         # Views
-        'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
         'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
         'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
+        'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
         'appV': urls.get_url(ctx, u'js/views/appV'),
+        'auth': urls.get_url(ctx, u'js/views/auth'),
         'disclaimerV': urls.get_url(ctx, u'js/views/disclaimerV'),
-        'FormV': urls.get_url(ctx, u'js/views/FormV'),
-        'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
-        'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
         'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
+        'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
+        'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
+        'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
 
         # Models
         'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
@@ -68,7 +69,6 @@ requireconfig = {
         'DistributionChartM': urls.get_url(ctx, u'js/models/DistributionChartM'),
 
         # Modules
-        'auth': urls.get_url(ctx, u'js/auth'),
         'helpers': urls.get_url(ctx, 'js/modules/helpers')
         },
     'shim': {

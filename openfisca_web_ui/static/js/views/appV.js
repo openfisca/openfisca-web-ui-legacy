@@ -72,7 +72,9 @@ define([
 					.attr('height', this.height);
 			}
 		});
+
 		var appV = new AppV();
 		return appV;
+
 	}
 );

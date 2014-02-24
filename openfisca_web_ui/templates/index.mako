@@ -24,14 +24,20 @@
 
 
 <%!
-from openfisca_web_ui import model, urls
+from openfisca_web_ui import model
+from openfisca_web_ui.templates import helpers
 %>
 
 
 <%inherit file="site.mako"/>
 
 
-<%namespace file="form.mako" name="form"/>
+<%namespace file="forms.mako" name="forms"/>
+
+
+<%def name="appconfig_script()" filter="trim">
+define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
+</%def>
 
 
 <%def name="breadcrumb()" filter="trim">
@@ -53,7 +59,7 @@ from openfisca_web_ui import model, urls
     % endif
         <div class="row">
             <div class="col-sm-4">
-                ${form.form(root_question=root_question, user=user)}
+                ${forms.situation_form(root_question=root_question, user=user)}
             </div>
             <div class="col-sm-8">
                 <div id="chart-wrapper"></div>
