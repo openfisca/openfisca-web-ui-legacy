@@ -7,12 +7,17 @@ define(['jquery', 'x-editable'], function ($) {
 
 		// editable
 		$('.editable').editable({
+			escape: true,
 			type: 'text',
 			url: config.legislationUrl,
 			pk: 1,
-			placement: 'inline',
 			title: 'Nouvelle valeur',
-			source: '/list'
+			success: function(response, newValue) {
+				if (response.status == 'error') {
+					//msg will be shown in editable form
+					return response.msg;
+				}
+			}
 		});
 
 

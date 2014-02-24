@@ -38,7 +38,7 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
 </%def>
 
 
-<%def name="render_dated_legislation_node(node, path = None)" filter="trim">
+<%def name="render_dated_legislation_node(node, editable = False, path = None)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:
 <%
@@ -59,18 +59,22 @@ data-target="#${html_node_path}">
                             </a>
                         </p>
                         <div id="${html_node_path}" class="collapse collapse-node">
-                            ${self.render_dated_legislation_node(node = node['children'][node_name], path = node_path)}
+                            ${self.render_dated_legislation_node(
+                                node = node['children'][node_name],
+                                editable = editable,
+                                path = node_path,
+                                )}
                         </div>
         % endfor
     % elif node.get('@type') == 'Scale':
-        ${self.render_dated_legislation_scale(scale = node, path = path)}
+        ${self.render_dated_legislation_scale(scale = node, editable = editable, path = path)}
     % elif node.get('@type') == 'Parameter':
-        ${self.render_dated_legislation_parameter(parameter = node, path = path)}
+        ${self.render_dated_legislation_parameter(parameter = node, editable = editable, path = path)}
     % endif
 </%def>
 
 
-<%def name="render_dated_legislation_scale(scale, path = None)" filter="trim">
+<%def name="render_dated_legislation_scale(scale, editable = False, path = None)" filter="trim">
     <table class="table table-condensed">
         <thead>
             <tr>
@@ -82,15 +86,24 @@ data-target="#${html_node_path}">
         <tbody>
     % for index, slice in enumerate(scale.get('slices')):
             <tr>
-                <td class="editable" data-name="${path | n, js, h}" data-index="${index}" data-element="threshold">
-                    ${slice['threshold'] if slice.get('threshold') else ''}
+        % if editable is True:
+                <td>
+                    <a class="editable" data-name="${path | n, js, h}" data-index="${index}" \
+data-element="threshold">${slice['threshold'] if slice.get('threshold') else ''}</a>
                 </td>
-                <td class="editable" data-name="${path | n, js, h}" data-index="${index}" data-element="base">
-                    ${slice['base'] if slice.get('base') else ''}
+                <td>
+                    <a class="editable" data-name="${path | n, js, h}" data-index="${index}" \
+data-element="base">${slice['base'] if slice.get('base') else ''}</a>
                 </td>
-                <td class="editable" data-name="${path | n, js, h}" data-index="${index}" data-element="rate">
-                    ${slice['rate'] if slice.get('rate') else ''}
+                <td>
+                    <a class="editable" data-name="${path | n, js, h}" data-index="${index}" \
+data-element="rate">${slice['rate'] if slice.get('rate') else ''}</a>
                 </td>
+        % else:
+                <td>${slice['threshold'] if slice.get('threshold') else ''}</td>
+                <td>${slice['base'] if slice.get('base') else ''}</td>
+                <td>${slice['rate'] if slice.get('rate') else ''}</td>
+        % endif
             </tr>
     % endfor
         </tbody>
@@ -98,8 +111,12 @@ data-target="#${html_node_path}">
 </%def>
 
 
-<%def name="render_dated_legislation_parameter(parameter, path = None)" filter="trim">
-    <div class="editable" data-name="${path | n, js, h}">${parameter.get('value')}</div>
+<%def name="render_dated_legislation_parameter(parameter, editable = False, path = None)" filter="trim">
+    % if editable is True:
+    <a class="editable" data-name="${path | n, js, h}" href="#">${parameter.get('value')}</a>
+    % else:
+    <div data-name="${path | n, js, h}">${parameter.get('value')}</div>
+    % endif
 </%def>
 
 

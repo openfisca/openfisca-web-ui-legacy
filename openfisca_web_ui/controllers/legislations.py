@@ -202,11 +202,12 @@ def admin_index(req):
 @wsgihelpers.wsgify
 def admin_new(req):
     ctx = contexts.Ctx(req)
+    user = model.get_user(ctx)
 
-    if not model.is_admin(ctx):
+    if user is None or user.email is None:
         return wsgihelpers.unauthorized(ctx,
             explanation = ctx._("Creation unauthorized"),
-            message = ctx._("You must  be an administrator to create a legislation."),
+            message = ctx._("You must be authentified to create a legislation."),
             title = ctx._('Operation denied'),
             )
 
@@ -261,7 +262,6 @@ def admin_new(req):
 @wsgihelpers.wsgify
 def admin_view(req):
     ctx = contexts.Ctx(req)
-    model.is_admin(ctx, check = True)
     legislation = ctx.node
     params = req.GET
     date, error = conv.pipe(
@@ -481,6 +481,7 @@ def route_api1_class(environ, start_response):
 def route_user(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_index),
+        ('GET', '^/new?$', admin_new),
         ('GET', '^/(?P<id_or_slug>[^/]+)$', user_view),
         )
     return router(environ, start_response)

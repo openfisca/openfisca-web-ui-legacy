@@ -48,6 +48,10 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
+<%
+    user = model.get_user(ctx)
+    editable = model.is_admin(ctx) or user is not None and user._id == legislation.author_id
+%>\
         <div class="page-header">
             <h1>${_('Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
         </div>
@@ -60,13 +64,10 @@ from openfisca_web_ui import model, urls
                     <%self:view_fields/>
                 </li>
                 <li class="list-group-item">
-                    <%self:view_content/>
+                    ${self.view_content(editable = editable)}
                 </li>
             </ul>
-<%
-    user = model.get_user(ctx)
-%>\
-    % if model.is_admin(ctx) or user is not None and user._id == legislation.author_id:
+    % if editable:
             <div class="panel-footer">
                 <div class="btn-toolbar">
                     <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}">
@@ -122,7 +123,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
 
 
-<%def name="view_content()" filter="trim">
+<%def name="view_content(editable = False)" filter="trim">
 <%
     value = legislation.json
 %>\
@@ -130,7 +131,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
         <div class="row">
             <div class="col-lg-8">
             % if value.get('datesim'):
-                <%render_legislation:render_dated_legislation_node node="${value}"/>
+                <%render_legislation:render_dated_legislation_node node="${value}" editable="${editable}"/>
             % else:
                 <%render_legislation:render_legislation_node node="${value}"/>
             % endif:
