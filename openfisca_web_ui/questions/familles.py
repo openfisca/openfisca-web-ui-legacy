@@ -123,8 +123,8 @@ title="afficher / masquer">{self[categories][principal][prenom].value}</a>
 <div class="panel panel-default">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
-href="#collapse-famille-{self.parent[id].value}-categories" title="affcher / masquer">Plus de précisions</a>
+      <a class="collapsed" data-toggle="collapse" href="#collapse-famille-{self.parent[id].value}-categories" \
+title="affcher / masquer">Plus de précisions</a>
     </h4>
   </div>
   <div id="collapse-famille-{self.parent[id].value}-categories" class="panel-collapse collapse">

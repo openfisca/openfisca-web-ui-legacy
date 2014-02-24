@@ -45,8 +45,8 @@ def make_foyers_fiscaux_repeat(prenom_select_choices):
 <div class="panel panel-primary">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a data-toggle="collapse" data-parent="#accordion" href="#collapse-foyer-fiscal-{self[id].value}"
-title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
+      <a data-toggle="collapse" href="#collapse-foyer-fiscal-{self[id].value}" title="afficher / masquer">\
+Déclaration d'impôts {formatted_index}</a>
     </h4>
   </div>
   <div id="collapse-foyer-fiscal-{self[id].value}" class="panel-collapse collapse in">
@@ -99,8 +99,8 @@ title="afficher / masquer">Déclaration d'impôts {formatted_index}</a>
 <div class="panel panel-default">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
-href="#collapse-foyer-fiscal-{self.parent[id].value}-categories" title="affcher / masquer">Plus de précisions</a>
+      <a class="collapsed" data-toggle="collapse" href="#collapse-foyer-fiscal-{self.parent[id].value}-categories" \
+title="affcher / masquer">Plus de précisions</a>
     </h4>
   </div>
   <div id="collapse-foyer-fiscal-{self.parent[id].value}-categories" class="panel-collapse collapse">
