@@ -37,8 +37,6 @@ import pymongo
 import webob
 import webob.multidict
 
-from biryani1.baseconv import cleanup_text, input_to_slug, not_none, pipe
-
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
@@ -48,15 +46,15 @@ inputs_to_legislation_data = conv.pipe(
             author_id = conv.base.input_to_uuid,
             datetime_begin = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
             datetime_end = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
-            description = cleanup_text,
-            json = pipe(
+            description = conv.cleanup_text,
+            json = conv.pipe(
                 conv.cleanup_line,
                 conv.make_input_to_json(),
                 ),
             url = conv.make_input_to_url(full = True),
             title = conv.pipe(
                 conv.base.cleanup_line,
-                not_none,
+                conv.not_none,
                 ),
             ),
         default = 'drop',
@@ -120,7 +118,7 @@ def admin_edit(req):
         if errors is None:
             legislation_json, error = None, None
             if data['url'] is not None:
-                legislation_json, error = pipe(
+                legislation_json, error = conv.pipe(
                     conv.legislations.retrieve_legislation,
                     conv.legislations.validate_legislation_json,
                     )(data['url'], state = ctx)
@@ -231,7 +229,7 @@ def admin_new(req):
         if errors is None:
             legislation_json, error = None, None
             if data['json'] is None:
-                legislation_json, error = pipe(
+                legislation_json, error = conv.pipe(
                     conv.legislations.retrieve_legislation,
                     conv.legislations.validate_legislation_json,
                     )(data['url'], state = ctx)
@@ -295,9 +293,9 @@ def admin_view(req):
 def api1_json(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'GET'
-    legislation, error = pipe(
-        input_to_slug,
-        not_none,
+    legislation, error = conv.pipe(
+        conv.input_to_slug,
+        conv.not_none,
         model.Legislation.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
@@ -513,9 +511,9 @@ def user_view(req):
             conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
             conv.default(datetime.datetime.utcnow())
             ),
-        'legislation': pipe(
-            input_to_slug,
-            not_none,
+        'legislation': conv.pipe(
+            conv.input_to_slug,
+            conv.not_none,
             model.Legislation.make_id_or_slug_or_words_to_instance(),
             ),
         })(inputs, state = ctx)
