@@ -36,33 +36,39 @@ define('appconfig', ${helpers.legislation_appconfig(ctx) | n, js});
 </%def>
 
 
-<%def name="render_dated_legislation_node(node)" filter="trim">
+<%def name="render_dated_legislation_node(node, path = None)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:
 <%
             node_title = node['children'][node_name].get('description')
             node_slug = strings.slugify(node_title)
+            node_path = copy(path) if path is not None else []
+            node_path.append(strings.slugify(node_name))
+            if path is None:
+                html_node_path = node_path[-1]
+            else:
+                html_node_path = "-".join(node_path)
 %>\
                         <p>
-                            <a href="#" class="collapse-node-toggle collapsed" data-toggle="collapse" \
-data-target="#node-${node_slug}">
+                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+data-target="#${html_node_path}">
                                 <span class="indicator"></span>
                                 ${node_title}
                             </a>
                         </p>
-                        <div id="node-${node_slug}" class="collapse collapse-node">
-                            <%self:render_dated_legislation_node node="${node['children'][node_name]}"/>
+                        <div id="${html_node_path}" class="collapse collapse-node">
+                            ${self.render_dated_legislation_node(node = node['children'][node_name], path = node_path)}
                         </div>
         % endfor
     % elif node.get('@type') == 'Scale':
-        <%self:render_dated_legislation_scale scale="${node}"/>
+        ${self.render_dated_legislation_scale(scale = node, path = path)}
     % elif node.get('@type') == 'Parameter':
-        <%self:render_dated_legislation_parameter parameter="${node}"/>
+        ${self.render_dated_legislation_parameter(parameter = node, path = path)}
     % endif
 </%def>
 
 
-<%def name="render_dated_legislation_scale(scale)" filter="trim">
+<%def name="render_dated_legislation_scale(scale, path = None)" filter="trim">
     <table class="table table-condensed">
         <thead>
             <tr>
@@ -72,11 +78,30 @@ data-target="#node-${node_slug}">
             </tr>
         </thead>
         <tbody>
-    % for slice in scale.get('slices'):
+    % for index, slice in enumerate(scale.get('slices')):
             <tr>
-                <td>${slice['threshold'] if slice.get('threshold') else ''}</td>
-                <td>${slice['base'] if slice.get('base') else ''}</td>
-                <td>${slice['rate'] if slice.get('rate') else ''}</td>
+<%
+        data_path = {
+            'path': path,
+            'index': index,
+            'element': 'threshold',
+            }
+%>
+                <td class="editable" data-path="${data_path | n, js, h}">
+                    ${slice['threshold'] if slice.get('threshold') else ''}
+                </td>
+<%
+        data_path['element'] = 'base',
+%>
+                <td class="editable" data-path="${data_path | n, js, h}">
+                    ${slice['base'] if slice.get('base') else ''}
+                </td>
+<%
+        data_path['element'] = 'rate',
+%>
+                <td class="editable" data-path="${data_path | n, js, h}">
+                    ${slice['rate'] if slice.get('rate') else ''}
+                </td>
             </tr>
     % endfor
         </tbody>
@@ -84,8 +109,8 @@ data-target="#node-${node_slug}">
 </%def>
 
 
-<%def name="render_dated_legislation_parameter(parameter)" filter="trim">
-    ${parameter.get('value')}
+<%def name="render_dated_legislation_parameter(parameter, path = None)" filter="trim">
+    <div class="editable" data-path="${path | n, js, h}">${parameter.get('value')}</div>
 </%def>
 
 
