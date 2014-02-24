@@ -290,6 +290,43 @@ def admin_view(req):
 
 
 @wsgihelpers.wsgify
+def api1_edit(req):
+    ctx = contexts.Ctx(req)
+    params = req.params
+    inputs = {
+        'id_or_slug_or_words': req.urlvars.get('id_or_slug_or_words'),
+        'name': params.getall('name[]'),
+        'value': params.get('value'),
+        }
+    data, errors = conv.pipe(
+        conv.struct({
+            'id_or_slug_or_words': conv.pipe(
+                conv.input_to_slug,
+                conv.not_none,
+                model.Legislation.make_id_or_slug_or_words_to_instance(),
+                ),
+            'name': conv.uniform_sequence(
+                conv.cleanup_line
+                ),
+            'value': conv.cleanup_line,
+            }),
+        conv.rename_item('id_or_slug_or_words', 'legislation'),
+        )(inputs, state = ctx)
+
+    print data
+
+    legislation_node = data['legislation'].json['children']
+    for key in data['name']:
+        legislation_node = legislation_node[key]
+        if 'children' in legislation_node:
+            legislation_node = legislation_node['children']
+
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = ctx._('Legislation edit error: {}').format(errors))
+    return wsgihelpers.respond_json(ctx, data['legislation'].json)
+
+
+@wsgihelpers.wsgify
 def api1_json(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'GET'
@@ -435,6 +472,7 @@ def route_admin_class(environ, start_response):
 def route_api1_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/typeahead/?$', api1_typeahead),
+        ('POST', '^/(?P<id_or_slug_or_words>[^/]+)/edit?$', api1_edit),
         ('GET', '^/(?P<id_or_slug_or_words>[^/]+)/json?$', api1_json),
         )
     return router(environ, start_response)

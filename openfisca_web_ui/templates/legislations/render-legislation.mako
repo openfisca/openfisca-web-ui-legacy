@@ -24,6 +24,8 @@
 
 
 <%!
+from copy import copy
+
 from biryani1 import strings
 
 from openfisca_web_ui import urls, uuidhelpers
@@ -32,7 +34,7 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="appconfig_script()" filter="trim">
-define('appconfig', ${helpers.legislation_appconfig(ctx) | n, js});
+define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_url(ctx, 'edit')) | n, js});
 </%def>
 
 
@@ -43,11 +45,11 @@ define('appconfig', ${helpers.legislation_appconfig(ctx) | n, js});
             node_title = node['children'][node_name].get('description')
             node_slug = strings.slugify(node_title)
             node_path = copy(path) if path is not None else []
-            node_path.append(strings.slugify(node_name))
+            node_path.append(node_name)
             if path is None:
-                html_node_path = node_path[-1]
+                html_node_path = strings.slugify(node_path[-1])
             else:
-                html_node_path = "-".join(node_path)
+                html_node_path = strings.slugify("-".join(node_path))
 %>\
                         <p>
                             <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
@@ -80,26 +82,13 @@ data-target="#${html_node_path}">
         <tbody>
     % for index, slice in enumerate(scale.get('slices')):
             <tr>
-<%
-        data_path = {
-            'path': path,
-            'index': index,
-            'element': 'threshold',
-            }
-%>
-                <td class="editable" data-path="${data_path | n, js, h}">
+                <td class="editable" data-name="${path | n, js, h}" data-index="${index}" data-element="threshold">
                     ${slice['threshold'] if slice.get('threshold') else ''}
                 </td>
-<%
-        data_path['element'] = 'base',
-%>
-                <td class="editable" data-path="${data_path | n, js, h}">
+                <td class="editable" data-name="${path | n, js, h}" data-index="${index}" data-element="base">
                     ${slice['base'] if slice.get('base') else ''}
                 </td>
-<%
-        data_path['element'] = 'rate',
-%>
-                <td class="editable" data-path="${data_path | n, js, h}">
+                <td class="editable" data-name="${path | n, js, h}" data-index="${index}" data-element="rate">
                     ${slice['rate'] if slice.get('rate') else ''}
                 </td>
             </tr>
@@ -110,7 +99,7 @@ data-target="#${html_node_path}">
 
 
 <%def name="render_dated_legislation_parameter(parameter, path = None)" filter="trim">
-    <div class="editable" data-path="${path | n, js, h}">${parameter.get('value')}</div>
+    <div class="editable" data-name="${path | n, js, h}">${parameter.get('value')}</div>
 </%def>
 
 
