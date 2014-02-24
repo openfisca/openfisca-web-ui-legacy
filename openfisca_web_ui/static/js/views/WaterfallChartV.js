@@ -168,16 +168,16 @@ define([
 				this.prefix = d3.formatPrefix(magnitude);
 				switch(this.prefix.symbol) {
 					case 'G':
-						this.legendText = 'En\nmilliards\nd\'euros';
+						this.legendText = 'milliards €';
 						break;
 					case 'M':
-						this.legendText = 'En\nmillions\nd\'euros';
+						this.legendText = 'millions €';
 						break;
 					case 'k':
-						this.legendText = 'En\nmilliers\nd\'euros';
+						this.legendText = 'milliers €';
 						break;
 					case '':
-						this.legendText = 'En euros';
+						this.legendText = '€';
 					default:
 						this.legendText = '';
 				}

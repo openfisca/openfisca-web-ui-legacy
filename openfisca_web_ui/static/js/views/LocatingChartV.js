@@ -83,15 +83,15 @@ define([
 
 				console.log('set this.legendText');
 				switch(this.yFormat.symbol) {
-					case 'G': this.legendText = 'Milliards d\'euros'; break;
-					case 'M': this.legendText = 'Millions d\'euros'; break;
-					case 'k': this.legendText = 'Milliers d\'euros'; break;
-					case '': this.legendText = 'Euros'; break;
+					case 'G': this.legendText = 'revenu en milliards €'; break;
+					case 'M': this.legendText = 'revenu en millions €'; break;
+					case 'k': this.legendText = 'revenu en milliers €'; break;
+					case '': this.legendText = 'revenu en €'; break;
 					default: this.legendText = '';
 				};
 
 				this.chart.xAxis
-					.axisLabel('Vingtiles')
+					.axisLabel('% de la population')
 					.tickFormat(d3.format(',r'));
 
 				this.chart.yAxis
