@@ -12,7 +12,7 @@ define([
 			'!/repartition': 'distributionChart',
 
 			// '*path': 'error404',
-			'': 'waterfallChart'
+			'': 'locatingChart'
 		},
 		initialize: function () {
 			Backbone.history.start();

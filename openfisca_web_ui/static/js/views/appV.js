@@ -24,10 +24,10 @@ define([
 				<div id="chart-menu">\
 					<ul class="nav nav-tabs">\
 						<li>\
-							<a data-target="cascade" data-toggle="tab" href="#!/cascade">Cascade</a>\
+							<a data-target="se-situer" data-toggle="tab" href="#!/se-situer">Se situer</a>\
 						</li>\
 						<li>\
-							<a data-target="se-situer" data-toggle="tab" href="#!/se-situer">Se situer</a>\
+							<a data-target="cascade" data-toggle="tab" href="#!/cascade">Cascade</a>\
 						</li>\
 						<li>\
 							<a data-target="repartition" data-toggle="tab" href="#!/repartition">Répartition</a>\
