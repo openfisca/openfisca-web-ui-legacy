@@ -84,6 +84,13 @@ from openfisca_web_ui import model, urls
 </%def>
 
 
+<%def name="css()" filter="trim">
+    <%parent:css/>
+    <link href="${urls.get_url(ctx, u'bower/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')}" \
+media="screen" rel="stylesheet">
+</%def>
+
+
 <%def name="title_content()" filter="trim">
 ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
