@@ -112,10 +112,10 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
         return self.full_name or self.slug or self.email or self._id
 
     def get_user_url(cls, ctx, *path, **query):
-        return urls.get_url(ctx, 'accounts', *path, **query)
+        return urls.get_url(ctx, 'account', *path, **query)
 
     def get_user_full_url(cls, ctx, *path, **query):
-        return urls.get_full_url(ctx, 'accounts', *path, **query)
+        return urls.get_full_url(ctx, 'account', *path, **query)
 
     @classmethod
     def make_id_or_slug_or_words_to_instance(cls):

@@ -82,7 +82,7 @@ def make_router():
         ('GET', '^/?$', forms.situation_form_get),
         ('POST', '^/?$', forms.situation_form_post),
         (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
-        (None, '^/accounts(?=/|$)', accounts.route_user),
+        (None, '^/account(?=/|$)', accounts.route_user),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
