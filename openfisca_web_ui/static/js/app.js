@@ -14,7 +14,7 @@ define([
 					this.acceptCookiesModalV = new AcceptCookiesModalV();
 				});
 			}
-			else if (enabledModules.acceptCnilConditionsModal) {
+			else if (appconfig.acceptCnilConditionsModal) {
 				require(['AcceptCnilConditionsModalV'], function(AcceptCnilConditionsModalV) {
 					this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
 				});

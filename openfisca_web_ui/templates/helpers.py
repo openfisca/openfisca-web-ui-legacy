@@ -66,7 +66,9 @@ def index_appconfig(ctx):
     return appconfig
 
 
-def legislation_appconfig(ctx):
+def legislation_appconfig(ctx, legislation_url):
     appconfig = base_appconfig(ctx)
-    appconfig['enabledModules']['legislation'] = True
+    appconfig['enabledModules']['legislation'] = {
+        'legislationUrl': legislation_url
+        }
     return appconfig

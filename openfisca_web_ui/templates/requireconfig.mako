@@ -46,7 +46,7 @@ requireconfig = {
         'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
         'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
         'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
-        'x-editable': urls.get_url(ctx, u'bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
+        'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
 
         # App
         'app': urls.get_url(ctx, u'js/app'),

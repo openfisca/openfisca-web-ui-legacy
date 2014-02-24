@@ -1,6 +1,21 @@
-define(['jquery'], function ($) {
+define(['jquery', 'x-editable'], function ($) {
 
-	function init () {
+	function init (config) {
+
+		//turn to inline mode
+		$.fn.editable.defaults.mode = 'inline';
+
+		// editable
+		$('.editable').editable({
+			type: 'text',
+			url: config.legislationUrl,
+			pk: 1,
+			placement: 'inline',
+			title: 'Nouvelle valeur',
+			source: '/list'
+		});
+
+
 		$('.collapse-node-toggle').on('click', function(evt) {
 			evt.preventDefault();
 		});
