@@ -32,13 +32,14 @@ from .. import conf, model, urls
 def base_appconfig(ctx):
     """Config of JS modules included on each page."""
     req = ctx.req
+    session = ctx.session
     user = model.get_user(ctx)
     enabled_modules = {}
     if conf['auth.enable']:
         enabled_modules['auth'] = {
             'currentUser': user.email if user is not None else None,
             }
-    if not ctx.session.disclaimer_closed:
+    if session is not None and not session.disclaimer_closed:
         enabled_modules['disclaimer'] = {
             'disclaimerClosedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
             }
