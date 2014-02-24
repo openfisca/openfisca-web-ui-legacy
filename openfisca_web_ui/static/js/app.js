@@ -25,7 +25,7 @@ define([
 				}
 				if (enabledModules.disclaimer) {
 					require(['disclaimer'], function(disclaimer) {
-						disclaimerV.init(enabledModules.disclaimer);
+						disclaimer.init(enabledModules.disclaimer);
 					});
 				}
 				if (enabledModules.situationForm) {

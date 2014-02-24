@@ -56,7 +56,7 @@ requireconfig = {
         'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
         'appV': urls.get_url(ctx, u'js/views/appV'),
         'auth': urls.get_url(ctx, u'js/views/auth'),
-        'disclaimerV': urls.get_url(ctx, u'js/views/disclaimerV'),
+        'disclaimer': urls.get_url(ctx, u'js/views/disclaimer'),
         'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
         'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
         'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
