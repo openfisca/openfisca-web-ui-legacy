@@ -36,12 +36,12 @@ article.cgu h2{
 .collapse-node-toggle:hover {
     text-decoration: none;
 }
-.collapse-node-toggle > span:after {
+.collapse-node-toggle > span.indicator:after {
     /* symbol for "opening" panels */
     font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
     content: "\e114";    /* adjust as needed, taken from bootstrap.css */
 }
-.collapse-node-toggle.collapsed > span:after {
+.collapse-node-toggle.collapsed > span.indicator:after {
     /* symbol for "collapsed" panels */
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
@@ -60,19 +60,6 @@ article.cgu h2{
 
 img.media-object {
     height: 100px;
-}
-
-.panel-form a:after {
-    /* symbol for "opening" panels */
-    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
-    float: right;        /* adjust as needed */
-    color: grey;         /* adjust as needed */
-}
-
-.panel-form a.collapsed:after {
-    /* symbol for "collapsed" panels */
-    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
 /* SVG */

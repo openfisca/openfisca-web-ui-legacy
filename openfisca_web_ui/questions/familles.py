@@ -50,8 +50,10 @@ def make_familles_repeat():
 <div class="panel panel-primary">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a data-toggle="collapse" data-parent="#accordion" href="#collapse-famille-{self[id].value}"
-title="afficher / masquer">Famille {formatted_index}</a>
+      <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-famille-{self[id].value}" \
+title="afficher / masquer">
+        <span class="indicator"></span> Famille {formatted_index}
+      </a>
     </h4>
   </div>
   <div id="collapse-famille-{self[id].value}" class="panel-collapse collapse in">
@@ -72,9 +74,15 @@ title="afficher / masquer">Famille {formatted_index}</a>
   <div class="panel-heading panel-form">
     <div class="form-inline">
       <h4 class="panel-title">
+        <a class="collapse-node-toggle{collapsed_class}" data-toggle="collapse" \
+href="#collapse-individu-{self[id].value}" title="afficher / masquer">
+          <span class="indicator"></span>
+        </a>
         {self[role].html}
-        <a{link_classes} data-toggle="collapse" data-parent="#accordion" href="#collapse-individu-{self[id].value}"
-title="afficher / masquer">{self[categories][principal][prenom].value}</a>
+        <a class="x-editable" data-name="{self[categories][principal][prenom].full_name}" href="#" \
+title="Modifier le prénom">
+          {self[categories][principal][prenom].value}
+        </a>
       </h4>
     </div>
   </div>
@@ -84,8 +92,8 @@ title="afficher / masquer">{self[categories][principal][prenom].value}</a>
     </div>
   </div>
 </div>'''.format(
+                collapsed_class = u'' if is_last_individu else ' collapsed',
                 in_class = u' in' if is_last_individu else '',
-                link_classes = '' if is_last_individu else u' class="collapsed"',
                 self = self,
                 )
 

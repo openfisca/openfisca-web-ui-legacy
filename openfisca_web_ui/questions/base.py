@@ -35,7 +35,7 @@ from korma.choice import Radio, Select
 from korma.date import Date
 from korma.group import Group
 from korma.repeat import Repeat as KormaRepeat
-from korma.text import Number, Text
+from korma.text import Hidden, Number, Text
 
 from ..conv import base
 
@@ -143,12 +143,15 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
             u'validate': ctx._(u'Validate'),
             }
 
-    def build_category_questions(entity_category_children):
+    def build_category_questions(entity_category):
         category_questions = []
-        for column_name in entity_category_children:
+        for column_name in entity_category['children']:
             column = model.fields_api_data()['columns'].get(column_name)
             if column is not None:
-                question = make_question(column)
+                # Transform prenom question into hidden for use with x-editable field.
+                question = Hidden(name = column['name']) \
+                    if entity == 'individus' and entity_category['label'] == u'Principal' \
+                        and column['name'] == 'prenom' else make_question(column)
                 if question is None:
                     log.error(u'Could not make question from column: {!r}'.format(column))
                 else:
@@ -158,7 +161,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
     entity_categories = model.fields_api_data()['columns_tree'][entity]['children']
     categories_groups = []
     for entity_category in entity_categories:
-        group_questions = build_category_questions(entity_category['children'])
+        group_questions = build_category_questions(entity_category)
         if entity_category['label'] == u'Principal':
             category_group = Group(
                 children_attributes = {'_outer_html_template': bootstrap_form_group},

@@ -24,7 +24,7 @@
 
 
 <%!
-from openfisca_web_ui import model
+from openfisca_web_ui import model, urls
 from openfisca_web_ui.templates import helpers
 %>
 
@@ -65,4 +65,11 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
                 <div id="chart-wrapper"></div>
             </div>
         </div>
+</%def>
+
+
+<%def name="css()" filter="trim">
+    <%parent:css/>
+    <link href="${urls.get_url(ctx, u'bower/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')}" \
+media="screen" rel="stylesheet">
 </%def>

@@ -44,9 +44,9 @@ define('appconfig', ${helpers.legislation_appconfig(ctx) | n, js});
             node_slug = strings.slugify(node_title)
 %>\
                         <p>
-                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+                            <a href="#" class="collapse-node-toggle collapsed" data-toggle="collapse" \
 data-target="#node-${node_slug}">
-                                <span></span>
+                                <span class="indicator"></span>
                                 ${node_title}
                             </a>
                         </p>
@@ -97,9 +97,9 @@ data-target="#node-${node_slug}">
             node_slug = strings.slugify(node_title)
 %>\
                         <p>
-                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+                            <a href="#" class="collapse-node-toggle collapsed" data-toggle="collapse" \
 data-target="#node-${node_slug}">
-                                <span></span>
+                                <span class="indicator"></span>
                                 ${node_title}
                             </a>
                         </p>
