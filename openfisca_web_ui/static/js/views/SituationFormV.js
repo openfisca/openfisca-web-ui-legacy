@@ -11,7 +11,6 @@ define([
 		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
 
 		var SituationFormV = Backbone.View.extend({
-			currentTabName: 'familles',
 			el: 'form[name="situation"]',
 			events: {
 				'change :input': 'onInputChange',
@@ -62,8 +61,11 @@ define([
 			},
 			render: function() {
 				var formData = this.model.get('formData');
-				if ( ! _.isUndefined(formData)) {
-					this.$el.html(formData);
+				if ( ! _.isUndefined(formData.html)) {
+					this.$el.html(formData.html);
+				}
+				if (_.isUndefined(formData.errors)) {
+					this.$el.find('.error').remove();
 				}
 				return this;
 			},
@@ -72,12 +74,15 @@ define([
 					return;
 				}
 				this.submitTriggered = true;
-				this.model.saveForm(this.currentTabName, formDataStr, _.bind(function() {
+				this.model.saveForm(formDataStr, _.bind(function() {
 					this.submitTriggered = false;
-					if (doReloadForm) {
-						this.model.fetchForm();
-					} else {
-						this.model.simulate();
+					var formData = this.model.get('formData');
+					if (_.isUndefined(formData.errors)) {
+						if (doReloadForm) {
+							this.model.fetchForm();
+						} else {
+							this.model.simulate();
+						}
 					}
 				}, this));
 			}

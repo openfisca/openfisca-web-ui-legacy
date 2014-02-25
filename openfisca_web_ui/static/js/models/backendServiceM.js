@@ -9,7 +9,7 @@ define([
 		var BackendServiceM = Backbone.Model.extend({
 			defaults: {
 				apiData: {},
-				formData: null
+				formData: {}
 			},
 			events: {},
 			urlPaths: appconfig.api.urls,
@@ -17,25 +17,20 @@ define([
 			initialize: function () {
 				this.simulate();
 			},
-			fetchForm: function(tabName, callback) {
-				$.ajax({
+			fetchForm: function() {
+				return $.ajax({
 					context: this,
 					url: this.urlPaths.form
 				})
 				.done(function(data) {
-					this.set('formData', data);
+					this.set('formData', {html: data});
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error('fetchForm fail', jqXHR, textStatus, errorThrown);
-				})
-				.always(function() {
-					if ( ! _.isUndefined(callback)) {
-						callback();
-					}
 				});
 			},
-			saveForm: function(tabName, data, callback) {
-				$.ajax({
+			saveForm: function(data, callback) {
+				return $.ajax({
 					context: this,
 					data: data,
 					type: 'POST',
@@ -44,18 +39,20 @@ define([
 				.done(function(data, textStatus, jqXHR) {
 					if (data !== null && ! _.isUndefined(data.errors)) {
 						console.error('Errors in form', data.errors);
-						this.set('formData', data.formHtml);
 					}
-					if (! _.isUndefined(callback)) {
-						callback();
-					}
+					this.set('formData', data === null ? {} : data);
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error(jqXHR, textStatus, errorThrown);
+				})
+				.always(function() {
+					if ( ! _.isUndefined(callback)) {
+						callback();
+					}
 				});
 			},
 			simulate: function() {
-				$.ajax({
+				return $.ajax({
 					context: this,
 					url: this.urlPaths.simulate
 				})

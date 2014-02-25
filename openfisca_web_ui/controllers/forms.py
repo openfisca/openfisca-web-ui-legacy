@@ -110,7 +110,7 @@ def situation_form_post(req):
         if req.is_xhr:
             form_html = templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
                                              user = session.user)
-            return wsgihelpers.respond_json(ctx, {'errors': errors, 'formHtml': form_html})
+            return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
         else:
             return templates.render(ctx, '/index.mako', root_question = root_question)
     api_data = check(conv.base.korma_data_to_api_data(data, state = ctx))
