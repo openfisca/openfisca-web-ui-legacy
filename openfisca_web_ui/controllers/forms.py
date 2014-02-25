@@ -35,43 +35,6 @@ from formencode import variabledecode
 from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
 
 
-#def build_page_form(ctx, page_data, user_api_data):
-#    form_factory = page_data['form_factory']
-#    page_slug = page_data['slug']
-#    if page_slug == 'familles':
-#        page_form = form_factory()
-#    elif page_slug in ('declarations-impots', 'logements-principaux'):
-#        prenom_select_choices = questions.individus.build_prenom_select_choices(user_api_data)
-#        page_form = form_factory(prenom_select_choices)
-#    else:
-#        assert page_slug == 'advanced', page_slug
-#        simulations_id_and_name = (
-#            (simulation._id, simulation.title)
-#            for simulation in ctx.session.user.simulations
-#            )
-#        legislations_id_and_name = (
-#            (legislation._id, legislation.title)
-#            for legislation in model.Legislation.find()
-#            )
-#        page_form = form_factory(simulations_id_and_name, legislations_id_and_name)
-#    return page_form
-
-
-def build_page_korma_values(ctx, page_data, page_form, user_api_data = None, user_scenarios = None):
-    page_slug = page_data['slug']
-    if page_slug in ('familles', 'declarations-impots', 'logements-principaux'):
-        return pipe(
-            page_data['api_data_to_page_korma_data'],
-            page_form.root_data_to_str,
-            )(user_api_data, state = ctx)
-    else:
-        assert page_slug == 'advanced', page_slug
-        return pipe(
-            page_data['scenarios_to_page_korma_data'],
-            page_form.root_data_to_str,
-            )(user_scenarios, state = ctx)
-
-
 def generate_default_user_api_data():
     individu_id = uuidhelpers.generate_uuid()
     user_api_data = {
@@ -88,12 +51,12 @@ def situation_form_get(req):
     session = update_session(session)
 
     if conf['cookie'] in req.cookies:
-        if ctx.req.cookies.get(conf['cookie']) != session.token:
-            ctx.req.response.set_cookie(
+        if req.cookies.get(conf['cookie']) != session.token:
+            req.response.set_cookie(
                 conf['cookie'],
                 session.token,
                 httponly = True,
-                secure = ctx.req.scheme == 'https',
+                secure = req.scheme == 'https',
                 )
 
     user_api_data = None
