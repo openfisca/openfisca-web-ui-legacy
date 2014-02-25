@@ -153,7 +153,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
                     if entity == 'individus' and entity_category['label'] == u'Principal' \
                         and column['name'] == 'prenom' else make_question(column)
                 if question is None:
-                    log.error(u'Could not make question from column: {!r}'.format(column))
+                    log.error(u'Unable to make question from column: {!r}'.format(column))
                 else:
                     category_questions.append(question)
         return category_questions

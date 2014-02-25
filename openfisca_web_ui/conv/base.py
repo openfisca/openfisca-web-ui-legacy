@@ -54,7 +54,7 @@ def build_categories(columns, entity_name):
     for column_name, column_value in columns.iteritems():
         category_name = model.find_category_name(column_name = column_name, entity_name = entity_name)
         if category_name is None:
-            log.error(u'Could not find category name from column_name: {!r} within entity: {!r}'.format(
+            log.error(u'Unable to find category name from column_name: {!r} within entity: {!r}'.format(
                 column_name, entity_name))
         else:
             categories.setdefault(category_name, {})[column_name] = column_value

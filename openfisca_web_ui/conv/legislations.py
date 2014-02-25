@@ -99,8 +99,8 @@ def retrieve_legislation(url, state = None):
     except requests.exceptions.ConnectionError:
         return url, state._('Unable to connect to URL: {}').format(url)
     if not response.ok:
-        return url, state._('URL {} respond with status code {}').format(url, response.status_code)
+        return url, state._('URL {} responded with status code {}').format(url, response.status_code)
     try:
         return response.json(object_pairs_hook = collections.OrderedDict), None
     except ValueError:
-        return url, state._('URL {} doesn\'t returned valid JSON').format(url)
+        return url, state._('URL {} didn\'t return a valid JSON').format(url)
