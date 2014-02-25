@@ -79,8 +79,7 @@ href="#collapse-individu-{self[id].value}" title="afficher / masquer">
           <span class="indicator"></span>
         </a>
         {self[role].html}
-        <a class="x-editable" data-name="{self[categories][principal][prenom].full_name}" href="#" \
-title="Modifier le prénom">
+        <a class="x-editable" data-name="{self[categories][principal][prenom].full_name}" href="#" title="Modifier">
           {self[categories][principal][prenom].value}
         </a>
       </h4>
