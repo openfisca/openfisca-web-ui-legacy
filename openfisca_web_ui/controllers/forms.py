@@ -84,7 +84,8 @@ def situation_form_get(req):
     root_question.value = values
     root_question.error = errors
 
-    return templates.render_def(ctx, '/forms.mako', 'form', root_question = root_question, user = session.user) \
+    return templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
+                                user = session.user) \
         if req.is_xhr or req.params.get('xhr') \
         else templates.render(ctx, '/index.mako', root_question = root_question, settings_question = settings_question)
 
@@ -107,7 +108,7 @@ def situation_form_post(req):
     if errors is not None:
         root_question.fill(inputs, errors)
         if req.is_xhr:
-            form_html = templates.render_def(ctx, '/forms.mako', 'form', root_question = root_question,
+            form_html = templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
                                              user = session.user)
             return wsgihelpers.respond_json(ctx, {'errors': errors, 'formHtml': form_html})
         else:
