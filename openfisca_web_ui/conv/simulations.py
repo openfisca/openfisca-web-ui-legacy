@@ -32,7 +32,7 @@ from itertools import chain
 import json
 import logging
 
-from biryani1.baseconv import condition, function, noop, pipe, struct, test, uniform_sequence
+from biryani1.baseconv import condition, default, function, noop, pipe, struct, test, uniform_sequence, rename_item
 from biryani1.states import default_state
 import requests
 
@@ -205,7 +205,7 @@ def scenarios_to_api_data(values, state = None):
             pipe(
                 struct(
                     {
-                        'legislation': pipe(
+                        'legislation_id': pipe(
                             model.Legislation.make_id_or_slug_or_words_to_instance(),
                             condition(
                                 test(lambda legislation: legislation.url is None),
@@ -213,15 +213,18 @@ def scenarios_to_api_data(values, state = None):
                                 function(lambda legislation: legislation.url),
                                 ),
                             ),
-                        'simulation': pipe(
+                        'simulation_id': pipe(
                             model.Simulation.make_id_or_slug_or_words_to_instance(),
-                            function(lambda simulation: simulation.api_data),
+                            function(lambda simulation: simulation.api_data if simulation.api_data is not None else {}),
                             fill_user_api_data,
                             ),
+                        'year': default(2013),
                         },
                     default = noop,
                     drop_none_values = False,
                     ),
+                rename_item('legislation_id', 'legislation'),
+                rename_item('simulation_id', 'simulation'),
                 function(lambda struct: dict(
                     (key, value)
                     for key, value in chain(

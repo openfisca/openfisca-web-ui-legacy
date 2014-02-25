@@ -60,6 +60,10 @@ def situation_form_get(req):
                 )
 
     user_api_data = None
+    if session is not None and session.user is not None:
+        user_api_data = session.user.current_api_data
+    if user_api_data is None:
+        user_api_data = generate_default_user_api_data()
     root_question = questions.base.make_situation_form(user_api_data)
     values, errors = pipe(
         conv.base.api_data_to_korma_data,

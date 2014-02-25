@@ -30,39 +30,9 @@ import collections
 import json
 import requests
 
-from biryani1.baseconv import function, pipe, uniform_sequence
 from biryani1.states import default_state
 
 from .. import conf
-
-
-def scenarios_to_page_korma_data(scenarios, state = None):
-    if scenarios is None:
-        scenarios = [{}]
-    return {
-        'legislations': [
-            {'legislation': scenario}
-            for scenario in scenarios
-            ],
-        }, None
-
-
-def korma_data_to_scenarios(values, state = None):
-    if values is None:
-        return None, None
-    if state is None:
-        state = default_state
-    scenarios, error = pipe(
-        function(lambda data: data.get(u'legislations')),
-        uniform_sequence(
-            function(lambda data: data.get('legislation')),
-            ),
-        )(values, state)
-    if error is not None:
-        return values, error
-    if values.get('add'):
-        scenarios.append({})
-    return scenarios, None
 
 
 def validate_legislation_json(json_dict, state = None):

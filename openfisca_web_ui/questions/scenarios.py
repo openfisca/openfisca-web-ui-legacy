@@ -67,12 +67,12 @@ def make_scenarios_repeat(user):
                 base.BootstrapSelect(
                     add_first_empty_value = True,
                     choices = simulations_id_and_name,
-                    name = 'simulation',
+                    name = 'simulation_id',
                     ),
                 base.BootstrapSelect(
                     add_first_empty_value = True,
                     choices = legislations_id_and_name,
-                    name = 'legislation',
+                    name = 'legislation_id',
                     ),
                 ],
             ),
