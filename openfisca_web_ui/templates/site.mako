@@ -263,35 +263,9 @@ ${conf['app_name']}
 <%def name="modals()" filter="trim">
     % if conf['cookie'] not in req.cookies:
     <%self:accept_cookies_modal/>
-    % elif ctx.session is not None and ctx.session.user is not None:
-        % if ctx.session.user.email is None:
+    % elif ctx.session is not None and ctx.session.user is not None and ctx.session.user.email is None:
     <%self:accept_cnil_conditions_modal user="${ctx.session.user}"/>
-        % elif settings_question:
-    <%self:settings_modal/>
-        % endif
     % endif
-</%def>
-
-
-<%def name="settings_modal()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="settings-modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">${_('Settings')}</h4>
-                </div>
-                <form action="${urls.get_url(ctx, 'scenarios')}" class="korma form" method="POST" role="form">
-                    <div class="modal-body">
-                        ${settings_question.html | n}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">${_('Cancel')}</button>
-                        <button class="btn btn-success" type="submit">${_('Validate')}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </%def>
 
 
@@ -350,7 +324,7 @@ ${conf['app_name']}
     user = model.get_user(ctx)
 %>
     % if user is not None and user.email is not None:
-        <li><a href="${user.get_user_url(ctx)}">${_('My simulations')}</a></li>
+        <li><a href="${user.get_user_url(ctx)}">${_('My account')}</a></li>
     % endif
         <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
         <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
@@ -369,11 +343,6 @@ ${conf['app_name']}
                 <li><a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">${
                         _(u'Sign in')}</a></li>
         % else:
-                <li>
-                    <a data-toggle="modal" data-target="#settings-modal" href="#" title="${_('Settings')}">
-                        <span class="glyphicon glyphicon-cog"></span>
-                    </a>
-                </li>
                 <li class="active">
                     <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
                 </li>

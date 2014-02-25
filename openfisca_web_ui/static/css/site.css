@@ -75,3 +75,7 @@ img.media-object {
   stroke: #777;
   stroke-dasharray: 2,2;
 }
+
+.form-inline select {
+    margin-left: 10px;
+}

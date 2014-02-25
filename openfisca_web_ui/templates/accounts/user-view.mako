@@ -50,12 +50,29 @@ from openfisca_web_ui import model, urls
                 </a>
             </div>
         </div>
-        <p>
-            <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#delete-user-modal">
-                <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}
-            </a>
-        </p>
-        <%self:modals/>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title">${_(u'My scenarios')}</h2>
+            </div>
+            <form action="${urls.get_url(ctx, 'scenarios')}" class="korma form-inline" method="POST" role="form">
+                ${scenarios_question.html | n}
+                <div class="panel-footer">
+                    <button class="btn btn-success" type="submit">${_('Enregistrer')}</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title">${_(u'My rights')}</h2>
+            </div>
+            <div class="panel-footer">
+                <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#delete-user-modal">
+                    <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}
+                </a>
+            </div>
+        </div>
 </%def>
 
 

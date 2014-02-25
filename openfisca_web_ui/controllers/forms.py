@@ -48,9 +48,9 @@ def generate_default_user_api_data():
 def situation_form_get(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
-    session = update_session(session)
 
     if conf['cookie'] in req.cookies:
+        session = update_session(session)
         if req.cookies.get(conf['cookie']) != session.token:
             req.response.set_cookie(
                 conf['cookie'],
@@ -60,22 +60,6 @@ def situation_form_get(req):
                 )
 
     user_api_data = None
-    settings_question = None
-    if session is not None and session.user is not None:
-        user_api_data = session.user.current_api_data
-    if user_api_data is None:
-        user_api_data = generate_default_user_api_data()
-    if session.user is not None and session.user.email is not None:
-        settings_question = questions.legislations.make_legislations_repeat(session.user)
-        values, errors = pipe(
-            conv.legislations.scenarios_to_page_korma_data,
-            settings_question.root_data_to_str,
-            )(session.user.scenarios, state = ctx)
-        settings_question.fill(values, errors)
-
-    fields_api_data = model.fields_api_data()
-    if fields_api_data is None:
-        return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)
     values, errors = pipe(
         conv.base.api_data_to_korma_data,
@@ -87,7 +71,7 @@ def situation_form_get(req):
     return templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
                                 user = session.user) \
         if req.is_xhr or req.params.get('xhr') \
-        else templates.render(ctx, '/index.mako', root_question = root_question, settings_question = settings_question)
+        else templates.render(ctx, '/index.mako', root_question = root_question)
 
 
 @wsgihelpers.wsgify
