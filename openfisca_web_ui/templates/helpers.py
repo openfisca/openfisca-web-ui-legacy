@@ -45,8 +45,8 @@ def base_appconfig(ctx):
             }
     if conf['cookie'] not in req.cookies:
         enabled_modules['acceptCookiesModal'] = True
-    elif user is not None:
-        enabled_modules['acceptCnilConditionsModal'] = user.email is not None and not user.cnil_conditions_accepted
+    elif user is not None and user.email is not None and not user.cnil_conditions_accepted:
+        enabled_modules['acceptCnilConditionsModal'] = True
     appconfig = {
         'enabledModules': enabled_modules,
         }
