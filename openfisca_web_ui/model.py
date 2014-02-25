@@ -501,7 +501,6 @@ def fetch_fields_api_data():
 def fields_api_data():
     if _fields_api_data is None:
         fetch_fields_api_data()
-    assert _fields_api_data is not None
     return _fields_api_data
 
 

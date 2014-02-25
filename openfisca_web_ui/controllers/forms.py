@@ -73,6 +73,9 @@ def situation_form_get(req):
             )(session.user.scenarios, state = ctx)
         settings_question.fill(values, errors)
 
+    fields_api_data = model.fields_api_data()
+    if fields_api_data is None:
+        return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)
     values, errors = pipe(
         conv.base.api_data_to_korma_data,
