@@ -139,13 +139,16 @@ def simulate(req):
         user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
         if user_api_data is None:
             user_api_data = {}
-        api_data = check(conv.simulations.user_api_data_to_api_data(user_api_data, state = ctx))
+        api_data, errors = conv.simulations.user_api_data_to_api_data(user_api_data, state = ctx)
     else:
-        api_data = check(conv.simulations.scenarios_to_api_data(user_scenarios, state = ctx))
-    output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
-    if errors is not None:
-        log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
-    data = {'output': output, 'errors': errors}
+        api_data, errors = conv.simulations.scenarios_to_api_data(user_scenarios, state = ctx)
+    if errors is None:
+        output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
+        if errors is not None:
+            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
+        data = {'output': output, 'errors': errors}
+    else:
+        data = {'errors': errors}
     return wsgihelpers.respond_json(ctx, data)
 
 
