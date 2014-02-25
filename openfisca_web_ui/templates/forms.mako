@@ -41,7 +41,7 @@
                 ${root_question['menages'].html | n}
             </div>
         </div>
-        <p class="buttons">
+        <div>
     % if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">
                 ${_(u'Save')}
@@ -51,7 +51,7 @@
                     u'Reset this simulation')}">
                 ${_(u'Reset')}
             </button>
-        </p>
+        </div>
     </form>
     <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
         <div class="modal-dialog modal-sm">
