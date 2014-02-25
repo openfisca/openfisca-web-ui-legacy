@@ -148,17 +148,19 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             % else:
                 <%render_legislation:render_legislation_node node="${value}"/>
             % endif:
-                <button type="button" class="btn btn-default btn-xs btn-toggle-open">
-                    ${_('Open all')}
-                </button>
-                <button type="button" class="btn btn-default btn-xs btn-toggle-close">
-                    ${_('Close all')}
-                </button>
+                <div class="buttons">
+                    <button type="button" class="btn btn-default btn-xs btn-expand-all">
+                        ${_('Open all')}
+                    </button>
+                    <button type="button" class="btn btn-default btn-xs btn-collapse-all">
+                        ${_('Close all')}
+                    </button>
             % if editable is False:
-                <a class="btn btn-default btn-primary btn-xs" href="${legislation.get_user_url(ctx, 'edit')}">
-                    ${_('Edit content')}
-                </a>
+                    <a class="btn btn-default btn-primary btn-xs" href="${legislation.get_user_url(ctx, 'edit')}">
+                        ${_('Edit content')}
+                    </a>
             % endif
+                </div>
             </div>
         </div>
     % endif

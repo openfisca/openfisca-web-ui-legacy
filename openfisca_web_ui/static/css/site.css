@@ -28,10 +28,17 @@ article.cgu h2{
     word-wrap: break-word;
 }
 
+.buttons {
+    margin: 1em;
+}
+
 .collapse-node {
-    border-left: 3px solid #2A6496;
+    border-left: px solid #428bca;
     padding-left: 15px;
     margin-left: 6px;
+}
+.collapse-node-toggle {
+    display: block;
 }
 .collapse-node-toggle:hover {
     text-decoration: none;

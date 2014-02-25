@@ -20,17 +20,18 @@ define(['jquery', 'x-editable'], function ($) {
 			}
 		});
 
-
 		$('.collapse-node-toggle').on('click', function(evt) {
 			evt.preventDefault();
 		});
 
-		$('.btn-toggle-open').on('click', function(evt) {
-			$('.collapse-node').collapse('show');
+		$('.btn-expand-all').on('click', function(evt) {
+			$('.collapse-node-toggle.collapsed').removeClass('collapsed');
+			$('.collapse-node.collapse').addClass('in').removeClass('collapse').css({height: ''});
 		});
 
-		$('.btn-toggle-close').on('click', function(evt) {
-			$('.collapse-node').collapse('hide');
+		$('.btn-collapse-all').on('click', function(evt) {
+			$('.collapse-node-toggle').addClass('collapsed');
+			$('.collapse-node').addClass('collapse').removeClass('in');
 		});
 	}
 

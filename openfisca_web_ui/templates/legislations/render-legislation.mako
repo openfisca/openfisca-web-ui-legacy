@@ -51,13 +51,11 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
             else:
                 html_node_path = strings.slugify("-".join(node_path))
 %>\
-                        <p>
-                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+                        <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
 data-target="#${html_node_path}">
-                                <span class="indicator"></span>
-                                ${node_title}
-                            </a>
-                        </p>
+                            <span class="indicator"></span>
+                            ${node_title}
+                        </a>
                         <div id="${html_node_path}" class="collapse collapse-node">
                             ${self.render_dated_legislation_node(
                                 node = node['children'][node_name],
