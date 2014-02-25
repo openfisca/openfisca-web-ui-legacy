@@ -4,9 +4,9 @@ define([
 	'backbone',
 	'd3',
 
-	'DistributionChartM',
+	'/js/models/chartM.js',
 	'helpers',
-	], function ($, _, Backbone, d3, DistributionChartM, helpers) {
+	], function ($, _, Backbone, d3, chartM, helpers) {
 		'use strict';
 
 		var DistributionChartV = Backbone.View.extend({
@@ -16,7 +16,7 @@ define([
 			},
 
 			/* Settings */
-			model: new DistributionChartM,
+			model: chartM,
 			views: [],
 			datakey: '',
 
@@ -40,16 +40,16 @@ define([
 				this.height = parent.height;
 				this.width = parent.width;
 
-				this.listenTo(this.model, 'change:datas', this.render);
-				if(!_.isEmpty(this.model.get('datas'))) this.render();
+				if(this.model.fetched) this.render();
+				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function () {
-				this.setData(this.model.get('datas'));
+				this.setData(this.model.get('distributionData', {type: 'default'}));
 				this.buildLayoutGlobal();
 			},
 
 			setData: function (data) {
-				this.currentDataSet = $.extend(true, {}, this.model.get('datas'));
+				this.currentDataSet = $.extend(true, {}, data);
 				this.currentDataSetContainer = [];
 				var that = this;
 
@@ -94,7 +94,7 @@ define([
 				/* Circles */
 				this.circles
 					.enter().append("svg:circle")
-						.attr("cx", function(d) { return d.x; })
+						.attr("cx", function(d) { console.log(d.x); return d.x; })
 						.attr("cy", function(d) { return d.y; })
 						.attr("r", function(d) {
 							return d.children ? d.r: 0;
@@ -253,7 +253,7 @@ define([
 			},
 			buildLayoutPositive: function () {
 				this.packs = [];
-				var datas = $.extend(true, {}, this.model.get('groupedDatas.positive'));
+				var datas = $.extend(true, {}, this.model.get('distributionData', {type: 'positive'}));
 
 				this.pack = d3.layout.pack()
 							.size([this.width/2, this.height])

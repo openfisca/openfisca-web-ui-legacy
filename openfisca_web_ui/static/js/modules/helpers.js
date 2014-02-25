@@ -61,7 +61,6 @@ define(['underscore'], function (_) {
 		findDeep: function(items, attrs) {
 			function match(value) {
 				for (var key in attrs) {
-					// console.log(attrs[key], value[key], attrs[key] !== value[key]);
 					if (attrs[key] !== value[key]) {
 						return false;
 					}

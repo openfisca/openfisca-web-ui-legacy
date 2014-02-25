@@ -1,5 +1,5 @@
 define([
-	'LocatingChartM',
+	'/js/models/chartM.js',
 	'helpers',
 	'nvd3',
 
@@ -7,10 +7,10 @@ define([
 	'underscore',
 	'backbone'
 	],
-	function (LocatingChartM, helpers, nvd3, $, _, Backbone) {
+	function (chartM, helpers, nvd3, $, _, Backbone) {
 		
 		var LocatingChartV = Backbone.View.extend({
-			model: new LocatingChartM(),
+			model: chartM,
 
 			year: 2011,
 
@@ -26,18 +26,15 @@ define([
 				bottom: 0,
 				right: 20
 			},			
-
-			chart: nv.models.lineChart()
-						.margin({left: 100})
-						.transitionDuration(300)
-						.showLegend(true)
-						.showYAxis(true)
-						.showXAxis(true)
-						.useInteractiveGuideline(true),
 			initialize: function (parent) {
 
 				var that = this;
 				this.active = true;
+
+				/* Add nvd3 stylesheet */
+				if($('link[href$="/bower/nvd3/nv.d3.min.css"').length == 0) {
+					$('<link>').appendTo('head').attr({type : 'text/css', rel : 'stylesheet'}).attr('href', '/bower/nvd3/nv.d3.min.css');
+				}
 
 				this.height = parent.height - this.margin.bottom - this.margin.top;
 				this.width = parent.width - this.margin.left - this.margin.right;
@@ -45,6 +42,15 @@ define([
 				this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
 
 				nv.addGraph(function() {
+
+					that.chart = nv.models.lineChart()
+						.margin({left: 100})
+						.transitionDuration(300)
+						.showLegend(true)
+						.showYAxis(true)
+						.showXAxis(true)
+						.useInteractiveGuideline(true);
+
 					d3.select('svg')
 						.datum(that.vingtiles)
 						.call(that.chart);
@@ -56,19 +62,18 @@ define([
 					that.chart.interactiveLayer.tooltip
 					    .contentGenerator(that.tooltipContentGenerator.bind(that));
 
+					d3.select('svg').attr('opacity', 0);
+					that.setElement('.nvd3');
+
+					if(that.model.fetched) that.render();
+					that.listenTo(that.model, 'change:source', that.render);
+
 					return that.chart;
 				});
-
-				d3.select('svg').attr('opacity', 0);
-
-				this.setElement('.nvd3');
-
-				this.listenTo(this.model, 'change:datas', this.render);
-				if(!_.isEmpty(this.model.get('datas').children)) this.render();
 			},
 			render: function () {
 				var that = this,
-					data = this.model.get('datas');
+					data = this.model.get('locatingData');
 
 				this.vingtiles = this.updateVingtilesByUserData(_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }), data);
 
@@ -76,7 +81,6 @@ define([
 					yMax = d3.max(this.vingtiles, function (vingtile) { return d3.max(_.map(vingtile.values, function (d) { return d.y; })); });
 				this.yFormat = d3.formatPrefix(yMax);
 
-				console.log('set this.legendText');
 				switch(this.yFormat.symbol) {
 					case 'G': this.legendText = 'revenu en milliards €'; break;
 					case 'M': this.legendText = 'revenu en millions €'; break;
@@ -96,11 +100,9 @@ define([
 				});
 
 				d3.select('svg').datum(this.vingtiles);
+				d3.select('svg').attr('opacity', 1);
 
 				this.chart.update();
-				nv.render();
-
-				d3.select('svg').attr('opacity', 1);
 
 				this.showUserPoints();
 
@@ -167,50 +169,50 @@ define([
 				return vingtiles;
 			},
 			tooltipContentGenerator: function (d) {
-			var that = this;
-			if (d == null) return '';
-			var table = d3.select(document.createElement("table"));
-			var theadEnter = table.selectAll("thead")
-				.data([d])
-				.enter().append("thead");
-			theadEnter.append("tr")
-				.append("td")
-				.attr("colspan",3)
-				.append("strong")
-					.classed("x-value",true)
-					.html(d.value+' % des français ont un');
+				var that = this;
+				if (d == null) return '';
+				var table = d3.select(document.createElement("table"));
+				var theadEnter = table.selectAll("thead")
+					.data([d])
+					.enter().append("thead");
+				theadEnter.append("tr")
+					.append("td")
+					.attr("colspan",3)
+					.append("strong")
+						.classed("x-value",true)
+						.html(d.value+' % des français ont un');
 
-			var tbodyEnter = table.selectAll("tbody")
-				.data([d])
-				.enter().append("tbody");
-			var trowEnter = tbodyEnter.selectAll("tr")
-				.data(function(p) { return p.series})
-				.enter()
-				.append("tr")
-				.classed("highlight", function(p) { return p.highlight})
-				;
+				var tbodyEnter = table.selectAll("tbody")
+					.data([d])
+					.enter().append("tbody");
+				var trowEnter = tbodyEnter.selectAll("tr")
+					.data(function(p) { return p.series})
+					.enter()
+					.append("tr")
+					.classed("highlight", function(p) { return p.highlight})
+					;
 
-			trowEnter.append("td")
-				.classed("legend-color-guide",true)
-				.append("div")
-					.style("background-color", function(p) { return p.color});
-			trowEnter.append("td")
-				.classed("key",true)
-				.html(function(p) {return p.key + ' inférieur à : '});
-			trowEnter.append("td")
-				.classed("value",true)
-				.html(function(p,i) { return (""+p.value).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + 'euros'; });
+				trowEnter.append("td")
+					.classed("legend-color-guide",true)
+					.append("div")
+						.style("background-color", function(p) { return p.color});
+				trowEnter.append("td")
+					.classed("key",true)
+					.html(function(p) {return p.key + ' inférieur à : '});
+				trowEnter.append("td")
+					.classed("value",true)
+					.html(function(p,i) { return (""+p.value).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' euros'; });
 
-				trowEnter.selectAll("td").each(function(p) {
-					if (p.highlight) {
-						var opacityScale = d3.scale.linear().domain([0,1]).range(["#fff",p.color]);
-						var opacity = 0.6;
-						d3.select(this)
-							.style("border-bottom-color", opacityScale(opacity))
-							.style("border-top-color", opacityScale(opacity))
-							;
-					}
-	            });
+					trowEnter.selectAll("td").each(function(p) {
+						if (p.highlight) {
+							var opacityScale = d3.scale.linear().domain([0,1]).range(["#fff",p.color]);
+							var opacity = 0.6;
+							d3.select(this)
+								.style("border-bottom-color", opacityScale(opacity))
+								.style("border-top-color", opacityScale(opacity))
+								;
+						}
+		            });
 
 	            var html = table.node().outerHTML;
 	            if (d.footer !== undefined)

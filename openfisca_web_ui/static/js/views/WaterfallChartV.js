@@ -4,21 +4,18 @@ define([
 	'backbone',
 	'd3',
 
-	'DetailChartM',
+	'/js/models/chartM.js',
 	'helpers',
-	], function ($, _, Backbone, d3, DetailChartM, helpers) {
+	], function ($, _, Backbone, d3, chartM, helpers) {
 		'use strict';
 
 		d3.selection.prototype.moveToFront = function() { return this.each(function(){ this.parentNode.appendChild(this); }); };
 		d3.selection.prototype.moveToBack = function() {return this.each(function() {var firstChild = this.parentNode.firstChild;if (firstChild) {this.parentNode.insertBefore(this, firstChild);}});};
 
 		var WaterfallChartV = Backbone.View.extend({
-			// events: {
-			// 	'click': 'focusOnBar'
-			// },
 
 			/* Properties */
-			model: new DetailChartM(),
+			model: chartM,
 			views: [],
 
 			/* Settings */
@@ -54,13 +51,13 @@ define([
 				this.height = parent.height - this.margin.bottom - this.margin.top;
 				this.width = parent.width - this.margin.left - this.margin.right;
 
-				this.listenTo(this.model, 'change:groupedDatasAll', this.render);
-				if(!_.isEmpty(this.model.get('groupedDatasAll'))) this.render();
+				if(this.model.fetched) this.render();
+				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function (args) {
 
 				var args = args || {};
-				if(_.isUndefined(args.getDatas) || args.getDatas) this.setData(this.model.get('groupedDatasAll'));
+				if(_.isUndefined(args.getDatas) || args.getDatas) this.setData(this.model.get('waterfallData'));
 
 				this.buildBars({endTransitionCallback: this.buildActiveBars});
 
@@ -94,9 +91,6 @@ define([
 				});
 
 				this.updateScales();
-			},
-			setViewAllButton: function () {
-
 			},
 			updateScales: function (args) {
 				var args = args || {},
