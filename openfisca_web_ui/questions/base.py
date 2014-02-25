@@ -209,12 +209,16 @@ def make_question(column):
     elif column['@type'] == 'Float':
         question = BootstrapNumber(
             label = question_label,
+            max = column.get('max'),
+            min = column.get('min'),
             name = column['name'],
             )
         question.placeholder = default_str(question)
     elif column['@type'] == 'Integer':
         question = BootstrapNumber(
             label = question_label,
+            max = column.get('max'),
+            min = column.get('min'),
             name = column['name'],
             step = 1,
             )
