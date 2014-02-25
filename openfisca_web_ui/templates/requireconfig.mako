@@ -57,10 +57,7 @@ requireconfig = {
         'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
         'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
         'appV': urls.get_url(ctx, u'js/views/appV'),
-        'auth': urls.get_url(ctx, u'js/views/auth'),
-        'disclaimer': urls.get_url(ctx, u'js/views/disclaimer'),
         'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
-        'legislation': urls.get_url(ctx, u'js/views/legislation'),
         'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
         'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
         'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
@@ -70,7 +67,10 @@ requireconfig = {
         'chartM': urls.get_url(ctx, u'js/models/chartM'),
 
         # Modules
-        'helpers': urls.get_url(ctx, 'js/modules/helpers')
+        'auth': urls.get_url(ctx, u'js/modules/auth'),
+        'disclaimer': urls.get_url(ctx, u'js/modules/disclaimer'),
+        'helpers': urls.get_url(ctx, 'js/modules/helpers'),
+        'legislation': urls.get_url(ctx, u'js/modules/legislation'),
         },
     'shim': {
         'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
