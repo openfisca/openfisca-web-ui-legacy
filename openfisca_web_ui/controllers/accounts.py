@@ -738,7 +738,7 @@ def user_reset(req):
     if current_simulation is not None:
         current_simulation.api_data = None
         current_simulation.save(safe = True)
-    return wsgihelpers.redirect(ctx, location = '/')
+    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
 @wsgihelpers.wsgify
@@ -747,7 +747,7 @@ def user_view(req):
 
     session = ctx.session
     if session is None or session.user is None or session.user.email is None:
-        return wsgihelpers.redirect(ctx, location = '/')
+        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
     scenarios_question = None
     if session.user.email is not None:

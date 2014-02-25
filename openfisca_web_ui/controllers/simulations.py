@@ -161,7 +161,7 @@ def edit(req):
             session.user.simulations_id.append(data['simulation']._id)
             session.user.current_simulation_id = data['simulation']._id
             session.user.save(safe = True)
-        return wsgihelpers.redirect(ctx, location = '/')
+        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
     if data['simulation'] is None or data['simulation']._id not in session.user.simulations_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(data['id_or_slug']))
@@ -205,4 +205,4 @@ def use(req):
 
     session.user.current_simulation = simulation
     session.user.save(safe = True)
-    return wsgihelpers.redirect(ctx, location = '/')
+    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
