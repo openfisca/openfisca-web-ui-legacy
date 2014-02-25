@@ -31,7 +31,7 @@ define([
 			}
 			if (enabledModules.legislation) {
 				require(['legislation'], function(legislation) {
-					legislation.init();
+					legislation.init(enabledModules.legislation);
 				});
 			}
 			if (enabledModules.situationForm) {

@@ -328,18 +328,40 @@ def api1_edit(req):
             }),
         conv.rename_item('id_or_slug_or_words', 'legislation'),
         )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.respond_json(
+            ctx,
+            {'status': 'error', 'errors': errors, 'inputs': inputs},
+            )
 
-    print data
+    legislation = data['legislation']
+    if not (legislation.author_id == user._id or model.is_admin(ctx)):
+        return wsgihelpers.respond_json(
+            ctx,
+            {'status': 'error', 'message': ctx._("You must be an administrator to edit a legislation.")},
+            )
+    if 'datesim' not in legislation.json:
+        # Test is JSON is a dated legislation
+        return wsgihelpers.respond_json(
+            ctx,
+            {'status': 'error', 'message': ctx._("You cannot edit a non-dated legislation.")},
+            )
 
-    legislation_node = data['legislation'].json['children']
-    for key in data['name']:
-        legislation_node = legislation_node[key]
-        if 'children' in legislation_node:
-            legislation_node = legislation_node['children']
+    def get_deep_key(data, layers):
+        if data is None:
+            return None
+        layer = layers[0]
+        next_layers = layers[1:]
+        layer_data = data.get('children').get(layer)
+        return get_deep_key(data=layer_data, layers=next_layers) if next_layers else layer_data
+
+    node = get_deep_key(legislation.json, data['name'])
+    node['value'] = data['value']
+    legislation.save(safe = True)
 
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = ctx._('Legislation edit error: {}').format(errors))
-    return wsgihelpers.respond_json(ctx, data['legislation'].json)
+    return wsgihelpers.respond_json(ctx, data['value'])
 
 
 @wsgihelpers.wsgify
