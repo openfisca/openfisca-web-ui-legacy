@@ -99,8 +99,10 @@ Déclaration d'impôts {formatted_index}</a>
 <div class="panel panel-default">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a class="collapsed" data-toggle="collapse" href="#collapse-foyer-fiscal-{self.parent[id].value}-categories" \
-title="affcher / masquer">Plus de précisions</a>
+      <a class="collapse-node-toggle collapsed" data-toggle="collapse" \
+href="#collapse-foyer-fiscal-{self.parent[id].value}-categories" title="affcher / masquer">
+        <span class="indicator"></span> Plus de précisions
+      </a>
     </h4>
   </div>
   <div id="collapse-foyer-fiscal-{self.parent[id].value}-categories" class="panel-collapse collapse">
