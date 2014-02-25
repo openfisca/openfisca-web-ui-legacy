@@ -1,5 +1,42 @@
 define(['underscore'], function (_) {
 
+	function installConsolePolyfill() {
+		if (typeof console === "undefined") {
+			console = {};
+			var alertFallback = false;
+			var polyfillMethod = function(msg) {
+				if (alertFallback) {
+					alert(msg);
+				}
+			};
+			var methodNames = ['error', 'info', 'log'];
+			for (var methodIndex in methodNames) {
+				var methodName = methodNames[methodIndex];
+				if (typeof console[methodName] === "undefined") {
+					console[methodName] = polyfillMethod;
+				}
+			}
+		}
+	}
+
+	function installNavigatorIdPolyfill() {
+		if (typeof navigator.id === "undefined") {
+			navigator.id = {};
+			var polyfillMethod = function(methodName) {
+				return function() {
+					console.log('navigator.id.' + methodName + ' polyfill called');
+				}
+			};
+			var methodNames = ['logout', 'request', 'watch'];
+			for (var methodIndex in methodNames) {
+				var methodName = methodNames[methodIndex];
+				if (typeof navigator.id[methodName] === "undefined") {
+					navigator.id[methodName] = polyfillMethod(methodName);
+				}
+			}
+		}
+	}
+
 	function installPolyfills() {
 		Object._length = function(obj) {
 			var size = 0, key;
@@ -9,29 +46,16 @@ define(['underscore'], function (_) {
 			return size;
 		};
 
-
 		Object._concat = function (obj1, obj2) {
 			for (var key in obj2) {
 				obj1[key] = obj2[key];
 			}
 			return obj1;
-		}
+		};
 
-		var alertFallback = false;
-		if (typeof console === "undefined") {
-			console = {};
-			var methodNames = ['error', 'info', 'log'];
-			for (methodName in methodNames) {
-				if (typeof console[methodName] === "undefined") {
-					console[methodName] = function(msg) {
-						if (alertFallback) {
-							alert(msg);
-						}
-					};
-				}
-			}
-		}
-	};
+		installConsolePolyfill();
+		installNavigatorIdPolyfill();
+	}
 
 	_.mixin({ 
 		findDeep: function(items, attrs) {
