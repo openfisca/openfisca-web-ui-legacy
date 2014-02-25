@@ -99,7 +99,7 @@ Logement principal {formatted_index}</a>
                                 choices = (
                                     (u'personne_de_reference', u'Personne de référence'),
                                     (u'conjoint', u'Conjoint de la personne de référence'),
-                                    (u'enfants', u'Enfant de la personne de référence ou de son conjoint'),
+                                    (u'enfants', u'Enfant de la personne de référence / conjoint'),
                                     (u'autres', u'Autre'),
                                     ),
                                 name = u'role',
