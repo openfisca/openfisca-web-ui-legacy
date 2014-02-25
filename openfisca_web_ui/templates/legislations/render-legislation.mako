@@ -120,22 +120,31 @@ data-element="rate">${slice['rate'] if slice.get('rate') else ''}</a>
 </%def>
 
 
-<%def name="render_legislation_node(node)" filter="trim">
+<%def name="render_legislation_node(node, path = None)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:
 <%
             node_title = node['children'][node_name].get('description')
             node_slug = strings.slugify(node_title)
+            node_path = copy(path) if path is not None else []
+            node_path.append(node_name)
+            if path is None:
+                html_node_path = strings.slugify(node_path[-1])
+            else:
+                html_node_path = strings.slugify("-".join(node_path))
 %>\
                         <p>
-                            <a href="#" class="collapse-node-toggle collapsed" data-toggle="collapse" \
-data-target="#node-${node_slug}">
+                            <a href="#" class="collapse-node-toggle collapsed" type="button" data-toggle="collapse" \
+data-target="#${html_node_path}">
                                 <span class="indicator"></span>
                                 ${node_title}
                             </a>
                         </p>
-                        <div id="node-${node_slug}" class="collapse collapse-node">
-                            <%self:render_legislation_node node="${node['children'][node_name]}"/>
+                        <div id="${html_node_path}" class="collapse collapse-node">
+                            ${self.render_legislation_node(
+                                node = node['children'][node_name],
+                                path = node_path,
+                                )}
                         </div>
         % endfor
     % elif node.get('@type') == 'Scale':

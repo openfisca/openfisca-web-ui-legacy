@@ -107,6 +107,7 @@ def admin_edit(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
+        inputs['author_id'] = legislation.author_id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -274,19 +275,27 @@ def admin_view(req):
                 ),
             ),
         )(params.get('date'), state = ctx)
-    response = requests.post(
-        conf['api.urls.legislations'],
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': conf['app_name'],
-            },
-        data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
-        )
-    legislation_json = response.json()
-    legislation.json = legislation_json.get('dated_legislation') or legislation_json.get('legislation')
+    if legislation.json is not None and 'datesim' not in legislation.json:
+        response = requests.post(
+            conf['api.urls.legislations'],
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': conf['app_name'],
+                },
+            data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
+            )
+        dated_legislation_json = response.json()
+    else:
+        dated_legislation_json = legislation.json
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)
-    return templates.render(ctx, '/legislations/admin-view.mako', date = date, legislation = legislation)
+    return templates.render(
+        ctx,
+        '/legislations/admin-view.mako',
+        date = date,
+        legislation = legislation,
+        dated_legislation_json = dated_legislation_json,
+        )
 
 
 @wsgihelpers.wsgify

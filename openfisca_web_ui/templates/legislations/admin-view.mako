@@ -49,8 +49,10 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
 <%
-    user = model.get_user(ctx)
-    editable = model.is_admin(ctx) or user is not None and user._id == legislation.author_id
+    user = model.get_user(ctx, check = True)
+    dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
+    owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
+    editable = owner_or_admin and dated_legislation
 %>\
         <div class="page-header">
             <h1>${_('Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
@@ -67,19 +69,23 @@ from openfisca_web_ui import model, urls
                     ${self.view_content(editable = editable)}
                 </li>
             </ul>
-    % if editable:
             <div class="panel-footer">
                 <div class="btn-toolbar">
                     <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}">
                         ${_(u'View as JSON')}
                     </a>
-                    <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+    % if owner_or_admin:
+                    <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">
+                        ${_(u'Edit') if owner_or_admin else _(u'Copy and edit')}
+                    </a>
+    % endif
+    % if owner_or_admin:
                     <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
                         <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
                     </a>
+    % endif
                 </div>
             </div>
-    % endif
         </div>
 </%def>
 
@@ -137,17 +143,22 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
     % if value is not None:
         <div class="row">
             <div class="col-lg-8">
-            % if value.get('datesim'):
+            % if value.get('datesim') is not None:
                 <%render_legislation:render_dated_legislation_node node="${value}" editable="${editable}"/>
             % else:
                 <%render_legislation:render_legislation_node node="${value}"/>
             % endif:
-##                <button type="button" class="btn btn-default btn-xs btn-toggle-open">
-##                    ${_('Open all')}
-##                </button>
-##                <button type="button" class="btn btn-default btn-xs btn-toggle-close">
-##                    ${_('Close all')}
-##                </button>
+                <button type="button" class="btn btn-default btn-xs btn-toggle-open">
+                    ${_('Open all')}
+                </button>
+                <button type="button" class="btn btn-default btn-xs btn-toggle-close">
+                    ${_('Close all')}
+                </button>
+            % if editable is False:
+                <a class="btn btn-default btn-primary btn-xs" href="${legislation.get_user_url(ctx, 'edit')}">
+                    ${_('Edit content')}
+                </a>
+            % endif
             </div>
         </div>
     % endif
