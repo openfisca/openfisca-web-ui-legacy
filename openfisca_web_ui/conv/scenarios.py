@@ -31,12 +31,10 @@ from biryani1.states import default_state
 
 
 def scenarios_to_page_korma_data(scenarios, state = None):
-    if scenarios is None:
-        scenarios = [{}]
     return {
         'scenarios': [
             {'scenario': scenario}
-            for scenario in scenarios
+            for scenario in scenarios or []
             ],
         }, None
 
