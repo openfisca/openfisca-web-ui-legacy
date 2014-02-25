@@ -37,7 +37,7 @@ article.cgu h2{
     padding-left: 15px;
     margin-left: 6px;
 }
-.collapse-node-toggle {
+.collapse-node-toggle.legislation-node {
     display: block;
 }
 .collapse-node-toggle:hover {
