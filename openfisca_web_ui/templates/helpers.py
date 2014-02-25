@@ -48,6 +48,7 @@ def base_appconfig(ctx):
     elif user is not None and user.email is not None and not user.cnil_conditions_accepted:
         enabled_modules['acceptCnilConditionsModal'] = True
     appconfig = {
+        'debug': conf['debug'],
         'enabledModules': enabled_modules,
         }
     return appconfig
