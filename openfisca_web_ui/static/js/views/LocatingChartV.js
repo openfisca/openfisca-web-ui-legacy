@@ -31,11 +31,6 @@ define([
 				var that = this;
 				this.active = true;
 
-				/* Add nvd3 stylesheet */
-				if($('link[href$="/bower/nvd3/nv.d3.min.css"').length == 0) {
-					$('<link>').appendTo('head').attr({type : 'text/css', rel : 'stylesheet'}).attr('href', '/bower/nvd3/nv.d3.min.css');
-				}
-
 				this.height = parent.height - this.margin.bottom - this.margin.top;
 				this.width = parent.width - this.margin.left - this.margin.right;
 
