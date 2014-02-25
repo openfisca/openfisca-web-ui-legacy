@@ -58,7 +58,7 @@ from openfisca_web_ui import model, urls
             <form action="${urls.get_url(ctx, 'scenarios')}" class="korma form-inline" method="POST" role="form">
                 ${scenarios_question.html | n}
                 <div class="panel-footer">
-                    <button class="btn btn-success" type="submit">${_('Enregistrer')}</button>
+                    <button class="btn btn-success" type="submit">${_(u'Save')}</button>
                 </div>
             </form>
         </div>
@@ -168,7 +168,7 @@ ${simulation.description or ''}</textarea>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-success" name="submit" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> Enregistrer
+                            <span class="glyphicon glyphicon-ok"></span> ${_(u'Save')}
                         </button>
                         <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Annuler</button>
                     </div>
