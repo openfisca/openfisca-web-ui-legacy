@@ -1,5 +1,5 @@
 define([
-	'/js/models/chartM.js',
+	'chartM',
 	'helpers',
 	'nvd3',
 

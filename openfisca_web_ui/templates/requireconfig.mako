@@ -67,9 +67,7 @@ requireconfig = {
 
         # Models
         'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
-        'DetailChartM': urls.get_url(ctx, u'js/models/DetailChartM'),
-        'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
-        'DistributionChartM': urls.get_url(ctx, u'js/models/DistributionChartM'),
+        'chartM': urls.get_url(ctx, u'js/models/chartM'),
 
         # Modules
         'helpers': urls.get_url(ctx, 'js/modules/helpers')

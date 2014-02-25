@@ -4,7 +4,7 @@ define([
 	'backbone',
 	'd3',
 
-	'/js/models/chartM.js',
+	'chartM',
 	'helpers',
 	], function ($, _, Backbone, d3, chartM, helpers) {
 		'use strict';
