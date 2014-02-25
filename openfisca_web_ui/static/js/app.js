@@ -8,12 +8,12 @@ define([
 		App.prototype = {
 			init: function () {
 				var enabledModules = appconfig.enabledModules;
-				if (appconfig.acceptCookiesModal) {
+				if (enabledModules.acceptCookiesModal) {
 					require(['AcceptCookiesModalV'], function(AcceptCookiesModalV) {
 						this.acceptCookiesModalV = new AcceptCookiesModalV();
 					});
 				}
-				else if (appconfig.acceptCnilConditionsModal) {
+				else if (enabledModules.acceptCnilConditionsModal) {
 					require(['AcceptCnilConditionsModalV'], function(AcceptCnilConditionsModalV) {
 						this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
 					});
