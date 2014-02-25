@@ -738,6 +738,8 @@ def user_reset(req):
     if current_simulation is not None:
         current_simulation.api_data = None
         current_simulation.save(safe = True)
+    session.user.scenarios = None
+    session.user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
