@@ -559,7 +559,7 @@ def user_edit(req):
         datetime_begin = legislation.datetime_begin,
         datetime_end = legislation.datetime_end,
         description = u'Copie de la legislation « {} »'.format(legislation.title),
-        title = '{} (Copie)'.format(legislation.title),
+        title = u'{} (Copie)'.format(legislation.title),
         )
     response = requests.post(
         conf['api.urls.legislations'],
