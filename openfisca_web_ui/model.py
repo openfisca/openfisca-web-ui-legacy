@@ -457,9 +457,9 @@ class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, 
                     as_class = collections.OrderedDict,
                     ).limit(2))
                 if not instances:
-                    return value, state._(u"No account with ID, slug or words: {0}").format(value)
+                    return value, state._(u"No simulation with ID, slug or words: {0}").format(value)
                 if len(instances) > 1:
-                    return value, state._(u"Too much accounts with words: {0}").format(u' '.join(words))
+                    return value, state._(u"Too much simulations with words: {0}").format(u' '.join(words))
                 self = instances[0]
             return self, None
         return id_or_slug_or_words_to_instance
