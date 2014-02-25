@@ -26,7 +26,6 @@
 """Korma questions and factories"""
 
 
-import datetime
 import logging
 
 from biryani1.baseconv import check, guess_bool, pipe
@@ -84,7 +83,7 @@ BootstrapText = lambda *args, **kwargs: bootstrapize(Text, *args, **kwargs)
 
 
 custom_column_default_values = {
-    u'birth': datetime.datetime(1984, 1, 1, 0, 0),
+    u'birth': 1984,
     }
 
 
