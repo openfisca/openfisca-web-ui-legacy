@@ -93,21 +93,25 @@ from openfisca_web_ui.templates import helpers
                     </div>
                     <div class="modal-body">
                         <p>
-                            Le simulateur Openfisca permet d'obtenir une estimation de la situation socio-fiscale de
-                            votre ménage.<br>
+                            OpenFisca est un logiciel libre de simulation du système socio-fiscal français. Il permet de
+                            visualiser simplement un grand nombre de prestations sociales et d'impôts payés par les
+                            ménages, et de simuler l'impact de réformes sur le budget des ménages. Il s'agit d'un outil
+                            à vocation pédagogique pour aider les citoyens à mieux comprendre le système socio-fiscal
+                            français.
+                        </p>
+                        <p>
                             La simulation est effectuée à partir des textes juridiques applicables et des éléments
                             saisis en ligne. Elle ne constitue en aucune façon une déclaration de revenus.
                         </p>
                         <p>
-                            Les montants, obtenus à partir des <strong>renseignements inscrits sous votre seule
-                            responsabilité, n'ont qu’une valeur indicative</strong>. Ainsi, les montants de vos impôts
+                            Les montants, obtenus à partir des <strong>informations inscrites sous votre seule
+                            responsabilité, n'ont qu'une valeur indicative</strong>. Ainsi, les montants de vos impôts
                             calculés lors de votre déclaration de revenus peuvent être différents.
                         </p>
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des
-                                <a target="_blank" href="/terms">conditions générales d'utilisation</a>.
+                                J'ai pris connaissance des informations ci-dessus.
                             </label>
                         </div>
                         <p class="cookie-text">
