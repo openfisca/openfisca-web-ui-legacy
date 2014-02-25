@@ -68,8 +68,9 @@ log = logging.getLogger(__name__)
 def admin_delete(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
+    user = model.get_user(ctx, check = True)
 
-    if not model.is_admin(ctx):
+    if not (legislation.author_id == user._id or model.is_admin(ctx)):
         return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Deletion forbidden"),
             message = ctx._("You must  be an administrator to delete a legislation."),
@@ -78,7 +79,10 @@ def admin_delete(req):
 
     if req.method == 'POST':
         legislation.delete(safe = True)
-        return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
+        if model.is_admin(ctx):
+            return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
+        else:
+            return wsgihelpers.redirect(ctx, location = model.Legislation.get_class_url(ctx))
     return templates.render(ctx, '/legislations/admin-delete.mako', legislation = legislation)
 
 
@@ -86,8 +90,9 @@ def admin_delete(req):
 def admin_edit(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
+    user = model.get_user(ctx, check = True)
 
-    if not model.is_admin(ctx):
+    if not (legislation.author_id == user._id or model.is_admin(ctx)):
         return wsgihelpers.forbidden(ctx,
             explanation = ctx._("Edition forbidden"),
             message = ctx._("You must  be an administrator to edit a legislation."),
@@ -302,6 +307,8 @@ def admin_view(req):
 def api1_edit(req):
     ctx = contexts.Ctx(req)
     params = req.params
+    user = model.get_user(ctx, check = True)
+
     inputs = {
         'id_or_slug_or_words': req.urlvars.get('id_or_slug_or_words'),
         'name': params.getall('name[]'),
@@ -491,9 +498,58 @@ def route_user(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_index),
         ('GET', '^/new?$', admin_new),
+        ('GET', '^/(?P<id_or_slug>[^/]+)/edit/?$', user_edit),
         ('GET', '^/(?P<id_or_slug>[^/]+)$', user_view),
         )
     return router(environ, start_response)
+
+
+@wsgihelpers.wsgify
+def user_edit(req):
+    ctx = contexts.Ctx(req)
+    user = model.get_user(ctx, check = True)
+
+    params = req.GET
+    inputs = {
+        'date': params.get('date'),
+        'legislation': req.urlvars.get('id_or_slug'),
+        }
+    data, errors = conv.struct({
+        'date': conv.pipe(
+            conv.cleanup_line,
+            conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+            conv.default(datetime.datetime.utcnow())
+            ),
+        'legislation': conv.pipe(
+            conv.input_to_slug,
+            conv.not_none,
+            model.Legislation.make_id_or_slug_or_words_to_instance(),
+            ),
+        })(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+
+    legislation = data['legislation']
+    if legislation.author_id == user._id and 'datesim' in legislation.json:
+        return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx, 'edit'))
+    new_legislation = model.Legislation(
+        author_id = user._id,
+        datetime_begin = legislation.datetime_begin,
+        datetime_end = legislation.datetime_end,
+        description = u'Copie de la legislation « {} »'.format(legislation.title),
+        title = '{} (Copie)'.format(legislation.title),
+        )
+    response = requests.post(
+        conf['api.urls.legislations'],
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': conf['app_name'],
+            },
+        data = json.dumps(dict(date = data['date'].isoformat(), legislation = legislation.json)),
+        )
+    new_legislation.json = response.json().get('dated_legislation')
+    new_legislation.save(safe = True)
+    return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx, 'edit'))
 
 
 @wsgihelpers.wsgify
