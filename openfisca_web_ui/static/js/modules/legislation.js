@@ -1,23 +1,24 @@
-define(['jquery', 'x-editable'], function ($) {
+define(['jquery', 'moment', 'x-editable'], function ($) {
 
 	function init (config) {
+
+		$('.editable-date').editable({
+			type: 'combodate',
+			format: 'DD/MM/YYYY',
+			url: config.legislationUrl,
+			pk: 1,
+			title: 'Appliquer cette legislation à une nouvelle date',
+		});
 
 		//turn to inline mode
 		$.fn.editable.defaults.mode = 'inline';
 
 		// editable
 		$('.editable').editable({
-			escape: true,
 			type: 'text',
 			url: config.legislationUrl,
 			pk: 1,
 			title: 'Nouvelle valeur',
-			success: function(response, newValue) {
-				if (response.status == 'error') {
-					//msg will be shown in editable form
-					return response.msg;
-				}
-			}
 		});
 
 		$('.collapse-node-toggle').on('click', function(evt) {

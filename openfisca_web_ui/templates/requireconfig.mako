@@ -44,6 +44,7 @@ requireconfig = {
         'd3': urls.get_url(ctx, u'bower/d3/d3'),
         'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
         'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
+        'moment': urls.get_url(ctx, u'/bower/moment/moment'),
         'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
         'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
         'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),

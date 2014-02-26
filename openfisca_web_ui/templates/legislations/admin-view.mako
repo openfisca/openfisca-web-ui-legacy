@@ -24,6 +24,8 @@
 
 
 <%!
+import datetime
+
 from openfisca_web_ui import model, urls
 %>
 
@@ -125,6 +127,15 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             <dt>${_("Source URL")}</dt>
             <dd><a href="${value}">${value}</a></dd>
     % endif
+    % if dated_legislation:
+<%
+        value = legislation.json['datesim']
+%>\
+        % if value is not None:
+            <dt>${_("Dated legislation")}</dt>
+            <dd>${value}</dd>
+        % endif
+    % endif
 <%
     value = legislation.updated
 %>\
@@ -167,6 +178,10 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                         <span class="glyphicon glyphicon-lock"></span>
                         ${_('Edit content')}
                     </a>
+            % endif
+            % if not dated_legislation:
+                    ${_('Legislation for')}
+                    <a class="editable-date" data-name="date">${datetime.datetime.strftime(date, '%d/%m/%Y')}</a>
             % endif
                 </div>
             </div>
