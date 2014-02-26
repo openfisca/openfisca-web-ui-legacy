@@ -80,34 +80,34 @@ from openfisca_web_ui import model, urls
 <%
 user = model.get_user(ctx)
 %>
-    % if user is not None and user.simulations is not None:
-        % for simulation in user.simulations:
-        <%self:modals_edit simulation="${simulation}"/>
+    % if user is not None and user.test_cases is not None:
+        % for test_case in user.test_cases:
+        <%self:modals_edit test_case="${test_case}"/>
         % endfor
     % endif
 <%
-    simulation = model.Simulation(slug = 'new', title = '')
+    test_case = model.TestCase(slug = 'new', title = '')
 %>\
-        <%self:modals_edit simulation="${simulation}"/>
+        <%self:modals_edit test_case="${test_case}"/>
     % if user is not None:
-        % for simulation in user.simulations:
-        <%self:modals_delete simulation="${simulation}"/>
+        % for test_case in user.test_cases:
+        <%self:modals_delete test_case="${test_case}"/>
         % endfor
     % endif
         <%self:modals_delete_user/>
 </%def>
 
 
-<%def name="modals_delete(simulation)" filter="trim">
-    <div class="modal fade bs-modal-lg" id="${u'delete-{}-modal'.format(simulation.slug)}" role="dialog">
+<%def name="modals_delete(test_case)" filter="trim">
+    <div class="modal fade bs-modal-lg" id="${u'delete-{}-modal'.format(test_case.slug)}" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Supprimer la simulation ${simulation.title} ?</h4>
+                    <h4 class="modal-title">Supprimer la simulation ${test_case.title} ?</h4>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="${simulation.get_url(ctx, 'delete')}">
+                    <form method="POST" action="${test_case.get_url(ctx, 'delete')}">
                         <button type="submit" class="btn btn-danger">${_(u'Delete')}</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Cancel')}</button>
                     </form>
@@ -138,31 +138,31 @@ user = model.get_user(ctx)
 </%def>
 
 
-<%def name="modals_edit(simulation)" filter="trim">
-    <div class="modal fade bs-modal-lg" id="${u'edit-{}-modal'.format(simulation.slug)}" role="dialog">
+<%def name="modals_edit(test_case)" filter="trim">
+    <div class="modal fade bs-modal-lg" id="${u'edit-{}-modal'.format(test_case.slug)}" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    % if simulation.title == 'new':
+    % if test_case.title == 'new':
                     <h4 class="modal-title">${_('New Simulation')}</h4>
     % else:
-                    <h4 class="modal-title">${_('Edit Simulation')} ${simulation.title}</h4>
+                    <h4 class="modal-title">${_('Edit Simulation')} ${test_case.title}</h4>
     % endif
                 </div>
-                <form class="form-horizontal" method="POST" action="${simulation.get_url(ctx, 'edit')}">
+                <form class="form-horizontal" method="POST" action="${test_case.get_url(ctx, 'edit')}">
                     <div class="modal-body">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">Nom :</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="title" value="${simulation.title}">
+                                <input type="text" class="form-control" name="title" value="${test_case.title}">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">Description :</label>
                             <div class="col-sm-10">
                                 <textarea class="form-control" name="description">\
-${simulation.description or ''}</textarea>
+${test_case.description or ''}</textarea>
                             </div>
                         </div>
                     </div>
@@ -199,21 +199,21 @@ user = model.get_user(ctx)
 %>
     % if user is not None:
             <tbody>
-        % for simulation in user.simulations:
+        % for test_case in user.test_cases:
                 <tr>
                     <td>${'<span class="glyphicon glyphicon-ok"></span>' \
-                        if simulation._id == account.current_simulation_id else u' ' | n}</td>
-                    <td><a href="${simulation.get_url(ctx, 'use')}">${simulation.title}</a></td>
-                    <td>${simulation.description or ''}</td>
+                        if test_case._id == account.current_test_case_id else u' ' | n}</td>
+                    <td><a href="${test_case.get_url(ctx, 'use')}">${test_case.title}</a></td>
+                    <td>${test_case.description or ''}</td>
                     <td>
-                        <a class="btn btn-sm btn-primary" href="${simulation.get_url(ctx, 'use')}">${_(u'Use')}</a>
+                        <a class="btn btn-sm btn-primary" href="${test_case.get_url(ctx, 'use')}">${_(u'Use')}</a>
                         <a class="btn btn-sm btn-default" href="#" data-toggle="modal" \
-data-target="#${u'edit-{}-modal'.format(simulation.slug)}">${_(u'Edit')}</a>
-                        <a class="btn btn-sm btn-default" href="${simulation.get_url(ctx, 'duplicate')}">
+data-target="#${u'edit-{}-modal'.format(test_case.slug)}">${_(u'Edit')}</a>
+                        <a class="btn btn-sm btn-default" href="${test_case.get_url(ctx, 'duplicate')}">
                             ${_(u'Duplicate')}
                         </a>
                         <a class="btn btn-sm btn-danger" href="#" data-toggle="modal" \
-data-target="#${u'delete-{}-modal'.format(simulation.slug)}">${_(u'Delete')}</a>
+data-target="#${u'delete-{}-modal'.format(test_case.slug)}">${_(u'Delete')}</a>
                     </td>
                 </tr>
         % endfor

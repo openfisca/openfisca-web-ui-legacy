@@ -602,7 +602,7 @@ def login(req):
     return wsgihelpers.respond_json(
         ctx,
         dict(
-            accountUrl = session.user.get_user_url(ctx) if len(session.user.simulations_id or []) > 1 else '/',
+            accountUrl = session.user.get_user_url(ctx) if len(session.user.test_cases_id or []) > 1 else '/',
             )
         )
 
@@ -734,10 +734,10 @@ def user_reset(req):
             message = ctx._("You can not delete an account."),
             title = ctx._('Operation denied'),
             )
-    current_simulation = session.user.current_simulation
-    if current_simulation is not None:
-        current_simulation.api_data = None
-        current_simulation.save(safe = True)
+    current_test_case = session.user.current_test_case
+    if current_test_case is not None:
+        current_test_case.api_data = None
+        current_test_case.save(safe = True)
     session.user.scenarios = None
     session.user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))

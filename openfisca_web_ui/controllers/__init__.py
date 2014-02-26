@@ -33,7 +33,7 @@ from biryani1.baseconv import check
 from formencode import variabledecode
 
 from .. import contexts, conf, conv, model, templates, questions, urls, uuidhelpers, wsgihelpers
-from . import accounts, forms, legislations, sessions, simulations
+from . import accounts, forms, legislations, sessions, test_cases
 
 
 log = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ def make_router():
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/simulate$', simulate),
         (None, '^/legislations(?=/|$)', legislations.route_user),
-        (None, '^/simulations(?=/|$)', simulations.route),
+        (None, '^/simulations(?=/|$)', test_cases.route),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
         ('POST', '^/scenarios/?$', scenarios),

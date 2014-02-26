@@ -44,9 +44,9 @@ def make_scenarios_repeat(user):
 </li>
 '''.format(formatted_index = index + 1, self = self)
 
-    simulations_id_and_name = (
-        (simulation._id, simulation.title)
-        for simulation in user.simulations
+    test_cases_id_and_name = (
+        (test_case._id, test_case.title)
+        for test_case in user.test_cases
         )
     legislations_id_and_name = (
         (legislation._id, legislation.title)
@@ -66,8 +66,8 @@ def make_scenarios_repeat(user):
                 base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
                 base.BootstrapSelect(
                     add_first_empty_value = True,
-                    choices = simulations_id_and_name,
-                    name = 'simulation_id',
+                    choices = test_cases_id_and_name,
+                    name = 'test_case_id',
                     ),
                 base.BootstrapSelect(
                     add_first_empty_value = True,

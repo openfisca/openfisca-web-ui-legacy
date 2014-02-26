@@ -213,9 +213,9 @@ def scenarios_to_api_data(values, state = None):
                                 function(lambda legislation: legislation.url),
                                 ),
                             ),
-                        'simulation_id': pipe(
-                            model.Simulation.make_id_or_slug_or_words_to_instance(),
-                            function(lambda simulation: simulation.api_data if simulation.api_data is not None else {}),
+                        'test_case_id': pipe(
+                            model.TestCase.make_id_or_slug_or_words_to_instance(),
+                            function(lambda test_case: test_case.api_data if test_case.api_data is not None else {}),
                             fill_user_api_data,
                             ),
                         'year': default(2013),
@@ -224,11 +224,11 @@ def scenarios_to_api_data(values, state = None):
                     drop_none_values = False,
                     ),
                 rename_item('legislation_id', 'legislation'),
-                rename_item('simulation_id', 'simulation'),
+                rename_item('test_case_id', 'test_case'),
                 function(lambda struct: dict(
                     (key, value)
                     for key, value in chain(
-                        (struct['simulation'] or {}).iteritems(),
+                        (struct['test_case'] or {}).iteritems(),
                         [('legislation_url', struct['legislation']), ('year', struct['year'])],
                         )
                     )),

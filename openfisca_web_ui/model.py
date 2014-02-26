@@ -48,8 +48,8 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     email = None
     full_name = None
     scenarios = None
-    simulations_id = None
-    current_simulation_id = None
+    test_cases_id = None
+    current_test_case_id = None
     slug = None
     stats_accepted = None
 
@@ -79,16 +79,16 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def current_api_data(self):
-        assert self.current_simulation is not None
-        return self.current_simulation.api_data
+        assert self.current_test_case is not None
+        return self.current_test_case.api_data
 
     @property
-    def current_simulation(self):
-        return Simulation.find_one(self.current_simulation_id) if self.current_simulation_id is not None else None
+    def current_test_case(self):
+        return TestCase.find_one(self.current_test_case_id) if self.current_test_case_id is not None else None
 
-    @current_simulation.setter
-    def current_simulation(self, simulation):
-        self.current_simulation_id = simulation._id
+    @current_test_case.setter
+    def current_test_case(self, test_case):
+        self.current_test_case_id = test_case._id
 
     @classmethod
     def get_admin_class_full_url(cls, ctx, *path, **query):
@@ -149,8 +149,8 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
         return id_or_slug_or_words_to_instance
 
     @property
-    def simulations(self):
-        return list(Simulation.find({'_id': {'$in': self.simulations_id}})) if self.simulations_id else None
+    def test_cases(self):
+        return list(TestCase.find({'_id': {'$in': self.test_cases_id}})) if self.test_cases_id else None
 
     def turn_to_json_attributes(self, state):
         value, error = conv.object_to_clean_dict(self, state = state)
@@ -381,10 +381,10 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
         return self, None
 
 
-class Simulation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
+class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     api_data = None
     author_id = None
-    collection_name = 'simulations'
+    collection_name = 'test_cases'
     description = None
     slug = None
     title = None

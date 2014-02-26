@@ -48,11 +48,11 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
 <%
     user = model.get_user(ctx)
 %>\
-    % if user is not None and user.simulations is not None and len(user.simulations) > 1:
-        % for simulation in user.simulations:
-            % if simulation._id == user.current_simulation_id:
+    % if user is not None and user.test_cases is not None and len(user.test_cases) > 1:
+        % for test_case in user.test_cases:
+            % if test_case._id == user.current_test_case_id:
         <div class="page-header">
-            <h1>${simulation.title}</h1>
+            <h1>${test_case.title}</h1>
         </div>
             % endif
         % endfor

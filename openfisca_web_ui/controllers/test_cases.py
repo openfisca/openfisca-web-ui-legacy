@@ -47,32 +47,31 @@ def delete(req):
             )
 
     id_or_slug = req.urlvars.get('id_or_slug')
-    simulation = conv.check(
-        model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
+    test_case = conv.check(
+        model.TestCase.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
         )
-    if simulation is None or simulation._id not in session.user.simulations_id:
+    if test_case is None or test_case._id not in session.user.test_cases_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
-    session.user.simulations_id.remove(simulation._id)
-    if len(session.user.simulations_id) == 0:
-        simulation.delete(safe = True)
-        simulation_date = datetime.datetime.utcnow()
-        simulation_title = u'Ma simulation du {} à {}'.format(
-            datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
-            datetime.datetime.strftime(simulation_date, u'%H:%M'),
+    session.user.test_cases_id.remove(test_case._id)
+    if len(session.user.test_cases_id) == 0:
+        test_case.delete(safe = True)
+        test_case_date = datetime.datetime.utcnow()
+        test_case_title = u'Ma simulation du {} à {}'.format(
+            datetime.datetime.strftime(test_case_date, u'%d/%m/%Y'),
+            datetime.datetime.strftime(test_case_date, u'%H:%M'),
             )
-        simulation = model.Simulation(
+        test_case = model.TestCase(
             author_id = session.user._id,
-            title = simulation_title,
-            slug = strings.slugify(simulation_title),
+            title = test_case_title,
+            slug = strings.slugify(test_case_title),
             )
-        simulation.save(safe = True)
-        session.user.current_simulation = simulation
-        session.user.simulations_id = [simulation._id]
-    elif session.user.current_simulation_id == simulation._id:
-        session.user.current_simulation = simulation
-        session.user.current_simulation = session.user.simulations[0]
-        simulation.delete(safe = True)
+        test_case.save(safe = True)
+        session.user.current_test_case = test_case
+        session.user.test_cases_id = [test_case._id]
+    elif session.user.current_test_case == test_case:
+        session.user.current_test_case_id = session.user.test_cases_id[0]
+        test_case.delete(safe = True)
     session.user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
@@ -90,23 +89,23 @@ def duplicate(req):
             )
 
     id_or_slug = req.urlvars.get('id_or_slug')
-    simulation = conv.check(
-        model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
+    test_case = conv.check(
+        model.TestCase.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
         )
-    if simulation is None or simulation._id not in session.user.simulations_id:
+    if test_case is None or test_case._id not in session.user.test_cases_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
-    del simulation._id
-    simulation.description = u'Copie de la simulation {}'.format(simulation.title)
-    simulation.title = u'{} « (Copie) »'.format(simulation.title)
-    simulation.slug = strings.slugify(simulation.title)
-    simulation.save(safe = True)
-    if session.user.simulations_id is None:
-        session.user.simulations_id = [simulation._id]
-        session.user.current_simulation_id = simulation._id
+    del test_case._id
+    test_case.description = u'Copie de la simulation {}'.format(test_case.title)
+    test_case.title = u'{} « (Copie) »'.format(test_case.title)
+    test_case.slug = strings.slugify(test_case.title)
+    test_case.save(safe = True)
+    if session.user.test_cases_id is None:
+        session.user.test_cases_id = [test_case._id]
+        session.user.current_test_case_id = test_case._id
         session.user.save(safe = True)
-    elif simulation._id not in session.user.simulations_id:
-        session.user.simulations_id.append(simulation._id)
+    elif test_case._id not in session.user.test_cases_id:
+        session.user.test_cases_id.append(test_case._id)
         session.user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
@@ -136,40 +135,40 @@ def edit(req):
             'description': conv.cleanup_line,
             'id_or_slug': conv.first_match(
                 conv.test(lambda id: id == 'new'),
-                model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id),
+                model.TestCase.make_id_or_slug_or_words_to_instance(user_id = session.user._id),
                 ),
             }),
-        conv.rename_item('id_or_slug', 'simulation'),
+        conv.rename_item('id_or_slug', 'test_case'),
         )(inputs, state = ctx)
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = errors)
 
-    if data['simulation'] == 'new':
-        data['simulation'] = model.Simulation(
+    if data['test_case'] == 'new':
+        data['test_case'] = model.TestCase(
             author_id = session.user._id,
             description = data['description'],
             title = data['title'],
             slug = strings.slugify(data['title']),
             )
-        data['simulation'].api_data = None
-        data['simulation'].save(safe = True)
-        if session.user.simulations_id is None:
-            session.user.simulations_id = [data['simulation']._id]
-            session.user.current_simulation_id = data['simulation']._id
+        data['test_case'].api_data = None
+        data['test_case'].save(safe = True)
+        if session.user.test_cases_id is None:
+            session.user.test_cases_id = [data['test_case']._id]
+            session.user.current_test_case_id = data['test_case']._id
             session.user.save(safe = True)
-        elif data['simulation']._id not in session.user.simulations_id:
-            session.user.simulations_id.append(data['simulation']._id)
-            session.user.current_simulation_id = data['simulation']._id
+        elif data['test_case']._id not in session.user.test_cases_id:
+            session.user.test_cases_id.append(data['test_case']._id)
+            session.user.current_test_case_id = data['test_case']._id
             session.user.save(safe = True)
         return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
-    if data['simulation'] is None or data['simulation']._id not in session.user.simulations_id:
+    if data['test_case'] is None or data['test_case']._id not in session.user.test_cases_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(data['id_or_slug']))
 
-    data['simulation'].title = data['title']
-    data['simulation'].slug = strings.slugify(data['title'])
-    data['simulation'].description = data['description']
-    data['simulation'].save(safe = True)
+    data['test_case'].title = data['title']
+    data['test_case'].slug = strings.slugify(data['title'])
+    data['test_case'].description = data['description']
+    data['test_case'].save(safe = True)
     return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
 
 
@@ -197,12 +196,12 @@ def use(req):
             )
 
     id_or_slug = req.urlvars.get('id_or_slug')
-    simulation = conv.check(
-        model.Simulation.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
+    test_case = conv.check(
+        model.TestCase.make_id_or_slug_or_words_to_instance(user_id = session.user._id)(id_or_slug, state = ctx)
         )
-    if simulation is None or simulation._id not in session.user.simulations_id:
+    if test_case is None or test_case._id not in session.user.test_cases_id:
         return wsgihelpers.not_found(ctx, explanation = ctx._(u'Simulation {} not found').format(id_or_slug))
 
-    session.user.current_simulation = simulation
+    session.user.current_test_case = test_case
     session.user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))

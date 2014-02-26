@@ -104,9 +104,9 @@ def situation_form_post(req):
     api_data = check(conv.base.korma_data_to_api_data(data, state = ctx))
     if api_data is not None:
         user_api_data.update(api_data)
-        current_simulation = session.user.current_simulation
-        current_simulation.api_data = user_api_data
-        current_simulation.save(safe = True)
+        current_test_case = session.user.current_test_case
+        current_test_case.api_data = user_api_data
+        current_test_case.save(safe = True)
     if req.is_xhr:
         return wsgihelpers.respond_json(ctx, None)
     else:
@@ -121,19 +121,19 @@ def update_session(session):
         user = model.Account()
         user._id = uuidhelpers.generate_uuid()
         user.compute_words()
-        simulation_date = datetime.datetime.utcnow()
-        simulation_title = u'Ma simulation du {} à {}'.format(
-            datetime.datetime.strftime(simulation_date, u'%d/%m/%Y'),
-            datetime.datetime.strftime(simulation_date, u'%H:%M'),
+        test_case_date = datetime.datetime.utcnow()
+        test_case_title = u'Ma simulation du {} à {}'.format(
+            datetime.datetime.strftime(test_case_date, u'%d/%m/%Y'),
+            datetime.datetime.strftime(test_case_date, u'%H:%M'),
             )
-        simulation = model.Simulation(
+        test_case = model.TestCase(
             author_id = user._id,
-            title = simulation_title,
-            slug = strings.slugify(simulation_title),
+            title = test_case_title,
+            slug = strings.slugify(test_case_title),
             )
-        simulation.save(safe = True)
-        user.current_simulation = simulation
-        user.simulations_id = [simulation._id]
+        test_case.save(safe = True)
+        user.current_test_case = test_case
+        user.test_cases_id = [test_case._id]
         user.save(safe = True)
         session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
