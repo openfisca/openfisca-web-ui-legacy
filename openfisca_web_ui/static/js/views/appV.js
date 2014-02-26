@@ -12,6 +12,7 @@ define([
 	function ($, _, Backbone, d3, appconfig, WaterfallChartV, LocatingChartV, DistributionChartV) {
 
 		var AppV = Backbone.View.extend({
+			defaultChart: appconfig.enabledModules.locatingChart ? 'locatingChart' : 'waterfallChart',
 			events: {},
 			el: '#chart-wrapper',
 			width: null,

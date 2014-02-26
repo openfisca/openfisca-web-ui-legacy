@@ -12,7 +12,7 @@ define([
 			'!/repartition': 'distributionChart',
 
 			// '*path': 'error404',
-			'': 'locatingChart'
+			'': appV.defaultChart
 		},
 		initialize: function () {
 			Backbone.history.start();
