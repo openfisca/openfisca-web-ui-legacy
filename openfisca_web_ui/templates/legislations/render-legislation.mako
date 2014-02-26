@@ -25,6 +25,7 @@
 
 <%!
 from copy import copy
+from itertools import chain
 
 from biryani1 import strings
 
@@ -86,16 +87,16 @@ data-toggle="collapse" data-target="#${html_node_path}">
             <tr>
         % if editable is True:
                 <td>
-                    <a class="editable" data-name="${path | n, js, h}" data-index="${index}" \
-data-element="threshold">${slice['threshold'] if slice.get('threshold') else ''}</a>
+                    <a class="editable" data-name="${list(chain(path, ('slices', index, 'threshold'))) | n, js, h}">\
+${slice['threshold'] if slice.get('threshold') else ''}</a>
                 </td>
                 <td>
-                    <a class="editable" data-name="${path | n, js, h}" data-index="${index}" \
-data-element="base">${slice['base'] if slice.get('base') else ''}</a>
+                    <a class="editable" data-name="${list(chain(path, ('slices', index, 'base'))) | n, js, h}">\
+${slice['base'] if slice.get('base') else ''}</a>
                 </td>
                 <td>
-                    <a class="editable" data-name="${path | n, js, h}" data-index="${index}" \
-data-element="rate">${slice['rate'] if slice.get('rate') else ''}</a>
+                    <a class="editable" data-name="${list(chain(path, ('slices', index, 'rate'))) | n, js, h}">\
+${slice['rate'] if slice.get('rate') else ''}</a>
                 </td>
         % else:
                 <td>${slice['threshold'] if slice.get('threshold') else ''}</td>

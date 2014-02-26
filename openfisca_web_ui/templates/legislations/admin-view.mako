@@ -66,7 +66,14 @@ from openfisca_web_ui import model, urls
                     <%self:view_fields/>
                 </li>
                 <li class="list-group-item">
-                    ${self.view_content(editable = editable)}
+    % if editable:
+                    <div class="alert alert-info">
+                        <strong>${_('Editable content')}</strong>
+    % endif:
+                        ${self.view_content(editable = editable)}
+    % if editable:
+                    </div>
+    % endif:
                 </li>
             </ul>
             <div class="panel-footer">
@@ -157,6 +164,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                     </button>
             % if editable is False:
                     <a class="btn btn-default btn-primary btn-xs" href="${legislation.get_user_url(ctx, 'edit')}">
+                        <span class="glyphicon glyphicon-lock"></span>
                         ${_('Edit content')}
                     </a>
             % endif
