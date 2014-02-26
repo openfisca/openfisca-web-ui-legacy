@@ -356,11 +356,22 @@ def api1_edit(req):
         return get_deep_key(data=layer_data, layers=next_layers) if next_layers else layer_data
 
     node = get_deep_key(legislation.json, data['name'])
-    node['value'] = data['value']
-    legislation.save(safe = True)
-
-    if errors is not None:
+    value, error = conv.switch(
+        conv.function(lambda value: node.get('format', 'float')),
+        {
+            'float': conv.input_to_float,
+            'integer': conv.input_to_int,
+            'rate': conv.pipe(
+                conv.input_to_float,
+                conv.test_greater_or_equal(0),
+                conv.test_less_or_equal(1),
+                ),
+            },
+        )(data['value'], state = ctx)
+    if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = ctx._('Legislation edit error: {}').format(errors))
+    node['value'] = value
+    legislation.save(safe = True)
     return wsgihelpers.respond_json(ctx, data['value'])
 
 
