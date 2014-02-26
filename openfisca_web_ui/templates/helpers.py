@@ -35,7 +35,11 @@ def base_appconfig(ctx):
     session = ctx.session
     user = model.get_user(ctx)
     enabled_modules = {}
-    if conf['auth.enable']:
+    if conf['cookie'] not in req.cookies:
+        enabled_modules['acceptCookiesModal'] = True
+    elif user is not None and user.email is not None and not user.cnil_conditions_accepted:
+        enabled_modules['acceptCnilConditionsModal'] = True
+    if conf['enabled.auth']:
         enabled_modules['auth'] = {
             'currentUser': user.email if user is not None else None,
             }
@@ -43,10 +47,8 @@ def base_appconfig(ctx):
         enabled_modules['disclaimer'] = {
             'disclaimerClosedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
             }
-    if conf['cookie'] not in req.cookies:
-        enabled_modules['acceptCookiesModal'] = True
-    elif user is not None and user.email is not None and not user.cnil_conditions_accepted:
-        enabled_modules['acceptCnilConditionsModal'] = True
+    if conf['enabled.charts.locating']:
+        enabled_modules['locatingChart'] = True
     appconfig = {
         'debug': conf['debug'],
         'enabledModules': enabled_modules,

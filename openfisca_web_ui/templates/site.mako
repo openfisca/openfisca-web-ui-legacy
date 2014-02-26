@@ -274,7 +274,7 @@ ${conf['app_name']}
 
 
 <%def name="scripts()" filter="trim">
-% if conf['auth.enable']:
+% if conf['enabled.auth']:
     ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
     ## you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
@@ -338,7 +338,7 @@ ${conf['app_name']}
 
 
 <%def name="topbar_user()" filter="trim">
-    % if conf['auth.enable']:
+    % if conf['enabled.auth']:
 <%
         user = model.get_user(ctx)
 %>\

@@ -4,11 +4,12 @@ define([
 	'backbone',
 	'd3',
 
+	'appconfig',
 	'WaterfallChartV',
 	'LocatingChartV',
 	'DistributionChartV'
 	],
-	function ($, _, Backbone, d3, WaterfallChartV, LocatingChartV, DistributionChartV) {
+	function ($, _, Backbone, d3, appconfig, WaterfallChartV, LocatingChartV, DistributionChartV) {
 
 		var AppV = Backbone.View.extend({
 			events: {},
@@ -20,20 +21,21 @@ define([
 				this.svg = d3.select(this.el).append('svg');
 				$(window).on('resize', $.proxy(this.updateDimensions, this));
 				this.updateDimensions();
-				this.$el.prepend('\
-				<div id="chart-menu">\
-					<ul class="nav nav-tabs">\
-						<li>\
-							<a data-target="se-situer" data-toggle="tab" href="#!/se-situer">Se situer</a>\
-						</li>\
-						<li>\
-							<a data-target="cascade" data-toggle="tab" href="#!/cascade">Cascade</a>\
-						</li>\
-						<li>\
-							<a data-target="repartition" data-toggle="tab" href="#!/repartition">Répartition</a>\
-						</li>\
-					</ul>\
-				</div>');
+				var chartMenuHtml = '<div id="chart-menu"><ul class="nav nav-tabs">';
+				if (appconfig.enabledModules.locatingChart) {
+					chartMenuHtml += '<li><a data-target="se-situer" data-toggle="tab" href="#!/se-situer">\
+Se situer</a></li>';
+				}
+				chartMenuHtml += '\
+	<li>\
+		<a data-target="cascade" data-toggle="tab" href="#!/cascade">Cascade</a>\
+	</li>\
+		<li>\
+			<a data-target="repartition" data-toggle="tab" href="#!/repartition">Répartition</a>\
+		</li>\
+	</ul>\
+</div>';
+				this.$el.prepend(chartMenuHtml);
 				this.$el.find('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
 					var href = $(evt.target).attr('href');
 					window.location.hash = href;
@@ -54,7 +56,9 @@ define([
 
 						break;
 					case 'locating':
-						this.chart = new LocatingChartV(this);
+						if (appconfig.enabledModules.locatingChart) {
+							this.chart = new LocatingChartV(this);
+						}
 
 						break;
 					case 'distribution':
