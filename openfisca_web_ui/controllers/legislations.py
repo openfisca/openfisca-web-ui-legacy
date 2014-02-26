@@ -591,7 +591,7 @@ def user_edit(req):
 
     legislation = data['legislation']
     if legislation.author_id == user._id and 'datesim' in legislation.json:
-        return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx, 'edit'))
+        return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
     new_legislation = model.Legislation(
         author_id = user._id,
         datetime_begin = legislation.datetime_begin,
