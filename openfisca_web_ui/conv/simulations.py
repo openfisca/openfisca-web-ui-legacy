@@ -77,6 +77,30 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
 
 def fill_user_api_data(values, state = None):
     """Compute missing values for API consistency and fill user API data with them."""
+
+    def guess_role_in_foyer_fiscal(individu_id):
+        if individu_id in (last_foyer_fiscal.get('declarants') or []) or \
+                individu_id in (last_foyer_fiscal.get('personnes_a_charge') or []):
+            return None
+        return 'personnes_a_charge' if get_role_in_famille(individu_id, familles) == 'enfants' else 'declarants'
+
+    def guess_role_in_menage(individu_id):
+        if last_menage.get('personne_de_reference') == individu_id or \
+                last_menage.get('conjoint') == individu_id or \
+                individu_id in (last_menage.get('enfants') or []) or \
+                individu_id in (last_menage.get('autres') or []):
+            return None
+        role_in_famille = get_role_in_famille(individu_id, familles)
+        if role_in_famille == 'parents':
+            if last_menage.get('personne_de_reference') is None:
+                return 'personne_de_reference'
+            elif last_menage.get('conjoint') is None:
+                return 'conjoint'
+            else:
+                return 'autres'
+        elif role_in_famille == 'enfants':
+            return 'enfants'
+
     if values is None:
         return None, None
     if state is None:
@@ -106,11 +130,6 @@ def fill_user_api_data(values, state = None):
     foyers_fiscaux = default_foyers_fiscaux if values.get('foyers_fiscaux') is None else values['foyers_fiscaux']
     last_foyer_fiscal = foyers_fiscaux[foyers_fiscaux.keys()[-1]]
 
-    def guess_role_in_foyer_fiscal(individu_id):
-        if individu_id in (last_foyer_fiscal.get('declarants') or []) or \
-                individu_id in (last_foyer_fiscal.get('personnes_a_charge') or []):
-            return None
-        return 'personnes_a_charge' if get_role_in_famille(individu_id, familles) == 'enfants' else 'declarants'
     for individu_id in individu_ids:
         role_in_foyer_fiscal = guess_role_in_foyer_fiscal(individu_id)
         if role_in_foyer_fiscal is not None:
@@ -129,22 +148,6 @@ def fill_user_api_data(values, state = None):
     menages = default_menages if values.get('menages') is None else values['menages']
     last_menage = menages[menages.keys()[-1]]
 
-    def guess_role_in_menage(individu_id):
-        if last_menage.get('personne_de_reference') == individu_id or \
-                last_menage.get('conjoint') == individu_id or \
-                individu_id in (last_menage.get('enfants') or []) or \
-                individu_id in (last_menage.get('autres') or []):
-            return None
-        role_in_famille = get_role_in_famille(individu_id, familles)
-        if role_in_famille == 'parents':
-            if last_menage.get('personne_de_reference') is None:
-                return 'personne_de_reference'
-            elif last_menage.get('conjoint') is None:
-                return 'conjoint'
-            else:
-                return 'autres'
-        elif role_in_famille == 'enfants':
-            return 'enfants'
     for individu_id in individu_ids:
         role_in_menage = guess_role_in_menage(individu_id)
         if role_in_menage is not None:
