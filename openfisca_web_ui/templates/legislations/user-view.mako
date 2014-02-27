@@ -48,6 +48,16 @@ from openfisca_web_ui import model, urls, uuidhelpers
 
 
 <%def name="container_content()" filter="trim">
+<%
+    user = model.get_user(ctx)
+    dated_legislation = False
+    owner_or_admin = False
+    editable = False
+    if user is not None:
+        dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
+        owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
+        editable = owner_or_admin and dated_legislation
+%>\
         <div class="page-header">
             <h1>${_('Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
         </div>
@@ -65,14 +75,32 @@ from openfisca_web_ui import model, urls, uuidhelpers
                 </li>
             </ul>
             <div class="panel-footer">
-                <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">
-                    ${_(u'Duplicate and edit copy')}
-                </a>
                 <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}" rel="external">
                     ${_(u'View as JSON')}
                 </a>
+        % if editable:
+                <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">
+                    <span class="glyphicon glyphicon-pencil"></span>
+        % else:
+                <a class="btn btn-primary" data-toggle="modal" data-target="#modal-duplicate-and-edit" href="#">
+                    <span class="glyphicon glyphicon-lock"></span>
+        % endif
+                    ${_(u'Edit')}
+                </a>
+        % if owner_or_admin:
+                <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
+                    <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
+                </a>
+        % endif
             </div>
         </div>
+</%def>
+
+
+<%def name="modals()" filter="trim">
+    <%parent:modals/>
+    <%render_legislation:modal_change_legislation_date/>
+    <%render_legislation:modal_duplicate_and_edit/>
 </%def>
 
 

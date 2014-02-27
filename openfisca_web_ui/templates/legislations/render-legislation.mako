@@ -39,6 +39,41 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
 </%def>
 
 
+<%def name="modal_change_legislation_date(date = None)" filter="trim">
+</%def>
+
+
+<%def name="modal_duplicate_and_edit()" filter="trim">
+    <div class="modal fade bs-modal-lg" id="modal-duplicate-and-edit" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Dupliquer et éditer une legislation</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Vous pouvez modifier une legislation si et seulement si les deux conditions suivantes sont
+                        remplis :
+                    </p>
+                    <ul>
+                        <li>Vous êtes l'auteur de la legislation</li>
+                        <li>Cette legislation est au format « legislation datée »</li>
+                    </ul>
+                    <p>
+                        La legislation que vous tentez d'éditer ne remplissant pas ces deux critères, une copie de
+                        cette legislation va être créer pour vous.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">${_('Edit')}</a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
 <%def name="render_dated_legislation_node(node, editable = False, path = None)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:

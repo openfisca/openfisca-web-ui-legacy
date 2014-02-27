@@ -68,14 +68,7 @@ from openfisca_web_ui import model, urls
                     <%self:view_fields/>
                 </li>
                 <li class="list-group-item">
-    % if editable:
-                    <div class="alert alert-info">
-                        <strong>${_('Editable content')}</strong>
-    % endif:
-                        ${self.view_content(editable = editable)}
-    % if editable:
-                    </div>
-    % endif:
+                    ${self.view_content(editable = editable)}
                 </li>
             </ul>
             <div class="panel-footer">
@@ -84,10 +77,12 @@ from openfisca_web_ui import model, urls
                         ${_(u'View as JSON')}
                     </a>
     % if owner_or_admin:
-                    <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">
+                    <a class="btn btn-primary" href="${legislation.get_admin_url(ctx, 'edit')}">
+    % else:
+                    <a class="btn btn-primary" data-toggle="modal" data-target="#modal-duplicate-and-edit" href="#">
+    % endif:
                         ${_(u'Edit') if owner_or_admin else _(u'Copy and edit')}
                     </a>
-    % endif
     % if owner_or_admin:
                     <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
                         <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
@@ -103,6 +98,21 @@ from openfisca_web_ui import model, urls
     <%parent:css/>
     <link href="${urls.get_url(ctx, u'bower/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')}" \
 media="screen" rel="stylesheet">
+</%def>
+
+
+<%def name="modals()" filter="trim">
+<%
+    user = model.get_user(ctx, check = True)
+    dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
+    owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
+    editable = owner_or_admin and dated_legislation
+%>\
+    <%parent:modals/>
+    <%render_legislation:modal_change_legislation_date/>
+    % if not editable:
+    <%render_legislation:modal_duplicate_and_edit/>
+    % endif
 </%def>
 
 
@@ -159,13 +169,26 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
     value = legislation.json
 %>\
     % if value is not None:
+        % if editable:
+        <p>
+            <strong>${_('Editable content')}</strong>
+        </p>
+        <div class="alert alert-info">
+        % endif:
         <div class="row">
             <div class="col-lg-8">
-            % if value.get('datesim') is not None:
+        % if value.get('datesim') is not None:
                 <%render_legislation:render_dated_legislation_node node="${value}" editable="${editable}"/>
-            % else:
+        % else:
                 <%render_legislation:render_legislation_node node="${value}"/>
-            % endif:
+        % endif:
+            </div>
+        </div>
+        % if editable:
+        </div>
+        % endif:
+        <div class="row">
+            <div class="col-lg-8">
                 <div class="buttons">
                     <button type="button" class="btn btn-default btn-xs btn-expand-all">
                         ${_('Open all')}
@@ -174,14 +197,17 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                         ${_('Close all')}
                     </button>
             % if editable is False:
-                    <a class="btn btn-default btn-primary btn-xs" href="${legislation.get_user_url(ctx, 'edit')}">
+                    <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
+href="#">
                         <span class="glyphicon glyphicon-lock"></span>
-                        ${_('Edit content')}
+                        ${_(u'Edit content')}
                     </a>
-            % endif
+            % endif:
             % if not dated_legislation:
                     ${_('Legislation for')}
-                    <a class="editable-date" data-name="date">${datetime.datetime.strftime(date, '%d/%m/%Y')}</a>
+                    <a data-toggle="modal" data-target="#modal-change-legislation-date" href="#">
+                        ${datetime.datetime.strftime(date, '%d/%m/%Y')}
+                    </a>
             % endif
                 </div>
             </div>

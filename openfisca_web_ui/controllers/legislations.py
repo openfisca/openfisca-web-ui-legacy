@@ -37,6 +37,8 @@ import pymongo
 import webob
 import webob.multidict
 
+from biryani1 import strings
+
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
@@ -142,7 +144,7 @@ def admin_edit(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(email = ctx._('A legislation with the same name already exists.'))
+                errors = dict(title = ctx._('A legislation with the same name already exists.'))
         if errors is None:
             legislation.set_attributes(**data)
             legislation.compute_words()
@@ -592,23 +594,41 @@ def user_edit(req):
     legislation = data['legislation']
     if legislation.author_id == user._id and 'datesim' in legislation.json:
         return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
-    new_legislation = model.Legislation(
-        author_id = user._id,
-        datetime_begin = legislation.datetime_begin,
-        datetime_end = legislation.datetime_end,
-        description = u'Copie de la legislation « {} »'.format(legislation.title),
-        title = u'{} (Copie)'.format(legislation.title),
+
+    new_legislation = None
+    new_legislation_title = u'{} (Copie)'.format(legislation.title)
+    new_legislation_slug = strings.slugify(new_legislation_title)
+    existing_legislations_cursor = model.Legislation.find(
+        dict(
+            slug = new_legislation_slug,
+            ),
+        as_class = collections.OrderedDict,
         )
-    response = requests.post(
-        conf['api.urls.legislations'],
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': conf['app_name'],
-            },
-        data = json.dumps(dict(date = data['date'].isoformat(), legislation = legislation.json)),
-        )
-    new_legislation.json = response.json().get('dated_legislation')
-    new_legislation.save(safe = True)
+    if existing_legislations_cursor.count() > 0:
+        for existing_legislation in existing_legislations_cursor:
+            if existing_legislation.author_id == user._id:
+                return wsgihelpers.redirect(ctx, location = existing_legislation.get_admin_url(ctx))
+        if new_legislation is None:
+            return wsgihelpers.bad_request(ctx, explanation = ctx._('A legislation with the same name already exists.'))
+    else:
+        new_legislation = model.Legislation(
+            author_id = user._id,
+            datetime_begin = legislation.datetime_begin,
+            datetime_end = legislation.datetime_end,
+            description = u'Copie de la legislation « {} »'.format(legislation.title),
+            title = new_legislation_title,
+            slug = new_legislation_slug,
+            )
+        response = requests.post(
+            conf['api.urls.legislations'],
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': conf['app_name'],
+                },
+            data = json.dumps(dict(date = data['date'].isoformat(), legislation = legislation.json)),
+            )
+        new_legislation.json = response.json().get('dated_legislation')
+        new_legislation.save(safe = True)
     return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx, 'edit'))
 
 
