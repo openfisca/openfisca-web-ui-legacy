@@ -602,7 +602,7 @@ def login(req):
     return wsgihelpers.respond_json(
         ctx,
         dict(
-            accountUrl = session.user.get_user_url(ctx) if len(session.user.test_cases_id or []) > 1 else '/',
+            redirectLocation = session.user.get_user_url(ctx) if len(session.user.test_cases_id or []) > 1 else None,
             )
         )
 

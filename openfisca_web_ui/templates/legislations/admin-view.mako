@@ -30,7 +30,7 @@ from openfisca_web_ui import model, urls
 %>
 
 
-<%inherit file="/site.mako"/>
+<%inherit file="/admin.mako"/>
 
 
 <%namespace name="render_legislation" file="/legislations/render-legislation.mako"/>

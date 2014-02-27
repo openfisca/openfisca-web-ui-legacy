@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(['jquery', 'underscore'], function($, _) {
 
     function init (authconfig) {
         navigator.id.watch({
@@ -12,7 +12,11 @@ define(['jquery'], function($) {
                     }
                 })
                 .done(function(data) {
-                    window.location.href = data.accountUrl;
+                    if (_.isUndefined(data.redirectLocation)) {
+                        window.location.reload();
+                    } else {
+                        window.location.href = data.redirectLocation;
+                    }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
                     console.error('onlogin fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
@@ -22,6 +26,7 @@ define(['jquery'], function($) {
                 });
             },
             onlogout: function () {
+                // TODO use urls.get_url.
                 if (window.location.pathname == '/logout') {
                     window.location.href = '/';
                 } else {
@@ -30,7 +35,11 @@ define(['jquery'], function($) {
                         url: '/logout'
                     })
                     .done(function() {
-                        window.location.reload();
+                        if (_.isUndefined(authconfig.redirectLocation)) {
+                            window.location.reload();
+                        } else {
+                            window.location.href = authconfig.redirectLocation;
+                        }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         console.error('onlogout fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);

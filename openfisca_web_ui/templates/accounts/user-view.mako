@@ -31,6 +31,11 @@ from openfisca_web_ui import model, urls
 <%inherit file="/site.mako"/>
 
 
+<%def name="appconfig_script()" filter="trim">
+define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
+</%def>
+
+
 <%def name="breadcrumb()" filter="trim">
 </%def>
 

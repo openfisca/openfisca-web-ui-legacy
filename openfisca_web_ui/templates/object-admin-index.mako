@@ -27,7 +27,8 @@
 from openfisca_web_ui import urls
 %>
 
-<%inherit file="/site.mako"/>
+
+<%inherit file="/admin.mako"/>
 
 
 <%def name="pagination(object_class, pager)" filter="trim">

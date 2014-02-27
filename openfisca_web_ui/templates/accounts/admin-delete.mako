@@ -28,7 +28,7 @@ from openfisca_web_ui import model, urls
 %>
 
 
-<%inherit file="/site.mako"/>
+<%inherit file="/admin.mako"/>
 <%namespace name="view" file="admin-view.mako"/>
 
 

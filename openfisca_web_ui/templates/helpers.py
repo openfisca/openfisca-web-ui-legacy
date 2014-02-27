@@ -29,6 +29,13 @@
 from .. import conf, model, urls
 
 
+def admin_appconfig(ctx):
+    appconfig = base_appconfig(ctx)
+    if conf['enabled.auth']:
+        appconfig['enabledModules']['auth']['redirectLocation'] = urls.get_url(ctx)
+    return appconfig
+
+
 def base_appconfig(ctx):
     """Config of JS modules included on each page."""
     req = ctx.req
@@ -73,4 +80,11 @@ def legislation_appconfig(ctx, legislation_url):
     appconfig['enabledModules']['legislation'] = {
         'legislationUrl': legislation_url
         }
+    return appconfig
+
+
+def user_view_appconfig(ctx):
+    appconfig = base_appconfig(ctx)
+    if conf['enabled.auth']:
+        appconfig['enabledModules']['auth']['redirectLocation'] = urls.get_url(ctx)
     return appconfig
