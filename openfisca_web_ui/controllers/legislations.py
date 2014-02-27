@@ -38,6 +38,7 @@ import webob
 import webob.multidict
 
 from biryani1 import strings
+from korma.date import make_formatted_str_to_datetime
 
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
@@ -46,8 +47,8 @@ inputs_to_legislation_data = conv.pipe(
     conv.struct(
         dict(
             author_id = conv.base.input_to_uuid,
-            datetime_begin = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
-            datetime_end = conv.base.function(lambda string: datetime.datetime.strptime(string, u'%d-%m-%Y')),
+            datetime_begin = make_formatted_str_to_datetime(u'%d-%m-%Y'),
+            datetime_end = make_formatted_str_to_datetime(u'%d-%m-%Y'),
             description = conv.cleanup_text,
             json = conv.pipe(
                 conv.cleanup_line,
@@ -278,7 +279,7 @@ def admin_view(req):
             conv.test(lambda date: isinstance(date, basestring)),
             conv.pipe(
                 conv.cleanup_line,
-                conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+                make_formatted_str_to_datetime(u'%d-%m-%Y'),
                 ),
             ),
         )(params.get('date'), state = ctx)
@@ -579,8 +580,8 @@ def user_edit(req):
     data, errors = conv.struct({
         'date': conv.pipe(
             conv.cleanup_line,
-            conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
-            conv.default(datetime.datetime.utcnow())
+            make_formatted_str_to_datetime(u'%d-%m-%Y'),
+            conv.default(datetime.datetime.utcnow()),
             ),
         'legislation': conv.pipe(
             conv.input_to_slug,
@@ -692,7 +693,7 @@ def user_view(req):
     data, errors = conv.struct({
         'date': conv.pipe(
             conv.cleanup_line,
-            conv.function(lambda date_string: datetime.datetime.strptime(date_string, u'%d-%m-%Y')),
+            make_formatted_str_to_datetime(u'%d-%m-%Y'),
             conv.default(datetime.datetime.utcnow())
             ),
         'legislation': conv.pipe(
