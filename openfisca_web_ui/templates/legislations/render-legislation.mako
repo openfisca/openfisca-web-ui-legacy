@@ -25,6 +25,7 @@
 
 <%!
 from copy import copy
+import datetime
 from itertools import chain
 
 from biryani1 import strings
@@ -40,6 +41,39 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
 
 
 <%def name="modal_change_legislation_date(date = None)" filter="trim">
+<%
+    current_datetime = date if date is not None else datetime.datetime.utcnow()
+%>
+    <div class="modal fade bs-modal-lg" id="modal-change-legislation-date" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h4 class="modal-title">Visualiser cette legislation pour une autre date</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Les paramétres de legislation peuvent contenir plusieurs valeurs. Chacune de ces valeurs est
+                            appliquée pour un inteval de date donné.
+                        </p>
+                        <p>
+                            Changer la date vous permez de visualiser les paramètres de le legislation appliquable à la
+                            date choisie.
+                        </p>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="text" class="form-control" id="date" name="date" \
+${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%d-%m-%Y')}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit">Valider</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </%def>
 
 
