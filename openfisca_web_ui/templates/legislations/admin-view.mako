@@ -209,7 +209,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                     </button>
             % if editable is False:
                 % if owner_or_admin:
-                    <a class="btn btn-primary btn-xs" href="${legislation.get_admin_url(ctx, 'edit')}">
+                    <a class="btn btn-primary btn-xs" href="${legislation.get_user_url(ctx, 'edit')}">
                         <span class="glyphicon glyphicon-lock"></span>
                         ${_(u'Edit content')}
                     </a>

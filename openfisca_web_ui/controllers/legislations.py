@@ -634,7 +634,7 @@ def user_edit(req):
                 },
             data = json.dumps(dict(date = data['date'].isoformat(), legislation = legislation.json)),
             )
-        new_legislation.json = response.json().get('dated_legislation')
+        new_legislation.json = response.json(object_pairs_hook = collections.OrderedDict).get('dated_legislation')
         new_legislation.save(safe = True)
     return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx, 'edit'))
 
