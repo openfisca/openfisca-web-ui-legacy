@@ -49,15 +49,15 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
             <div class="modal-content">
                 <form>
                     <div class="modal-header">
-                        <h4 class="modal-title">Visualiser cette legislation pour une autre date</h4>
+                        <h4 class="modal-title">Visualiser cette législation pour une autre date</h4>
                     </div>
                     <div class="modal-body">
                         <p>
-                            Les paramétres de legislation peuvent contenir plusieurs valeurs. Chacune de ces valeurs est
+                            Les paramétres de législation peuvent contenir plusieurs valeurs. Chacune de ces valeurs est
                             appliquée pour un inteval de date donné.
                         </p>
                         <p>
-                            Changer la date vous permez de visualiser les paramètres de le legislation appliquable à la
+                            Changer la date vous permez de visualiser les paramètres de le législation appliquable à la
                             date choisie.
                         </p>
                         <div class="form-group">
@@ -82,20 +82,20 @@ ${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%d
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Dupliquer et éditer une legislation</h4>
+                    <h4 class="modal-title">Dupliquer et éditer une législation</h4>
                 </div>
                 <div class="modal-body">
                     <p>
-                        Vous pouvez modifier une legislation si et seulement si les deux conditions suivantes sont
-                        remplis :
+                        Vous pouvez modifier une législation si et seulement si les deux conditions suivantes sont
+                        remplies :
                     </p>
                     <ul>
-                        <li>Vous êtes l'auteur de la legislation</li>
-                        <li>Cette legislation est au format « legislation datée »</li>
+                        <li>Vous êtes l'auteur de la législation</li>
+                        <li>Cette législation est au format « législation datée »</li>
                     </ul>
                     <p>
-                        La legislation que vous tentez d'éditer ne remplissant pas ces deux critères, une copie de
-                        cette legislation va être créer pour vous.
+                        La législation que vous tentez d'éditer ne remplissant pas ces deux critères, une copie de
+                        cette législation va être créer pour vous.
                     </p>
                 </div>
                 <div class="modal-footer">

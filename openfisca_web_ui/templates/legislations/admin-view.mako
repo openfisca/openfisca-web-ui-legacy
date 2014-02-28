@@ -61,7 +61,17 @@ from openfisca_web_ui import model, urls
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h2 class="panel-title">${legislation.get_title(ctx)}</h2>
+                <h2 class="panel-title">
+    % if owner_or_admin:
+                    <a class="btn btn-primary btn-sm" href="${legislation.get_admin_url(ctx, 'edit')}">
+    % else:
+                    <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
+href="#" title="${_(u'Edit') if owner_or_admin else _(u'Duplicate and edit')}">
+    % endif:
+                        <span class="glyphicon glyphicon-cog"></span>
+                    </a>
+                    ${legislation.get_title(ctx)}
+                </h2>
             </div>
             <ul class="list-group">
                 <li class="list-group-item">
@@ -75,13 +85,6 @@ from openfisca_web_ui import model, urls
                 <div class="btn-toolbar">
                     <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}">
                         ${_(u'View as JSON')}
-                    </a>
-    % if owner_or_admin:
-                    <a class="btn btn-primary" href="${legislation.get_admin_url(ctx, 'edit')}">
-    % else:
-                    <a class="btn btn-primary" data-toggle="modal" data-target="#modal-duplicate-and-edit" href="#">
-    % endif:
-                        ${_(u'Edit') if owner_or_admin else _(u'Copy and edit')}
                     </a>
     % if owner_or_admin:
                     <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
