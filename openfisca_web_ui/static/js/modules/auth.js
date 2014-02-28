@@ -1,4 +1,4 @@
-define(['jquery', 'underscore'], function($, _) {
+define(['jquery', 'underscore', 'persona', 'helpers'], function($, _, persona, helpers) {
 
     function init (authconfig) {
         navigator.id.watch({

@@ -1,4 +1,4 @@
-    # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 # OpenFisca -- A versatile microsimulation software
@@ -26,7 +26,9 @@
 """Template helpers"""
 
 
-from .. import conf, model, urls
+import urlparse
+
+from .. import conf, model, urls, uuidhelpers
 
 
 def admin_appconfig(ctx):
@@ -61,6 +63,60 @@ def base_appconfig(ctx):
         'enabledModules': enabled_modules,
         }
     return appconfig
+
+
+def build_requireconfig(ctx):
+    return {
+        'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
+        'paths': {
+            # Bower components
+            'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
+            'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
+            'd3': urls.get_url(ctx, u'bower/d3/d3'),
+            'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
+            'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
+            'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
+            'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
+            'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
+
+            # App
+            'app': urls.get_url(ctx, u'js/app'),
+            'router': urls.get_url(ctx, u'js/router'),
+
+            # Views
+            'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
+            'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
+            'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
+            'appV': urls.get_url(ctx, u'js/views/appV'),
+            'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
+            'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
+            'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
+            'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
+
+            # Models
+            'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
+            'chartM': urls.get_url(ctx, u'js/models/chartM'),
+
+            # Modules
+            'auth': urls.get_url(ctx, u'js/modules/auth'),
+            'disclaimer': urls.get_url(ctx, u'js/modules/disclaimer'),
+            'helpers': urls.get_url(ctx, 'js/modules/helpers'),
+            'legislation': urls.get_url(ctx, u'js/modules/legislation'),
+
+            # External libs
+            # You must include this on every page which uses navigator.id functions.
+            # Because Persona is still in development, you should not self-host the include.js file.
+            'persona': urlparse.urljoin(conf['persona.url'], 'include'),
+            },
+        'shim': {
+            'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
+            'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
+            'd3': {'exports': 'd3'},
+            'jquery': {'exports': '$'},
+            'nvd3': {'exports': 'nv', 'deps': ['d3']},
+            'underscore': {'exports': '_'},
+            },
+        }
 
 
 def index_appconfig(ctx):

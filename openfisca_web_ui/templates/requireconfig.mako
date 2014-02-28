@@ -29,58 +29,10 @@
 
 
 <%!
-from openfisca_web_ui import urls, uuidhelpers
+from openfisca_web_ui.templates import helpers
 %>
 
 
 <%def name="requireconfig_script()" filter="trim">
-<%
-requireconfig = {
-    'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
-    'paths': {
-        # Bower components
-        'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
-        'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
-        'd3': urls.get_url(ctx, u'bower/d3/d3'),
-        'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
-        'jquery': urls.get_url(ctx, u'bower/jquery/jquery'),
-        'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
-        'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
-        'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
-
-        # App
-        'app': urls.get_url(ctx, u'js/app'),
-        'router': urls.get_url(ctx, u'js/router'),
-
-        # Views
-        'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
-        'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
-        'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
-        'appV': urls.get_url(ctx, u'js/views/appV'),
-        'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
-        'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
-        'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
-        'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
-
-        # Models
-        'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
-        'chartM': urls.get_url(ctx, u'js/models/chartM'),
-
-        # Modules
-        'auth': urls.get_url(ctx, u'js/modules/auth'),
-        'disclaimer': urls.get_url(ctx, u'js/modules/disclaimer'),
-        'helpers': urls.get_url(ctx, 'js/modules/helpers'),
-        'legislation': urls.get_url(ctx, u'js/modules/legislation'),
-        },
-    'shim': {
-        'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
-        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
-        'd3': {'exports': 'd3'},
-        'jquery': {'exports': '$'},
-        'nvd3': {'exports': 'nv', 'deps': ['d3']},
-        'underscore': {'exports': '_'},
-        },
-    }
-%>\
-require.config(${requireconfig | n, js});
+require.config(${helpers.build_requireconfig(ctx) | n, js});
 </%def>

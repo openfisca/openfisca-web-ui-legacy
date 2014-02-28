@@ -30,7 +30,6 @@
 
 <%!
 import datetime
-import urlparse
 
 from biryani1 import strings
 
@@ -281,11 +280,6 @@ ${conf['app_name']}
 
 
 <%def name="scripts()" filter="trim">
-% if conf['enabled.auth']:
-    ## You must include this on every page which uses navigator.id functions. Because Persona is still in development,
-    ## you should not self-host the include.js file.
-    <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
-% endif
     <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
         <%requireconfig:requireconfig_script/>

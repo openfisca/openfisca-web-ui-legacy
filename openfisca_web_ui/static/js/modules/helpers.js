@@ -19,24 +19,6 @@ define(['underscore'], function (_) {
 		}
 	}
 
-	function installNavigatorIdPolyfill() {
-		if (typeof navigator.id === "undefined") {
-			navigator.id = {};
-			var polyfillMethod = function(methodName) {
-				return function() {
-					console.log('navigator.id.' + methodName + ' polyfill called');
-				}
-			};
-			var methodNames = ['logout', 'request', 'watch'];
-			for (var methodIndex in methodNames) {
-				var methodName = methodNames[methodIndex];
-				if (typeof navigator.id[methodName] === "undefined") {
-					navigator.id[methodName] = polyfillMethod(methodName);
-				}
-			}
-		}
-	}
-
 	function installPolyfills() {
 		Object._length = function(obj) {
 			var size = 0, key;
@@ -54,7 +36,6 @@ define(['underscore'], function (_) {
 		};
 
 		installConsolePolyfill();
-		installNavigatorIdPolyfill();
 	}
 
 	_.mixin({ 
