@@ -1,0 +1,24 @@
+
+/* SVG */
+#chart-wrapper .y-axis path { display: none; }
+#chart-wrapper .domain { display: none; }
+#chart-wrapper .y-axis line { stroke: #AAA; stroke-dasharray: 6,6; }
+
+/*svg text {
+	font-size: 13^px
+}
+*/
+#waterfall-chart .x-axis .tick text {
+	font-size: 13px;
+	font-weight: bold;
+}
+#waterfall-chart .income-number {
+	text-anchor: start;
+	font-weight: bold;
+	fill: #444;
+	font-size: 18px;
+}
+#waterfall-chart .income-label {
+	font-size: 16px;
+	fill: #777;
+}

@@ -30,15 +30,17 @@ define([
 			/* D3 Settings */
 			force: d3.layout.force(),
 			gravity: 0,
-			charge: function (d) {
-				return -Math.pow(d.radius, 2.0)/1.5;
-			},
+			charge: function (d) { return -Math.pow(d.radius, 2.0)/1.2; },
 			friction: 0.6,
 			rScale: d3.scale.linear().clamp(true),
-			defaultGravity: 0.3,
+			defaultGravity: 0.4,
 
 			nodes: [],
 			bubbles: {},
+			positiveColor: '#6aa632',
+			negativeColor: '#b22424',
+
+			prefix: null,
 
 			/* Sort */
 			sortData: {
@@ -46,7 +48,7 @@ define([
 					'name': 'Cotisations / prestations',
 					'children': [
 						{ name: 'Cotisations', value: false },
-						{ name: 'Presations', value: true }
+						{ name: 'Prestations', value: true }
 					]
 				},
 				'test': {
@@ -54,10 +56,10 @@ define([
 					'children': [
 						{ name: 'valeur 1', value: 'aaa' },
 						{ name: 'valeur 2', value: 'bbb' },
-						{ name: 'valeur 3', value: 'ccc' },
 						{ name: 'valeur 4', value: 'ddd' },
 						{ name: 'valeur 5', value: 'eee' },
 						{ name: 'valeur 6', value: 'fff' },
+						{ name: 'valeur 3', value: 'ccc' },
 						{ name: 'valeur 7', value: 'ggg' },
 						{ name: 'valeur 8', value: 'hhh' },
 						{ name: 'valeur 9', value: 'iii' },
@@ -79,7 +81,7 @@ define([
 					.attr('id', 'distribution-chart');
 				this.setElement(this._el[0]);
 
-				this.$el.append('<div id="sort-menu"></div>');
+				this.$el.append('<div id="sort-menu" class="btn-group"></div>');
 
 				this.g = this._el.append('svg')
 					.attr('height', this.height)
@@ -101,16 +103,49 @@ define([
 				if(this.sortData[sortType].children.length < this.defaultPackByLine) this.packByLine = this.sortData[sortType].children.length;
 				else this.packByLine = this.defaultPackByLine;
 
-				this.setSectionsDimensions();
+				var data = this.model.get('distributionData', {type: sortType});
 
-				this.sortBubblesBy(sortType);
+				this.setSectionsDimensions();
+				this.setPrefix(data);
+
+				this.sortBubblesBy(sortType, data);
 				this.setHeader(sortType);
 			},
 			setSectionsDimensions: function () {
 				this.sectionWidth = this.innerWidth / (this.packByLine);
 				this.quarterWidth = this.sectionWidth / 2;
 				this.sectionHeight = this.sectionWidth + this.sectionBottomMargin;
-				this.rScale.range([2, this.sectionWidth/5]);
+				this.rScale.range([2, this.sectionWidth/4]);
+			},
+			setPrefix: function (data) {
+				var yMin = d3.min(data, function (d) { return d.value; }),
+					yMax = d3.max(data, function (d) { return d.value; }),
+					magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax),
+					that = this;
+
+				this.prefix = d3.formatPrefix(magnitude);
+				/* Number formating */
+				this.prefix._scale = function (val) {
+					if(	that.prefix.symbol != 'G' && that.prefix.symbol != 'M' && that.prefix.symbol != 'k' && that.prefix.symbol != '') {
+						return (""+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+					}
+					var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
+					if(that.prefix.symbol == 'k') val = that.prefix.scale(val)*1000;
+					else val = that.prefix.scale(val);
+					return (""+ d3.round(val, roundLevel)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+				};
+
+				switch(this.prefix.symbol) {
+					case 'G': this.prefix.symbolText = 'milliards\n€';
+						break;
+					case 'M': this.prefix.symbolText = 'millions\n€';
+						break;
+					case 'k': this.prefix.symbolText = 'euros';
+						break;
+					case '': this.prefix.symbolText = 'euros';
+					default:
+						this.legendText = '';
+				}
 			},
 			setHeader: function (sortType) {
 				var $sortMenu = this.$el.find('#sort-menu'),
@@ -127,9 +162,8 @@ define([
 					}
 				});
 			},
-			sortBubblesBy: function (sortType) {
+			sortBubblesBy: function (sortType, data) {
 				this.currentSort = sortType;
-				var data = this.model.get('distributionData', {type: sortType});
 				this.rScale.domain([0, d3.max(data, function (d) { return Math.abs(d.value); })]);
 				this.updateNodes(data);
 
@@ -158,10 +192,12 @@ define([
 					else {
 						var out = {};
 					}
-					out._id = node._id,
-					out.value = node.value,
-					out.radius = that.rScale(Math.abs(node.value)),
-					out.fillColor = (node.value > 0) ? '#5cb85c': '#c11137'
+					out._id = node._id;
+					out.value = node.value;
+					out.radius = that.rScale(Math.abs(node.value));
+					out.fillColor = (node.value > 0) ? that.positiveColor: that.negativeColor;
+					out.name = node.name;
+					out.description = node.description;
 					if(!_.isUndefined(node.sort)) out.sort = node.sort;
 
 					return out;
@@ -180,8 +216,6 @@ define([
 						.attr('x', x)
 						.attr('y', y)
 						.text(d.name);
-
-					// that.g.append('circle').attr('r', 3).attr('cy', y).attr('cx', x).attr('fill', 'red');
 				});
 			},
 			buildBubbles: function (data) {
@@ -205,6 +239,8 @@ define([
 						.attr('stroke', 'black')
 						.attr('stroke-width', 1)
 						.attr('opacity', 0.8)
+						.on('mouseover', this.bubbleMouseover())
+						.on('mouseout', this.bubbleMouseout())
 						.moveToBack();
 
 				this.bubbles
@@ -218,14 +254,70 @@ define([
 							.attr('opacity', 0)
 							.remove();
 			},
+			bubbleMouseover: function () {
+				var that = this;
+				return function (d) {
+					var bubble = this;
+
+					/* Show tooltip */
+					that.$el.append('\
+						<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+'" style="opacity: 0; position: absolute;">\
+							<table class="nv-pointer-events-none">\
+								<thead>\
+									<tr class="nv-pointer-events-none">\
+										<td colspan="3" class="nv-pointer-events-none">\
+											<strong class="x-value">'+d.description+'</strong>\
+										</td>\
+									</tr>\
+								</thead>\
+								<tbody>\
+									<tr class="nv-pointer-events-none">\
+										<td>'+that.prefix._scale(d.value)+' '+that.prefix.symbolText+'</td>\
+									</tr>\
+								</tbody>\
+							</table>\
+						</div>\
+					');
+					var svg = that.$el.find('svg');
+					d3.select(that.el).select('#nvtooltip-'+d._id)
+						.style('left', function () {
+							var xPos = d3.select(bubble).attr('cx');
+							return xPos + 'px';
+						})
+						.style('top', function () {
+							var yPos = d3.select(bubble).attr('cy');
+							return yPos + 'px';
+						})
+						// .call(function () {
+						// 	that.g.append('circle').attr('r', 3).attr('cy', d.y).attr('cx', d.x).attr('fill', 'red');
+						// })
+						.transition().duration(100)
+							.style('opacity', 1);
+
+					/* Add bubble style */
+					d3.select(this)
+						.attr('stroke-width', 3);
+						
+				};
+			},
+			bubbleMouseout: function () {
+				var that = this;
+				return function (d) {
+					d3.select(that.el).select('#nvtooltip-'+d._id)
+						.transition().duration(100)
+							.style('opacity', 0)
+							.remove();
+
+					d3.select(this)
+						.attr('stroke-width', 1);
+				};
+			},
 			updateBubblePositions: function (alpha) {
 				var that = this;
 				return function (d, i) {
 					var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sort}).index,
 						targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth,
 						targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.quarterWidth;
-
-					// if(alpha == 0.099) that.g.append('circle').attr('r', 3).attr('cy', function () {return targetY+that.padding.top; }).attr('cx', function () {return targetX+that.padding.left; }).attr('fill', 'red');
 
 					d.y = d.y + (targetY - d.y) * alpha * 1.1 * that.defaultGravity;
 					d.x = d.x + (targetX - d.x) * alpha * 1.1 * that.defaultGravity;

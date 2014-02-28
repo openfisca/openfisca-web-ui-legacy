@@ -87,7 +87,7 @@ define([
 			removeRootNode: function () {
 				var data = this.outputValue,
 					json = _.where(data.children, function (d) { return d._id == 'revdisp'});
-				this.outputValue = json;
+				this.outputValue = json[0];
 				return this;
 			},
 			
@@ -215,6 +215,7 @@ define([
 			get_waterfallData: function () { /* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
 				return new Parser(this.get('source'))
 								.clean()
+								.removeRootNode()
 								.setParentNodes()
 								.listChildren()
 								.values();

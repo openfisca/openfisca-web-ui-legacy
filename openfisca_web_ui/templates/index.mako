@@ -73,4 +73,5 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
     <link href="${urls.get_url(ctx, u'bower/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')}" \
 media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'bower/nvd3/nv.d3.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'css/chart.css')}" media="screen" rel="stylesheet">
 </%def>
