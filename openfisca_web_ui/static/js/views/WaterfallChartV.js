@@ -187,12 +187,12 @@ define([
 						this.prefix.symbolText = 'millions\n€';
 						break;
 					case 'k':
-						this.legendText = 'Euros';
-						this.prefix.symbolText = 'euros';
+						this.legendText = 'En euros';
+						this.prefix.symbolText = '€';
 						break;
 					case '':
-						this.legendText = 'Euros';
-						this.prefix.symbolText = 'euros';
+						this.legendText = 'En euros';
+						this.prefix.symbolText = '€';
 					default:
 						this.legendText = '';
 				}

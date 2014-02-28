@@ -140,9 +140,9 @@ define([
 						break;
 					case 'M': this.prefix.symbolText = 'millions\n€';
 						break;
-					case 'k': this.prefix.symbolText = 'euros';
+					case 'k': this.prefix.symbolText = '€';
 						break;
-					case '': this.prefix.symbolText = 'euros';
+					case '': this.prefix.symbolText = '€';
 					default:
 						this.legendText = '';
 				}

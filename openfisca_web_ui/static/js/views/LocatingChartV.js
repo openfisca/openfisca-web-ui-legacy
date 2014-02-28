@@ -238,11 +238,11 @@ define([
 				};
 
 				switch(this.yFormat.symbol) {
-					case 'G': this.legendText = 'revenu en milliards €'; this.prefix.symbolText = 'milliards €'; break;
-					case 'M': this.legendText = 'revenu en millions €'; this.prefix.symbolText = 'millions €'; break;
-					case 'k': this.legendText = 'revenu en milliers €'; this.prefix.symbolText = 'euros'; break;
-					case '': this.legendText = 'revenu en €'; this.prefix.symbolText = 'euros'; break;
-					default: this.legendText = ''; this.prefix.symbolText = 'euros';
+					case 'G': this.legendText = 'revenu en milliards €'; this.yFormat.symbolText = 'milliards €'; break;
+					case 'M': this.legendText = 'revenu en millions €'; this.yFormat.symbolText = 'millions €'; break;
+					case 'k': this.legendText = 'revenu en milliers €'; this.yFormat.symbolText = '€'; break;
+					case '': this.legendText = 'revenu en €'; this.yFormat.symbolText = '€'; break;
+					default: this.legendText = ''; this.yFormat.symbolText = '€';
 				};
 			},
 			_remove: function () {
