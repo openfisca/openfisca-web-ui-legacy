@@ -24,6 +24,8 @@ define([
 					url: _.bind(function(data) {
 						var $hidden = this.$el.find('[name="' + data.name + '"]');
 						$hidden.val(data.value);
+						var individuId = this.$el.find('[data-name="' + data.name + '"]').data('id');
+						this.updatePrenoms(individuId, data.value);
 						var formDataStr = this.$el.serialize();
 						this.submit(formDataStr, false);
 					}, this)
@@ -32,7 +34,7 @@ define([
 			},
 			onInputChange: function(evt) {
 				var $input = $(evt.target);
-				if ($input.parents('.main-category').length) {
+				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length == 0) {
 					var formDataStr = this.$el.serialize();
 					this.submit(formDataStr, false);
 				}
@@ -52,7 +54,7 @@ define([
 				this.submit(formDataStr, doReloadForm);
 			},
 			onKeyPress: function(evt) {
-				if (evt.keyCode === 13 && $(evt.target).parents('.editableform').length == 0) {
+				if (evt.keyCode === 13 && $(evt.target).parents('.editableform').length === 0) {
 					evt.preventDefault();
 					var formDataStr = this.$el.serialize();
 					var doReloadForm = endsWith(evt.target.name, '.prenom');
@@ -85,6 +87,9 @@ define([
 						}
 					}
 				}, this));
+			},
+			updatePrenoms: function(individuId, prenom) {
+				this.$el.find('option[value="' + individuId + '"]').text(prenom);
 			}
 		});
 

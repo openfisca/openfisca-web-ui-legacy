@@ -83,6 +83,21 @@ img.media-object {
   stroke-dasharray: 2,2;
 }
 
-.form-inline select {
-    margin-left: 10px;
+form[name="scenarios"] .form-inline select {
+    margin-left: 1em;
+}
+
+#familles button.add {
+    margin-bottom: 1em;
+}
+#familles button.delete {
+    margin-top: 1em;
+}
+#foyers-fiscaux .form-inline.individu,
+#menages .form-inline.individu {
+    margin-bottom: 1em;
+}
+#foyers-fiscaux .form-inline select,
+#menages .form-inline select {
+    margin-right: 1em;
 }

@@ -29,7 +29,7 @@
 import datetime
 import logging
 
-from biryani1.baseconv import check
+from biryani1.baseconv import check, pipe
 from formencode import variabledecode
 
 from .. import contexts, conf, conv, model, templates, questions, urls, uuidhelpers, wsgihelpers
@@ -141,7 +141,10 @@ def simulate(req):
         user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
         if user_api_data is None:
             user_api_data = {}
-        api_data, errors = conv.simulations.user_api_data_to_api_data(user_api_data, state = ctx)
+        api_data, errors = pipe(
+            conv.base.make_fill_user_api_data(fill_columns_without_default_value = True),
+            conv.simulations.user_api_data_to_api_data,
+            )(user_api_data, state = ctx)
     else:
         api_data, errors = conv.simulations.scenarios_to_api_data(user_scenarios, state = ctx)
     if errors is None:

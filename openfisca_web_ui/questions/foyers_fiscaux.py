@@ -26,9 +26,9 @@
 """Korma questions related to foyers fiscaux"""
 
 
-from korma.base import Button
 from korma.choice import Select
 from korma.group import Group
+from korma.repeat import Repeat
 from korma.text import Hidden
 
 from . import base
@@ -45,8 +45,10 @@ def make_foyers_fiscaux_repeat(prenom_select_choices):
 <div class="panel panel-primary">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a data-toggle="collapse" href="#collapse-foyer-fiscal-{self[id].value}" title="afficher / masquer">\
-Déclaration d'impôts {formatted_index}</a>
+      <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-foyer-fiscal-{self[id].value}" \
+title="afficher / masquer">
+        <span class="indicator"></span> Déclaration d'impôts {formatted_index}
+      </a>
     </h4>
   </div>
   <div id="collapse-foyer-fiscal-{self[id].value}" class="panel-collapse collapse in">
@@ -56,22 +58,21 @@ Déclaration d'impôts {formatted_index}</a>
   </div>
 </div>'''.format(formatted_index = index + 1, self = self)
 
-    return base.Repeat(
-        add_button_label = u'Ajouter une déclaration d\'impôts',
+    return Repeat(
+        count = 1,
         name = u'foyers_fiscaux',
         template_question = FoyerFiscalGroup(
             name = u'foyer_fiscal',
             questions = [
                 Hidden(name = 'id'),
-                base.Repeat(
+                Repeat(
                     name = u'individus',
-                    add_button_label = u'Ajouter un membre',
                     template_question = Group(
                         children_attributes = {
                             '_control_attributes': {'class': 'form-control'},
                             },
                         name = u'individu',
-                        outer_html_template = u'<div class="form-inline"><p>{self.inner_html}</p></div>',
+                        outer_html_template = u'<div class="form-inline individu">{self.inner_html}</div>',
                         questions = [
                             Select(
                                 choices = (
@@ -84,11 +85,6 @@ Déclaration d'impôts {formatted_index}</a>
                                 choices = prenom_select_choices,
                                 input_to_data = conv.base.input_to_uuid,
                                 name = 'id',
-                                ),
-                            Button(
-                                control_attributes = {'class': 'btn', 'type': 'submit'},
-                                label = u'Supprimer',
-                                name = 'delete',
                                 ),
                             ],
                         ),

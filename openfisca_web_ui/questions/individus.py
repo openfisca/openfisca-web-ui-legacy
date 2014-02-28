@@ -29,11 +29,12 @@
 from .. import uuidhelpers
 
 
-def build_default_values(existing_individus_count=0):
+def build_default_values(existing_individus_count = 0):
     return {u'prenom': u'Personne {}'.format(existing_individus_count + 1)}
 
 
 def default_value():
+    # TODO remove this function?
     return {uuidhelpers.generate_uuid(): build_default_values()}
 
 

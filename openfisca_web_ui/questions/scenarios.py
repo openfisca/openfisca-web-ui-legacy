@@ -27,22 +27,20 @@
 
 
 from korma.group import Group
+from korma.repeat import Repeat
 
 from . import base
 
 
 def make_scenarios_repeat(user):
-    from .. import model
+    from .. import contexts, model
 
     class ScenarioGroup(Group):
         @property
         def outer_html(self):
             index = self.parent_data['scenarios']['index']
-            return u'''
-<li class="list-group-item">
-      {self.inner_html}
-</li>
-'''.format(formatted_index = index + 1, self = self)
+            return u'<li class="list-group-item">{self.inner_html}</li>'.format(
+                formatted_index = index + 1, self = self)
 
     test_cases_id_and_name = (
         (test_case._id, test_case.title)
@@ -52,28 +50,42 @@ def make_scenarios_repeat(user):
         (legislation._id, legislation.title)
         for legislation in model.Legislation.find()
         )
-    return base.Repeat(
-        add_button_label = u'Ajouter un scénario',
-        name = u'scenarios',
-        outer_html_template = u'<ul class="list-group">{self.inner_html}</ul>',
-        template_question = ScenarioGroup(
-            children_attributes = {
-                '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-#                '_label_attributes': {'class': 'sr-only'},
-                },
-            name = u'scenario',
-            questions = [
-                base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
-                base.BootstrapSelect(
-                    add_first_empty_value = True,
-                    choices = test_cases_id_and_name,
-                    name = 'test_case_id',
-                    ),
-                base.BootstrapSelect(
-                    add_first_empty_value = True,
-                    choices = legislations_id_and_name,
-                    name = 'legislation_id',
-                    ),
-                ],
-            ),
+
+    ctx = contexts.Ctx()
+
+    return Group(
+        name = 'my_scenarios',
+        questions = [
+            Repeat(
+                name = u'scenarios',
+                outer_html_template = u'<ul class="list-group">{self.inner_html}</ul>',
+                template_question = [
+                    ScenarioGroup(
+                        children_attributes = {
+                            '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+                            # '_label_attributes': {'class': 'sr-only'},
+                            },
+                        name = u'scenario',
+                        questions = [
+                            base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
+                            base.BootstrapSelect(
+                                add_first_empty_value = True,
+                                choices = test_cases_id_and_name,
+                                name = 'test_case_id',
+                                ),
+                            base.BootstrapSelect(
+                                add_first_empty_value = True,
+                                choices = legislations_id_and_name,
+                                name = 'legislation_id',
+                                ),
+                            ],
+                        ),
+                    base.BootstrapButton(
+                        label = ctx._(u'Add a scenario'),
+                        name = 'add',
+                        value = 'add',
+                        ),
+                    ],
+                ),
+            ],
         )

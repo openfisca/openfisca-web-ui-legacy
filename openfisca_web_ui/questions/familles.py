@@ -28,6 +28,7 @@
 
 from korma.choice import Select
 from korma.group import Group
+from korma.repeat import Repeat
 from korma.text import Hidden
 
 from .. import uuidhelpers
@@ -79,7 +80,8 @@ href="#collapse-individu-{self[id].value}" title="afficher / masquer">
           <span class="indicator"></span>
         </a>
         {self[role].html}
-        <a class="x-editable" data-name="{self[categories][principal][prenom].full_name}" href="#" title="Modifier">
+        <a class="x-editable" data-id="{self[id].value}" data-name="{self[categories][principal][prenom].full_name}" \
+href="#" title="Modifier">
           {self[categories][principal][prenom].value}
         </a>
       </h4>
@@ -88,6 +90,7 @@ href="#collapse-individu-{self[id].value}" title="afficher / masquer">
   <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse{in_class}">
     <div class="panel-body">
       {self[categories].html}
+      {self[delete].html}
     </div>
   </div>
 </div>'''.format(
@@ -96,17 +99,13 @@ href="#collapse-individu-{self[id].value}" title="afficher / masquer">
                 self = self,
                 )
 
-    return base.Repeat(
-        add_button_label = u'Ajouter une famille',
-        count = 0,
+    return Repeat(
         name = u'familles',
         template_question = FamilleGroup(
             name = u'famille',
             questions = [
                 Hidden(name = 'id'),
-                base.Repeat(
-                    add_button_label = u'Ajouter un membre',
-                    count = 0,
+                Repeat(
                     name = u'individus',
                     template_question = IndividuGroup(
                         name = u'individu',
@@ -121,8 +120,20 @@ href="#collapse-individu-{self[id].value}" title="afficher / masquer">
                                 name = u'categories',
                                 questions = base.make_categories_groups(entity=u'individus'),
                                 ),
+                            base.BootstrapButton(
+                                label = u'Supprimer',
+                                name = 'delete',
+                                other_classes = 'delete pull-right',
+                                value = 'delete',
+                                ),
                             ],
                         ),
+                    ),
+                base.BootstrapButton(
+                    label = u'Ajouter un membre',
+                    name = 'add',
+                    other_classes = 'add',
+                    value = 'add',
                     ),
                 Group(
                     name = u'categories',

@@ -29,11 +29,11 @@
 import logging
 
 from biryani1.baseconv import check, guess_bool, pipe
+from korma.base import Button
 from korma.checkbox import Checkbox
 from korma.choice import Radio, Select
 from korma.date import Date
 from korma.group import Group
-from korma.repeat import Repeat as KormaRepeat
 from korma.text import Hidden, Number, Text
 
 from ..conv import base
@@ -49,6 +49,14 @@ bootstrapize = lambda question_class, *args, **kwargs: \
     question_class(
         control_attributes = {'class': u'form-control'},
         *args, **kwargs)
+
+
+def BootstrapButton(control_attributes = None, other_classes = None, *args, **kwargs):
+    if control_attributes is None:
+        control_attributes = {'class': 'btn btn-default', 'type': 'submit'}
+    if other_classes is not None and control_attributes.get('class'):
+        control_attributes['class'] += ' ' + other_classes
+    return Button(control_attributes = control_attributes, *args, **kwargs)
 
 
 BootstrapCheckbox = lambda *args, **kwargs: \
@@ -104,11 +112,6 @@ FrenchDate = lambda placeholder = u'jj/mm/aaaa', *args, **kwargs: \
 BootstrapFrenchDate = lambda *args, **kwargs: bootstrapize(FrenchDate, *args, **kwargs)
 
 
-Repeat = lambda add_button_label = u'Ajouter', *args, **kwargs: \
-    KormaRepeat(add_button_classes = u'add btn', add_button_label = add_button_label, javascript_add_button=False,
-                *args, **kwargs)
-
-
 def make_categories_groups(entity):
     from .. import contexts, model
 
@@ -150,7 +153,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
                 # Transform prenom question into hidden for use with x-editable field.
                 question = Hidden(name = column['name']) \
                     if entity == 'individus' and entity_category['label'] == u'Principal' \
-                        and column['name'] == 'prenom' else make_question(column)
+                    and column['name'] == 'prenom' else make_question(column)
                 if question is None:
                     log.error(u'Unable to make question from column: {!r}'.format(column))
                 else:

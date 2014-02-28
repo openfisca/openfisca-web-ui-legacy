@@ -36,10 +36,6 @@ from biryani1.baseconv import condition, default, function, noop, pipe, struct, 
 from biryani1.states import default_state
 import requests
 
-from .. import questions, uuidhelpers
-from . import familles as familles_conv
-from . import menages as menages_conv
-
 
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
 log = logging.getLogger(__name__)
@@ -75,105 +71,6 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
     return simulation_output, None
 
 
-def fill_user_api_data(values, state = None):
-    """Compute missing values for API consistency and fill user API data with them."""
-
-    def guess_role_in_foyer_fiscal(individu_id):
-        if individu_id in (last_foyer_fiscal.get('declarants') or []) or \
-                individu_id in (last_foyer_fiscal.get('personnes_a_charge') or []):
-            return None
-        return 'personnes_a_charge' if get_role_in_famille(individu_id, familles) == 'enfants' else 'declarants'
-
-    def guess_role_in_menage(individu_id):
-        if last_menage.get('personne_de_reference') == individu_id or \
-                last_menage.get('conjoint') == individu_id or \
-                individu_id in (last_menage.get('enfants') or []) or \
-                individu_id in (last_menage.get('autres') or []):
-            return None
-        role_in_famille = get_role_in_famille(individu_id, familles)
-        if role_in_famille == 'parents':
-            if last_menage.get('personne_de_reference') is None:
-                return 'personne_de_reference'
-            elif last_menage.get('conjoint') is None:
-                return 'conjoint'
-            else:
-                return 'autres'
-        elif role_in_famille == 'enfants':
-            return 'enfants'
-
-    if values is None:
-        return None, None
-    if state is None:
-        state = default_state
-
-    # individus
-    individus = questions.individus.default_value() if values.get('individus') is None else values['individus']
-    for individu_id, individu in individus.iteritems():
-        for key, value in questions.base.custom_column_default_values.iteritems():
-            if individu.get(key) is None:
-                individu[key] = value
-    new_values = {u'individus': individus}
-    individu_ids = individus.keys()
-
-    # familles
-    # By design, familles are always filled with individus, or just empty. No need to fill them individu by individu.
-    familles = questions.familles.default_value(individu_ids) if values.get('familles') is None else values['familles']
-    new_values['familles'] = familles
-
-    # foyers fiscaux
-    default_foyers_fiscaux = {
-        uuidhelpers.generate_uuid(): {
-            'declarants': [],
-            'personnes_a_charge': [],
-            },
-        }
-    foyers_fiscaux = default_foyers_fiscaux if values.get('foyers_fiscaux') is None else values['foyers_fiscaux']
-    last_foyer_fiscal = foyers_fiscaux[foyers_fiscaux.keys()[-1]]
-
-    for individu_id in individu_ids:
-        role_in_foyer_fiscal = guess_role_in_foyer_fiscal(individu_id)
-        if role_in_foyer_fiscal is not None:
-            last_foyer_fiscal.setdefault(role_in_foyer_fiscal, []).append(individu_id)
-    new_values['foyers_fiscaux'] = foyers_fiscaux
-
-    # ménages
-    default_menages = {
-        uuidhelpers.generate_uuid(): {
-            'autres': [],
-            'conjoint': None,
-            'enfants': [],
-            'personne_de_reference': None,
-            },
-        }
-    menages = default_menages if values.get('menages') is None else values['menages']
-    last_menage = menages[menages.keys()[-1]]
-
-    for individu_id in individu_ids:
-        role_in_menage = guess_role_in_menage(individu_id)
-        if role_in_menage is not None:
-            if role_in_menage in menages_conv.singleton_roles:
-                last_menage[role_in_menage] = individu_id
-            else:
-                last_menage.setdefault(role_in_menage, []).append(individu_id)
-    new_values['menages'] = menages
-
-    if values.get('year') is None:
-        # FIXME Parametrize year.
-        new_values['year'] = 2013
-
-    return new_values, None
-
-
-def get_role_in_famille(individu_id, familles):
-    for famille_id, famille in familles.iteritems():
-        for role in familles_conv.roles:
-            role_individu_ids = famille.get(role)
-            if role_individu_ids is not None:
-                if individu_id in role_individu_ids:
-                    return role
-    return None
-
-
 def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
     if scenarios_api_data is None:
         return None, None
@@ -203,6 +100,7 @@ def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
 
 def scenarios_to_api_data(values, state = None):
     from .. import model
+    from . import base
     return pipe(
         uniform_sequence(
             pipe(
@@ -219,7 +117,7 @@ def scenarios_to_api_data(values, state = None):
                         'test_case_id': pipe(
                             model.TestCase.make_id_or_slug_or_words_to_instance(),
                             function(lambda test_case: test_case.api_data if test_case.api_data is not None else {}),
-                            fill_user_api_data,
+                            base.make_fill_user_api_data(fill_columns_without_default_value = True),
                             ),
                         'year': default(2013),
                         },
@@ -262,12 +160,6 @@ def user_api_data_to_api_data(user_data, state = None):
         individu['id'] = individu_id
         api_data['individus'].append(individu)
     return {'scenarios': [api_data]}, None
-
-
-user_api_data_to_api_data = pipe(
-    fill_user_api_data,
-    user_api_data_to_api_data,
-    )
 
 
 api_data_to_simulation_output = pipe(

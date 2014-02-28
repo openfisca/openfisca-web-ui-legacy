@@ -60,7 +60,8 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
             <div class="panel-heading">
                 <h2 class="panel-title">${_(u'My scenarios')}</h2>
             </div>
-            <form action="${urls.get_url(ctx, 'scenarios')}" class="korma form-inline" method="POST" role="form">
+            <form action="${urls.get_url(ctx, 'scenarios')}" class="form-inline" method="POST" name="scenarios" \
+role="form">
                 ${scenarios_question.html | n}
                 <div class="panel-footer">
                     <button class="btn btn-success" type="submit">${_(u'Save')}</button>

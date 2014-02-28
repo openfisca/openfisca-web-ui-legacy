@@ -28,6 +28,7 @@
 
 from korma.choice import Select
 from korma.group import Group
+from korma.repeat import Repeat
 from korma.text import Hidden
 
 from .. import uuidhelpers
@@ -67,8 +68,10 @@ def make_menages_repeat(prenom_select_choices):
 <div class="panel panel-primary">
   <div class="panel-heading panel-form">
     <h4 class="panel-title">
-      <a data-toggle="collapse" href="#collapse-menage-{self[id].value}" title="afficher / masquer">\
-Logement principal {formatted_index}</a>
+      <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-menage-{self[id].value}" \
+title="afficher / masquer">
+        <span class="indicator"></span> Logement principal {formatted_index}
+      </a>
     </h4>
   </div>
   <div id="collapse-menage-{self[id].value}" class="panel-collapse collapse in">
@@ -78,22 +81,20 @@ Logement principal {formatted_index}</a>
   </div>
 </div>'''.format(formatted_index = index + 1, self = self)
 
-    return base.Repeat(
-        add_button_label = u'Ajouter un logement principal',
+    return Repeat(
         name = u'menages',
         template_question = MenageGroup(
             name = u'menage',
             questions = [
                 Hidden(name = 'id'),
-                base.Repeat(
+                Repeat(
                     name = u'individus',
-                    add_button_label = u'Ajouter un membre',
                     template_question = Group(
                         children_attributes = {
                             '_control_attributes': {'class': 'form-control'},
                             },
                         name = u'individu',
-                        outer_html_template = u'<div class="form-inline"><p>{self.inner_html}</p></div>',
+                        outer_html_template = u'<div class="form-inline individu">{self.inner_html}</div>',
                         questions = [
                             Select(
                                 choices = (

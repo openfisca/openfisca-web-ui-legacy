@@ -24,7 +24,7 @@
 
 
 <%def name="situation_form(root_question, user)" filter="trim">
-    <form class="korma form" method="POST" name="situation" role="form">
+    <form method="POST" name="situation" role="form">
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#familles">Familles</a></li>
             <li><a data-toggle="tab" href="#foyers-fiscaux">Déclarations d'impôts</a></li>

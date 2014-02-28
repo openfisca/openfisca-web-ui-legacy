@@ -35,12 +35,13 @@ from formencode import variabledecode
 from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
 
 
-def generate_default_user_api_data():
-    individu_id = uuidhelpers.generate_uuid()
-    user_api_data = {
-        u'familles': questions.familles.default_value(individu_ids = [individu_id]),
-        u'individus': {individu_id: questions.individus.build_default_values()},
-        }
+def get_user_api_data(ctx):
+    session = ctx.session
+    user_api_data = None
+    if session is not None and session.user is not None:
+        user_api_data = session.user.current_api_data
+    if user_api_data is None:
+        user_api_data = {}
     return user_api_data
 
 
@@ -59,18 +60,17 @@ def situation_form_get(req):
                 secure = req.scheme == 'https',
                 )
 
-    user_api_data = None
-    if session is not None and session.user is not None:
-        user_api_data = session.user.current_api_data
-    if user_api_data is None:
-        user_api_data = generate_default_user_api_data()
-    root_question = questions.base.make_situation_form(user_api_data)
+    user_api_data = get_user_api_data(ctx)
+    filled_user_api_data = check(
+        conv.base.make_fill_user_api_data(fill_columns_without_default_value = False)(user_api_data)
+        )
+
+    root_question = questions.base.make_situation_form(filled_user_api_data)
     values, errors = pipe(
         conv.base.api_data_to_korma_data,
-        root_question.data_to_str,
-        )(user_api_data, state = ctx)
-    root_question.value = values
-    root_question.error = errors
+        root_question.root_data_to_str,
+        )(filled_user_api_data, state = ctx)
+    root_question.fill(values, errors)
 
     return templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
                                 user = session.user) \
@@ -86,10 +86,7 @@ def situation_form_post(req):
         return wsgihelpers.unauthorized(ctx)
     assert session.user is not None
 
-    user_api_data = session.user.current_api_data
-    if user_api_data is None:
-        user_api_data = {}
-
+    user_api_data = get_user_api_data(ctx)
     root_question = questions.base.make_situation_form(user_api_data)
     inputs = variabledecode.variable_decode(req.params)
     data, errors = root_question.root_input_to_data(inputs, state = ctx)
@@ -101,16 +98,16 @@ def situation_form_post(req):
             return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
         else:
             return templates.render(ctx, '/index.mako', root_question = root_question)
-    api_data = check(conv.base.korma_data_to_api_data(data, state = ctx))
+    api_data, errors = conv.base.korma_data_to_api_data(data, state = ctx)
+    if errors is not None:
+        return wsgihelpers.respond_json(ctx, {'errors': errors})
+
     if api_data is not None:
         user_api_data.update(api_data)
         current_test_case = session.user.current_test_case
         current_test_case.api_data = user_api_data
         current_test_case.save(safe = True)
-    if req.is_xhr:
-        return wsgihelpers.respond_json(ctx, None)
-    else:
-        return wsgihelpers.redirect(ctx, location = '')
+    return wsgihelpers.respond_json(ctx, None) if req.is_xhr else wsgihelpers.redirect(ctx, location = '')
 
 
 def update_session(session):

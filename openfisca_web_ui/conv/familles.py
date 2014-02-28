@@ -35,7 +35,15 @@ roles = ('parents', 'enfants')
 
 
 def api_data_to_korma_data(values, state = None):
+    from .. import questions
     from . import base
+
+    make_korma_individu = lambda columns, individu_id, role: {
+        u'categories': base.build_categories(columns = columns, entity_name = u'individus'),
+        u'id': individu_id,
+        u'role': role,
+        }
+
     if values is None:
         return None, None
     if state is None:
@@ -51,17 +59,19 @@ def api_data_to_korma_data(values, state = None):
             for role in roles:
                 if famille.get(role) is not None:
                     for individu_id in famille[role]:
-                        new_individu = {
-                            u'categories': base.build_categories(
-                                columns=values['individus'][individu_id], entity_name = u'individus'),
-                            u'id': individu_id,
-                            u'role': role,
-                            }
-                        new_famille['individus'].append({u'individu': new_individu})
-            columns = {key: value for key, value in famille.iteritems() if key not in roles}
-            new_famille[u'categories'] = base.build_categories(columns = columns, entity_name = u'familles')
+                        new_famille['individus'].append({
+                            u'individu': make_korma_individu(
+                                columns = values['individus'][individu_id],
+                                individu_id = individu_id,
+                                role = role,
+                                )
+                            })
+            new_famille[u'categories'] = base.build_categories(
+                columns = {key: value for key, value in famille.iteritems() if key not in roles},
+                entity_name = u'familles',
+                )
             new_familles.append({u'famille': new_famille})
-    return {u'familles': new_familles}, None
+    return {u'familles': new_familles or None}, None
 
 
 def korma_data_to_api_data(values, state = None):
@@ -88,8 +98,9 @@ def korma_data_to_api_data(values, state = None):
                     if individu['categories'] is not None:
                         for category_name, category in individu['categories'].iteritems():
                             new_individu.update(category)
-                    new_individus[new_individu_id] = new_individu
-                    new_famille.setdefault(individu['role'], []).append(new_individu_id)
+                    if not individu.get('delete'):
+                        new_individus[new_individu_id] = new_individu
+                        new_famille.setdefault(individu['role'], []).append(new_individu_id)
             if famille.get('add'):
                 new_individu_id = uuidhelpers.generate_uuid()
                 new_individus[new_individu_id] = individus.build_default_values(
@@ -101,6 +112,6 @@ def korma_data_to_api_data(values, state = None):
         new_famille_id = uuidhelpers.generate_uuid()
         new_familles[new_famille_id] = {}
     return {
-        u'familles': new_familles,
-        u'individus': new_individus,
+        u'familles': new_familles or None,
+        u'individus': new_individus or None,
         }, None
