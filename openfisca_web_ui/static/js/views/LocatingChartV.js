@@ -170,6 +170,7 @@ define([
 			},
 			tooltipContentGenerator: function (d) {
 				var that = this;
+				if (_.isUndefined(this.yFormat)) return '';
 				if (d == null) return '';
 				var table = d3.select(document.createElement("table"));
 				var theadEnter = table.selectAll("thead")
@@ -201,7 +202,7 @@ define([
 					.html(function(p) {return p.key + ' inférieur à : '});
 				trowEnter.append("td")
 					.classed("value",true)
-					.html(function(p,i) { return that.yFormat._scale(p.value) + ' '+ that.yFormat; });
+					.html(function(p,i) { return that.yFormat._scale(p.value) + ' '+ that.yFormat.symbolText; });
 
 					trowEnter.selectAll("td").each(function(p) {
 						if (p.highlight) {
@@ -228,7 +229,7 @@ define([
 				this.yFormat = d3.formatPrefix(magnitude);
 				/* Number formating */
 				this.yFormat._scale = function (val) {
-					if(	that.yFormat.symbol != 'G' && that.yFormat.symbol != 'M' && that.yFormat.symbol != 'k' && that.prefix.symbol != '') {
+					if(	that.yFormat.symbol != 'G' && that.yFormat.symbol != 'M' && that.yFormat.symbol != 'k' && that.yFormat.symbol != '') {
 						return (""+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 					}
 					var roundLevel = (that.yFormat.symbol == 'G' || that.yFormat.symbol == 'M') ? 2: 0;
