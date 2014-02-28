@@ -68,12 +68,14 @@ from openfisca_web_ui import model, urls, uuidhelpers
     % if owner_or_admin:
                     <a class="btn btn-primary btn-sm" href="${legislation.get_admin_url(ctx, 'edit')}" \
 title="${_(u'Edit')}">
-    % else:
-                    <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
-href="#" title="${_(u'Duplicate and edit')}">
-    % endif:
                         <span class="glyphicon glyphicon-cog"></span>
                     </a>
+    % elif user is not None and user.email is not None:
+                    <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
+href="#" title="${_(u'Duplicate and edit')}">
+                        <span class="glyphicon glyphicon-cog"></span>
+                    </a>
+    % endif:
                     ${legislation.get_title(ctx)}
                 </h2>
             </div>
@@ -82,7 +84,7 @@ href="#" title="${_(u'Duplicate and edit')}">
                     <%view:view_fields/>
                 </li>
                 <li class="list-group-item">
-                    <%view:view_content/>
+                    ${view.view_content(user = user)}
                 </li>
             </ul>
             <div class="panel-footer">

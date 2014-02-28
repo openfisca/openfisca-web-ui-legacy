@@ -78,7 +78,7 @@ href="#" title="${_(u'Edit') if owner_or_admin else _(u'Duplicate and edit')}">
                     <%self:view_fields/>
                 </li>
                 <li class="list-group-item">
-                    ${self.view_content(editable = editable)}
+                    ${self.view_content(user = user)}
                 </li>
             </ul>
             <div class="panel-footer">
@@ -167,8 +167,16 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>
 
 
-<%def name="view_content(editable = False)" filter="trim">
+<%def name="view_content(user = None)" filter="trim">
 <%
+    dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
+    if user is not None:
+        owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
+        editable = owner_or_admin and dated_legislation
+    else:
+        owner_or_admin = False
+        editable = False
+
     value = legislation.json
 %>\
     % if value is not None:
@@ -200,11 +208,18 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                         ${_('Close all')}
                     </button>
             % if editable is False:
+                % if owner_or_admin:
+                    <a class="btn btn-primary btn-xs" href="${legislation.get_admin_url(ctx, 'edit')}">
+                        <span class="glyphicon glyphicon-lock"></span>
+                        ${_(u'Edit content')}
+                    </a>
+                % elif user is not None and user.email is not None:
                     <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
 href="#">
                         <span class="glyphicon glyphicon-lock"></span>
                         ${_(u'Edit content')}
                     </a>
+                % endif
             % endif:
             % if not dated_legislation:
                     ${_('Legislation for')}

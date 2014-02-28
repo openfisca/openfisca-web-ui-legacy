@@ -571,6 +571,12 @@ def route_user(environ, start_response):
 def user_edit(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
+    if user.email is None:
+        return wsgihelpers.forbidden(ctx,
+            explanation = ctx._("Edit legislation forbidden"),
+            message = ctx._("You must have an account to edit a legislation."),
+            title = ctx._('Operation denied'),
+            )
 
     params = req.GET
     inputs = {
