@@ -35,7 +35,6 @@ roles = ('parents', 'enfants')
 
 
 def api_data_to_korma_data(values, state = None):
-    from .. import questions
     from . import base
 
     make_korma_individu = lambda columns, individu_id, role: {
