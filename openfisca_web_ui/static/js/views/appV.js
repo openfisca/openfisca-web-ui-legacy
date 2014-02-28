@@ -17,7 +17,6 @@ define([
 			height: null,
 			charts: {},
 			initialize: function () {
-				this.svg = d3.select(this.el).append('svg');
 				$(window).on('resize', $.proxy(this.updateDimensions, this));
 				this.updateDimensions();
 				this.$el.prepend('\
@@ -51,25 +50,23 @@ define([
 				switch(args.chart) {
 					case 'waterfall':
 						this.chart = new WaterfallChartV(this);
-
 						break;
 					case 'locating':
 						this.chart = new LocatingChartV(this);
-
 						break;
 					case 'distribution':
 						this.chart = new DistributionChartV(this);
-
 						break;
 //					default:
 //						console.error('_Error : No chart selected when called AppV.render');
 				};
+				window.chart = this.chart;
 				return this;
 			},
 			outTransition: function () {
 	            this.chart._remove();
 
-	            $('svg').empty();
+	            $('svg').remove();
 				this.chart.model.destroy();
 			},
 			updateDimensions: function() {

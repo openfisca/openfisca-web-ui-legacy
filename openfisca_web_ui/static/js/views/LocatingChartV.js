@@ -51,7 +51,9 @@ define([
 						.showXAxis(true)
 						.useInteractiveGuideline(true);
 
-					d3.select('svg')
+					that.svg = d3.select(parent.el).append('svg')
+						.attr('height', that.height)
+						.attr('width', that.width)
 						.datum(that.vingtiles)
 						.call(that.chart);
 				
@@ -62,7 +64,7 @@ define([
 					that.chart.interactiveLayer.tooltip
 					    .contentGenerator(that.tooltipContentGenerator.bind(that));
 
-					d3.select('svg').attr('opacity', 0);
+					that.svg.attr('opacity', 0);
 					that.setElement('.nvd3');
 
 					if(that.model.fetched) that.render();
@@ -99,8 +101,8 @@ define([
 				        return that.yFormat.scale(d); 
 				});
 
-				d3.select('svg').datum(this.vingtiles);
-				d3.select('svg').attr('opacity', 1);
+				that.svg.datum(this.vingtiles);
+				that.svg.attr('opacity', 1);
 
 				this.chart.update();
 
@@ -220,7 +222,7 @@ define([
 	            return html;
 			},
 			_remove: function () {
-				d3.select('svg')
+				this.svg
 	              .on('mousemove', null)
 	              .on("mouseout" ,null)
 	              .on("dblclick" ,null);

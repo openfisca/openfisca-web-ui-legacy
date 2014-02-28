@@ -3,275 +3,268 @@ define([
 	'underscore',
 	'backbone',
 	'd3',
-
 	'chartM',
 	'helpers',
 	], function ($, _, Backbone, d3, chartM, helpers) {
 		'use strict';
 
+		d3.selection.prototype.moveToFront = function() { return this.each(function(){ this.parentNode.appendChild(this); }); };
+		d3.selection.prototype.moveToBack = function() {return this.each(function() {var firstChild = this.parentNode.firstChild;if (firstChild) {this.parentNode.insertBefore(this, firstChild);}});};
+
 		var DistributionChartV = Backbone.View.extend({
-
-			events: {
-				'click circle.parent': 'hoverParentCircle'
-			},
-
-			/* Settings */
 			model: chartM,
-			views: [],
-			datakey: '',
 
-			/* Properties */
+			defaultSort: 'positive',
+			currentSort: null,
+ 			headHeight: 50,
+			height: null,
+			width: null,
+			padding: { top: 100, left: 20, bottom: 40, right: 20},
+			sectionWidth: null,
+			sectionHeight: null,
+			sectionBottomMargin: 30,
 
-			padding: {
-				top: 20,
-				left: 20,
-				bottom: 20,
-				right: 20
+			defaultPackByLine: 3,
+			packByLine: null,
+
+			/* D3 Settings */
+			force: d3.layout.force(),
+			gravity: 0,
+			charge: function (d) {
+				return -Math.pow(d.radius, 2.0)/1.5;
 			},
-			packPadding: 20,
+			friction: 0.6,
+			rScale: d3.scale.linear().clamp(true),
+			defaultGravity: 0.3,
 
-			bubbles: [],
-			d_bubbles: undefined,
+			nodes: [],
+			bubbles: {},
+
+			/* Sort */
+			sortData: {
+				'positive': {
+					'name': 'Cotisations / prestations',
+					'children': [
+						{ name: 'Cotisations', value: false },
+						{ name: 'Presations', value: true }
+					]
+				},
+				'test': {
+					'name': 'Test',
+					'children': [
+						{ name: 'valeur 1', value: 'aaa' },
+						{ name: 'valeur 2', value: 'bbb' },
+						{ name: 'valeur 3', value: 'ccc' },
+						{ name: 'valeur 4', value: 'ddd' },
+						{ name: 'valeur 5', value: 'eee' },
+						{ name: 'valeur 6', value: 'fff' },
+						{ name: 'valeur 7', value: 'ggg' },
+						{ name: 'valeur 8', value: 'hhh' },
+						{ name: 'valeur 9', value: 'iii' },
+						{ name: 'valeur 10', value: 'jjj' }
+					]
+				}
+			},
 
 			initialize: function (parent) {
-				this.g = parent.svg.append('g').attr('id', 'distribution-chart');
-				this.setElement(this.g[0]);
 
+				/* Positions and dimensions */
 				this.height = parent.height;
 				this.width = parent.width;
 
+				this.innerWidth = this.width - this.padding.left - this.padding.right;
+				this.innerHeight = this.height - this.padding.top - this.padding.bottom;
+
+				this._el = d3.select(parent.el).append('div')
+					.attr('id', 'distribution-chart');
+				this.setElement(this._el[0]);
+
+				this.$el.append('<div id="sort-menu"></div>');
+
+				this.g = this._el.append('svg')
+					.attr('height', this.height)
+					.attr('width', this.width);
+
+				this.legendText = this.g.append('g')
+					.attr('class', 'text-label');
+
+				this.currentSort = this.defaultSort;
+
+				/* Render when data if ok or is changed */
 				if(this.model.fetched) this.render();
 				this.listenTo(this.model, 'change:source', this.render);
 			},
-			render: function () {
-				this.setData(this.model.get('distributionData', {type: 'default'}));
-				this.buildLayoutGlobal();
+			render: function (sortType) {
+				if(typeof sortType != 'string') sortType = this.currentSort;
+
+				// /* If data.length < packByLine */
+				if(this.sortData[sortType].children.length < this.defaultPackByLine) this.packByLine = this.sortData[sortType].children.length;
+				else this.packByLine = this.defaultPackByLine;
+
+				this.setSectionsDimensions();
+
+				this.sortBubblesBy(sortType);
+				this.setHeader(sortType);
 			},
-
-			setData: function (data) {
-				this.currentDataSet = $.extend(true, {}, data);
-				this.currentDataSetContainer = [];
-				var that = this;
-
-				var defineFictiveDataGroup = function (datas) {
-
-					if(_.isUndefined(datas.distribution)) datas.distribution = {};
-
-					_.each(datas.children, function (data) {
-						data.distribution = {};
-						if(datas.children.length == 1) data.distribution.fictive = true;
-						else data.distribution.fictive = false;
-						defineFictiveDataGroup(data);
-					});
+			setSectionsDimensions: function () {
+				this.sectionWidth = this.innerWidth / (this.packByLine);
+				this.quarterWidth = this.sectionWidth / 2;
+				this.sectionHeight = this.sectionWidth + this.sectionBottomMargin;
+				this.rScale.range([2, this.sectionWidth/5]);
+			},
+			setHeader: function (sortType) {
+				var $sortMenu = this.$el.find('#sort-menu'),
+					that = this;
+				$sortMenu.html('');
+				for(var prop in this.sortData) {
+					$sortMenu
+						.append('<input class="btn btn-default '+prop+'-sort '+((prop == sortType)?'active':'')+'" data-sort="'+prop+'" type="button" value="'+this.sortData[prop].name+'">');
 				};
-				defineFictiveDataGroup(this.currentDataSet);
+				$sortMenu.off('click');
+				$sortMenu.on('click', 'input', function () {
+					if(!$(this).hasClass('active')) {
+						that.render($(this).data('sort'));
+					}
+				});
 			},
-			buildLayoutGlobal: function () {
-				var that = this,
-					datas = this.currentDataSet,
-					containerDatas = this.currentDataSetContainer;
+			sortBubblesBy: function (sortType) {
+				this.currentSort = sortType;
+				var data = this.model.get('distributionData', {type: sortType});
+				this.rScale.domain([0, d3.max(data, function (d) { return Math.abs(d.value); })]);
+				this.updateNodes(data);
 
-				if(_.isUndefined(this.pack)) {
-					this.pack = d3.layout.pack()
-					.size([this.width, this.height])
-					.value(function (d) {
-						d._value = d.value;
-						return Math.abs(d.value);
-					})
-					.padding(this.packPadding)
-				}
+				/* Add index to sort data values */
+				_.each(this.sortData[sortType].children, function (d, i) { d.index = i; });
 
-				var nodes = this.pack.nodes(datas);
+				this.buildBubbles(this.nodes);
 
-				this.circles = this.g.selectAll('circle')
-					.data(nodes);
-				this.paths = this.g.selectAll('path')
-					.data(nodes);
-				this.texts = this.g.selectAll('text')
-					.data(nodes);
+				this.buildTextLegend();
 
+				this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*this.sectionWidth + this.padding.top + this.padding.bottom});
 
-				/* Circles */
-				this.circles
-					.enter().append("svg:circle")
-						.attr("cx", function(d) { console.log(d.x); return d.x; })
-						.attr("cy", function(d) { return d.y; })
-						.attr("r", function(d) {
-							return d.children ? d.r: 0;
-						})
-						.attr('fill', function (d) {
-							if(!d.children) {
-								if(d._value > 0) return '#5cb85c';
-								else return '#C11137';
-							}
-							else return 'none';
-						})
-						.attr('stroke-width', 2)
-						.attr('stroke', function (d) {
-							return d.children ? '#666' : 'none';
-						})
-						.attr('stroke-dasharray', function (d) {
-							return d.children ? '10,10' : 'none';
-						})
-						.attr('opacity', 0)
-
-				this.circles
-					.attr("class", function(d) { return d.children ? "parent" : "child"; })
-
-				this.circles
-					.transition()
-					.duration(1000)
-					.attr("r", function(d) { return d.r - ((d.distribution.fictive == true && !d.children) ? 5:0); })
-					.attr("cx", function(d) { return d.x; })
-					.attr("cy", function(d) { return d.y; })
-					.attr('stroke', function (d) { return d.children ? '#666' : 'none'; })
-					.attr('fill', function (d) {
-						if(!d.children) {
-							if(d._value > 0) return '#5cb85c';
-							else return '#C11137';
-						}
-						else return '#FFF';
-					})
-					.attr('stroke-dasharray', function (d) { return d.children ? '10,10' : 'none'; })
-					.attr('fill-opacity', function (d) { return (d3.select(this).attr('class') == 'parent')? 0: 1; })
-					.attr("opacity", 1);
-
-				this.circles.exit()
-					.transition()
-						.duration(1000)
-						.attr('opacity', 0)
-						.each('end', function () {
-							this.remove();
-						});
-
-
-				/* Paths */
-
-				this.paths.exit()
-					.transition()
-						.duration(1000)
-						.attr('opacity', 0)
-						.each('end', function () {
-							this.remove();
-						});
-
-				this.paths
-					.enter().append('svg:path')
-					.attr("stroke", function(d, i) { return 'blue'; })
-					.attr('d', function (d) {
-						var arc = d3.svg.arc()
-						    .innerRadius(d.r*1.03)
-						    .outerRadius(d.r*1.03)
-						    .startAngle(5)
-						    .endAngle(10);
-						return arc();
-					})
-					.attr('transform', function (d) { return 'translate('+d.x+','+d.y+')'; });
-
-				this.paths
-					.attr('id', function (d, i) { return 'path-parent-'+i; })
-
-				this.paths
-					.transition()
-						.duration(1000)
-						.attr('d', function (d, i) {
-							var arc = d3.svg.arc()
-							    .innerRadius(d.r*1.02)
-							    .outerRadius(d.r*1.02)
-							    .startAngle(5)
-							    .endAngle(10);
-							return arc();
-						})
-						.attr('opacity', 0)
-						.attr('transform', function (d) { return 'translate('+d.x+','+d.y+')'; });
-
-				/* Texts */
-
-				this.texts.exit()
-					.transition()
-						.duration(1000)
-						.attr('opacity', 0)
-						.each('end', function () {
-							this.remove();
-						});
-
-				this.textsPaths =
-					this.texts
-						.enter()
-						.append('svg:text')
-						.append('svg:textPath')
-						.attr('display', function (d) {
-							return (d.distribution.fictive || !d.children) ? 'none': 'block';
-						})
-						.attr("xlink:href", function (d, i) {
-							return '#path-parent-'+i;
-						})
-						.attr('font-size', function (d, i) {
-							var fs = 8 + Math.sqrt(d.r);
-							return fs+'px';
-						})
-						.attr('fill', '#222')
-						.attr('opacity', 0)
-						.text(function(d){ return d.name; });
-				
-				this.textsPaths
-					.attr('id', function (d, i) { return 'text-parent-'+i; })
-
-				this.textsPaths
-					.transition()
-						.duration(1000)
-						.attr('font-size', function (d, i) {
-								var fs = 8 + Math.sqrt(d.r);
-								// console.log(fs);
-								return fs+'px';
-						})
-						.attr('opacity', function (d, i) {
-							// console.log('transition :',i, 'opacity :', (d.distribution.fictive || !d.children)?0: 0.3)
-							return (d.distribution.fictive || !d.children) ? 0: 0.3;
-						});
-
-				this.globalLayoutEvents();
+				this.start();
 			},
-			globalLayoutEvents: function () {
+			updateNodes: function (nodes) {
 				var that = this;
-				// this.circles
-				// .filter(function (d) { return d.children; })
-				// .on('mouseover', function (d, i) {
-				// 	d3.select('#text-parent-'+i)
-				// 		.transition()
-				// 			.duration(200)
-				// 			.attr('opacity', 1)
-				// 			.attr('font-size', 15 + Math.sqrt(d.r));
-				// })
-				// .on('mouseout', function (d, i) {
-				// 	d3.select('#text-parent-'+i)
-				// 		.transition()
-				// 			.duration(200)
-				// 			.attr('opacity', 0.3)
-				// 			.attr('font-size', 8 + Math.sqrt(d.r));
-				// });
+				var outputNodes = _.map(nodes, function (node, i) {
+					/* If node already doesn't exist, we create it, else we update it */
+					var oldNode = _.findWhere(that.nodes, {'_id': node._id });
+					if(!_.isUndefined(oldNode)) {
+						var out = {
+							x: oldNode.px,
+							y: oldNode.py
+						};
+					}
+					else {
+						var out = {};
+					}
+					out._id = node._id,
+					out.value = node.value,
+					out.radius = that.rScale(Math.abs(node.value)),
+					out.fillColor = (node.value > 0) ? '#5cb85c': '#c11137'
+					if(!_.isUndefined(node.sort)) out.sort = node.sort;
+
+					return out;
+				});
+				this.nodes = outputNodes;
 			},
-			buildLayoutPositive: function () {
-				this.packs = [];
-				var datas = $.extend(true, {}, this.model.get('distributionData', {type: 'positive'}));
+			buildTextLegend: function () {
+				var that = this;
+				this.$el.find('.text-label').html('');
+				_.each(this.sortData[this.currentSort].children, function (d, i) {
+					var x = (that.sectionWidth * (i % that.packByLine)) + that.quarterWidth,
+						y = that.sectionHeight * (Math.floor(i / that.packByLine)) + that.sectionHeight;
 
-				this.pack = d3.layout.pack()
-							.size([this.width/2, this.height])
-							.value(function (d) {
-								return Math.abs(d.value);
-							});
+					that.legendText.append('text')
+						.attr('class', 'title')
+						.attr('x', x)
+						.attr('y', y)
+						.text(d.name);
 
-				var nodes = [];
-				_.each(datas, function (d) {
-					nodes.push(this.pack.nodes(d));
-				}.bind(this));
+					// that.g.append('circle').attr('r', 3).attr('cy', y).attr('cx', x).attr('fill', 'red');
+				});
+			},
+			buildBubbles: function (data) {
+				var that = this,
+					data = data || this.nodes;
 
-				_.each(nodes, function () {
-					
-				}.bind(this));
+				this.bubbles = this.g.selectAll('._bubble')
+					.data(data);
+
+				/* Trouver nombre d'éléments et faire marcher exit */
+				this.bubbles
+					.enter()
+						.append('svg:circle')
+						.attr('class', '_bubble')
+						.attr('cx', function (d, i) { return _.random(that.padding.left, that.innerWidth); })
+						.attr('cy', function (d, i) { return _.random(that.padding.top, that.innerHeight); })
+						.attr('r', function (d) { return d.radius; })
+
+						/* MOVE TO CSS */
+						.attr('fill', function (d) { return d.fillColor })
+						.attr('stroke', 'black')
+						.attr('stroke-width', 1)
+						.attr('opacity', 0.8)
+						.moveToBack();
+
+				this.bubbles
+					.transition().duration(200)
+						.attr('r', function (d) { return d.radius; })
+						.attr('fill', function (d) { return d.fillColor });
+
+				this.bubbles
+					.exit()
+						.transition().duration(100)
+							.attr('opacity', 0)
+							.remove();
+			},
+			updateBubblePositions: function (alpha) {
+				var that = this;
+				return function (d, i) {
+					var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sort}).index,
+						targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth,
+						targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.quarterWidth;
+
+					// if(alpha == 0.099) that.g.append('circle').attr('r', 3).attr('cy', function () {return targetY+that.padding.top; }).attr('cx', function () {return targetX+that.padding.left; }).attr('fill', 'red');
+
+					d.y = d.y + (targetY - d.y) * alpha * 1.1 * that.defaultGravity;
+					d.x = d.x + (targetX - d.x) * alpha * 1.1 * that.defaultGravity;
+				};
+				
+			},
+			/* Layouts */
+			start: function () {
+				var that = this;
+
+				this.force.nodes(this.nodes);
+
+				this.force
+					.gravity(this.gravity)
+					.charge(this.charge)
+					.friction(this.friction)
+					.on('tick', function (e) {
+						that.bubbles
+							.each(that.updateBubblePositions(e.alpha))
+							.attr("cx", function(d, i) { return d.x + that.padding.left; })
+            				.attr("cy", function(d) { return d.y + that.padding.top; });
+					})
+					.start();
+			},
+			resize: function (args) {
+				if(!_.isUndefined(args.height)) {
+					this.g.transition().duration(400)
+						.attr('height', args.height);
+				}
+				else if(!_.isUndefined(args.width)) {
+					this.g.transition().duration(400)
+						.attr('width', args.width);
+				}
 			},
 			_remove: function () {
+				this.$el.remove();
 			}
 		});
-	return DistributionChartV;
+
+		return DistributionChartV;
+
 });

@@ -9,9 +9,12 @@ define([
 	function (backendServiceM, helpers, $, _, Backbone) {
 
 		/* Parsing methods (private) */
-		var parser = {
-			clean: function (source) {
-				var json = $.extend(true, {}, source);
+		var Parser = function (data) {
+			this.outputValue = $.extend(true, {}, data);
+		};
+		Parser.prototype = {
+			clean: function () {
+				var json = this.outputValue;
 					json._id = 'root';
 
 				var doIt = function (json) {
@@ -28,9 +31,6 @@ define([
 							if(el.children) { doIt(el); }
 							else {
 								newEl.value = newEl.values[0];
-
-								/* Add isPositive */
-								if(newEl.value !== 0) newEl.isPositive = (newEl.value > 0) ? true : false;
 							}
 							json.children.push(newEl);
 						}
@@ -39,16 +39,12 @@ define([
 				};
 
 				var result = doIt(json);
-				return result;
+				this.outputValue = result;
+				return this;
 			},
-			removeRootNode: function (data) {
-				var data = $.extend(true, {}, data),
-					json = data.children.revdisp;
-					json._id = 'revdisp';
-				return json;
-			},
-			groupByPositive: function (data) {
-				var data = $.extend(true, {}, data),
+			/* Useless */
+			groupByPositive: function () {
+				var data = this.outputValue,
 					groupedData = { positive: [], negative: [] };
 				var doIt = function (obj) {
 					_.each(obj, function (el, name) {
@@ -60,24 +56,50 @@ define([
 					});
 				};
 				doIt(data.children);
-				return groupedData;
+				this.ouputValue = groupedData;
+				return this;
 			},
-			ungroup: function (data) {
-				var groupedData = $.extend(true, {}, data);
-					groupedData.children = [];
+			/*
+				List children
+				
+				Description 		: convert object type data in array type data of children
+				Data requirements 	: cleaned
+			*/
+			listChildren: function () {
+				var data = this.outputValue,
+					groupedData = [];
 					doIt = function (obj) {
 						_.each(obj, function (el, name) {
 							if(el.hasOwnProperty('children')) {doIt(el.children);}
-							else groupedData.children.push(el);
+							else groupedData.push(el);
 						});
 				};
 				doIt(data.children);
-				return groupedData;
+				this.outputValue = groupedData;
+				return this;
 			},
-			/* Need to be cleaned up before */
-			setParentsNodes: function (data) {
+			/*
+				Remove Root Node
+
+				Description 		: Delete first "root" node
+				Data requirements 	: cleaned
+			*/
+			removeRootNode: function () {
+				var data = this.outputValue,
+					json = _.where(data.children, function (d) { return d._id == 'revdisp'});
+				this.outputValue = json;
+				return this;
+			},
+			
+			/*
+				Set Parentnodes
+				
+				Description 		: set "parentNodes" property in each node
+				Data requirements 	: cleaned
+			*/
+			setParentNodes: function () {
 				var that = this,
-					_data = $.extend(true, {}, data);
+					_data = this.outputValue;
 
 				var doIt = function (loopData) {
 					var	loopDataChildren = loopData.children,
@@ -87,14 +109,70 @@ define([
 						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) { loopDatum.parentNodes = loopData.parentNodes;}
 						else { loopDatum.parentNodes = [];}
 
-						if(i == dataLength-1) {
-							loopDatum.parentNodes.push(loopData.description);
-						}
+						if(i == dataLength-1) loopDatum.parentNodes.push(loopData.description);
 						doIt(loopDatum);
 					})
 				}
 				doIt(_data);
-				return _data;
+				this.outputValue = _data;
+				return this;
+			},
+			/*
+				Set Positive
+				
+				Description 		: set "positive" sort property in each children
+				Data requirements 	: cleaned
+			*/
+			setPositiveSort: function () {
+				var data = this.outputValue;
+				var doIt = function (obj) {
+					_.each(obj, function (el, name) {
+						el.sortKey = 'positive';
+						el.sort = {};
+						if(el.hasOwnProperty('children')) { doIt(el.children); }
+						else {
+							if(el.values[0] > 0) el.sort = true;
+							else if(el.values[0] < 0) el.sort = false;
+						}
+					});
+				};
+				doIt(data.children);
+				this.outputValue = data;
+				return this;
+			},
+			setTestSort: function () {
+				var data = this.outputValue;
+				var doIt = function (obj) {
+					_.each(obj, function (el, i) {
+						el.sortKey = 'test';
+						el.sort = {};
+						if(el.hasOwnProperty('children')) { doIt(el.children); }
+						else {
+							if(i == 0) el.sort = 'bbb';
+							else if(i == 1) el.sort = 'aaa';
+							else if(i == 2) el.sort = 'ccc';
+							else if(i == 3) el.sort = 'ddd';
+							else if(i == 4) el.sort = 'eee';
+							else if(i == 5) el.sort = 'fff';
+							else if(i == 6) el.sort = 'ggg';
+							else if(i == 7) el.sort = 'hhh';
+							else if(i == 8) el.sort = 'iii';
+							else if(i == 9) el.sort = 'jjj';
+						}
+					});
+				};
+				doIt(data.children);
+				this.outputValue = data;
+				return this;
+			},
+			/*
+				Values
+
+				Description : return parsed data this.ouputValue
+			*/
+			values: function () {
+				if(_.isObject(this.outputValue) && !_.isArray(this.outputValue)) return $.extend(true, {}, this.outputValue);
+				else return this.outputValue;
 			}
 		};
 
@@ -210,24 +288,45 @@ define([
 
 			/* Custom get methods */
 			get_waterfallData: function () { /* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
-				return parser.ungroup(
-						parser.setParentsNodes(
-							parser.clean(
-								parser.removeRootNode(
-									this.get('source')))));
+				return new Parser(this.get('source'))
+								.clean()
+								.setParentNodes()
+								.listChildren()
+								.values();
 			},
 			get_distributionData: function (args) { var args = args || {};
 				if(args.type == 'default') {/* Cleaned up and ungrouped data */
-					return parser.clean(
-							parser.removeRootNode(
-								this.get('source'))); }
+					return new Parser(this.get('source'))
+								.clean()
+								.removeRootNode()
+								.listChildren()
+								.values();
+				}
 				else if(args.type == 'positive') {
-					return parser.groupByPositive(parser.clean(this.get('source'))); }
+					return new Parser(this.get('source'))
+								.clean()
+								.setPositiveSort()
+								.listChildren()
+								.values();
+				}
+				else if(args.type == 'test') {
+					return new Parser(this.get('source'))
+								.clean()
+								.setTestSort()
+								.listChildren()
+								.values();
+				}
 				else {
-					return parser.clean(this.get('source')); }
+					return new Parser(this.get('source'))
+								.clean()
+								.listChildren()
+								.values();
+				}
 			},
 			get_locatingData: function () { /* Just cleaned up */
-				return parser.clean(this.get('source'));
+				return new Parser(this.get('source'))
+							.clean()
+							.values();
 			}
 		});
 

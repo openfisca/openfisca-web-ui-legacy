@@ -42,14 +42,17 @@ define([
 			/* Settings */
 
 			initialize: function (parent) {
-//				if(_.isUndefined(parent)) console.error('Missing parent object in WaterfallChartV constructor');
 
-				this.g = parent.svg.append('g').attr('id', 'waterfall-chart');
+				this.g = d3.select(parent.el).append('svg');
 
 				this.setElement(this.g[0]);
 
 				this.height = parent.height - this.margin.bottom - this.margin.top;
 				this.width = parent.width - this.margin.left - this.margin.right;
+
+				this.g
+					.attr('height', this.height)
+					.attr('width', this.width);
 
 				if(this.model.fetched) this.render();
 				this.listenTo(this.model, 'change:source', this.render);
@@ -74,14 +77,14 @@ define([
 			},
 			setData: function (data) {
 				/* Set stopvalues */
-				var children = data.children,
+				var children = data,
 					childrenLength = children.length,
 					that = this;
 
-				this.currentDataSet = $.extend(true, {}, data);
+				this.currentDataSet = data;
 
 				var baseHeight = 0, _baseHeight = 0;
-				_.each(this.currentDataSet.children, function (d) {
+				_.each(this.currentDataSet, function (d) {
 					_baseHeight += d.value;
 					d.waterfall = {
 						'startValue': baseHeight,
@@ -95,7 +98,7 @@ define([
 			updateScales: function (args) {
 				var args = args || {},
 					that = this,
-					currentDataSetValues = _.map(this.currentDataSet.children, function (data) {
+					currentDataSetValues = _.map(this.currentDataSet, function (data) {
 						return [data.waterfall.startValue, data.waterfall.endValue];
 				});
 
@@ -107,7 +110,7 @@ define([
 					this.scales = {
 						x: d3.scale.ordinal()
 							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-							.domain(that.currentDataSet.children.map(function(d) {
+							.domain(that.currentDataSet.map(function(d) {
 								return d.name;
 						})),
 						y: d3.scale.linear()
@@ -142,7 +145,7 @@ define([
 					this.scales = {
 						x: d3.scale.ordinal()
 							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-							.domain(that.currentDataSet.children.map(function(d) {
+							.domain(that.currentDataSet.map(function(d) {
 								return d.name;
 						})),
 						y: d3.scale.linear()
@@ -178,13 +181,13 @@ define([
 			},
 			buildBars: function (args) {
 				var that = this,
-					dataLength = this.currentDataSet.children.length,
+					dataLength = this.currentDataSet.length,
 					barsLength = (!_.isUndefined(this.bars[0])) ? this.bars[0].length: 0,
 					barWidth = (that.width - that.padding.left - that.padding.right - dataLength*that.innerPadding)/dataLength,
 					args = args || {};
 				
 				this.bars = this.g.selectAll('.bar')
-						.data(this.currentDataSet.children)
+						.data(this.currentDataSet)
 
 				this.bars
 					.enter()
@@ -284,12 +287,12 @@ define([
 			},
 			buildActiveBars: function () {
 				var that = this,
-					dataLength = this.currentDataSet.children.length,
+					dataLength = this.currentDataSet.length,
 					barsLength = (!_.isUndefined(this.bars[0])) ? this.bars[0].length: 0,
 					barWidth = (that.width - that.padding.left - that.padding.right)/dataLength;
 
 				this.activeBars = this.g.selectAll('.active-bar')
-					.data(this.currentDataSet.children);
+					.data(this.currentDataSet);
 
 				this.activeBars
 					.enter()
