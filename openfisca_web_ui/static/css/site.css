@@ -69,20 +69,6 @@ img.media-object {
     height: 100px;
 }
 
-/* SVG */
-#chart-wrapper .x-axis {
-}
-#chart-wrapper .y-axis path {
-    display: none;
-}
-#chart-wrapper .domain {
-    display: none;
-}
-#chart-wrapper .y-axis line {
-  stroke: #777;
-  stroke-dasharray: 2,2;
-}
-
 form[name="scenarios"] .form-inline select {
     margin-left: 1em;
 }

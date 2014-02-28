@@ -25,7 +25,8 @@ define([
 				left: 0,
 				bottom: 0,
 				right: 20
-			},			
+			},
+			userPointFill: '#a63232',
 			initialize: function (parent) {
 
 				var that = this;
@@ -46,7 +47,9 @@ define([
 						.showXAxis(true)
 						.useInteractiveGuideline(true);
 
-					d3.select('svg')
+					that.svg = d3.select(parent.el).append('svg')
+						.attr('height', that.height)
+						.attr('width', that.width)
 						.datum(that.vingtiles)
 						.call(that.chart);
 				
@@ -57,7 +60,7 @@ define([
 					that.chart.interactiveLayer.tooltip
 					    .contentGenerator(that.tooltipContentGenerator.bind(that));
 
-					d3.select('svg').attr('opacity', 0);
+					that.svg.attr('opacity', 0);
 					that.setElement('.nvd3');
 
 					if(that.model.fetched) that.render();
@@ -71,10 +74,8 @@ define([
 					data = this.model.get('locatingData');
 
 				this.vingtiles = this.updateVingtilesByUserData(_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }), data);
-
-				var yMin = 0,
-					yMax = d3.max(this.vingtiles, function (vingtile) { return d3.max(_.map(vingtile.values, function (d) { return d.y; })); });
-				this.yFormat = d3.formatPrefix(yMax);
+				
+				this.setPrefix();
 
 				switch(this.yFormat.symbol) {
 					case 'G': this.legendText = 'revenu en milliards €'; break;
@@ -91,11 +92,11 @@ define([
 				this.chart.yAxis
 					.axisLabel(this.legendText)
 					.tickFormat(function (d) {
-				        return that.yFormat.scale(d); 
+				        return that.yFormat._scale(d); 
 				});
 
-				d3.select('svg').datum(this.vingtiles);
-				d3.select('svg').attr('opacity', 1);
+				that.svg.datum(this.vingtiles);
+				that.svg.attr('opacity', 1);
 
 				this.chart.update();
 
@@ -106,12 +107,16 @@ define([
 				});
 			},
 			showUserPoints: function () {
+				var that = this;
 				_.each(this.vingtiles, function (d) {
 					_.each(d.values, function (_d, _i) {
 						if(_d.userPoint) {
 							d3.select('.nv-series-'+d.values[0].series+' .nv-point-'+_i)
 								.style('fill-opacity', 1)
-								.style('stroke-opacity', 1);
+								.style('stroke', that.userPointFill)
+								.style('stroke-opacity', 1)
+								.style('stroke-width', 4)
+								.style('fill', that.userPointFill);
 						}
 						else {
 							d3.select('.nv-series-'+d.values[0].series+' .nv-point-'+_i)
@@ -196,7 +201,7 @@ define([
 					.html(function(p) {return p.key + ' inférieur à : '});
 				trowEnter.append("td")
 					.classed("value",true)
-					.html(function(p,i) { return (""+p.value).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' euros'; });
+					.html(function(p,i) { return that.yFormat._scale(p.value) + ' '+ that.yFormat; });
 
 					trowEnter.selectAll("td").each(function(p) {
 						if (p.highlight) {
@@ -214,8 +219,34 @@ define([
 	                html += "<div class='footer'>" + d.footer + "</div>";
 	            return html;
 			},
+			setPrefix: function () {
+				var yMin = 0,
+					yMax = d3.max(this.vingtiles, function (vingtile) { return d3.max(_.map(vingtile.values, function (d) { return d.y; })); }),
+					magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax),
+					that = this;
+
+				this.yFormat = d3.formatPrefix(magnitude);
+				/* Number formating */
+				this.yFormat._scale = function (val) {
+					if(	that.yFormat.symbol != 'G' && that.yFormat.symbol != 'M' && that.yFormat.symbol != 'k' && that.prefix.symbol != '') {
+						return (""+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+					}
+					var roundLevel = (that.yFormat.symbol == 'G' || that.yFormat.symbol == 'M') ? 2: 0;
+					if(that.yFormat.symbol == 'k') val = that.yFormat.scale(val)*1000;
+					else val = that.yFormat.scale(val);
+					return (""+ d3.round(val, roundLevel)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+				};
+
+				switch(this.yFormat.symbol) {
+					case 'G': this.legendText = 'revenu en milliards €'; this.prefix.symbolText = 'milliards €'; break;
+					case 'M': this.legendText = 'revenu en millions €'; this.prefix.symbolText = 'millions €'; break;
+					case 'k': this.legendText = 'revenu en milliers €'; this.prefix.symbolText = 'euros'; break;
+					case '': this.legendText = 'revenu en €'; this.prefix.symbolText = 'euros'; break;
+					default: this.legendText = ''; this.prefix.symbolText = 'euros';
+				};
+			},
 			_remove: function () {
-				d3.select('svg')
+				this.svg
 	              .on('mousemove', null)
 	              .on("mouseout" ,null)
 	              .on("dblclick" ,null);
