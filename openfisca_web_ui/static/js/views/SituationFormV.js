@@ -20,21 +20,12 @@ define([
 			model: backendServiceM,
 			submitTriggered: false,
 			initialize: function() {
-				this.$el.find('.x-editable').editable({
-					url: _.bind(function(data) {
-						var $hidden = this.$el.find('[name="' + data.name + '"]');
-						$hidden.val(data.value);
-						var individuId = this.$el.find('[data-name="' + data.name + '"]').data('id');
-						this.updatePrenoms(individuId, data.value);
-						var formDataStr = this.$el.serialize();
-						this.submit(formDataStr, false);
-					}, this)
-				});
+				this.setupXeditable();
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
 			onInputChange: function(evt) {
 				var $input = $(evt.target);
-				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length == 0) {
+				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length === 0) {
 					var formDataStr = this.$el.serialize();
 					this.submit(formDataStr, false);
 				}
@@ -65,11 +56,24 @@ define([
 				var formData = this.model.get('formData');
 				if ( ! _.isUndefined(formData.html)) {
 					this.$el.html(formData.html);
+					this.setupXeditable();
 				}
 				if (_.isUndefined(formData.errors)) {
 					this.$el.find('.error').remove();
 				}
 				return this;
+			},
+			setupXeditable: function() {
+				this.$el.find('.x-editable').editable({
+					url: _.bind(function(data) {
+						var $hidden = this.$el.find('[name="' + data.name + '"]');
+						$hidden.val(data.value);
+						var individuId = this.$el.find('[data-name="' + data.name + '"]').data('id');
+						this.updatePrenoms(individuId, data.value);
+						var formDataStr = this.$el.serialize();
+						this.submit(formDataStr, false);
+					}, this)
+				});
 			},
 			submit: function(formDataStr, doReloadForm) {
 				if (this.submitTriggered) {
