@@ -37,6 +37,7 @@ define([
 					.hide()
 					.appendTo(this.$el);
 				this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
+				this.updateOverlay();
 			},
 			render: function (chartName) {
 				if (_.isUndefined(chartName)) {
