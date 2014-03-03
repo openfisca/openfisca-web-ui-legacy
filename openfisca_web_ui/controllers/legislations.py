@@ -705,4 +705,12 @@ def user_view(req):
         })(inputs, state = ctx)
     if errors is not None:
         return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
-    return templates.render(ctx, '/legislations/user-view.mako', date = data['date'], legislation = data['legislation'])
+    legislation = data['legislation']
+    return templates.render(
+        ctx,
+        '/legislations/user-view.mako',
+        date = data['date'],
+        dated_legislation_json = legislation.json \
+            if legislation.json is not None and 'datesim' in legislation.json else None,
+        legislation = legislation,
+        )
