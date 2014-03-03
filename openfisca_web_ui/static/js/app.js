@@ -35,10 +35,10 @@ define([
 				});
 			}
 			if (enabledModules.situationForm) {
-				require(['nvd3', 'appV', 'router', 'SituationFormV'], function(nvd3, appV, router, SituationFormV) {
+				require(['nvd3', 'chartsV', 'router', 'SituationFormV'], function(nvd3, chartsV, router, SituationFormV) {
 					nvd3.dev = appconfig.debug;
 					this.router = router.init();
-					this.appV = appV;
+					this.chartsV = chartsV;
 					this.situationFormV = new SituationFormV();
 				});
 			}

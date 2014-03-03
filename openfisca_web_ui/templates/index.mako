@@ -63,6 +63,7 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
             </div>
             <div class="col-sm-8">
                 <div id="chart-wrapper"></div>
+                <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">${_(u'Export')}</button>
             </div>
         </div>
 </%def>
@@ -74,4 +75,36 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
 media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'bower/nvd3/nv.d3.css')}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/chart.css')}" media="screen" rel="stylesheet">
+</%def>
+
+
+<%def name="export_modal()" filter="trim">
+    <div class="modal fade" id="export-modal" tabindex="-1" role="dialog" aria-labelledby="export-modal-label" \
+aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="export-modal-label">${_(u'Export')}</h4>
+          </div>
+          <div class="modal-body">
+            <a class="btn btn-primary" href="/api/1/session" rel="external" target="_blank">
+              ${_(u'Export simulation input')}
+            </a>
+            <a class="btn btn-primary" href="/api/1/simulate" rel="external" target="_blank">
+              ${_(u'Export simulation output')}
+            </a>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Close')}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</%def>
+
+
+<%def name="modals()" filter="trim">
+    <%parent:modals/>
+    <%self:export_modal/>
 </%def>

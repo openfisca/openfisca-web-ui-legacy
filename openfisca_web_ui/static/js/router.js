@@ -1,50 +1,42 @@
 define([
 	'backbone',
 
-	'appV'
-], function (Backbone, appV) {
+	'chartsV'
+], function (Backbone, chartsV) {
 
-	var router = null,
-		Router = Backbone.Router.extend({
+	var router = null;
+
+	function init () {
+		if (router === null) {
+			router = new Router();
+		}
+		return router;
+	}
+
+	var Router = Backbone.Router.extend({
 		routes: {
-			'!/cascade': 'waterfallChart',
-			'!/se-situer': 'locatingChart',
-			'!/repartition': 'distributionChart',
-
-			// '*path': 'error404',
-			'': appV.defaultChart
+			'': 'defaultChart',
+			'cascade': 'waterfallChart',
+			'répartition': 'distributionChart',
+			'se-situer': 'locatingChart'
 		},
 		initialize: function () {
 			Backbone.history.start();
 		},
-		waterfallChart: function () {
-			appV.render({
-				chart: 'waterfall',
-				fr_chart: 'cascade'
-			});
-		},
-		locatingChart: function () {
-			appV.render({
-				chart: 'locating',
-				fr_chart: 'se-situer'
-			});
+		defaultChart: function () {
+			chartsV.render();
 		},
 		distributionChart: function () {
-			appV.render({
-				chart: 'distribution',
-				fr_chart: 'repartition'
-			});
+			chartsV.render('distribution');
 		},
-		error404: function () {
-
+		locatingChart: function () {
+			chartsV.render('locating');
+		},
+		waterfallChart: function () {
+			chartsV.render('waterfall');
 		}
 	});
 
-	return {
-		init: function () {
-			if(null == router) router = new Router();
-			return router;
-		}
-	};
+	return {init: init};
+
 });
-	

@@ -7,50 +7,44 @@ define([
 	'appconfig',
 	'WaterfallChartV',
 	'LocatingChartV',
-	'DistributionChartV'
+	'DistributionChartV',
+	'hbs!templates/chartsTabs'
 	],
-	function ($, _, Backbone, d3, appconfig, WaterfallChartV, LocatingChartV, DistributionChartV) {
+	function ($, _, Backbone, d3, appconfig, WaterfallChartV, LocatingChartV, DistributionChartV, chartsTabsT) {
 
 		var AppV = Backbone.View.extend({
-			defaultChart: appconfig.enabledModules.locatingChart ? 'locatingChart' : 'waterfallChart',
 			events: {},
 			el: '#chart-wrapper',
+			fragmentByChartName: {
+				'distribution': 'répartition',
+				'locating': 'se-situer',
+				'waterfall': 'cascade'
+			},
 			width: null,
 			height: null,
-			charts: {},
 			initialize: function () {
 				$(window).on('resize', $.proxy(this.updateDimensions, this));
 				this.updateDimensions();
-				var chartMenuHtml = '<div id="chart-menu"><ul class="nav nav-tabs">';
-				if (appconfig.enabledModules.locatingChart) {
-					chartMenuHtml += '<li><a data-target="se-situer" data-toggle="tab" href="#!/se-situer">\
-Se situer</a></li>';
-				}
-				chartMenuHtml += '\
-	<li>\
-		<a data-target="cascade" data-toggle="tab" href="#!/cascade">Cascade</a>\
-	</li>\
-		<li>\
-			<a data-target="repartition" data-toggle="tab" href="#!/repartition">Répartition</a>\
-		</li>\
-	</ul>\
-</div>';
-				this.$el.prepend(chartMenuHtml);
-				this.$el.find('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
-					var href = $(evt.target).attr('href');
-					window.location.hash = href;
-				});
+				this.$el
+					.html(chartsTabsT({enableLocatingChart: appconfig.enabledModules.locatingChart}))
+					.find('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
+						var href = $(evt.target).attr('href');
+						window.location.hash = href;
+					});
 			},
-			render: function (args) {
-				var args = args || {};
-
+			render: function (chartName) {
+				if (_.isUndefined(chartName)) {
+					chartName = appconfig.enabledModules.locatingChart ? 'locating' : 'waterfall';
+				}
 				/* Switch menu */
-				if(this.$el.find('.active').length == 0)
-					this.$el.find('#chart-menu a[data-target="'+args.fr_chart+'"]').parent('li').addClass('active');
+				if(this.$el.find('.active').length === 0) {
+					this.$el.find('.nav a[href="#' + this.fragmentByChartName[chartName] + '"]')
+						.parent('li').addClass('active');
+				}
 
 				if(!_.isUndefined(this.chart)) this.outTransition();
 
-				switch(args.chart) {
+				switch(chartName) {
 					case 'waterfall':
 						this.chart = new WaterfallChartV(this);
 						break;
@@ -64,8 +58,7 @@ Se situer</a></li>';
 						break;
 //					default:
 //						console.error('_Error : No chart selected when called AppV.render');
-				};
-				window.chart = this.chart;
+				}
 				return this;
 			},
 			outTransition: function () {
