@@ -5,12 +5,14 @@ define([
 	'd3',
 
 	'appconfig',
+	'backendServiceM',
 	'WaterfallChartV',
 	'LocatingChartV',
 	'DistributionChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, _, Backbone, d3, appconfig, WaterfallChartV, LocatingChartV, DistributionChartV, chartsTabsT) {
+	function ($, _, Backbone, d3, appconfig, backendServiceM, WaterfallChartV, LocatingChartV, DistributionChartV,
+		chartsTabsT) {
 
 		var AppV = Backbone.View.extend({
 			events: {},
@@ -31,6 +33,10 @@ define([
 						var href = $(evt.target).attr('href');
 						window.location.hash = href;
 					});
+				this.$overlay = $('<div class="alert alert-info overlay">Simulation en cours…</div>')
+					.hide()
+					.appendTo(this.$el);
+				this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
 			},
 			render: function (chartName) {
 				if (_.isUndefined(chartName)) {
@@ -73,6 +79,17 @@ define([
 				this.$el.find('svg')
 					.attr('width', this.width)
 					.attr('height', this.height);
+			},
+			updateOverlay: function() {
+				var simulationInProgress = backendServiceM.get('simulationInProgress');
+				var $svg = this.$el.find('svg');
+				if (simulationInProgress) {
+					$svg.css('opacity', 0.1);
+					this.$overlay.show();
+				} else {
+					$svg.css('opacity', 1);
+					this.$overlay.hide();
+				}
 			}
 		});
 

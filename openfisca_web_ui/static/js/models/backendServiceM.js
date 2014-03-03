@@ -9,7 +9,8 @@ define([
 		var BackendServiceM = Backbone.Model.extend({
 			defaults: {
 				apiData: {},
-				formData: {}
+				formData: {},
+				simulationInProgress: false,
 			},
 			events: {},
 			urlPaths: appconfig.api.urls,
@@ -52,6 +53,7 @@ define([
 				});
 			},
 			simulate: function() {
+				this.set('simulationInProgress', true);
 				return $.ajax({
 					context: this,
 					url: this.urlPaths.simulate
@@ -70,6 +72,8 @@ define([
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error(jqXHR, textStatus, errorThrown);
+				}).always(function() {
+					this.set('simulationInProgress', false);
 				});
 			}
 		});

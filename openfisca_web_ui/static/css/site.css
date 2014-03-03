@@ -90,3 +90,13 @@ form[name="scenarios"] .form-inline select {
 #menages .form-inline select {
     margin-right: 1em;
 }
+
+#chart-wrapper {
+    position: relative;
+}
+
+#chart-wrapper .overlay {
+    left: 40%;
+    position: absolute;
+    top: 50%;
+}
