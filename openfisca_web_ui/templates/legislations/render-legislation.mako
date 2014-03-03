@@ -214,35 +214,113 @@ data-toggle="collapse" data-target="#${html_node_path}">
                         </div>
         % endfor
     % elif node.get('@type') == 'Scale':
-        <%self:render_legislation_scale scale="${node}"/>
+        <%self:render_legislation_scale scale="${node}" path="${path}"/>
     % elif node.get('@type') == 'Parameter':
         <%self:render_legislation_parameter parameter="${node['values']}"/>
     % endif
 </%def>
 
 
-<%def name="render_legislation_scale(scale)" filter="trim">
-    <table class="table table-condensed">
-        <thead>
-            <tr>
-                <th>Seuil</th>
-                <th>Assiette</th>
-                <th>Taux</th>
-            </tr>
-        </thead>
-        <tbody>
-    % for slice in scale.get('slices'):
-            <tr>
-                <td>${slice['threshold'][-1].get('value') if slice.get('threshold') else ''}</td>
-                <td>${slice['base'][-1].get('value') if slice.get('base') else ''}</td>
-                <td>${slice['rate'][-1].get('value') if slice.get('rate') else ''}</td>
-            </tr>
+<%def name="render_legislation_scale(scale, path)" filter="trim">
+<%
+html_node_path = strings.slugify("-".join(path))
+dates_set = set()
+for slice in scale.get('slices', []):
+    for param in chain(slice.get('threshold', []), slice.get('rate', []), slice.get('base', [])):
+        dates_set.add(param.get('from'))
+        dates_set.add(param.get('to'))
+
+dates = sorted(filter(None, [datetime.datetime.strptime(date, '%Y-%m-%d') for date in dates_set]))
+periods = []
+for index, date in enumerate(sorted(dates[:-1])):
+    if dates[index + 1] - date <= datetime.timedelta(1):
+        continue
+    periods.append((date, dates[index + 1]))
+%>
+    <form>
+        <select class="period-select">
+    % for index, period in enumerate(periods):
+            <option${u' checked="checked"' if index == len(periods) - 1 else '' | n} value="${index}">
+                ${_('From')} ${period[0].strftime('%d/%m/%Y')} ${_('To')} ${period[1].strftime('%d/%m/%Y')}
+            </option>
     % endfor
-        </tbody>
-    </table>
+        </select>
+    </form>
+    <ul class="nav nav-tabs nav-hidden period-tabs">
+    % for index, period in enumerate(periods):
+        <li${u' class="active"' if index == len(periods) - 1 else '' | n}>
+            <a href="#${html_node_path}-${period[0].strftime('%Y-%m-%d')}-${period[1].strftime('%Y-%m-%d')}">
+                ${_('From')} ${period[0].strftime('%d/%m/%Y')} ${_('To')} ${period[1].strftime('%d/%m/%Y')}
+            </a>
+        </li>
+    % endfor
+    </ul>
+
+    <div class="tab-content">
+    % for index, period in enumerate(periods):
+        <div class="tab-pane${u' active' if index == len(periods) - 1 else ''}" \
+id="${html_node_path}-${period[0].strftime('%Y-%m-%d')}-${period[1].strftime('%Y-%m-%d')}">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Seuil</th>
+                        <th>Assiette</th>
+                        <th>Taux</th>
+                    </tr>
+                </thead>
+                <tbody>
+        % for slice in scale.get('slices', []):
+                    <tr>
+            % for item_name in ['threshold', 'base', 'rate']:
+                        <td>
+                % for item in slice.get(item_name, []):
+<%
+                    from_date = datetime.datetime.strptime(item.get('from'), '%Y-%m-%d')
+                    to_date = datetime.datetime.strptime(item.get('to'), '%Y-%m-%d')
+                    from_bool = from_date >= period[0] and from_date <= period[1]
+                    to_bool = to_date >= period[1]
+%>\
+                    % if from_bool and to_bool:
+                            ${item.get('value')}
+                    % endif
+                % endfor
+                        </td>
+            % endfor
+                    </tr>
+        % endfor
+                </tbody>
+            </table>
+        </div>
+    % endfor
+    </div>
 </%def>
 
 
 <%def name="render_legislation_parameter(parameter)" filter="trim">
-    ${parameter[-1].get('value')}
+<%
+    if parameter is None or len(parameter) == 0:
+        return ''
+%>
+    % if len(parameter) == 1:
+        ${parameter[0].get('value')}
+    % else:
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>${_('Value')}</th>
+                <th>${_('From')}</th>
+                <th>${_('To')}</th>
+            </tr>
+        </thead>
+        <tbody>
+        % for param in parameter:
+            <tr>
+                <td>${param.get('value')}</td>
+                <td>${param.get('from')}</td>
+                <td>${param.get('to')}</td>
+            </tr>
+        % endfor
+        </tbody>
+    </table>
+    % endif
 </%def>

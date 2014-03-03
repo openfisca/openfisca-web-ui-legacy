@@ -60,6 +60,9 @@ article.cgu h2{
 .nav-tabs {
     margin-bottom: 30px;
 }
+.nav-hidden {
+    display: none;
+}
 
 .waterfall-img {
     width: 100%;

@@ -26,6 +26,10 @@ define(['jquery', 'x-editable'], function ($) {
 			$('.collapse-node-toggle').addClass('collapsed');
 			$('.collapse-node').addClass('collapse').removeClass('in');
 		});
+
+		$('.period-select').on('change', function(evt) {
+			$(this).parent().next().find('li a').eq($(this).val()).tab('show');
+		});
 	}
 
 	return {init: init};
