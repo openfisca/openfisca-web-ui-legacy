@@ -8,6 +8,7 @@ define([
 	],
 	function ($, _, Backbone, xEditable, backendServiceM) {
 
+		var debounceDelay = 100;
 		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
 
 		var SituationFormV = Backbone.View.extend({
@@ -23,13 +24,13 @@ define([
 				this.setupXeditable();
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
-			onInputChange: function(evt) {
+			onInputChange: _.debounce(function(evt) {
 				var $input = $(evt.target);
 				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length === 0) {
 					var formDataStr = this.$el.serialize();
 					this.submit(formDataStr, false);
 				}
-			},
+			}, debounceDelay),
 			onAddButtonClicked: function(evt) {
 				evt.preventDefault();
 				var doReloadForm = false;
