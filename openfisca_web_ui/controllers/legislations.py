@@ -273,17 +273,9 @@ def admin_view(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     params = req.GET
-    date, error = conv.pipe(
-        conv.default(datetime.datetime.utcnow()),
-        conv.condition(
-            conv.test(lambda date: isinstance(date, basestring)),
-            conv.pipe(
-                conv.cleanup_line,
-                make_formatted_str_to_datetime(u'%d-%m-%Y'),
-                ),
-            ),
-        )(params.get('date'), state = ctx)
-    if legislation.json is not None and 'datesim' not in legislation.json:
+    date, error = make_formatted_str_to_datetime(u'%d-%m-%Y')(params.get('date'), state = ctx)
+    dated_legislation_json = None
+    if legislation.json is not None and 'datesim' not in legislation.json and date is not None:
         response = requests.post(
             conf['api.urls.legislations'],
             headers = {
@@ -292,8 +284,11 @@ def admin_view(req):
                 },
             data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
             )
-        dated_legislation_json = response.json()
-    else:
+        if not response.ok:
+            error = 'Cannot compute dated legislation'
+        else:
+            dated_legislation_json = response.json()
+    elif 'datesim' in legislation.json:
         dated_legislation_json = legislation.json
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)

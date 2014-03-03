@@ -63,9 +63,9 @@ from openfisca_web_ui import model, urls
             <div class="panel-heading">
                 <h2 class="panel-title">
     % if owner_or_admin:
-                    <a class="btn btn-primary btn-sm" href="${legislation.get_admin_url(ctx, 'edit')}">
+                    <a class="btn btn-default btn-sm" href="${legislation.get_admin_url(ctx, 'edit')}">
     % else:
-                    <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
+                    <a class="btn btn-default btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
 href="#" title="${_(u'Edit') if owner_or_admin else _(u'Duplicate and edit')}">
     % endif:
                         <span class="glyphicon glyphicon-cog"></span>
@@ -148,6 +148,21 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             <dt>${_("Dated legislation")}</dt>
             <dd>${value}</dd>
         % endif
+    % elif legislation.json is not None:
+<%
+        value = legislation.json.get('from')
+%>\
+        % if value is not None:
+            <dt>${_("Begin date")}</dt>
+            <dd>${value}</dd>
+        % endif
+<%
+        value = legislation.json.get('to')
+%>\
+        % if value is not None:
+            <dt>${_("End date")}</dt>
+            <dd>${value}</dd>
+        % endif
     % endif
 <%
     value = legislation.updated
@@ -188,10 +203,12 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
         % endif:
         <div class="row">
             <div class="col-lg-8">
-        % if value.get('datesim') is not None:
-                <%render_legislation:render_dated_legislation_node node="${value}" editable="${editable}"/>
+        % if dated_legislation_json is not None:
+                ${render_legislation.render_dated_legislation_node(node = dated_legislation_json, editable = editable)}
+        % elif value.get('datesim') is not None:
+                ${render_legislation.render_dated_legislation_node(node = value, editable = editable)}
         % else:
-                <%render_legislation:render_legislation_node node="${value}"/>
+                ${render_legislation.render_legislation_node(node = value)}
         % endif:
             </div>
         </div>
@@ -221,11 +238,16 @@ href="#">
                     </a>
                 % endif
             % endif:
-            % if not dated_legislation:
+            % if dated_legislation:
+                    ${_('Legislation for')}
+                    ${datetime.datetime.strftime(date, '%d/%m/%Y')}
+            % elif date:
                     ${_('Legislation for')}
                     <a data-toggle="modal" data-target="#modal-change-legislation-date" href="#">
                         ${datetime.datetime.strftime(date, '%d/%m/%Y')}
                     </a>
+            % else:
+                    ${_('Legislation from {} to {}').format(value.get('from'), value.get('to'))}
             % endif
                 </div>
             </div>
