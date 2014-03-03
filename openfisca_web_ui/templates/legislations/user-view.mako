@@ -88,7 +88,8 @@ href="#" title="${_(u'Duplicate and edit')}">
                 </li>
             </ul>
             <div class="panel-footer">
-                <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}" rel="external">
+                <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}" rel="external" \
+target="_blank">
                     ${_(u'View as JSON')}
                 </a>
         % if owner_or_admin:

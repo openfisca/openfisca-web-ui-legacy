@@ -232,15 +232,16 @@ ${conf['app_name']}
             <%self:footer_service/>
             <p>
                 ${_('{0}:').format(_('Software'))}
-                <a href="http://www.openfisca.fr" rel="external">OpenFisca</a>
+                <a href="http://www.openfisca.fr" rel="external" target="_blank">OpenFisca</a>
                 &mdash;
                 <span>${_(u'Copyright © {} OpenFisca Team').format(u', '.join(
                     unicode(year)
                     for year in range(2011, datetime.date.today().year + 1)
                     ))}</span>
                 &mdash;
-                <a href="http://www.gnu.org/licenses/agpl.html" rel="external">${_(
-                    u'GNU Affero General Public License')}</a>
+                <a href="http://www.gnu.org/licenses/agpl.html" rel="external" target="_blank">
+                    ${_(u'GNU Affero General Public License')}
+                </a>
             </p>
         </footer>
 </%def>
