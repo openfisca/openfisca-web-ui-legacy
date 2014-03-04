@@ -28,13 +28,16 @@ from openfisca_web_ui import model, urls
 %>
 
 
-<%inherit file="/site.mako"/>
+<%inherit file="/object-admin-index.mako"/>
 
 
 <%namespace name="object" file="/object-admin-index.mako"/>
 
 
-<%def name="breadcrumb()" filter="trim">
+<%def name="breadcrumb_content()" filter="trim">
+            <%parent:breadcrumb_content/>
+            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
+            <li class="active">${_(u'Visualizations')}</li>
 </%def>
 
 
@@ -56,7 +59,7 @@ from openfisca_web_ui import model, urls
         % endif
         <%object:pagination object_class="${model.Visualization}" pager="${pager}"/>
         % for visualization in visualizations:
-        <a href="${visualization.get_user_url(ctx)}">
+        <a href="${visualization.get_admin_url(ctx)}">
             <div class="thumbnail">
                 <img alt="visualization.get_title(ctx)">
                 <div class="caption">
@@ -78,7 +81,7 @@ from openfisca_web_ui import model, urls
 %>\
     % if user is not None and user.email is not None:
         <div class="btn-toolbar">
-            <a class="btn btn-default" href="${model.Visualization.get_user_class_url(ctx, 'new')}">${_(u'New')}</a>
+            <a class="btn btn-default" href="${model.Visualization.get_admin_class_url(ctx, 'new')}">${_(u'New')}</a>
         </div>
     % endif
 </%def>
