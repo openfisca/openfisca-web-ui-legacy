@@ -1,14 +1,22 @@
 define([
-	'chartM',
-	'helpers',
-	'nvd3',
-
 	'jquery',
 	'underscore',
-	'backbone'
+	'backbone',
+	'nvd3',
+
+	'appconfig',
+	'chartM',
+	'helpers'
 	],
-	function (chartM, helpers, nvd3, $, _, Backbone) {
-		
+	function ($, _, Backbone, nvd3, appconfig, chartM, helpers) {
+
+		nvd3.dev = appconfig.debug;
+		$('<link>', {
+			href: appconfig.enabledModules.locatingChart.nvd3CssUrlPath,
+			media: 'screen',
+			rel: 'stylesheet'
+		}).appendTo($('head'));
+
 		var LocatingChartV = Backbone.View.extend({
 			model: chartM,
 
@@ -37,36 +45,40 @@ define([
 
 				this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
 
-				nv.addGraph(function() {
+				nvd3.addGraph({
+					callback: function(chart) {
+						if(that.model.fetched) {
+							that.render();
+						}
+						that.listenTo(that.model, 'change:source', that.render);
+					},
+					generate: function() {
+						that.chart = nvd3.models.lineChart()
+							.margin({left: 100})
+							.transitionDuration(300)
+							.showLegend(true)
+							.showYAxis(true)
+							.showXAxis(true)
+							.useInteractiveGuideline(true);
 
-					that.chart = nv.models.lineChart()
-						.margin({left: 100})
-						.transitionDuration(300)
-						.showLegend(true)
-						.showYAxis(true)
-						.showXAxis(true)
-						.useInteractiveGuideline(true);
-
-					that.svg = d3.select(parent.el).append('svg')
-						.attr('height', that.height)
-						.attr('width', that.width)
-						.datum(that.vingtiles)
-						.call(that.chart);
+						that.svg = d3.select(parent.el).append('svg')
+							.attr('height', that.height)
+							.attr('width', that.width)
+							.datum(that.vingtiles)
+							.call(that.chart);
 				
-					nv.utils.windowResize(function() {
-						if(that.active) that.chart.update();
-					});
+						nvd3.utils.windowResize(function() {
+							if(that.active) that.chart.update();
+						});
 
-					that.chart.interactiveLayer.tooltip
-					    .contentGenerator(that.tooltipContentGenerator.bind(that));
+						that.chart.interactiveLayer.tooltip
+							.contentGenerator(that.tooltipContentGenerator.bind(that));
 
-					that.svg.attr('opacity', 0);
-					that.setElement('.nvd3');
+						that.svg.attr('opacity', 0);
+						that.setElement('.nvd3');
 
-					if(that.model.fetched) that.render();
-					that.listenTo(that.model, 'change:source', that.render);
-
-					return that.chart;
+						return that.chart;
+					}
 				});
 			},
 			render: function () {

@@ -35,8 +35,7 @@ define([
 				});
 			}
 			if (enabledModules.situationForm) {
-				require(['nvd3', 'chartsV', 'router', 'SituationFormV'], function(nvd3, chartsV, router, SituationFormV) {
-					nvd3.dev = appconfig.debug;
+				require(['chartsV', 'router', 'SituationFormV'], function(chartsV, router, SituationFormV) {
 					this.router = router.init();
 					this.chartsV = chartsV;
 					this.situationFormV = new SituationFormV();

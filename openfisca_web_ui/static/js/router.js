@@ -1,10 +1,13 @@
 define([
 	'backbone',
 
+	'appconfig',
 	'chartsV'
-], function (Backbone, chartsV) {
+], function (Backbone, appconfig, chartsV) {
 
 	var router = null;
+
+	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
 
 	function init () {
 		if (router === null) {
@@ -13,15 +16,23 @@ define([
 		return router;
 	}
 
+	var routes = {
+		'': 'defaultChart',
+		'cascade': 'waterfallChart',
+		'répartition': 'distributionChart',
+		'*fragment': 'default'
+	};
+	if (enableLocatingChart) {
+		routes['se-situer'] = 'locatingChart';
+	}
+
 	var Router = Backbone.Router.extend({
-		routes: {
-			'': 'defaultChart',
-			'cascade': 'waterfallChart',
-			'répartition': 'distributionChart',
-			'se-situer': 'locatingChart'
-		},
+		routes: routes,
 		initialize: function () {
 			Backbone.history.start();
+		},
+		default: function() {
+			this.navigate('', {trigger: true});
 		},
 		defaultChart: function () {
 			chartsV.render();

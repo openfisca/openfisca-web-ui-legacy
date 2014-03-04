@@ -6,29 +6,32 @@ define([
 
 	'appconfig',
 	'backendServiceM',
-	'WaterfallChartV',
-	'LocatingChartV',
 	'DistributionChartV',
+	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, _, Backbone, d3, appconfig, backendServiceM, WaterfallChartV, LocatingChartV, DistributionChartV,
-		chartsTabsT) {
+	function ($, _, Backbone, d3, appconfig, backendServiceM, DistributionChartV, WaterfallChartV, chartsTabsT) {
+
+		var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
 
 		var AppV = Backbone.View.extend({
 			events: {},
 			el: '#chart-wrapper',
-			fragmentByChartName: {
-				'distribution': 'répartition',
-				'locating': 'se-situer',
-				'waterfall': 'cascade'
-			},
+			fragmentByChartName: null,
 			width: null,
 			height: null,
 			initialize: function () {
+				this.fragmentByChartName = {
+					'distribution': 'répartition',
+					'waterfall': 'cascade'
+				};
+				if (enableLocatingChart) {
+					this.fragmentByChartName.locating = 'se-situer';
+				}
 				$(window).on('resize', $.proxy(this.updateDimensions, this));
 				this.updateDimensions();
 				this.$el
-					.html(chartsTabsT({enableLocatingChart: appconfig.enabledModules.locatingChart}))
+					.html(chartsTabsT({enableLocatingChart: enableLocatingChart}))
 					.find('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
 						var href = $(evt.target).attr('href');
 						window.location.hash = href;
@@ -41,7 +44,7 @@ define([
 			},
 			render: function (chartName) {
 				if (_.isUndefined(chartName)) {
-					chartName = appconfig.enabledModules.locatingChart ? 'locating' : 'waterfall';
+					chartName = enableLocatingChart ? 'locating' : 'waterfall';
 				}
 				/* Switch menu */
 				if(this.$el.find('.active').length === 0) {
@@ -56,8 +59,10 @@ define([
 						this.chart = new WaterfallChartV(this);
 						break;
 					case 'locating':
-						if (appconfig.enabledModules.locatingChart) {
-							this.chart = new LocatingChartV(this);
+						if (enableLocatingChart) {
+							require(['LocatingChartV'], _.bind(function(LocatingChartV) {
+								this.chart = new LocatingChartV(this);
+							}, this));
 						}
 						break;
 					case 'distribution':
