@@ -74,11 +74,7 @@ def admin_delete(req):
     user = model.get_user(ctx, check = True)
 
     if not (legislation.author_id == user._id or model.is_admin(ctx)):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You must  be an administrator to delete a legislation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     if req.method == 'POST':
         legislation.delete(safe = True)
@@ -96,11 +92,7 @@ def admin_edit(req):
     user = model.get_user(ctx, check = True)
 
     if not (legislation.author_id == user._id or model.is_admin(ctx)):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Edition forbidden"),
-            message = ctx._("You must  be an administrator to edit a legislation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     if req.method == 'GET':
         errors = None
@@ -214,11 +206,7 @@ def admin_new(req):
     user = model.get_user(ctx)
 
     if user is None or user.email is None:
-        return wsgihelpers.unauthorized(ctx,
-            explanation = ctx._("Creation unauthorized"),
-            message = ctx._("You must be authentified to create a legislation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.unauthorized(ctx)
 
     legislation = model.Legislation()
     if req.method == 'GET':
@@ -567,11 +555,7 @@ def user_edit(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
     if user.email is None:
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Edit legislation forbidden"),
-            message = ctx._("You must have an account to edit a legislation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     params = req.GET
     inputs = {
