@@ -753,11 +753,19 @@ def user_view(req):
 
     scenarios_question = None
     if session.user.email is not None:
+        user_scenarios = session.user.scenarios
+        if user_scenarios is None:
+            legislation = model.Legislation.find_one()
+            user_scenarios = [{
+                'test_case_id': session.user.current_test_case_id,
+                'legislation_id': legislation._id if legislation is not None else None,
+                'year': 2013,
+                }]
         scenarios_question = questions.scenarios.make_scenarios_repeat(session.user)
         values, errors = conv.pipe(
             conv.scenarios.scenarios_to_page_korma_data,
             scenarios_question.root_data_to_str,
-            )(session.user.scenarios, state = ctx)
+            )(user_scenarios, state = ctx)
         scenarios_question.fill(values, errors)
     return templates.render(
         ctx,

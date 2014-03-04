@@ -32,10 +32,12 @@ from biryani1.states import default_state
 
 def scenarios_to_page_korma_data(scenarios, state = None):
     return {
-        'scenarios': [
-            {'scenario': scenario}
-            for scenario in scenarios or []
-            ],
+        'my_scenarios': {
+            'scenarios': [
+                {'scenario': scenario}
+                for scenario in scenarios or []
+                ],
+            },
         }, None
 
 
@@ -45,6 +47,7 @@ def korma_data_to_scenarios(values, state = None):
     if state is None:
         state = default_state
     scenarios, error = pipe(
+        function(lambda data: data.get(u'my_scenarios')),
         function(lambda data: data.get(u'scenarios')),
         uniform_sequence(
             function(lambda data: data.get('scenario')),

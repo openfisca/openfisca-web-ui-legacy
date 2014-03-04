@@ -144,7 +144,8 @@ def scenarios(req):
     if scenarios is not None:
         session.user.scenarios = scenarios
         session.user.save(safe = True)
-    if data.get('add'):
+    if 'add' in data['my_scenarios']:
+        scenarios.append({})
         return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 

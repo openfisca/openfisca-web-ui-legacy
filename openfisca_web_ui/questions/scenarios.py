@@ -59,33 +59,36 @@ def make_scenarios_repeat(user):
             Repeat(
                 name = u'scenarios',
                 outer_html_template = u'<ul class="list-group">{self.inner_html}</ul>',
-                template_question = [
-                    ScenarioGroup(
-                        children_attributes = {
-                            '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                            # '_label_attributes': {'class': 'sr-only'},
-                            },
-                        name = u'scenario',
-                        questions = [
-                            base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
-                            base.BootstrapSelect(
-                                add_first_empty_value = True,
-                                choices = test_cases_id_and_name,
-                                name = 'test_case_id',
-                                ),
-                            base.BootstrapSelect(
-                                add_first_empty_value = True,
-                                choices = legislations_id_and_name,
-                                name = 'legislation_id',
-                                ),
-                            ],
-                        ),
-                    base.BootstrapButton(
-                        label = ctx._(u'Add a scenario'),
-                        name = 'add',
-                        value = 'add',
-                        ),
-                    ],
+                template_question = ScenarioGroup(
+                    children_attributes = {
+                        '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
+                        # '_label_attributes': {'class': 'sr-only'},
+                        },
+                    name = u'scenario',
+                    questions = [
+                        base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
+                        base.BootstrapSelect(
+                            add_first_empty_value = True,
+                            choices = test_cases_id_and_name,
+                            name = 'test_case_id',
+                            ),
+                        base.BootstrapSelect(
+                            add_first_empty_value = True,
+                            choices = legislations_id_and_name,
+                            name = 'legislation_id',
+                            ),
+                        base.BootstrapButton(
+                            label = ctx._(u'Remove'),
+                            name = 'remove',
+                            value = 'remove',
+                            ),
+                        ],
+                    ),
+                ),
+            base.BootstrapButton(
+                label = ctx._(u'Add a scenario'),
+                name = 'add',
+                value = 'add',
                 ),
             ],
         )

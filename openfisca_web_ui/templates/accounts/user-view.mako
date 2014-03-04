@@ -25,6 +25,7 @@
 
 <%!
 from openfisca_web_ui import model, urls
+from openfisca_web_ui.templates import helpers
 %>
 
 
