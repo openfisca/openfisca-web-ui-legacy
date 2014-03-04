@@ -190,7 +190,6 @@ def make_question(column):
     cerfa_field = column.get('cerfa_field')
     if cerfa_field is not None and isinstance(cerfa_field, basestring):
         question_label += u' (CERFA {})'.format(cerfa_field)
-        print question_label
     if column['@type'] == 'Boolean':
         question = BootstrapRadio(
             choices = ((False, u'Non'), (True, u'Oui')),
