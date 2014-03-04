@@ -187,6 +187,10 @@ def make_question(column):
         default = custom_column_default_values.get(column['name'])
     default_str = lambda question: check(question.data_to_str(default))
     question_label = column.get('label')
+    cerfa_field = column.get('cerfa_field')
+    if cerfa_field is not None and isinstance(cerfa_field, basestring):
+        question_label += u' (CERFA {})'.format(cerfa_field)
+        print question_label
     if column['@type'] == 'Boolean':
         question = BootstrapRadio(
             choices = ((False, u'Non'), (True, u'Oui')),
