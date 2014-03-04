@@ -33,7 +33,7 @@ from biryani1.baseconv import check, pipe
 from formencode import variabledecode
 
 from .. import contexts, conf, conv, model, templates, questions, urls, uuidhelpers, wsgihelpers
-from . import accounts, forms, legislations, sessions, test_cases
+from . import accounts, forms, legislations, sessions, test_cases, visualizations
 
 
 log = logging.getLogger(__name__)
@@ -102,6 +102,7 @@ def make_router():
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
+        (None, '^/admin/visualizations(?=/|$)', visualizations.route_admin_class),
         (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/disclaimer_closed$', disclaimer_closed),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
@@ -109,6 +110,7 @@ def make_router():
         (None, '^/api/1/simulate$', simulate),
         (None, '^/legislations(?=/|$)', legislations.route_user),
         (None, '^/simulations(?=/|$)', test_cases.route),
+        (None, '^/visualizations(?=/|$)', visualizations.route_user),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
         ('POST', '^/scenarios/?$', scenarios),

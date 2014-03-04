@@ -482,6 +482,147 @@ class Status(objects.Mapper, objects.Wrapper):
     last_upgrade_name = None
 
 
+class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
+    author_id = None
+    collection_name = u'visualizations'
+    description = None
+    enabled = None
+    featured = None
+    iframe = None
+    image_filename = None
+    organization = None
+    slug = None
+    title = None
+    url = None
+
+    @classmethod
+    def bson_to_json(cls, value, state = None):
+        if value is None:
+            return value, None
+        value = value.copy()
+        if value.get('draft_id') is not None:
+            value['draft_id'] = unicode(value['draft_id'])
+        id = value.pop('_id', None)
+        if id is not None:
+            value['id'] = unicode(id)
+        return value, None
+
+    def compute_words(self):
+        self.words = sorted(set(strings.slugify(u'-'.join(
+            fragment
+            for fragment in (
+                unicode(self._id),
+                self.description,
+                self.title,
+                )
+            if fragment is not None
+            )).split(u'-'))) or None
+
+    @classmethod
+    def get_admin_class_full_url(cls, ctx, *path, **query):
+        return urls.get_full_url(ctx, 'admin', 'visualizations', *path, **query)
+
+    @classmethod
+    def get_admin_class_url(cls, ctx, *path, **query):
+        return urls.get_url(ctx, 'admin', 'visualizations', *path, **query)
+
+    def get_admin_full_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return self.get_admin_class_full_url(ctx, self.slug or self._id, *path, **query)
+
+    def get_admin_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return self.get_admin_class_url(ctx, self.slug or self._id, *path, **query)
+
+    def get_api1_full_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return urls.get_full_url(ctx, 'api', '1', 'visualizations', self.slug or self._id, *path, **query)
+
+    def get_api1_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return urls.get_url(ctx, 'api', '1', 'visualizations', self.slug or self._id, *path, **query)
+
+    @classmethod
+    def get_class_full_url(cls, ctx, *path, **query):
+        return urls.get_full_url(ctx, 'visualizations', *path, **query)
+
+    @classmethod
+    def get_class_url(cls, ctx, *path, **query):
+        return urls.get_url(ctx, 'visualizations', *path, **query)
+
+    def get_full_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return self.get_class_full_url(ctx, self.slug or self._id, *path, **query)
+
+    def get_title(self, ctx):
+        return self.title or self.slug or self._id
+
+    def get_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return self.get_class_url(ctx, self.slug or self._id, *path, **query)
+
+    @classmethod
+    def get_user_class_full_url(cls, ctx, *path, **query):
+        return urls.get_full_url(ctx, 'visualizations', *path, **query)
+
+    @classmethod
+    def get_user_class_url(cls, ctx, *path, **query):
+        return urls.get_url(ctx, 'visualizations', *path, **query)
+
+    def get_user_url(self, ctx, *path, **query):
+        if self._id is None and self.slug is None:
+            return None
+        return self.get_user_class_url(ctx, self.slug or self._id, *path, **query)
+
+    @classmethod
+    def make_id_or_slug_or_words_to_instance(cls):
+        def id_or_slug_or_words_to_instance(value, state = None):
+            if value is None:
+                return value, None
+            if state is None:
+                state = conv.default_state
+            id, error = conv.str_to_object_id(value, state = state)
+            if error is None:
+                self = cls.find_one(id, as_class = collections.OrderedDict)
+            else:
+                self = cls.find_one(dict(slug = value), as_class = collections.OrderedDict)
+            if self is None:
+                words = sorted(set(value.split(u'-')))
+                instances = list(cls.find(
+                    dict(
+                        words = {'$all': [
+                            re.compile(u'^{}'.format(re.escape(word)))
+                            for word in words
+                            ]},
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).limit(2))
+                if not instances:
+                    return value, state._(u"No legislation with ID, slug or words: {0}").format(value)
+                if len(instances) > 1:
+                    return value, state._(u"Too much legislations with words: {0}").format(u' '.join(words))
+                self = instances[0]
+            return self, None
+        return id_or_slug_or_words_to_instance
+
+    def turn_to_json_attributes(self, state):
+        value, error = conv.object_to_clean_dict(self, state = state)
+        if error is not None:
+            return value, error
+        if value.get('draft_id') is not None:
+            value['draft_id'] = unicode(value['draft_id'])
+        id = value.pop('_id', None)
+        if id is not None:
+            value['id'] = unicode(id)
+        return value, None
+
+
 def configure(ctx):
     pass
 

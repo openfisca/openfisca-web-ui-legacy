@@ -323,6 +323,7 @@ ${conf['app_name']}
             <ul class="dropdown-menu">
                 <li><a href="${model.Account.get_admin_class_url(ctx)}">${_('Accounts')}</a></li>
                 <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
+                <li><a href="${model.Visualization.get_admin_class_url(ctx)}">${_('Visualizations')}</a></li>
             </ul>
         </li>
     % endif
