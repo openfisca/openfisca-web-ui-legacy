@@ -113,6 +113,7 @@ def situation_form_post(req):
 def update_session(session):
     if session is None:
         session = model.Session()
+        session.anonymous_token = uuidhelpers.generate_uuid()
         session.token = uuidhelpers.generate_uuid()
     if session.user is None:
         user = model.Account()

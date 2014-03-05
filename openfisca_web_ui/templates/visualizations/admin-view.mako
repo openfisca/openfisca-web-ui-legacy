@@ -25,6 +25,7 @@
 
 <%!
 import datetime
+import urllib
 
 from openfisca_web_ui import model, urls
 %>
@@ -91,8 +92,12 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     value = visualization.url
     if value is None:
         return ''
+    simulation_url = '{}?{}'.format(
+        urls.get_full_url(ctx, 'api', '1', 'smulate'),
+        urllib.urlencode({'token': ctx.session.anonymous_token}),
+        )
 %>\
-        <iframe src="${value}"></iframe>
+        <iframe src="${value.format(simulation_url = simulation_url)}"></iframe>
 </%def>
 
 

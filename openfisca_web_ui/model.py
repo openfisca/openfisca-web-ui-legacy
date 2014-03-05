@@ -312,6 +312,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
 class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper):
     _user = UnboundLocalError
     collection_name = 'sessions'
+    anonymous_token = None  # token givn to external application to retrieve simulation data.
     disclaimer_closed = None
     expiration = None
     token = None  # the cookie token

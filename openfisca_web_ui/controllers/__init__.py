@@ -50,6 +50,7 @@ def accept_cookies(req):
     session = ctx.session
     if session is None:
         session = ctx.session = model.Session()
+        session.anonymous_token = uuidhelpers.generate_uuid()
         session.token = uuidhelpers.generate_uuid()
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(safe = True)
