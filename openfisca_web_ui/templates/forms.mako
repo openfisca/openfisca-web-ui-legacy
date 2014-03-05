@@ -25,22 +25,7 @@
 
 <%def name="situation_form(root_question, user)" filter="trim">
     <form method="POST" name="situation" role="form">
-        <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#familles">Familles</a></li>
-            <li><a data-toggle="tab" href="#foyers-fiscaux">Déclarations d'impôts</a></li>
-            <li><a data-toggle="tab" href="#menages">Logements principaux</a></li>
-        </ul>
-        <div class="tab-content">
-            <div class="tab-pane active" id="familles">
-                ${root_question['familles'].html | n}
-            </div>
-            <div class="tab-pane" id="foyers-fiscaux">
-                ${root_question['foyers_fiscaux'].html | n}
-            </div>
-            <div class="tab-pane" id="menages">
-                ${root_question['menages'].html | n}
-            </div>
-        </div>
+        ${root_question.html | n}
         <div>
     % if user is None or user.email is None:
             <a class="btn btn-success sign-in" href="#" title="${_(u'Save this simulation')}">

@@ -26,40 +26,49 @@
 """Korma questions related to menages"""
 
 
+import collections
+
 from korma.choice import Select
 from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Hidden
 
-from .. import uuidhelpers
+from .. import conv, uuidhelpers
 from . import base
 
 
-def default_value(individu_ids, familles=None):
-    parent_ids = []
-    enfants_ids = []
-    if familles is None:
-        parent_ids = individu_ids
+def fill_values(values, individu_ids):
+    menages = values or collections.OrderedDict([(uuidhelpers.generate_uuid(), {})])
+    for individu_id in individu_ids:
+        if find_menage_id(individu_id, menages) is None:
+            menage = menages[menages.keys()[-1]]
+            role = get_first_available_role_in_menage(menage)
+            if role in conv.menages.singleton_roles:
+                menage[role] = individu_id
+            else:
+                menage.setdefault(role, []).append(individu_id)
+    return menages
+
+
+def find_menage_id(individu_id, menages):
+    """Find the menage containing the given individu."""
+    for menage_id, menage in menages.iteritems():
+        for menage_individu_id in conv.menages.extract_individu_ids(menage):
+            if individu_id == menage_individu_id:
+                return menage_id
+    return None
+
+
+def get_first_available_role_in_menage(menage):
+    if menage.get('personne_de_reference') is None:
+        return 'personne_de_reference'
+    elif menage.get('conjoint') is None:
+        return 'conjoint'
     else:
-        for famille in familles.itervalues():
-            if famille.get('parents'):
-                parent_ids.extend(famille['parents'])
-            if famille.get('enfants'):
-                enfants_ids.extend(famille['enfants'])
-    menage = {}
-    for role in ['personne_de_reference', 'conjoint']:
-        if len(parent_ids) > 0:
-            menage[role] = parent_ids.pop()
-    if len(parent_ids) > 0:
-        menage['enfants'] = parent_ids
-    if len(enfants_ids) > 0:
-        menage.setdefault('enfants', []).extend(enfants_ids)
-    return {uuidhelpers.generate_uuid(): menage}
+        return 'enfants'
 
 
 def make_menages_repeat(prenom_select_choices):
-    from .. import conv
-
     class MenageGroup(Group):
         @property
         def outer_html(self):

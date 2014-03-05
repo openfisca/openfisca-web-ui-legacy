@@ -245,13 +245,54 @@ def make_question(column):
 
 
 def make_situation_form(user_api_data):
-    from . import familles, foyers_fiscaux, individus, menages
-    prenom_select_choices = individus.build_prenom_select_choices(user_api_data)
+    from . import familles, foyers_fiscaux, menages
+    prenom_select_choices = [
+        (individu_id, individu.get('prenom'))
+        for individu_id, individu in user_api_data['individus'].iteritems()
+        ] if user_api_data is not None and user_api_data.get('individus') is not None else None
     return Group(
         name = 'situation',
+        outer_html_template = u'''
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#familles">Familles</a></li>
+    <li><a data-toggle="tab" href="#foyers-fiscaux">Déclarations d'impôts</a></li>
+    <li><a data-toggle="tab" href="#menages">Logements principaux</a></li>
+</ul>
+<div class="tab-content">
+    <div class="tab-pane active" id="familles">
+        {self[familles].html}
+        {self[add_famille].html}
+    </div>
+    <div class="tab-pane" id="foyers-fiscaux">
+        {self[foyers_fiscaux].html}
+        {self[add_foyer_fiscal].html}
+    </div>
+    <div class="tab-pane" id="menages">
+        {self[menages].html}
+        {self[add_menage].html}
+    </div>
+</div>''',
         questions = [
             familles.make_familles_repeat(),
+            BootstrapButton(
+                label = u'Ajouter une famille',
+                name = 'add_famille',
+                other_classes = 'add',
+                value = 1,
+                ),
             foyers_fiscaux.make_foyers_fiscaux_repeat(prenom_select_choices),
+            BootstrapButton(
+                label = u'Ajouter un foyer fiscal',
+                name = 'add_foyer_fiscal',
+                other_classes = 'add',
+                value = 1,
+                ),
             menages.make_menages_repeat(prenom_select_choices),
+            BootstrapButton(
+                label = u'Ajouter un ménage',
+                name = 'add_menage',
+                other_classes = 'add',
+                value = 1,
+                ),
             ],
         )

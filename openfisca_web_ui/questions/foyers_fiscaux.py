@@ -26,17 +26,56 @@
 """Korma questions related to foyers fiscaux"""
 
 
+import collections
+
 from korma.choice import Select
 from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Hidden
 
 from . import base
+from .. import conv, uuidhelpers
+
+
+def fill_values(values, familles):
+    """Fill values of foyers fiscaux according to familles."""
+    foyers_fiscaux = values or collections.OrderedDict()
+    for famille in familles.itervalues():
+        if famille is not None:
+            famille_individu_ids = conv.familles.extract_individu_ids(famille)
+            if famille_individu_ids:
+                for individu_id in famille_individu_ids:
+                    target_foyer_fiscal_id = None
+                    if find_foyer_fiscal_id(individu_id, foyers_fiscaux) is None:
+                        target_foyer_fiscal_id = guess_related_foyer_fiscal_id(famille_individu_ids, foyers_fiscaux)
+                        if target_foyer_fiscal_id is None:
+                            target_foyer_fiscal_id = uuidhelpers.generate_uuid()
+                            foyers_fiscaux[target_foyer_fiscal_id] = {}
+                        role = 'declarants' if individu_id in famille['parents'] else 'personnes_a_charge'
+                        foyers_fiscaux[target_foyer_fiscal_id].setdefault(role, []).append(individu_id)
+    return foyers_fiscaux
+
+
+def find_foyer_fiscal_id(individu_id, foyers_fiscaux):
+    """Find the foyer fiscal containing the given individu."""
+    for foyer_fiscal_id, foyer_fiscal in foyers_fiscaux.iteritems():
+        for foyer_fiscal_individu_id in conv.foyers_fiscaux.extract_individu_ids(foyer_fiscal):
+            if individu_id == foyer_fiscal_individu_id:
+                return foyer_fiscal_id
+    return None
+
+
+def guess_related_foyer_fiscal_id(famille_individu_ids, foyers_fiscaux):
+    """Find the first foyer fiscal having at least one individu in common with the given famille."""
+    for famille_individu_id in famille_individu_ids:
+        for foyer_fiscal_id, foyer_fiscal in foyers_fiscaux.iteritems():
+            for foyer_fiscal_individu_id in conv.foyers_fiscaux.extract_individu_ids(foyer_fiscal):
+                if famille_individu_id == foyer_fiscal_individu_id:
+                    return foyer_fiscal_id
+    return None
 
 
 def make_foyers_fiscaux_repeat(prenom_select_choices):
-    from .. import conv
-
     class FoyerFiscalGroup(Group):
         @property
         def outer_html(self):

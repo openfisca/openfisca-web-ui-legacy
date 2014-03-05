@@ -26,13 +26,25 @@
 """Conversion functions related to familles"""
 
 
+import collections
+from itertools import chain
+
 from biryani1.states import default_state
 
 from .. import uuidhelpers
 
 
+# Entity values
+
 roles = ('parents', 'enfants')
 
+
+# Helpers
+
+extract_individu_ids = lambda values: list(chain.from_iterable(filter(None, [values.get(key) for key in roles])))
+
+
+# Converters
 
 def api_data_to_korma_data(values, state = None):
     from . import base
@@ -55,20 +67,22 @@ def api_data_to_korma_data(values, state = None):
                 u'id': famille_id,
                 u'individus': [],
                 }
-            for role in roles:
-                if famille.get(role) is not None:
-                    for individu_id in famille[role]:
-                        new_famille['individus'].append({
-                            u'individu': make_korma_individu(
-                                columns = values['individus'][individu_id],
-                                individu_id = individu_id,
-                                role = role,
-                                )
-                            })
-            new_famille[u'categories'] = base.build_categories(
-                columns = {key: value for key, value in famille.iteritems() if key not in roles},
-                entity_name = u'familles',
-                )
+            if famille is not None:
+                for role in roles:
+                    if famille.get(role) is not None:
+                        for individu_id in famille[role]:
+                            new_famille['individus'].append({
+                                u'individu': make_korma_individu(
+                                    columns = values['individus'][individu_id],
+                                    individu_id = individu_id,
+                                    role = role,
+                                    )
+                                })
+            if famille is not None:
+                new_famille[u'categories'] = base.build_categories(
+                    columns = {key: value for key, value in famille.iteritems() if key not in roles},
+                    entity_name = u'familles',
+                    )
             new_familles.append({u'famille': new_famille})
     return {u'familles': new_familles or None}, None
 
@@ -80,10 +94,13 @@ def korma_data_to_api_data(values, state = None):
     if state is None:
         state = default_state
     new_individus = {}
-    new_familles = {}
+    new_familles = collections.OrderedDict()
     if values['familles'] is not None:
+        add_individu_in_famille_id = None
         for famille_group_values in values['familles']:
             famille = famille_group_values['famille']
+            if famille.get('delete'):
+                continue
             new_famille_id = uuidhelpers.generate_uuid() if famille['id'] is None else famille['id']
             new_famille = {}
             if famille['categories'] is not None:
@@ -100,16 +117,19 @@ def korma_data_to_api_data(values, state = None):
                     if not individu.get('delete'):
                         new_individus[new_individu_id] = new_individu
                         new_famille.setdefault(individu['role'], []).append(new_individu_id)
+            new_familles[new_famille_id] = new_famille or None
             if famille.get('add'):
-                new_individu_id = uuidhelpers.generate_uuid()
-                new_individus[new_individu_id] = individus.build_default_values(
-                    existing_individus_count=len(famille['individus']))
-                new_individu_role = u'parents' if len(new_famille.get(u'parents') or []) < 2 else u'enfants'
-                new_famille.setdefault(new_individu_role, []).append(new_individu_id)
-            new_familles[new_famille_id] = new_famille
-    if values.get('add'):
-        new_famille_id = uuidhelpers.generate_uuid()
-        new_familles[new_famille_id] = {}
+                add_individu_in_famille_id = new_famille_id
+        # Add new individu after iterating over existing familles to compute the individu index correctly.
+        if add_individu_in_famille_id is not None:
+            new_individu_id = uuidhelpers.generate_uuid()
+            new_individus[new_individu_id] = individus.build_default_values(index = len(new_individus.keys()) + 1)
+            new_famille = new_familles[add_individu_in_famille_id] or {}
+            new_individu_role = u'parents' if len(new_famille.get(u'parents') or []) < 2 else u'enfants'
+            new_famille.setdefault(new_individu_role, []).append(new_individu_id)
+            new_familles[add_individu_in_famille_id] = new_famille
+    if values.get('add_famille'):
+        new_familles[uuidhelpers.generate_uuid()] = None
     return {
         u'familles': new_familles or None,
         u'individus': new_individus or None,

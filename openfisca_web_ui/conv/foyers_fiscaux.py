@@ -26,13 +26,24 @@
 """Conversion functions related to foyers fiscaux"""
 
 
+from itertools import chain
+
 from biryani1.states import default_state
 
 from .. import uuidhelpers
 
 
+# Entity values
+
 roles = ('declarants', 'personnes_a_charge')
 
+
+# Helpers
+
+extract_individu_ids = lambda values: list(chain.from_iterable(filter(None, [values.get(key) for key in roles])))
+
+
+# Converters
 
 def api_data_to_korma_data(values, state = None):
     from . import base
@@ -87,7 +98,7 @@ def korma_data_to_api_data(values, state = None):
                     if individu['id'] in individus:
                         new_foyer_fiscal.setdefault(individu['role'], []).append(individu['id'])
             new_foyers_fiscaux[new_foyer_fiscal_id] = new_foyer_fiscal
-    if values.get('add'):
+    if values.get('add_foyer_fiscal'):
         new_foyer_fiscal_id = uuidhelpers.generate_uuid()
         new_foyers_fiscaux[new_foyer_fiscal_id] = {}
     return {u'foyers_fiscaux': new_foyers_fiscaux or None}, None

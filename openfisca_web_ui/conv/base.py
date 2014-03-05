@@ -38,6 +38,9 @@ from . import foyers_fiscaux as foyers_fiscaux_conv
 from . import menages as menages_conv
 
 
+# FIXME Parametrize year.
+DEFAULT_YEAR = 2013
+
 N_ = lambda message: message
 log = logging.getLogger(__name__)
 uuid_re = re.compile(ur'[\da-f]{32}$')
@@ -82,110 +85,46 @@ date_to_datetime = function(lambda value: datetime.datetime(*(value.timetuple()[
 datetime_to_date = function(lambda value: value.date())
 
 
-def make_fill_user_api_data(fill_columns_without_default_value = False):
+def make_fill_user_api_data(ensure_api_compliance):
     def fill_user_api_data(values, state = None):
         """Compute missing values for API consistency and fill user API data with them."""
 
-        from .. import questions, uuidhelpers
-
-        def guess_role_in_foyer_fiscal(individu_id):
-            if individu_id in (last_foyer_fiscal.get('declarants') or []) or \
-                    individu_id in (last_foyer_fiscal.get('personnes_a_charge') or []):
-                return None
-            return 'personnes_a_charge' if get_role_in_famille(individu_id, familles) == 'enfants' else 'declarants'
-
-        def guess_role_in_menage(individu_id):
-            if last_menage.get('personne_de_reference') == individu_id or \
-                    last_menage.get('conjoint') == individu_id or \
-                    individu_id in (last_menage.get('enfants') or []) or \
-                    individu_id in (last_menage.get('autres') or []):
-                return None
-            role_in_famille = get_role_in_famille(individu_id, familles)
-            if role_in_famille == 'parents':
-                if last_menage.get('personne_de_reference') is None:
-                    return 'personne_de_reference'
-                elif last_menage.get('conjoint') is None:
-                    return 'conjoint'
-                else:
-                    return 'autres'
-            elif role_in_famille == 'enfants':
-                return 'enfants'
-
-        def get_role_in_famille(individu_id, familles):
-            for famille_id, famille in familles.iteritems():
-                for role in familles_conv.roles:
-                    role_individu_ids = famille.get(role)
-                    if role_individu_ids is not None:
-                        if individu_id in role_individu_ids:
-                            return role
-            return None
+        from .. import questions
 
         if values is None:
             return None, None
         if state is None:
             state = default_state
 
+        new_values = {}
+
         # individus
-        if values.get('individus'):
-            default_individu_id = None
-            individus = values['individus']
-        else:
-            default_individu_id = uuidhelpers.generate_uuid()
-            individus = {default_individu_id: questions.individus.build_default_values()}
-        if fill_columns_without_default_value:
-            for individu_id, individu in individus.iteritems():
-                for key, value in questions.base.custom_column_default_values.iteritems():
-                    if individu.get(key) is None:
-                        individu[key] = value
-        new_values = {u'individus': individus}
+        individus = questions.individus.fill_values(values.get('individus'), ensure_api_compliance)
+        new_values['individus'] = individus
         individu_ids = individus.keys()
 
         # familles
-        familles = values['familles'] if values.get('familles') else questions.familles.default_value(individu_ids)
-        if default_individu_id is not None:
-            last_famille = familles[familles.keys()[-1]]
-            if last_famille.get('parents') is None or default_individu_id not in last_famille['parents']:
-                last_famille.setdefault('parents', []).append(default_individu_id)
+        familles = questions.familles.fill_values(
+            ensure_api_compliance = ensure_api_compliance,
+            individu_ids = individu_ids,
+            values = values.get('familles'),
+            )
         new_values['familles'] = familles
 
         # foyers fiscaux
-        default_foyers_fiscaux = {
-            uuidhelpers.generate_uuid(): {
-                'declarants': [],
-                'personnes_a_charge': [],
-                },
-            }
-        foyers_fiscaux = values['foyers_fiscaux'] if values.get('foyers_fiscaux') else default_foyers_fiscaux
-        last_foyer_fiscal = foyers_fiscaux[foyers_fiscaux.keys()[-1]]
-        for individu_id in individu_ids:
-            role_in_foyer_fiscal = guess_role_in_foyer_fiscal(individu_id)
-            if role_in_foyer_fiscal is not None:
-                last_foyer_fiscal.setdefault(role_in_foyer_fiscal, []).append(individu_id)
-        new_values['foyers_fiscaux'] = foyers_fiscaux
+        new_values['foyers_fiscaux'] = questions.foyers_fiscaux.fill_values(
+            familles = familles,
+            values = values.get('foyers_fiscaux'),
+            )
 
         # ménages
-        default_menages = {
-            uuidhelpers.generate_uuid(): {
-                'autres': [],
-                'conjoint': None,
-                'enfants': [],
-                'personne_de_reference': None,
-                },
-            }
-        menages = values['menages'] if values.get('menages') else default_menages
-        last_menage = menages[menages.keys()[-1]]
-        for individu_id in individu_ids:
-            role_in_menage = guess_role_in_menage(individu_id)
-            if role_in_menage is not None:
-                if role_in_menage in menages_conv.singleton_roles:
-                    last_menage[role_in_menage] = individu_id
-                else:
-                    last_menage.setdefault(role_in_menage, []).append(individu_id)
-        new_values['menages'] = menages
+        new_values['menages'] = questions.menages.fill_values(
+            individu_ids = individu_ids,
+            values = values.get('menages'),
+            )
 
         if values.get('year') is None:
-            # FIXME Parametrize year.
-            new_values['year'] = 2013
+            new_values['year'] = DEFAULT_YEAR
 
         return new_values, None
     return fill_user_api_data

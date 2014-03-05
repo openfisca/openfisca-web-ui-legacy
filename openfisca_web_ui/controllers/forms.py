@@ -62,7 +62,7 @@ def situation_form_get(req):
 
     user_api_data = get_user_api_data(ctx)
     filled_user_api_data = check(
-        conv.base.make_fill_user_api_data(fill_columns_without_default_value = False)(user_api_data)
+        conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data)
         )
 
     root_question = questions.base.make_situation_form(filled_user_api_data)
@@ -100,8 +100,13 @@ def situation_form_post(req):
             return templates.render(ctx, '/index.mako', root_question = root_question)
     api_data, errors = conv.base.korma_data_to_api_data(data, state = ctx)
     if errors is not None:
-        return wsgihelpers.respond_json(ctx, {'errors': errors})
-
+        root_question.fill(api_data, errors)
+        if req.is_xhr:
+            form_html = templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
+                                             user = session.user)
+            return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
+        else:
+            return templates.render(ctx, '/index.mako', root_question = root_question)
     if api_data is not None:
         user_api_data.update(api_data)
         current_test_case = session.user.current_test_case

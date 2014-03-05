@@ -27,22 +27,19 @@
 
 
 from .. import uuidhelpers
+from . import base
 
 
-def build_default_values(existing_individus_count = 0):
-    return {u'prenom': u'Personne {}'.format(existing_individus_count + 1)}
+def build_default_values(index = 1):
+    return {u'prenom': u'Personne {}'.format(index)}
 
 
-def default_value():
-    # TODO remove this function?
-    return {uuidhelpers.generate_uuid(): build_default_values()}
-
-
-def build_prenom_select_choices(user_api_data):
-    prenom_select_choices = []
-    if user_api_data is not None:
-        individus = user_api_data.get('individus')
-        if individus is not None:
-            for individu_id, individu in individus.iteritems():
-                prenom_select_choices.append((individu_id, individu.get('prenom')))
-    return prenom_select_choices
+def fill_values(values, ensure_api_compliance):
+    individus = values if values else {uuidhelpers.generate_uuid(): build_default_values()}
+    if ensure_api_compliance:
+        # Fill values for columns without default value, setting an arbitrary value.
+        for individu in individus.itervalues():
+            for key, value in base.custom_column_default_values.iteritems():
+                if individu.get(key) is None:
+                    individu[key] = value
+    return individus

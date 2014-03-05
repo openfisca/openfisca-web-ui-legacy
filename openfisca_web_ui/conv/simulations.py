@@ -117,7 +117,7 @@ def scenarios_to_api_data(values, state = None):
                         'test_case_id': pipe(
                             model.TestCase.make_id_or_slug_or_words_to_instance(),
                             function(lambda test_case: test_case.api_data if test_case.api_data is not None else {}),
-                            base.make_fill_user_api_data(fill_columns_without_default_value = True),
+                            base.make_fill_user_api_data(ensure_api_compliance = True),
                             ),
                         'year': default(DEFAULT_YEAR),
                         },
@@ -165,13 +165,9 @@ def user_api_data_to_api_data(user_data, state = None):
     return {'scenarios': [scenario]}, None
 
 
+# Level 2 converters
+
 api_data_to_simulation_output = pipe(
     api_data_to_api_post_content,
     api_post_content_to_simulation_output,
-    )
-
-
-user_api_data_to_simulation_output = pipe(
-    user_api_data_to_api_data,
-    api_data_to_simulation_output,
     )

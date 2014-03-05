@@ -31,9 +31,30 @@ from biryani1.states import default_state
 from .. import uuidhelpers
 
 
+# Entity values
+
 roles = (u'personne_de_reference', u'conjoint', u'enfants', u'autres')
 singleton_roles = (u'personne_de_reference', u'conjoint')
 
+
+# Helpers
+
+def extract_individu_ids(values):
+    global roles, singleton_roles
+    individu_ids = []
+    for role in roles:
+        if role in singleton_roles:
+            role_individu_id = values.get(role)
+            if role_individu_id is not None:
+                individu_ids.append(role_individu_id)
+        else:
+            role_individu_ids = values.get(role)
+            if role_individu_ids is not None:
+                individu_ids.extend(role_individu_ids)
+    return individu_ids
+
+
+# Converters
 
 def api_data_to_korma_data(values, state = None):
     from . import base
@@ -108,7 +129,7 @@ def korma_data_to_api_data(values, state = None):
                         if error is not None:
                             return values, error
             new_menages[new_menage_id] = new_menage
-    if values.get('add'):
+    if values.get('add_menage'):
         new_menage_id = uuidhelpers.generate_uuid()
         new_menages[new_menage_id] = {}
     return {u'menages': new_menages or None}, None

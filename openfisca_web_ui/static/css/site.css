@@ -76,7 +76,7 @@ form[name="scenarios"] .form-inline select {
     margin-left: 1em;
 }
 
-#familles button.add {
+form[name=situation] button.add {
     margin-bottom: 1em;
 }
 #familles button.delete {

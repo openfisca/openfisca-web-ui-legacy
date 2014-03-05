@@ -28,6 +28,7 @@
 
 import datetime
 import logging
+from pprint import pformat
 
 from biryani1.baseconv import check, pipe
 from formencode import variabledecode
@@ -87,7 +88,7 @@ def get_api_data_and_errors(ctx, token = None):
         if user_api_data is None:
             user_api_data = {}
         api_data, errors = pipe(
-            conv.base.make_fill_user_api_data(fill_columns_without_default_value = True),
+            conv.base.make_fill_user_api_data(ensure_api_compliance = True),
             conv.simulations.user_api_data_to_api_data,
             )(user_api_data, state = ctx)
     else:
@@ -168,13 +169,13 @@ def session(req):
 @wsgihelpers.wsgify
 def simulate(req):
     ctx = contexts.Ctx(req)
-
     token, error = conv.base.input_to_uuid(req.params.get('token'))
     api_data, errors = get_api_data_and_errors(ctx, token = token)
     if errors is None:
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
-            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
+            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(
+                pformat(api_data), errors))
         data = {'output': output, 'errors': errors}
     else:
         data = {'errors': errors}

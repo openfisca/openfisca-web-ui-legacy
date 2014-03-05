@@ -26,23 +26,36 @@
 """Korma questions related to familles"""
 
 
+import collections
+
 from korma.choice import Select
 from korma.group import Group
 from korma.repeat import Repeat
 from korma.text import Hidden
 
-from .. import uuidhelpers
+from .. import conv, uuidhelpers
 from . import base
 
 
-def default_value(individu_ids):
+def build_default_values(individu_ids):
     famille = {'parents': individu_ids[:2]}
     if len(individu_ids) > 2:
         famille['enfants'] = individu_ids[2:]
-    return {uuidhelpers.generate_uuid(): famille}
+    return famille
+
+
+def fill_values(values, ensure_api_compliance, individu_ids):
+    familles = values
+    if ensure_api_compliance and familles:
+        familles = conv.base.without_none_values(familles)
+    if not familles:
+        familles = collections.OrderedDict([(uuidhelpers.generate_uuid(), build_default_values(individu_ids))])
+    return familles
 
 
 def make_familles_repeat():
+    from .. import contexts
+
     class FamilleGroup(Group):
         @property
         def outer_html(self):
@@ -67,16 +80,14 @@ title="afficher / masquer">
     class IndividuGroup(Group):
         @property
         def outer_html(self):
-            index = self.parent_data['individus']['index']
-            is_last_individu = index == self.parent.questions_count - 1
             return u'''
 {self[id].html}
 <div class="panel panel-default">
   <div class="panel-heading panel-form">
     <div class="form-inline">
       <h4 class="panel-title">
-        <a class="collapse-node-toggle{collapsed_class}" data-toggle="collapse" \
-href="#collapse-individu-{self[id].value}" title="afficher / masquer">
+        <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-individu-{self[id].value}" \
+title="afficher / masquer">
           <span class="indicator"></span>
         </a>
         {self[role].html}
@@ -87,17 +98,15 @@ href="#" title="Modifier">
       </h4>
     </div>
   </div>
-  <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse{in_class}">
+  <div id="collapse-individu-{self[id].value}" class="panel-collapse collapse">
     <div class="panel-body">
       {self[categories].html}
       {self[delete].html}
     </div>
   </div>
-</div>'''.format(
-                collapsed_class = u'' if is_last_individu else ' collapsed',
-                in_class = u' in' if is_last_individu else '',
-                self = self,
-                )
+</div>'''.format(self = self)
+
+    ctx = contexts.Ctx()
 
     return Repeat(
         name = u'familles',
@@ -121,7 +130,7 @@ href="#" title="Modifier">
                                 questions = base.make_categories_groups(entity=u'individus'),
                                 ),
                             base.BootstrapButton(
-                                label = u'Supprimer',
+                                label = ctx._(u'Delete'),
                                 name = 'delete',
                                 other_classes = 'delete pull-right',
                                 value = 'delete',
@@ -130,7 +139,7 @@ href="#" title="Modifier">
                         ),
                     ),
                 base.BootstrapButton(
-                    label = u'Ajouter un membre',
+                    label = ctx._(u'Add a member'),
                     name = 'add',
                     other_classes = 'add',
                     value = 'add',
@@ -154,6 +163,11 @@ href="#collapse-famille-{self.parent[id].value}-categories" title="affcher / mas
   </div>
 </div>''',
                     questions = base.make_categories_groups(entity=u'familles'),
+                    ),
+                base.BootstrapButton(
+                    label = ctx._(u'Delete'),
+                    name = 'delete',
+                    value = 'delete',
                     ),
                 ],
             ),

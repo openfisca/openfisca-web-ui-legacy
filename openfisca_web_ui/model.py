@@ -84,7 +84,8 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def current_test_case(self):
-        return TestCase.find_one(self.current_test_case_id) if self.current_test_case_id is not None else None
+        return TestCase.find_one(self.current_test_case_id, as_class = collections.OrderedDict) \
+            if self.current_test_case_id is not None else None
 
     @current_test_case.setter
     def current_test_case(self, test_case):
