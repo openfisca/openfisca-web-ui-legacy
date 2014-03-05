@@ -247,6 +247,97 @@ def admin_view(req):
     return templates.render(ctx, '/visualizations/admin-view.mako', visualization = ctx.node)
 
 
+@wsgihelpers.wsgify
+def api1_search(req):
+    ctx = contexts.Ctx(req)
+
+    params = req.GET
+    inputs = dict(
+        page = params.get('page'),
+        sort = params.get('sort'),
+        term = params.get('term'),
+        )
+    data, errors = conv.pipe(
+        conv.struct(
+            dict(
+                page = conv.pipe(
+                    conv.input_to_int,
+                    conv.test_greater_or_equal(1),
+                    conv.default(1),
+                    ),
+                sort = conv.pipe(
+                    conv.cleanup_line,
+                    conv.test_in(['slug', 'updated']),
+                    ),
+                term = conv.base.input_to_words,
+                ),
+            ),
+        conv.rename_item('page', 'page_number'),
+        )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+
+    criteria = {}
+    if data['term'] is not None:
+        criteria['words'] = {'$all': [
+            re.compile(u'^{}'.format(re.escape(word)))
+            for word in data['term']
+            ]}
+    cursor = model.Visualization.find(criteria, as_class = collections.OrderedDict)
+    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
+    if data['sort'] == 'slug':
+        cursor.sort([('slug', pymongo.ASCENDING)])
+    elif data['sort'] == 'updated':
+        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
+    visualizations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+
+    return wsgihelpers.respond_json(ctx,
+        [
+            {
+                'title': visualization.title,
+                'description': visualization.description,
+                'thumbnail_url': visualization.thumbnail_url,
+                'url': visualization.get_user_url(ctx),
+                }
+            for visualization in visualizations
+            ],
+        )
+
+
+@wsgihelpers.wsgify
+def api1_typeahead(req):
+    ctx = contexts.Ctx(req)
+    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
+
+    assert req.method == 'GET'
+    params = req.GET
+    inputs = dict(
+        q = params.get('q'),
+        )
+    data, errors = conv.struct(
+        dict(
+            q = conv.base.input_to_words,
+            ),
+        )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+
+    criteria = {}
+    if data['q'] is not None:
+        criteria['words'] = {'$all': [
+            re.compile(u'^{}'.format(re.escape(word)))
+            for word in data['q']
+            ]}
+    cursor = model.Visualization.get_collection().find(criteria, ['title'])
+    return wsgihelpers.respond_json(ctx,
+        [
+            visualization_attributes['title']
+            for visualization_attributes in cursor.limit(10)
+            ],
+        headers = headers,
+        )
+
+
 def extract_visualization_inputs_from_params(ctx, params = None):
     if params is None:
         params = webob.multidict.MultiDict()
@@ -290,6 +381,14 @@ def route_admin_class(environ, start_response):
         ('GET', '^/?$', admin_index),
         (('GET', 'POST'), '^/new/?$', admin_new),
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_admin),
+        )
+    return router(environ, start_response)
+
+
+def route_api1_class(environ, start_response):
+    router = urls.make_router(
+        ('GET', '^/search/?$', api1_search),
+        ('GET', '^/typeahead/?$', api1_typeahead),
         )
     return router(environ, start_response)
 
