@@ -44,7 +44,7 @@ inputs_to_visualization_data = conv.pipe(
             enabled = conv.guess_bool,
             featured = conv.guess_bool,
             iframe = conv.guess_bool,
-            image_filename = conv.cleanup_line,
+            thumbnail_url = conv.make_input_to_url(full = True),
             organization = conv.cleanup_line,
             title = conv.pipe(
                 conv.base.cleanup_line,
@@ -93,7 +93,7 @@ def admin_edit(req):
             enabled = visualization.enabled,
             featured = visualization.featured,
             iframe = visualization.iframe,
-            image_filename = visualization.image_filename,
+            thumbnail_url = visualization.thumbnail_url,
             organization = visualization.organization,
             title = visualization.title,
             url = visualization.url,
@@ -138,7 +138,8 @@ def admin_edit(req):
 @wsgihelpers.wsgify
 def admin_index(req):
     ctx = contexts.Ctx(req)
-    model.is_admin(ctx, check = True)
+    if not model.is_admin(ctx):
+        return wsgihelpers.redirect(ctx, location = model.Visualization.get_user_class_url(ctx))
 
     assert req.method == 'GET'
     params = req.GET
@@ -243,8 +244,7 @@ def admin_new(req):
 @wsgihelpers.wsgify
 def admin_view(req):
     ctx = contexts.Ctx(req)
-    visualization = ctx.node
-    return templates.render(ctx, '/visualizations/admin-view.mako', visualization = visualization)
+    return templates.render(ctx, '/visualizations/admin-view.mako', visualization = ctx.node)
 
 
 def extract_visualization_inputs_from_params(ctx, params = None):
@@ -255,7 +255,7 @@ def extract_visualization_inputs_from_params(ctx, params = None):
         enabled = params.get('enabled'),
         featured = params.get('featured'),
         iframe = params.get('iframe'),
-        image_filename = params.get('image_filename'),
+        thumbnail_url = params.get('thumbnail-url'),
         organization = params.get('organization'),
         title = params.get('title'),
         url = params.get('url'),
@@ -362,14 +362,13 @@ def user_index(req):
 def user_view(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'GET'
-    params = req.GET
     visualization, error = conv.pipe(
         conv.input_to_slug,
         conv.not_none,
         model.Visualization.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(error))
     return templates.render(
         ctx,
         '/visualizations/user-view.mako',

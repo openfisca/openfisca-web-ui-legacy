@@ -59,10 +59,10 @@ from openfisca_web_ui import model, urls
         % for visualization in visualizations:
             <div class="col-md-4 col-sm-6">
                 <a href="${visualization.get_user_url(ctx)}">
-                    <div class="thumbnail">
-                        <img alt="visualization.get_title(ctx)">
+                    <div class="thumbnail thumbnail-visualization">
+                        <img alt="${visualization.get_title(ctx)}" src="${visualization.thumbnail_url or ''}">
                         <div class="caption">
-                            <h3>visualization.get_title(ctx)</h3>
+                            <h3>${visualization.get_title(ctx)}</h3>
 <%
             description_text = visualization.description
 %>\

@@ -489,7 +489,7 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
     enabled = None
     featured = None
     iframe = None
-    image_filename = None
+    thumbnail_url = None
     organization = None
     slug = None
     title = None

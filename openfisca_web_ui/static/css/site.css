@@ -100,3 +100,8 @@ form[name="scenarios"] .form-inline select {
     position: absolute;
     top: 50%;
 }
+
+.thumbnail-visualization > img {
+    max-height: 150px;
+    max-width: 250px;
+}

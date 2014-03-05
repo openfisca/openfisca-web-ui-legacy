@@ -60,9 +60,14 @@ from openfisca_web_ui import model, urls
                     ${visualization.get_title(ctx)}
                 </h2>
             </div>
-            <div class="panel-body">
-                <%self:view_fields/>
-            </div>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <%self:view_fields/>
+                </li>
+                <li class="list-group-item">
+                    <%self:view_content/>
+                </li>
+            </ul>
     % if owner_or_admin:
             <div class="panel-footer">
                 <div class="btn-toolbar">
@@ -78,6 +83,10 @@ from openfisca_web_ui import model, urls
 
 <%def name="title_content()" filter="trim">
 ${visualization.get_title(ctx)} - ${parent.title_content()}
+</%def>
+
+
+<%def name="view_content()" filter="trim">
 </%def>
 
 

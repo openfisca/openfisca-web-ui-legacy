@@ -78,6 +78,17 @@ from openfisca_web_ui import conf, model, urls
     % endif
                 </div>
 <%
+    error = errors.get('thumbnail_url') if errors is not None else None
+%>\
+                <div class="form-group${' has-error' if error else ''}">
+                    <label for="thumbnail-url">${_('Visualization\'s thumbnail URL')}</label>
+                    <input class="form-control" id="thumbnail-url" name="thumbnail-url" type="text" \
+value="${inputs['thumbnail_url'] or ''}">
+    % if error:
+                    <pre class="help-block alert-danger">${error | n, js, h}</pre>
+    % endif
+                </div>
+<%
     error = errors.get('url') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
