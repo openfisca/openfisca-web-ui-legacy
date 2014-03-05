@@ -94,6 +94,7 @@ def build_requireconfig(ctx):
             'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
             'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
             'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
+            'VisualizationsChartV': urls.get_url(ctx, u'js/views/VisualizationsChartV'),
             'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
 
             # Models

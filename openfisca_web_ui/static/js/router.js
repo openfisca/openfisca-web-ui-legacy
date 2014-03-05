@@ -21,6 +21,7 @@ define([
 		'cascade': 'waterfallChart',
 		'répartition': 'distributionChart',
 		'se-situer': enableLocatingChart ? 'locatingChart' : 'default',
+		'visualisations': 'visualizationsChart',
 		'*fragment': 'default'
 	};
 
@@ -43,6 +44,9 @@ define([
 		},
 		waterfallChart: function () {
 			chartsV.render('waterfall');
+		},
+		visualizationsChart: function () {
+			chartsV.render('visualisations');
 		}
 	});
 
