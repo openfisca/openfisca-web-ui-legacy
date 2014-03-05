@@ -76,8 +76,11 @@ def disclaimer_closed(req):
     return wsgihelpers.no_content(ctx)
 
 
-def get_api_data_and_errors(ctx):
-    session = ctx.session
+def get_api_data_and_errors(ctx, token = None):
+    if token is None:
+        session = ctx.session
+    else:
+        session = model.Session.find_one({'anonymous_token': token})
     user_scenarios = session.user.scenarios if session is not None and session.user is not None else None
     if user_scenarios is None:
         user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
@@ -164,7 +167,9 @@ def session(req):
 @wsgihelpers.wsgify
 def simulate(req):
     ctx = contexts.Ctx(req)
-    api_data, errors = get_api_data_and_errors(ctx)
+
+    token, error = conv.base.input_to_uuid(req.params.get('token'))
+    api_data, errors = get_api_data_and_errors(ctx, token = token)
     if errors is None:
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
@@ -172,6 +177,9 @@ def simulate(req):
         data = {'output': output, 'errors': errors}
     else:
         data = {'errors': errors}
+    if token is not None and 'params' in data.get('output', {}):
+        # Call with token are anonymous. Remove params from json response
+        del data['output']['params']
     return wsgihelpers.respond_json(ctx, data)
 
 
