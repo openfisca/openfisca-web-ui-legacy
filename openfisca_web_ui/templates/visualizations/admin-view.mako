@@ -87,6 +87,12 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
 
 
 <%def name="view_content()" filter="trim">
+<%
+    value = visualization.url
+    if value is None:
+        return ''
+%>\
+        <iframe src="${value}"></iframe>
 </%def>
 
 
