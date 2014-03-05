@@ -103,5 +103,11 @@ form[name="scenarios"] .form-inline select {
 
 .thumbnail-visualization > img {
     max-height: 150px;
-    max-width: 250px;
+}
+.thumbnail-visualization {
+    margin: 0 0 20px 0;
+}
+.thumbnail-visualization:hover {
+    border: 1px solid #999;
+    background-color: #DDD;
 }
