@@ -58,22 +58,26 @@ from openfisca_web_ui import model, urls
         <h2>${_(u"{} visualizations").format(pager.item_count)}</h2>
         % endif
         <%object:pagination object_class="${model.Visualization}" pager="${pager}"/>
+        <div class="row">
         % for visualization in visualizations:
-        <a href="${visualization.get_admin_url(ctx)}">
-            <div class="thumbnail">
-                <img alt="visualization.get_title(ctx)">
-                <div class="caption">
-                    <h3>visualization.get_title(ctx)</h3>
+            <div class="col-md-4 col-sm-6">
+                <a href="${visualization.get_admin_url(ctx)}">
+                    <div class="thumbnail">
+                        <img alt="visualization.get_title(ctx)">
+                        <div class="caption">
+                            <h3>visualization.get_title(ctx)</h3>
 <%
             description_text = visualization.description
 %>\
             % if description_text:
-                    <p>${description_text}</p>
+                            <p>${description_text}</p>
             % endif
-                </div>
+                        </div>
+                    </div>
+                </a>
             </div>
-        </a>
         % endfor
+        </div>
         <%object:pagination object_class="${model.Visualization}" pager="${pager}"/>
     % endif
 <%

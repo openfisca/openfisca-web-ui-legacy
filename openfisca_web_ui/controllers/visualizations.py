@@ -36,7 +36,7 @@ import webob
 from .. import contexts, conv, model, paginations, templates, urls, wsgihelpers
 
 
-inputs_to_legislation_data = conv.pipe(
+inputs_to_visualization_data = conv.pipe(
     conv.struct(
         dict(
             author_id = conv.base.input_to_uuid,
@@ -60,13 +60,79 @@ log = logging.getLogger(__name__)
 
 
 @wsgihelpers.wsgify
-def admin_delete():
-    pass
+def admin_delete(req):
+    ctx = contexts.Ctx(req)
+    visualization = ctx.node
+    user = model.get_user(ctx, check = True)
+
+    if not (visualization.author_id == user._id or model.is_admin(ctx)):
+        return wsgihelpers.forbidden(ctx)
+
+    if req.method == 'POST':
+        visualization.delete(safe = True)
+        if model.is_admin(ctx):
+            return wsgihelpers.redirect(ctx, location = model.Visualization.get_admin_class_url(ctx))
+        else:
+            return wsgihelpers.redirect(ctx, location = model.Visualization.get_class_url(ctx))
+    return templates.render(ctx, '/visualizations/admin-delete.mako', visualization = visualization)
 
 
 @wsgihelpers.wsgify
-def admin_edit():
-    pass
+def admin_edit(req):
+    ctx = contexts.Ctx(req)
+    visualization = ctx.node
+    user = model.get_user(ctx, check = True)
+
+    if not (visualization.author_id == user._id or model.is_admin(ctx)):
+        return wsgihelpers.forbidden(ctx)
+
+    if req.method == 'GET':
+        errors = None
+        inputs = dict(
+            description = visualization.description,
+            enabled = visualization.enabled,
+            featured = visualization.featured,
+            iframe = visualization.iframe,
+            image_filename = visualization.image_filename,
+            organization = visualization.organization,
+            title = visualization.title,
+            url = visualization.url,
+        )
+    else:
+        assert req.method == 'POST'
+        inputs = extract_visualization_inputs_from_params(ctx, req.POST)
+        inputs['author_id'] = visualization.author_id
+        data, errors = inputs_to_visualization_data(inputs, state = ctx)
+        if errors is None:
+            data['slug'], error = conv.pipe(
+                conv.input_to_slug,
+                conv.not_none,
+                )(data['title'], state = ctx)
+            if error is not None:
+                errors = dict(title = error)
+        if errors is None:
+            if model.Visualization.find(
+                    dict(
+                        _id = {'$ne': visualization._id},
+                        slug = data['slug'],
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).count() > 0:
+                errors = dict(title = ctx._('A visualization with the same name already exists.'))
+        if errors is None:
+            visualization.set_attributes(**data)
+            visualization.compute_words()
+            visualization.save(safe = True)
+
+            # View visualization.
+            return wsgihelpers.redirect(ctx, location = visualization.get_admin_url(ctx))
+    return templates.render(
+        ctx,
+        '/visualizations/admin-edit.mako',
+        errors = errors,
+        inputs = inputs,
+        visualization = visualization,
+        )
 
 
 @wsgihelpers.wsgify
@@ -137,12 +203,12 @@ def admin_new(req):
     visualization = model.Visualization()
     if req.method == 'GET':
         errors = None
-        inputs = extract_legislation_inputs_from_params(ctx)
+        inputs = extract_visualization_inputs_from_params(ctx)
     else:
         assert req.method == 'POST'
-        inputs = extract_legislation_inputs_from_params(ctx, req.POST)
+        inputs = extract_visualization_inputs_from_params(ctx, req.POST)
         inputs['author_id'] = user._id
-        data, errors = inputs_to_legislation_data(inputs, state = ctx)
+        data, errors = inputs_to_visualization_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
                 conv.input_to_slug,
@@ -181,7 +247,7 @@ def admin_view(req):
     return templates.render(ctx, '/visualizations/admin-view.mako', visualization = visualization)
 
 
-def extract_legislation_inputs_from_params(ctx, params = None):
+def extract_visualization_inputs_from_params(ctx, params = None):
     if params is None:
         params = webob.multidict.MultiDict()
     return dict(
