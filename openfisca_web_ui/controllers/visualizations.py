@@ -298,15 +298,9 @@ def route_user(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_index),
         ('GET', '^/new?$', admin_new),
-        ('GET', '^/(?P<id_or_slug>[^/]+)/edit/?$', user_edit),
         ('GET', '^/(?P<id_or_slug>[^/]+)/?$', user_view),
         )
     return router(environ, start_response)
-
-
-@wsgihelpers.wsgify
-def user_edit():
-    pass
 
 
 @wsgihelpers.wsgify
@@ -365,5 +359,19 @@ def user_index(req):
 
 
 @wsgihelpers.wsgify
-def user_view():
-    pass
+def user_view(req):
+    ctx = contexts.Ctx(req)
+    assert req.method == 'GET'
+    params = req.GET
+    visualization, error = conv.pipe(
+        conv.input_to_slug,
+        conv.not_none,
+        model.Visualization.make_id_or_slug_or_words_to_instance(),
+        )(req.urlvars.get('id_or_slug'), state = ctx)
+    if error is not None:
+        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+    return templates.render(
+        ctx,
+        '/visualizations/user-view.mako',
+        visualization = visualization,
+        )

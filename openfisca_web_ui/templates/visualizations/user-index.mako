@@ -58,7 +58,7 @@ from openfisca_web_ui import model, urls
         <div class="row">
         % for visualization in visualizations:
             <div class="col-md-4 col-sm-6">
-                <a href="${visualization.get_admin_url(ctx)}">
+                <a href="${visualization.get_user_url(ctx)}">
                     <div class="thumbnail">
                         <img alt="visualization.get_title(ctx)">
                         <div class="caption">
