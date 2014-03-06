@@ -719,7 +719,7 @@ def setup():
     Account.ensure_index('admin', sparse = True)
     Account.ensure_index('api_key', sparse = True, unique = True)
     Account.ensure_index('email', sparse = True, unique = True)
-    Account.ensure_index('slug', unique = True)
+    Account.ensure_index('slug', sparse = True, unique = True)
     Account.ensure_index('updated')
     Account.ensure_index('words')
 
