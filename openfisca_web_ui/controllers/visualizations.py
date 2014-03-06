@@ -36,25 +36,22 @@ import webob
 from .. import contexts, conv, model, paginations, templates, urls, wsgihelpers
 
 
-inputs_to_visualization_data = conv.pipe(
-    conv.struct(
-        dict(
-            author_id = conv.base.input_to_uuid,
-            description = conv.cleanup_text,
-            enabled = conv.guess_bool,
-            featured = conv.guess_bool,
-            iframe = conv.guess_bool,
-            thumbnail_url = conv.make_input_to_url(full = True),
-            organization = conv.cleanup_line,
-            title = conv.pipe(
-                conv.base.cleanup_line,
-                conv.not_none,
-                ),
-            url = conv.make_input_to_url(full = True),
+inputs_to_visualization_data = conv.struct(
+    dict(
+        author_id = conv.base.input_to_uuid,
+        description = conv.cleanup_text,
+        enabled = conv.guess_bool,
+        featured = conv.guess_bool,
+        iframe = conv.guess_bool,
+        thumbnail_url = conv.make_input_to_url(full = True),
+        organization = conv.cleanup_line,
+        title = conv.pipe(
+            conv.base.cleanup_line,
+            conv.not_none,
             ),
-        default = 'drop',
+        url = conv.make_input_to_url(full = True),
         ),
-    conv.test(lambda struct: struct.get('url') is not None or struct.get('json') is not None),
+    default = 'drop',
     )
 log = logging.getLogger(__name__)
 

@@ -62,6 +62,7 @@ inputs_to_legislation_data = conv.pipe(
             ),
         default = 'drop',
         ),
+    # FIXME errors must be structured
     conv.test(lambda struct: struct.get('url') is not None or struct.get('json') is not None),
     )
 log = logging.getLogger(__name__)
