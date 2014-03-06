@@ -37,6 +37,8 @@ from biryani1.states import default_state
 import requests
 
 
+DEFAULT_YEAR = 2013
+
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
 log = logging.getLogger(__name__)
 
@@ -61,17 +63,15 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
             )
     except requests.exceptions.ConnectionError:
         return api_post_content, state._('Unable to connect to simulate API, url: {}').format(conf['api.urls.simulate'])
-    if not response.ok:
-        try:
-            response_data = response.json(object_pairs_hook = collections.OrderedDict)
-        except ValueError:
-            return api_post_content, state._(u'Unable to decode JSON data of simulate API response')
-        return api_post_content, response_data.get('error')
-    simulation_output = response.json(object_pairs_hook = collections.OrderedDict)
-    return simulation_output, None
+    try:
+        response_data = response.json(object_pairs_hook = collections.OrderedDict)
+    except ValueError:
+        return api_post_content, state._(u'Unable to decode JSON data of simulate API response')
+    return (response_data, None) if response.ok else (api_post_content, response_data.get('error'))
 
 
 def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
+    # FIXME merge with user_api_data_to_api_data?
     if scenarios_api_data is None:
         return None, None
     if state is None:
@@ -85,7 +85,7 @@ def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
             'menages': scenario_api_data.get('menages', {}).values(),
             'individus': [],
             'legislation_url': scenario_api_data.get('legislation_url'),
-            'year': scenario_api_data.get('year', 2013),
+            'year': scenario_api_data.get('year', DEFAULT_YEAR),
             }
         for individu_id in scenario_api_data.get('individus', {}).iterkeys():
             individu = dict(
@@ -119,7 +119,7 @@ def scenarios_to_api_data(values, state = None):
                             function(lambda test_case: test_case.api_data if test_case.api_data is not None else {}),
                             base.make_fill_user_api_data(fill_columns_without_default_value = True),
                             ),
-                        'year': default(2013),
+                        'year': default(DEFAULT_YEAR),
                         },
                     default = noop,
                     drop_none_values = False,
@@ -145,12 +145,11 @@ def user_api_data_to_api_data(user_data, state = None):
     if state is None:
         state = default_state
 
-    api_data = {
+    test_case = {
         'familles': user_data.get('familles', {}).values(),
         'foyers_fiscaux': user_data.get('foyers_fiscaux', {}).values(),
         'menages': user_data.get('menages', {}).values(),
         'individus': [],
-        'year': user_data.get('year', 2013),
         }
     for individu_id in user_data.get('individus', {}).iterkeys():
         individu = dict(
@@ -158,8 +157,12 @@ def user_api_data_to_api_data(user_data, state = None):
             for key, value in user_data['individus'][individu_id].iteritems()
             )
         individu['id'] = individu_id
-        api_data['individus'].append(individu)
-    return {'scenarios': [api_data]}, None
+        test_case['individus'].append(individu)
+    scenario = {
+        'test_case': test_case,
+        'year': user_data.get('year', DEFAULT_YEAR),
+        }
+    return {'scenarios': [scenario]}, None
 
 
 api_data_to_simulation_output = pipe(
