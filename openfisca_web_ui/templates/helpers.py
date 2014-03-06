@@ -94,12 +94,13 @@ def build_requireconfig(ctx):
             'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
             'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
             'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
-            'VisualizationsChartV': urls.get_url(ctx, u'js/views/VisualizationsChartV'),
+            'VisualizationsPaneV': urls.get_url(ctx, u'js/views/VisualizationsPaneV'),
             'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
 
             # Models
             'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
             'chartM': urls.get_url(ctx, u'js/models/chartM'),
+            'VisualizationsPaneM': urls.get_url(ctx, u'js/models/VisualizationsPaneM'),
 
             # Modules
             'auth': urls.get_url(ctx, u'js/modules/auth'),
@@ -125,7 +126,12 @@ def build_requireconfig(ctx):
 
 def index_appconfig(ctx):
     appconfig = base_appconfig(ctx)
-    appconfig['enabledModules']['situationForm'] = True
+    appconfig['enabledModules'].update({
+        'situationForm': True,
+        'visualizations': {
+            'searchUrlPath': urls.get_url(ctx, 'api/1/visualizations/search'),
+            },
+        })
     appconfig['api'] = {
         'urls': {
             'form': urls.get_url(ctx, '/'),

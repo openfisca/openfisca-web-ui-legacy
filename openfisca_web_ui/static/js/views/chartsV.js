@@ -7,11 +7,11 @@ define([
 	'appconfig',
 	'backendServiceM',
 	'DistributionChartV',
-	'VisualizationsChartV',
+	'VisualizationsPaneV',
 	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, _, Backbone, d3, appconfig, backendServiceM, DistributionChartV, VisualizationsChartV, WaterfallChartV, chartsTabsT) {
+	function ($, _, Backbone, d3, appconfig, backendServiceM, DistributionChartV, VisualizationsPaneV, WaterfallChartV, chartsTabsT) {
 
 		var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
 
@@ -24,7 +24,8 @@ define([
 			initialize: function () {
 				this.fragmentByChartName = {
 					'distribution': 'répartition',
-					'waterfall': 'cascade'
+					'waterfall': 'cascade',
+					'visualisations': 'visualisations'
 				};
 				if (enableLocatingChart) {
 					this.fragmentByChartName.locating = 'se-situer';
@@ -70,7 +71,7 @@ define([
 						this.chart = new DistributionChartV(this);
 						break;
 					case 'visualisations':
-						this.chart = new VisualizationsChartV(this);
+						this.chart = new VisualizationsPaneV(this);
 						break;
 //					default:
 //						console.error('_Error : No chart selected when called AppV.render');
