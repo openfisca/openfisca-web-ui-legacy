@@ -98,6 +98,45 @@ value="${inputs['thumbnail_url'] or ''}">
                     <pre class="help-block alert-danger">${error | n, js, h}</pre>
     % endif
                 </div>
+<%
+    error = errors.get('organization') if errors is not None else None
+%>\
+                <div class="form-group${' has-error' if error else ''}">
+                    <label for="thumbnail-url">${_('Organization')}</label>
+                    <input class="form-control" id="organization" name="organization" type="text" \
+value="${inputs['organization'] or ''}">
+    % if error:
+                    <pre class="help-block alert-danger">${error | n, js, h}</pre>
+    % endif
+                </div>
+    % if model.is_admin(ctx):
+<%
+        error = errors.get('featured') if errors is not None else None
+%>\
+                <div class="checkbox${' has-error' if error else ''}">
+                    <label>
+                        <input${' checked' if inputs['featured'] else ''} id="featured" name="featured" type="checkbox" \
+value="1">
+                        ${_(u'Featured')}
+                    </label>
+        % if error:
+                    <span class="help-block">${error}</span>
+        % endif
+                </div>
+<%
+        error = errors.get('enabled') if errors is not None else None
+%>\
+                <div class="checkbox${' has-error' if error else ''}">
+                    <label>
+                        <input${' checked' if inputs['enabled'] else ''} id="enabled" name="enabled" type="checkbox" \
+value="1">
+                        ${_(u'Enabled')}
+                    </label>
+        % if error:
+                    <span class="help-block">${error}</span>
+        % endif
+                </div>
+    % endif
 </%def>
 
 

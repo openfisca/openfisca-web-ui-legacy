@@ -120,6 +120,18 @@ def admin_edit(req):
                     ).count() > 0:
                 errors = dict(title = ctx._('A visualization with the same name already exists.'))
         if errors is None:
+            if not model.is_admin(ctx):
+                if visualization.enabled != data['enabled']:
+                    errors = dict(
+                        enabled = ctx._(
+                            'You can\'t enable or disable this visualization because you aren\'t an administrator'
+                            ),
+                        )
+                if visualization.featured != data['featured']:
+                    errors = dict(
+                        enabled = ctx._('You can\'t promote this visualization because you aren\'t an administrator'),
+                        )
+        if errors is None:
             visualization.set_attributes(**data)
             visualization.compute_words()
             visualization.save(safe = True)

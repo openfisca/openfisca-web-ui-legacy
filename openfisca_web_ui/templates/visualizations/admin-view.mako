@@ -118,6 +118,27 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
             <dd><a href="${value}">${value}</a></dd>
     % endif
 <%
+    value = visualization.enabled
+%>\
+    % if value is not None:
+            <dt>${_("Enabled")}</dt>
+            <dd>${_("Yes") if value else _("No")}</dd>
+    % endif
+<%
+    value = visualization.featured
+%>\
+    % if value is not None:
+            <dt>${_("Featured")}</dt>
+            <dd>${_("Yes") if value else _("No")}</dd>
+    % endif
+<%
+    value = visualization.organization
+%>\
+    % if value is not None:
+            <dt>${_("Organization")}</dt>
+            <dd>${value}</dd>
+    % endif
+<%
     value = visualization.updated
 %>\
     % if value is not None:
@@ -130,6 +151,6 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     % if value is not None:
             <dt>${_("Published")}</dt>
             <dd>${value}</dd>
-        </dl>
     % endif
+        </dl>
 </%def>
