@@ -175,7 +175,7 @@ define([
 
 									d.x = d3.round(vingtile.values[i-1].x + dx);
 								}
-							}							
+							}
 					});
 				});
 				return vingtiles;
@@ -216,21 +216,22 @@ define([
 					.classed("value",true)
 					.html(function(p,i) { return that.yFormat._scale(p.value) + ' '+ that.yFormat.symbolText; });
 
-					trowEnter.selectAll("td").each(function(p) {
-						if (p.highlight) {
-							var opacityScale = d3.scale.linear().domain([0,1]).range(["#fff",p.color]);
-							var opacity = 0.6;
-							d3.select(this)
-								.style("border-bottom-color", opacityScale(opacity))
-								.style("border-top-color", opacityScale(opacity))
-								;
-						}
-		            });
+				trowEnter.selectAll("td").each(function(p) {
+					if (p.highlight) {
+						var opacityScale = d3.scale.linear().domain([0,1]).range(["#fff",p.color]);
+						var opacity = 0.6;
+						d3.select(this)
+							.style("border-bottom-color", opacityScale(opacity))
+							.style("border-top-color", opacityScale(opacity))
+							;
+					}
+				});
 
-	            var html = table.node().outerHTML;
-	            if (d.footer !== undefined)
-	                html += "<div class='footer'>" + d.footer + "</div>";
-	            return html;
+				var html = table.node().outerHTML;
+				if (d.footer !== undefined) {
+					html += "<div class='footer'>" + d.footer + "</div>";
+				}
+				return html;
 			},
 			setPrefix: function () {
 				var yMin = 0,
@@ -260,10 +261,10 @@ define([
 			},
 			_remove: function () {
 				this.svg
-	              .on('mousemove', null)
-	              .on("mouseout" ,null)
-	              .on("dblclick" ,null);
-				
+					.on('mousemove', null)
+					.on("mouseout" ,null)
+					.on("dblclick" ,null);
+
 				this.stopListening(this.model);
 				this.active = false;
 			}

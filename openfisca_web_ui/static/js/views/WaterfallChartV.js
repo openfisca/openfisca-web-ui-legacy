@@ -516,7 +516,7 @@ define([
 					.call(this.xAxis);
 
 				this.g.select('.x-axis').moveToFront()
-				this.g.selectAll('.x-axis .tick text')					
+				this.g.selectAll('.x-axis .tick text')
 					.attr('transform', function (d) {
 						var el = d3.select(this),
 							_dim = this.getBBox();

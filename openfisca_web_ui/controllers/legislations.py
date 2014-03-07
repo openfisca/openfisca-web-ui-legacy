@@ -695,7 +695,7 @@ def user_view(req):
         ctx,
         '/legislations/user-view.mako',
         date = data['date'],
-        dated_legislation_json = legislation.json \
+        dated_legislation_json = legislation.json
             if legislation.json is not None and 'datesim' in legislation.json else None,
         legislation = legislation,
         )
