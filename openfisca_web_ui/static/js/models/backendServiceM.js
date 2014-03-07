@@ -64,7 +64,7 @@ define([
 						alert(errorMessage);
 						console.error(errorMessage, data)
 					} else {
-						var result = data.output.value[0];
+						var result = data.output.value;
 						if ( ! _.isUndefined(result)) {
 							this.set('apiData', result);
 						}

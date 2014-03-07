@@ -622,7 +622,7 @@ define([
 							<thead>\
 								<tr class="nv-pointer-events-none">\
 									<td colspan="3" class="nv-pointer-events-none">\
-										<strong class="x-value">'+d.description+'</strong>\
+										<strong class="x-value">'+d.name+'</strong>\
 									</td>\
 								</tr>\
 							</thead>\

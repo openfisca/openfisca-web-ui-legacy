@@ -107,6 +107,7 @@ def build_requireconfig(ctx):
             'disclaimer': urls.get_url(ctx, u'js/modules/disclaimer'),
             'helpers': urls.get_url(ctx, 'js/modules/helpers'),
             'legislation': urls.get_url(ctx, u'js/modules/legislation'),
+            'parser': urls.get_url(ctx, 'js/modules/parser'),
 
             # External libs
             # You must include this on every page which uses navigator.id functions.
