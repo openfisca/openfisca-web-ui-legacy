@@ -57,9 +57,9 @@ define([
 			},
 			/*
 				List children
-				
-				Description 		: convert object type data in array type data of children
-				Data requirements 	: cleaned
+
+				Description : convert object type data in array type data of children
+				Data requirements : cleaned
 			*/
 			listChildren: function () {
 				var data = this.outputValue,
@@ -77,21 +77,23 @@ define([
 			/*
 				Remove Root Node
 
-				Description 		: Delete first "root" node
-				Data requirements 	: cleaned
+				Description : Delete first "root" node
+				Data requirements : cleaned
 			*/
 			removeRootNode: function () {
 				var data = this.outputValue,
-					json = _.where(data.children, function (d) { return d._id == 'revdisp'});
+					json = _.where(data.children, function (d) {
+						return d._id == 'revdisp';
+					});
 				this.outputValue = json[0];
 				return this;
 			},
-			
+
 			/*
 				Set Parentnodes
 				
-				Description 		: set "parentNodes" property in each node
-				Data requirements 	: cleaned
+				Description : set "parentNodes" property in each node
+				Data requirements : cleaned
 			*/
 			setParentNodes: function () {
 				var that = this,
@@ -107,17 +109,17 @@ define([
 
 						if(i == dataLength-1) loopDatum.parentNodes.push(loopData.description);
 						doIt(loopDatum);
-					})
-				}
+					});
+				};
 				doIt(_data);
 				this.outputValue = _data;
 				return this;
 			},
 			/*
 				Set Positive
-				
-				Description 		: set "positive" sort property in each children
-				Data requirements 	: cleaned
+
+				Description : set "positive" sort property in each children
+				Data requirements : cleaned
 			*/
 			setPositiveSort: function () {
 				var data = this.outputValue;
@@ -144,16 +146,16 @@ define([
 						el.sort = {};
 						if(el.hasOwnProperty('children')) { doIt(el.children); }
 						else {
-							if(i == 0) el.sort = 'bbb';
-							else if(i == 1) el.sort = 'aaa';
-							else if(i == 2) el.sort = 'ccc';
-							else if(i == 3) el.sort = 'ddd';
-							else if(i == 4) el.sort = 'eee';
-							else if(i == 5) el.sort = 'fff';
-							else if(i == 6) el.sort = 'ggg';
-							else if(i == 7) el.sort = 'hhh';
-							else if(i == 8) el.sort = 'iii';
-							else if(i == 9) el.sort = 'jjj';
+							if(i === 0) el.sort = 'bbb';
+							else if(i === 1) el.sort = 'aaa';
+							else if(i === 2) el.sort = 'ccc';
+							else if(i === 3) el.sort = 'ddd';
+							else if(i === 4) el.sort = 'eee';
+							else if(i === 5) el.sort = 'fff';
+							else if(i === 6) el.sort = 'ggg';
+							else if(i === 7) el.sort = 'hhh';
+							else if(i === 8) el.sort = 'iii';
+							else if(i === 9) el.sort = 'jjj';
 						}
 					});
 				};

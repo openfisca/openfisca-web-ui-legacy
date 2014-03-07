@@ -53,33 +53,34 @@ define([
 								.listChildren()
 								.values();
 			},
-			get_distributionData: function (args) { var args = args || {};
+			get_distributionData: function (args) {
+				args = args || {};
 				if(args.type == 'default') {/* Cleaned up and ungrouped data */
 					return new Parser(this.get('source'))
-								.clean()
-								.removeRootNode()
-								.listChildren()
-								.values();
+						.clean()
+						.removeRootNode()
+						.listChildren()
+						.values();
 				}
 				else if(args.type == 'positive') {
 					return new Parser(this.get('source'))
-								.clean()
-								.setPositiveSort()
-								.listChildren()
-								.values();
+						.clean()
+						.setPositiveSort()
+						.listChildren()
+						.values();
 				}
 				else if(args.type == 'test') {
 					return new Parser(this.get('source'))
-								.clean()
-								.setTestSort()
-								.listChildren()
-								.values();
+						.clean()
+						.setTestSort()
+						.listChildren()
+						.values();
 				}
 				else {
 					return new Parser(this.get('source'))
-								.clean()
-								.listChildren()
-								.values();
+						.clean()
+						.listChildren()
+						.values();
 				}
 			},
 			get_locatingData: function () { /* Just cleaned up */

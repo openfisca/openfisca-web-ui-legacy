@@ -79,9 +79,8 @@ define([
 				return this;
 			},
 			outTransition: function () {
-	            this.chart._remove();
-
-	            $('svg').remove();
+				this.chart._remove();
+				$('svg').remove();
 				this.chart.model.destroy();
 			},
 			updateDimensions: function() {

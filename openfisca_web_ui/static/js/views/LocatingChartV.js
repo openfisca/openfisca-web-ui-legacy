@@ -86,7 +86,7 @@ define([
 					data = this.model.get('locatingData');
 
 				this.vingtiles = this.updateVingtilesByUserData(_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }), data);
-				
+
 				this.setPrefix();
 
 				switch(this.yFormat.symbol) {
@@ -95,7 +95,7 @@ define([
 					case 'k': this.legendText = 'revenu en milliers €'; break;
 					case '': this.legendText = 'revenu en €'; break;
 					default: this.legendText = '';
-				};
+				}
 
 				this.chart.xAxis
 					.axisLabel('% de la population')
@@ -104,8 +104,8 @@ define([
 				this.chart.yAxis
 					.axisLabel(this.legendText)
 					.tickFormat(function (d) {
-				        return that.yFormat._scale(d); 
-				});
+						return that.yFormat._scale(d);
+					});
 
 				that.svg.datum(this.vingtiles);
 				that.svg.attr('opacity', 1);
@@ -140,8 +140,8 @@ define([
 			},
 			updateVingtilesByUserData: function (vingtiles, data) {
 				var r = {};
-					r.revdisp = _.findDeep(data, {_id: 'revdisp'}),
-					r.sal = _.findDeep(data, {_id: 'sal'}),
+					r.revdisp = _.findDeep(data, {_id: 'revdisp'});
+					r.sal = _.findDeep(data, {_id: 'sal'});
 					r.pat = _.findDeep(data, {_id: 'pat'});
 
 				r = _.filter(r, function (d) {
@@ -165,7 +165,7 @@ define([
 						.each(function (d, i, el) {
 							/* Define x position */
 							if(d.userPoint) {
-								if(i == 0) { d.x = 0; }
+								if(i === 0) { d.x = 0; }
 								else if(i == vingtile.values.length-1) { d.x = 99; }
 								else {
 									var dY = vingtile.values[i+1].y - vingtile.values[i-1].y,
@@ -183,7 +183,7 @@ define([
 			tooltipContentGenerator: function (d) {
 				var that = this;
 				if (_.isUndefined(this.yFormat)) return '';
-				if (d == null) return '';
+				if (d === null) return '';
 				var table = d3.select(document.createElement("table"));
 				var theadEnter = table.selectAll("thead")
 					.data([d])
@@ -199,19 +199,21 @@ define([
 					.data([d])
 					.enter().append("tbody");
 				var trowEnter = tbodyEnter.selectAll("tr")
-					.data(function(p) { return p.series})
+					.data(function(p) { return p.series; })
 					.enter()
 					.append("tr")
-					.classed("highlight", function(p) { return p.highlight})
+					.classed("highlight", function(p) { return p.highlight; })
 					;
 
 				trowEnter.append("td")
 					.classed("legend-color-guide",true)
 					.append("div")
-						.style("background-color", function(p) { return p.color});
+					.style("background-color", function(p) { return p.color; });
 				trowEnter.append("td")
 					.classed("key",true)
-					.html(function(p) {return p.key + ' inférieur à : '});
+					.html(function (p) {
+						return p.key + ' inférieur à : ';
+					});
 				trowEnter.append("td")
 					.classed("value",true)
 					.html(function(p,i) { return that.yFormat._scale(p.value) + ' '+ that.yFormat.symbolText; });
@@ -242,7 +244,7 @@ define([
 				this.yFormat = d3.formatPrefix(magnitude);
 				/* Number formating */
 				this.yFormat._scale = function (val) {
-					if(	that.yFormat.symbol != 'G' && that.yFormat.symbol != 'M' && that.yFormat.symbol != 'k' && that.yFormat.symbol != '') {
+					if(	that.yFormat.symbol !== 'G' && that.yFormat.symbol !== 'M' && that.yFormat.symbol !== 'k' && that.yFormat.symbol !== '') {
 						return (""+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 					}
 					var roundLevel = (that.yFormat.symbol == 'G' || that.yFormat.symbol == 'M') ? 2: 0;
@@ -257,7 +259,7 @@ define([
 					case 'k': this.legendText = 'revenu en milliers €'; this.yFormat.symbolText = '€'; break;
 					case '': this.legendText = 'revenu en €'; this.yFormat.symbolText = '€'; break;
 					default: this.legendText = ''; this.yFormat.symbolText = '€';
-				};
+				}
 			},
 			_remove: function () {
 				this.svg

@@ -62,7 +62,7 @@ define([
 					if (data.errors) {
 						var errorMessage = 'Erreur de simulation : les paramètres sont probablement incohérents.';
 						alert(errorMessage);
-						console.error(errorMessage, data)
+						console.error(errorMessage, data);
 					} else {
 						var result = data.output.value;
 						if ( ! _.isUndefined(result)) {

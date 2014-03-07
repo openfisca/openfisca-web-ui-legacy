@@ -64,10 +64,12 @@ define([
 			},
 			render: function (args) {
 
-				var args = args || {};
-				if(_.isUndefined(args.getDatas) || args.getDatas) this.setData(this.model.get('waterfallData'));
+				args = args || {};
+				if(_.isUndefined(args.getDatas) || args.getDatas) {
+					this.setData(this.model.get('waterfallData'));
+				}
 
-				this.buildBars({endTransitionCallback: this.buildActiveBars});
+				this.buildBars(this.buildActiveBars);
 
 				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) this.buildLegend();
 				else this.updateLegend();
@@ -77,7 +79,7 @@ define([
 			_events: function () {
 				var that = this;
 				this.g.on('click', function (d) {
-					that.updateScales();		
+					that.updateScales();
 				});
 			},
 			setData: function (data) {
@@ -100,17 +102,17 @@ define([
 
 				this.updateScales();
 			},
-			updateScales: function (args) {
-				var args = args || {},
-					that = this,
-					currentDataSetValues = _.map(this.currentDataSet, function (data) {
-						return [data.waterfall.startValue, data.waterfall.endValue];
+			updateScales: function (yValues) {
+				var that = this;
+				var currentDataSetValues = _.map(this.currentDataSet, function (data) {
+					return [data.waterfall.startValue, data.waterfall.endValue];
 				});
+				var yMin, yMax;
 
-				if(!_.isUndefined(args.yValues)) {
+				if(!_.isUndefined(yValues)) {
 
-					var yMin = d3.min(args.yValues),
-						yMax = d3.max(args.yValues);
+					yMin = d3.min(yValues);
+					yMax = d3.max(yValues);
 
 					this.scales = {
 						x: d3.scale.ordinal()
@@ -119,7 +121,7 @@ define([
 								return d.name;
 						})),
 						y: d3.scale.linear()
-							.domain([d3.min(args.yValues), d3.max(args.yValues)])
+							.domain([d3.min(yValues), d3.max(yValues)])
 							.range([that.height - that.padding.bottom, that.padding.top])
 					};
 
@@ -145,8 +147,8 @@ define([
 				}
 				else {
 					/* Set scales */
-					var yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);}),
-						yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
+					yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
+					yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
 					this.scales = {
 						x: d3.scale.ordinal()
 							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
@@ -169,8 +171,8 @@ define([
 				var magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax);
 				this.prefix = d3.formatPrefix(magnitude);
 				this.prefix._scale = function (val) {
-					if(	that.prefix.symbol != 'G' && that.prefix.symbol != 'M' && that.prefix.symbol != 'k' && that.prefix.symbol != '') {
-						return (""+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+					if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' && that.prefix.symbol !== '') {
+						return ("" + d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 					}
 					var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
 					if(that.prefix.symbol == 'k') val = that.prefix.scale(val)*1000;
@@ -193,19 +195,19 @@ define([
 					case '':
 						this.legendText = 'En euros';
 						this.prefix.symbolText = '€';
+						break;
 					default:
 						this.legendText = '';
 				}
 			},
-			buildBars: function (args) {
-				var that = this,
-					dataLength = this.currentDataSet.length,
-					barsLength = (!_.isUndefined(this.bars[0])) ? this.bars[0].length: 0,
-					barWidth = (that.width - that.padding.left - that.padding.right - dataLength*that.innerPadding)/dataLength,
-					args = args || {};
-				
+			buildBars: function (endTransitionCallback) {
+				var that = this;
+				var dataLength = this.currentDataSet.length;
+				var barsLength = (!_.isUndefined(this.bars[0])) ? this.bars[0].length: 0;
+				var barWidth = (that.width - that.padding.left - that.padding.right - dataLength*that.innerPadding)/dataLength;
+
 				this.bars = this.g.selectAll('.bar')
-						.data(this.currentDataSet)
+					.data(this.currentDataSet);
 
 				this.bars
 					.enter()
@@ -215,18 +217,21 @@ define([
 						.attr('width', barWidth)
 						.attr('height', 0)
 						.attr("rx", 4)
-    					.attr("ry", 4)
+						.attr("ry", 4)
 						.attr('y', function (d, i) {
-							if(d.value < 0) var r = that.scales.y(d.waterfall.startValue);
-							else var r = that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
-							return r;
+							return d.value < 0 ?
+								that.scales.y(d.waterfall.startValue) :
+								that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 						})
 						.attr('x', function (d, i, a) {
 							return 0;
 						})
 						.attr('fill', function (d) {
-								if(d.value > 0) return that.positiveColor;
-								else return that.negativeColor;
+							if (d.value > 0) {
+								return that.positiveColor;
+							} else {
+								return that.negativeColor;
+							}
 						})
 						.attr('opacity', 0.8)
 						.attr('stroke-width', 1);
@@ -235,18 +240,21 @@ define([
 						.duration(1000)
 						.attr('width', barWidth)
 						.attr('height', function (d) {
-							if(d.value < 0) var _return = that.scales.y(d.waterfall.endValue) - that.scales.y(d.waterfall.startValue);
-							else var _return = that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue);
-
+							var _return;
+							if (d.value < 0) {
+								_return = that.scales.y(d.waterfall.endValue) - that.scales.y(d.waterfall.startValue);
+							} else {
+								_return= that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue);
+							}
 							return _return < 0.8 ? 0.8: _return;
 						})
 						.attr('x', function (d, i, a) {
 								return that.scales.x(d.name) + that.innerPadding/2;
 						})
 						.attr('y', function (d, i) {
-							if(d.value < 0) var r = that.scales.y(d.waterfall.startValue);
-							else var r = that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
-							return r;
+							return d.value < 0 ?
+								that.scales.y(d.waterfall.startValue) :
+								that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 						})
 						.attr('fill', function (d) {
 							if(d.value > 0) return that.positiveColor;
@@ -262,8 +270,8 @@ define([
 							if(!_.isUndefined(that.incomeText)) that.incomeText.transition().duration(100).remove();
 						})
 						.each('end',function (d, i) {
-							if(!_.isUndefined(args.endTransitionCallback) && i==0) {
-								args.endTransitionCallback.call(that);
+							if(!_.isUndefined(endTransitionCallback) && i === 0) {
+								endTransitionCallback.call(that);
 							}
 						});
 
@@ -294,14 +302,14 @@ define([
 						.attr("height", that.padding.bottom)
 						.attr("x", 0)
 						.attr("y", that.height - that.padding.bottom)
-						.style("fill", "url(#bottomBorderGradient)")
+						.style("fill", "url(#bottomBorderGradient)");
 
 					this.g.append("svg:rect")
 						.attr("width", that.width+that.margin.right)
 						.attr("height", that.padding.top)
 						.attr("x", 0)
 						.attr("y", 0)
-						.style("fill", "url(#topBorderGradient)")
+						.style("fill", "url(#topBorderGradient)");
 				}
 
 				if(!_.isUndefined(this.backToGlobalScaleButton)) this.backToGlobalScaleButton.moveToFront();
@@ -346,7 +354,7 @@ define([
 							d3.select(this)
 								.transition()
 								.duration(50)
-									.attr('opacity', 0)
+									.attr('opacity', 0);
 
 							that.showTooltip(bar);
 
@@ -365,10 +373,10 @@ define([
 								.attr('stroke-dasharray', ('3, 3'))
 								.attr('opacity', 0)
 
-								.attr('x1', function () { return barAttrs.x })
-								.attr('y1', function () {  return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);})
-								.attr('x2', function () {  return that.width; })
-								.attr('y2', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);})
+								.attr('x1', function () { return barAttrs.x; })
+								.attr('y1', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
+								.attr('x2', function () { return that.width; })
+								.attr('y2', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
 								.moveToBack();
 							
 							that.incomeText = that.g.selectAll('.income-number')
@@ -385,7 +393,7 @@ define([
 									var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
 									return barAttrs.y + lineHeight * _i - (that.incomeText.data().length * lineHeight-10) + (barData.value < 0 ? (barAttrs.height) : 0);
 								})
-								.text(function (_d) { 
+								.text(function (_d) {
 									return _d;
 								})
 								.attr('opacity', 1)
@@ -393,33 +401,35 @@ define([
 									.append('text')
 									.attr('class', 'income-number')
 									.attr('font-size', 15)
-									.attr('x', function () { return that.width + 5 })
+									.attr('x', function () { return that.width + 5; })
 									.attr('y', function (_d, _i) {
-										var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
+										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
 										return barAttrs.y + lineHeight * _i - (that.incomeText.data().length * lineHeight-10) + (barData.value < 0 ? (barAttrs.height) : 0);
 									})
 									.attr('font-weight', 'bold')
-									.text(function (_d) { 
+									.text(function (_d) {
 										return _d;
-								}
-							);
+									});
 
-							if(!_.isUndefined(d.parentNodes[0])) {
+							if (! _.isUndefined(d.parentNodes[0])) {
 								var parentNode = d.parentNodes[0].split(' ');
 								that.incomeLabel = that.g.selectAll('.income-label')
 									.data(parentNode);
 
 								that.incomeLabel
 									.text(function (d) { return d; })
-									.attr('y', function (_d, _i) { var lineHeight = parseInt(d3.select(this).attr('font-size'))+3; return barAttrs.y + lineHeight + _i * lineHeight + (barData.value < 0 ? (barAttrs.height) : 0); })
-									.attr('x', function () { return that.width + 5 })
+									.attr('y', function (_d, _i) {
+										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
+										return barAttrs.y + lineHeight + _i * lineHeight + (barData.value < 0 ? (barAttrs.height) : 0);
+									})
+									.attr('x', function () { return that.width + 5; })
 									.enter()
 										.append('text')
 										.attr('class', 'income-label')
-										.attr('x', function () { return that.width + 5 })
+										.attr('x', function () { return that.width + 5; })
 										.attr('font-size', 12)
 										.attr('font-weight', 'bold')
-										.attr('y', function (_d, _i) { 
+										.attr('y', function (_d, _i) {
 											var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
 											return barAttrs.y + lineHeight + _i * lineHeight + (barData.value < 0 ? (barAttrs.height) : 0);
 										})
@@ -471,7 +481,7 @@ define([
 						.on('click', function (d) {
 							var topV = d.waterfall.startValue - (d.value*3),
 								bottomV = d.waterfall.endValue + (d.value*3);
-							that.updateScales({ yValues: [topV, bottomV]});
+							that.updateScales([topV, bottomV]);
 							that.render({getDatas: false});
 						});
 
@@ -499,11 +509,11 @@ define([
 			updateLegend: function () {
 				var that = this;
 
-				this.xAxis.scale(this.scales.x)
+				this.xAxis.scale(this.scales.x);
 				this.yAxis.scale(this.scales.y)
 					.tickFormat(function (d) {
-				        return that.prefix._scale(d); 
-				    })
+						return that.prefix._scale(d);
+					});
 
 				this.yAxisLegend
 					.transition()
@@ -515,7 +525,7 @@ define([
 					.duration(1000)
 					.call(this.xAxis);
 
-				this.g.select('.x-axis').moveToFront()
+				this.g.select('.x-axis').moveToFront();
 				this.g.selectAll('.x-axis .tick text')
 					.attr('transform', function (d) {
 						var el = d3.select(this),
@@ -531,7 +541,7 @@ define([
 
 				var legendTextSplited = this.legendText.split('\n');
 				this.legendTextObject = this.g.selectAll('.legendText_y')
-					.data(legendTextSplited)
+					.data(legendTextSplited);
 
 				this.legendTextObject
 					.text(function (d) { return d; })
@@ -539,13 +549,13 @@ define([
 						.attr('class', 'legendText_y')
 						.attr('fill', '#333')
 						.attr('x', function (d) { return that.padding.left; })
-						.attr('y', function (d, i) {  return 10 + i*10; })
+						.attr('y', function (d, i) { return 10 + i*10; })
 						.attr('font-size', 12)
 						.attr('font-weight', 'normal')
 						.attr('text-anchor', 'end')
 						.text(function (d) { return d; });
 
-				this.legendTextObject.moveToFront()
+				this.legendTextObject.moveToFront();
 
 				this.legendTextObject.exit().remove();
 			},
@@ -554,15 +564,15 @@ define([
 				var that = this;
 					this.xAxis = d3.svg.axis()
 						.scale(this.scales.x)
-						.orient("bottom")
+						.orient("bottom");
 
 					this.yAxis = d3.svg.axis()
 						.scale(this.scales.y)
 						.tickSize(this.width - this.padding.left)
 						.orient("left")
 						.tickFormat(function (d) {
-					        return that.prefix._scale(d); 
-					    })
+							return that.prefix._scale(d);
+						});
 
 					this.yAxisLegend = this.g.append("g");
 					this.xAxisLegend = this.g.append("g");
@@ -573,7 +583,7 @@ define([
 							var pos = that.width;
 							return 'translate('+pos+',0)';
 						})
-						.call(this.yAxis)
+						.call(this.yAxis);
 
 					this.xAxisLegend
 						.attr("class", "x-axis")
@@ -605,7 +615,7 @@ define([
 						.attr('class', 'legendText_y')
 						.attr('fill', '#333')
 						.attr('x', function (d) { return that.padding.left; })
-						.attr('y', function (d, i) {  return 10 + i*10; })
+						.attr('y', function (d, i) { return 10 + i*10; })
 						.attr('font-size', 12)
 						.attr('font-weight', 'normal')
 						.attr('text-anchor', 'end')
@@ -616,6 +626,7 @@ define([
 				var d = bar.data()[0],
 					that = this;
 				/* Show tooltip */
+				/* jshint multistr: true */
 				this.$el.append('\
 					<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+'" style="opacity: 0; position: absolute;">\
 						<table class="nv-pointer-events-none">\

@@ -38,7 +38,7 @@ define(['underscore'], function (_) {
 		installConsolePolyfill();
 	}
 
-	_.mixin({ 
+	_.mixin({
 		findDeep: function(items, attrs) {
 			function match(value) {
 				for (var key in attrs) {

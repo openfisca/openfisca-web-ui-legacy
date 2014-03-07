@@ -16,7 +16,7 @@ define([
 
 			defaultSort: 'positive',
 			currentSort: null,
- 			headHeight: 50,
+			headHeight: 50,
 			height: null,
 			width: null,
 			padding: { top: 100, left: 20, bottom: 40, right: 20},
@@ -126,7 +126,7 @@ define([
 				this.prefix = d3.formatPrefix(magnitude);
 				/* Number formating */
 				this.prefix._scale = function (val) {
-					if(	that.prefix.symbol != 'G' && that.prefix.symbol != 'M' && that.prefix.symbol != 'k' && that.prefix.symbol != '') {
+					if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' && that.prefix.symbol !== '') {
 						return (""+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 					}
 					var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
@@ -143,6 +143,7 @@ define([
 					case 'k': this.prefix.symbolText = '€';
 						break;
 					case '': this.prefix.symbolText = '€';
+						break;
 					default:
 						this.legendText = '';
 				}
@@ -154,7 +155,7 @@ define([
 				for(var prop in this.sortData) {
 					$sortMenu
 						.append('<input class="btn btn-default '+prop+'-sort '+((prop == sortType)?'active':'')+'" data-sort="'+prop+'" type="button" value="'+this.sortData[prop].name+'">');
-				};
+				}
 				$sortMenu.off('click');
 				$sortMenu.on('click', 'input', function () {
 					if(!$(this).hasClass('active')) {
@@ -183,14 +184,12 @@ define([
 				var outputNodes = _.map(nodes, function (node, i) {
 					/* If node already doesn't exist, we create it, else we update it */
 					var oldNode = _.findWhere(that.nodes, {'_id': node._id });
+					var out = {};
 					if(!_.isUndefined(oldNode)) {
-						var out = {
+						out = {
 							x: oldNode.px,
 							y: oldNode.py
 						};
-					}
-					else {
-						var out = {};
 					}
 					out._id = node._id;
 					out.value = node.value;
@@ -219,8 +218,8 @@ define([
 				});
 			},
 			buildBubbles: function (data) {
-				var that = this,
-					data = data || this.nodes;
+				var that = this;
+				data = data || this.nodes;
 
 				this.bubbles = this.g.selectAll('._bubble')
 					.data(data);
@@ -235,7 +234,9 @@ define([
 						.attr('r', function (d) { return d.radius; })
 
 						/* MOVE TO CSS */
-						.attr('fill', function (d) { return d.fillColor })
+						.attr('fill', function (d) {
+							return d.fillColor;
+						})
 						.attr('stroke', 'black')
 						.attr('stroke-width', 1)
 						.attr('opacity', 0.8)
@@ -245,8 +246,8 @@ define([
 
 				this.bubbles
 					.transition().duration(200)
-						.attr('r', function (d) { return d.radius; })
-						.attr('fill', function (d) { return d.fillColor });
+					.attr('r', function (d) { return d.radius; })
+					.attr('fill', function (d) { return d.fillColor; });
 
 				this.bubbles
 					.exit()
@@ -260,6 +261,7 @@ define([
 					var bubble = this;
 
 					/* Show tooltip */
+					/*jshint multistr: true */
 					that.$el.append('\
 						<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+'" style="opacity: 0; position: absolute;">\
 							<table class="nv-pointer-events-none">\
@@ -289,7 +291,7 @@ define([
 							return yPos + 'px';
 						})
 						// .call(function () {
-						// 	that.g.append('circle').attr('r', 3).attr('cy', d.y).attr('cx', d.x).attr('fill', 'red');
+						// that.g.append('circle').attr('r', 3).attr('cy', d.y).attr('cx', d.x).attr('fill', 'red');
 						// })
 						.transition().duration(100)
 							.style('opacity', 1);
@@ -338,7 +340,7 @@ define([
 						that.bubbles
 							.each(that.updateBubblePositions(e.alpha))
 							.attr("cx", function(d, i) { return d.x + that.padding.left; })
-            				.attr("cy", function(d) { return d.y + that.padding.top; });
+							.attr("cy", function(d) { return d.y + that.padding.top; });
 					})
 					.start();
 			},
