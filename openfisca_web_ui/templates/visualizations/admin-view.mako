@@ -111,11 +111,15 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
             <dd>${value}</dd>
     % endif
 <%
+    simulation_url = '{}?{}'.format(
+        urls.get_full_url(ctx, 'api/1/simulate'),
+        urllib.urlencode({'token': ctx.session.anonymous_token}),
+        )
     value = visualization.url
 %>\
     % if value is not None:
             <dt>${_("Source URL")}</dt>
-            <dd><a href="${value}">${value}</a></dd>
+            <dd><a href="${value.format(simulation_url = simulation_url)}">${value}</a></dd>
     % endif
 <%
     value = visualization.enabled
