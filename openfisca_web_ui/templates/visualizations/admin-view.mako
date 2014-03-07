@@ -93,11 +93,11 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     if value is None:
         return ''
     simulation_url = '{}?{}'.format(
-        urls.get_full_url(ctx, 'api', '1', 'smulate'),
+        urls.get_full_url(ctx, 'api/1/simulate'),
         urllib.urlencode({'token': ctx.session.anonymous_token}),
         )
 %>\
-        <iframe src="${value.format(simulation_url = simulation_url)}"></iframe>
+        <iframe class="visualization-iframe" src="${value.format(simulation_url = simulation_url)}"></iframe>
 </%def>
 
 
