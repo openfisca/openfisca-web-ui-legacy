@@ -668,7 +668,8 @@ define([
 				bar.attr('stroke-width', 1);
 			},
 			_remove: function () {
-				
+				this.stopListening(this.model);
+				this.active = false;
 			}
 		});
 	return WaterfallChartV;
