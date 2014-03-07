@@ -19,7 +19,7 @@ define([
 	var routes = {
 		'': 'defaultChart',
 		'cascade': 'waterfallChart',
-		'répartition': 'distributionChart',
+		'repartition': 'distributionChart',
 		'se-situer': enableLocatingChart ? 'locatingChart' : 'default',
 		'visualisations': 'visualizationsChart',
 		'*fragment': 'default'
