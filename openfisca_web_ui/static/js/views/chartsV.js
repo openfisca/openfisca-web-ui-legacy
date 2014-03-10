@@ -23,7 +23,7 @@ define([
 			height: null,
 			initialize: function () {
 				this.fragmentByChartName = {
-					'distribution': 'répartition',
+					'distribution': 'repartition',
 					'waterfall': 'cascade',
 					'visualisations': 'visualisations'
 				};
