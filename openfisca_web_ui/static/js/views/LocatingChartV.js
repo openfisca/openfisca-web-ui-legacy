@@ -63,7 +63,7 @@ define([
 							.showXAxis(true)
 							.useInteractiveGuideline(true);
 
-						that.svg = d3.select(this.parent.el).append('svg')
+						that.svg = d3.select(that.parent.el).append('svg')
 							.attr('height', that.height)
 							.attr('width', that.width)
 							.datum(that.vingtiles)

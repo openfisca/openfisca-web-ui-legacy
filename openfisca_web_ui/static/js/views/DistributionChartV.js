@@ -70,7 +70,7 @@ define([
 			},
 
 			initialize: function (options) {
-				this.parent = parent;
+				this.parent = options.parent;
 
 				/* Positions and dimensions */
 				this.height = this.parent.height;
