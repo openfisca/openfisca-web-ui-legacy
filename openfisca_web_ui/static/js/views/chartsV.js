@@ -58,20 +58,20 @@ define([
 
 				switch(chartName) {
 					case 'waterfall':
-						this.chart = new WaterfallChartV(this);
+						this.chart = new WaterfallChartV({parent: this});
 						break;
 					case 'locating':
 						if (enableLocatingChart) {
 							require(['LocatingChartV'], _.bind(function(LocatingChartV) {
-								this.chart = new LocatingChartV(this);
+								this.chart = new LocatingChartV({parent: this});
 							}, this));
 						}
 						break;
 					case 'distribution':
-						this.chart = new DistributionChartV(this);
+						this.chart = new DistributionChartV({parent: this});
 						break;
 					case 'visualisations':
-						this.chart = new VisualizationsPaneV(this);
+						this.chart = new VisualizationsPaneV({parent: this});
 						break;
 //					default:
 //						console.error('_Error : No chart selected when called AppV.render');

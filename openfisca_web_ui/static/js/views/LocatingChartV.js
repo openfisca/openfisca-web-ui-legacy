@@ -34,14 +34,16 @@ define([
 				bottom: 0,
 				right: 20
 			},
+			parent: null,
 			userPointFill: '#a63232',
-			initialize: function (parent) {
+			initialize: function (options) {
+				this.parent = options.parent;
 
 				var that = this;
 				this.active = true;
 
-				this.height = parent.height - this.margin.bottom - this.margin.top;
-				this.width = parent.width - this.margin.left - this.margin.right;
+				this.height = this.parent.height - this.margin.bottom - this.margin.top;
+				this.width = this.parent.width - this.margin.left - this.margin.right;
 
 				this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
 
@@ -61,7 +63,7 @@ define([
 							.showXAxis(true)
 							.useInteractiveGuideline(true);
 
-						that.svg = d3.select(parent.el).append('svg')
+						that.svg = d3.select(this.parent.el).append('svg')
 							.attr('height', that.height)
 							.attr('width', that.width)
 							.datum(that.vingtiles)

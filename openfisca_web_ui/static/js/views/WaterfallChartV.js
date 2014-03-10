@@ -16,6 +16,7 @@ define([
 
 			/* Properties */
 			model: chartM,
+			parent: null,
 			views: [],
 
 			/* Settings */
@@ -44,16 +45,17 @@ define([
 
 			/* Settings */
 
-			initialize: function (parent) {
+			initialize: function (options) {
+				this.parent = options.parent;
 
-				this._el = d3.select(parent.el).append('div')
+				this._el = d3.select(this.parent.el).append('div')
 					.attr('id', 'waterfall-chart');
 				this.setElement(this._el[0]);
 
 				this.g = d3.select(this.el).append('svg');
 
-				this.height = parent.height - this.margin.bottom - this.margin.top;
-				this.width = parent.width - this.margin.left - this.margin.right;
+				this.height = this.parent.height - this.margin.bottom - this.margin.top;
+				this.width = this.parent.width - this.margin.left - this.margin.right;
 
 				this.g
 					.attr('height', this.height)

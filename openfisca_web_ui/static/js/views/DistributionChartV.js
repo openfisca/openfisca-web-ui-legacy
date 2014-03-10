@@ -13,6 +13,7 @@ define([
 
 		var DistributionChartV = Backbone.View.extend({
 			model: chartM,
+			parent: null,
 
 			defaultSort: 'positive',
 			currentSort: null,
@@ -68,16 +69,17 @@ define([
 				}
 			},
 
-			initialize: function (parent) {
+			initialize: function (options) {
+				this.parent = parent;
 
 				/* Positions and dimensions */
-				this.height = parent.height;
-				this.width = parent.width;
+				this.height = this.parent.height;
+				this.width = this.parent.width;
 
 				this.innerWidth = this.width - this.padding.left - this.padding.right;
 				this.innerHeight = this.height - this.padding.top - this.padding.bottom;
 
-				this._el = d3.select(parent.el).append('div')
+				this._el = d3.select(this.parent.el).append('div')
 					.attr('id', 'distribution-chart');
 				this.setElement(this._el[0]);
 
