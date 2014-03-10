@@ -10,4 +10,4 @@ flake8:
 	flake8
 
 jshint:
-	jshint openfisca_web_ui/static/js
+	jshint openfisca_web_ui/static/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
