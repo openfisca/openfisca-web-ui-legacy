@@ -86,7 +86,7 @@ title="afficher / masquer">
   <div class="panel-heading panel-form">
     <div class="form-inline">
       <h4 class="panel-title">
-        <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-individu-{self[id].value}" \
+        <a class="collapsed collapse-node-toggle" data-toggle="collapse" href="#collapse-individu-{self[id].value}" \
 title="afficher / masquer">
           <span class="indicator"></span>
         </a>
