@@ -169,20 +169,42 @@ def session(req):
 @wsgihelpers.wsgify
 def simulate(req):
     ctx = contexts.Ctx(req)
-    token, error = conv.base.input_to_uuid(req.params.get('token'))
-    api_data, errors = get_api_data_and_errors(ctx, token = token)
+    params = req.params
+    inputs = dict(
+        token = params.get('token'),
+        axes = params.get('axes'),
+        )
+    data, errors = conv.struct({
+        'token': conv.base.input_to_uuid,
+        'axes': conv.pipe(
+            conv.make_input_to_json(),
+            conv.uniform_sequence(
+                conv.struct({
+                    'count': conv.test_greater_or_equal(1),
+                    'min': conv.test_isinstance(int),
+                    'max': conv.test_isinstance(int),
+                    'name': conv.cleanup_line,
+                    }),
+                ),
+            ),
+        })(inputs, state = ctx)
     if errors is None:
+        api_data, errors = get_api_data_and_errors(ctx, token = data['token'])
+    if errors is None:
+        if data['axes'] is not None:
+            for scenario in api_data['scenarios']:
+                scenario['axes'] = data['axes']
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
             log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(
                 pformat(api_data), errors))
-        data = {'output': output, 'errors': errors}
+        output_data = {'output': output, 'errors': errors}
     else:
-        data = {'errors': errors}
-    if token is not None and 'params' in data.get('output', {}):
+        output_data = {'errors': errors}
+    if data['token'] is not None and 'params' in output_data.get('output', {}):
         # Call with token are anonymous. Remove params from json response
-        del data['output']['params']
-    return wsgihelpers.respond_json(ctx, data)
+        del output_data['output']['params']
+    return wsgihelpers.respond_json(ctx, output_data)
 
 
 @wsgihelpers.wsgify
