@@ -30,6 +30,7 @@ import collections
 import logging
 import pymongo
 import re
+import urllib
 
 import webob
 
@@ -300,12 +301,19 @@ def api1_search(req):
         cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
     visualizations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
 
-    return wsgihelpers.respond_json(ctx,
+    return wsgihelpers.respond_json(
+        ctx,
         [
             {
                 'title': visualization.title,
                 'description': visualization.description,
-                'thumbnail_url': visualization.thumbnail_url,
+                'iframeUrl': visualization.url.format(
+                    simulation_url = u'{}?{}'.format(
+                        urls.get_full_url(ctx, 'api/1/simulate'),
+                        urllib.urlencode({'token': ctx.session.anonymous_token}),
+                        ),
+                    ),
+                'thumbnailUrl': visualization.thumbnail_url,
                 'url': visualization.get_user_url(ctx),
                 }
             for visualization in visualizations
@@ -338,7 +346,8 @@ def api1_typeahead(req):
             for word in data['q']
             ]}
     cursor = model.Visualization.get_collection().find(criteria, ['title'])
-    return wsgihelpers.respond_json(ctx,
+    return wsgihelpers.respond_json(
+        ctx,
         [
             visualization_attributes['title']
             for visualization_attributes in cursor.limit(10)
