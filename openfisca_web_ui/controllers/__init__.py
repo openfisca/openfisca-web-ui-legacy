@@ -169,6 +169,7 @@ def session(req):
 @wsgihelpers.wsgify
 def simulate(req):
     ctx = contexts.Ctx(req)
+    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
     params = req.params
     inputs = dict(
         token = params.get('token'),
@@ -204,7 +205,7 @@ def simulate(req):
     if data['token'] is not None and 'params' in output_data.get('output', {}):
         # Call with token are anonymous. Remove params from json response
         del output_data['output']['params']
-    return wsgihelpers.respond_json(ctx, output_data)
+    return wsgihelpers.respond_json(ctx, output_data, headers = headers)
 
 
 @wsgihelpers.wsgify
