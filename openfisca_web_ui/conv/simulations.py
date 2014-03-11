@@ -52,21 +52,15 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
         return None, None
     if state is None:
         state = default_state
-    try:
-        response = requests.post(
-            conf['api.urls.simulate'],
-            headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': conf['app_name'],
-                },
-            data = api_post_content,
-            )
-    except requests.exceptions.ConnectionError:
-        return api_post_content, state._('Unable to connect to simulate API, url: {}').format(conf['api.urls.simulate'])
-    try:
-        response_data = response.json(object_pairs_hook = collections.OrderedDict)
-    except ValueError:
-        return api_post_content, state._(u'Unable to decode JSON data of simulate API response')
+    response = requests.post(
+        conf['api.urls.simulate'],
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': conf['app_name'],
+            },
+        data = api_post_content,
+        )
+    response_data = response.json(object_pairs_hook = collections.OrderedDict)
     return (response_data, None) if response.ok else (api_post_content, response_data.get('error'))
 
 

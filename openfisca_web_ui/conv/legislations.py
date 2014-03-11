@@ -40,23 +40,15 @@ def validate_legislation_json(json_dict, state = None):
         return None, None
     if state is None:
         state = default_state
-    try:
-        response = requests.post(
-            conf['api.urls.legislations'],
-            headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': conf['app_name'],
-                },
-            data = json.dumps(dict(legislation = json_dict)),
-            )
-    except requests.exceptions.ConnectionError:
-        return json_dict, state._('Unable to connect to API, url: {}').format(conf['api.urls.legislations'])
-    if not response.ok:
-        try:
-            return json_dict, response.json(object_pairs_hook = collections.OrderedDict)
-        except ValueError as exc:
-            return json_dict, unicode(exc)
-    return json_dict, None
+    response = requests.post(
+        conf['api.urls.legislations'],
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': conf['app_name'],
+            },
+        data = json.dumps(dict(legislation = json_dict)),
+        )
+    return (json_dict, None) if response.ok else (json_dict, response.json(object_pairs_hook = collections.OrderedDict))
 
 
 def retrieve_legislation(url, state = None):
@@ -67,10 +59,10 @@ def retrieve_legislation(url, state = None):
     try:
         response = requests.get(url)
     except requests.exceptions.ConnectionError:
-        return url, state._('Unable to connect to URL: {}').format(url)
+        return url, state._(u'Unable to connect to URL "{}"').format(url)
     if not response.ok:
-        return url, state._('URL {} responded with status code {}').format(url, response.status_code)
+        return url, state._(u'URL "{}" responded with status code "{}"').format(url, response.status_code)
     try:
         return response.json(object_pairs_hook = collections.OrderedDict), None
     except ValueError:
-        return url, state._('URL {} didn\'t return a valid JSON').format(url)
+        return url, state._(u'Unable to decode JSON returned by URL "{}"').format(url)

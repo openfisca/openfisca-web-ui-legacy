@@ -28,6 +28,7 @@
 
 import collections
 import datetime
+import logging
 import re
 import requests
 
@@ -37,6 +38,7 @@ from . import conf, conv, objects, urls, wsgihelpers
 
 
 _fields_api_data = None
+log = logging.getLogger(__name__)
 
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
@@ -633,9 +635,8 @@ def fetch_fields_api_data():
     global _fields_api_data
     try:
         response = requests.get(conf['api.urls.fields'])
-    except requests.exceptions.ConnectionError:
-        return
-    except requests.exceptions.HTTPError:
+    except requests.exceptions.ConnectionError as exc:
+        log.exception(exc)
         return
     if response.ok:
         _fields_api_data = response.json()
