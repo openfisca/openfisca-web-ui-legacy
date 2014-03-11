@@ -13,14 +13,14 @@ define([
 
 		var DistributionChartV = Backbone.View.extend({
 			model: chartM,
-			parent: null,
 
 			defaultSort: 'positive',
 			currentSort: null,
 			headHeight: 50,
 			height: null,
 			width: null,
-			padding: { top: 100, left: 20, bottom: 40, right: 20},
+			maxWidth: 1000,
+			padding: {top: 100, left: 20, bottom: 40, right: 20},
 			sectionWidth: null,
 			sectionHeight: null,
 			sectionBottomMargin: 30,
@@ -70,22 +70,14 @@ define([
 			},
 
 			initialize: function (options) {
-				this.parent = options.parent;
-
-				/* Positions and dimensions */
-				this.height = this.parent.height;
-				this.width = this.parent.width;
+				this.updateDimensions();
 
 				this.innerWidth = this.width - this.padding.left - this.padding.right;
 				this.innerHeight = this.height - this.padding.top - this.padding.bottom;
 
-				this._el = d3.select(this.parent.el).append('div')
-					.attr('id', 'distribution-chart');
-				this.setElement(this._el[0]);
-
 				this.$el.append('<div id="sort-menu" class="btn-group"></div>');
 
-				this.g = this._el.append('svg')
+				this.g = d3.select(this.el).append('svg')
 					.attr('height', this.height)
 					.attr('width', this.width);
 
@@ -180,6 +172,10 @@ define([
 				this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*this.sectionWidth + this.padding.top + this.padding.bottom});
 
 				this.start();
+			},
+			updateDimensions: function() {
+				this.width = Math.min(this.$el.width(), this.maxWidth);
+				this.height = this.width * 0.66;
 			},
 			updateNodes: function (nodes) {
 				var that = this;
@@ -355,9 +351,6 @@ define([
 					this.g.transition().duration(400)
 						.attr('width', args.width);
 				}
-			},
-			_remove: function () {
-				this.$el.remove();
 			}
 		});
 

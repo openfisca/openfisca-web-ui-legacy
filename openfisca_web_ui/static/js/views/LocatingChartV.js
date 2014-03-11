@@ -19,9 +19,8 @@ define([
 
 		var LocatingChartV = Backbone.View.extend({
 			model: chartM,
-
+//			TODO parametrize year
 			year: 2011,
-
 			padding: {
 				top: 50,
 				right: 0,
@@ -34,19 +33,14 @@ define([
 				bottom: 0,
 				right: 20
 			},
-			parent: null,
+			maxWidth: 1000,
 			userPointFill: '#a63232',
-			initialize: function (options) {
-				this.parent = options.parent;
-
+			height: null,
+			width: null,
+			initialize: function () {
 				var that = this;
-				this.active = true;
-
-				this.height = this.parent.height - this.margin.bottom - this.margin.top;
-				this.width = this.parent.width - this.margin.left - this.margin.right;
-
+				this.updateDimensions();
 				this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
-
 				nvd3.addGraph({
 					callback: function(chart) {
 						if(that.model.fetched) {
@@ -63,21 +57,20 @@ define([
 							.showXAxis(true)
 							.useInteractiveGuideline(true);
 
-						that.svg = d3.select(that.parent.el).append('svg')
+						that.svg = d3.select(that.el).append('svg')
 							.attr('height', that.height)
 							.attr('width', that.width)
 							.datum(that.vingtiles)
 							.call(that.chart);
 				
-						nvd3.utils.windowResize(function() {
-							if(that.active) that.chart.update();
+						nvd3.utils.windowResize(function () {
+							that.chart.update();
 						});
 
 						that.chart.interactiveLayer.tooltip
 							.contentGenerator(that.tooltipContentGenerator.bind(that));
 
 						that.svg.attr('opacity', 0);
-						that.setElement('.nvd3');
 
 						return that.chart;
 					}
@@ -117,7 +110,7 @@ define([
 				this.showUserPoints();
 
 				$('.nv-legend').on('click', function () {
-					if(this.active) that.showUserPoints();
+					that.showUserPoints();
 				});
 			},
 			showUserPoints: function () {
@@ -139,6 +132,10 @@ define([
 						}
 					});
 				});
+			},
+			updateDimensions: function () {
+				this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
+				this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
 			},
 			updateVingtilesByUserData: function (vingtiles, data) {
 				var r = {};
@@ -262,15 +259,6 @@ define([
 					case '': this.legendText = 'revenu en €'; this.yFormat.symbolText = '€'; break;
 					default: this.legendText = ''; this.yFormat.symbolText = '€';
 				}
-			},
-			_remove: function () {
-				this.svg
-					.on('mousemove', null)
-					.on("mouseout" ,null)
-					.on("dblclick" ,null);
-
-				this.stopListening(this.model);
-				this.active = false;
 			}
 		});
 		return LocatingChartV;

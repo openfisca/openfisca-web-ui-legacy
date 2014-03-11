@@ -8,17 +8,17 @@
 	font-size: 13^px
 }
 */
-#waterfall-chart .x-axis .tick text {
+#chart-wrapper #waterfall .x-axis .tick text {
 	font-size: 13px;
 	font-weight: bold;
 }
-#waterfall-chart .income-number {
+#chart-wrapper #waterfall .income-number {
 	text-anchor: start;
 	font-weight: bold;
 	fill: #444;
 	font-size: 18px;
 }
-#waterfall-chart .income-label {
+#chart-wrapper #waterfall .income-label {
 	font-size: 16px;
 	fill: #777;
 }

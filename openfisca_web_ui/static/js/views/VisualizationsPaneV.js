@@ -13,20 +13,12 @@ define([
 		var VisualizationsPaneV = Backbone.View.extend({
 			events: {
 				'click .thumbnail-visualization': 'renderVisualization',
-				'click button.back': 'render'
+				'click button.back': 'renderVisualizations'
 			},
 			model: null,
-			parent: null,
-			initialize: function (options) {
-				this.parent = options.parent;
-				this.setElement(this.parent.el);
+			initialize: function () {
 				this.model = new VisualizationsPaneM();
-				this.listenTo(this.model, 'change:visualizations', this.render);
-			},
-			render: function() {
-				this.$el
-					.find('.visualization').remove().end()
-					.append(visualizationsT({visualizations: this.model.get('visualizations')}));
+				this.listenTo(this.model, 'change:visualizations', this.renderVisualizations);
 			},
 			renderVisualization: function(evt) {
 				evt.preventDefault();
@@ -36,8 +28,10 @@ define([
 				});
 				this.$el.find('.row').replaceWith(visualizationT(visualization));
 			},
-			_remove: function () {
-				this.$el.remove();
+			renderVisualizations: function() {
+				this.$el
+					.empty()
+					.append(visualizationsT({visualizations: this.model.get('visualizations')}));
 			}
 		});
 

@@ -1,16 +1,25 @@
 <ul class="nav nav-tabs">
 {{#if enableLocatingChart}}
   <li>
-    <a data-toggle="tab" href="#se-situer">Se situer</a>
+    <a data-toggle="tab" href="#locating">Se situer</a>
   </li>
 {{/if}}
   <li>
-    <a data-toggle="tab" href="#cascade">Cascade</a>
+    <a data-toggle="tab" href="#waterfall">Cascade</a>
   </li>
   <li>
-  <a data-toggle="tab" href="#repartition">Répartition</a>
+  <a data-toggle="tab" href="#distribution">Répartition</a>
   </li>
   <li class="pull-right">
-    <a data-toggle="tab" href="#visualisations">Autres</a>
+    <a data-toggle="tab" href="#visualizations">Autres</a>
   </li>
 </ul>
+<div class="tab-content">
+{{#if enableLocatingChart}}
+  <div class="tab-pane active" id="locating"></div>
+{{/if}}
+  <div class="tab-pane" id="waterfall"></div>
+  <div class="tab-pane" id="distribution"></div>
+  <div class="tab-pane" id="visualizations"></div>
+</div>
+<div class="alert alert-info hide overlay">Simulation en cours…</div>

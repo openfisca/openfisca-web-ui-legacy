@@ -13,11 +13,7 @@ define([
 		d3.selection.prototype.moveToBack = function() {return this.each(function() {var firstChild = this.parentNode.firstChild;if (firstChild) {this.parentNode.insertBefore(this, firstChild);}});};
 
 		var WaterfallChartV = Backbone.View.extend({
-
-			/* Properties */
 			model: chartM,
-			parent: null,
-			views: [],
 
 			/* Settings */
 			padding: {
@@ -32,6 +28,7 @@ define([
 				bottom: 0,
 				right: 80
 			},
+			maxWidth: 1000,
 			innerPadding: 10,
 
 			title: '',
@@ -43,39 +40,28 @@ define([
 			positiveColor: '#6aa632',
 			negativeColor: '#b22424',
 
-			/* Settings */
-
-			initialize: function (options) {
-				this.parent = options.parent;
-
-				this._el = d3.select(this.parent.el).append('div')
-					.attr('id', 'waterfall-chart');
-				this.setElement(this._el[0]);
-
-				this.g = d3.select(this.el).append('svg');
-
-				this.height = this.parent.height - this.margin.bottom - this.margin.top;
-				this.width = this.parent.width - this.margin.left - this.margin.right;
-
-				this.g
+			initialize: function () {
+				this.updateDimensions();
+				this.g = d3.select(this.el)
+					.append('svg')
 					.attr('height', this.height)
 					.attr('width', this.width);
-
-				if(this.model.fetched) this.render();
+				if(this.model.fetched) {
+					this.render();
+				}
 				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function (args) {
-
 				args = args || {};
 				if(_.isUndefined(args.getDatas) || args.getDatas) {
 					this.setData(this.model.get('waterfallData'));
 				}
-
 				this.buildBars(this.buildActiveBars);
-
-				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) this.buildLegend();
-				else this.updateLegend();
-
+				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
+					this.buildLegend();
+				} else {
+					this.updateLegend();
+				}
 				return this;
 			},
 			_events: function () {
@@ -103,6 +89,10 @@ define([
 				});
 
 				this.updateScales();
+			},
+			updateDimensions: function() {
+				this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
+				this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
 			},
 			updateScales: function (yValues) {
 				var that = this;
@@ -679,10 +669,6 @@ define([
 						.remove();
 
 				bar.attr('stroke-width', 1);
-			},
-			_remove: function () {
-				this.stopListening(this.model);
-				this.active = false;
 			}
 		});
 	return WaterfallChartV;

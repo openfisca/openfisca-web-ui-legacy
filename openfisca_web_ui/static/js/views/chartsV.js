@@ -7,88 +7,51 @@ define([
 	'appconfig',
 	'backendServiceM',
 	'DistributionChartV',
+	'LocatingChartV',
 	'VisualizationsPaneV',
 	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, _, Backbone, d3, appconfig, backendServiceM, DistributionChartV, VisualizationsPaneV, WaterfallChartV, chartsTabsT) {
+	function ($, _, Backbone, d3, appconfig, backendServiceM, DistributionChartV, LocatingChartV, VisualizationsPaneV,
+		WaterfallChartV, chartsTabsT) {
+		'use strict';
 
 		var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
+		var viewClassByChartName = {
+			distribution: DistributionChartV,
+			visualizations: VisualizationsPaneV,
+			waterfall: WaterfallChartV
+		};
+		if (enableLocatingChart) {
+			viewClassByChartName.locating = LocatingChartV;
+		}
 
 		var AppV = Backbone.View.extend({
-			events: {},
+			currentChildView: null,
 			el: '#chart-wrapper',
-			fragmentByChartName: null,
-			width: null,
-			height: null,
+			events: {
+				'click a[data-toggle="tab"]': 'onTabClicked',
+				'shown.bs.tab a[data-toggle="tab"]': 'onTabShown'
+			},
 			initialize: function () {
-				this.fragmentByChartName = {
-					'distribution': 'repartition',
-					'waterfall': 'cascade',
-					'visualisations': 'visualisations'
-				};
-				if (enableLocatingChart) {
-					this.fragmentByChartName.locating = 'se-situer';
-				}
-				$(window).on('resize', $.proxy(this.updateDimensions, this));
-				this.updateDimensions();
-				this.$el
-					.html(chartsTabsT({enableLocatingChart: enableLocatingChart}))
-					.find('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
-						var href = $(evt.target).attr('href');
-						window.location.hash = href;
-					});
-				this.$overlay = $('<div class="alert alert-info overlay">Simulation en cours…</div>')
-					.hide()
-					.appendTo(this.$el);
+				this.$el.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
+				this.$overlay = this.$el.find('.overlay');
 				this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
 				this.updateOverlay();
 			},
+			onTabClicked: function(evt) {
+				evt.preventDefault();
+			},
+			onTabShown: function(evt) {
+				window.location.hash = $(evt.target).attr('href');
+			},
 			render: function (chartName) {
-				if (_.isUndefined(chartName)) {
-					chartName = enableLocatingChart ? 'locating' : 'waterfall';
+				if (this.$el.find('.nav .active').length === 0) {
+					this.$el.find('.nav a[href="#' + chartName + '"]').tab('show');
 				}
-				/* Switch menu */
-				if(this.$el.find('.active').length === 0) {
-					this.$el.find('.nav a[href="#' + this.fragmentByChartName[chartName] + '"]')
-						.parent('li').addClass('active');
-				}
-
-				if(!_.isUndefined(this.chart)) this.outTransition();
-
-				switch(chartName) {
-					case 'waterfall':
-						this.chart = new WaterfallChartV({parent: this});
-						break;
-					case 'locating':
-						if (enableLocatingChart) {
-							require(['LocatingChartV'], _.bind(function(LocatingChartV) {
-								this.chart = new LocatingChartV({parent: this});
-							}, this));
-						}
-						break;
-					case 'distribution':
-						this.chart = new DistributionChartV({parent: this});
-						break;
-					case 'visualisations':
-						this.chart = new VisualizationsPaneV({parent: this});
-						break;
-//					default:
-//						console.error('_Error : No chart selected when called AppV.render');
-				}
+				this.$el.find('.tab-pane.active').empty();
+				this.currentChildView = new viewClassByChartName[chartName]({el: this.$el.find('#' + chartName)});
 				return this;
-			},
-			outTransition: function () {
-				this.chart._remove();
-				$('svg').remove();
-				this.chart.model.destroy();
-			},
-			updateDimensions: function() {
-				this.width = Math.min(this.$el.width(), 1000);
-				this.height = this.width * 0.66;
-				this.$el.find('svg')
-					.attr('width', this.width)
-					.attr('height', this.height);
 			},
 			updateOverlay: function() {
 				var simulationInProgress = backendServiceM.get('simulationInProgress');
