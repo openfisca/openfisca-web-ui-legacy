@@ -74,20 +74,23 @@ def scenarios_api_data_to_api_data(scenarios_api_data, state = None):
     scenarios = []
     for scenario_api_data in scenarios_api_data:
         api_data = {
-            'familles': scenario_api_data.get('familles', {}).values(),
-            'foyers_fiscaux': scenario_api_data.get('foyers_fiscaux', {}).values(),
-            'menages': scenario_api_data.get('menages', {}).values(),
-            'individus': [],
+            'test_case': dict(
+                (key, value.values())
+                for key, value in scenario_api_data.get('test_case', {}).iteritems()
+                if key != 'year' and key != 'individus'
+                ),
             'legislation_url': scenario_api_data.get('legislation_url'),
             'year': scenario_api_data.get('year', DEFAULT_YEAR),
             }
-        for individu_id in scenario_api_data.get('individus', {}).iterkeys():
+        individus = []
+        for individu_id in scenario_api_data['test_case'].get('individus', {}).iterkeys():
             individu = dict(
                 (key, value)
-                for key, value in scenario_api_data['individus'][individu_id].iteritems()
+                for key, value in scenario_api_data['test_case']['individus'][individu_id].iteritems()
                 )
             individu['id'] = individu_id
-            api_data['individus'].append(individu)
+            individus.append(individu)
+        api_data['test_case']['individus'] = individus
         scenarios.append(api_data)
     return {'scenarios': scenarios}, None
 
@@ -118,15 +121,8 @@ def scenarios_to_api_data(values, state = None):
                     default = noop,
                     drop_none_values = False,
                     ),
-                rename_item('legislation_id', 'legislation'),
+                rename_item('legislation_id', 'legislation_url'),
                 rename_item('test_case_id', 'test_case'),
-                function(lambda struct: dict(
-                    (key, value)
-                    for key, value in chain(
-                        (struct['test_case'] or {}).iteritems(),
-                        [('legislation_url', struct['legislation']), ('year', struct['year'])],
-                        )
-                    )),
                 ),
             ),
         scenarios_api_data_to_api_data,
