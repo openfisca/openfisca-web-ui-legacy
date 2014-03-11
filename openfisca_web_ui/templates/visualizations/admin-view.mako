@@ -92,10 +92,10 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     value = visualization.url
     if value is None:
         return ''
-    simulation_url = '{}?{}'.format(
+    simulation_url = urllib.quote('{}?{}'.format(
         urls.get_full_url(ctx, 'api/1/simulate'),
         urllib.urlencode({'token': ctx.session.anonymous_token}),
-        )
+        ))
 %>\
         <iframe class="visualization-iframe" src="${value.format(simulation_url = simulation_url)}"></iframe>
 </%def>
@@ -111,10 +111,10 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
             <dd>${value}</dd>
     % endif
 <%
-    simulation_url = '{}?{}'.format(
+    simulation_url = urllib.quote('{}?{}'.format(
         urls.get_full_url(ctx, 'api/1/simulate'),
         urllib.urlencode({'token': ctx.session.anonymous_token}),
-        )
+        ))
     value = visualization.url
 %>\
     % if value is not None:
