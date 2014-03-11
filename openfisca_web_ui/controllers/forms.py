@@ -65,6 +65,8 @@ def situation_form_get(req):
         conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data)
         )
 
+    if model.fields_api_data() is None:
+        return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(filled_user_api_data)
     values, errors = pipe(
         conv.base.api_data_to_korma_data,
@@ -87,6 +89,8 @@ def situation_form_post(req):
     assert session.user is not None
 
     user_api_data = get_user_api_data(ctx)
+    if model.fields_api_data() is None:
+        return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)
     inputs = variabledecode.variable_decode(req.params)
     data, errors = root_question.root_input_to_data(inputs, state = ctx)

@@ -116,6 +116,7 @@ def make_categories_groups(entity):
     from .. import contexts, model
 
     ctx = contexts.Ctx()
+    fields_api_data = model.fields_api_data()
 
     class ModalGroup(Group):
         _outer_html_template = u'''
@@ -148,7 +149,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
     def build_category_questions(entity_category):
         category_questions = []
         for column_name in entity_category['children']:
-            column = model.fields_api_data()['columns'].get(column_name)
+            column = fields_api_data['columns'].get(column_name)
             if column is not None:
                 # Transform prenom question into hidden for use with x-editable field.
                 question = Hidden(name = column['name']) \
@@ -160,7 +161,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
                     category_questions.append(question)
         return category_questions
 
-    entity_categories = model.fields_api_data()['columns_tree'][entity]['children']
+    entity_categories = fields_api_data['columns_tree'][entity]['children']
     categories_groups = []
     for entity_category in entity_categories:
         group_questions = build_category_questions(entity_category)
