@@ -38,7 +38,7 @@ from . import conf, conv, objects, urls, wsgihelpers
 
 
 _fields_api_data = None
-log = logging.getLogger(__name__)
+email_log = logging.getLogger('email')
 
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
@@ -636,7 +636,7 @@ def fetch_fields_api_data():
     try:
         response = requests.get(conf['api.urls.fields'])
     except requests.exceptions.ConnectionError as exc:
-        log.exception(exc)
+        email_log.exception(exc)
         return
     if response.ok:
         _fields_api_data = response.json()
