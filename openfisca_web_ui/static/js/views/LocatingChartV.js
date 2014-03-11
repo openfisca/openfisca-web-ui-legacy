@@ -35,6 +35,7 @@ define([
 				right: 20
 			},
 			maxWidth: 1000,
+			dataIsMissing: true,
 			userPointFill: '#a63232',
 			height: null,
 			width: null,
@@ -108,7 +109,11 @@ define([
 
 				this.chart.update();
 
-				this.showUserPoints();
+				if(!this.dataIsMissing) {
+					if($('.nv-noData').length > 0) { $('.nv-noData').remove(); }
+					this.showUserPoints();
+				}
+				else { this.showMissingDataError(); }
 
 				$('.nv-legend').on('click', function () {
 					that.showUserPoints();
@@ -147,6 +152,14 @@ define([
 				r = _.filter(r, function (d) {
 					return !_.isUndefined(d);
 				});
+
+				if(_.isEmpty(r)) {
+					this.dataIsMissing = true;
+					return vingtiles;
+				}
+				else {
+					this.dataIsMissing = false;
+				}
 
 				vingtiles = _.filter(vingtiles, function (d) {
 					return !_.isUndefined(_.findWhere(r, {'_id': d.id}));
@@ -260,6 +273,20 @@ define([
 					case '': this.legendText = 'revenu en €'; this.yFormat.symbolText = '€'; break;
 					default: this.legendText = ''; this.yFormat.symbolText = '€';
 				}
+			},
+			showMissingDataError: function () {
+				if($('.nv-noData').length > 0) { $('.nv-noData').remove(); }
+				var pos = {
+					x: d3.round(this.width/2, 0),
+					y: d3.round(this.height/2)
+				};
+
+				var nod = this.svg.append('svg:text')
+					.attr('class', 'nv-noData')
+					.attr('x', pos.x)
+					.attr('y', pos.y)
+					.style('text-anchor', 'middle')
+					.text('Vos revenus ne vous permettent pas d\'apparaitre sur cette courbe');
 			}
 		});
 		return LocatingChartV;

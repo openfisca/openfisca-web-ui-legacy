@@ -52,7 +52,7 @@ define([
 					});
 				};
 				doIt(data.children);
-				this.ouputValue = groupedData;
+				this.outputValue = groupedData;
 				return this;
 			},
 			/*
@@ -107,7 +107,7 @@ define([
 						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) { loopDatum.parentNodes = loopData.parentNodes;}
 						else { loopDatum.parentNodes = [];}
 
-						if(i == dataLength-1) loopDatum.parentNodes.push(loopData.description);
+						if(i == dataLength-1) loopDatum.parentNodes.push(loopData.name);
 						doIt(loopDatum);
 					});
 				};
@@ -166,9 +166,10 @@ define([
 			/*
 				Values
 
-				Description : return parsed data this.ouputValue
+				Description : return parsed data this.outputValue
 			*/
 			values: function () {
+				console.log(this.outputValue);
 				if(_.isObject(this.outputValue) && !_.isArray(this.outputValue)) return $.extend(true, {}, this.outputValue);
 				else return this.outputValue;
 			}

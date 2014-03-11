@@ -174,11 +174,11 @@ define([
 				switch(this.prefix.symbol) {
 					case 'G':
 						this.legendText = 'Milliards €';
-						this.prefix.symbolText = 'milliards\n€';
+						this.prefix.symbolText = '\nmilliards €';
 						break;
 					case 'M':
 						this.legendText = 'Millions €';
-						this.prefix.symbolText = 'millions\n€';
+						this.prefix.symbolText = '\nmillions €';
 						break;
 					case 'k':
 						this.legendText = 'En euros';
@@ -372,7 +372,7 @@ define([
 								.moveToBack();
 							
 							that.incomeText = that.g.selectAll('.income-number')
-								.data((that.prefix._scale(barData.waterfall.endValue) + '\n'+that.prefix.symbolText).split('\n'));
+								.data((that.prefix._scale(barData.waterfall.endValue) + that.prefix.symbolText).split('\n'));
 
 							that.incomeText
 								.exit()
@@ -402,8 +402,7 @@ define([
 									.text(function (_d) {
 										return _d;
 									});
-
-							if (! _.isUndefined(d.parentNodes[0])) {
+							if (!_.isUndefined(d.parentNodes[0])) {
 								var parentNode = d.parentNodes[0].split(' ');
 								that.incomeLabel = that.g.selectAll('.income-label')
 									.data(parentNode);
@@ -638,8 +637,6 @@ define([
 					</div>\
 				');
 				var svg = this.$el.find('svg');
-				// console.log(bar.getBBox());
-
 				var barBBox = {};
 					bar.each(function () { barBBox = this.getBBox(); });
 
