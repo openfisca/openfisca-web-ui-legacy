@@ -50,7 +50,10 @@ inputs_to_visualization_data = conv.struct(
             conv.base.cleanup_line,
             conv.not_none,
             ),
-        url = conv.make_input_to_url(full = True),
+        url = conv.pipe(
+            conv.make_input_to_url(full = True),
+            conv.not_none,
+            ),
         ),
     default = 'drop',
     )
