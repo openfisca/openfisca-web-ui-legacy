@@ -276,6 +276,11 @@ define([
 			},
 			showMissingDataError: function () {
 				if($('.nv-noData').length > 0) { $('.nv-noData').remove(); }
+				
+				d3.selectAll('.nv-point')
+					.attr('style', null);
+
+
 				var pos = {
 					x: d3.round(this.width/2, 0),
 					y: d3.round(this.height/2)
