@@ -30,8 +30,7 @@ define([
 			currentChildView: null,
 			el: '#chart-wrapper',
 			events: {
-				'click a[data-toggle="tab"]': 'onTabClicked',
-				'shown.bs.tab a[data-toggle="tab"]': 'onTabShown'
+				'show.bs.tab a[data-toggle="tab"]': 'onTabShow'
 			},
 			initialize: function () {
 				this.$el.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
@@ -39,10 +38,7 @@ define([
 				this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
 				this.updateOverlay();
 			},
-			onTabClicked: function(evt) {
-				evt.preventDefault();
-			},
-			onTabShown: function(evt) {
+			onTabShow: function(evt) {
 				window.location.hash = $(evt.target).attr('href');
 			},
 			render: function (chartName) {
