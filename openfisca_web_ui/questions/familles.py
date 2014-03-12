@@ -132,7 +132,7 @@ href="#" title="Modifier">
                             base.BootstrapButton(
                                 label = ctx._(u'Delete'),
                                 name = 'delete',
-                                other_classes = 'delete pull-right',
+                                other_classes = 'btn-danger delete pull-right',
                                 value = 'delete',
                                 ),
                             ],
@@ -167,6 +167,7 @@ href="#collapse-famille-{self.parent[id].value}-categories" title="affcher / mas
                 base.BootstrapButton(
                     label = ctx._(u'Delete'),
                     name = 'delete',
+                    other_classes = 'btn-danger',
                     value = 'delete',
                     ),
                 ],

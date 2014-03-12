@@ -32,15 +32,12 @@ from korma.repeat import Repeat
 from . import base
 
 
+# TODO parametrize year
+DEFAULT_YEAR = 2013
+
+
 def make_scenarios_repeat(user):
     from .. import contexts, model
-
-    class ScenarioGroup(Group):
-        @property
-        def outer_html(self):
-            index = self.parent_data['scenarios']['index']
-            return u'<li class="list-group-item">{self.inner_html}</li>'.format(
-                formatted_index = index + 1, self = self)
 
     test_cases_id_and_name = (
         (test_case._id, test_case.title)
@@ -58,15 +55,14 @@ def make_scenarios_repeat(user):
         questions = [
             Repeat(
                 name = u'scenarios',
-                outer_html_template = u'<ul class="list-group">{self.inner_html}</ul>',
-                template_question = ScenarioGroup(
+                template_question = Group(
                     children_attributes = {
                         '_outer_html_template': u'<div class="form-group">{self.inner_html}</div>',
-                        # '_label_attributes': {'class': 'sr-only'},
                         },
                     name = u'scenario',
+                    outer_html_template = u'<div class="scenario">{self.inner_html}</div>',
                     questions = [
-                        base.BootstrapNumber(name = 'year', placeholder = '2013', step = 1),
+                        base.BootstrapNumber(name = 'year', placeholder = unicode(DEFAULT_YEAR), step = 1),
                         base.BootstrapSelect(
                             add_first_empty_value = True,
                             choices = test_cases_id_and_name,
@@ -78,15 +74,17 @@ def make_scenarios_repeat(user):
                             name = 'legislation_id',
                             ),
                         base.BootstrapButton(
-                            label = ctx._(u'Remove'),
-                            name = 'remove',
-                            value = 'remove',
+                            label = ctx._(u'Delete'),
+                            name = 'delete',
+                            other_classes = 'btn-danger btn-sm',
+                            value = 'delete',
                             ),
                         ],
                     ),
                 ),
             base.BootstrapButton(
-                label = ctx._(u'Add a scenario'),
+                label = ctx._(u'Add a new scenario'),
+                other_classes = 'add btn-primary',
                 name = 'add',
                 value = 'add',
                 ),

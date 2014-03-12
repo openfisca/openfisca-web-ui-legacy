@@ -33,6 +33,7 @@ import logging
 import re
 
 from biryani1 import strings
+from formencode import variabledecode
 import pymongo
 import requests
 import webob
@@ -40,6 +41,9 @@ import webob.multidict
 
 from .. import conf, contexts, conv, model, paginations, templates, questions, urls, uuidhelpers, wsgihelpers
 
+
+# TODO parametrize year
+DEFAULT_YEAR = 2013
 
 inputs_to_account_admin_data = conv.struct(
     dict(
@@ -446,7 +450,8 @@ def route_api1_class(environ, start_response):
 
 def route_user(environ, start_response):
     router = urls.make_router(
-        ('GET', '^/?$', user_view),
+        ('GET', '^/?$', user_view_get),
+        ('POST', '^/?$', user_view_post),
         ('POST', '^/accept-cnil-conditions/?$', accept_cnil_conditions),
         ('POST', '^/delete/?$', user_delete),
         ('GET', '^/reset/?$', user_reset),
@@ -482,7 +487,7 @@ def user_reset(req):
 
 
 @wsgihelpers.wsgify
-def user_view(req):
+def user_view_get(req):
     ctx = contexts.Ctx(req)
 
     session = ctx.session
@@ -497,7 +502,7 @@ def user_view(req):
             user_scenarios = [{
                 'test_case_id': session.user.current_test_case_id,
                 'legislation_id': legislation._id if legislation is not None else None,
-                'year': 2013,
+                'year': DEFAULT_YEAR,
                 }]
         scenarios_question = questions.scenarios.make_scenarios_repeat(session.user)
         values, errors = conv.pipe(
@@ -505,6 +510,41 @@ def user_view(req):
             scenarios_question.root_data_to_str,
             )(user_scenarios, state = ctx)
         scenarios_question.fill(values, errors)
+    return templates.render(
+        ctx,
+        '/accounts/user-view.mako',
+        account = session.user,
+        scenarios_question = scenarios_question,
+        )
+
+
+@wsgihelpers.wsgify
+def user_view_post(req):
+    ctx = contexts.Ctx(req)
+    session = ctx.session
+    if session is None:
+        return wsgihelpers.unauthorized(ctx)
+    assert session.user is not None
+
+    scenarios_question = questions.scenarios.make_scenarios_repeat(session.user)
+    inputs = variabledecode.variable_decode(req.params)
+    data, errors = scenarios_question.root_input_to_data(inputs, state = ctx)
+    if errors is None:
+        user_scenarios = conv.check(conv.scenarios.korma_data_to_scenarios(data, state = ctx))
+        print user_scenarios
+        session.user.scenarios = user_scenarios
+        session.user.save(safe = True)
+        if data['my_scenarios'].get('add'):
+            user_scenarios.append({})
+            values, errors = conv.pipe(
+                conv.scenarios.scenarios_to_page_korma_data,
+                scenarios_question.root_data_to_str,
+                )(user_scenarios, state = ctx)
+            scenarios_question.fill(values, errors)
+        else:
+            return wsgihelpers.redirect(ctx, location = '')
+    else:
+        scenarios_question.fill(inputs, errors)
     return templates.render(
         ctx,
         '/accounts/user-view.mako',

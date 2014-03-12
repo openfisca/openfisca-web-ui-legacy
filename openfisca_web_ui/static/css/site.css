@@ -72,8 +72,16 @@ img.media-object {
     height: 100px;
 }
 
-form[name="scenarios"] .form-inline select {
-    margin-left: 1em;
+form[name="scenarios"] .scenario {
+    margin: 1em;
+}
+
+form[name="scenarios"] button.add {
+    margin: 1em;
+}
+
+form[name="scenarios"] .scenario select {
+    margin: 0 1em;
 }
 
 form[name=situation] button.add {

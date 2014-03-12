@@ -46,15 +46,11 @@ def korma_data_to_scenarios(values, state = None):
         return None, None
     if state is None:
         state = default_state
-    scenarios, error = pipe(
+    return pipe(
         function(lambda data: data.get(u'my_scenarios')),
         function(lambda data: data.get(u'scenarios')),
         uniform_sequence(
+            # TODO check ObjectId validity
             function(lambda data: data.get('scenario')),
             ),
-        )(values, state)
-    if error is not None:
-        return values, error
-    if values.get('add'):
-        scenarios.append({})
-    return scenarios, None
+        )(values, state = state)

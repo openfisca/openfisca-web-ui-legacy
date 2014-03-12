@@ -50,18 +50,17 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
             <%self:view_fields/>
             <div class="panel-footer">
                 <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#edit-new-modal">
-                    ${_(u'New simulation')}
+                    ${_(u'Add a new simulation')}
                 </a>
             </div>
         </div>
 
         <h2>${_(u'My scenarios')}</h2>
         <div class="panel panel-default">
-            <form action="${urls.get_url(ctx, 'scenarios')}" class="form-inline" method="POST" name="scenarios" \
-role="form">
+            <form class="form-inline" method="POST" name="scenarios" role="form">
                 ${scenarios_question.html | n}
                 <div class="panel-footer">
-                    <button class="btn btn-success" type="submit">${_(u'Save')}</button>
+                    <button class="btn btn-default" type="submit">${_(u'Save')}</button>
                 </div>
             </form>
         </div>

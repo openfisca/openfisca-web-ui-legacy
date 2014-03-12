@@ -30,9 +30,8 @@ import datetime
 import logging
 
 from biryani1.baseconv import check, pipe
-from formencode import variabledecode
 
-from .. import contexts, conf, conv, model, templates, questions, urls, uuidhelpers, wsgihelpers
+from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
 from . import accounts, forms, legislations, sessions, test_cases, visualizations
 
 
@@ -118,43 +117,10 @@ def make_router():
         (None, '^/visualizations(?=/|$)', visualizations.route_user),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),
-        ('POST', '^/scenarios/?$', scenarios),
         ('GET', '^/terms/?$', terms),
         ]
     router = urls.make_router(*routings)
     return router
-
-
-@wsgihelpers.wsgify
-def scenarios(req):
-    ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None:
-        return wsgihelpers.unauthorized(ctx)
-    assert session.user is not None
-
-    scenarios_question = questions.scenarios.make_scenarios_repeat(session.user)
-    inputs = variabledecode.variable_decode(req.params)
-    data, errors = scenarios_question.root_input_to_data(inputs, state = ctx)
-    if errors is not None:
-        if req.is_xhr:
-            return wsgihelpers.respond_json(ctx, {'errors': errors})
-        else:
-            scenarios_question.fill(inputs, errors)
-            return templates.render(
-                ctx,
-                '/index.mako',
-                root_question = questions.base.make_situation_form(session.user.current_api_data or {}),
-                scenarios_question = scenarios_question,
-                )
-    scenarios = check(conv.scenarios.korma_data_to_scenarios(data, state = ctx))
-    if scenarios is not None:
-        session.user.scenarios = scenarios
-        session.user.save(safe = True)
-    if 'add' in data['my_scenarios']:
-        scenarios.append({})
-        return wsgihelpers.redirect(ctx, location = session.user.get_user_url(ctx))
-    return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
 @wsgihelpers.wsgify
