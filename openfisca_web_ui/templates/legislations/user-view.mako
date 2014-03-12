@@ -24,7 +24,6 @@
 
 
 <%!
-
 from biryani1 import strings
 
 from openfisca_web_ui import model, urls, uuidhelpers
@@ -59,44 +58,27 @@ from openfisca_web_ui import model, urls, uuidhelpers
         editable = owner_or_admin and dated_legislation
 %>\
         <div class="page-header">
-            <h1>${_('Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
+            <h1>${_(u'Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
         </div>
 
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2 class="panel-title">
-    % if owner_or_admin:
-                    <a class="btn btn-default btn-sm" href="${legislation.get_admin_url(ctx, 'edit')}" \
-title="${_(u'Edit')}">
-                        <span class="glyphicon glyphicon-cog"></span>
-                    </a>
-    % elif user is not None and user.email is not None:
-                    <a class="btn btn-default btn-xs" data-toggle="modal" data-target="#modal-duplicate-and-edit" \
-href="#" title="${_(u'Duplicate and edit')}">
-                        <span class="glyphicon glyphicon-cog"></span>
-                    </a>
-    % endif:
-                    ${legislation.get_title(ctx)}
-                </h2>
+            <div class="panel-body">
+                <%view:view_fields/>
+                ${view.view_content(user = user)}
             </div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <%view:view_fields/>
-                </li>
-                <li class="list-group-item">
-                    ${view.view_content(user = user)}
-                </li>
-            </ul>
             <div class="panel-footer">
                 <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}" rel="external" \
 target="_blank">
                     ${_(u'View as JSON')}
                 </a>
-        % if owner_or_admin:
-                <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
-                    <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
+    % if owner_or_admin:
+                <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+                <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
+    % elif user is not None and user.email is not None:
+                <a class="btn btn-default" data-toggle="modal" data-target="#modal-duplicate-and-edit" href="#">
+                    ${_(u'Duplicate and edit')}
                 </a>
-        % endif
+    % endif
             </div>
         </div>
 </%def>
@@ -104,7 +86,7 @@ target="_blank">
 
 <%def name="modals()" filter="trim">
     <%parent:modals/>
-    <%render_legislation:modal_change_legislation_date/>
+    ${render_legislation.modal_change_legislation_date(date = date)}
     <%render_legislation:modal_duplicate_and_edit/>
 </%def>
 

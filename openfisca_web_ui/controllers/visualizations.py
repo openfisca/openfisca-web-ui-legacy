@@ -119,18 +119,18 @@ def admin_edit(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(title = ctx._('A visualization with the same name already exists.'))
+                errors = dict(title = ctx._(u'A visualization with the same name already exists.'))
         if errors is None:
             if not model.is_admin(ctx):
                 if visualization.enabled != data['enabled']:
                     errors = dict(
                         enabled = ctx._(
-                            'You can\'t enable or disable this visualization because you aren\'t an administrator'
+                            u'You can\'t enable or disable this visualization because you aren\'t an administrator'
                             ),
                         )
                 if visualization.featured != data['featured']:
                     errors = dict(
-                        enabled = ctx._('You can\'t promote this visualization because you aren\'t an administrator'),
+                        enabled = ctx._(u'You can\'t promote this visualization because you aren\'t an administrator'),
                         )
         if errors is None:
             visualization.set_attributes(**data)
@@ -181,7 +181,7 @@ def admin_index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
     criteria = {}
     if data['term'] is not None:
         criteria['words'] = {'$all': [
@@ -237,7 +237,7 @@ def admin_new(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(full_name = ctx._('A visualization with the same name already exists.'))
+                errors = dict(full_name = ctx._(u'A visualization with the same name already exists.'))
         if errors is None:
             visualization.set_attributes(**data)
             visualization.compute_words()
@@ -288,7 +288,7 @@ def api1_search(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
     if data['term'] is not None:
@@ -340,7 +340,7 @@ def api1_typeahead(req):
             ),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
     if data['q'] is not None:
@@ -384,8 +384,7 @@ def route_admin(environ, start_response):
         model.Visualization.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization Error: {}').format(error))(
-            environ, start_response)
+        return wsgihelpers.not_found(ctx, explanation = error)(environ, start_response)
 
     ctx.node = visualization
 
@@ -453,7 +452,7 @@ def user_index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
     criteria = {}
     if data['term'] is not None:
         criteria['words'] = {'$all': [
@@ -488,7 +487,7 @@ def user_view(req):
         model.Visualization.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Visualization search error: {}').format(error))
+        return wsgihelpers.not_found(ctx, explanation = error)
     return templates.render(
         ctx,
         '/visualizations/user-view.mako',

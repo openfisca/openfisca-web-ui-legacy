@@ -38,8 +38,10 @@ import pprint
 
 
 <%def name="container_content()" filter="trim">
+        <div class="page-header">
+            <h1 class="alert-heading">${title}</h1>
+        </div>
         <div class="alert alert-block alert-danger">
-            <h2 class="alert-heading">${title}</h2>
             <p>${explanation}</p>
     % if comment:
             <p>${comment}</p>

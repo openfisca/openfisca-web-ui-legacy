@@ -45,22 +45,18 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
         <div class="page-header">
             <h1>${_(u'My account')} <small>${account.get_title(ctx)}</small></h1>
         </div>
+        <h2>${_(u'My simulations')}</h2>
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2 class="panel-title">${_(u'My simulations')}</h2>
-            </div>
             <%self:view_fields/>
             <div class="panel-footer">
                 <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#edit-new-modal">
-                    ${_('New simulation')}
+                    ${_(u'New simulation')}
                 </a>
             </div>
         </div>
 
+        <h2>${_(u'My scenarios')}</h2>
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2 class="panel-title">${_(u'My scenarios')}</h2>
-            </div>
             <form action="${urls.get_url(ctx, 'scenarios')}" class="form-inline" method="POST" name="scenarios" \
 role="form">
                 ${scenarios_question.html | n}
@@ -70,16 +66,10 @@ role="form">
             </form>
         </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2 class="panel-title">${_(u'My rights')}</h2>
-            </div>
-            <div class="panel-footer">
-                <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#delete-user-modal">
-                    <span class="glyphicon glyphicon-trash"></span> ${_('Delete account')}
-                </a>
-            </div>
-        </div>
+        <h2>${_(u'Delete my account')}</h2>
+        <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#delete-user-modal">
+            <span class="glyphicon glyphicon-trash"></span> ${_(u'Delete my account')}
+        </a>
 </%def>
 
 
@@ -152,21 +142,21 @@ user = model.get_user(ctx)
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     % if test_case.title == 'new':
-                    <h4 class="modal-title">${_('New Simulation')}</h4>
+                    <h4 class="modal-title">${_(u'New Simulation')}</h4>
     % else:
-                    <h4 class="modal-title">${_('Edit Simulation')} ${test_case.title}</h4>
+                    <h4 class="modal-title">${_(u'Edit Simulation')} ${test_case.title}</h4>
     % endif
                 </div>
                 <form class="form-horizontal" method="POST" action="${test_case.get_url(ctx, 'edit')}">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">Nom :</label>
+                            <label class="col-sm-2 control-label">${_(u'Name')}</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" name="title" value="${test_case.title}">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">Description :</label>
+                            <label class="col-sm-2 control-label">${_(u'Description')}</label>
                             <div class="col-sm-10">
                                 <textarea class="form-control" name="description">\
 ${test_case.description or ''}</textarea>
@@ -174,10 +164,10 @@ ${test_case.description or ''}</textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-success" name="submit" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> ${_(u'Save')}
+                        <button class="btn btn-success" name="submit" type="submit">${_(u'Save')}</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">
+                            ${_(u'Cancel')}
                         </button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Annuler</button>
                     </div>
                 </form>
             </div>
@@ -196,9 +186,9 @@ ${account.get_title(ctx)} - ${parent.title_content()}
             <thead>
                 <tr>
                     <th></th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+                    <th>${_(u'Name')}</th>
+                    <th>${_(u'Description')}</th>
+                    <th>${_(u'Actions')}</th>
                 </tr>
             </thead>
 <%

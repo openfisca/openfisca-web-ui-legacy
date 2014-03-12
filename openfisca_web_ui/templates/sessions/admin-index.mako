@@ -40,21 +40,31 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
     % if pager.item_count == 0:
-        <h2>${_(u"No session found")}</h2>
+        <div class="page-header">
+            <h1>${_(u"No session found")}</h1>
+        </div>
     % else:
         % if pager.page_count > 1:
             % if pager.page_size == 1:
-        <h2>${_(u"Session {0} of {1}").format(pager.first_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Session {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
+        </div>
             % else:
-        <h2>${_(u"Sessions {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Sessions {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
+        </div>
             % endif
         % elif pager.item_count == 1:
-        <h2>${_(u"Single session")}</h2>
+        <div class="page-header">
+            <h1>${_(u"Single session")}</h1>
+        </div>
         % else:
-        <h2>${_(u"{} sessions").format(pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"{} sessions").format(pager.item_count)}</h1>
+        </div>
         % endif
         <%self:pagination object_class="${model.Session}" pager="${pager}"/>
-        <table class="table table-bordered table-condensed table-striped">
+        <table class="table">
             <thead>
                 <tr>
                     <th>${_(u"Token")}</th>
@@ -85,5 +95,5 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="title_content()" filter="trim">
-${_('Sessions')} - ${parent.title_content()}
+${_(u'Sessions')} - ${parent.title_content()}
 </%def>

@@ -169,7 +169,7 @@ ${conf['app_name']}
 
 
 <%def name="breadcrumb_content()" filter="trim">
-            <li><a href="${urls.get_url(ctx)}">${_('Home')}</a></li>
+            <li><a href="${urls.get_url(ctx)}">${_(u'Home')}</a></li>
 </%def>
 
 
@@ -186,7 +186,7 @@ ${conf['app_name']}
 <%def name="error_alert()" filter="trim">
     % if errors:
                 <div class="alert alert-danger">
-                    <h4 class="alert-heading">${_('Error!')}</h4>
+                    <h1 class="alert-heading">${_(u'Error!')}</h1>
         % if '' in errors:
 <%
             error = unicode(errors[''])
@@ -197,7 +197,7 @@ ${conf['app_name']}
                     ${error}
             % endif
         % else:
-                    ${_(u"Please, correct the informations below.")}
+                    ${_(u'Please, correct the informations below.')}
         % endif
                 </div>
     % endif
@@ -231,7 +231,7 @@ ${conf['app_name']}
         <footer class="footer">
             <%self:footer_service/>
             <p>
-                ${_('{0}:').format(_('Software'))}
+                ${_(u'{}:').format(_(u'Software'))}
                 <a href="http://www.openfisca.fr" rel="external" target="_blank">OpenFisca</a>
                 &mdash;
                 <span>${_(u'Copyright © {} OpenFisca Team').format(u', '.join(
@@ -318,25 +318,30 @@ ${conf['app_name']}
 
 <%def name="topbar_links()" filter="trim">
     % if model.is_admin(ctx):
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">${_('Administration')} <b class="caret"></b></a>
+        <li class="${u'active ' if req.script_name.startswith('/admin') else ''}dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">${_(u'Administration')} <b class="caret"></b></a>
             <ul class="dropdown-menu">
-                <li><a href="${model.Account.get_admin_class_url(ctx)}">${_('Accounts')}</a></li>
-                <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_('Legislations')}</a></li>
-                <li><a href="${model.Visualization.get_admin_class_url(ctx)}">${_('Visualizations')}</a></li>
+                <li${u' class="active"' if req.script_name.startswith('/admin/accounts') else '' | n}>
+                    <a href="${model.Account.get_admin_class_url(ctx)}">${_(u'Accounts')}</a>
+                </li>
+                <li${u' class="active"' if req.script_name.startswith('/admin/legislations') else '' | n}>
+                    <a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u'Legislations')}</a>
+                </li>
+                <li${u' class="active"' if req.script_name.startswith('/admin/visualizations') else '' | n}>
+                    <a href="${model.Visualization.get_admin_class_url(ctx)}">${_(u'Visualizations')}</a>
+                </li>
             </ul>
         </li>
     % endif
 <%
     user = model.get_user(ctx)
 %>
-    % if user is not None and user.email is not None:
-        <li><a href="${user.get_user_url(ctx)}">${_('My account')}</a></li>
-    % endif
-        <li><a href="${model.Legislation.get_class_url(ctx)}">${_('Legislations')}</a></li>
-        <li><a href="http://www.openfisca.fr/a-propos">${_('About')}</a></li>
-        <li><a href="http://www.openfisca.fr/api">${_('API')}</a></li>
-        <li><a href="/terms" title="${_('Terms of use')}">${_('CGU')}</a></li>
+        <li${u' class="active"' if req.script_name.startswith('/legislations') else '' | n}>
+            <a href="${model.Legislation.get_class_url(ctx)}">${_(u'Legislations')}</a>
+        </li>
+        <li><a href="http://www.openfisca.fr/a-propos">${_(u'About')}</a></li>
+        <li><a href="http://www.openfisca.fr/api">${_(u'API')}</a></li>
+        <li><a href="/terms" title="${_(u'Terms of use')}">${_(u'CGU')}</a></li>
 </%def>
 
 
@@ -350,8 +355,10 @@ ${conf['app_name']}
                 <li><a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">${
                         _(u'Sign in')}</a></li>
         % else:
-                <li class="active">
-                    <a href="${user.get_user_url(ctx)}"><span class="glyphicon glyphicon-user"></span>${user.email}</a>
+                <li${u' class="active"' if req.script_name == '/account' else '' | n}>
+                    <a href="${user.get_user_url(ctx)}" title="${_(u'My account')}">
+                        <span class="glyphicon glyphicon-user"></span> ${user.email}
+                    </a>
                 </li>
                 <li><a class="sign-out" href="#" title="${_(u'Sign out')}">${_(u'Sign out')}</a></li>
         % endif

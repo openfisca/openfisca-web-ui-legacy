@@ -24,6 +24,7 @@
 
 
 <%!
+import babel.dates
 from copy import copy
 import datetime
 from itertools import chain
@@ -63,7 +64,7 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
                         <div class="form-group">
                             <label for="date">Date</label>
                             <input type="text" class="form-control" id="date" name="date" \
-${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%d-%m-%Y')}">
+${u'placeholder' if date is None else u'value'}="${babel.dates.format_date(current_datetime, format = 'short')}">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -99,8 +100,8 @@ ${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%d
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">${_('Edit')}</a>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">${_(u'Edit')}</a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Close')}</button>
                 </div>
             </div>
         </div>
@@ -241,7 +242,9 @@ for index, date in enumerate(sorted(dates[:-1])):
         <select class="period-select">
     % for index, period in enumerate(periods):
             <option${u' checked="checked"' if index == len(periods) - 1 else '' | n} value="${index}">
-                ${_('From')} ${period[0].strftime('%d/%m/%Y')} ${_('To')} ${period[1].strftime('%d/%m/%Y')}
+                ${_(u'From {} to {}').format(
+                    babel.dates.format_date(period[0], format = 'short'),
+                    babel.dates.format_date(period[1], format = 'short'))}
             </option>
     % endfor
         </select>
@@ -250,7 +253,9 @@ for index, date in enumerate(sorted(dates[:-1])):
     % for index, period in enumerate(periods):
         <li${u' class="active"' if index == len(periods) - 1 else '' | n}>
             <a href="#${html_node_path}-${period[0].strftime('%Y-%m-%d')}-${period[1].strftime('%Y-%m-%d')}">
-                ${_('From')} ${period[0].strftime('%d/%m/%Y')} ${_('To')} ${period[1].strftime('%d/%m/%Y')}
+                ${_(u'From {} to {}').format(
+                    babel.dates.format_date(period[0], format = 'short'),
+                    babel.dates.format_date(period[1], format = 'short'))}
             </a>
         </li>
     % endfor
@@ -307,9 +312,9 @@ id="${html_node_path}-${period[0].strftime('%Y-%m-%d')}-${period[1].strftime('%Y
     <table class="table table-condensed">
         <thead>
             <tr>
-                <th>${_('Value')}</th>
-                <th>${_('From')}</th>
-                <th>${_('To')}</th>
+                <th>${_(u'Value')}</th>
+                <th>${_(u'From')}</th>
+                <th>${_(u'To')}</th>
             </tr>
         </thead>
         <tbody>

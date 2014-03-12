@@ -40,10 +40,18 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <h2>${session.get_title(ctx)}</h2>
-        <%self:view_fields/>
-        <div class="btn-toolbar">
-            <a class="btn btn-danger"  href="${session.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
+        <div class="page-header">
+            <h1>${_(u'Session')} <small>${session.get_title(ctx)}</small></h1>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <%self:view_fields/>
+            </div>
+            <div class="panel-footer">
+                <div class="btn-toolbar">
+                    <a class="btn btn-danger" href="${session.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
+                </div>
+            </div>
         </div>
 </%def>
 
@@ -54,27 +62,21 @@ ${session.get_title(ctx)} - ${parent.title_content()}
 
 
 <%def name="view_fields()" filter="trim">
-        <div class="field">
-            <b class="field-label">${_('{0}:').format(_("Token"))}</b>
-            <span class="field-value">${session.token}</span>
-        </div>
+        <dl class="dl-horizontal">
+            <dt>${_(u'Token')}</dt>
+            <dd>${session.token}</dd>
 <%
     user = session.user
 %>\
     % if user is None:
-        <div class="field">
-            <b class="field-label">${_('{0}:').format(_("User ID"))}</b>
-            <span class="field-value">${session.user_id}</span>
-        </div>
+            <dt>${_(u'User ID')}</dt>
+            <dd>${session.user_id}</dd>
     % else:
-        <div class="field">
-            <b class="field-label">${_('{0}:').format(_("User"))}</b>
-            <a class="field-value" href="${user.get_admin_url(ctx)}">${user.get_title(ctx)}</span></a>
-        </div>
+            <dt>${_(u'User')}</dt>
+            <dd><a href="${user.get_admin_url(ctx)}">${user.get_title(ctx)}</a></dd>
     % endif
-        <div class="field">
-            <b class="field-label">${_('{0}:').format(_("Expiration Date"))}</b>
-            <span class="field-value">${session.expiration.isoformat()}</span>
-        </div>
+            <dt>${_(u'Expiration Date')}</dt>
+            <dd>${session.expiration.isoformat()}</dd>
+        </dl>
 </%def>
 

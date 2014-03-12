@@ -328,6 +328,6 @@ class ActivityStreamWrapper(SmartWrapper):
     words = None
 
     def before_upsert(self, old_bson, bson):
-        self.updated = bson['updated'] = updated = datetime.datetime.utcnow().isoformat() + 'Z'
+        self.updated = bson['updated'] = updated = datetime.datetime.utcnow()
         if self.published is None:
             self.published = bson['published'] = updated

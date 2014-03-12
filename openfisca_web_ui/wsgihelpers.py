@@ -43,19 +43,19 @@ N_ = lambda message: message
 
 
 errors_explanation = {
-    400: N_("Request is faulty"),
-    401: N_("Access is restricted to authorized persons."),
-    403: N_("Access is forbidden."),
-    404: N_("The requested page was not found."),
+    400: N_(u"Request is faulty"),
+    401: N_(u"Access is restricted to authorized persons."),
+    403: N_(u"Access is forbidden."),
+    404: N_(u"The requested page was not found."),
     }
 errors_message = {
-    401: N_("You must login to access this page."),
+    401: N_(u"You must login to access this page."),
     }
 errors_title = {
-    400: N_("Unable to Access"),
-    401: N_("Access Denied"),
-    403: N_("Access Denied"),
-    404: N_("Unable to Access"),
+    400: N_(u"Unable to Access"),
+    401: N_(u"Access Denied"),
+    403: N_(u"Access Denied"),
+    404: N_(u"Unable to Access"),
     }
 
 
@@ -158,8 +158,9 @@ def redirect(ctx, code = 302, location = None, **kw):
         template_path = kw.pop('template_path', '/http-error.mako')
         explanation = kw.pop('explanation', None)
         if explanation is None:
-            explanation = Markup(ctx._('{0} <a href="{1}">{1}</a>.')).format(
-                ctx._(u"You'll be redirected to page"), location)
+            explanation = Markup(
+                ctx._(u'{0} <a href="{1}">{1}</a>.')
+                ).format(ctx._(u"You'll be redirected to page"), location)
         message = kw.pop('message', None)
         if message is None:
             message = errors_message.get(code)
@@ -167,7 +168,7 @@ def redirect(ctx, code = 302, location = None, **kw):
                 message = ctx._(message)
         title = kw.pop('title', None)
         if title is None:
-            title = ctx._("Redirection in progress...")
+            title = ctx._(u'Redirection in progress…')
         body = templates.render(ctx, template_path,
             comment = kw.pop('comment', None),
             explanation = explanation,

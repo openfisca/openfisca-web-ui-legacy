@@ -43,11 +43,7 @@ def admin_delete(req):
     session = ctx.node
 
     if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You can not delete a session."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     if req.method == 'POST':
         session.delete(safe = True)
@@ -67,7 +63,7 @@ def admin_index(req):
         conv.default(1),
         )(req.params.get('page'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Page number error: {}').format(error))
+        return wsgihelpers.bad_request(ctx, explanation = error)
 
     cursor = model.Session.find(as_class = collections.OrderedDict)
     pager = paginations.Pager(item_count = cursor.count(), page_number = page_number)
@@ -95,8 +91,7 @@ def route_admin(environ, start_response):
         model.Session.uuid_to_instance,
         )(req.urlvars.get('token'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Session Error: {}').format(error))(
-            environ, start_response)
+        return wsgihelpers.not_found(ctx, explanation = error)(environ, start_response)
 
     ctx.node = session
 

@@ -26,6 +26,7 @@
 """Controllers for simulations"""
 
 
+import babel.dates
 import datetime
 
 from biryani1 import strings
@@ -40,11 +41,7 @@ def delete(req):
 
     session = ctx.session
     if session is None or session.user is None:
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("User simulations forbidden"),
-            message = ctx._("You can not view this simulation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     id_or_slug = req.urlvars.get('id_or_slug')
     test_case = conv.check(
@@ -57,10 +54,7 @@ def delete(req):
     if len(session.user.test_cases_id) == 0:
         test_case.delete(safe = True)
         test_case_date = datetime.datetime.utcnow()
-        test_case_title = u'Ma simulation du {} à {}'.format(
-            datetime.datetime.strftime(test_case_date, u'%d/%m/%Y'),
-            datetime.datetime.strftime(test_case_date, u'%H:%M'),
-            )
+        test_case_title = u'Ma simulation du {}'.format(babel.dates.format_datetime(test_case_date)),
         test_case = model.TestCase(
             author_id = session.user._id,
             title = test_case_title,
@@ -82,11 +76,7 @@ def duplicate(req):
 
     session = ctx.session
     if session is None or session.user is None:
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("View forbidden"),
-            message = ctx._("You can not view an account."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     id_or_slug = req.urlvars.get('id_or_slug')
     test_case = conv.check(
@@ -117,11 +107,7 @@ def edit(req):
 
     session = ctx.session
     if session is None or session.user is None:
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("User simulations forbidden"),
-            message = ctx._("You can not view this simulation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     params = req.params
     inputs = {
@@ -189,11 +175,7 @@ def use(req):
 
     session = ctx.session
     if session is None or session.user is None:
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("User simulations forbidden"),
-            message = ctx._("You can not view this simulation."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     id_or_slug = req.urlvars.get('id_or_slug')
     test_case = conv.check(

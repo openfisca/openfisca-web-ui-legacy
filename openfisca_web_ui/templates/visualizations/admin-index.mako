@@ -42,30 +42,40 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <%self:search_form/>
     % if pager.item_count == 0:
-        <h2>${_(u"No visualization found")}</h2>
+        <div class="page-header">
+            <h1>${_(u"No visualization found")}</h1>
+        </div>
     % else:
         % if pager.page_count > 1:
             % if pager.page_size == 1:
-        <h2>${_(u"Visualization {0} of {1}").format(pager.first_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Visualization {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
+        </div>
             % else:
-        <h2>${_(u"Visualization {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Visualization {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
+        </div>
+        <%self:search_form/>
             % endif
         % elif pager.item_count == 1:
-        <h2>${_(u"Single visualization")}</h2>
+        <div class="page-header">
+            <h1>${_(u"Single visualization")}</h1>
+        </div>
         % else:
-        <h2>${_(u"{} visualizations").format(pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"{} visualizations").format(pager.item_count)}</h1>
+        </div>
         % endif
         <%object:pagination object_class="${model.Visualization}" pager="${pager}"/>
         <div class="row">
         % for visualization in visualizations:
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <a href="${visualization.get_user_url(ctx)}">
-                    <div class="thumbnail thumbnail-visualization">
+                    <article class="thumbnail thumbnail-visualization">
                         <img alt="${visualization.get_title(ctx)}" src="${visualization.thumbnail_url or ''}">
                         <div class="caption">
-                            <h3>${visualization.get_title(ctx)}</h3>
+                            <h1>${visualization.get_title(ctx)}</h1>
 <%
             description_text = visualization.description
 %>\
@@ -73,7 +83,7 @@ from openfisca_web_ui import model, urls
                             <p>${description_text}</p>
             % endif
                         </div>
-                    </div>
+                    </article>
                 </a>
             </div>
         % endfor
@@ -101,25 +111,24 @@ from openfisca_web_ui import model, urls
     error = errors.get('term') if errors is not None else None
 %>\
             <div class="form-group${' has-error' if error else ''}">
-                <label for="term">${_("Term")}</label>
+                <label for="term">${_(u'Term')}</label>
                 <input class="form-control" id="term" name="term" type="text" value="${inputs['term'] or ''}">
     % if error:
                 <span class="help-block">${error}</span>
     % endif
             </div>
-            <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search"></span> ${
-                _('Search')}</button>
+            <button class="btn btn-primary" type="submit">${_(u'Search')}</button>
     % if data['advanced_search']:
             <a class="pull-right" href="${model.Visualization.get_user_class_url(ctx, **urls.relative_query(inputs,
-                    advanced_search = None))}">${_('Simplified Search')}</a>
+                    advanced_search = None))}">${_(u'Simplified Search')}</a>
     % else:
             <a class="pull-right" href="${model.Visualization.get_user_class_url(ctx, **urls.relative_query(inputs,
-                    advanced_search = 1))}">${_('Advanced Search')}</a>
+                    advanced_search = 1))}">${_(u'Advanced Search')}</a>
     % endif
         </form>
 </%def>
 
 
 <%def name="title_content()" filter="trim">
-${_('Visualizations')} - ${parent.title_content()}
+${_(u'Visualizations')} - ${parent.title_content()}
 </%def>

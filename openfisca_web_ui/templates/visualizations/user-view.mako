@@ -48,33 +48,18 @@ from openfisca_web_ui import model, urls
         owner_or_admin = model.is_admin(ctx) or user._id == visualization.author_id
 %>\
         <div class="page-header">
-            <h1>${_('Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
+            <h1>${_(u'Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
         </div>
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2 class="panel-title">
-    % if owner_or_admin:
-                    <a class="btn btn-default btn-sm" href="${visualization.get_admin_url(ctx, 'edit')}">
-                        <span class="glyphicon glyphicon-cog"></span>
-                    </a>
-    % endif:
-                    ${visualization.get_title(ctx)}
-                </h2>
+            <div class="panel-body">
+                <%view:view_fields/>
+                <%view:view_content/>
             </div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <%view:view_fields/>
-                </li>
-                <li class="list-group-item">
-                    <%view:view_content/>
-                </li>
-            </ul>
     % if owner_or_admin:
             <div class="panel-footer">
                 <div class="btn-toolbar">
-                    <a class="btn btn-danger"  href="${visualization.get_admin_url(ctx, 'delete')}">
-                        <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
-                    </a>
+                    <a class="btn btn-default" href="${visualization.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+                    <a class="btn btn-danger"  href="${visualization.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
                 </div>
             </div>
     % endif

@@ -103,11 +103,7 @@ def admin_delete(req):
     account = ctx.node
 
     if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Deletion forbidden"),
-            message = ctx._("You must  be an administrator to delete an account."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     if req.method == 'POST':
         account.delete(safe = True)
@@ -121,11 +117,7 @@ def admin_edit(req):
     account = ctx.node
 
     if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("Edition forbidden"),
-            message = ctx._("You must  be an administrator to edit an account."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     if req.method == 'GET':
         errors = None
@@ -209,7 +201,7 @@ def admin_index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Account search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
     if data['term'] is not None:
@@ -234,254 +226,9 @@ def admin_view(req):
     account = ctx.node
 
     if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx,
-            explanation = ctx._("View forbidden"),
-            message = ctx._("You must  be an administrator to view an account."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.forbidden(ctx)
 
     return templates.render(ctx, '/accounts/admin-view.mako', account = account)
-
-
-#@wsgihelpers.wsgify
-#def api1_delete(req):
-#    ctx = contexts.Ctx(req)
-#    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
-
-#    assert req.method == 'DELETE', req.method
-
-#    content_type = req.content_type
-#    if content_type is not None:
-#        content_type = content_type.split(';', 1)[0].strip()
-#    if content_type == 'application/json':
-#        inputs, error = conv.pipe(
-#            conv.make_input_to_json(),
-#            conv.test_isinstance(dict),
-#            )(req.body, state = ctx)
-#        if error is not None:
-#            return wsgihelpers.respond_json(ctx,
-#                collections.OrderedDict(sorted(dict(
-#                    apiVersion = '1.0',
-#                    error = collections.OrderedDict(sorted(dict(
-#                        code = 400,  # Bad Request
-#                        errors = [error],
-#                        message = ctx._(u'Invalid JSON in request DELETE body'),
-#                        ).iteritems())),
-#                    method = req.script_name,
-#                    params = req.body,
-#                    url = req.url.decode('utf-8'),
-#                    ).iteritems())),
-#                headers = headers,
-#                )
-#    else:
-#        # URL-encoded POST.
-#        inputs = dict(req.POST)
-
-#    data, errors = conv.struct(
-#        dict(
-#            # Shared secret between client and server
-#            api_key = conv.pipe(
-#                conv.test_isinstance(basestring),
-#                conv.base.input_to_uuid,
-#                conv.not_none,
-#                ),
-#            # For asynchronous calls
-#            context = conv.test_isinstance(basestring),
-#            ),
-#        )(inputs, state = ctx)
-#    if errors is not None:
-#        return wsgihelpers.respond_json(ctx,
-#            collections.OrderedDict(sorted(dict(
-#                apiVersion = '1.0',
-#                context = inputs.get('context'),
-#                error = collections.OrderedDict(sorted(dict(
-#                    code = 400,  # Bad Request
-#                    errors = [errors],
-#                    message = ctx._(u'Bad parameters in request'),
-#                    ).iteritems())),
-#                method = req.script_name,
-#                params = inputs,
-#                url = req.url.decode('utf-8'),
-#                ).iteritems())),
-#            headers = headers,
-#            )
-
-#    api_key = data['api_key']
-#    account = model.Account.find_one(
-#        dict(
-#            api_key = api_key,
-#            ),
-#        as_class = collections.OrderedDict,
-#        )
-#    if account is None:
-#        return wsgihelpers.respond_json(ctx,
-#            collections.OrderedDict(sorted(dict(
-#                apiVersion = '1.0',
-#                context = data['context'],
-#                error = collections.OrderedDict(sorted(dict(
-#                    code = 401,  # Unauthorized
-#                    message = ctx._('Unknown API Key: {}').format(api_key),
-#                    ).iteritems())),
-#                method = req.script_name,
-#                params = inputs,
-#                url = req.url.decode('utf-8'),
-#                ).iteritems())),
-#            headers = headers,
-#            )
-#    if not account.admin:
-#        return wsgihelpers.respond_json(ctx,
-#            collections.OrderedDict(sorted(dict(
-#                apiVersion = '1.0',
-#                context = data['context'],
-#                error = collections.OrderedDict(sorted(dict(
-#                    code = 403,  # Forbidden
-#                    message = ctx._('Non-admin API Key: {}').format(api_key),
-#                    ).iteritems())),
-#                method = req.script_name,
-#                params = inputs,
-#                url = req.url.decode('utf-8'),
-#                ).iteritems())),
-#            headers = headers,
-#            )
-
-#    deleted_value = conv.check(conv.method('turn_to_json'))(ctx.node, state = ctx)
-#    ctx.node.delete(ctx, safe = True)
-
-#    return wsgihelpers.respond_json(ctx,
-#        collections.OrderedDict(sorted(dict(
-#            apiVersion = '1.0',
-#            context = data['context'],
-#            method = req.script_name,
-#            params = inputs,
-#            url = req.url.decode('utf-8'),
-#            value = deleted_value,
-#            ).iteritems())),
-#        headers = headers,
-#        )
-
-
-#@wsgihelpers.wsgify
-#def api1_get(req):
-#    ctx = contexts.Ctx(req)
-#    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
-
-#    assert req.method == 'GET', req.method
-#    params = req.GET
-#    inputs = dict(
-#        callback = params.get('callback'),
-#        context = params.get('context'),
-#        )
-#    data, errors = conv.pipe(
-#        conv.struct(
-#            dict(
-#                callback = conv.pipe(
-#                    conv.test_isinstance(basestring),
-#                    conv.cleanup_line,
-#                    ),
-#                context = conv.test_isinstance(basestring),
-#                ),
-#            ),
-#        )(inputs, state = ctx)
-#    if errors is not None:
-#        return wsgihelpers.respond_json(ctx,
-#            dict(
-#                apiVersion = '1.0',
-#                context = inputs['context'],
-#                error = dict(
-#                    code = 400,  # Bad Request
-#                    errors = [
-#                        dict(
-#                            location = key,
-#                            message = error,
-#                            )
-#                        for key, error in sorted(errors.iteritems())
-#                        ],
-#                    # message will be automatically defined.
-#                    ),
-#                method = req.script_name,
-#                params = inputs,
-#                url = req.url.decode('utf-8'),
-#                ),
-#            headers = headers,
-#            jsonp = inputs['callback'],
-#            )
-
-#    return wsgihelpers.respond_json(ctx,
-#        collections.OrderedDict(sorted(dict(
-#            apiVersion = '1.0',
-#            context = data['context'],
-#            method = req.script_name,
-#            params = inputs,
-#            url = req.url.decode('utf-8'),
-#            value = conv.check(conv.method('turn_to_json'))(ctx.node, state = ctx),
-#            ).iteritems())),
-#        headers = headers,
-#        jsonp = data['callback'],
-#        )
-
-
-#@wsgihelpers.wsgify
-#def api1_index(req):
-#    ctx = contexts.Ctx(req)
-#    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
-
-#    assert req.method == 'GET', req.method
-#    params = req.GET
-#    inputs = dict(
-#        callback = params.get('callback'),
-#        context = params.get('context'),
-#        )
-#    data, errors = conv.pipe(
-#        conv.struct(
-#            dict(
-#                callback = conv.pipe(
-#                    conv.test_isinstance(basestring),
-#                    conv.cleanup_line,
-#                    ),
-#                context = conv.test_isinstance(basestring),
-#                ),
-#            ),
-#        )(inputs, state = ctx)
-#    if errors is not None:
-#        return wsgihelpers.respond_json(ctx,
-#            dict(
-#                apiVersion = '1.0',
-#                context = inputs['context'],
-#                error = dict(
-#                    code = 400,  # Bad Request
-#                    errors = [
-#                        dict(
-#                            location = key,
-#                            message = error,
-#                            )
-#                        for key, error in sorted(errors.iteritems())
-#                        ],
-#                    # message will be automatically defined.
-#                    ),
-#                method = req.script_name,
-#                params = inputs,
-#                url = req.url.decode('utf-8'),
-#                ),
-#            headers = headers,
-#            jsonp = inputs['callback'],
-#            )
-
-#    cursor = model.Account.get_collection().find(None, [])
-#    return wsgihelpers.respond_json(ctx,
-#        collections.OrderedDict(sorted(dict(
-#            apiVersion = '1.0',
-#            context = data['context'],
-#            method = req.script_name,
-#            params = inputs,
-#            url = req.url.decode('utf-8'),
-#            value = [
-#                account_attributes['_id']
-#                for account_attributes in cursor
-#                ],
-#            ).iteritems())),
-#        headers = headers,
-#        jsonp = data['callback'],
-#        )
 
 
 @wsgihelpers.wsgify
@@ -500,7 +247,7 @@ def api1_typeahead(req):
             ),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Account search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
     if data['q'] is not None:
@@ -635,8 +382,7 @@ def route_admin(environ, start_response):
         model.Account.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Account Error: {}').format(error))(
-            environ, start_response)
+        return wsgihelpers.not_found(ctx, explanation = error)(environ, start_response)
 
     ctx.node = account
 
@@ -673,7 +419,7 @@ def route_api1(environ, start_response):
                 context = params.get('context'),
                 error = collections.OrderedDict(sorted(dict(
                     code = 404,  # Not Found
-                    message = ctx._('Account Error: {}').format(error),
+                    message = error,
                     ).iteritems())),
                 method = req.script_name,
                 url = req.url.decode('utf-8'),
@@ -713,11 +459,7 @@ def user_delete(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
     if session is None or session.user is None:
-        return wsgihelpers.unauthorized(ctx,
-            explanation = ctx._("Deletion unauthorized"),
-            message = ctx._("You can not delete an account."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.unauthorized(ctx)
 
     assert req.method == 'POST'
     session.user.delete(safe = True)
@@ -729,11 +471,7 @@ def user_reset(req):
     ctx = contexts.Ctx(req)
     session = ctx.session
     if session is None or session.user is None:
-        return wsgihelpers.unauthorized(ctx,
-            explanation = ctx._("Deletion unauthorized"),
-            message = ctx._("You can not delete an account."),
-            title = ctx._('Operation denied'),
-            )
+        return wsgihelpers.unauthorized(ctx)
     current_test_case = session.user.current_test_case
     if current_test_case is not None:
         current_test_case.api_data = None

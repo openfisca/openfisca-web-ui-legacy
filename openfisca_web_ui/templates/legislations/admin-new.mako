@@ -41,13 +41,13 @@ from openfisca_web_ui import conf, model, urls
 
 <%def name="container_content()" filter="trim">
         <div class="page-header">
-            <h1>${_(u"Creation of Legislation")}</h1>
+            <h1>${_(u'Create a Legislation')}</h1>
         </div>
         <form action="${model.Legislation.get_admin_class_url(ctx, 'new')}" method="post" role="form">
             <%edit:hidden_fields/>
             <%self:error_alert/>
             <%edit:form_fields/>
-            <button class="btn btn-primary" name="submit" type="submit"><span class="glyphicon glyphicon-ok"></span> ${_('Create')}</button>
+            <button class="btn btn-primary" name="submit" type="submit">${_(u'Create')}</button>
         </form>
 </%def>
 

@@ -39,23 +39,33 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <%self:search_form/>
     % if pager.item_count == 0:
-        <h2>${_(u"No account found")}</h2>
+        <div class="page-header">
+            <h1>${_(u"No account found")}</h1>
+        </div>
     % else:
         % if pager.page_count > 1:
             % if pager.page_size == 1:
-        <h2>${_(u"Account {0} of {1}").format(pager.first_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Account {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
+        </div>
             % else:
-        <h2>${_(u"Accounts {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Accounts {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
+        </div>
+        <%self:search_form/>
             % endif
         % elif pager.item_count == 1:
-        <h2>${_(u"Single account")}</h2>
+        <div class="page-header">
+            <h1>${_(u"Single account")}</h1>
+        </div>
         % else:
-        <h2>${_(u"{} accounts").format(pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"{} accounts").format(pager.item_count)}</h1>
+        </div>
         % endif
         <%self:pagination object_class="${model.Account}" pager="${pager}"/>
-        <table class="table table-bordered table-condensed table-striped">
+        <table class="table">
             <thead>
                 <tr>
                     <th>${_(u"Email")}</th>
@@ -97,18 +107,18 @@ from openfisca_web_ui import model, urls
     error = errors.get('term') if errors is not None else None
 %>\
             <div class="form-group${' has-error' if error else ''}">
-                <label for="term">${_("Term")}</label>
+                <label for="term">${_(u'Term')}</label>
                 <input class="form-control" id="term" name="term" type="text" value="${inputs['term'] or ''}">
     % if error:
                 <span class="help-block">${error}</span>
     % endif
             </div>
-            <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search"></span> ${_('Search')}</button>
+            <button class="btn btn-primary" type="submit">${_(u'Search')}</button>
         </form>
 </%def>
 
 
 <%def name="title_content()" filter="trim">
-${_('Accounts')} - ${parent.title_content()}
+${_(u'Accounts')} - ${parent.title_content()}
 </%def>
 

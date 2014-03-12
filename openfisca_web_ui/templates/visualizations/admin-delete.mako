@@ -42,13 +42,13 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <h2>${_(u'Deletion of {}').format(visualization.get_title(ctx))}</h2>
+        <div class="page-header">
+            <h1>${_(u'Delete a Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
+        </div>
         <p class="confirm">${_(u'Delete this visualization?')}</p>
         <form method="post" action="${visualization.get_admin_url(ctx, 'delete')}">
             <%view:view_fields/>
-            <button class="btn btn-danger" name="submit" type="submit">
-                <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
-            </button>
+            <button class="btn btn-danger" name="submit" type="submit">${_(u'Delete')}</button>
         </form>
 </%def>
 

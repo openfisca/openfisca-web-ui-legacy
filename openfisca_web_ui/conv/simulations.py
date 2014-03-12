@@ -28,7 +28,6 @@
 
 import collections
 import datetime
-from itertools import chain
 import json
 import logging
 
@@ -60,6 +59,7 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
             },
         data = api_post_content,
         )
+    print api_post_content
     response_data = response.json(object_pairs_hook = collections.OrderedDict)
     return (response_data, None) if response.ok else (api_post_content, response_data.get('error'))
 

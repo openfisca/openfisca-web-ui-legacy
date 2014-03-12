@@ -24,6 +24,7 @@
 
 
 <%!
+import babel.dates
 import datetime
 import urllib
 
@@ -36,8 +37,8 @@ from openfisca_web_ui import model, urls
 
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
-            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Visualization.get_admin_class_url(ctx)}">${_(u"Visualizations")}</a></li>
+            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u'Admin')}</a></li>
+            <li><a href="${model.Visualization.get_admin_class_url(ctx)}">${_(u'Visualizations')}</a></li>
             <li class="active">${visualization.get_title(ctx)}</li>
 </%def>
 
@@ -48,33 +49,18 @@ from openfisca_web_ui import model, urls
     owner_or_admin = model.is_admin(ctx) or user._id == visualization.author_id
 %>\
         <div class="page-header">
-            <h1>${_('Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
+            <h1>${_(u'Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
         </div>
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2 class="panel-title">
-    % if owner_or_admin:
-                    <a class="btn btn-default btn-sm" href="${visualization.get_admin_url(ctx, 'edit')}">
-                        <span class="glyphicon glyphicon-cog"></span>
-                    </a>
-    % endif:
-                    ${visualization.get_title(ctx)}
-                </h2>
+            <div class="panel-body">
+                <%self:view_fields/>
+                <%self:view_content/>
             </div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <%self:view_fields/>
-                </li>
-                <li class="list-group-item">
-                    <%self:view_content/>
-                </li>
-            </ul>
     % if owner_or_admin:
             <div class="panel-footer">
                 <div class="btn-toolbar">
-                    <a class="btn btn-danger"  href="${visualization.get_admin_url(ctx, 'delete')}">
-                        <span class="glyphicon glyphicon-trash"></span> ${_('Delete')}
-                    </a>
+                    <a class="btn btn-default" href="${visualization.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+                    <a class="btn btn-danger"  href="${visualization.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
                 </div>
             </div>
     % endif
@@ -89,12 +75,13 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
 
 <%def name="view_content()" filter="trim">
 <%
+    anonymous_token = ctx.session.anonymous_token if ctx.session is not None else ''
     value = visualization.url
     if value is None:
         return ''
     simulation_url = urllib.quote('{}?{}'.format(
         urls.get_full_url(ctx, 'api/1/simulate'),
-        urllib.urlencode({'token': ctx.session.anonymous_token}),
+        urllib.urlencode({'token': anonymous_token}),
         ))
 %>\
         <iframe class="visualization-iframe" src="${value.format(simulation_url = simulation_url)}"></iframe>
@@ -107,54 +94,55 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     value = visualization.description
 %>\
     % if value is not None:
-            <dt>${_("Description")}</dt>
+            <dt>${_(u'Description')}</dt>
             <dd>${value}</dd>
     % endif
 <%
+    anonymous_token = ctx.session.anonymous_token if ctx.session is not None else ''
     simulation_url = urllib.quote('{}?{}'.format(
         urls.get_full_url(ctx, 'api/1/simulate'),
-        urllib.urlencode({'token': ctx.session.anonymous_token}),
+        urllib.urlencode({'token': anonymous_token}),
         ))
     value = visualization.url
 %>\
     % if value is not None:
-            <dt>${_("Source URL")}</dt>
+            <dt>${_(u'Source URL')}</dt>
             <dd><a href="${value.format(simulation_url = simulation_url)}">${value}</a></dd>
     % endif
 <%
     value = visualization.enabled
 %>\
     % if value is not None:
-            <dt>${_("Enabled")}</dt>
-            <dd>${_("Yes") if value else _("No")}</dd>
+            <dt>${_(u'Enabled')}</dt>
+            <dd>${_(u'Yes') if value else _(u'No')}</dd>
     % endif
 <%
     value = visualization.featured
 %>\
     % if value is not None:
-            <dt>${_("Featured")}</dt>
-            <dd>${_("Yes") if value else _("No")}</dd>
+            <dt>${_(u'Featured')}</dt>
+            <dd>${_(u'Yes') if value else _(u'No')}</dd>
     % endif
 <%
     value = visualization.organization
 %>\
     % if value is not None:
-            <dt>${_("Organization")}</dt>
+            <dt>${_(u'Organization')}</dt>
             <dd>${value}</dd>
     % endif
 <%
     value = visualization.updated
 %>\
     % if value is not None:
-            <dt>${_("Updated")}</dt>
-            <dd>${value}</dd>
+            <dt>${_(u'Updated')}</dt>
+            <dd>${babel.dates.format_date(value, format = 'short')}</dd>
     % endif
 <%
     value = visualization.published
 %>\
     % if value is not None:
-            <dt>${_("Published")}</dt>
-            <dd>${value}</dd>
+            <dt>${_(u'Published')}</dt>
+            <dd>${babel.dates.format_date(value, format = 'short')}</dd>
     % endif
         </dl>
 </%def>

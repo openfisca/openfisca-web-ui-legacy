@@ -24,6 +24,8 @@
 
 
 <%!
+import babel.dates
+
 from openfisca_web_ui import model, urls
 %>
 
@@ -40,13 +42,19 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <h2>${account.get_title(ctx)}</h2>
-        <%self:view_fields/>
-        <div class="btn-toolbar">
-##            <a class="btn btn-default" href="${account.get_admin_url(ctx, 'stats')}">${_(u'Statistics')}</a>
-##            <a class="btn btn-default" href="${urls.get_url(ctx, 'api', 1, 'accounts', account.slug)}">${_(u'JSON')}</a>
-            <a class="btn btn-default" href="${account.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
-            <a class="btn btn-danger"  href="${account.get_admin_url(ctx, 'delete')}"><span class="glyphicon glyphicon-trash"></span> ${_('Delete')}</a>
+        <div class="page-header">
+            <h1>${_(u'Account')} <small>${account.get_title(ctx)}</small></h1>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <%self:view_fields/>
+            </div>
+            <div class="panel-footer">
+                <div class="btn-toolbar">
+                    <a class="btn btn-default" href="${account.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
+                    <a class="btn btn-danger"  href="${account.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
+                </div>
+            </div>
         </div>
 </%def>
 
@@ -57,92 +65,63 @@ ${account.get_title(ctx)} - ${parent.title_content()}
 
 
 <%def name="view_fields()" filter="trim">
+                <dl class="dl-horizontal">
 <%
     value = account.full_name
 %>\
-        % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Full Name"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
-        % endif
+    % if value is not None:
+                    <dt>${_(u'Full Name')}<dt>
+                    <dd>${value}</dd>
+    % endif
 <%
     value = account.slug
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Slug"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+                    <dt>${_(u'Slug')}<dt>
+                    <dd>${value}</dd>
     % endif
 <%
     value = account.email
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Email"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+                    <dt>${_(u'Email')}<dt>
+                    <dd>${value}</dd>
     % endif
 <%
     value = account.description
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Description"))}</b></div>
-        % if value is not None:
-            <div class="col-sm-10">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#about-view">${_(u"View")}</a></li>
-                    <li><a data-toggle="tab" href="#about-source">${_(u"Source")}</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="active tab-pane" id="about-view">
-                        ${value | n}
-                    </div>
-                    <div class="tab-pane" id="about-source">
-                        <pre class="break-word">${value}</pre>
-                    </div>
-                </div>
-            </div>
-        % endif
-        </div>
+                    <dt>${_(u'Description')}<dt>
+                    <dd>${value}</dd>
     % endif
 <%
     value = account.admin
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Admin"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+                    <dt>${_(u'Administrator')}<dt>
+                    <dd>${_(u'Yes') if value else _(u'No')}</dd>
     % endif
 <%
     value = account.api_key
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("API Key"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+                    <dt>${_(u'API Key')}<dt>
+                    <dd>${value}</dd>
     % endif
 <%
     value = account.updated
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Updated"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+                    <dt>${_(u'Updated')}<dt>
+                    <dd>${babel.dates.format_date(value, format = 'short')}</dd>
     % endif
 <%
     value = account.published
 %>\
     % if value is not None:
-        <div class="row">
-            <div class="col-sm-2 text-right"><b>${_(u'{0}:').format(_("Published"))}</b></div>
-            <div class="col-sm-10">${value}</div>
-        </div>
+                    <dt>${_(u'Published')}<dt>
+                    <dd>${babel.dates.format_date(value, format = 'short')}</dd>
     % endif
+                </dl>
 </%def>
 

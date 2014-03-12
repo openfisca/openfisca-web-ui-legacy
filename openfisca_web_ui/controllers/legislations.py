@@ -26,6 +26,7 @@
 """Controllers for legislations"""
 
 
+import babel.dates
 import collections
 import datetime
 import json
@@ -38,7 +39,6 @@ import webob
 import webob.multidict
 
 from biryani1 import strings
-from korma.date import make_formatted_str_to_datetime
 
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
@@ -47,16 +47,13 @@ inputs_to_legislation_data = conv.pipe(
     conv.struct(
         dict(
             author_id = conv.base.input_to_uuid,
-            datetime_begin = make_formatted_str_to_datetime(u'%d-%m-%Y'),
-            datetime_end = make_formatted_str_to_datetime(u'%d-%m-%Y'),
+            datetime_begin = conv.iso8601_input_to_datetime,
+            datetime_end = conv.iso8601_input_to_datetime,
             description = conv.cleanup_text,
-            json = conv.pipe(
-                conv.cleanup_line,
-                conv.make_input_to_json(),
-                ),
+            json = conv.make_input_to_json(),
             url = conv.make_input_to_url(full = True),
             title = conv.pipe(
-                conv.base.cleanup_line,
+                conv.cleanup_line,
                 conv.not_none,
                 ),
             ),
@@ -98,8 +95,8 @@ def admin_edit(req):
     if req.method == 'GET':
         errors = None
         inputs = dict(
-            datetime_begin = datetime.datetime.strftime(legislation.datetime_begin, u'%d-%m-%Y'),
-            datetime_end = datetime.datetime.strftime(legislation.datetime_end, u'%d-%m-%Y'),
+            datetime_begin = babel.dates.format_date(legislation.datetime_begin, format = 'short'),
+            datetime_end = babel.dates.format_date(legislation.datetime_end, format = 'short'),
             description = legislation.description,
             json = legislation.json,
             url = legislation.url,
@@ -138,7 +135,7 @@ def admin_edit(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(title = ctx._('A legislation with the same name already exists.'))
+                errors = dict(title = ctx._(u'A legislation with the same name already exists.'))
         if errors is None:
             legislation.set_attributes(**data)
             legislation.compute_words()
@@ -182,7 +179,7 @@ def admin_index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
     if data['term'] is not None:
@@ -245,7 +242,7 @@ def admin_new(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(full_name = ctx._('A legislation with the same name already exists.'))
+                errors = dict(full_name = ctx._(u'A legislation with the same name already exists.'))
         if errors is None:
             legislation.set_attributes(**data)
             legislation.compute_words()
@@ -262,7 +259,7 @@ def admin_view(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     params = req.GET
-    date, error = make_formatted_str_to_datetime(u'%d-%m-%Y')(params.get('date'), state = ctx)
+    date, error = conv.iso8601_input_to_datetime(params.get('date'), state = ctx)
     dated_legislation_json = None
     if legislation.json is not None and 'datesim' not in legislation.json and date is not None:
         response = requests.post(
@@ -325,13 +322,13 @@ def api1_edit(req):
     if not (legislation.author_id == user._id or model.is_admin(ctx)):
         return wsgihelpers.respond_json(
             ctx,
-            {'status': 'error', 'message': ctx._("You must be an administrator to edit a legislation.")},
+            {'status': 'error', 'message': ctx._(u'You must be an administrator to edit a legislation.')},
             )
     if 'datesim' not in legislation.json:
         # Test is JSON is a dated legislation
         return wsgihelpers.respond_json(
             ctx,
-            {'status': 'error', 'message': ctx._("You cannot edit a non-dated legislation.")},
+            {'status': 'error', 'message': ctx._(u'You cannot edit a non-dated legislation.')},
             )
 
     def get_deep_key(data, layers):
@@ -379,11 +376,7 @@ def api1_edit(req):
                 },
             )(data['value'], state = ctx)
     if error is not None:
-        return wsgihelpers.error(
-            ctx,
-            body = ctx._('Legislation edit error: {}').format(error),
-            code = 400,
-            )
+        return wsgihelpers.error(ctx, body = error, code = 400)
     node[node_key] = value
     legislation.save(safe = True)
     return wsgihelpers.respond_json(ctx, data['value'])
@@ -399,7 +392,7 @@ def api1_json(req):
         model.Legislation.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(error))
+        return wsgihelpers.not_found(ctx, explanation = error)
     return wsgihelpers.respond_json(ctx, legislation.json)
 
 
@@ -419,7 +412,7 @@ def api1_typeahead(req):
             ),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
     if data['q'] is not None:
@@ -450,56 +443,6 @@ def extract_legislation_inputs_from_params(ctx, params = None):
         )
 
 
-#@wsgihelpers.wsgify
-#def index(req):
-#    ctx = contexts.Ctx(req)
-
-#    assert req.method == 'GET'
-#    params = req.GET
-#    inputs = dict(
-#        advanced_search = params.get('advanced_search'),
-#        page = params.get('page'),
-#        sort = params.get('sort'),
-#        term = params.get('term'),
-#        )
-#    data, errors = conv.pipe(
-#        conv.struct(
-#            dict(
-#                advanced_search = conv.guess_bool,
-#                page = conv.pipe(
-#                    conv.input_to_int,
-#                    conv.test_greater_or_equal(1),
-#                    conv.default(1),
-#                    ),
-#                sort = conv.pipe(
-#                    conv.cleanup_line,
-#                    conv.test_in(['slug', 'updated']),
-#                    ),
-#                term = conv.base.input_to_words,
-#                ),
-#            ),
-#        conv.rename_item('page', 'page_number'),
-#        )(inputs, state = ctx)
-#    if errors is not None:
-#        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
-
-#    criteria = {}
-#    if data['term'] is not None:
-#        criteria['words'] = {'$all': [
-#            re.compile(u'^{}'.format(re.escape(word)))
-#            for word in data['term']
-#            ]}
-#    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
-#    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
-#    if data['sort'] == 'slug':
-#        cursor.sort([('slug', pymongo.ASCENDING)])
-#    elif data['sort'] == 'updated':
-#        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
-#    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
-#    return templates.render(ctx, '/legislations/index.mako', data = data, errors = errors, legislations = legislations,
-#        inputs = inputs, pager = pager)
-
-
 def route_admin(environ, start_response):
     req = webob.Request(environ)
     ctx = contexts.Ctx(req)
@@ -510,8 +453,7 @@ def route_admin(environ, start_response):
         model.Legislation.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation Error: {}').format(error))(
-            environ, start_response)
+        return wsgihelpers.not_found(ctx, explanation = error)(environ, start_response)
 
     ctx.node = legislation
 
@@ -565,8 +507,7 @@ def user_edit(req):
         }
     data, errors = conv.struct({
         'date': conv.pipe(
-            conv.cleanup_line,
-            make_formatted_str_to_datetime(u'%d-%m-%Y'),
+            conv.iso8601_input_to_datetime,
             conv.default(datetime.datetime.utcnow()),
             ),
         'legislation': conv.pipe(
@@ -576,7 +517,7 @@ def user_edit(req):
             ),
         })(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
 
     legislation = data['legislation']
     if legislation.author_id == user._id and 'datesim' in legislation.json:
@@ -596,7 +537,10 @@ def user_edit(req):
             if existing_legislation.author_id == user._id:
                 return wsgihelpers.redirect(ctx, location = existing_legislation.get_admin_url(ctx))
         if new_legislation is None:
-            return wsgihelpers.bad_request(ctx, explanation = ctx._('A legislation with the same name already exists.'))
+            return wsgihelpers.bad_request(
+                ctx,
+                explanation = ctx._(u'A legislation with the same name already exists.'),
+                )
     else:
         new_legislation = model.Legislation(
             author_id = user._id,
@@ -649,7 +593,7 @@ def user_index(req):
         conv.rename_item('page', 'page_number'),
         )(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
     criteria = {}
     if data['term'] is not None:
         criteria['words'] = {'$all': [
@@ -677,11 +621,7 @@ def user_view(req):
         'legislation': req.urlvars.get('id_or_slug'),
         }
     data, errors = conv.struct({
-        'date': conv.pipe(
-            conv.cleanup_line,
-            make_formatted_str_to_datetime(u'%d-%m-%Y'),
-            conv.default(datetime.datetime.utcnow())
-            ),
+        'date': conv.iso8601_input_to_datetime,
         'legislation': conv.pipe(
             conv.input_to_slug,
             conv.not_none,
@@ -689,7 +629,7 @@ def user_view(req):
             ),
         })(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.not_found(ctx, explanation = ctx._('Legislation search error: {}').format(errors))
+        return wsgihelpers.bad_request(ctx, explanation = errors)
     legislation = data['legislation']
     return templates.render(
         ctx,

@@ -52,7 +52,7 @@ def environment_setter(app):
 #        if conf['host_urls'] is not None:
 #            host_url = req.host_url + '/'
 #            if host_url not in conf['host_urls']:
-#                return wsgihelpers.bad_request(ctx, explanation = ctx._('Web site not found.'))(environ,
+#                return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Web site not found.'))(environ,
 #                    start_response)
         model.configure(ctx)
         return app(req.environ, start_response)

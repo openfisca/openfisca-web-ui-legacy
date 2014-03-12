@@ -36,14 +36,14 @@ from openfisca_web_ui import conf, model, urls
 
 
 <%def name="container_content()" filter="trim">
+        <div class="page-header">
+            <h1>${_(u'Edit my account')} <small>${account.get_title(ctx)}</small></h1>
+        </div>
         <form action="${account.get_admin_url(ctx, 'edit')}" method="post" role="form">
             <%self:hidden_fields/>
-            <fieldset>
-                <legend>${_(u'Edition of %s') % account.get_title(ctx)}</legend>
-                <%self:error_alert/>
-                <%self:form_fields/>
-                <button class="btn btn-primary" name="submit" type="submit"><span class="glyphicon glyphicon-ok"></span> ${_('Save')}</button>
-            </fieldset>
+            <%self:error_alert/>
+            <%self:form_fields/>
+            <button class="btn btn-primary" name="submit" type="submit">${_(u'Save')}</button>
         </form>
 </%def>
 
@@ -53,7 +53,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('email') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="email">${_("Email")}</label>
+                    <label for="email">${_(u'Email')}</label>
                     <input class="form-control" id="email" name="email" required type="email" value="${
                             inputs['email'] or ''}">
     % if error:
@@ -64,7 +64,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('full_name') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="full_name">${_("Full Name")}</label>
+                    <label for="full_name">${_(u'Full Name')}</label>
                     <input class="form-control" id="full_name" name="full_name" required type="text" value="${
                             inputs['full_name'] or ''}">
     % if error:

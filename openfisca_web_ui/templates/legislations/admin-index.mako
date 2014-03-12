@@ -24,6 +24,8 @@
 
 
 <%!
+import babel.dates
+
 from openfisca_web_ui import model, urls
 %>
 
@@ -39,23 +41,33 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-        <%self:search_form/>
     % if pager.item_count == 0:
-        <h2>${_(u"No legislation found")}</h2>
+        <div class="page-header">
+            <h1>${_(u"No legislation found")}</h1>
+        </div>
     % else:
         % if pager.page_count > 1:
             % if pager.page_size == 1:
-        <h2>${_(u"Legislation {0} of {1}").format(pager.first_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Legislation {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
+        </div>
             % else:
-        <h2>${_(u"Legislation {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"Legislation {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
+        </div>
+        <%self:search_form/>
             % endif
         % elif pager.item_count == 1:
-        <h2>${_(u"Single legislation")}</h2>
+        <div class="page-header">
+            <h1>${_(u"Single legislation")}</h1>
+        </div>
         % else:
-        <h2>${_(u"{} legislations").format(pager.item_count)}</h2>
+        <div class="page-header">
+            <h1>${_(u"{} legislations").format(pager.item_count)}</h1>
+        </div>
         % endif
         <%self:pagination object_class="${model.Legislation}" pager="${pager}"/>
-        <table class="table table-bordered table-condensed table-striped">
+        <table class="table">
             <thead>
                 <tr>
             % if data['sort'] == 'slug':
@@ -75,16 +87,8 @@ from openfisca_web_ui import model, urls
             <tbody>
         % for legislation in legislations:
                 <tr>
-                    <td>
-                        <h4><a href="${legislation.get_admin_url(ctx)}">${legislation.title}</a></h4>
-<%
-            description_text = legislation.description
-%>\
-            % if description_text:
-                        ${description_text}
-            % endif
-                    </td>
-                    <td>${legislation.updated.split('T')[0]}</td>
+                    <td><a href="${legislation.get_admin_url(ctx)}">${legislation.title}</a></td>
+                    <td>${babel.dates.format_date(legislation.updated)}</td>
                 </tr>
         % endfor
             </tbody>
@@ -112,26 +116,25 @@ from openfisca_web_ui import model, urls
     error = errors.get('term') if errors is not None else None
 %>\
             <div class="form-group${' has-error' if error else ''}">
-                <label for="term">${_("Term")}</label>
+                <label for="term">${_(u'Term')}</label>
                 <input class="form-control" id="term" name="term" type="text" value="${inputs['term'] or ''}">
     % if error:
                 <span class="help-block">${error}</span>
     % endif
             </div>
-            <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search"></span> ${
-                _('Search')}</button>
+            <button class="btn btn-primary" type="submit">${_(u'Search')}</button>
     % if data['advanced_search']:
             <a class="pull-right" href="${model.Legislation.get_admin_class_url(ctx, **urls.relative_query(inputs,
-                    advanced_search = None))}">${_('Simplified Search')}</a>
+                    advanced_search = None))}">${_(u'Simplified Search')}</a>
     % else:
             <a class="pull-right" href="${model.Legislation.get_admin_class_url(ctx, **urls.relative_query(inputs,
-                    advanced_search = 1))}">${_('Advanced Search')}</a>
+                    advanced_search = 1))}">${_(u'Advanced Search')}</a>
     % endif
         </form>
 </%def>
 
 
 <%def name="title_content()" filter="trim">
-${_('Legislations')} - ${parent.title_content()}
+${_(u'Legislations')} - ${parent.title_content()}
 </%def>
 

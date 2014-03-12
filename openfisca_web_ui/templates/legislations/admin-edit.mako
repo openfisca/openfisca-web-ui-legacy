@@ -43,14 +43,14 @@ from openfisca_web_ui import conf, model, urls
 
 
 <%def name="container_content()" filter="trim">
+        <div class="page-header">
+            <h1>${_(u'Edit a Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
+        </div>
         <form action="${legislation.get_admin_url(ctx, 'edit')}" method="post" role="form">
             <%self:hidden_fields/>
-            <fieldset>
-                <legend>${_(u'Edition of %s') % legislation.get_title(ctx)}</legend>
-                <%self:error_alert/>
-                <%self:form_fields/>
-                <button class="btn btn-primary" name="submit" type="submit"><span class="glyphicon glyphicon-ok"></span> ${_('Save')}</button>
-            </fieldset>
+            <%self:error_alert/>
+            <%self:form_fields/>
+            <button class="btn btn-primary" name="submit" type="submit">${_(u'Save')}</button>
         </form>
 </%def>
 
@@ -60,7 +60,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('title') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="title">${_("Title")}</label>
+                    <label for="title">${_(u'Title')}</label>
                     <input class="form-control" id="title" name="title" required type="text" value="${inputs['title'] or ''}">
     % if error:
                     <span class="help-block">${error}</span>
@@ -70,7 +70,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('description') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="description">${_("Description")}</label>
+                    <label for="description">${_(u'Description')}</label>
                     <textarea class="form-control" id="description" name="description">${
                         inputs['description'] or ''}</textarea>
     % if error:
@@ -81,7 +81,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('datetime_begin') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="datetime_begin">${_("Begin Date")}</label>
+                    <label for="datetime_begin">${_(u'Begin Date')}</label>
                     <input class="form-control" id="datetime_begin" name="datetime_begin" placeholder="dd-mm-yyyy"
                         type="text" value="${inputs['datetime_begin'] or ''}">
     % if error:
@@ -92,7 +92,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('datetime_end') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="datetime_end">${_("End Date")}</label>
+                    <label for="datetime_end">${_(u'End Date')}</label>
                     <input class="form-control" id="datetime_end" name="datetime_end" placeholder="dd-mm-yyyy"
                         type="text" value="${inputs['datetime_end'] or ''}">
     % if error:
@@ -109,7 +109,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('url') if errors is not None else None
 %>\
                         <div class="form-group${' has-error' if error else ''}">
-                            <label for="url">${_('Legislation URL')}</label>
+                            <label for="url">${_(u'Legislation URL')}</label>
                             <input class="form-control" id="url" name="url" type="text" value="${inputs['url'] or ''}">
     % if error:
                             <pre class="help-block alert-danger">${error | n, js, h}</pre>
@@ -121,7 +121,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('json') if errors is not None else None
 %>\
                         <div class="form-group${' has-error' if error else ''}">
-                            <label for="json">${_('Legislation JSON')}</label>
+                            <label for="json">${_(u'Legislation JSON')}</label>
         % if inputs['json']:
                             <textarea class="form-control" id="json" name="json">${
                                 inputs['json'] | n, js, h}</textarea>

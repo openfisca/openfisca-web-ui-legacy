@@ -26,6 +26,7 @@
 """Form controllers"""
 
 
+import babel.dates
 import datetime
 
 from biryani1.baseconv import check, pipe
@@ -129,10 +130,7 @@ def update_session(session):
         user._id = uuidhelpers.generate_uuid()
         user.compute_words()
         test_case_date = datetime.datetime.utcnow()
-        test_case_title = u'Ma simulation du {} à {}'.format(
-            datetime.datetime.strftime(test_case_date, u'%d/%m/%Y'),
-            datetime.datetime.strftime(test_case_date, u'%H:%M'),
-            )
+        test_case_title = u'Ma simulation du {}'.format(babel.dates.format_datetime(test_case_date))
         test_case = model.TestCase(
             author_id = user._id,
             title = test_case_title,
