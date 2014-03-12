@@ -36,7 +36,7 @@ from .. import contexts, conf, conv, model, templates, questions, urls, uuidhelp
 from . import accounts, forms, legislations, sessions, test_cases, visualizations
 
 
-log = logging.getLogger(__name__)
+email_log = logging.getLogger('email')
 router = None
 
 
@@ -196,7 +196,7 @@ def simulate(req):
                 scenario['axes'] = data['axes']
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
-            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
+            email_log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
         output_data = {'output': output, 'errors': errors}
     else:
         output_data = {'errors': errors}

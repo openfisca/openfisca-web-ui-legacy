@@ -39,7 +39,7 @@ from korma.text import Hidden, Number, Text
 from ..conv import base
 
 
-log = logging.getLogger(__name__)
+email_log = logging.getLogger('email')
 
 
 bootstrap_form_group = u'<div class="form-group">{self.inner_html}</div>'
@@ -156,7 +156,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
                     if entity == 'individus' and entity_category['label'] == u'Principal' \
                     and column['name'] == 'prenom' else make_question(column)
                 if question is None:
-                    log.error(u'Unable to make question from column: {!r}'.format(column))
+                    email_log.error(u'Unable to make question from column: {!r}'.format(column))
                 else:
                     category_questions.append(question)
         return category_questions

@@ -42,7 +42,7 @@ from . import menages as menages_conv
 DEFAULT_YEAR = 2013
 
 N_ = lambda message: message
-log = logging.getLogger(__name__)
+email_log = logging.getLogger('email')
 uuid_re = re.compile(ur'[\da-f]{32}$')
 
 
@@ -72,7 +72,7 @@ def build_categories(columns, entity_name):
     for column_name, column_value in columns.iteritems():
         category_name = model.find_category_name(column_name = column_name, entity_name = entity_name)
         if category_name is None:
-            log.error(u'Unable to find category name from column_name: {!r} within entity: {!r}'.format(
+            email_log.error(u'Unable to find category name from column_name: {!r} within entity: {!r}'.format(
                 column_name, entity_name))
         else:
             categories.setdefault(category_name, {})[column_name] = column_value
