@@ -49,14 +49,17 @@ define(['jquery', 'underscore', 'persona', 'helpers'], function($, _, persona, h
                 }
             }
         });
-
-        $(document).on('click', '.sign-in', function () {
-            navigator.id.request();
-        });
-
-        $(document).on('click', '.sign-out', function() {
+        if (authconfig.logout) {
             navigator.id.logout();
-        });
+        } else {
+            $(document).on('click', '.sign-in', function () {
+                navigator.id.request();
+            });
+
+            $(document).on('click', '.sign-out', function() {
+                navigator.id.logout();
+            });
+        }
     }
 
     return {init: init};

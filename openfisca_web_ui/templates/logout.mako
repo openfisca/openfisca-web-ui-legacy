@@ -23,7 +23,17 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+<%!
+from openfisca_web_ui.templates import helpers
+%>
+
+
 <%inherit file="site.mako"/>
+
+
+<%def name="appconfig_script()" filter="trim">
+define('appconfig', ${helpers.logout_appconfig(ctx) | n, js});
+</%def>
 
 
 <%def name="breadcrumb()" filter="trim">
@@ -32,14 +42,6 @@
 
 <%def name="container_content()" filter="trim">
     <div class="alert alert-block alert-success">
-        <p>Déconnexion en cours</p>
+        <p>${_(u'Logout in progress…')}</p>
     </div>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-<%parent:scripts/>
-    <script>
-navigator.id.logout();
-    </script>
 </%def>

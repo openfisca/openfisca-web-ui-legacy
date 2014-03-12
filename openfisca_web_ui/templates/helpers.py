@@ -152,6 +152,12 @@ def legislation_appconfig(ctx, legislation_url):
     return appconfig
 
 
+def logout_appconfig(ctx):
+    appconfig = base_appconfig(ctx)
+    appconfig['enabledModules']['auth']['logout'] = True
+    return appconfig
+
+
 def user_view_appconfig(ctx):
     appconfig = base_appconfig(ctx)
     if conf['enabled.auth']:
