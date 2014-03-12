@@ -560,7 +560,7 @@ def user_edit(req):
             )
         new_legislation.json = response.json(object_pairs_hook = collections.OrderedDict).get('dated_legislation')
         new_legislation.save(safe = True)
-    return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx, 'edit'))
+    return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx))
 
 
 @wsgihelpers.wsgify
