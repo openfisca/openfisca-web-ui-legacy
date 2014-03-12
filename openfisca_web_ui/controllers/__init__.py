@@ -28,7 +28,6 @@
 
 import datetime
 import logging
-from pprint import pformat
 
 from biryani1.baseconv import check, pipe
 from formencode import variabledecode
@@ -197,8 +196,7 @@ def simulate(req):
                 scenario['axes'] = data['axes']
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
-            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(
-                pformat(api_data), errors))
+            log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
         output_data = {'output': output, 'errors': errors}
     else:
         output_data = {'errors': errors}
