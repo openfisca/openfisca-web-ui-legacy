@@ -78,7 +78,9 @@ def build_requireconfig(ctx):
             'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
             'hbs': urls.get_url(ctx, u'bower/require-handlebars-plugin/hbs'),
             'jquery': urls.get_url(ctx, u'bower/jquery/dist/jquery'),
+            'json': urls.get_url(ctx, u'bower/requirejs-json/json'),
             'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
+            'text': urls.get_url(ctx, u'bower/requirejs-text/text'),
             'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
             'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
 
