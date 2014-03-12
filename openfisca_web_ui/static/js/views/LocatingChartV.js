@@ -10,7 +10,8 @@ define([
 	],
 	function ($, _, Backbone, nvd3, appconfig, chartM, helpers) {
 
-		nvd3.dev = appconfig.debug;
+		nvd3.dev = false;
+
 		$('<link>', {
 			href: appconfig.enabledModules.locatingChart.nvd3CssUrlPath,
 			media: 'screen',
