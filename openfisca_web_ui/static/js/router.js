@@ -32,7 +32,7 @@ define([
 			Backbone.history.start();
 		},
 		defaultChart: function () {
-			this.navigate(enableLocatingChart ? 'locating' : 'cascade', {replace: true, trigger: true});
+			this.navigate(enableLocatingChart ? 'locating' : 'waterfall', {replace: true, trigger: true});
 		},
 		distributionChart: function () {
 			chartsV.render('distribution');

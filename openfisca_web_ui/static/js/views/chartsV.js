@@ -1,19 +1,16 @@
 define([
 	'jquery',
-	'underscore',
 	'backbone',
-	'd3',
 
 	'appconfig',
 	'backendServiceM',
 	'DistributionChartV',
-	'LocatingChartV',
 	'VisualizationsPaneV',
 	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, _, Backbone, d3, appconfig, backendServiceM, DistributionChartV, LocatingChartV, VisualizationsPaneV,
-		WaterfallChartV, chartsTabsT) {
+	function ($, Backbone, appconfig, backendServiceM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
+		chartsTabsT) {
 		'use strict';
 
 		var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
@@ -22,9 +19,6 @@ define([
 			visualizations: VisualizationsPaneV,
 			waterfall: WaterfallChartV
 		};
-		if (enableLocatingChart) {
-			viewClassByChartName.locating = LocatingChartV;
-		}
 
 		var AppV = Backbone.View.extend({
 			currentChildView: null,
@@ -42,11 +36,13 @@ define([
 				window.location.hash = $(evt.target).attr('href');
 			},
 			render: function (chartName) {
-				if (this.$el.find('.nav .active').length === 0) {
-					this.$el.find('.nav a[href="#' + chartName + '"]').tab('show');
+				if (chartName in viewClassByChartName) {
+					if (this.$el.find('.nav .active').length === 0) {
+						this.$el.find('.nav a[href="#' + chartName + '"]').tab('show');
+					}
+					this.$el.find('.tab-pane.active').empty();
+					this.currentChildView = new viewClassByChartName[chartName]({el: this.$el.find('#' + chartName)});
 				}
-				this.$el.find('.tab-pane.active').empty();
-				this.currentChildView = new viewClassByChartName[chartName]({el: this.$el.find('#' + chartName)});
 				return this;
 			},
 			updateOverlay: function() {
@@ -63,6 +59,12 @@ define([
 		});
 
 		var appV = new AppV();
+		if (enableLocatingChart) {
+			require(['LocatingChartV'], function(LocatingChartV) {
+				viewClassByChartName.locating = LocatingChartV;
+				appV.render('locating');
+			});
+		}
 		return appV;
 
 	}
