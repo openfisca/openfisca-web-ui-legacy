@@ -79,12 +79,12 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     value = visualization.url
     if value is None:
         return ''
-    simulation_url = urllib.quote('{}?{}'.format(
+    simulate_url = urllib.quote('{}?{}'.format(
         urls.get_full_url(ctx, 'api/1/simulate'),
         urllib.urlencode({'token': anonymous_token}),
         ))
 %>\
-        <iframe class="visualization-iframe" src="${value.format(simulation_url = simulation_url)}"></iframe>
+        <iframe class="visualization-iframe" src="${value.format(simulate_url = simulate_url)}"></iframe>
 </%def>
 
 
@@ -99,7 +99,7 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     % endif
 <%
     anonymous_token = ctx.session.anonymous_token if ctx.session is not None else ''
-    simulation_url = urllib.quote('{}?{}'.format(
+    simulate_url = urllib.quote('{}?{}'.format(
         urls.get_full_url(ctx, 'api/1/simulate'),
         urllib.urlencode({'token': anonymous_token}),
         ))
@@ -107,7 +107,7 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
 %>\
     % if value is not None:
             <dt>${_(u'Source URL')}</dt>
-            <dd><a href="${value.format(simulation_url = simulation_url)}">${value}</a></dd>
+            <dd><a href="${value.format(simulate_url = simulate_url)}">${value}</a></dd>
     % endif
 <%
     value = visualization.enabled
