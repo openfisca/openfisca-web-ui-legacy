@@ -152,7 +152,10 @@ def simulate(req):
                     }),
                 ),
             ),
-        'decomposition': conv.make_input_to_json(),
+        'decomposition': conv.first_match(
+            conv.make_input_to_json(),
+            conv.cleanup_line,
+            ),
         'token': conv.base.input_to_uuid,
         })(inputs, state = ctx)
     if errors is None:
