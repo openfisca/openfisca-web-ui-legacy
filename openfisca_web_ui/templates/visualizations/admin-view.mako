@@ -83,8 +83,15 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
         urls.get_full_url(ctx, 'api/1/simulate'),
         urllib.urlencode({'token': anonymous_token}),
         ))
+    iframe_src_url = value.format(simulate_url = simulate_url) if '{simulate_url}' in value else None
 %>\
-        <iframe class="visualization-iframe" src="${value.format(simulate_url = simulate_url)}"></iframe>
+    % if iframe_src_url is None:
+        <div class="alert alert-danger">
+            ${'Visualization URL does not contain "{simulate_url}" pattern.'}
+        </div>
+    % else:
+        <iframe class="visualization-iframe" src="${iframe_src_url}"></iframe>
+    % endif
 </%def>
 
 
@@ -106,8 +113,8 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
     value = visualization.url
 %>\
     % if value is not None:
-            <dt>${_(u'Source URL')}</dt>
-            <dd><a href="${value.format(simulate_url = simulate_url)}">${value}</a></dd>
+            <dt>${_(u'Visualization URL')}</dt>
+            <dd>${value}</dd>
     % endif
 <%
     value = visualization.enabled
