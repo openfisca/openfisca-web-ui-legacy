@@ -179,6 +179,13 @@ def method(method_name, *args, **kwargs):
     return method_converter
 
 
+without_keys = lambda excluded_keys, mapping: dict(
+    (key, value)
+    for key, value in mapping.iteritems()
+    if key not in excluded_keys
+)
+
+
 without_none_values = lambda mapping: dict((key, value) for key, value in mapping.iteritems() if value is not None)
 
 

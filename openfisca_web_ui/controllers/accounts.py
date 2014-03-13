@@ -518,10 +518,11 @@ def user_view_post(req):
     data, errors = scenarios_question.root_input_to_data(inputs, state = ctx)
     if errors is None:
         user_scenarios = conv.check(conv.scenarios.korma_data_to_scenarios(data, state = ctx))
-        print user_scenarios
-        session.user.scenarios = user_scenarios
+        session.user.scenarios = user_scenarios or None
         session.user.save(safe = True)
         if data['my_scenarios'].get('add'):
+            if user_scenarios is None:
+                user_scenarios = []
             user_scenarios.append({})
             values, errors = conv.pipe(
                 conv.scenarios.scenarios_to_page_korma_data,

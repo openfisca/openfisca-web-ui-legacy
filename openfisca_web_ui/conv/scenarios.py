@@ -29,6 +29,8 @@
 from biryani1.baseconv import function, pipe, uniform_sequence
 from biryani1.states import default_state
 
+from . import base
+
 
 def scenarios_to_page_korma_data(scenarios, state = None):
     return {
@@ -46,7 +48,7 @@ def korma_data_to_scenarios(values, state = None):
         return None, None
     if state is None:
         state = default_state
-    return pipe(
+    new_values, errors = pipe(
         function(lambda data: data.get(u'my_scenarios')),
         function(lambda data: data.get(u'scenarios')),
         uniform_sequence(
@@ -54,3 +56,11 @@ def korma_data_to_scenarios(values, state = None):
             function(lambda data: data.get('scenario')),
             ),
         )(values, state = state)
+    if errors is not None:
+        return values, errors
+    new_values = [
+        base.without_keys(excluded_keys = ['delete'], mapping = scenario)
+        for scenario in new_values
+        if scenario.get('delete') is None
+        ] or None
+    return new_values, None
