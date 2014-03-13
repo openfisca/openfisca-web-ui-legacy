@@ -16,6 +16,7 @@ define([
 			events: {
 				'change :input': 'onInputChange',
 				'click :input.add': 'onAddButtonClicked',
+				'click button.simulate': 'onSimulateButtonClicked',
 				'keypress :input': 'onKeyPress'
 			},
 			model: backendServiceM,
@@ -24,13 +25,6 @@ define([
 				this.setupXeditable();
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
-			onInputChange: _.debounce(function(evt) {
-				var $input = $(evt.target);
-				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length === 0) {
-					var formDataStr = this.$el.serialize();
-					this.submit(formDataStr, false);
-				}
-			}, debounceDelay),
 			onAddButtonClicked: function(evt) {
 				evt.preventDefault();
 				var doReloadForm = false;
@@ -45,6 +39,13 @@ define([
 				}
 				this.submit(formDataStr, doReloadForm);
 			},
+			onInputChange: _.debounce(function(evt) {
+				var $input = $(evt.target);
+				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length === 0) {
+					var formDataStr = this.$el.serialize();
+					this.submit(formDataStr, false);
+				}
+			}, debounceDelay),
 			onKeyPress: function(evt) {
 				if (evt.keyCode === 13 && $(evt.target).parents('.editableform').length === 0) {
 					evt.preventDefault();
@@ -52,6 +53,11 @@ define([
 					var doReloadForm = endsWith(evt.target.name, '.prenom');
 					this.submit(formDataStr, doReloadForm);
 				}
+			},
+			onSimulateButtonClicked: function(evt) {
+				evt.preventDefault();
+				var formDataStr = this.$el.serialize();
+				this.submit(formDataStr, false);
 			},
 			render: function() {
 				var formData = this.model.get('formData');
