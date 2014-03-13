@@ -7,6 +7,11 @@ define([
 
 		function init () {
 			var enabledModules = appconfig.enabledModules;
+			if (enabledModules.auth) {
+				require(['auth'], function(auth) {
+					auth.init(enabledModules.auth);
+				});
+			}
 			if (enabledModules.acceptCookiesModal) {
 				require(['AcceptCookiesModalV'], function(AcceptCookiesModalV) {
 					this.acceptCookiesModalV = new AcceptCookiesModalV();
@@ -18,11 +23,6 @@ define([
 				});
 			}
 			if ( ! enabledModules.acceptCookiesModal && ! enabledModules.acceptCnilConditionsModal) {
-				if (enabledModules.auth) {
-					require(['auth'], function(auth) {
-						auth.init(enabledModules.auth);
-					});
-				}
 				if (enabledModules.disclaimer) {
 					require(['disclaimer'], function(disclaimer) {
 						disclaimer.init(enabledModules.disclaimer);
