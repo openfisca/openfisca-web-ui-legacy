@@ -315,7 +315,7 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
 class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper):
     _user = UnboundLocalError
     collection_name = 'sessions'
-    anonymous_token = None  # token givn to external application to retrieve simulation data.
+    anonymous_token = None  # token given to external application to retrieve simulation data.
     disclaimer_closed = None
     expiration = None
     token = None  # the cookie token
@@ -680,7 +680,7 @@ def is_admin(ctx, check = False):
         return False
     if not user.admin:
         if Account.find_one(dict(admin = True), []) is None:
-            # Whem there is no admin, every logged user is an admin.
+            # When there is no admin, every logged user is an admin.
             return True
         if check:
             raise wsgihelpers.forbidden(ctx, message = ctx._(u"You must be an administrator to access this page."))
