@@ -137,6 +137,7 @@ def simulate(req):
     params = req.params
     inputs = dict(
         axes = params.get('axes'),
+        decomposition = params.get('decomposition'),
         token = params.get('token'),
         )
     data, errors = conv.struct({
@@ -151,6 +152,7 @@ def simulate(req):
                     }),
                 ),
             ),
+        'decomposition': conv.make_input_to_json(),
         'token': conv.base.input_to_uuid,
         })(inputs, state = ctx)
     if errors is None:
@@ -159,6 +161,7 @@ def simulate(req):
         if data['axes'] is not None:
             for scenario in api_data['scenarios']:
                 scenario['axes'] = data['axes']
+        api_data['decomposition'] = data['decomposition']
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
             email_log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
