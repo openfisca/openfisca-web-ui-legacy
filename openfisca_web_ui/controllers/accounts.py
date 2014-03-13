@@ -341,12 +341,7 @@ def login(req):
     session.save(safe = True)
 
     req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
-    return wsgihelpers.respond_json(
-        ctx,
-        dict(
-            redirectLocation = session.user.get_user_url(ctx) if len(session.user.test_cases_id or []) > 1 else None,
-            )
-        )
+    return wsgihelpers.no_content(ctx)
 
 
 @wsgihelpers.wsgify
@@ -364,7 +359,7 @@ def logout(req):
                 httponly = True,
                 secure = req.scheme == 'https',
                 )
-    return 'Logout successful' if req.is_xhr else templates.render(ctx, '/logout.mako')
+    return wsgihelpers.no_content(ctx) if req.is_xhr else templates.render(ctx, '/logout.mako')
 
 
 def route_admin(environ, start_response):

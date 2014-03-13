@@ -12,11 +12,7 @@ define(['jquery', 'underscore', 'persona', 'helpers'], function($, _, persona, h
                     }
                 })
                 .done(function(data) {
-                    if (_.isUndefined(data.redirectLocation)) {
-                        window.location.reload();
-                    } else {
-                        window.location.href = data.redirectLocation;
-                    }
+                    window.location.reload();
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
                     console.error('onlogin fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);

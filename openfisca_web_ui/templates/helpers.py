@@ -34,6 +34,7 @@ from .. import conf, model, urls, uuidhelpers
 def admin_appconfig(ctx):
     appconfig = base_appconfig(ctx)
     if conf['enabled.auth']:
+        # Admin pages should redirect to home page on logout.
         appconfig['enabledModules']['auth']['redirectLocation'] = urls.get_url(ctx)
     return appconfig
 
