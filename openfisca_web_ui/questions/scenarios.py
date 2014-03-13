@@ -64,7 +64,6 @@ def make_scenarios_repeat(user):
                     questions = [
                         base.BootstrapNumber(name = 'year', placeholder = unicode(DEFAULT_YEAR), step = 1),
                         base.BootstrapSelect(
-                            add_first_empty_value = True,
                             choices = test_cases_id_and_name,
                             name = 'test_case_id',
                             ),
@@ -83,8 +82,8 @@ def make_scenarios_repeat(user):
                     ),
                 ),
             base.BootstrapButton(
-                label = ctx._(u'Add a new scenario'),
-                other_classes = 'add btn-primary',
+                label = ctx._(u'Add a scenario'),
+                other_classes = 'add btn-default',
                 name = 'add',
                 value = 'add',
                 ),

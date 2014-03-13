@@ -49,10 +49,10 @@ def get_user_api_data(ctx):
 @wsgihelpers.wsgify
 def situation_form_get(req):
     ctx = contexts.Ctx(req)
-    session = ctx.session
 
     if conf['cookie'] in req.cookies:
-        session = update_session(session)
+        update_session(ctx)
+        session = ctx.session
         if req.cookies.get(conf['cookie']) != session.token:
             req.response.set_cookie(
                 conf['cookie'],
@@ -75,8 +75,7 @@ def situation_form_get(req):
         )(filled_user_api_data, state = ctx)
     root_question.fill(values, errors)
 
-    return templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
-                                user = session.user) \
+    return templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question) \
         if req.is_xhr or req.params.get('xhr') \
         else templates.render(ctx, '/index.mako', root_question = root_question)
 
@@ -84,11 +83,7 @@ def situation_form_get(req):
 @wsgihelpers.wsgify
 def situation_form_post(req):
     ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None:
-        return wsgihelpers.unauthorized(ctx)
-    assert session.user is not None
-
+    user = model.get_user(ctx, check = True)
     user_api_data = get_user_api_data(ctx)
     if model.fields_api_data() is None:
         return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
@@ -98,8 +93,7 @@ def situation_form_post(req):
     if errors is not None:
         root_question.fill(inputs, errors)
         if req.is_xhr:
-            form_html = templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
-                                             user = session.user)
+            form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
             return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
         else:
             return templates.render(ctx, '/index.mako', root_question = root_question)
@@ -107,20 +101,20 @@ def situation_form_post(req):
     if errors is not None:
         root_question.fill(api_data, errors)
         if req.is_xhr:
-            form_html = templates.render_def(ctx, '/forms.mako', 'situation_form', root_question = root_question,
-                                             user = session.user)
+            form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
             return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
         else:
             return templates.render(ctx, '/index.mako', root_question = root_question)
     if api_data is not None:
         user_api_data.update(api_data)
-        current_test_case = session.user.current_test_case
+        current_test_case = user.current_test_case
         current_test_case.api_data = user_api_data
         current_test_case.save(safe = True)
     return wsgihelpers.respond_json(ctx, None) if req.is_xhr else wsgihelpers.redirect(ctx, location = '')
 
 
-def update_session(session):
+def update_session(ctx):
+    session = ctx.session
     if session is None:
         session = model.Session()
         session.anonymous_token = uuidhelpers.generate_uuid()
@@ -129,8 +123,8 @@ def update_session(session):
         user = model.Account()
         user._id = uuidhelpers.generate_uuid()
         user.compute_words()
-        test_case_date = datetime.datetime.utcnow()
-        test_case_title = u'Ma simulation du {}'.format(babel.dates.format_datetime(test_case_date))
+        # TODO move default test_case into Account class?
+        test_case_title = babel.dates.format_datetime(datetime.datetime.utcnow())
         test_case = model.TestCase(
             author_id = user._id,
             title = test_case_title,
@@ -143,4 +137,4 @@ def update_session(session):
         session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
     session.save(safe = True)
-    return session
+    ctx.session = session

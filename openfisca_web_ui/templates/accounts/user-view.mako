@@ -37,7 +37,9 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
 </%def>
 
 
-<%def name="breadcrumb()" filter="trim">
+<%def name="breadcrumb_content()" filter="trim">
+            <%parent:breadcrumb_content/>
+            <li class="active">${_(u'My account')}</li>
 </%def>
 
 
@@ -49,8 +51,8 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
         <div class="panel panel-default">
             <%self:view_fields/>
             <div class="panel-footer">
-                <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#edit-new-modal">
-                    ${_(u'Add a new simulation')}
+                <a class="btn btn-default" href="#" data-toggle="modal" data-target="#edit-new-modal">
+                    ${_(u'Add a simulation')}
                 </a>
             </div>
         </div>
@@ -58,9 +60,10 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
         <h2>${_(u'My scenarios')}</h2>
         <div class="panel panel-default">
             <form class="form-inline" method="POST" name="scenarios" role="form">
-                ${scenarios_question.html | n}
+                ${scenarios_question['scenarios'].html | n}
                 <div class="panel-footer">
                     <button class="btn btn-default" type="submit">${_(u'Save')}</button>
+                    ${scenarios_question['add'].html | n}
                 </div>
             </form>
         </div>
@@ -100,9 +103,10 @@ user = model.get_user(ctx)
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Supprimer la simulation ${test_case.title} ?</h4>
+                    <h4 class="modal-title">${_(u'Delete simulation?')}</h4>
                 </div>
                 <div class="modal-body">
+                    <p>${_(u'Delete simulation "{}"?').format(test_case.title)}</p>
                     <form method="POST" action="${test_case.get_url(ctx, 'delete')}">
                         <button type="submit" class="btn btn-danger">${_(u'Delete')}</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Cancel')}</button>
@@ -182,14 +186,6 @@ ${account.get_title(ctx)} - ${parent.title_content()}
 
 <%def name="view_fields()" filter="trim">
         <table class="table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>${_(u'Name')}</th>
-                    <th>${_(u'Description')}</th>
-                    <th>${_(u'Actions')}</th>
-                </tr>
-            </thead>
 <%
 user = model.get_user(ctx)
 %>
@@ -197,12 +193,15 @@ user = model.get_user(ctx)
             <tbody>
         % for test_case in user.test_cases:
                 <tr>
-                    <td>${'<span class="glyphicon glyphicon-ok"></span>' \
-                        if test_case._id == account.current_test_case_id else u' ' | n}</td>
-                    <td><a href="${test_case.get_url(ctx, 'use')}">${test_case.title}</a></td>
-                    <td>${test_case.description or ''}</td>
                     <td>
-                        <a class="btn btn-sm btn-primary" href="${test_case.get_url(ctx, 'use')}">${_(u'Use')}</a>
+            % if test_case._id == account.current_test_case_id:
+                        <span class="glyphicon glyphicon-ok" title="${_(u'Active simulation')}"></span>
+            % endif
+                    </td>
+                    <td><a href="${test_case.get_url(ctx, 'use')}">${test_case.title}</a></td>
+                    <td>
+                        <a class="btn btn-sm btn-default" \
+href="${test_case.get_url(ctx, 'use', redirect = urls.get_url(ctx))}">${_(u'View')}</a>
                         <a class="btn btn-sm btn-default" href="#" data-toggle="modal" \
 data-target="#${u'edit-{}-modal'.format(test_case.slug)}">${_(u'Edit')}</a>
                         <a class="btn btn-sm btn-default" href="${test_case.get_url(ctx, 'duplicate')}">

@@ -32,6 +32,10 @@ article.cgu h2{
     margin: 1em;
 }
 
+form[name="situation"] .buttons {
+    margin: 1em 0;
+}
+
 .collapse-node {
     border-left: px solid #428bca;
     padding-left: 15px;
@@ -73,10 +77,6 @@ img.media-object {
 }
 
 form[name="scenarios"] .scenario {
-    margin: 1em;
-}
-
-form[name="scenarios"] button.add {
     margin: 1em;
 }
 

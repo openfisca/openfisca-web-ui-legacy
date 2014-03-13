@@ -53,7 +53,7 @@ bootstrapize = lambda question_class, *args, **kwargs: \
 
 def BootstrapButton(control_attributes = None, other_classes = None, *args, **kwargs):
     if control_attributes is None:
-        control_attributes = {'class': 'btn btn-default', 'type': 'submit'}
+        control_attributes = {'class': 'btn', 'type': 'submit'}
     if other_classes is not None and control_attributes.get('class'):
         control_attributes['class'] += ' ' + other_classes
     return Button(control_attributes = control_attributes, *args, **kwargs)
@@ -278,21 +278,21 @@ def make_situation_form(user_api_data):
             BootstrapButton(
                 label = u'Ajouter une famille',
                 name = 'add_famille',
-                other_classes = 'add',
+                other_classes = 'add btn-default',
                 value = 1,
                 ),
             foyers_fiscaux.make_foyers_fiscaux_repeat(prenom_select_choices),
             BootstrapButton(
                 label = u'Ajouter un foyer fiscal',
                 name = 'add_foyer_fiscal',
-                other_classes = 'add',
+                other_classes = 'add btn-default',
                 value = 1,
                 ),
             menages.make_menages_repeat(prenom_select_choices),
             BootstrapButton(
                 label = u'Ajouter un ménage',
                 name = 'add_menage',
-                other_classes = 'add',
+                other_classes = 'add btn-default',
                 value = 1,
                 ),
             ],

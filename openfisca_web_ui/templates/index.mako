@@ -32,9 +32,6 @@ from openfisca_web_ui.templates import helpers
 <%inherit file="site.mako"/>
 
 
-<%namespace file="forms.mako" name="forms"/>
-
-
 <%def name="appconfig_script()" filter="trim">
 define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
 </%def>
@@ -45,25 +42,12 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
 
 
 <%def name="container_content()" filter="trim">
-<%
-    user = model.get_user(ctx)
-%>\
-    % if user is not None and user.test_cases is not None and len(user.test_cases) > 1:
-        % for test_case in user.test_cases:
-            % if test_case._id == user.current_test_case_id:
-        <div class="page-header">
-            <h1>${test_case.title}</h1>
-        </div>
-            % endif
-        % endfor
-    % endif
         <div class="row">
             <div class="col-sm-4">
-                ${forms.situation_form(root_question=root_question, user=user)}
+                ${situation_form(root_question)}
             </div>
             <div class="col-sm-8">
                 <div id="chart-wrapper"></div>
-                <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">${_(u'Export')}</button>
             </div>
         </div>
 </%def>
@@ -106,4 +90,61 @@ aria-hidden="true">
 <%def name="modals()" filter="trim">
     <%parent:modals/>
     <%self:export_modal/>
+    <%self:reset_modal/>
+</%def>
+
+
+<%def name="reset_modal()" filter="trim">
+<%
+    user = model.get_user(ctx)
+%>\
+    <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">${_(u'Reset this simulation?')}</h4>
+                </div>
+                <div class="modal-body">
+                    <p>${_(u'Data associated to this simulation will be deleted.')}</p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-danger btn-reset" \
+href="${user.get_user_url(ctx, 'reset') if user is not None else '/'}">
+                        ${_(u'Reset')}
+                    </a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Cancel')}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</%def>
+
+
+<%def name="situation_form(root_question)" filter="trim">
+<%
+    user = model.get_user(ctx)
+%>\
+    <form method="POST" name="situation" role="form">
+        ${root_question.html | n}
+        <div class="buttons">
+    % if user is None or user.email is None:
+            <a class="btn btn-default sign-in" href="#" title="${_(u'Save this simulation')}">
+                ${_(u'Save')}
+            </a>
+    % endif
+            <button class="btn btn-primary">${_(u'Simulate')}</button>
+            <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">${_(u'Export')}</button>
+            <button class="btn btn-default pull-right" data-toggle="modal" data-target="#reset-dialog">
+                ${_(u'Reset')}
+            </button>
+        </div>
+    % if user is not None:
+        <p>
+            <a href="${user.get_user_url(ctx)}">
+                ${_(u'Viewing simulation "{}"').format(user.current_test_case.title)}
+            </a>
+        </p>
+    % endif
+    </form>
 </%def>
