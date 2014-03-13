@@ -41,19 +41,30 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
     % if pager.item_count == 0:
-        <h1>${_(u"No legislation found")}</h1>
+        <div class="page-header">
+            <h1>${_(u"No legislation found")}</h1>
+        </div>
     % else:
         % if pager.page_count > 1:
             % if pager.page_size == 1:
-        <h1>${_(u"Legislation {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
+        <div class="page-header">
+            <h1>${_(u"Legislation {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
+        </div>
             % else:
         <%self:search_form/>
-        <h1>${_(u"Legislation {0} - {1} of {2}").format(pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
+        <div class="page-header">
+            <h1>${_(u"Legislation {0} - {1} of {2}").format(
+                pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
+        </div>
             % endif
         % elif pager.item_count == 1:
-        <h1>${_(u"Single legislation")}</h1>
+        <div class="page-header">
+            <h1>${_(u"Single legislation")}</h1>
+        </div>
         % else:
-        <h1>${_(u"{} legislations").format(pager.item_count)}</h1>
+        <div class="page-header">
+            <h1>${_(u"{} legislations").format(pager.item_count)}</h1>
+        </div>
         % endif
         <%object:pagination object_class="${model.Legislation}" pager="${pager}"/>
         <table class="table">
