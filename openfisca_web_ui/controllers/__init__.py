@@ -42,7 +42,6 @@ router = None
 @wsgihelpers.wsgify
 def accept_cookies(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'POST'
     if not ('accept' in req.params and check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
         # User doesn't accept the use of cookies => Bye bye.
         return wsgihelpers.redirect(ctx, location = conf['www.url'])
@@ -100,7 +99,7 @@ def make_router():
     routings = [
         ('GET', '^/?$', forms.situation_form_get),
         ('POST', '^/?$', forms.situation_form_post),
-        (('GET', 'POST'), '^/accept-cookies/?$', accept_cookies),
+        ('POST', '^/accept-cookies/?$', accept_cookies),
         (None, '^/account(?=/|$)', accounts.route_user),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
