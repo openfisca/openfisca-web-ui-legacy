@@ -63,7 +63,7 @@ define([
 			render: function() {
 				var formData = this.model.get('formData');
 				if ( ! _.isUndefined(formData.html)) {
-					this.$el.html(formData.html);
+					this.$el.replaceWith($(formData.html));
 					this.setupXeditable();
 				}
 				if (_.isUndefined(formData.errors)) {
