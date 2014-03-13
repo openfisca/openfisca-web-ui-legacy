@@ -21,7 +21,9 @@ define([
 				locating_data: {},
 				distribution_data: {},
 
-				vingtiles: vingtiles
+				vingtiles: vingtiles,
+
+				currentChartName: null
 			},
 			backendServiceM: backendServiceM,
 			initialize: function () {
@@ -83,6 +85,9 @@ define([
 				return new Parser(this.get('source'))
 							.clean()
 							.values();
+			},
+			simulate: function () {
+
 			}
 		});
 

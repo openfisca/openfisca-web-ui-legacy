@@ -2,8 +2,8 @@ define([
 	'backbone',
 
 	'appconfig',
-	'chartsV'
-], function (Backbone, appconfig, chartsV) {
+	'chartM'
+], function (Backbone, appconfig, chartM) {
 
 	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
 	var router = null;
@@ -35,21 +35,21 @@ define([
 			this.navigate(enableLocatingChart ? 'locating' : 'waterfall', {replace: true, trigger: true});
 		},
 		distributionChart: function () {
-			chartsV.render('distribution');
+			chartM.set('currentChartName', 'distribution');
 		},
 		locatingChart: function () {
 			if (enableLocatingChart) {
-				chartsV.render('locating');
+				chartM.set('currentChartName', 'locating');
 			}
 		},
 		otherCharts: function () {
-			chartsV.render('other');
+			chartM.set('currentChartName', 'other');
 		},
 		waterfallChart: function () {
-			chartsV.render('waterfall');
+			chartM.set('currentChartName', 'waterfall');
 		},
 		visualizationsChart: function () {
-			chartsV.render('visualizations');
+			chartM.set('currentChartName', 'visualizations');
 		}
 	});
 

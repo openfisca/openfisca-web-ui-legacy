@@ -5,8 +5,9 @@ define([
 	'x-editable',
 
 	'backendServiceM',
+	'chartM'
 	],
-	function ($, _, Backbone, xEditable, backendServiceM) {
+	function ($, _, Backbone, xEditable, backendServiceM, chartM) {
 
 		var debounceDelay = 100;
 		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
@@ -94,7 +95,7 @@ define([
 						if (doReloadForm) {
 							this.model.fetchForm();
 						} else {
-							this.model.simulate();
+							chartM.simulate();	
 						}
 					}
 				}, this));
