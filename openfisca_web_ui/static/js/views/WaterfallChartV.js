@@ -366,11 +366,10 @@ define([
 											return doIt(el.children[0]);
 										}
 										return el;
-									}
+									};
 									return doIt(obj);
 								};
 
-								// console.log(d.parentNodes[1].id);
 								var parentNode = d.parentNodes[0];
 									parentNode.name = $.isArray(parentNode.name) ? parentNode.name : parentNode.name.split(' ');
 
@@ -381,7 +380,7 @@ define([
 
 								var yMiddleTextPos = 
 									(barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
-									(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)))/2
+									(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)))/2;
 
 								that.incomeLine = that.g.append('line')
 									.attr('stroke', function () { return '#333'; })
@@ -414,7 +413,7 @@ define([
 									.attr('x1', function () { return that.width-10; })
 									.attr('y1', function () { return (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)); })
 									.attr('x2', function () { return that.width-10; })
-									.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
+									.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); });
 								
 								that.incomeText = that.g.selectAll('.income-number')
 									.data((that.prefix._scale(d.parentNodes[0].value) + that.prefix.symbolText).split('\n'));
@@ -522,13 +521,7 @@ define([
 								that.incomeText
 									.remove();
 							}
-						})
-						// .on('click', function (d) {
-						// 	var topV = d.waterfall.startValue - (d.value*3),
-						// 		bottomV = d.waterfall.endValue + (d.value*3);
-						// 	that.updateScales([topV, bottomV]);
-						// 	that.render({getDatas: false});
-						// });
+						});
 
 				this.activeBars.moveToFront();
 

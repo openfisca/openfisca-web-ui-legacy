@@ -35,7 +35,6 @@ define([
 				}, this));
 			},
 			parse: function () {
-				console.log(this.backendServiceM.get('apiData'));
 				this.fetched = true;
 				this.set('source', $.extend(true, {}, this.backendServiceM.get('apiData')));
 			},
@@ -56,12 +55,6 @@ define([
 								.setParentNodes()
 								.listChildren()
 								.values();
-
-				console.log(r);
-				_.each(r, function (obj) {
-					console.log(obj.parentNodes);
-				});
-
 				return r;
 			},
 			get_distributionData: function (args) {
