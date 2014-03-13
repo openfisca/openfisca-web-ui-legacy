@@ -28,14 +28,11 @@ from openfisca_web_ui import conf, model, urls
 %>
 
 
-<%inherit file="/admin.mako"/>
-<%namespace name="edit" file="admin-edit.mako"/>
+<%inherit file="/site.mako"/>
+<%namespace name="edit" file="user-edit.mako"/>
 
 
-<%def name="breadcrumb_content()" filter="trim">
-            <%parent:breadcrumb_content/>
-            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
-            <li class="active">${_(u'New')}</li>
+<%def name="breadcrumb()" filter="trim">
 </%def>
 
 
@@ -43,7 +40,7 @@ from openfisca_web_ui import conf, model, urls
         <div class="page-header">
             <h1>${_(u'Create a Legislation')}</h1>
         </div>
-        <form action="${model.Legislation.get_admin_class_url(ctx, 'new')}" method="post" role="form">
+        <form action="${model.Legislation.get_user_class_url(ctx, 'new')}" method="post" role="form">
             <%edit:hidden_fields/>
             <%self:error_alert/>
             <%edit:form_fields/>

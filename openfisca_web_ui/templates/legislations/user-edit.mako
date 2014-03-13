@@ -30,15 +30,10 @@ from openfisca_web_ui import conf, model, urls
 %>
 
 
-<%inherit file="/admin.mako"/>
+<%inherit file="/site.mako"/>
 
 
-<%def name="breadcrumb_content()" filter="trim">
-            <%parent:breadcrumb_content/>
-            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
-            <li><a href="${legislation.get_admin_url(ctx)}">${legislation.get_title(ctx)}</a></li>
-            <li class="active">${_(u'Edit')}</li>
+<%def name="breadcrumb()" filter="trim">
 </%def>
 
 
@@ -51,7 +46,7 @@ from openfisca_web_ui import conf, model, urls
             <%self:error_alert/>
             <%self:form_fields/>
             <button class="btn btn-primary" name="submit" type="submit">${_(u'Save')}</button>
-            <a class="btn btn-default" href="${legislation.get_admin_url(ctx)}">${_(u'Cancel')}</a>
+            <a class="btn btn-default" href="${legislation.get_user_url(ctx)}">${_(u'Cancel')}</a>
         </form>
 </%def>
 

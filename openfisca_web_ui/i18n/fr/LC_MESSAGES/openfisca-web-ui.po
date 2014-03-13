@@ -8,21 +8,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-03-13 11:21+0100\n"
-"PO-Revision-Date: 2014-03-13 11:20+0100\n"
+"POT-Creation-Date: 2014-03-13 23:02+0100\n"
+"PO-Revision-Date: 2014-03-13 23:03+0100\n"
 "Last-Translator: Christophe Benz <christophe.benz@data.gouv.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: openfisca_web_ui/model.py:147
 msgid "No account with ID, slug or words: {0}"
 msgstr ""
-"Aucun compte avec l'ID, le nom simplifié ou indexé par les mots "
-"suivants : {0}"
+"Aucun compte avec l'ID, le nom simplifié ou indexé par les mots suivants : "
+"{0}"
 
 #: openfisca_web_ui/model.py:149
 msgid "Too much accounts with words: {0}"
@@ -64,8 +65,8 @@ msgstr "Trop de simulations avec les mots : {0}"
 #: openfisca_web_ui/model.py:679
 msgid "You must be authenticated as an administrator to access this page."
 msgstr ""
-"Vous devez être authentifié en tant qu'administrateur pour accéder à "
-"cette page."
+"Vous devez être authentifié en tant qu'administrateur pour accéder à cette "
+"page."
 
 #: openfisca_web_ui/model.py:686
 msgid "You must be an administrator to access this page."
@@ -137,8 +138,8 @@ msgstr "Un compte avec le même nom existe déjà."
 
 #: openfisca_web_ui/controllers/accounts.py:158
 msgid ""
-"You can't promote this account to be an administrator, because you aren't"
-" an administrator yourself."
+"You can't promote this account to be an administrator, because you aren't an "
+"administrator yourself."
 msgstr ""
 "Vous ne pouvez pas donner les droits administrateur car vous n'êtes pas "
 "administrateur vous même."
@@ -157,17 +158,39 @@ msgstr "Erreur durant la vérification de l'assertion d'authentification"
 msgid "Unable to retrieve form fields."
 msgstr "Impossible de récupérer les champs du formulaire."
 
-#: openfisca_web_ui/controllers/legislations.py:138
-#: openfisca_web_ui/controllers/legislations.py:245
-#: openfisca_web_ui/controllers/legislations.py:542
+#: openfisca_web_ui/controllers/legislations.py:66
+msgid "Either URL or JSON must be provided."
+msgstr "Soit l'URL soit le JSON doit être fourni."
+
+#: openfisca_web_ui/controllers/legislations.py:133
+#: openfisca_web_ui/controllers/legislations.py:183
+#: openfisca_web_ui/controllers/legislations.py:300
+#: openfisca_web_ui/controllers/legislations.py:641
+#: openfisca_web_ui/controllers/legislations.py:691
+#: openfisca_web_ui/controllers/legislations.py:804
 msgid "A legislation with the same name already exists."
 msgstr "Un élément avec le même nom existe déjà."
 
-#: openfisca_web_ui/controllers/legislations.py:325
+#: openfisca_web_ui/controllers/legislations.py:168
+#: openfisca_web_ui/controllers/legislations.py:676
+msgid "{} (copy {})"
+msgstr "{} (copie {})"
+
+#: openfisca_web_ui/controllers/legislations.py:190
+#: openfisca_web_ui/controllers/legislations.py:698
+msgid "Copy of legislation \"{}\""
+msgstr "Copie de la législation « {} »"
+
+#: openfisca_web_ui/controllers/legislations.py:329
+#: openfisca_web_ui/controllers/legislations.py:836
+msgid "Unable to compute dated legislation"
+msgstr "Impossible de calculer la législation datée"
+
+#: openfisca_web_ui/controllers/legislations.py:380
 msgid "You must be an administrator to edit a legislation."
 msgstr "Vous devez être un administrateur pour éditer un législation."
 
-#: openfisca_web_ui/controllers/legislations.py:331
+#: openfisca_web_ui/controllers/legislations.py:386
 msgid "You cannot edit a non-dated legislation."
 msgstr "Vous ne pouvez pas éditer une législation non datée."
 
@@ -181,11 +204,12 @@ msgid ""
 "You can't enable or disable this visualization because you aren't an "
 "administrator"
 msgstr ""
-"Vous ne pouvez pas activer ou désactiver cette visualisation car vous "
-"n'êtes pas administrateur"
+"Vous ne pouvez pas activer ou désactiver cette visualisation car vous n'êtes "
+"pas administrateur"
 
 #: openfisca_web_ui/controllers/visualizations.py:133
-msgid "You can't promote this visualization because you aren't an administrator"
+msgid ""
+"You can't promote this visualization because you aren't an administrator"
 msgstr ""
 "Vous ne pouvez pas promouvoir cette visualisation car vous n'êtes pas "
 "administrateur"
@@ -212,7 +236,6 @@ msgstr "Ce rôle est déjà défini."
 
 #: openfisca_web_ui/questions/base.py:145
 #: openfisca_web_ui/templates/index.mako:82
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:104
 msgid "Close"
 msgstr "Fermer"
 
@@ -230,11 +253,13 @@ msgstr "Valider"
 #: openfisca_web_ui/templates/accounts/user-view.mako:111
 #: openfisca_web_ui/templates/accounts/user-view.mako:131
 #: openfisca_web_ui/templates/accounts/user-view.mako:211
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:40
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:51
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:57
-#: openfisca_web_ui/templates/legislations/admin-view.mako:89
-#: openfisca_web_ui/templates/legislations/user-view.mako:76
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:39
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:49
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:55
+#: openfisca_web_ui/templates/legislations/admin-view.mako:81
+#: openfisca_web_ui/templates/legislations/user-delete.mako:44
+#: openfisca_web_ui/templates/legislations/user-delete.mako:50
+#: openfisca_web_ui/templates/legislations/user-view.mako:80
 #: openfisca_web_ui/templates/sessions/admin-delete.mako:40
 #: openfisca_web_ui/templates/sessions/admin-delete.mako:51
 #: openfisca_web_ui/templates/sessions/admin-delete.mako:57
@@ -242,8 +267,8 @@ msgstr "Valider"
 #: openfisca_web_ui/templates/visualizations/admin-delete.mako:40
 #: openfisca_web_ui/templates/visualizations/admin-delete.mako:51
 #: openfisca_web_ui/templates/visualizations/admin-delete.mako:57
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:63
-#: openfisca_web_ui/templates/visualizations/user-view.mako:62
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:65
+#: openfisca_web_ui/templates/visualizations/user-view.mako:64
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -277,7 +302,7 @@ msgid "Data associated to this simulation will be deleted."
 msgstr "Les données associées à cette simulation seront supprimées."
 
 #: openfisca_web_ui/templates/index.mako:114
-#: openfisca_web_ui/templates/index.mako:139
+#: openfisca_web_ui/templates/index.mako:138
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -285,6 +310,8 @@ msgstr "Réinitialiser"
 #: openfisca_web_ui/templates/accounts/user-view.mako:112
 #: openfisca_web_ui/templates/accounts/user-view.mako:132
 #: openfisca_web_ui/templates/accounts/user-view.mako:172
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:54
+#: openfisca_web_ui/templates/legislations/user-edit.mako:49
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -298,6 +325,7 @@ msgstr "Enregistrer cette simulation"
 #: openfisca_web_ui/templates/accounts/user-view.mako:65
 #: openfisca_web_ui/templates/accounts/user-view.mako:170
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:53
+#: openfisca_web_ui/templates/legislations/user-edit.mako:48
 #: openfisca_web_ui/templates/visualizations/admin-edit.mako:53
 msgid "Save"
 msgstr "Enregistrer"
@@ -306,7 +334,7 @@ msgstr "Enregistrer"
 msgid "Simulate"
 msgstr "Simuler"
 
-#: openfisca_web_ui/templates/index.mako:145
+#: openfisca_web_ui/templates/index.mako:143
 msgid "Viewing simulation \"{}\""
 msgstr "Visualisation de la simulation « {} »"
 
@@ -361,17 +389,18 @@ msgstr "Comptes"
 
 #: openfisca_web_ui/templates/site.mako:328
 #: openfisca_web_ui/templates/site.mako:340
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:38
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:37
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:39
 #: openfisca_web_ui/templates/legislations/admin-index.mako:39
 #: openfisca_web_ui/templates/legislations/admin-index.mako:138
 #: openfisca_web_ui/templates/legislations/admin-new.mako:37
 #: openfisca_web_ui/templates/legislations/admin-view.mako:48
-#: openfisca_web_ui/templates/legislations/user-index.mako:135
+#: openfisca_web_ui/templates/legislations/user-index.mako:146
 msgid "Legislations"
 msgstr "Législations"
 
 #: openfisca_web_ui/templates/site.mako:331
+#: openfisca_web_ui/templates/site.mako:344
 #: openfisca_web_ui/templates/visualizations/admin-delete.mako:38
 #: openfisca_web_ui/templates/visualizations/admin-edit.mako:39
 #: openfisca_web_ui/templates/visualizations/admin-index.mako:40
@@ -382,37 +411,37 @@ msgstr "Législations"
 msgid "Visualizations"
 msgstr "Visualisations"
 
-#: openfisca_web_ui/templates/site.mako:342
+#: openfisca_web_ui/templates/site.mako:347
 msgid "About"
 msgstr "À propos"
 
-#: openfisca_web_ui/templates/site.mako:343
+#: openfisca_web_ui/templates/site.mako:348
 msgid "API"
 msgstr "API"
 
-#: openfisca_web_ui/templates/site.mako:344
+#: openfisca_web_ui/templates/site.mako:349
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
-#: openfisca_web_ui/templates/site.mako:344
+#: openfisca_web_ui/templates/site.mako:349
 msgid "CGU"
 msgstr "CGU"
 
-#: openfisca_web_ui/templates/site.mako:355
+#: openfisca_web_ui/templates/site.mako:360
 msgid "Access to your account and your simulations"
 msgstr "Accéder à votre compte et à vos simulations"
 
-#: openfisca_web_ui/templates/site.mako:356
+#: openfisca_web_ui/templates/site.mako:361
 msgid "Sign in"
 msgstr "Connexion"
 
-#: openfisca_web_ui/templates/site.mako:359
+#: openfisca_web_ui/templates/site.mako:364
 #: openfisca_web_ui/templates/accounts/user-view.mako:42
 #: openfisca_web_ui/templates/accounts/user-view.mako:48
 msgid "My account"
 msgstr "Mon compte"
 
-#: openfisca_web_ui/templates/site.mako:363
+#: openfisca_web_ui/templates/site.mako:368
 msgid "Sign out"
 msgstr "Déconnexion"
 
@@ -420,7 +449,7 @@ msgstr "Déconnexion"
 #: openfisca_web_ui/templates/accounts/admin-edit.mako:36
 #: openfisca_web_ui/templates/accounts/admin-index.mako:36
 #: openfisca_web_ui/templates/accounts/admin-view.mako:38
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:37
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:36
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:38
 #: openfisca_web_ui/templates/legislations/admin-index.mako:38
 #: openfisca_web_ui/templates/legislations/admin-view.mako:47
@@ -449,14 +478,14 @@ msgstr "Supprimer ce compte ?"
 #: openfisca_web_ui/templates/accounts/user-edit.mako:96
 #: openfisca_web_ui/templates/accounts/user-view.mako:206
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:41
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:145
-#: openfisca_web_ui/templates/legislations/admin-view.mako:86
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:103
-#: openfisca_web_ui/templates/legislations/user-view.mako:75
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:151
+#: openfisca_web_ui/templates/legislations/admin-view.mako:78
+#: openfisca_web_ui/templates/legislations/user-edit.mako:146
+#: openfisca_web_ui/templates/legislations/user-view.mako:77
 #: openfisca_web_ui/templates/visualizations/admin-edit.mako:41
-#: openfisca_web_ui/templates/visualizations/admin-edit.mako:148
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:62
-#: openfisca_web_ui/templates/visualizations/user-view.mako:61
+#: openfisca_web_ui/templates/visualizations/admin-edit.mako:161
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:64
+#: openfisca_web_ui/templates/visualizations/user-view.mako:63
 msgid "Edit"
 msgstr "Éditer"
 
@@ -515,16 +544,17 @@ msgstr "Profil"
 #: openfisca_web_ui/templates/accounts/admin-view.mako:115
 #: openfisca_web_ui/templates/legislations/admin-index.mako:80
 #: openfisca_web_ui/templates/legislations/admin-index.mako:83
-#: openfisca_web_ui/templates/legislations/admin-view.mako:184
-#: openfisca_web_ui/templates/legislations/user-index.mako:69
-#: openfisca_web_ui/templates/legislations/user-index.mako:72
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:137
+#: openfisca_web_ui/templates/legislations/admin-view.mako:166
+#: openfisca_web_ui/templates/legislations/user-index.mako:80
+#: openfisca_web_ui/templates/legislations/user-index.mako:83
+#: openfisca_web_ui/templates/legislations/user-view.mako:168
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:153
 msgid "Updated"
 msgstr "Mis à jour"
 
 #: openfisca_web_ui/templates/accounts/admin-index.mako:110
 #: openfisca_web_ui/templates/legislations/admin-index.mako:119
-#: openfisca_web_ui/templates/legislations/user-index.mako:116
+#: openfisca_web_ui/templates/legislations/user-index.mako:127
 #: openfisca_web_ui/templates/visualizations/admin-index.mako:114
 #: openfisca_web_ui/templates/visualizations/user-index.mako:105
 msgid "Term"
@@ -532,7 +562,7 @@ msgstr "Terme"
 
 #: openfisca_web_ui/templates/accounts/admin-index.mako:116
 #: openfisca_web_ui/templates/legislations/admin-index.mako:125
-#: openfisca_web_ui/templates/legislations/user-index.mako:122
+#: openfisca_web_ui/templates/legislations/user-index.mako:133
 #: openfisca_web_ui/templates/visualizations/admin-index.mako:120
 #: openfisca_web_ui/templates/visualizations/user-index.mako:111
 msgid "Search"
@@ -548,22 +578,26 @@ msgstr "Nom simplifié"
 
 #: openfisca_web_ui/templates/accounts/admin-view.mako:94
 #: openfisca_web_ui/templates/accounts/user-view.mako:162
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:73
-#: openfisca_web_ui/templates/legislations/admin-view.mako:135
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:74
+#: openfisca_web_ui/templates/legislations/admin-view.mako:117
+#: openfisca_web_ui/templates/legislations/user-edit.mako:69
+#: openfisca_web_ui/templates/legislations/user-view.mako:119
 #: openfisca_web_ui/templates/visualizations/admin-edit.mako:73
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:97
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:106
 msgid "Description"
 msgstr "Description"
 
 #: openfisca_web_ui/templates/accounts/admin-view.mako:102
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:117
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:124
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:126
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:133
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:140
 msgid "Yes"
 msgstr "Oui"
 
 #: openfisca_web_ui/templates/accounts/admin-view.mako:102
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:117
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:124
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:126
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:133
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:140
 msgid "No"
 msgstr "Non"
 
@@ -572,8 +606,9 @@ msgid "API Key"
 msgstr "Clé d'API"
 
 #: openfisca_web_ui/templates/accounts/admin-view.mako:122
-#: openfisca_web_ui/templates/legislations/admin-view.mako:191
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:144
+#: openfisca_web_ui/templates/legislations/admin-view.mako:173
+#: openfisca_web_ui/templates/legislations/user-view.mako:175
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:160
 msgid "Published"
 msgstr "Publié"
 
@@ -630,79 +665,94 @@ msgstr "Voir"
 msgid "Duplicate"
 msgstr "Dupliquer"
 
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:46
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:45
+#: openfisca_web_ui/templates/legislations/user-delete.mako:40
 msgid "Delete legislation"
 msgstr "Supprimer la législation"
 
-#: openfisca_web_ui/templates/legislations/admin-delete.mako:48
+#: openfisca_web_ui/templates/legislations/admin-delete.mako:47
+#: openfisca_web_ui/templates/legislations/user-delete.mako:42
 msgid "Delete this legislation?"
 msgstr "Supprimer cette législation ?"
 
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:47
+#: openfisca_web_ui/templates/legislations/user-edit.mako:42
 msgid "Edit a Legislation"
 msgstr "Éditer une législation"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:63
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:64
 #: openfisca_web_ui/templates/legislations/admin-index.mako:74
 #: openfisca_web_ui/templates/legislations/admin-index.mako:77
-#: openfisca_web_ui/templates/legislations/user-index.mako:63
-#: openfisca_web_ui/templates/legislations/user-index.mako:66
+#: openfisca_web_ui/templates/legislations/user-edit.mako:59
+#: openfisca_web_ui/templates/legislations/user-index.mako:74
+#: openfisca_web_ui/templates/legislations/user-index.mako:77
 #: openfisca_web_ui/templates/visualizations/admin-edit.mako:63
 msgid "Title"
 msgstr "Titre"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:84
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:85
+#: openfisca_web_ui/templates/legislations/user-edit.mako:80
 msgid "Begin Date"
 msgstr "Date de début"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:95
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:96
+#: openfisca_web_ui/templates/legislations/user-edit.mako:91
 msgid "End Date"
 msgstr "Date de fin"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:103
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:107
+#: openfisca_web_ui/templates/legislations/user-edit.mako:102
+msgid "Error with source JSON"
+msgstr "Erreur avec le JSON source"
+
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:110
+#: openfisca_web_ui/templates/legislations/user-edit.mako:105
 msgid "URL"
 msgstr "URL"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:104
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:111
+#: openfisca_web_ui/templates/legislations/user-edit.mako:106
 msgid "Source"
 msgstr "Source"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:112
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:119
+#: openfisca_web_ui/templates/legislations/user-edit.mako:114
 msgid "Legislation URL"
 msgstr "URL de la législation"
 
-#: openfisca_web_ui/templates/legislations/admin-edit.mako:124
+#: openfisca_web_ui/templates/legislations/admin-edit.mako:131
+#: openfisca_web_ui/templates/legislations/user-edit.mako:126
 msgid "Legislation JSON"
 msgstr "JSON de la législation"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:46
-#: openfisca_web_ui/templates/legislations/user-index.mako:44
+#: openfisca_web_ui/templates/legislations/user-index.mako:45
 msgid "No legislation found"
 msgstr "Aucune législation n'a été trouvée"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:52
-#: openfisca_web_ui/templates/legislations/user-index.mako:48
+#: openfisca_web_ui/templates/legislations/user-index.mako:51
 msgid "Legislation {0} of {1}"
 msgstr "Législation {0} sur {1}"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:56
-#: openfisca_web_ui/templates/legislations/user-index.mako:51
+#: openfisca_web_ui/templates/legislations/user-index.mako:56
 msgid "Legislation {0} - {1} of {2}"
 msgstr "Législations {0} à {1} sur {2}"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:62
-#: openfisca_web_ui/templates/legislations/user-index.mako:54
+#: openfisca_web_ui/templates/legislations/user-index.mako:62
 msgid "Single legislation"
 msgstr "Législation unique"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:66
-#: openfisca_web_ui/templates/legislations/user-index.mako:56
+#: openfisca_web_ui/templates/legislations/user-index.mako:66
 msgid "{} legislations"
 msgstr "{} législations"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:103
 #: openfisca_web_ui/templates/legislations/admin-new.mako:38
-#: openfisca_web_ui/templates/legislations/user-index.mako:100
+#: openfisca_web_ui/templates/legislations/user-index.mako:111
 #: openfisca_web_ui/templates/visualizations/admin-index.mako:98
 #: openfisca_web_ui/templates/visualizations/admin-new.mako:38
 #: openfisca_web_ui/templates/visualizations/user-index.mako:89
@@ -710,99 +760,109 @@ msgid "New"
 msgstr "Nouveau"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:128
-#: openfisca_web_ui/templates/legislations/user-index.mako:125
+#: openfisca_web_ui/templates/legislations/user-index.mako:136
 #: openfisca_web_ui/templates/visualizations/admin-index.mako:123
 #: openfisca_web_ui/templates/visualizations/user-index.mako:114
 msgid "Simplified Search"
 msgstr "Recherche simplifiée"
 
 #: openfisca_web_ui/templates/legislations/admin-index.mako:131
-#: openfisca_web_ui/templates/legislations/user-index.mako:128
+#: openfisca_web_ui/templates/legislations/user-index.mako:139
 #: openfisca_web_ui/templates/visualizations/admin-index.mako:126
 #: openfisca_web_ui/templates/visualizations/user-index.mako:117
 msgid "Advanced Search"
 msgstr "Recherche avancée"
 
 #: openfisca_web_ui/templates/legislations/admin-new.mako:44
+#: openfisca_web_ui/templates/legislations/user-new.mako:41
 msgid "Create a Legislation"
 msgstr "Créer une législation"
 
 #: openfisca_web_ui/templates/legislations/admin-new.mako:50
+#: openfisca_web_ui/templates/legislations/user-new.mako:47
 #: openfisca_web_ui/templates/visualizations/admin-new.mako:50
 msgid "Create"
 msgstr "Créer"
 
 #: openfisca_web_ui/templates/legislations/admin-new.mako:66
+#: openfisca_web_ui/templates/legislations/user-new.mako:63
 msgid "New Legislation"
 msgstr "Nouvelle législation"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:61
-#: openfisca_web_ui/templates/legislations/user-view.mako:61
+#: openfisca_web_ui/templates/legislations/admin-view.mako:59
+#: openfisca_web_ui/templates/legislations/user-view.mako:57
 msgid "Legislation"
 msgstr "Législation"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:73
-#: openfisca_web_ui/templates/legislations/admin-view.mako:77
-msgid "Edit content"
-msgstr "Éditer le contenu"
-
-#: openfisca_web_ui/templates/legislations/admin-view.mako:82
-#: openfisca_web_ui/templates/legislations/user-view.mako:72
+#: openfisca_web_ui/templates/legislations/admin-view.mako:69
+#: openfisca_web_ui/templates/legislations/user-view.mako:67
 msgid "View as JSON"
 msgstr "Voir en JSON"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:93
-#: openfisca_web_ui/templates/legislations/user-view.mako:79
-msgid "Duplicate and edit"
-msgstr "Dupliquer et éditer"
+#: openfisca_web_ui/templates/legislations/admin-view.mako:73
+#: openfisca_web_ui/templates/legislations/user-view.mako:71
+msgid "Duplicate legislation for today values"
+msgstr "Dupliquer la législation aux les valeurs d'aujourd'hui"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:142
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:109
+#: openfisca_web_ui/templates/legislations/admin-view.mako:74
+#: openfisca_web_ui/templates/legislations/user-view.mako:72
+msgid "Extract"
+msgstr "Extraire"
+
+#: openfisca_web_ui/templates/legislations/admin-view.mako:124
+#: openfisca_web_ui/templates/legislations/user-view.mako:126
 msgid "Source URL"
 msgstr "URL source"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:150
+#: openfisca_web_ui/templates/legislations/admin-view.mako:132
+#: openfisca_web_ui/templates/legislations/user-view.mako:134
 msgid "Dated legislation"
 msgstr "Legislation datée"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:159
+#: openfisca_web_ui/templates/legislations/admin-view.mako:141
+#: openfisca_web_ui/templates/legislations/user-view.mako:143
 msgid "Begin date"
 msgstr "Date de début"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:167
+#: openfisca_web_ui/templates/legislations/admin-view.mako:149
+#: openfisca_web_ui/templates/legislations/user-view.mako:151
 msgid "End date"
 msgstr "Date de fin"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:173
+#: openfisca_web_ui/templates/legislations/admin-view.mako:155
+#: openfisca_web_ui/templates/legislations/user-view.mako:157
 msgid "Values viewed for"
 msgstr "Valeurs affichées pour"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:176
+#: openfisca_web_ui/templates/legislations/admin-view.mako:158
+#: openfisca_web_ui/templates/legislations/user-view.mako:160
 msgid "define"
 msgstr "définir"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:215
+#: openfisca_web_ui/templates/legislations/admin-view.mako:190
+#: openfisca_web_ui/templates/legislations/user-view.mako:199
 msgid "Open all"
 msgstr "Tout ouvrir"
 
-#: openfisca_web_ui/templates/legislations/admin-view.mako:218
+#: openfisca_web_ui/templates/legislations/admin-view.mako:193
+#: openfisca_web_ui/templates/legislations/user-view.mako:202
 msgid "Close all"
 msgstr "Tout fermer"
 
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:245
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:256
+#: openfisca_web_ui/templates/legislations/legislation-tree.mako:214
+#: openfisca_web_ui/templates/legislations/legislation-tree.mako:225
 msgid "From {} to {}"
 msgstr "Du {} au {}"
 
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:315
+#: openfisca_web_ui/templates/legislations/legislation-tree.mako:284
 msgid "Value"
 msgstr "Valeur"
 
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:316
+#: openfisca_web_ui/templates/legislations/legislation-tree.mako:285
 msgid "From"
 msgstr "Du"
 
-#: openfisca_web_ui/templates/legislations/render-legislation.mako:317
+#: openfisca_web_ui/templates/legislations/legislation-tree.mako:286
 msgid "To"
 msgstr "Au"
 
@@ -877,21 +937,27 @@ msgid "Visualization's thumbnail URL"
 msgstr "URL de la vignette de la visualisation "
 
 #: openfisca_web_ui/templates/visualizations/admin-edit.mako:95
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:118
 msgid "Visualization URL"
 msgstr "URL de la visualisation"
 
-#: openfisca_web_ui/templates/visualizations/admin-edit.mako:105
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:130
+#: openfisca_web_ui/templates/visualizations/admin-edit.mako:108
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:125
+msgid "Iframe"
+msgstr "Iframe"
+
+#: openfisca_web_ui/templates/visualizations/admin-edit.mako:118
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:146
 msgid "Organization"
 msgstr "Organisme"
 
-#: openfisca_web_ui/templates/visualizations/admin-edit.mako:120
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:123
+#: openfisca_web_ui/templates/visualizations/admin-edit.mako:133
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:139
 msgid "Featured"
 msgstr "Sélectionnée"
 
-#: openfisca_web_ui/templates/visualizations/admin-edit.mako:133
-#: openfisca_web_ui/templates/visualizations/admin-view.mako:116
+#: openfisca_web_ui/templates/visualizations/admin-edit.mako:146
+#: openfisca_web_ui/templates/visualizations/admin-view.mako:132
 msgid "Enabled"
 msgstr "Activée"
 
@@ -1170,3 +1236,8 @@ msgstr "Visualisation"
 #~ msgid "Use"
 #~ msgstr "Utiliser"
 
+#~ msgid "Edit content"
+#~ msgstr "Éditer le contenu"
+
+#~ msgid "Duplicate and edit"
+#~ msgstr "Dupliquer et éditer"

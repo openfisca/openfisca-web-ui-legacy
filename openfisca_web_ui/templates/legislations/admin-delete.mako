@@ -29,7 +29,6 @@ from openfisca_web_ui import model, urls
 
 
 <%inherit file="/admin.mako"/>
-<%namespace name="view" file="admin-view.mako"/>
 
 
 <%def name="breadcrumb_content()" filter="trim">
@@ -47,7 +46,6 @@ from openfisca_web_ui import model, urls
         </div>
         <p class="confirm">${_(u'Delete this legislation?')}</p>
         <form method="post" action="${legislation.get_admin_url(ctx, 'delete')}">
-            <%view:view_fields/>
             <button class="btn btn-danger" name="submit" type="submit">${_(u'Delete')}</button>
         </form>
 </%def>

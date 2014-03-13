@@ -41,7 +41,7 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
 </%def>
 
 
-<%def name="modal_change_legislation_date(date = None)" filter="trim">
+<%def name="change_legislation_date_modal(date = None)" filter="trim">
 <%
     current_datetime = date if date is not None else datetime.datetime.utcnow()
 %>
@@ -64,7 +64,7 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
                         <div class="form-group">
                             <label for="date">Date</label>
                             <input type="text" class="form-control" id="date" name="date" \
-${u'placeholder' if date is None else u'value'}="${babel.dates.format_date(current_datetime, format = 'short')}">
+${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%Y-%m-%d')}">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -72,37 +72,6 @@ ${u'placeholder' if date is None else u'value'}="${babel.dates.format_date(curre
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-</%def>
-
-
-<%def name="modal_duplicate_and_edit()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="modal-duplicate-and-edit" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Dupliquer et éditer une législation</h4>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Vous pouvez modifier une législation si et seulement si les deux conditions suivantes sont
-                        remplies :
-                    </p>
-                    <ul>
-                        <li>Vous êtes l'auteur de la législation</li>
-                        <li>Cette législation est au format « législation datée »</li>
-                    </ul>
-                    <p>
-                        La législation que vous tentez d'éditer ne remplissant pas ces deux critères, une copie de
-                        cette législation va être créer pour vous.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">${_(u'Edit')}</a>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Close')}</button>
-                </div>
             </div>
         </div>
     </div>
@@ -155,7 +124,7 @@ data-toggle="collapse" data-target="#${html_node_path}">
         <tbody>
     % for index, slice in enumerate(scale.get('slices')):
             <tr>
-        % if editable is True:
+        % if editable:
                 <td>
                     <a class="editable" data-name="${list(chain(path, ('slices', index, 'threshold'))) | n, js, h}">\
 ${slice['threshold'] if slice.get('threshold') else ''}</a>
@@ -181,7 +150,7 @@ ${slice['rate'] if slice.get('rate') else ''}</a>
 
 
 <%def name="render_dated_legislation_parameter(parameter, editable = False, path = None)" filter="trim">
-    % if editable is True:
+    % if editable:
     <a class="editable" data-name="${path | n, js, h}" href="#">${parameter.get('value')}</a>
     % else:
     <div data-name="${path | n, js, h}">${parameter.get('value')}</div>

@@ -39,16 +39,19 @@ import webob
 import webob.multidict
 
 from biryani1 import strings
+from korma.date import make_formatted_str_to_datetime
 
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
 
+N_ = lambda message: message
 inputs_to_legislation_data = conv.pipe(
     conv.struct(
         dict(
             author_id = conv.base.input_to_uuid,
-            datetime_begin = conv.iso8601_input_to_datetime,
-            datetime_end = conv.iso8601_input_to_datetime,
+            # TODO replace by babel.dates parser.
+            datetime_begin = make_formatted_str_to_datetime(u'%d/%m/%y'),
+            datetime_end = make_formatted_str_to_datetime(u'%d/%m/%y'),
             description = conv.cleanup_text,
             json = conv.make_input_to_json(),
             url = conv.make_input_to_url(full = True),
@@ -59,8 +62,8 @@ inputs_to_legislation_data = conv.pipe(
             ),
         default = 'drop',
         ),
-    # FIXME errors must be structured
-    conv.test(lambda struct: struct.get('url') is not None or struct.get('json') is not None),
+    conv.test(lambda struct: struct.get('url') is not None or struct.get('json') is not None, error = {
+        'url': N_(u'Either URL or JSON must be provided.')}),
     )
 log = logging.getLogger(__name__)
 
@@ -69,17 +72,11 @@ log = logging.getLogger(__name__)
 def admin_delete(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
-    user = model.get_user(ctx, check = True)
-
-    if not (legislation.author_id == user._id or model.is_admin(ctx)):
-        return wsgihelpers.forbidden(ctx)
+    model.is_admin(ctx, check = True)
 
     if req.method == 'POST':
         legislation.delete(safe = True)
-        if model.is_admin(ctx):
-            return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
-        else:
-            return wsgihelpers.redirect(ctx, location = model.Legislation.get_class_url(ctx))
+        return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
     return templates.render(ctx, '/legislations/admin-delete.mako', legislation = legislation)
 
 
@@ -87,10 +84,8 @@ def admin_delete(req):
 def admin_edit(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
-    user = model.get_user(ctx, check = True)
-
-    if not (legislation.author_id == user._id or model.is_admin(ctx)):
-        return wsgihelpers.forbidden(ctx)
+    model.get_user(ctx, check = True)
+    model.is_admin(ctx, check = True)
 
     if req.method == 'GET':
         errors = None
@@ -98,7 +93,7 @@ def admin_edit(req):
             datetime_begin = babel.dates.format_date(legislation.datetime_begin, format = 'short'),
             datetime_end = babel.dates.format_date(legislation.datetime_end, format = 'short'),
             description = legislation.description,
-            json = legislation.json,
+            json = json.dumps(legislation.json, encoding = 'utf-8', ensure_ascii = False, indent = 2),
             url = legislation.url,
             title = legislation.title,
         )
@@ -124,7 +119,7 @@ def admin_edit(req):
             else:
                 legislation_json, error = conv.legislations.validate_legislation_json(data['json'], state = ctx)
             if error is not None:
-                errors = dict(json = error) if data['url'] is None else dict(url = error)
+                errors = dict(json = error['error']) if data['url'] is None else dict(url = error)
             else:
                 data['json'] = legislation_json
         if errors is None:
@@ -145,6 +140,68 @@ def admin_edit(req):
             return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
     return templates.render(ctx, '/legislations/admin-edit.mako', errors = errors, inputs = inputs,
         legislation = legislation)
+
+
+@wsgihelpers.wsgify
+def admin_extract(req):
+    ctx = contexts.Ctx(req)
+    user = model.get_user(ctx, check = True)
+    model.is_admin(ctx, check = True)
+
+    params = req.GET
+    inputs = {
+        'date': params.get('date'),
+        }
+    data, errors = conv.struct({
+        'date': conv.pipe(
+            make_formatted_str_to_datetime(u'%d/%m/%y'),
+            conv.default(datetime.datetime.utcnow()),
+            ),
+        })(inputs, state = ctx)
+    if errors is not None:
+        raise wsgihelpers.bad_request(ctx, explanation = errors)
+    legislation = ctx.node
+    if legislation.author_id == user._id and 'datesim' in legislation.json:
+        raise wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
+
+    new_legislation = None
+    new_legislation_title = ctx._(u'{} (copy {})').format(legislation.title, user.email)
+    new_legislation_slug = strings.slugify(new_legislation_title)
+    existing_legislations_cursor = model.Legislation.find(
+        dict(
+            slug = new_legislation_slug,
+            ),
+        as_class = collections.OrderedDict,
+        )
+    if existing_legislations_cursor.count() > 0:
+        for existing_legislation in existing_legislations_cursor:
+            if existing_legislation.author_id == user._id:
+                raise wsgihelpers.redirect(ctx, location = existing_legislation.get_admin_url(ctx))
+        if new_legislation is None:
+            raise wsgihelpers.bad_request(
+                ctx,
+                explanation = ctx._(u'A legislation with the same name already exists.'),
+                )
+    else:
+        new_legislation = model.Legislation(
+            author_id = user._id,
+            datetime_begin = legislation.datetime_begin,
+            datetime_end = legislation.datetime_end,
+            description = ctx._(u'Copy of legislation "{}"').format(legislation.title),
+            title = new_legislation_title,
+            slug = new_legislation_slug,
+            )
+        response = requests.post(
+            conf['api.urls.legislations'],
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': conf['app_name'],
+                },
+            data = json.dumps(dict(date = data['date'].isoformat(), legislation = legislation.json)),
+            )
+        new_legislation.json = response.json(object_pairs_hook = collections.OrderedDict).get('dated_legislation')
+        new_legislation.save(safe = True)
+    return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx))
 
 
 @wsgihelpers.wsgify
@@ -201,10 +258,8 @@ def admin_index(req):
 @wsgihelpers.wsgify
 def admin_new(req):
     ctx = contexts.Ctx(req)
-    user = model.get_user(ctx)
-
-    if user is None or user.email is None:
-        return wsgihelpers.unauthorized(ctx)
+    user = model.get_user(ctx, check = True)
+    model.is_admin(ctx, check = True)
 
     legislation = model.Legislation()
     if req.method == 'GET':
@@ -213,7 +268,7 @@ def admin_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = model.get_user(ctx)._id
+        inputs['author_id'] = user._id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -259,7 +314,7 @@ def admin_view(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     params = req.GET
-    date, error = conv.iso8601_input_to_datetime(params.get('date'), state = ctx)
+    date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)
     dated_legislation_json = None
     if legislation.json is not None and 'datesim' not in legislation.json and date is not None:
         response = requests.post(
@@ -271,7 +326,7 @@ def admin_view(req):
             data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
             )
         if not response.ok:
-            error = 'Cannot compute dated legislation'
+            error = ctx._(u'Unable to compute dated legislation')
         else:
             dated_legislation_json = response.json()
     elif 'datesim' in legislation.json:
@@ -461,6 +516,7 @@ def route_admin(environ, start_response):
         ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
+        ('GET', '^/extract/?$', admin_extract),
         )
     return router(environ, start_response)
 
@@ -484,47 +540,140 @@ def route_api1_class(environ, start_response):
 
 
 def route_user(environ, start_response):
+    req = webob.Request(environ)
+    ctx = contexts.Ctx(req)
+
+    legislation, error = conv.pipe(
+        conv.input_to_slug,
+        conv.not_none,
+        model.Legislation.make_id_or_slug_or_words_to_instance(),
+        )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
+    if error is not None:
+        return wsgihelpers.not_found(ctx, explanation = error)(environ, start_response)
+
+    ctx.node = legislation
+
+    router = urls.make_router(
+        (('GET', 'POST'), '^/delete/?$', user_delete),
+        (('GET', 'POST'), '^/edit/?$', user_edit),
+        ('GET', '^/extract/?$', user_extract),
+        ('GET', '^/?$', user_view),
+        )
+    return router(environ, start_response)
+
+
+def route_user_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_index),
-        ('GET', '^/new?$', admin_new),
-        ('GET', '^/(?P<id_or_slug>[^/]+)/edit/?$', user_edit),
-        ('GET', '^/(?P<id_or_slug>[^/]+)$', user_view),
+        (('GET', 'POST'), '^/new/?$', user_new),
+        (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_user),
         )
     return router(environ, start_response)
 
 
 @wsgihelpers.wsgify
+def user_delete(req):
+    ctx = contexts.Ctx(req)
+    legislation = ctx.node
+    user = model.get_user(ctx, check = True)
+
+    if not (legislation.author_id == user._id or model.is_admin(ctx)):
+        return wsgihelpers.forbidden(ctx)
+
+    if req.method == 'POST':
+        legislation.delete(safe = True)
+        return wsgihelpers.redirect(ctx, location = model.Legislation.get_class_url(ctx))
+    return templates.render(ctx, '/legislations/user-delete.mako', legislation = legislation)
+
+
+@wsgihelpers.wsgify
 def user_edit(req):
+    ctx = contexts.Ctx(req)
+    legislation = ctx.node
+    user = model.get_user(ctx, check = True)
+
+    if not (legislation.author_id == user._id or model.is_admin(ctx)):
+        return wsgihelpers.forbidden(ctx)
+
+    if req.method == 'GET':
+        errors = None
+        inputs = dict(
+            datetime_begin = babel.dates.format_date(legislation.datetime_begin, format = 'short'),
+            datetime_end = babel.dates.format_date(legislation.datetime_end, format = 'short'),
+            description = legislation.description,
+            json = json.dumps(legislation.json, encoding = 'utf-8', ensure_ascii = False, indent = 2),
+            url = legislation.url,
+            title = legislation.title,
+        )
+    else:
+        assert req.method == 'POST'
+        inputs = extract_legislation_inputs_from_params(ctx, req.POST)
+        inputs['author_id'] = legislation.author_id
+        data, errors = inputs_to_legislation_data(inputs, state = ctx)
+        if errors is None:
+            data['slug'], error = conv.pipe(
+                conv.input_to_slug,
+                conv.not_none,
+                )(data['title'], state = ctx)
+            if error is not None:
+                errors = dict(title = error)
+        if errors is None:
+            legislation_json, error = None, None
+            if data['url'] is not None:
+                legislation_json, error = conv.pipe(
+                    conv.legislations.retrieve_legislation,
+                    conv.legislations.validate_legislation_json,
+                    )(data['url'], state = ctx)
+            else:
+                legislation_json, error = conv.legislations.validate_legislation_json(data['json'], state = ctx)
+            if error is not None:
+                errors = dict(json = error['error']) if data['url'] is None else dict(url = error)
+            else:
+                data['json'] = legislation_json
+        if errors is None:
+            if model.Legislation.find(
+                    dict(
+                        _id = {'$ne': legislation._id},
+                        slug = data['slug'],
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).count() > 0:
+                errors = dict(title = ctx._(u'A legislation with the same name already exists.'))
+        if errors is None:
+            legislation.set_attributes(**data)
+            legislation.compute_words()
+            legislation.save(safe = True)
+
+            # View legislation.
+            return wsgihelpers.redirect(ctx, location = legislation.get_user_url(ctx))
+    return templates.render(ctx, '/legislations/user-edit.mako', errors = errors, inputs = inputs,
+        legislation = legislation)
+
+
+@wsgihelpers.wsgify
+def user_extract(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
     if user.email is None:
         return wsgihelpers.unauthorized(ctx)
-
     params = req.GET
     inputs = {
         'date': params.get('date'),
-        'legislation': req.urlvars.get('id_or_slug'),
         }
     data, errors = conv.struct({
         'date': conv.pipe(
-            conv.iso8601_input_to_datetime,
+            make_formatted_str_to_datetime(u'%d/%m/%y'),
             conv.default(datetime.datetime.utcnow()),
-            ),
-        'legislation': conv.pipe(
-            conv.input_to_slug,
-            conv.not_none,
-            model.Legislation.make_id_or_slug_or_words_to_instance(),
             ),
         })(inputs, state = ctx)
     if errors is not None:
-        return wsgihelpers.bad_request(ctx, explanation = errors)
-
-    legislation = data['legislation']
+        raise wsgihelpers.bad_request(ctx, explanation = errors)
+    legislation = ctx.node
     if legislation.author_id == user._id and 'datesim' in legislation.json:
-        return wsgihelpers.redirect(ctx, location = legislation.get_admin_url(ctx))
+        raise wsgihelpers.redirect(ctx, location = legislation.get_user_url(ctx))
 
     new_legislation = None
-    new_legislation_title = u'{} (Copie)'.format(legislation.title)
+    new_legislation_title = ctx._(u'{} (copy {})').format(legislation.title, user.email)
     new_legislation_slug = strings.slugify(new_legislation_title)
     existing_legislations_cursor = model.Legislation.find(
         dict(
@@ -535,9 +684,9 @@ def user_edit(req):
     if existing_legislations_cursor.count() > 0:
         for existing_legislation in existing_legislations_cursor:
             if existing_legislation.author_id == user._id:
-                return wsgihelpers.redirect(ctx, location = existing_legislation.get_admin_url(ctx))
+                raise wsgihelpers.redirect(ctx, location = existing_legislation.get_user_url(ctx))
         if new_legislation is None:
-            return wsgihelpers.bad_request(
+            raise wsgihelpers.bad_request(
                 ctx,
                 explanation = ctx._(u'A legislation with the same name already exists.'),
                 )
@@ -546,7 +695,7 @@ def user_edit(req):
             author_id = user._id,
             datetime_begin = legislation.datetime_begin,
             datetime_end = legislation.datetime_end,
-            description = u'Copie de la legislation « {} »'.format(legislation.title),
+            description = ctx._(u'Copy of legislation "{}"').format(legislation.title),
             title = new_legislation_title,
             slug = new_legislation_slug,
             )
@@ -560,7 +709,7 @@ def user_edit(req):
             )
         new_legislation.json = response.json(object_pairs_hook = collections.OrderedDict).get('dated_legislation')
         new_legislation.save(safe = True)
-    return wsgihelpers.redirect(ctx, location = new_legislation.get_admin_url(ctx))
+    return wsgihelpers.redirect(ctx, location = new_legislation.get_user_url(ctx))
 
 
 @wsgihelpers.wsgify
@@ -612,30 +761,89 @@ def user_index(req):
 
 
 @wsgihelpers.wsgify
+def user_new(req):
+    ctx = contexts.Ctx(req)
+    user = model.get_user(ctx, check = True)
+
+    legislation = model.Legislation()
+    if req.method == 'GET':
+        errors = None
+        inputs = extract_legislation_inputs_from_params(ctx)
+    else:
+        assert req.method == 'POST'
+        inputs = extract_legislation_inputs_from_params(ctx, req.POST)
+        inputs['author_id'] = user._id
+        data, errors = inputs_to_legislation_data(inputs, state = ctx)
+        if errors is None:
+            data['slug'], error = conv.pipe(
+                conv.input_to_slug,
+                conv.not_none,
+                )(data['title'], state = ctx)
+            if error is not None:
+                errors = dict(title = error)
+        if errors is None:
+            legislation_json, error = None, None
+            if data['json'] is None:
+                legislation_json, error = conv.pipe(
+                    conv.legislations.retrieve_legislation,
+                    conv.legislations.validate_legislation_json,
+                    )(data['url'], state = ctx)
+            else:
+                legislation_json, error = conv.legislations.validate_legislation_json(data['json'], state = ctx)
+            if error is not None:
+                errors = dict(json = error) if data['url'] is None else dict(url = error)
+            else:
+                data['json'] = legislation_json
+        if errors is None:
+            if model.Legislation.find(
+                    dict(
+                        slug = data['slug'],
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).count() > 0:
+                errors = dict(full_name = ctx._(u'A legislation with the same name already exists.'))
+        if errors is None:
+            legislation.set_attributes(**data)
+            legislation.compute_words()
+            legislation.save(safe = True)
+
+            # View legislation.
+            return wsgihelpers.redirect(ctx, location = legislation.get_user_url(ctx))
+    return templates.render(ctx, '/legislations/user-new.mako', errors = errors, inputs = inputs,
+        legislation = legislation)
+
+
+@wsgihelpers.wsgify
 def user_view(req):
     ctx = contexts.Ctx(req)
     assert req.method == 'GET'
     params = req.GET
-    inputs = {
-        'date': params.get('date'),
-        'legislation': req.urlvars.get('id_or_slug'),
-        }
-    data, errors = conv.struct({
-        'date': conv.iso8601_input_to_datetime,
-        'legislation': conv.pipe(
-            conv.input_to_slug,
-            conv.not_none,
-            model.Legislation.make_id_or_slug_or_words_to_instance(),
-            ),
-        })(inputs, state = ctx)
-    if errors is not None:
-        return wsgihelpers.bad_request(ctx, explanation = errors)
-    legislation = data['legislation']
+    legislation = ctx.node
+    date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)
+    if error is not None:
+        return wsgihelpers.bad_request(ctx, explanation = error)
+    dated_legislation_json = None
+    if legislation.json is not None and 'datesim' not in legislation.json and date is not None:
+        response = requests.post(
+            conf['api.urls.legislations'],
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': conf['app_name'],
+                },
+            data = json.dumps(dict(date = date.isoformat(), legislation = legislation.json)),
+            )
+        if not response.ok:
+            error = ctx._(u'Unable to compute dated legislation')
+        else:
+            dated_legislation_json = response.json()
+    elif 'datesim' in legislation.json:
+        dated_legislation_json = legislation.json
+    if error is not None:
+        return wsgihelpers.bad_request(ctx, explanation = error)
     return templates.render(
         ctx,
         '/legislations/user-view.mako',
-        date = data['date'],
-        dated_legislation_json = legislation.json
-            if legislation.json is not None and 'datesim' in legislation.json else None,
+        date = date,
         legislation = legislation,
+        dated_legislation_json = dated_legislation_json,
         )

@@ -24,44 +24,28 @@
 
 
 <%!
-from openfisca_web_ui import conf, model, urls
+from openfisca_web_ui import model, urls
 %>
 
 
-<%inherit file="/admin.mako"/>
-<%namespace name="edit" file="admin-edit.mako"/>
+<%inherit file="/site.mako"/>
 
 
-<%def name="breadcrumb_content()" filter="trim">
-            <%parent:breadcrumb_content/>
-            <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
-            <li class="active">${_(u'New')}</li>
+<%def name="breadcrumb()" filter="trim">
 </%def>
 
 
 <%def name="container_content()" filter="trim">
         <div class="page-header">
-            <h1>${_(u'Create a Legislation')}</h1>
+            <h1>${_(u'Delete legislation')} <small>${legislation.get_title(ctx)}</small></h1>
         </div>
-        <form action="${model.Legislation.get_admin_class_url(ctx, 'new')}" method="post" role="form">
-            <%edit:hidden_fields/>
-            <%self:error_alert/>
-            <%edit:form_fields/>
-            <button class="btn btn-primary" name="submit" type="submit">${_(u'Create')}</button>
+        <p class="confirm">${_(u'Delete this legislation?')}</p>
+        <form method="post" action="${legislation.get_user_url(ctx, 'delete')}">
+            <button class="btn btn-danger" name="submit" type="submit">${_(u'Delete')}</button>
         </form>
 </%def>
 
 
-<%def name="css()" filter="trim">
-        <%edit:css/>
-</%def>
-
-
-<%def name="scripts()" filter="trim">
-        <%edit:scripts/>
-</%def>
-
-
 <%def name="title_content()" filter="trim">
-${_(u'New Legislation')} - ${parent.title_content()}
+${_(u'Delete')} - ${legislation.get_title(ctx)} - ${parent.title_content()}
 </%def>

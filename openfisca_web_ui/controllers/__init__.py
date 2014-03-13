@@ -111,8 +111,9 @@ def make_router():
         (None, '^/api/1/session$', session),
         (None, '^/api/1/simulate/?$', simulate),
         (None, '^/api/1/visualizations(?=/|$)', visualizations.route_api1_class),
-        (None, '^/legislations(?=/|$)', legislations.route_user),
+        (None, '^/legislations(?=/|$)', legislations.route_user_class),
         (None, '^/simulations(?=/|$)', test_cases.route),
+        # TODO use route_user_class
         (None, '^/visualizations(?=/|$)', visualizations.route_user),
         ('POST', '^/login/?$', accounts.login),
         (('GET', 'POST'), '^/logout/?$', accounts.logout),

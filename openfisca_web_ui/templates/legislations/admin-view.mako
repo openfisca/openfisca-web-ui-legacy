@@ -34,11 +34,11 @@ from openfisca_web_ui import model, urls
 <%inherit file="/admin.mako"/>
 
 
-<%namespace name="render_legislation" file="/legislations/render-legislation.mako"/>
+<%namespace name="legislation_tree" file="/legislations/legislation-tree.mako"/>
 
 
 <%def name="appconfig_script()" filter="trim">
-    <%render_legislation:appconfig_script/>
+    <%legislation_tree:appconfig_script/>
 </%def>
 
 
@@ -53,9 +53,7 @@ from openfisca_web_ui import model, urls
 <%def name="container_content()" filter="trim">
 <%
     user = model.get_user(ctx, check = True)
-    dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-    owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
-    editable = owner_or_admin and dated_legislation
+    is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
 %>\
         <div class="page-header">
             <h1>${_(u'Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
@@ -67,32 +65,21 @@ from openfisca_web_ui import model, urls
             </div>
             <div class="panel-footer">
                 <div class="btn-toolbar">
-    % if editable is False:
-        % if owner_or_admin:
-                    <a class="btn btn-primary" href="${legislation.get_user_url(ctx, 'edit')}">
-                        ${_(u'Edit content')}
-                    </a>
-        % elif user is not None and user.email is not None:
-                    <a class="btn btn-primary" data-toggle="modal" data-target="#modal-duplicate-and-edit" href="#">
-                        ${_(u'Edit content')}
-                    </a>
-        % endif
-    % endif
                     <a class="btn btn-default" href="${legislation.get_api1_url(ctx, 'json')}">
                         ${_(u'View as JSON')}
                     </a>
-    % if owner_or_admin:
+    % if not is_dated_legislation:
+                    <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'extract')}" \
+title="${_(u'Duplicate legislation for today values')}">
+                        ${_(u'Extract')}
+                    </a>
+    % endif
                     <a class="btn btn-default" href="${legislation.get_admin_url(ctx, 'edit')}">
                         ${_(u'Edit')}
                     </a>
                     <a class="btn btn-danger"  href="${legislation.get_admin_url(ctx, 'delete')}">
                         ${_(u'Delete')}
                     </a>
-    % else:
-                    <a class="btn btn-default" data-toggle="modal" data-target="#modal-duplicate-and-edit" href="#">
-                        ${_(u'Duplicate and edit')}
-                    </a>
-    % endif
                 </div>
             </div>
         </div>
@@ -109,15 +96,10 @@ media="screen" rel="stylesheet">
 <%def name="modals()" filter="trim">
 <%
     user = model.get_user(ctx, check = True)
-    dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-    owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
-    editable = owner_or_admin and dated_legislation
+    is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
 %>\
     <%parent:modals/>
-    ${render_legislation.modal_change_legislation_date(date = date)}
-    % if not editable:
-    <%render_legislation:modal_duplicate_and_edit/>
-    % endif
+    ${legislation_tree.change_legislation_date_modal(date = date)}
 </%def>
 
 
@@ -197,14 +179,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
 
 <%def name="view_content(user = None)" filter="trim">
 <%
-    dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-    if user is not None:
-        owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
-        editable = owner_or_admin and dated_legislation
-    else:
-        owner_or_admin = False
-        editable = False
-
+    is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
     value = legislation.json
 %>\
     % if value is not None:
@@ -220,21 +195,23 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
                 </div>
             </div>
         </div>
-        % if editable:
+        % if is_dated_legislation:
         <div class="alert alert-info">
         % endif
         <div class="row">
             <div class="col-lg-8">
         % if dated_legislation_json is not None:
-                ${render_legislation.render_dated_legislation_node(node = dated_legislation_json, editable = editable)}
+                ${legislation_tree.render_dated_legislation_node(node = dated_legislation_json,
+                    editable = is_dated_legislation)}
         % elif value.get('datesim') is not None:
-                ${render_legislation.render_dated_legislation_node(node = value, editable = editable)}
+                ${legislation_tree.render_dated_legislation_node(node = value,
+                    editable = is_dated_legislation)}
         % else:
-                ${render_legislation.render_legislation_node(node = value)}
+                ${legislation_tree.render_legislation_node(node = value)}
         % endif
             </div>
         </div>
-        % if editable:
+        % if is_dated_legislation:
         </div>
         % endif
     % endif
