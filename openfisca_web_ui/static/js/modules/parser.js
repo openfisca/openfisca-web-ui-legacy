@@ -22,7 +22,6 @@ define([
 						if(el.values[0] !== 0) {
 							var newEl = el;
 							newEl._id = el.code;
-							newEl.name = el.short_name;
 
 							if(el.children) { doIt(el); }
 							else {
@@ -81,6 +80,7 @@ define([
 				Data requirements : cleaned
 			*/
 			removeRootNode: function () {
+				console.log(this.outputValue);
 				var data = this.outputValue,
 					json = _.where(data.children, function (d) {
 						return d._id == 'revdisp';

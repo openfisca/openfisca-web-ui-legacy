@@ -64,12 +64,6 @@ define([
 				}
 				return this;
 			},
-			_events: function () {
-				var that = this;
-				this.g.on('click', function (d) {
-					that.updateScales();
-				});
-			},
 			setData: function (data) {
 				/* Set stopvalues */
 				var children = data,
@@ -110,7 +104,7 @@ define([
 						x: d3.scale.ordinal()
 							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
 							.domain(that.currentDataSet.map(function(d) {
-								return d.name;
+								return d.short_name;
 						})),
 						y: d3.scale.linear()
 							.domain([d3.min(yValues), d3.max(yValues)])
@@ -145,7 +139,7 @@ define([
 						x: d3.scale.ordinal()
 							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
 							.domain(that.currentDataSet.map(function(d) {
-								return d.name;
+								return d.short_name;
 						})),
 						y: d3.scale.linear()
 							.domain([yMin, yMax])
@@ -241,7 +235,7 @@ define([
 							return _return < 0.8 ? 0.8: _return;
 						})
 						.attr('x', function (d, i, a) {
-								return that.scales.x(d.name) + that.innerPadding/2;
+								return that.scales.x(d.short_name) + that.innerPadding/2;
 						})
 						.attr('y', function (d, i) {
 							return d.value < 0 ?
@@ -324,7 +318,7 @@ define([
 						.attr('height', that.height)
 						.attr('y', that.padding.top)
 						.attr('x', function (d, i, a) {
-							return that.scales.x(d.name);
+							return that.scales.x(d.short_name);
 						})
 						.attr('fill', function (d) {
 							if(d.value > 0) return that.positiveColor;
@@ -469,12 +463,12 @@ define([
 									.remove();
 							}
 						})
-						.on('click', function (d) {
-							var topV = d.waterfall.startValue - (d.value*3),
-								bottomV = d.waterfall.endValue + (d.value*3);
-							that.updateScales([topV, bottomV]);
-							that.render({getDatas: false});
-						});
+						// .on('click', function (d) {
+						// 	var topV = d.waterfall.startValue - (d.value*3),
+						// 		bottomV = d.waterfall.endValue + (d.value*3);
+						// 	that.updateScales([topV, bottomV]);
+						// 	that.render({getDatas: false});
+						// });
 
 				this.activeBars.moveToFront();
 
@@ -484,7 +478,7 @@ define([
 						.attr('width', barWidth)
 						.attr('height', that.height)
 						.attr('x', function (d, i) {
-							return that.scales.x(d.name);
+							return that.scales.x(d.short_name);
 						})
 						.attr('y', this.padding.top)
 						.attr('fill', function (d) {

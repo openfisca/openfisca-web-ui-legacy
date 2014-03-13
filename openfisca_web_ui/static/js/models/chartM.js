@@ -35,6 +35,7 @@ define([
 				}, this));
 			},
 			parse: function () {
+				console.log(this.backendServiceM.get('apiData'));
 				this.fetched = true;
 				this.set('source', $.extend(true, {}, this.backendServiceM.get('apiData')));
 			},
@@ -49,19 +50,26 @@ define([
 
 			/* Custom get methods */
 			get_waterfallData: function () { /* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
-				return new Parser(this.get('source'))
+				var r = new Parser(this.get('source'))
 								.clean()
-								.removeRootNode()
+								// .removeRootNode()
 								.setParentNodes()
 								.listChildren()
 								.values();
+
+				console.log(r);
+				_.each(r, function (obj) {
+					console.log(obj.parentNodes);
+				});
+
+				return r;
 			},
 			get_distributionData: function (args) {
 				args = args || {};
 				if(args.type == 'default') {/* Cleaned up and ungrouped data */
 					return new Parser(this.get('source'))
 						.clean()
-						.removeRootNode()
+						// .removeRootNode()
 						.listChildren()
 						.values();
 				}
