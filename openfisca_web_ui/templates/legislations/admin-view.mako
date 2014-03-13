@@ -168,12 +168,12 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             <dd>${babel.dates.format_date(value, format = 'short')}</dd>
         % endif
 <%
-        value = date if 'date' in locals() else None
+        value = date
 %>\
             <dt>${_(u'Values viewed for')}</dt>
             <dd>
                 <a data-toggle="modal" data-target="#modal-change-legislation-date" href="#">
-                    ${_(u'define') if value is None or not isinstance(value, datetime.datetime) else babel.dates.format_date(value, format = 'short')}
+                    ${babel.dates.format_date(value, format = 'short') if value is not None else _(u'define')}
                 </a>
             </dd>
     % endif
