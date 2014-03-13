@@ -29,10 +29,6 @@ article.cgu h2{
 }
 
 .buttons {
-    margin: 1em;
-}
-
-form[name="situation"] .buttons {
     margin: 1em 0;
 }
 
