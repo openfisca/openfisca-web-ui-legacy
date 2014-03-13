@@ -99,6 +99,11 @@ define([
 							.clean()
 							.values();
 			},
+			get_cleanData: function () {
+				return new Parser(this.get('source'))
+							.clean()
+							.values();
+			},
 			simulate: function () {
 				this.backendServiceM.simulate();
 			}

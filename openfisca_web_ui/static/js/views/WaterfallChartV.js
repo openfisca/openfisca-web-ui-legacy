@@ -53,9 +53,14 @@ define([
 			},
 			render: function (args) {
 				args = args || {};
+				this.sourceData = this.model.get('cleanData');
+
+				$('.nvtooltip').hide().remove();
+
 				if(_.isUndefined(args.getDatas) || args.getDatas) {
 					this.setData(this.model.get('waterfallData'));
 				}
+
 				this.buildBars(this.buildActiveBars);
 				if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
 					this.buildLegend();
@@ -352,60 +357,105 @@ define([
 									else return 0.8;
 								});
 
+							if (!_.isUndefined(d.parentNodes[0])) {
 
-							that.incomeLine = that.g.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 2; })
-								.attr('stroke-dasharray', ('3, 3'))
-								.attr('opacity', 0)
+								/*	Helper : getDeeperFirstChild */
+								var getDeeperFirstChild = function (obj) {
+									var doIt = function (el) {
+										if(!_.isUndefined(el.children) && el.children.length > 0) {
+											return doIt(el.children[0]);
+										}
+										return el;
+									}
+									return doIt(obj);
+								};
 
-								.attr('x1', function () { return barAttrs.x; })
-								.attr('y1', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
-								.attr('x2', function () { return that.width; })
-								.attr('y2', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
-								.moveToBack();
-							
-							that.incomeText = that.g.selectAll('.income-number')
-								.data((that.prefix._scale(barData.waterfall.endValue) + that.prefix.symbolText).split('\n'));
+								// console.log(d.parentNodes[1].id);
+								var parentNode = d.parentNodes[0];
+									parentNode.name = $.isArray(parentNode.name) ? parentNode.name : parentNode.name.split(' ');
 
-							that.incomeText
-								.exit()
-									.transition().duration(50)
+								
+
+								var parentNodeFirstChildrenId = getDeeperFirstChild(_.findDeep(that.sourceData, {_id: parentNode.id }))._id,
+									parentNodeFirstChildren = _.findWhere(that.currentDataSet, {_id: parentNodeFirstChildrenId});
+
+								var yMiddleTextPos = 
+									(barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
+									(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)))/2
+
+								that.incomeLine = that.g.append('line')
+									.attr('stroke', function () { return '#333'; })
+									.attr('stroke-width', function () { return 2; })
+									.attr('stroke-dasharray', ('3, 3'))
 									.attr('opacity', 0)
-									.remove();
 
-							that.incomeText
-								.attr('y', function (_d, _i) {
-									var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
-									return barAttrs.y + lineHeight * _i - (that.incomeText.data().length * lineHeight-10) + (barData.value < 0 ? (barAttrs.height) : 0);
-								})
-								.text(function (_d) {
-									return _d;
-								})
-								.attr('opacity', 1)
-								.enter()
-									.append('text')
-									.attr('class', 'income-number')
-									.attr('font-size', 15)
-									.attr('x', function () { return that.width + 5; })
+									.attr('x1', function () { return barAttrs.x; })
+									.attr('y1', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
+									.attr('x2', function () { return that.width; })
+									.attr('y2', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
+									.moveToBack();
+
+								that.incomeLine2 = that.g.append('line')
+									.attr('stroke', function () { return '#333'; })
+									.attr('stroke-width', function () { return 2; })
+									.attr('stroke-dasharray', ('3, 3'))
+									.attr('opacity', 0)
+
+									.attr('x1', function () { return that.scales.x(parentNodeFirstChildren.short_name); })
+									.attr('y1', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
+									.attr('x2', function () { return that.width; })
+									.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
+									.moveToBack();
+
+								that.incomeLine3 = that.g.append('line')
+									.attr('stroke', function () { return '#333'; })
+									.attr('stroke-width', function () { return 7; })
+									.attr('opacity', 0)
+									.attr('x1', function () { return that.width-10; })
+									.attr('y1', function () { return (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)); })
+									.attr('x2', function () { return that.width-10; })
+									.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
+								
+								that.incomeText = that.g.selectAll('.income-number')
+									.data((that.prefix._scale(d.parentNodes[0].value) + that.prefix.symbolText).split('\n'));
+
+								that.incomeText
+									.exit()
+										.transition().duration(50)
+										.attr('opacity', 0)
+										.remove();
+
+								that.incomeText
 									.attr('y', function (_d, _i) {
-										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
-										return barAttrs.y + lineHeight * _i - (that.incomeText.data().length * lineHeight-10) + (barData.value < 0 ? (barAttrs.height) : 0);
+										var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
+										return yMiddleTextPos + lineHeight * _i - (that.incomeText.data().length * lineHeight-10);
 									})
-									.attr('font-weight', 'bold')
 									.text(function (_d) {
 										return _d;
-									});
-							if (!_.isUndefined(d.parentNodes[0])) {
-								var parentNode = d.parentNodes[0].split(' ');
+									})
+									.attr('opacity', 1)
+									.enter()
+										.append('text')
+										.attr('class', 'income-number')
+										.attr('font-size', 15)
+										.attr('x', function () { return that.width + 5; })
+										.attr('y', function (_d, _i) {
+											var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
+											return yMiddleTextPos + lineHeight * _i - (that.incomeText.data().length * lineHeight-10);
+										})
+										.attr('font-weight', 'bold')
+										.text(function (_d) {
+											return _d;
+										});
+
 								that.incomeLabel = that.g.selectAll('.income-label')
-									.data(parentNode);
+									.data(parentNode.name);
 
 								that.incomeLabel
 									.text(function (d) { return d; })
 									.attr('y', function (_d, _i) {
 										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
-										return barAttrs.y + lineHeight + _i * lineHeight + (barData.value < 0 ? (barAttrs.height) : 0);
+										return yMiddleTextPos + lineHeight + _i * lineHeight;
 									})
 									.attr('x', function () { return that.width + 5; })
 									.enter()
@@ -416,7 +466,7 @@ define([
 										.attr('font-weight', 'bold')
 										.attr('y', function (_d, _i) {
 											var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
-											return barAttrs.y + lineHeight + _i * lineHeight + (barData.value < 0 ? (barAttrs.height) : 0);
+											return yMiddleTextPos + lineHeight + _i * lineHeight;
 										})
 										.text(function (d) {
 											return d;
@@ -426,11 +476,21 @@ define([
 									.exit()
 										.transition().duration(100)
 										.remove();
+
+								that.incomeLine
+									.transition().duration(100)
+									.attr('opacity', 1);
+
+								that.incomeLine2
+									.transition().duration(100)
+									.attr('opacity', 1);
+
+								that.incomeLine3
+									.transition().duration(100)
+									.attr('opacity', 1);
 							}
 
-							that.incomeLine
-								.transition().duration(100)
-								.attr('opacity', 1);
+							
 						})
 						.on('mouseout', function (d, i) {
 
@@ -449,17 +509,17 @@ define([
 								});
 
 							that.hideTooltip(bar);
-
-							that.incomeLine
-								.remove();
-
-							that.incomeText
-								.remove();
-
 							
-
 							if(!_.isUndefined(that.incomeLabel)) {
 								that.incomeLabel
+									.remove();
+								that.incomeLine
+									.remove();
+								that.incomeLine2
+									.remove();
+								that.incomeLine3
+									.remove();
+								that.incomeText
 									.remove();
 							}
 						})

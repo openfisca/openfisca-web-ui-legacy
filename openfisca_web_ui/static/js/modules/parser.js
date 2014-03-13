@@ -14,6 +14,7 @@ define([
 					json._id = 'root';
 
 				var doIt = function (json) {
+					json.value = json.values[0];
 					var that = this,
 						old_children = json.children;
 						json.children = [];
@@ -24,9 +25,8 @@ define([
 							newEl._id = el.code;
 
 							if(el.children) { doIt(el); }
-							else {
-								newEl.value = newEl.values[0];
-							}
+							
+							newEl.value = newEl.values[0];
 							json.children.push(newEl);
 						}
 					});
@@ -107,7 +107,14 @@ define([
 						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) { loopDatum.parentNodes = loopData.parentNodes;}
 						else { loopDatum.parentNodes = [];}
 
-						if(i == dataLength-1) loopDatum.parentNodes.push(loopData.name);
+						if(i == dataLength-1) {
+							console.log(loopData.name, loopData.value);
+							loopDatum.parentNodes.push({
+									id: loopData._id,
+									name: loopData.name,
+									value: loopData.value
+							});
+						}
 						doIt(loopDatum);
 					});
 				};
