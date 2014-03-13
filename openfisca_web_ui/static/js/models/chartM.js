@@ -23,11 +23,16 @@ define([
 
 				vingtiles: vingtiles,
 
-				currentChartName: null
+				currentChartName: null,
+
+				simulationInProgress: false
 			},
 			backendServiceM: backendServiceM,
 			initialize: function () {
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
+				this.listenTo(this.backendServiceM, 'change:simulationInProgress', _.bind(function () {
+					this.set('simulationInProgress', this.backendServiceM.get('simulationInProgress'));
+				}, this));
 			},
 			parse: function () {
 				this.fetched = true;
@@ -87,7 +92,7 @@ define([
 							.values();
 			},
 			simulate: function () {
-
+				this.backendServiceM.simulate();
 			}
 		});
 

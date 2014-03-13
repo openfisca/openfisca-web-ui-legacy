@@ -3,14 +3,13 @@ define([
 	'backbone',
 
 	'appconfig',
-	'backendServiceM',
 	'chartM',
 	'DistributionChartV',
 	'VisualizationsPaneV',
 	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, Backbone, appconfig, backendServiceM, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
+	function ($, Backbone, appconfig, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
 		chartsTabsT) {
 		'use strict';
 
@@ -32,11 +31,9 @@ define([
 				this.$el.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
 				this.$overlay = this.$el.find('.overlay');
 
-				/* À passer dans chartM ! */
-				this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
-
 				this.listenTo(this.model, 'change:currentChartName', this.render);
-								
+				this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
+
 				this.updateOverlay();
 			},
 			onTabShow: function(evt) {
@@ -54,7 +51,7 @@ define([
 				return this;
 			},
 			updateOverlay: function() {
-				var simulationInProgress = backendServiceM.get('simulationInProgress');
+				var simulationInProgress = this.model.get('simulationInProgress');
 				var $svg = this.$el.find('svg');
 				if (simulationInProgress) {
 					$svg.css('opacity', 0.1);
