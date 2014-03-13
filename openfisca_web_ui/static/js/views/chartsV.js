@@ -1,6 +1,7 @@
 define([
 	'jquery',
 	'backbone',
+	'sticky',
 
 	'appconfig',
 	'chartM',
@@ -9,7 +10,7 @@ define([
 	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
 	],
-	function ($, Backbone, appconfig, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
+	function ($, Backbone, sticky, appconfig, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
 		chartsTabsT) {
 		'use strict';
 
@@ -28,7 +29,9 @@ define([
 			},
 			model: chartM,
 			initialize: function () {
-				this.$el.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
+				this.$el
+					.html(chartsTabsT({enableLocatingChart: enableLocatingChart}))
+					.sticky();
 				this.$overlay = this.$el.find('.overlay');
 
 				this.listenTo(this.model, 'change:currentChartName', this.render);
