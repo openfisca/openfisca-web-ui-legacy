@@ -337,6 +337,7 @@ def login(req):
     else:
         session.user_id = registered_account._id
         session.user = registered_account
+    session.anonymous_token = uuidhelpers.generate_uuid()
     session.token = uuidhelpers.generate_uuid()
     session.save(safe = True)
 
