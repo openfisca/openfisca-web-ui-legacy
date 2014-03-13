@@ -81,7 +81,7 @@ def build_requireconfig(ctx):
             'jquery': urls.get_url(ctx, u'bower/jquery/dist/jquery'),
             'json': urls.get_url(ctx, u'bower/requirejs-json/json'),
             'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
-            'sticky': urls.get_url(ctx, u'/bower/sticky/jquery.sticky'),
+            'sticky': urls.get_url(ctx, u'bower/sticky/jquery.sticky'),
             'text': urls.get_url(ctx, u'bower/requirejs-text/text'),
             'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
             'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
