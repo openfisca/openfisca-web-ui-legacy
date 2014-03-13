@@ -224,7 +224,7 @@ def respond_json(ctx, data, code = None, headers = None, jsonp = None):
         text = json.dumps(data, ensure_ascii = True, indent = 2)
     if jsonp:
         text = u'{0}({1})'.format(jsonp, text)
-    response.text = text
+    response.text = unicode(text)
     return response
 
 
