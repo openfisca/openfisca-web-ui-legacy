@@ -95,7 +95,7 @@ define([
 						if (doReloadForm) {
 							this.model.fetchForm();
 						} else {
-							chartM.simulate();	
+							chartM.simulate();
 						}
 					}
 				}, this));
