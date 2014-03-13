@@ -53,7 +53,9 @@ from openfisca_web_ui import model, urls
         <div class="panel panel-default">
             <div class="panel-body">
                 <%view:view_fields/>
+    % if visualization.iframe is True:
                 <%view:view_content/>
+    % endif
             </div>
     % if owner_or_admin:
             <div class="panel-footer">

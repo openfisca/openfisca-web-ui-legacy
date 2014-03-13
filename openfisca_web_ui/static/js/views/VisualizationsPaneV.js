@@ -12,7 +12,7 @@ define([
 
 		var VisualizationsPaneV = Backbone.View.extend({
 			events: {
-				'click .thumbnail-visualization': 'renderVisualization',
+				'click .thumbnail-link[target!="_blank"]': 'renderVisualization',
 				'click button.back': 'renderVisualizations'
 			},
 			model: null,
@@ -24,7 +24,7 @@ define([
 				evt.preventDefault();
 				var href = $(evt.target).parents('a').attr('href');
 				var visualization = _.find(this.model.get('visualizations'), function(item) {
-					return item.url === href;
+					return item.sourceUrl === href;
 				});
 				this.$el.find('.row').replaceWith(visualizationT(visualization));
 			},

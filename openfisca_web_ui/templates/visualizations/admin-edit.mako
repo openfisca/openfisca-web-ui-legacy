@@ -99,6 +99,19 @@ value="${inputs['thumbnail_url'] or ''}">
     % endif
                 </div>
 <%
+        error = errors.get('iframe') if errors is not None else None
+%>\
+                <div class="checkbox${' has-error' if error else ''}">
+                    <label>
+                        <input${' checked' if inputs['iframe'] else ''} id="iframe" name="iframe" type="checkbox" \
+value="1">
+                        ${_(u'Iframe')}
+                    </label>
+        % if error:
+                    <span class="help-block">${error}</span>
+        % endif
+                </div>
+<%
     error = errors.get('organization') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">

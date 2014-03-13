@@ -54,7 +54,9 @@ from openfisca_web_ui import model, urls
         <div class="panel panel-default">
             <div class="panel-body">
                 <%self:view_fields/>
+    % if visualization.iframe is True:
                 <%self:view_content/>
+    % endif
             </div>
     % if owner_or_admin:
             <div class="panel-footer">
@@ -114,7 +116,14 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
 %>\
     % if value is not None:
             <dt>${_(u'Visualization URL')}</dt>
-            <dd>${value}</dd>
+            <dd><a href="${value.format(simulate_url = simulate_url)}" target="_blank">${value}</a></dd>
+    % endif
+<%
+    value = visualization.iframe
+%>\
+    % if value is not None:
+            <dt>${_(u'Iframe')}</dt>
+            <dd>${_(u'Yes') if value else _(u'No')}</dd>
     % endif
 <%
     value = visualization.enabled

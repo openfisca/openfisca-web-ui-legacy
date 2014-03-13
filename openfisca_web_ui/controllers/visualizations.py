@@ -310,7 +310,8 @@ def api1_search(req):
             {
                 'title': visualization.title,
                 'description': visualization.description,
-                'iframeUrl': visualization.url.format(
+                'iframe': visualization.iframe or False,
+                'sourceUrl': visualization.url.format(
                     simulate_url = urllib.quote(u'{}?{}'.format(
                         urls.get_full_url(ctx, 'api/1/simulate'),
                         urllib.urlencode({'token': ctx.session.anonymous_token}),

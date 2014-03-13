@@ -1,7 +1,7 @@
 <div class="row">
 {{#visualizations}}
     <div class="col-sm-6">
-        <a href="{{url}}">
+        <a class="thumbnail-link" href="{{sourceUrl}}"{{^iframe}} rel="external" target="_blank"{{/iframe}}>
             <article class="thumbnail thumbnail-visualization">
                 <img alt="{{title}}" src="{{thumbnailUrl}}">
                 <div class="caption">
