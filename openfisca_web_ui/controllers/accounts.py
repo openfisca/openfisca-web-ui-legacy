@@ -105,10 +105,7 @@ def accept_cnil_conditions(req):
 def admin_delete(req):
     ctx = contexts.Ctx(req)
     account = ctx.node
-
-    if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx)
-
+    model.is_admin(ctx, check = True)
     if req.method == 'POST':
         account.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Account.get_admin_class_url(ctx))
@@ -119,10 +116,7 @@ def admin_delete(req):
 def admin_edit(req):
     ctx = contexts.Ctx(req)
     account = ctx.node
-
-    if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx)
-
+    model.is_admin(ctx, check = True)
     if req.method == 'GET':
         errors = None
         inputs = dict(
@@ -228,10 +222,7 @@ def admin_index(req):
 def admin_view(req):
     ctx = contexts.Ctx(req)
     account = ctx.node
-
-    if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx)
-
+    model.is_admin(ctx, check = True)
     return templates.render(ctx, '/accounts/admin-view.mako', account = account)
 
 

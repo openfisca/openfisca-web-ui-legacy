@@ -498,7 +498,7 @@ def user_edit(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
     if user.email is None:
-        return wsgihelpers.forbidden(ctx)
+        return wsgihelpers.unauthorized(ctx)
 
     params = req.GET
     inputs = {

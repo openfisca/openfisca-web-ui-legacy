@@ -41,10 +41,7 @@ log = logging.getLogger(__name__)
 def admin_delete(req):
     ctx = contexts.Ctx(req)
     session = ctx.node
-
-    if not model.is_admin(ctx):
-        return wsgihelpers.forbidden(ctx)
-
+    model.is_admin(ctx, check = True)
     if req.method == 'POST':
         session.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Session.get_admin_class_url(ctx))
