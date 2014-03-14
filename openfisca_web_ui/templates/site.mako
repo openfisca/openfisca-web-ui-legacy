@@ -339,7 +339,7 @@ ${conf['app_name']}
         <li${u' class="active"' if req.script_name.startswith('/legislations') else '' | n}>
             <a href="${model.Legislation.get_class_url(ctx)}">${_(u'Legislations')}</a>
         </li>
-    % if user.email is not None:
+    % if user is not None and user.email is not None:
         <li${u' class="active"' if req.script_name.startswith('/visualizations') else '' | n}>
             <a href="${model.Visualization.get_class_url(ctx)}">${_(u'Visualizations')}</a>
         </li>
