@@ -53,7 +53,6 @@ define([
 			},
 			render: function (args) {
 				args = args || {};
-				this.sourceData = this.model.get('cleanData');
 
 				$('.nvtooltip').hide().remove();
 
@@ -70,6 +69,7 @@ define([
 				return this;
 			},
 			setData: function (data) {
+				// Internalize data from model and add waterfall key to each item, containing start and end values.
 				/* Set stopvalues */
 				var children = data,
 					childrenLength = children.length,
@@ -93,72 +93,25 @@ define([
 				this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
 				this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
 			},
-			updateScales: function (yValues) {
+			updateScales: function () {
 				var that = this;
 				var currentDataSetValues = _.map(this.currentDataSet, function (data) {
 					return [data.waterfall.startValue, data.waterfall.endValue];
 				});
 				var yMin, yMax;
 
-				if(!_.isUndefined(yValues)) {
+				/* Set scales */
+				yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
+				yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
+				this.scales = {
+					x: d3.scale.ordinal()
+						.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
+						.domain(that.currentDataSet.map(function(d) { return d.short_name; })),
+					y: d3.scale.linear()
+						.domain([yMin, yMax])
+						.range([that.height - that.padding.bottom, that.padding.top])
+				};
 
-					yMin = d3.min(yValues);
-					yMax = d3.max(yValues);
-
-					this.scales = {
-						x: d3.scale.ordinal()
-							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-							.domain(that.currentDataSet.map(function(d) {
-								return d.short_name;
-						})),
-						y: d3.scale.linear()
-							.domain([d3.min(yValues), d3.max(yValues)])
-							.range([that.height - that.padding.bottom, that.padding.top])
-					};
-
-
-					if(_.isUndefined(this.backToGlobalScaleButton)) {
-						this.backToGlobalScaleButton = this.g.append('text')
-								.attr('class', 'back-to-global-scale-button')
-								.text('Retour à la globale')
-								.attr('x', function () {
-									return that.width/2;
-								})
-								.attr('y', function () {
-									return that.padding.top;
-								})
-								.attr('text-anchor', 'middle')
-								.on('click', function () {
-									that.updateScales();
-									that.render({getDatas: false});
-								});
-					}
-					
-
-				}
-				else {
-					/* Set scales */
-					yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
-					yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
-					this.scales = {
-						x: d3.scale.ordinal()
-							.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-							.domain(that.currentDataSet.map(function(d) {
-								return d.short_name;
-						})),
-						y: d3.scale.linear()
-							.domain([yMin, yMax])
-							.range([that.height - that.padding.bottom, that.padding.top])
-					};
-
-					if(!_.isUndefined(this.backToGlobalScaleButton)) {
-						this.backToGlobalScaleButton
-							.on('click', null)
-							.transition().duration(100)
-							.remove();
-						this.backToGlobalScaleButton = undefined;
-					}
-				}
 				var magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax);
 				this.prefix = d3.formatPrefix(magnitude);
 				this.prefix._scale = function (val) {
@@ -192,6 +145,7 @@ define([
 				}
 			},
 			buildBars: function (endTransitionCallback) {
+				// Create waterfall bars.
 				var that = this;
 				var dataLength = this.currentDataSet.length;
 				var barsLength = (!_.isUndefined(this.bars[0])) ? this.bars[0].length: 0;
@@ -302,10 +256,9 @@ define([
 						.attr("y", 0)
 						.style("fill", "url(#topBorderGradient)");
 				}
-
-				if(!_.isUndefined(this.backToGlobalScaleButton)) this.backToGlobalScaleButton.moveToFront();
 			},
 			buildActiveBars: function () {
+				// Callback of buildBars.
 				var that = this,
 					dataLength = this.currentDataSet.length,
 					barsLength = (!_.isUndefined(this.bars[0])) ? this.bars[0].length: 0,
@@ -373,10 +326,10 @@ define([
 								var parentNode = d.parentNodes[0];
 									parentNode.name = $.isArray(parentNode.name) ? parentNode.name : parentNode.name.split(' ');
 
-								
-
-								var parentNodeFirstChildrenId = getDeeperFirstChild(_.findDeep(that.sourceData, {_id: parentNode.id }))._id,
-									parentNodeFirstChildren = _.findWhere(that.currentDataSet, {_id: parentNodeFirstChildrenId});
+								var parentNodeFirstChildrenId = getDeeperFirstChild(
+									_.findDeep(that.model.get('cleanData'), {_id: parentNode.id })
+								)._id;
+								var parentNodeFirstChildren = _.findWhere(that.currentDataSet, {_id: parentNodeFirstChildrenId});
 
 								var yMiddleTextPos = 
 									(barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
@@ -598,38 +551,37 @@ define([
 				this.legendTextObject.exit().remove();
 			},
 			buildLegend: function () {
-
 				var that = this;
-					this.xAxis = d3.svg.axis()
-						.scale(this.scales.x)
-						.orient("bottom");
+				this.xAxis = d3.svg.axis()
+					.scale(this.scales.x)
+					.orient("bottom");
 
-					this.yAxis = d3.svg.axis()
-						.scale(this.scales.y)
-						.tickSize(this.width - this.padding.left)
-						.orient("left")
-						.tickFormat(function (d) {
-							return that.prefix._scale(d);
-						});
+				this.yAxis = d3.svg.axis()
+					.scale(this.scales.y)
+					.tickSize(this.width - this.padding.left)
+					.orient("left")
+					.tickFormat(function (d) {
+						return that.prefix._scale(d);
+					});
 
-					this.yAxisLegend = this.g.append("g");
-					this.xAxisLegend = this.g.append("g");
+				this.yAxisLegend = this.g.append("g");
+				this.xAxisLegend = this.g.append("g");
 
-					this.yAxisLegend
-						.attr("class", "y-axis")
-						.attr("transform", function () {
-							var pos = that.width;
-							return 'translate('+pos+',0)';
-						})
-						.call(this.yAxis);
+				this.yAxisLegend
+					.attr("class", "y-axis")
+					.attr("transform", function () {
+						var pos = that.width;
+						return 'translate('+pos+',0)';
+					})
+					.call(this.yAxis);
 
-					this.xAxisLegend
-						.attr("class", "x-axis")
-						.attr("transform", function () {
-							var pos = that.height - that.padding.bottom;
-							return 'translate(0,' + pos + ')';
-						})
-						.call(this.xAxis);
+				this.xAxisLegend
+					.attr("class", "x-axis")
+					.attr("transform", function () {
+						var pos = that.height - that.padding.bottom;
+						return 'translate(0,' + pos + ')';
+					})
+					.call(this.xAxis);
 
 
 				this.g.selectAll('.x-axis .tick text')
@@ -685,7 +637,7 @@ define([
 				');
 				var svg = this.$el.find('svg');
 				var barBBox = {};
-					bar.each(function () { barBBox = this.getBBox(); });
+				bar.each(function () { barBBox = this.getBBox(); });
 
 				d3.select(this.el).select('#nvtooltip-'+d._id)
 					.style('left', function () {
