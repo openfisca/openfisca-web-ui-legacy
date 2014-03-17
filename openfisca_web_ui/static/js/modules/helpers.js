@@ -50,6 +50,9 @@ define(['underscore'], function (_) {
 			}
 			function traverse(value) {
 				var result;
+				if (match(value)) {
+					return value;
+				}
 				_.forEach(value.children, function (val) {
 					if (result) {
 						return false;
