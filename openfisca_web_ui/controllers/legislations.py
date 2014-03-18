@@ -209,7 +209,6 @@ def admin_index(req):
     ctx = contexts.Ctx(req)
     model.is_admin(ctx, check = True)
 
-    assert req.method == 'GET'
     params = req.GET
     inputs = dict(
         advanced_search = params.get('advanced_search'),
@@ -440,7 +439,6 @@ def api1_edit(req):
 @wsgihelpers.wsgify
 def api1_json(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'GET'
     legislation, error = conv.pipe(
         conv.input_to_slug,
         conv.not_none,
@@ -456,7 +454,6 @@ def api1_typeahead(req):
     ctx = contexts.Ctx(req)
     headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
 
-    assert req.method == 'GET'
     params = req.GET
     inputs = dict(
         q = params.get('q'),
@@ -816,7 +813,6 @@ def user_new(req):
 @wsgihelpers.wsgify
 def user_view(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'GET'
     params = req.GET
     legislation = ctx.node
     date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)

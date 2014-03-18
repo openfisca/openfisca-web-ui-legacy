@@ -37,7 +37,6 @@ from .. import contexts, conv, model, urls, wsgihelpers
 @wsgihelpers.wsgify
 def delete(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'POST'
     user = model.get_user(ctx, check = True)
     id_or_slug = req.urlvars.get('id_or_slug')
     test_case = conv.check(
@@ -94,7 +93,6 @@ def duplicate(req):
 @wsgihelpers.wsgify
 def edit(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'POST'
     user = model.get_user(ctx, check = True)
     params = req.params
     inputs = {

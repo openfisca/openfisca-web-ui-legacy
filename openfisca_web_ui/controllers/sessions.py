@@ -53,7 +53,6 @@ def admin_index(req):
     ctx = contexts.Ctx(req)
     model.is_admin(ctx, check = True)
 
-    assert req.method == 'GET'
     page_number, error = conv.pipe(
         conv.input_to_int,
         conv.test_greater_or_equal(1),

@@ -153,8 +153,6 @@ def admin_index(req):
     ctx = contexts.Ctx(req)
     if not model.is_admin(ctx):
         return wsgihelpers.redirect(ctx, location = model.Visualization.get_user_class_url(ctx))
-
-    assert req.method == 'GET'
     params = req.GET
     inputs = dict(
         advanced_search = params.get('advanced_search'),
@@ -330,7 +328,6 @@ def api1_typeahead(req):
     ctx = contexts.Ctx(req)
     headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
 
-    assert req.method == 'GET'
     params = req.GET
     inputs = dict(
         q = params.get('q'),

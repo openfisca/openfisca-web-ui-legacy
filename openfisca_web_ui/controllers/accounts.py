@@ -174,7 +174,6 @@ def admin_index(req):
     ctx = contexts.Ctx(req)
     model.is_admin(ctx, check = True)
 
-    assert req.method == 'GET'
     params = req.GET
     inputs = dict(
         page = params.get('page'),
@@ -377,7 +376,6 @@ def user_delete(req):
     if session is None or session.user is None:
         return wsgihelpers.unauthorized(ctx)
 
-    assert req.method == 'POST'
     session.user.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
 
