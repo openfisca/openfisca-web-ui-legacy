@@ -87,7 +87,7 @@ from openfisca_web_ui import model, urls
             <tbody>
         % for account in accounts:
                 <tr>
-                    <td><a href="${account.get_admin_url(ctx)}">${account.email or ''}</a></td>
+                    <td><a href="${account.get_admin_url(ctx)}">${account.email or account._id}</a></td>
                     <td>${account.full_name or ''}</td>
                     <td>${_(u'Administrator') if account.admin else ''}</td>
                     <td>${account.updated or ''}</td>
