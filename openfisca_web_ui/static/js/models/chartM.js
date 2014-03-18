@@ -28,6 +28,10 @@ define([
 				simulationInProgress: false
 			},
 			backendServiceM: backendServiceM,
+			chartDecompositions: {
+				// 'distribution': 'decompositions-multiples.xml'
+			},
+			chartAxes: {},
 			initialize: function () {
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
 				this.listenTo(this.backendServiceM, 'change:simulationInProgress', _.bind(function () {
@@ -97,8 +101,22 @@ define([
 							.clean()
 							.values();
 			},
-			simulate: function () {
-				this.backendServiceM.simulate();
+			changeChart: function (chartName) {
+				this.simulate(chartName);
+				this.set('currentChartName', chartName);
+			},
+			simulate: function (chartName) {
+				var decomposition = null,
+					axes = null;
+
+				/* Simulate */
+				if(this.chartDecompositions.hasOwnProperty(chartName)) {
+					decomposition = this.chartDecompositions[chartName];
+				}
+				if(this.chartAxes.hasOwnProperty(chartName)) {
+					axes = this.chartAxes[chartName];
+				}
+				this.backendServiceM.simulate(decomposition, axes);				
 			}
 		});
 

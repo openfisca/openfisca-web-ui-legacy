@@ -86,8 +86,6 @@ define([
 
 				this.currentSort = this.defaultSort;
 
-				/* Render when data if ok or is changed */
-				if(this.model.fetched) this.render();
 				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function (sortType) {

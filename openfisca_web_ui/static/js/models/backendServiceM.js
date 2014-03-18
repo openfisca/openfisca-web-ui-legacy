@@ -15,9 +15,7 @@ define([
 			events: {},
 			urlPaths: appconfig.api.urls,
 
-			initialize: function () {
-				this.simulate();
-			},
+			initialize: function () {},
 			fetchForm: function() {
 				return $.ajax({
 					context: this,
@@ -52,11 +50,19 @@ define([
 					}
 				});
 			},
-			simulate: function() {
+			simulate: function(decomposition, axes) {
+				/* Decomposition & axes */
+				var reqAdditionalData = {},
+					decomposition = decomposition || null,
+					axes = axes || null;
+				if(decomposition != null) reqAdditionalData.decomposition = JSON.stringify(decomposition);
+				if(axes != null) reqAdditionalData.axes = JSON.stringify(axes);
+
 				this.set('simulationInProgress', true);
 				return $.ajax({
 					context: this,
-					url: this.urlPaths.simulate
+					url: this.urlPaths.simulate,
+					data: reqAdditionalData
 				})
 				.done(function(data) {
 					if (data.errors) {
@@ -66,6 +72,15 @@ define([
 					} else {
 						var result = data.output.value;
 						if ( ! _.isUndefined(result)) {
+							/* 	Si l'on n'ajoute pas cette propriété,
+								et que deux retours de l'api sont identiques,
+								le chartM ne considère pas que "apiData" a été mis à jour
+								et n'appelle pas le render.
+								La propriété _simulationTime permet donc à ChartM de détecter
+								qu'une nouvelle simulation a été effectuée même si le jeu de
+								donnée renvoyé est le même.
+							*/
+							result._simulationTime = new Date().getTime();
 							this.set('apiData', result);
 						}
 					}

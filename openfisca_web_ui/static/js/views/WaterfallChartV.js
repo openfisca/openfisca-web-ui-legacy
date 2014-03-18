@@ -46,9 +46,6 @@ define([
 					.append('svg')
 					.attr('height', this.height)
 					.attr('width', this.width);
-				if(this.model.fetched) {
-					this.render();
-				}
 				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function (args) {

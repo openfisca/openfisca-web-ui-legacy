@@ -45,9 +45,6 @@ define([
 				this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
 				nvd3.addGraph({
 					callback: function(chart) {
-						if(that.model.fetched) {
-							that.render();
-						}
 						that.listenTo(that.model, 'change:source', that.render);
 					},
 					generate: function() {

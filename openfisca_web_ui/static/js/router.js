@@ -35,21 +35,21 @@ define([
 			this.navigate(enableLocatingChart ? 'locating' : 'waterfall', {replace: true, trigger: true});
 		},
 		distributionChart: function () {
-			chartM.set('currentChartName', 'distribution');
+			chartM.changeChart('distribution');
 		},
 		locatingChart: function () {
 			if (enableLocatingChart) {
-				chartM.set('currentChartName', 'locating');
+				chartM.changeChart('locating');
 			}
 		},
 		otherCharts: function () {
-			chartM.set('currentChartName', 'other');
+			chartM.changeChart('other');
 		},
 		waterfallChart: function () {
-			chartM.set('currentChartName', 'waterfall');
+			chartM.changeChart('waterfall');
 		},
 		visualizationsChart: function () {
-			chartM.set('currentChartName', 'visualizations');
+			chartM.changeChart('visualizations');
 		}
 	});
 
