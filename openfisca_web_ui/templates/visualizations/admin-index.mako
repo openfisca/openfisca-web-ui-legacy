@@ -71,20 +71,21 @@ from openfisca_web_ui import model, urls
         <div class="row">
         % for visualization in visualizations:
             <div class="col-lg-3 col-md-4 col-sm-6">
-                <a href="${visualization.get_user_url(ctx)}">
-                    <article class="thumbnail thumbnail-visualization">
-                        <img alt="${visualization.get_title(ctx)}" src="${visualization.thumbnail_url or ''}">
-                        <div class="caption">
-                            <h1>${visualization.get_title(ctx)}</h1>
+                <article class="thumbnail thumbnail-visualization">
+            % if visualization.thumbnail_url is not None:
+                    <img alt="${visualization.get_title(ctx)}" src="${visualization.thumbnail_url}">
+            % endif
+                    <div class="caption">
+                        <h1>${visualization.get_title(ctx)}</h1>
 <%
             description_text = visualization.description
 %>\
-            % if description_text:
-                            <p>${description_text}</p>
+            % if description_text is not None:
+                        <p>${description_text}</p>
             % endif
-                        </div>
-                    </article>
-                </a>
+                        <p><a class="btn btn-default" href="${visualization.get_user_url(ctx)}">${_(u'View')}</a></p>
+                    </div>
+                </article>
             </div>
         % endfor
         </div>

@@ -111,15 +111,9 @@ form[name=situation] button.add {
     width: 60%;
 }
 
-.thumbnail-visualization > img {
+.thumbnail-visualization img {
+    /* We don't know image dimensions since its URL is external to the application. */
     max-height: 150px;
-}
-.thumbnail-visualization {
-    margin: 0 0 20px 0;
-}
-.thumbnail-visualization:hover {
-    border: 1px solid #999;
-    background-color: #DDD;
 }
 
 .visualization-iframe {
