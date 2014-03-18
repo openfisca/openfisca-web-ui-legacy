@@ -105,7 +105,6 @@ def make_router():
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/admin/visualizations(?=/|$)', visualizations.route_admin_class),
-        (None, '^/api/1/accounts(?=/|$)', accounts.route_api1_class),
         (None, '^/api/1/disclaimer_closed$', disclaimer_closed),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/session$', session),

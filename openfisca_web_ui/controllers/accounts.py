@@ -226,40 +226,6 @@ def admin_view(req):
     return templates.render(ctx, '/accounts/admin-view.mako', account = account)
 
 
-@wsgihelpers.wsgify
-def api1_typeahead(req):
-    ctx = contexts.Ctx(req)
-    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
-
-    assert req.method == 'GET'
-    params = req.GET
-    inputs = dict(
-        q = params.get('q'),
-        )
-    data, errors = conv.struct(
-        dict(
-            q = conv.base.input_to_words,
-            ),
-        )(inputs, state = ctx)
-    if errors is not None:
-        return wsgihelpers.bad_request(ctx, explanation = errors)
-
-    criteria = {}
-    if data['q'] is not None:
-        criteria['words'] = {'$all': [
-            re.compile(u'^{}'.format(re.escape(word)))
-            for word in data['q']
-            ]}
-    cursor = model.Account.get_collection().find(criteria, ['full_name'])
-    return wsgihelpers.respond_json(ctx,
-        [
-            account_attributes['full_name']
-            for account_attributes in cursor.limit(10)
-            ],
-        headers = headers,
-        )
-
-
 def extract_account_inputs_from_params(ctx, params = None):
     if params is None:
         params = webob.multidict.MultiDict()
@@ -389,48 +355,6 @@ def route_admin_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', admin_index),
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_admin),
-        )
-    return router(environ, start_response)
-
-
-def route_api1(environ, start_response):
-    req = webob.Request(environ)
-    ctx = contexts.Ctx(req)
-
-    account, error = conv.pipe(
-        conv.input_to_slug,
-        conv.not_none,
-        model.Account.make_id_or_slug_or_words_to_instance(),
-        )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
-    if error is not None:
-        params = req.GET
-        return wsgihelpers.respond_json(ctx,
-            collections.OrderedDict(sorted(dict(
-                apiVersion = '1.0',
-                context = params.get('context'),
-                error = collections.OrderedDict(sorted(dict(
-                    code = 404,  # Not Found
-                    message = error,
-                    ).iteritems())),
-                method = req.script_name,
-                url = req.url.decode('utf-8'),
-                ).iteritems())),
-            )(environ, start_response)
-
-    ctx.node = account
-
-    router = urls.make_router(
-#        ('DELETE', '^/?$', api1_delete),
-#        ('GET', '^/?$', api1_get),
-        )
-    return router(environ, start_response)
-
-
-def route_api1_class(environ, start_response):
-    router = urls.make_router(
-#        ('GET', '^/?$', api1_index),
-        ('GET', '^/typeahead/?$', api1_typeahead),
-        (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_api1),
         )
     return router(environ, start_response)
 
