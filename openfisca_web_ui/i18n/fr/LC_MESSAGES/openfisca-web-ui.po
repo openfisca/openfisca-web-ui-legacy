@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2014-03-13 23:02+0100\n"
-"PO-Revision-Date: 2014-03-13 23:03+0100\n"
+"PO-Revision-Date: 2014-03-18 16:12+0100\n"
 "Last-Translator: Christophe Benz <christophe.benz@data.gouv.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
@@ -46,7 +46,7 @@ msgstr "Session {0}"
 #: openfisca_web_ui/model.py:346
 #: openfisca_web_ui/templates/sessions/admin-index.mako:50
 msgid "Session {0} of {1}"
-msgstr "Session {0} sur {1}"
+msgstr "Session {0} de {1}"
 
 #: openfisca_web_ui/model.py:384
 msgid "No session with UUID {0}"
