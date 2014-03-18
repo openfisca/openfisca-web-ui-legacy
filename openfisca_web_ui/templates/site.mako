@@ -320,6 +320,9 @@ ${conf['app_name']}
                 <li${u' class="active"' if req.script_name.startswith('/admin/legislations') else '' | n}>
                     <a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u'Legislations')}</a>
                 </li>
+                <li${u' class="active"' if req.script_name.startswith('/admin/sessions') else '' | n}>
+                    <a href="${model.Session.get_admin_class_url(ctx)}">${_(u'Sessions')}</a>
+                </li>
                 <li${u' class="active"' if req.script_name.startswith('/admin/visualizations') else '' | n}>
                     <a href="${model.Visualization.get_admin_class_url(ctx)}">${_(u'Visualizations')}</a>
                 </li>
