@@ -30,6 +30,15 @@ define(['jquery', 'x-editable'], function ($) {
 		$('.period-select').on('change', function(evt) {
 			$(this).parent().next().find('li a').eq($(this).val()).tab('show');
 		});
+
+		$('.btn-delete-slice').on('click', function(evt) {
+			var url = config.legislationUrl;
+			var params = {
+				action: 'delete',
+				name: $(this).data('name')
+			};
+			$.post(url, params);
+		});
 	}
 
 	return {init: init};

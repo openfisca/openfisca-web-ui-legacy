@@ -119,6 +119,7 @@ data-toggle="collapse" data-target="#${html_node_path}">
                 <th>Seuil</th>
                 <th>Assiette</th>
                 <th>Taux</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -136,6 +137,12 @@ ${slice['base'] if slice.get('base') else ''}</a>
                 <td>
                     <a class="editable" data-name="${list(chain(path, ('slices', index, 'rate'))) | n, js, h}">\
 ${slice['rate'] if slice.get('rate') else ''}</a>
+                </td>
+                <td>
+                    <a class="btn btn-danger btn-xs btn-delete-slice" \
+data-name="${list(chain(path, ('slices', index))) | n, js, h}" title="${_('Delete slice')}">
+                        <span class="glyphicon glyphicon-minus"></span>
+                    </a>
                 </td>
         % else:
                 <td>${slice['threshold'] if slice.get('threshold') else ''}</td>

@@ -34,7 +34,7 @@ import requests
 
 from biryani1 import strings
 
-from . import conf, conv, objects, urls, wsgihelpers
+from . import conf, conv, datahelpers, objects, urls, wsgihelpers
 
 
 _fields_api_data = None
@@ -201,6 +201,12 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
                 )
             if fragment is not None
             )).split(u'-'))) or None
+
+    def deep_key(self, layers):
+        return datahelpers.get_deep_key(self.json, layers)
+
+    def delete_deep_key(self, layers, data = None):
+        return datahelpers.delete_deep_key(self.json, layers)
 
     @classmethod
     def get_admin_class_full_url(cls, ctx, *path, **query):

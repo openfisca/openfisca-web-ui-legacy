@@ -349,12 +349,17 @@ def api1_edit(req):
     user = model.get_user(ctx, check = True)
 
     inputs = {
+        'action': params.get('action'),
         'id_or_slug_or_words': req.urlvars.get('id_or_slug_or_words'),
         'name': params.getall('name[]'),
         'value': params.get('value'),
         }
     data, errors = conv.pipe(
         conv.struct({
+            'action': conv.pipe(
+                conv.cleanup_line,
+                conv.test_in(['delete', 'add']),
+                ),
             'id_or_slug_or_words': conv.pipe(
                 conv.input_to_slug,
                 conv.not_none,
@@ -386,53 +391,45 @@ def api1_edit(req):
             {'status': 'error', 'message': ctx._(u'You cannot edit a non-dated legislation.')},
             )
 
-    def get_deep_key(data, layers):
-        if data is None:
-            return None
-        layer = layers[0]
-        next_layers = layers[1:]
-        if isinstance(data, list):
-            layer_data = data[int(layer)]
-        elif data.get('children') is not None:
-            layer_data = data['children'].get(layer)
-        else:
-            layer_data = data.get(layer)
-        return get_deep_key(data=layer_data, layers=next_layers) if next_layers else layer_data
-
-    node_key = 'value' if data['name'][-1] not in ['base', 'rate', 'threshold'] else data['name'].pop()
-    node = get_deep_key(legislation.json, data['name'])
-    if data['name'][-1] in ['base', 'rate', 'threshold']:
-        value, error = conv.switch(
-            conv.function(lambda value: node_key),
-            {
-                'base': conv.pipe(
-                    conv.input_to_float,
-                    conv.test_greater_or_equal(0),
-                    ),
-                'rate': conv.pipe(
-                    conv.input_to_float,
-                    conv.test_greater_or_equal(0),
-                    conv.test_less_or_equal(1),
-                    ),
-                'threshold': conv.input_to_float,
-                },
-            )(data['value'], state = ctx)
+    node_key = data.get('action', 'value') \
+        if data['name'][-1] not in ['base', 'rate', 'threshold'] else data['name'].pop()
+    if data.get('action') is not None and data['action'] == 'delete':
+        error = None
+        legislation.delete_deep_key(data['name'])
     else:
-        value, error = conv.switch(
-            conv.function(lambda value: node.get('format', 'float')),
-            {
-                'float': conv.input_to_float,
-                'integer': conv.input_to_int,
-                'rate': conv.pipe(
-                    conv.input_to_float,
-                    conv.test_greater_or_equal(0),
-                    conv.test_less_or_equal(1),
-                    ),
-                },
-            )(data['value'], state = ctx)
-    if error is not None:
-        return wsgihelpers.error(ctx, body = error, code = 400)
-    node[node_key] = value
+        node = legislation.deep_key(data['name'])
+        if data['name'][-1] in ['base', 'rate', 'threshold']:
+            value, error = conv.switch(
+                conv.function(lambda value: node_key),
+                {
+                    'base': conv.pipe(
+                        conv.input_to_float,
+                        conv.test_greater_or_equal(0),
+                        ),
+                    'rate': conv.pipe(
+                        conv.input_to_float,
+                        conv.test_greater_or_equal(0),
+                        conv.test_less_or_equal(1),
+                        ),
+                    'threshold': conv.input_to_float,
+                    },
+                )(data['value'], state = ctx)
+        else:
+            value, error = conv.switch(
+                conv.function(lambda value: node.get('format', 'float')),
+                {
+                    'float': conv.input_to_float,
+                    'integer': conv.input_to_int,
+                    'rate': conv.pipe(
+                        conv.input_to_float,
+                        conv.test_greater_or_equal(0),
+                        conv.test_less_or_equal(1),
+                        ),
+                    },
+                )(data['value'], state = ctx)
+        if error is not None:
+            return wsgihelpers.error(ctx, body = error, code = 400)
+        node[node_key] = value
     legislation.save(safe = True)
     return wsgihelpers.respond_json(ctx, data['value'])
 
