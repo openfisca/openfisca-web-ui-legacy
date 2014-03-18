@@ -84,7 +84,7 @@ from openfisca_web_ui import model, urls
             % if user is None:
                     <td>${session.user_id}</td>
             % else:
-                    <td>${user.get_title(ctx)}</td>
+                    <td><a href="${user.get_admin_url(ctx)}">${user.get_title(ctx)}</a></td>
             % endif
                     <td>${babel.dates.format_datetime(session.expiration) if session.expiration is not None else ''}</td>
                 </tr>
