@@ -101,7 +101,7 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="search_form()" filter="trim">
-        <form action="${model.Account.get_admin_class_url(ctx)}" method="get" role="form">
+        <form method="get" role="form">
             <input name="sort" type="hidden" value="${inputs['sort'] or ''}">
 <%
     error = errors.get('term') if errors is not None else None

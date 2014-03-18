@@ -46,7 +46,7 @@ from openfisca_web_ui import conf, model, urls
         <div class="page-header">
             <h1>${_(u'Edit a Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
         </div>
-        <form action="${visualization.get_admin_url(ctx, 'edit')}" method="post" role="form">
+        <form method="post" role="form">
             <%self:hidden_fields/>
             <%self:error_alert/>
             <%self:form_fields/>

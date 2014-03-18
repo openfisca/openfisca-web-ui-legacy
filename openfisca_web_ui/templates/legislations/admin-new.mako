@@ -43,7 +43,7 @@ from openfisca_web_ui import conf, model, urls
         <div class="page-header">
             <h1>${_(u'Create a Legislation')}</h1>
         </div>
-        <form action="${model.Legislation.get_admin_class_url(ctx, 'new')}" method="post" role="form">
+        <form method="post" role="form">
             <%edit:hidden_fields/>
             <%self:error_alert/>
             <%edit:form_fields/>
