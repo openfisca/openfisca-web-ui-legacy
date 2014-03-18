@@ -139,10 +139,10 @@ ${slice['base'] if slice.get('base') else ''}</a>
 ${slice['rate'] if slice.get('rate') else ''}</a>
                 </td>
                 <td>
-                    <a class="btn btn-danger btn-xs btn-delete-slice" \
-data-name="${list(chain(path, ('slices', index))) | n, js, h}" title="${_('Delete slice')}">
+                    <button class="btn btn-danger btn-xs btn-delete-slice" \
+data-name="${list(chain(path, ('slices', index))) | n, js, h}">
                         <span class="glyphicon glyphicon-minus"></span>
-                    </a>
+                    </button>
                 </td>
         % else:
                 <td>${slice['threshold'] if slice.get('threshold') else ''}</td>
@@ -153,6 +153,11 @@ data-name="${list(chain(path, ('slices', index))) | n, js, h}" title="${_('Delet
     % endfor
         </tbody>
     </table>
+    % if editable:
+    <button class="btn btn-primary btn-xs btn-add-slice" data-name="${list(chain(path, ('slices'))) | n, js, h}">
+        ${_(u'Add a slice')}
+    </button>
+    % endif
 </%def>
 
 

@@ -396,6 +396,9 @@ def api1_edit(req):
     if data.get('action') is not None and data['action'] == 'delete':
         error = None
         legislation.delete_deep_key(data['name'])
+    elif data.get('action') is not None and data['action'] == 'add':
+        error = None
+        legislation.add_deep_key(data['name'])
     else:
         node = legislation.deep_key(data['name'])
         if data['name'][-1] in ['base', 'rate', 'threshold']:

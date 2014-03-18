@@ -179,6 +179,9 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
     title = None
     url = None
 
+    def add_deep_key(self, data, layers):
+        return datahelpers.add_deep_key(self.json, {'threshold': 0, 'base': 0, 'rate': 0}, layers)
+
     @classmethod
     def bson_to_json(cls, value, state = None):
         if value is None:

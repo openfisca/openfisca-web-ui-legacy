@@ -29,6 +29,49 @@
 from . import conv
 
 
+def add_deep_key(data, layers):
+    if data is None:
+        return False
+    node = get_deep_key(data, layers[:-1])
+    print node
+    print layers
+    raise Exception
+    if node is None:
+        return False
+
+    if isinstance(node, list):
+        key, error = conv.input_to_int(layers[-1])
+    elif isinstance(node, dict):
+        key, error = layers[-1], None if key in node else True
+    else:
+        return False
+
+    if error is not None:
+        return False
+    del node[key]
+    return True
+
+
+def delete_deep_key(data, layers):
+    if data is None:
+        return False
+    node = get_deep_key(data, layers[:-1])
+    if node is None:
+        return False
+
+    if isinstance(node, list):
+        key, error = conv.input_to_int(layers[-1])
+    elif isinstance(node, dict):
+        key, error = layers[-1], None if key in node else True
+    else:
+        return False
+
+    if error is not None:
+        return False
+    del node[key]
+    return True
+
+
 def get_deep_key(data, layers):
     if data is None:
         return None
@@ -41,19 +84,3 @@ def get_deep_key(data, layers):
     else:
         layer_data = data.get(layer)
     return get_deep_key(data = layer_data, layers = next_layers) if next_layers else layer_data
-
-
-def delete_deep_key(data, layers):
-    if data is None:
-        return None
-    node = get_deep_key(data, layers[:-1])
-    if isinstance(node, list):
-        key, error = conv.input_to_int(layers[-1])
-    elif isinstance(node, dict):
-        key, error = layers[-1], None if key in node else True
-    else:
-        return False
-    if error is not None:
-        return False
-    del node[key]
-    return True
