@@ -166,14 +166,14 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
 %>\
     % if value is not None:
             <dt>${_(u'Updated')}</dt>
-            <dd>${babel.dates.format_datetime(value, format = 'short')}</dd>
+            <dd>${babel.dates.format_datetime(value)}</dd>
     % endif
 <%
     value = legislation.published
 %>\
     % if value is not None:
             <dt>${_(u'Published')}</dt>
-            <dd>${babel.dates.format_datetime(value, format = 'short')}</dd>
+            <dd>${babel.dates.format_datetime(value)}</dd>
         </dl>
     % endif
 </%def>

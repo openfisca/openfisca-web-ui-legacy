@@ -25,6 +25,7 @@
 
 <%!
 import babel.dates
+
 from openfisca_web_ui import model, urls
 %>
 
@@ -96,7 +97,7 @@ from openfisca_web_ui import model, urls
                         ${description_text}
             % endif
                     </td>
-                    <td>${babel.dates.format_date(legislation.updated)}</td>
+                    <td>${babel.dates.format_datetime(legislation.updated)}</td>
                 </tr>
         % endfor
             </tbody>

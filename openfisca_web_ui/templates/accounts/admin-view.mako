@@ -113,14 +113,14 @@ ${account.get_title(ctx)} - ${parent.title_content()}
 %>\
     % if value is not None:
                     <dt>${_(u'Updated')}<dt>
-                    <dd>${babel.dates.format_date(value, format = 'short')}</dd>
+                    <dd>${babel.dates.format_datetime(value)}</dd>
     % endif
 <%
     value = account.published
 %>\
     % if value is not None:
                     <dt>${_(u'Published')}<dt>
-                    <dd>${babel.dates.format_date(value, format = 'short')}</dd>
+                    <dd>${babel.dates.format_datetime(value)}</dd>
     % endif
                 </dl>
 </%def>

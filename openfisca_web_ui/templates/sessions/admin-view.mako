@@ -24,6 +24,8 @@
 
 
 <%!
+import babel.dates
+
 from openfisca_web_ui import model, urls
 %>
 
@@ -76,7 +78,7 @@ ${session.get_title(ctx)} - ${parent.title_content()}
             <dd><a href="${user.get_admin_url(ctx)}">${user.get_title(ctx)}</a></dd>
     % endif
             <dt>${_(u'Expiration Date')}</dt>
-            <dd>${session.expiration.isoformat()}</dd>
+            <dd>${babel.dates.format_datetime(session.expiration) if session.expiration is not None else ''}</dd>
         </dl>
 </%def>
 
