@@ -22,3 +22,17 @@
 	font-size: 16px;
 	fill: #777;
 }
+#chart-wrapper #distribution .section-title {
+	text-anchor: middle;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 23px;
+	fill: #333;
+	font-weight: bold;	
+}
+#chart-wrapper #distribution .section-value {
+	text-anchor: middle;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 13px;
+	fill: #777;
+	font-weight: light;
+}

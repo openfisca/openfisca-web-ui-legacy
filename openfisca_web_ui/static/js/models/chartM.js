@@ -29,7 +29,7 @@ define([
 			},
 			backendServiceM: backendServiceM,
 			chartDecompositions: {
-				// 'distribution': 'decompositions-multiples.xml'
+				'distribution': 'decompositions-multiples.xml'
 			},
 			chartAxes: {},
 			initialize: function () {
@@ -62,34 +62,21 @@ define([
 				return r;
 			},
 			get_distributionData: function (args) {
-				args = args || {};
-				if(args.type == 'default') {/* Cleaned up and ungrouped data */
-					return new Parser(this.get('source'))
-						.clean()
-						// .removeRootNode()
-						.listChildren()
-						.values();
-				}
-				else if(args.type == 'positive') {
-					return new Parser(this.get('source'))
-						.clean()
-						.setPositiveSort()
-						.listChildren()
-						.values();
-				}
-				else if(args.type == 'test') {
-					return new Parser(this.get('source'))
-						.clean()
-						.setTestSort()
-						.listChildren()
-						.values();
-				}
-				else {
-					return new Parser(this.get('source'))
-						.clean()
-						.listChildren()
-						.values();
-				}
+				/* Par défault on renvoie la décomposition revdisp */
+				var args = args || {sort: 'revdisp'},
+					parser = new Parser(this.get('source')),
+					outputData;
+
+				if(args.sort == 'all') args.sort = revdisp;
+
+				var _return = parser
+					.clean()
+					.setPositiveSort()
+					.setDecompositionSort()
+					.listChildren()
+					.values();
+
+				return _return;
 			},
 			get_locatingData: function () { /* Just cleaned up */
 				return new Parser(this.get('source'))
@@ -107,7 +94,8 @@ define([
 			},
 			simulate: function (chartName) {
 				var decomposition = null,
-					axes = null;
+					axes = null,
+					chartName = chartName || this.get('currentChartName');
 
 				/* Simulate */
 				if(this.chartDecompositions.hasOwnProperty(chartName)) {

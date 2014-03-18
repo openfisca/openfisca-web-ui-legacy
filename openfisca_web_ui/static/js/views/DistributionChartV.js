@@ -21,6 +21,7 @@ define([
 			width: null,
 			maxWidth: 1000,
 			padding: {top: 100, left: 20, bottom: 40, right: 20},
+			minSectionHeight: 300,
 			sectionWidth: null,
 			sectionHeight: null,
 			sectionBottomMargin: 30,
@@ -30,11 +31,11 @@ define([
 
 			/* D3 Settings */
 			force: d3.layout.force(),
-			gravity: 0,
-			charge: function (d) { return -Math.pow(d.radius, 2.0)/1.2; },
+			gravity: 0.02,
+			charge: function (d) { return -Math.pow(d.radius/2, 2.0)/2; },
 			friction: 0.6,
 			rScale: d3.scale.linear().clamp(true),
-			defaultGravity: 0.4,
+			defaultGravity: 0.5,
 
 			nodes: [],
 			bubbles: {},
@@ -44,31 +45,15 @@ define([
 			prefix: null,
 
 			/* Sort */
-			sortData: {
+			defaultSortData: {
 				'positive': {
 					'name': 'Cotisations / prestations',
 					'children': [
 						{ name: 'Cotisations', value: false },
 						{ name: 'Prestations', value: true }
 					]
-				},
-				'test': {
-					'name': 'Test',
-					'children': [
-						{ name: 'valeur 1', value: 'aaa' },
-						{ name: 'valeur 2', value: 'bbb' },
-						{ name: 'valeur 4', value: 'ddd' },
-						{ name: 'valeur 5', value: 'eee' },
-						{ name: 'valeur 6', value: 'fff' },
-						{ name: 'valeur 3', value: 'ccc' },
-						{ name: 'valeur 7', value: 'ggg' },
-						{ name: 'valeur 8', value: 'hhh' },
-						{ name: 'valeur 9', value: 'iii' },
-						{ name: 'valeur 10', value: 'jjj' }
-					]
 				}
 			},
-
 			initialize: function (options) {
 				this.updateDimensions();
 
@@ -85,17 +70,19 @@ define([
 					.attr('class', 'text-label');
 
 				this.currentSort = this.defaultSort;
-
+				
 				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function (sortType) {
 				if(typeof sortType != 'string') sortType = this.currentSort;
 
-				// /* If data.length < packByLine */
-				if(this.sortData[sortType].children.length < this.defaultPackByLine) this.packByLine = this.sortData[sortType].children.length;
-				else this.packByLine = this.defaultPackByLine;
-
 				var data = this.model.get('distributionData', {type: sortType});
+
+				this.setSortDataByDataset(data);
+
+				if(_.isUndefined(this.sortData[sortType])) var sortType = this.defaultSort;
+				var sortDatum = this.sortData[sortType]
+				this.packByLine = sortDatum.children.length < this.defaultPackByLine ? sortDatum.children.length : this.defaultPackByLine;
 
 				this.setSectionsDimensions();
 				this.setPrefix(data);
@@ -103,12 +90,37 @@ define([
 				this.sortBubblesBy(sortType, data);
 				this.setHeader(sortType);
 			},
+			/* Check "sort" (decomposition) values in data and update sortData */
+			setSortDataByDataset: function (data) {
+				var sortData = $.extend(true, {}, this.defaultSortData),
+					cleanData = this.model.get('cleanData'); /* Get it to find decomposition names */
+
+				_.each(data, function (d) {
+					_.each(d.sorts, function (sortValue, sortKey) {
+						if(!sortData.hasOwnProperty(sortKey)) {
+							sortData[sortKey] = {
+								name: _.findDeep(cleanData, {code: sortKey}).name,
+								children: []
+							};
+						}
+						if(_.isUndefined(_.findWhere(sortData[sortKey].children, {value: sortValue}))) {
+							sortData[sortKey].children.push({
+								name: _.findDeep(cleanData, {code: sortValue}).name,
+								value: sortValue
+							});
+						}
+					});
+				});
+				this.sortData = sortData;
+			},
+			/* Define bubble groups position and dimensions and the rscale (scale for bubble sizes) */
 			setSectionsDimensions: function () {
 				this.sectionWidth = this.innerWidth / (this.packByLine);
 				this.quarterWidth = this.sectionWidth / 2;
-				this.sectionHeight = this.sectionWidth + this.sectionBottomMargin;
+				this.sectionHeight = this.minSectionHeight + this.sectionBottomMargin;
 				this.rScale.range([2, this.sectionWidth/4]);
 			},
+			/* Set prefix for number displays */
 			setPrefix: function (data) {
 				var yMin = d3.min(data, function (d) { return d.value; }),
 					yMax = d3.max(data, function (d) { return d.value; }),
@@ -128,9 +140,9 @@ define([
 				};
 
 				switch(this.prefix.symbol) {
-					case 'G': this.prefix.symbolText = 'milliards\n€';
+					case 'G': this.prefix.symbolText = 'milliards €';
 						break;
-					case 'M': this.prefix.symbolText = 'millions\n€';
+					case 'M': this.prefix.symbolText = 'millions €';
 						break;
 					case 'k': this.prefix.symbolText = '€';
 						break;
@@ -140,6 +152,7 @@ define([
 						this.legendText = '';
 				}
 			},
+			/* Set tabs in chart header */
 			setHeader: function (sortType) {
 				var $sortMenu = this.$el.find('#sort-menu'),
 					that = this;
@@ -155,6 +168,7 @@ define([
 					}
 				});
 			},
+			/* Make sort according to sort type and bubble data */
 			sortBubblesBy: function (sortType, data) {
 				this.currentSort = sortType;
 				this.rScale.domain([0, d3.max(data, function (d) { return Math.abs(d.value); })]);
@@ -162,19 +176,17 @@ define([
 
 				/* Add index to sort data values */
 				_.each(this.sortData[sortType].children, function (d, i) { d.index = i; });
-
 				this.buildBubbles(this.nodes);
-
 				this.buildTextLegend();
-
-				this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*this.sectionWidth + this.padding.top + this.padding.bottom});
-
+				this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*this.sectionHeight + this.padding.top + this.padding.bottom});
 				this.start();
 			},
+			/* Update chart dimensions */
 			updateDimensions: function() {
 				this.width = Math.min(this.$el.width(), this.maxWidth);
 				this.height = this.width * 0.66;
 			},
+			/* Parse data to be able to use them with bubbles */
 			updateNodes: function (nodes) {
 				var that = this;
 				var outputNodes = _.map(nodes, function (node, i) {
@@ -193,26 +205,46 @@ define([
 					out.fillColor = (node.value > 0) ? that.positiveColor: that.negativeColor;
 					out.name = node.name;
 					out.description = node.description;
-					if(!_.isUndefined(node.sort)) out.sort = node.sort;
+					if(!_.isUndefined(node.sorts)) out.sorts = node.sorts;
 
 					return out;
 				});
 				this.nodes = outputNodes;
 			},
+			/* Build legend : group titles */
 			buildTextLegend: function () {
 				var that = this;
 				this.$el.find('.text-label').html('');
 				_.each(this.sortData[this.currentSort].children, function (d, i) {
+
 					var x = (that.sectionWidth * (i % that.packByLine)) + that.quarterWidth,
 						y = that.sectionHeight * (Math.floor(i / that.packByLine)) + that.sectionHeight;
 
 					that.legendText.append('text')
-						.attr('class', 'title')
+						.attr('class', 'section-title')
 						.attr('x', x)
 						.attr('y', y)
 						.text(d.name);
+
+					/* Calculate sum of nodes and show it under sectionName */
+					var sectionValues = _.map(
+						_.filter(that.nodes, function (_d) { /* Only get section nodes */
+							return _d.sorts[that.currentSort] == d.value;
+						}),
+						function (_d) { /* Only get value */
+							return _d.value;
+						}
+					);
+					var sectionValue = _.reduce(sectionValues, function(memo, num){ return memo + num; }, 0);
+					that.legendText.append('text')
+						.attr('class', 'section-value')
+						.attr('x', x)
+						.attr('y', y + 20)
+						.text(that.prefix._scale(sectionValue) +' '+ that.prefix.symbolText);
+
 				});
 			},
+			/* Bubble chart bubbles */
 			buildBubbles: function (data) {
 				var that = this;
 				data = data || this.nodes;
@@ -251,6 +283,7 @@ define([
 							.attr('opacity', 0)
 							.remove();
 			},
+			/* Bubble mouseover callback */
 			bubbleMouseover: function () {
 				var that = this;
 				return function (d) {
@@ -298,6 +331,7 @@ define([
 						
 				};
 			},
+			/* Bubble mouseout callback */
 			bubbleMouseout: function () {
 				var that = this;
 				return function (d) {
@@ -310,24 +344,58 @@ define([
 						.attr('stroke-width', 1);
 				};
 			},
+			/* Manage bubbles positions during they are moving, according to alpha arg which creates movement effect */
 			updateBubblePositions: function (alpha) {
 				var that = this;
 				return function (d, i) {
-					var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sort}).index,
-						targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth,
-						targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.quarterWidth;
-
+					/* If this bubble doesn't appear in this sort */
+					if(_.isUndefined(d.sorts[that.currentSort])) {
+							targetX = i % 2 ? - that.sectionWidth/2 : that.sectionWidth*1.5,
+							targetY = that.sectionHeight/3;
+					}
+					else {
+						var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sorts[that.currentSort]}).index,
+							targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth,
+							targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.sectionHeight/3;
+					}
 					d.y = d.y + (targetY - d.y) * alpha * 1.1 * that.defaultGravity;
 					d.x = d.x + (targetX - d.x) * alpha * 1.1 * that.defaultGravity;
 				};
 				
 			},
-			/* Layouts */
+			collide: function(alpha) {
+				var that = this,
+					padding = 6,
+					quadtree = d3.geom.quadtree(this.nodes);
+				return function(d) {
+				var r = d.radius + that.maxRadius + padding,
+					nx1 = d.x - r,
+					nx2 = d.x + r,
+					ny1 = d.y - r,
+					ny2 = d.y + r;
+				quadtree.visit(function(quad, x1, y1, x2, y2) {
+					if (quad.point && (quad.point !== d) && (d.group === quad.point.group)) {
+						var x = d.x - quad.point.x,
+							y = d.y - quad.point.y,
+							l = Math.sqrt(x * x + y * y),
+							r = d.radius + quad.point.radius;
+						if (l < r) {
+							l = (l - r) / l * alpha;
+							d.x -= x *= l;
+							d.y -= y *= l;
+							quad.point.x += x;
+							quad.point.y += y;
+						}
+					}
+					return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+					});
+				};
+			},
+			/* Set layout */
 			start: function () {
 				var that = this;
 
 				this.force.nodes(this.nodes);
-
 				this.force
 					.gravity(this.gravity)
 					.charge(this.charge)
@@ -335,11 +403,13 @@ define([
 					.on('tick', function (e) {
 						that.bubbles
 							.each(that.updateBubblePositions(e.alpha))
+							.each(that.collide(0.5))
 							.attr("cx", function(d, i) { return d.x + that.padding.left; })
 							.attr("cy", function(d) { return d.y + that.padding.top; });
 					})
 					.start();
 			},
+			/* Resize for example when bubble groups number changes */
 			resize: function (args) {
 				if(!_.isUndefined(args.height)) {
 					this.g.transition().duration(400)

@@ -1,8 +1,9 @@
 define([
 	'jquery',
 	'underscore',
+	'helpers'
 	],
-	function ($, _) {
+	function ($, _, helpers) {
 
 		/* Parsing methods (private) */
 		var Parser = function (data) {
@@ -32,7 +33,6 @@ define([
 					});
 					return json;
 				};
-
 				var result = doIt(json);
 				this.outputValue = result;
 				return this;
@@ -65,8 +65,8 @@ define([
 					groupedData = [];
 					doIt = function (obj) {
 						_.each(obj, function (el, name) {
-							if(el.hasOwnProperty('children')) {doIt(el.children);}
-							else groupedData.push(el);
+							if(el.hasOwnProperty('children')) { doIt(el.children); }
+							else { groupedData.push(el); }
 						});
 				};
 				doIt(data.children);
@@ -107,6 +107,7 @@ define([
 						else { loopDatum.parentNodes = [];}
 
 						if(i == dataLength-1) {
+							console.log(loopData.name, loopData.value);
 							loopDatum.parentNodes.push({
 									id: loopData._id,
 									name: loopData.name,
@@ -121,6 +122,47 @@ define([
 				return this;
 			},
 			/*
+				Set Sorts
+				
+				Description : set "sorts" property in child node according to the API return
+				Data requirements : cleaned
+			*/
+			setDecompositionSort: function () {
+				if(this.outputValue.code != 'root') return this;
+
+				/* On sélectionne l'ensemble des noeuds, la donnée non décomposée */
+				var sourceData = _.findWhere(this.outputValue.children, {code: 'revdisp'}),
+					sortData = _.filter(this.outputValue.children, function (node) {
+						return node.code != 'revdisp';
+					}),
+					defineChildrenSortProperty = function (_sortNode, sortId) {
+						var sortValue = _sortNode.code;
+							doIt = function (_node) {
+							_.each(_node.children, function(_n) {
+								if(_n.hasOwnProperty('children')) {
+									doIt(_n);
+								}
+								else {
+									var sourceNode = _.findDeep(sourceData, {code: _n.code});
+									if(!_.isUndefined(sourceNode)) {
+										if(_.isUndefined(sourceNode.sorts)) sourceNode.sorts = {};
+										sourceNode.sorts[sortId] = sortValue;
+									}
+								}
+							});
+						};
+						doIt(_sortNode);
+				};
+				_.each(sortData, function (sortNode) {
+					var sortId = sortNode.code;
+					_.each(sortNode.children, function (sortCNode) {
+						defineChildrenSortProperty(sortCNode, sortId);
+					});
+				});
+				this.outputValue = sourceData;
+				return this;
+			},
+			/*
 				Set Positive
 
 				Description : set "positive" sort property in each children
@@ -130,37 +172,11 @@ define([
 				var data = this.outputValue;
 				var doIt = function (obj) {
 					_.each(obj, function (el, name) {
-						el.sortKey = 'positive';
-						el.sort = {};
+						if(!el.hasOwnProperty('sorts')) el.sorts = {};
 						if(el.hasOwnProperty('children')) { doIt(el.children); }
 						else {
-							if(el.values[0] > 0) el.sort = true;
-							else if(el.values[0] < 0) el.sort = false;
-						}
-					});
-				};
-				doIt(data.children);
-				this.outputValue = data;
-				return this;
-			},
-			setTestSort: function () {
-				var data = this.outputValue;
-				var doIt = function (obj) {
-					_.each(obj, function (el, i) {
-						el.sortKey = 'test';
-						el.sort = {};
-						if(el.hasOwnProperty('children')) { doIt(el.children); }
-						else {
-							if(i === 0) el.sort = 'bbb';
-							else if(i === 1) el.sort = 'aaa';
-							else if(i === 2) el.sort = 'ccc';
-							else if(i === 3) el.sort = 'ddd';
-							else if(i === 4) el.sort = 'eee';
-							else if(i === 5) el.sort = 'fff';
-							else if(i === 6) el.sort = 'ggg';
-							else if(i === 7) el.sort = 'hhh';
-							else if(i === 8) el.sort = 'iii';
-							else if(i === 9) el.sort = 'jjj';
+							if(el.values[0] > 0) el.sorts.positive = true;
+							else if(el.values[0] < 0) el.sorts.positive = false;
 						}
 					});
 				};
