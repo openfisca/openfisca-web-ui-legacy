@@ -45,13 +45,13 @@ from openfisca_web_ui import model, urls
             <h1>${_(u"No legislation found")}</h1>
         </div>
     % else:
+        <%self:search_form/>
         % if pager.page_count > 1:
             % if pager.page_size == 1:
         <div class="page-header">
             <h1>${_(u"Legislation {0} of {1}").format(pager.first_item_number, pager.item_count)}</h1>
         </div>
             % else:
-        <%self:search_form/>
         <div class="page-header">
             <h1>${_(u"Legislation {0} - {1} of {2}").format(
                 pager.first_item_number, pager.last_item_number, pager.item_count)}</h1>
