@@ -32,7 +32,7 @@ import logging
 from biryani1.baseconv import check, pipe
 
 from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
-from . import accounts, forms, legislations, sessions, test_cases, visualizations
+from . import accounts, auth, forms, legislations, sessions, test_cases, visualizations
 
 
 email_log = logging.getLogger('email')
@@ -111,13 +111,17 @@ def make_router():
         (None, '^/api/1/simulate/?$', simulate),
         (None, '^/api/1/visualizations(?=/|$)', visualizations.route_api1_class),
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
-        (None, '^/simulations(?=/|$)', test_cases.route),
-        # TODO use route_user_class
-        (None, '^/visualizations(?=/|$)', visualizations.route_user),
-        ('POST', '^/login/?$', accounts.login),
-        (('GET', 'POST'), '^/logout/?$', accounts.logout),
+        (None, '^/test_cases(?=/|$)', test_cases.route_class),
+        (None, '^/visualizations(?=/|$)', visualizations.route_user_class),
+        ('POST', '^/login/?$', auth.login),
+        (('GET', 'POST'), '^/logout/?$', auth.logout),
         ('GET', '^/terms/?$', terms),
         ]
+    if conf['debug']:
+        routings.extend([
+            ('GET', '^/login/admin?$', auth.become_admin),
+            ('GET', '^/login/user?$', auth.become_user),
+            ])
     router = urls.make_router(*routings)
     return router
 

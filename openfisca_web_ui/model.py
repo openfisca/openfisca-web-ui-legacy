@@ -32,6 +32,7 @@ import logging
 import re
 import requests
 
+import babel.dates
 from biryani1 import strings
 
 from . import conf, conv, objects, urls, wsgihelpers
@@ -393,6 +394,13 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
     slug = None
     title = None
 
+    def __init__(self, **attributes):
+        super(TestCase, self).__init__(**attributes)
+        if self.title is None:
+            self.title = babel.dates.format_datetime(datetime.datetime.utcnow())
+            # TODO slugify automatically?
+            self.slug = strings.slugify(self.title)
+
     @classmethod
     def bson_to_json(cls, value, state = None):
         if value is None:
@@ -438,7 +446,7 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
         return self.full_name or self.slug or self.email or self._id
 
     @classmethod
-    def make_id_or_slug_or_words_to_instance(cls, user_id = None):
+    def make_id_or_slug_or_words_to_instance(cls):
         def id_or_slug_or_words_to_instance(value, state = None):
             if value is None:
                 return value, None
@@ -448,7 +456,7 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
             if error is None:
                 self = cls.find_one(dict(_id = id), as_class = collections.OrderedDict)
             else:
-                self = cls.find_one(dict(slug = value, author_id = user_id), as_class = collections.OrderedDict)
+                self = cls.find_one(dict(slug = value), as_class = collections.OrderedDict)
             if self is None:
                 words = sorted(set(value.split(u'-')))
                 instances = list(cls.find(

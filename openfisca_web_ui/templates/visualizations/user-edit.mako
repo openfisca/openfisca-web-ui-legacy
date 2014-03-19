@@ -30,15 +30,10 @@ from openfisca_web_ui import conf, model, urls
 %>
 
 
-<%inherit file="/admin.mako"/>
+<%inherit file="/site.mako"/>
 
 
-<%def name="breadcrumb_content()" filter="trim">
-            <%parent:breadcrumb_content/>
-            <li><a href="${urls.get_url(ctx, 'admin')}">${_(u"Admin")}</a></li>
-            <li><a href="${model.Visualization.get_admin_class_url(ctx)}">${_(u"Visualizations")}</a></li>
-            <li><a href="${visualization.get_admin_url(ctx)}">${visualization.get_title(ctx)}</a></li>
-            <li class="active">${_(u'Edit')}</li>
+<%def name="breadcrumb()" filter="trim">
 </%def>
 
 
@@ -107,9 +102,9 @@ value="${inputs['thumbnail_url'] or ''}">
 value="1">
                         ${_(u'Iframe')}
                     </label>
-        % if error:
+    % if error:
                     <span class="help-block">${error}</span>
-        % endif
+    % endif
                 </div>
 <%
     error = errors.get('organization') if errors is not None else None
@@ -122,31 +117,19 @@ value="${inputs['organization'] or ''}">
                     <pre class="help-block alert-danger">${error | n, js, h}</pre>
     % endif
                 </div>
-<%
-    error = errors.get('featured') if errors is not None else None
-%>\
-                <div class="checkbox${' has-error' if error else ''}">
+                <div class="checkbox">
                     <label>
-                        <input${' checked' if inputs['featured'] else ''} id="featured" name="featured" type="checkbox" \
-value="1">
+                        <input${' checked' if inputs['featured'] else ''} id="featured" name="featured" readonly \
+type="checkbox">
                         ${_(u'Featured')}
                     </label>
-    % if error:
-                    <span class="help-block">${error}</span>
-    % endif
                 </div>
-<%
-    error = errors.get('enabled') if errors is not None else None
-%>\
-                <div class="checkbox${' has-error' if error else ''}">
+                <div class="checkbox">
                     <label>
-                        <input${' checked' if inputs['enabled'] else ''} id="enabled" name="enabled" type="checkbox" \
-value="1">
+                        <input${' checked' if inputs['enabled'] else ''} id="enabled" name="enabled" readonly \
+type="checkbox">
                         ${_(u'Enabled')}
                     </label>
-    % if error:
-                    <span class="help-block">${error}</span>
-    % endif
                 </div>
 </%def>
 

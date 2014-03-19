@@ -412,10 +412,29 @@ def route_api1_class(environ, start_response):
 
 
 def route_user(environ, start_response):
+    req = webob.Request(environ)
+    ctx = contexts.Ctx(req)
+
+    visualization, error = conv.pipe(
+        conv.input_to_slug,
+        conv.not_none,
+        model.Visualization.make_id_or_slug_or_words_to_instance(),
+        )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
+    if error is not None:
+        return wsgihelpers.not_found(ctx, explanation = error)(environ, start_response)
+
+    ctx.node = visualization
+
+    router = urls.make_router(
+        ('GET', '^/?$', user_view),
+        )
+    return router(environ, start_response)
+
+
+def route_user_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_index),
-        ('GET', '^/new?$', admin_new),
-        ('GET', '^/(?P<id_or_slug>[^/]+)/?$', user_view),
+        (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_user),
         )
     return router(environ, start_response)
 
@@ -476,16 +495,57 @@ def user_index(req):
 
 
 @wsgihelpers.wsgify
+def user_new(req):
+    ctx = contexts.Ctx(req)
+    user = model.get_user(ctx)
+
+    if user is None or user.email is None:
+        return wsgihelpers.unauthorized(ctx)
+
+    visualization = model.Visualization()
+    if req.method == 'GET':
+        errors = None
+        inputs = extract_visualization_inputs_from_params(ctx)
+    else:
+        assert req.method == 'POST'
+        inputs = extract_visualization_inputs_from_params(ctx, req.POST)
+        inputs['author_id'] = user._id
+        data, errors = inputs_to_visualization_data(inputs, state = ctx)
+        if errors is None:
+            data['slug'], error = conv.pipe(
+                conv.input_to_slug,
+                conv.not_none,
+                )(data['title'], state = ctx)
+            if error is not None:
+                errors = dict(title = error)
+        if errors is None:
+            if model.Visualization.find(
+                    dict(
+                        slug = data['slug'],
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).count() > 0:
+                errors = dict(full_name = ctx._(u'A visualization with the same name already exists.'))
+        if errors is None:
+            visualization.set_attributes(**data)
+            visualization.compute_words()
+            visualization.save(safe = True)
+
+            # View visualization.
+            return wsgihelpers.redirect(ctx, location = visualization.get_user_url(ctx))
+    return templates.render(
+        ctx,
+        '/visualizations/user-new.mako',
+        errors = errors,
+        inputs = inputs,
+        visualization = visualization,
+        )
+
+
+@wsgihelpers.wsgify
 def user_view(req):
     ctx = contexts.Ctx(req)
-    assert req.method == 'GET'
-    visualization, error = conv.pipe(
-        conv.input_to_slug,
-        conv.not_none,
-        model.Visualization.make_id_or_slug_or_words_to_instance(),
-        )(req.urlvars.get('id_or_slug'), state = ctx)
-    if error is not None:
-        return wsgihelpers.not_found(ctx, explanation = error)
+    visualization = ctx.node
     return templates.render(
         ctx,
         '/visualizations/user-view.mako',
