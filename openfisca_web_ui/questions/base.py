@@ -91,6 +91,7 @@ BootstrapText = lambda *args, **kwargs: bootstrapize(Text, *args, **kwargs)
 
 
 custom_column_default_values = {
+    # TODO remove birth as it is no more needed by API.
     u'birth': 1984,
     }
 
