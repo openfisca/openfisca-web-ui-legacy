@@ -277,7 +277,6 @@ def user_delete(req):
     session = ctx.session
     if session is None or session.user is None:
         return wsgihelpers.unauthorized(ctx)
-
     session.user.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
 
@@ -303,7 +302,7 @@ def user_view_get(req):
 
     session = ctx.session
     if session is None or session.user is None or session.user.email is None:
-        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
+        return wsgihelpers.unauthorized(ctx)
 
     scenarios_question = None
     if session.user.email is not None:
