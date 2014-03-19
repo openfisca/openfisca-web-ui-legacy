@@ -45,14 +45,13 @@ email_log = logging.getLogger('email')
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     admin = False
     api_key = None
-    description = None
     cnil_conditions_accepted = None
     collection_name = 'accounts'
+    current_test_case_id = None
+    description = None
     email = None
     full_name = None
     scenarios = None
-    test_cases_id = None
-    current_test_case_id = None
     slug = None
     stats_accepted = None
 
@@ -92,6 +91,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @current_test_case.setter
     def current_test_case(self, test_case):
+        assert test_case.author_id == self._id
         self.current_test_case_id = test_case._id
 
     @classmethod
@@ -154,7 +154,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def test_cases(self):
-        return list(TestCase.find({'_id': {'$in': self.test_cases_id}})) if self.test_cases_id else None
+        return list(TestCase.find({'author_id': self._id}))
 
     def turn_to_json_attributes(self, state):
         value, error = conv.object_to_clean_dict(self, state = state)

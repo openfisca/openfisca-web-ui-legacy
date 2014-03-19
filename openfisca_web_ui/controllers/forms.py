@@ -132,7 +132,6 @@ def update_session(ctx):
             )
         test_case.save(safe = True)
         user.current_test_case = test_case
-        user.test_cases_id = [test_case._id]
         user.save(safe = True)
         session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
