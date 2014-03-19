@@ -1,6 +1,6 @@
 .PHONY: clean flake8 jshint
 
-all: clean flake8 jshint
+all: clean flake8 jshint test
 
 clean:
 	rm -Rf cache/templates/
@@ -11,3 +11,6 @@ flake8:
 
 jshint:
 	jshint openfisca_web_ui/static/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
+
+test:
+	python setup.py test

@@ -81,5 +81,6 @@ setup(
     packages = find_packages(),
     paster_plugins = ['PasteScript'],
     setup_requires = ['PasteScript >= 1.6.3'],
+    test_suite='openfisca_web_ui.tests',
     zip_safe = False,
     )
