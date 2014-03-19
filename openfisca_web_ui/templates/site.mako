@@ -265,10 +265,13 @@ ${conf['app_name']}
 
 
 <%def name="modals()" filter="trim">
+<%
+    user = model.get_user(ctx)
+%>
     % if conf['cookie'] not in req.cookies:
     <%self:accept_cookies_modal/>
-    % elif ctx.session is not None and ctx.session.user is not None and not ctx.session.user.cnil_conditions_accepted:
-    <%self:accept_cnil_conditions_modal user="${ctx.session.user}"/>
+    % elif user is not None and not user.cnil_conditions_accepted:
+    <%self:accept_cnil_conditions_modal user="${user}"/>
     % endif
 </%def>
 

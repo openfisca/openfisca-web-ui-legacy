@@ -84,7 +84,7 @@ def situation_form_get(req):
 def situation_form_post(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
-    user_api_data = get_user_api_data(ctx)
+    user_api_data = ctx.session.user.current_api_data or {}
     if model.fields_api_data() is None:
         return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)

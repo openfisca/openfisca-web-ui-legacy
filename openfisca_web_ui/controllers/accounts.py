@@ -82,9 +82,7 @@ log = logging.getLogger(__name__)
 def accept_cnil_conditions(req):
     ctx = contexts.Ctx(req)
     params = req.params
-    session = ctx.session
-    assert session is not None and session.user is not None
-    user = session.user
+    user = model.get_user(ctx, check = True)
     if 'accept' in req.params:
         if conv.check(conv.guess_bool(params.get('accept-checkbox'))):
             user.cnil_conditions_accepted = True
@@ -152,8 +150,7 @@ def admin_edit(req):
                     as_class = collections.OrderedDict,
                     ).count() > 0:
                 errors = dict(full_name = ctx._(u'An account with the same name already exists.'))
-            user = model.get_user(ctx)
-            assert user is not None
+            user = model.get_user(ctx, check = True)
             if not user.admin and user._id != account._id and data['admin']:
                 errors = dict(admin = ctx._(u"You can't promote this account to be an administrator, because you aren't"
                     u" an administrator yourself."))
@@ -290,7 +287,6 @@ def login(req):
         user = session.user
         if user is None:
             user = model.Account()
-            user._id = uuidhelpers.generate_uuid()
             user.api_key = uuidhelpers.generate_uuid()
         user.email = verification_data['email']
         user.full_name = verification_data['email']
@@ -372,48 +368,40 @@ def route_user(environ, start_response):
 @wsgihelpers.wsgify
 def user_delete(req):
     ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None or session.user is None:
-        return wsgihelpers.unauthorized(ctx)
-
-    session.user.delete(safe = True)
+    user = model.get_user(ctx, check = True)
+    user.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
 
 
 @wsgihelpers.wsgify
 def user_reset(req):
     ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None or session.user is None:
-        return wsgihelpers.unauthorized(ctx)
-    current_test_case = session.user.current_test_case
+    user = model.get_user(ctx, check = True)
+    current_test_case = user.current_test_case
     if current_test_case is not None:
         current_test_case.api_data = None
         current_test_case.save(safe = True)
-    session.user.scenarios = None
-    session.user.save(safe = True)
+    user.scenarios = None
+    user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
 @wsgihelpers.wsgify
 def user_view_get(req):
     ctx = contexts.Ctx(req)
-
-    session = ctx.session
-    if session is None or session.user is None or session.user.email is None:
-        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
+    user = model.get_user(ctx, check = True)
 
     scenarios_question = None
-    if session.user.email is not None:
-        user_scenarios = session.user.scenarios
+    if user.email is not None:
+        user_scenarios = user.scenarios
         if user_scenarios is None:
             legislation = model.Legislation.find_one()
             user_scenarios = [{
-                'test_case_id': session.user.current_test_case_id,
+                'test_case_id': user.current_test_case_id,
                 'legislation_id': legislation._id if legislation is not None else None,
                 'year': DEFAULT_YEAR,
                 }]
-        scenarios_question = questions.scenarios.make_scenarios_repeat(session.user)
+        scenarios_question = questions.scenarios.make_scenarios_repeat(user)
         values, errors = conv.pipe(
             conv.scenarios.scenarios_to_page_korma_data,
             scenarios_question.root_data_to_str,
@@ -422,7 +410,7 @@ def user_view_get(req):
     return templates.render(
         ctx,
         '/accounts/user-view.mako',
-        account = session.user,
+        account = user,
         scenarios_question = scenarios_question,
         )
 
@@ -430,18 +418,15 @@ def user_view_get(req):
 @wsgihelpers.wsgify
 def user_view_post(req):
     ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is None:
-        return wsgihelpers.unauthorized(ctx)
-    assert session.user is not None
+    user = model.get_user(ctx, check = True)
 
-    scenarios_question = questions.scenarios.make_scenarios_repeat(session.user)
+    scenarios_question = questions.scenarios.make_scenarios_repeat(user)
     inputs = variabledecode.variable_decode(req.params)
     data, errors = scenarios_question.root_input_to_data(inputs, state = ctx)
     if errors is None:
         user_scenarios = conv.check(conv.scenarios.korma_data_to_scenarios(data, state = ctx))
-        session.user.scenarios = user_scenarios or None
-        session.user.save(safe = True)
+        user.scenarios = user_scenarios or None
+        user.save(safe = True)
         if data['my_scenarios'].get('add'):
             if user_scenarios is None:
                 user_scenarios = []
@@ -458,6 +443,6 @@ def user_view_post(req):
     return templates.render(
         ctx,
         '/accounts/user-view.mako',
-        account = session.user,
+        account = user,
         scenarios_question = scenarios_question,
         )
