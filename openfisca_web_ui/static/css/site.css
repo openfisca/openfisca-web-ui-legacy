@@ -72,14 +72,6 @@ img.media-object {
     height: 100px;
 }
 
-form[name="scenarios"] .scenario {
-    margin: 1em;
-}
-
-form[name="scenarios"] .scenario select {
-    margin: 0 1em;
-}
-
 form[name=situation] button.add {
     margin-bottom: 1em;
 }

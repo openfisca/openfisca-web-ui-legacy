@@ -357,7 +357,6 @@ def route_admin_class(environ, start_response):
 def route_user(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_view_get),
-        ('POST', '^/?$', user_view_post),
         ('POST', '^/accept-cnil-conditions/?$', accept_cnil_conditions),
         ('POST', '^/delete/?$', user_delete),
         ('GET', '^/reset/?$', user_reset),
@@ -381,7 +380,6 @@ def user_reset(req):
     if current_test_case is not None:
         current_test_case.api_data = None
         current_test_case.save(safe = True)
-    user.scenarios = None
     user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
@@ -390,59 +388,4 @@ def user_reset(req):
 def user_view_get(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
-
-    scenarios_question = None
-    if user.email is not None:
-        user_scenarios = user.scenarios
-        if user_scenarios is None:
-            legislation = model.Legislation.find_one()
-            user_scenarios = [{
-                'test_case_id': user.current_test_case_id,
-                'legislation_id': legislation._id if legislation is not None else None,
-                'year': DEFAULT_YEAR,
-                }]
-        scenarios_question = questions.scenarios.make_scenarios_repeat(user)
-        values, errors = conv.pipe(
-            conv.scenarios.scenarios_to_page_korma_data,
-            scenarios_question.root_data_to_str,
-            )(user_scenarios, state = ctx)
-        scenarios_question.fill(values, errors)
-    return templates.render(
-        ctx,
-        '/accounts/user-view.mako',
-        account = user,
-        scenarios_question = scenarios_question,
-        )
-
-
-@wsgihelpers.wsgify
-def user_view_post(req):
-    ctx = contexts.Ctx(req)
-    user = model.get_user(ctx, check = True)
-
-    scenarios_question = questions.scenarios.make_scenarios_repeat(user)
-    inputs = variabledecode.variable_decode(req.params)
-    data, errors = scenarios_question.root_input_to_data(inputs, state = ctx)
-    if errors is None:
-        user_scenarios = conv.check(conv.scenarios.korma_data_to_scenarios(data, state = ctx))
-        user.scenarios = user_scenarios or None
-        user.save(safe = True)
-        if data['my_scenarios'].get('add'):
-            if user_scenarios is None:
-                user_scenarios = []
-            user_scenarios.append({})
-            values, errors = conv.pipe(
-                conv.scenarios.scenarios_to_page_korma_data,
-                scenarios_question.root_data_to_str,
-                )(user_scenarios, state = ctx)
-            scenarios_question.fill(values, errors)
-        else:
-            return wsgihelpers.redirect(ctx, location = '')
-    else:
-        scenarios_question.fill(inputs, errors)
-    return templates.render(
-        ctx,
-        '/accounts/user-view.mako',
-        account = user,
-        scenarios_question = scenarios_question,
-        )
+    return templates.render(ctx, '/accounts/user-view.mako', account = user)

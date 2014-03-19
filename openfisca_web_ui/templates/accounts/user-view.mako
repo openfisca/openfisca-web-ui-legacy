@@ -57,17 +57,6 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
             </div>
         </div>
 
-        <h2>${_(u'My scenarios')}</h2>
-        <div class="panel panel-default">
-            <form class="form-inline" method="POST" name="scenarios" role="form">
-                ${scenarios_question['scenarios'].html | n}
-                <div class="panel-footer">
-                    <button class="btn btn-default" type="submit">${_(u'Save')}</button>
-                    ${scenarios_question['add'].html | n}
-                </div>
-            </form>
-        </div>
-
         <h2>${_(u'Delete my account')}</h2>
         <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#delete-user-modal">
             <span class="glyphicon glyphicon-trash"></span> ${_(u'Delete my account')}
@@ -76,11 +65,8 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
 
 
 <%def name="modals()" filter="trim">
-<%
-user = model.get_user(ctx)
-%>
-    % if user is not None and user.test_cases is not None:
-        % for test_case in user.test_cases:
+    % if account is not None and account.test_cases is not None:
+        % for test_case in account.test_cases:
         <%self:modals_edit test_case="${test_case}"/>
         % endfor
     % endif
@@ -88,8 +74,8 @@ user = model.get_user(ctx)
     test_case = model.TestCase(slug = 'new', title = '')
 %>\
         <%self:modals_edit test_case="${test_case}"/>
-    % if user is not None:
-        % for test_case in user.test_cases:
+    % if account is not None:
+        % for test_case in account.test_cases:
         <%self:modals_delete test_case="${test_case}"/>
         % endfor
     % endif

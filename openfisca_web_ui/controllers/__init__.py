@@ -79,17 +79,14 @@ def get_api_data_and_errors(ctx, anonymous_token = None):
         session = ctx.session
     else:
         session = model.Session.find_one({'anonymous_token': anonymous_token})
-    user_scenarios = session.user.scenarios if session is not None and session.user is not None else None
-    if user_scenarios is None:
-        user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
-        if user_api_data is None:
-            user_api_data = {}
-        api_data, errors = pipe(
-            conv.base.make_fill_user_api_data(ensure_api_compliance = True),
-            conv.simulations.user_api_data_to_api_data,
-            )(user_api_data, state = ctx)
-    else:
-        api_data, errors = conv.simulations.scenarios_to_api_data(user_scenarios, state = ctx)
+
+    user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
+    if user_api_data is None:
+        user_api_data = {}
+    api_data, errors = pipe(
+        conv.base.make_fill_user_api_data(ensure_api_compliance = True),
+        conv.simulations.user_api_data_to_api_data,
+        )(user_api_data, state = ctx)
     return api_data, errors
 
 
