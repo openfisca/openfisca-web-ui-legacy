@@ -81,6 +81,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def current_api_data(self):
+        # TODO remove this "double-link" method.
         assert self.current_test_case is not None
         return self.current_test_case.api_data
 
