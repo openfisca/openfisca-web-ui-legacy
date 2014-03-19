@@ -32,6 +32,7 @@ import logging
 import re
 import requests
 
+import babel.dates
 from biryani1 import strings
 
 from . import conf, conv, objects, urls, wsgihelpers
@@ -44,13 +45,12 @@ email_log = logging.getLogger('email')
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     admin = False
     api_key = None
-    description = None
     cnil_conditions_accepted = None
     collection_name = 'accounts'
+    current_test_case_id = None
+    description = None
     email = None
     full_name = None
-    test_cases_id = None
-    current_test_case_id = None
     slug = None
     stats_accepted = None
 
@@ -71,7 +71,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
         self.words = sorted(set(strings.slugify(u'-'.join(
             fragment
             for fragment in (
-                self._id,
+                unicode(self._id),
                 self.email,
                 self.full_name,
                 )
@@ -80,6 +80,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def current_api_data(self):
+        # TODO remove this "double-link" method.
         assert self.current_test_case is not None
         return self.current_test_case.api_data
 
@@ -90,6 +91,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @current_test_case.setter
     def current_test_case(self, test_case):
+        assert test_case.author_id == self._id
         self.current_test_case_id = test_case._id
 
     @classmethod
@@ -152,7 +154,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def test_cases(self):
-        return list(TestCase.find({'_id': {'$in': self.test_cases_id}})) if self.test_cases_id else None
+        return list(TestCase.find({'author_id': self._id}))
 
     def turn_to_json_attributes(self, state):
         value, error = conv.object_to_clean_dict(self, state = state)
@@ -392,6 +394,13 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
     slug = None
     title = None
 
+    def __init__(self, **attributes):
+        super(TestCase, self).__init__(**attributes)
+        if self.title is None:
+            self.title = babel.dates.format_datetime(datetime.datetime.utcnow())
+            # TODO slugify automatically?
+            self.slug = strings.slugify(self.title)
+
     @classmethod
     def bson_to_json(cls, value, state = None):
         if value is None:
@@ -408,7 +417,7 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
         self.words = sorted(set(strings.slugify(u'-'.join(
             fragment
             for fragment in (
-                self._id,
+                unicode(self._id),
                 self.description,
                 self.title,
                 )
@@ -417,27 +426,27 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
 
     @classmethod
     def get_class_url(cls, ctx, *path, **query):
-        return urls.get_url(ctx, 'simulations', *path, **query)
+        return urls.get_url(ctx, 'test_cases', *path, **query)
 
     @classmethod
     def get_class_full_url(cls, ctx, *path, **query):
-        return urls.get_full_url(ctx, 'simulations', *path, **query)
+        return urls.get_full_url(ctx, 'test_cases', *path, **query)
 
     def get_full_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
             return None
-        return urls.get_full_url(ctx, 'simulations', self.slug or self._id, *path, **query)
+        return urls.get_full_url(ctx, 'test_cases', self.slug or self._id, *path, **query)
 
     def get_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
             return None
-        return urls.get_url(ctx, 'simulations', self.slug or self._id, *path, **query)
+        return urls.get_url(ctx, 'test_cases', self.slug or self._id, *path, **query)
 
     def get_title(self, ctx):
         return self.full_name or self.slug or self.email or self._id
 
     @classmethod
-    def make_id_or_slug_or_words_to_instance(cls, user_id = None):
+    def make_id_or_slug_or_words_to_instance(cls):
         def id_or_slug_or_words_to_instance(value, state = None):
             if value is None:
                 return value, None
@@ -447,7 +456,7 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
             if error is None:
                 self = cls.find_one(dict(_id = id), as_class = collections.OrderedDict)
             else:
-                self = cls.find_one(dict(slug = value, author_id = user_id), as_class = collections.OrderedDict)
+                self = cls.find_one(dict(slug = value), as_class = collections.OrderedDict)
             if self is None:
                 words = sorted(set(value.split(u'-')))
                 instances = list(cls.find(

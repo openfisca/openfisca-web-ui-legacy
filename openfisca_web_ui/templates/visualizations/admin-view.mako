@@ -45,8 +45,8 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
 <%
-    user = model.get_user(ctx, check = True)
-    owner_or_admin = model.is_admin(ctx) or user._id == visualization.author_id
+    user = model.get_user(ctx)
+    is_owner = user._id == visualization.author_id
 %>\
         <div class="page-header">
             <h1>${_(u'Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
@@ -58,7 +58,7 @@ from openfisca_web_ui import model, urls
                 <%self:view_content/>
     % endif
             </div>
-    % if owner_or_admin:
+    % if is_owner:
             <div class="panel-footer">
                 <div class="btn-toolbar">
                     <a class="btn btn-default" href="${visualization.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>

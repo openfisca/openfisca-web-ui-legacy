@@ -76,20 +76,19 @@ from openfisca_web_ui import conf, model, urls
                     <span class="help-block">${error}</span>
     % endif
                 </div>
-    % if model.is_admin(ctx):
 <%
-        error = errors.get('admin') if errors is not None else None
+    error = errors.get('admin') if errors is not None else None
 %>\
                 <div class="checkbox${' has-error' if error else ''}">
                     <label>
-                        <input${' checked' if inputs['admin'] else ''} id="admin" name="admin" type="checkbox" value="1">
+                        <input${' checked' if inputs['admin'] else ''} id="admin" name="admin" type="checkbox" \
+value="1">
                         ${_(u'Administrator')}
                     </label>
-        % if error:
+    % if error:
                     <span class="help-block">${error}</span>
-        % endif
-                </div>
     % endif
+                </div>
 </%def>
 
 
@@ -100,4 +99,3 @@ from openfisca_web_ui import conf, model, urls
 <%def name="title_content()" filter="trim">
 ${_(u'Edit')} - ${account.get_title(ctx)} - ${parent.title_content()}
 </%def>
-

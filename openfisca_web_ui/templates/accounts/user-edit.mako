@@ -54,8 +54,8 @@ from openfisca_web_ui import conf, model, urls
 %>\
                 <div class="form-group${' has-error' if error else ''}">
                     <label for="email">${_(u'Email')}</label>
-                    <input class="form-control" id="email" name="email" required type="email" value="${
-                            inputs['email'] or ''}">
+                    <input class="form-control" id="email" name="email" required type="email" \
+value="${inputs['email'] or ''}">
     % if error:
                     <span class="help-block">${error}</span>
     % endif
@@ -65,26 +65,12 @@ from openfisca_web_ui import conf, model, urls
 %>\
                 <div class="form-group${' has-error' if error else ''}">
                     <label for="full_name">${_(u'Full Name')}</label>
-                    <input class="form-control" id="full_name" name="full_name" required type="text" value="${
-                            inputs['full_name'] or ''}">
+                    <input class="form-control" id="full_name" name="full_name" required type="text" \
+value="${inputs['full_name'] or ''}">
     % if error:
                     <span class="help-block">${error}</span>
     % endif
                 </div>
-    % if model.is_admin(ctx):
-<%
-        error = errors.get('admin') if errors is not None else None
-%>\
-                <div class="checkbox${' has-error' if error else ''}">
-                    <label>
-                        <input${' checked' if inputs['admin'] else ''} id="admin" name="admin" type="checkbox" value="1">
-                        ${_(u'Administrator')}
-                    </label>
-        % if error:
-                    <span class="help-block">${error}</span>
-        % endif
-                </div>
-    % endif
 </%def>
 
 
@@ -95,4 +81,3 @@ from openfisca_web_ui import conf, model, urls
 <%def name="title_content()" filter="trim">
 ${_(u'Edit')} - ${account.get_title(ctx)} - ${parent.title_content()}
 </%def>
-

@@ -24,16 +24,12 @@
 
 
 <%!
-import datetime
-
-from openfisca_web_ui import model, urls
+from openfisca_web_ui import conf, model, urls
 %>
 
 
 <%inherit file="/site.mako"/>
-
-
-<%namespace name="view" file="/visualizations/admin-view.mako"/>
+<%namespace name="edit" file="user-edit.mako"/>
 
 
 <%def name="breadcrumb()" filter="trim">
@@ -41,32 +37,28 @@ from openfisca_web_ui import model, urls
 
 
 <%def name="container_content()" filter="trim">
-<%
-    user = model.get_user(ctx)
-    is_owner = False if user is None else user._id == visualization.author_id
-%>\
         <div class="page-header">
-            <h1>${_(u'Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
+            <h1>${_(u"Create a Visualization")}</h1>
         </div>
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <%view:view_fields/>
-    % if visualization.iframe is True:
-                <%view:view_content/>
-    % endif
-            </div>
-    % if is_owner:
-            <div class="panel-footer">
-                <div class="btn-toolbar">
-                    <a class="btn btn-default" href="${visualization.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
-                    <a class="btn btn-danger"  href="${visualization.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
-                </div>
-            </div>
-    % endif
-        </div>
+        <form method="post" role="form">
+            <%edit:hidden_fields/>
+            <%self:error_alert/>
+            <%edit:form_fields/>
+            <button class="btn btn-primary" name="submit" type="submit">${_(u'Create')}</button>
+        </form>
+</%def>
+
+
+<%def name="css()" filter="trim">
+        <%edit:css/>
+</%def>
+
+
+<%def name="scripts()" filter="trim">
+        <%edit:scripts/>
 </%def>
 
 
 <%def name="title_content()" filter="trim">
-${visualization.get_title(ctx)} - ${parent.title_content()}
+${_(u'New Visualization')} - ${parent.title_content()}
 </%def>

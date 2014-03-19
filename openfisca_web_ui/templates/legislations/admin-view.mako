@@ -52,7 +52,7 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
 <%
-    user = model.get_user(ctx, check = True)
+    user = model.get_user(ctx)
     is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
 %>\
         <div class="page-header">
@@ -94,10 +94,6 @@ media="screen" rel="stylesheet">
 
 
 <%def name="modals()" filter="trim">
-<%
-    user = model.get_user(ctx, check = True)
-    is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-%>\
     <%parent:modals/>
     ${legislation_tree.change_legislation_date_modal(date = date)}
 </%def>

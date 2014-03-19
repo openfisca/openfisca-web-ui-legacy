@@ -27,19 +27,14 @@
 
 
 import collections
-import datetime
-import json
 import logging
 import re
-
-from biryani1 import strings
 from formencode import variabledecode
 import pymongo
-import requests
 import webob
 import webob.multidict
 
-from .. import conf, contexts, conv, model, paginations, templates, questions, urls, uuidhelpers, wsgihelpers
+from .. import contexts, conv, model, paginations, templates, questions, urls, uuidhelpers, wsgihelpers
 
 
 # TODO parametrize year
@@ -232,98 +227,6 @@ def extract_account_inputs_from_params(ctx, params = None):
         )
 
 
-@wsgihelpers.wsgify
-def login(req):
-    """Authorization request."""
-    ctx = contexts.Ctx(req)
-
-    assert req.method == 'POST'
-    params = req.POST
-    inputs = dict(
-        assertion = params.get('assertion'),
-        )
-    data, errors = conv.struct(
-        dict(
-            assertion = conv.pipe(
-                conv.cleanup_line,
-                conv.not_none,
-                ),
-            ),
-        )(inputs, state = ctx)
-    if errors is not None:
-        return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Login Error: {0}').format(errors))
-
-    response = requests.post('https://verifier.login.persona.org/verify',
-        data = dict(
-            audience = urls.get_full_url(ctx),
-            assertion = data['assertion'],
-            ),
-        verify = True,
-        )
-    if not response.ok:
-        return wsgihelpers.internal_error(ctx,
-            dump = response.text,
-            explanation = ctx._(u'Error while verifying authentication assertion'),
-            )
-    verification_data = json.loads(response.content)
-    # Check if the assertion was valid.
-    if verification_data['status'] != 'okay':
-        return wsgihelpers.internal_error(ctx,
-            dump = response.text,
-            explanation = ctx._(u'Error while verifying authentication assertion'),
-            )
-
-    registered_account = model.Account.find_one(
-        dict(
-            email = verification_data['email'],
-            ),
-        as_class = collections.OrderedDict,
-        )
-    session = ctx.session
-    if session is None:
-        ctx.session = session = model.Session()
-        session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
-    if registered_account is None:
-        user = session.user
-        if user is None:
-            user = model.Account()
-            user.api_key = uuidhelpers.generate_uuid()
-        user.email = verification_data['email']
-        user.full_name = verification_data['email']
-        user.slug = strings.slugify(user.full_name)
-        user.compute_words()
-        user.save(safe = True)
-        session.user_id = user._id
-        session.user = user
-    else:
-        session.user_id = registered_account._id
-        session.user = registered_account
-    session.anonymous_token = uuidhelpers.generate_uuid()
-    session.token = uuidhelpers.generate_uuid()
-    session.save(safe = True)
-
-    req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
-    return wsgihelpers.no_content(ctx)
-
-
-@wsgihelpers.wsgify
-def logout(req):
-    ctx = contexts.Ctx(req)
-    session = ctx.session
-    if session is not None:
-        session.delete(safe = True)
-        ctx.session = None
-        if req.cookies.get(conf['cookie']) is not None:
-            # Generate new cookie to "save" user agreement on cookie policy
-            req.response.set_cookie(
-                conf['cookie'],
-                uuidhelpers.generate_uuid(),
-                httponly = True,
-                secure = req.scheme == 'https',
-                )
-    return wsgihelpers.no_content(ctx) if req.is_xhr else templates.render(ctx, '/logout.mako')
-
-
 def route_admin(environ, start_response):
     req = webob.Request(environ)
     ctx = contexts.Ctx(req)
@@ -356,7 +259,7 @@ def route_admin_class(environ, start_response):
 
 def route_user(environ, start_response):
     router = urls.make_router(
-        ('GET', '^/?$', user_view_get),
+        ('GET', '^/?$', user_view),
         ('POST', '^/accept-cnil-conditions/?$', accept_cnil_conditions),
         ('POST', '^/delete/?$', user_delete),
         ('GET', '^/reset/?$', user_reset),
@@ -385,7 +288,7 @@ def user_reset(req):
 
 
 @wsgihelpers.wsgify
-def user_view_get(req):
+def user_view(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
     return templates.render(ctx, '/accounts/user-view.mako', account = user)

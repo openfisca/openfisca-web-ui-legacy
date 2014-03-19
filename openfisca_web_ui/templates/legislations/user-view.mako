@@ -48,10 +48,10 @@ from openfisca_web_ui import model, urls
 
 <%def name="container_content()" filter="trim">
 <%
-    user = model.get_user(ctx, check = True)
+    user = model.get_user(ctx)
     is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-    owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
-    editable = owner_or_admin and is_dated_legislation
+    is_owner = user._id == legislation.author_id
+    editable = is_owner and is_dated_legislation
 %>\
         <div class="page-header">
             <h1>${_(u'Legislation')} <small>${legislation.get_title(ctx)}</small></h1>
@@ -72,7 +72,7 @@ title="${_(u'Duplicate legislation for today values')}">
                         ${_(u'Extract')}
                     </a>
     % endif
-    % if owner_or_admin:
+    % if is_owner:
                     <a class="btn btn-default" href="${legislation.get_user_url(ctx, 'edit')}">
                         ${_(u'Edit')}
                     </a>
@@ -95,10 +95,10 @@ media="screen" rel="stylesheet">
 
 <%def name="modals()" filter="trim">
 <%
-    user = model.get_user(ctx, check = True)
+    user = model.get_user(ctx)
     is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-    owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
-    editable = owner_or_admin and is_dated_legislation
+    is_owner = user._id == legislation.author_id
+    editable = is_owner and is_dated_legislation
 %>\
     <%parent:modals/>
     ${legislation_tree.change_legislation_date_modal(date = date)}
@@ -182,12 +182,11 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
 <%def name="view_content(user = None)" filter="trim">
 <%
     is_dated_legislation = legislation.json is not None and legislation.json.get('datesim') is not None
-    if user is not None:
-        owner_or_admin = model.is_admin(ctx) or user._id == legislation.author_id
-        editable = owner_or_admin and is_dated_legislation
-    else:
-        owner_or_admin = False
+    if user is None:
         editable = False
+    else:
+        is_owner = user._id == legislation.author_id
+        editable = is_owner and is_dated_legislation
 
     value = legislation.json
 %>\
