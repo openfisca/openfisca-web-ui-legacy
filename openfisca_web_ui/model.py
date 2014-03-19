@@ -73,7 +73,7 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
         self.words = sorted(set(strings.slugify(u'-'.join(
             fragment
             for fragment in (
-                self._id,
+                unicode(self._id),
                 self.email,
                 self.full_name,
                 )
@@ -417,7 +417,7 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
         self.words = sorted(set(strings.slugify(u'-'.join(
             fragment
             for fragment in (
-                self._id,
+                unicode(self._id),
                 self.description,
                 self.title,
                 )
@@ -426,21 +426,21 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
 
     @classmethod
     def get_class_url(cls, ctx, *path, **query):
-        return urls.get_url(ctx, 'simulations', *path, **query)
+        return urls.get_url(ctx, 'test_cases', *path, **query)
 
     @classmethod
     def get_class_full_url(cls, ctx, *path, **query):
-        return urls.get_full_url(ctx, 'simulations', *path, **query)
+        return urls.get_full_url(ctx, 'test_cases', *path, **query)
 
     def get_full_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
             return None
-        return urls.get_full_url(ctx, 'simulations', self.slug or self._id, *path, **query)
+        return urls.get_full_url(ctx, 'test_cases', self.slug or self._id, *path, **query)
 
     def get_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
             return None
-        return urls.get_url(ctx, 'simulations', self.slug or self._id, *path, **query)
+        return urls.get_url(ctx, 'test_cases', self.slug or self._id, *path, **query)
 
     def get_title(self, ctx):
         return self.full_name or self.slug or self.email or self._id
