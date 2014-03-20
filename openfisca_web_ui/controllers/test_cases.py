@@ -51,7 +51,7 @@ def duplicate(req):
     test_case = ctx.node
     user = ctx.user
 
-    new_test_case_title = ctx._(u'Copie de {}').format(test_case.title)
+    new_test_case_title = ctx._(u'Copy of {}').format(test_case.title)
     new_test_case = model.TestCase(
         author_id = user._id,
         description = new_test_case_title,
