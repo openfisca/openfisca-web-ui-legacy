@@ -27,6 +27,7 @@
 
 
 import gettext
+import pkg_resources
 
 from biryani1.states import State
 import webob
@@ -215,7 +216,7 @@ class Ctx(State):
                 languages = [languages]
             translator = gettext.NullTranslations()
             for name, i18n_dir in [
-                    ('biryani1', conf['biryani1_i18n_dir']),
+                    ('biryani1', pkg_resources.get_distribution('biryani1').location),
                     ]:
                 if i18n_dir is not None:
                     translator = new_translator(name, i18n_dir, languages, fallback = translator)
