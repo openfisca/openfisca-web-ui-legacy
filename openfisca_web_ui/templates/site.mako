@@ -303,7 +303,9 @@ ${conf['app_name']}
             <ul class="nav navbar-nav">
                 <%self:topbar_links/>
             </ul>
+    % if conf['enabled.auth']:
             <%self:topbar_user/>
+    % endif
         </div>
     </nav>
 </%def>
@@ -342,29 +344,59 @@ ${conf['app_name']}
     % endif
         <li><a href="http://www.openfisca.fr/a-propos">${_(u'About')}</a></li>
         <li><a href="http://www.openfisca.fr/api">${_(u'API')}</a></li>
+## FIXME Translate abbreviation of CGU!
         <li><a href="/terms" title="${_(u'Terms of use')}">${_(u'CGU')}</a></li>
 </%def>
 
 
 <%def name="topbar_user()" filter="trim">
-    % if conf['enabled.auth']:
 <%
-        user = model.get_user(ctx)
+    user = model.get_user(ctx)
 %>\
             <ul class="nav navbar-nav navbar-right">
-        % if user is None or user.email is None:
-                <li><a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">${
-                        _(u'Sign in')}</a></li>
-        % else:
+    % if user is not None and user.email is not None:
                 <li${u' class="active"' if req.script_name == '/account' else '' | n}>
                     <a href="${user.get_user_url(ctx)}" title="${_(u'My account')}">
                         <span class="glyphicon glyphicon-user"></span> ${user.email}
                     </a>
                 </li>
-                <li><a class="sign-out" href="#" title="${_(u'Sign out')}">${_(u'Sign out')}</a></li>
-        % endif
-            </ul>
     % endif
+    % if conf['debug']:
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        ${_(u'Authentication')} <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+        % if user is None or user.email is None:
+                        <li>
+                            <a class="sign-in" href="#">${_(u'Sign in')}</a>
+                        </li>
+        % endif
+                        <li>
+                            <a href="${urls.get_url(ctx, 'login', 'admin')}">${_(u'Become admin')}</a>
+                        </li>
+                        <li>
+                            <a href="${urls.get_url(ctx, 'login', 'user')}">${_(u'Become user')}</a>
+                        </li>
+        % if user is not None and user.email is not None:
+                        <li>
+                            <a class="sign-out" href="#">${_(u'Sign out')}</a>
+                        </li>
+        % endif
+                    </ul>
+                </li>
+    % elif user is None or user.email is None:
+                <li>
+                    <a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">
+                        ${_(u'Sign in')}
+                    </a>
+                </li>
+    % else:
+                <li>
+                    <a class="sign-out" href="#">${_(u'Sign out')}</a>
+                </li>
+    % endif
+            </ul>
 </%def>
 
 
