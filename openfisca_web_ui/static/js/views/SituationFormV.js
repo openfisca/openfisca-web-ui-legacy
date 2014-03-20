@@ -102,6 +102,10 @@ define([
 			},
 			updatePrenoms: function(individuId, prenom) {
 				this.$el.find('option[value="' + individuId + '"]').text(prenom);
+			},
+			updateDimensions: function() {
+				this.width = Math.min(this.$el.width(), this.maxWidth);
+				this.height = this.width * 0.66;
 			}
 		});
 

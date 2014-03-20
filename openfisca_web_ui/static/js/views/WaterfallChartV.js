@@ -20,7 +20,7 @@ define([
 				top: 50,
 				right: 40,
 				bottom: 90,
-				left: 50,
+				left: 60,
 			},
 			margin: {
 				top: 0,
@@ -42,10 +42,12 @@ define([
 
 			initialize: function () {
 				this.updateDimensions();
+
 				this.g = d3.select(this.el)
 					.append('svg')
 					.attr('height', this.height)
 					.attr('width', this.width);
+
 				this.listenTo(this.model, 'change:source', this.render);
 			},
 			render: function (args) {
@@ -88,7 +90,7 @@ define([
 			},
 			updateDimensions: function() {
 				this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
-				this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
+				this.height = this.width * 0.8 - this.margin.bottom - this.margin.top;
 			},
 			updateScales: function () {
 				var that = this;
@@ -179,7 +181,7 @@ define([
 						.attr('stroke-width', 1);
 				this.bars
 					.transition()
-						.duration(1000)
+						.duration(300)
 						.attr('width', barWidth)
 						.attr('height', function (d) {
 							var _return;
@@ -219,7 +221,7 @@ define([
 
 				this.bars.exit()
 					.transition()
-						.duration(1000)
+						.duration(300)
 						.attr('x', function (d, i, a) {
 							return that.width*3;
 						})
@@ -227,32 +229,6 @@ define([
 						.each('end', function () {
 							this.remove();
 						});
-
-				if(_.isUndefined(this.bottomGradientProp) && _.isUndefined(this.topGradientProp)) {
-					this.bottomGradientProp = this.g.append("svg:defs").append("svg:linearGradient").attr("id", "bottomBorderGradient").attr("x1", "50%").attr("y1", "0").attr("x2", "50%").attr("y2", "100%").attr("spreadMethod", "pad");
-					this.bottomGradientProp.append("svg:stop").attr("offset", "0%").attr("stop-color", "#FFF").attr("stop-opacity", 0);
-					this.bottomGradientProp.append("svg:stop").attr("offset", "30%").attr("stop-color", "#FFF").attr("stop-opacity", 0.5);
-					this.bottomGradientProp.append("svg:stop").attr("offset", "100%").attr("stop-color", "#FFF").attr("stop-opacity", 1);
-
-					this.topGradientProp = this.g.append("svg:defs").append("svg:linearGradient").attr("id", "topBorderGradient").attr("x1", "50%").attr("y1", "0").attr("x2", "50%").attr("y2", "100%").attr("spreadMethod", "pad");
-					this.topGradientProp.append("svg:stop").attr("offset", "0%").attr("stop-color", "#FFF").attr("stop-opacity", 1);
-					this.topGradientProp.append("svg:stop").attr("offset", "70%").attr("stop-color", "#FFF").attr("stop-opacity", 0.5);
-					this.topGradientProp.append("svg:stop").attr("offset", "100%").attr("stop-color", "#FFF").attr("stop-opacity", 0);
-
-					this.g.append("svg:rect")
-						.attr("width", that.width+that.margin.right)
-						.attr("height", that.padding.bottom)
-						.attr("x", 0)
-						.attr("y", that.height - that.padding.bottom)
-						.style("fill", "url(#bottomBorderGradient)");
-
-					this.g.append("svg:rect")
-						.attr("width", that.width+that.margin.right)
-						.attr("height", that.padding.top)
-						.attr("x", 0)
-						.attr("y", 0)
-						.style("fill", "url(#topBorderGradient)");
-				}
 			},
 			buildActiveBars: function () {
 				// Callback of buildBars.
@@ -477,7 +453,7 @@ define([
 
 				this.activeBars
 					.transition()
-						.duration(1000)
+						.duration(300)
 						.attr('width', barWidth)
 						.attr('height', that.height)
 						.attr('x', function (d, i) {
@@ -498,22 +474,29 @@ define([
 				var that = this;
 
 				this.xAxis.scale(this.scales.x);
-				this.yAxis.scale(this.scales.y)
-					.tickFormat(function (d) {
-						return that.prefix._scale(d);
-					});
-
-				this.yAxisLegend
-					.transition()
-					.duration(1000)
-					.call(this.yAxis);
+				this.yAxis.scale(this.scales.y);
+				this.gridAxis.scale(this.scales.y);
 
 				this.xAxisLegend
 					.transition()
-					.duration(1000)
+					.duration(300)
+					.attr("transform", function () {
+						var pos = that.height - that.padding.bottom;
+						return 'translate(0,' + pos + ')';
+					})
 					.call(this.xAxis);
 
-				this.g.select('.x-axis').moveToFront();
+				this.yAxisLegend
+					.transition()
+					.duration(300)
+					.call(this.yAxis);
+
+
+				this.yGrid
+					.transition()
+					.duration(300)
+					.call(this.gridAxis);
+
 				this.g.selectAll('.x-axis .tick text')
 					.attr('transform', function (d) {
 						var el = d3.select(this),
@@ -551,12 +534,11 @@ define([
 				var that = this;
 				this.xAxis = d3.svg.axis()
 					.scale(this.scales.x)
-					.orient("bottom");
+					.orient('bottom');
 
 				this.yAxis = d3.svg.axis()
 					.scale(this.scales.y)
-					.tickSize(this.width - this.padding.left)
-					.orient("left")
+					.orient('left')
 					.tickFormat(function (d) {
 						return that.prefix._scale(d);
 					});
@@ -568,7 +550,7 @@ define([
 					.attr("class", "y-axis")
 					.attr("transform", function () {
 						var pos = that.width;
-						return 'translate('+pos+',0)';
+						return 'translate('+that.padding.left+',0)';
 					})
 					.call(this.yAxis);
 
@@ -580,6 +562,19 @@ define([
 					})
 					.call(this.xAxis);
 
+				this.gridAxis = d3.svg.axis()
+					.scale(that.scales.y)
+					.orient('left')
+					.tickSize(-that.width+that.padding.left, 0, 0)
+    				.tickFormat("");
+
+				this.yGrid = this.g.append("g")
+					.attr('class', 'grid')
+					.attr('transform', function (d) {
+						return 'translate('+that.padding.left+', 0)'; 
+					})
+					.call(this.gridAxis)
+					.moveToBack();
 
 				this.g.selectAll('.x-axis .tick text')
 					.attr('transform', function (d) {

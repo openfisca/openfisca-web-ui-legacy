@@ -25,7 +25,7 @@ define([
 			currentChildView: null,
 			el: '#chart-wrapper',
 			events: {
-				'show.bs.tab a[data-toggle="tab"]': 'onTabShow'
+				'show.bs.tab a[data-toggle="tab"]': 'onTabShow',
 			},
 			model: chartM,
 			initialize: function () {
@@ -33,6 +33,8 @@ define([
 					.html(chartsTabsT({enableLocatingChart: enableLocatingChart}))
 					.sticky();
 				this.$overlay = this.$el.find('.overlay');
+
+				$(window).on("resize", _.bind(this.updateDimensions, this));
 
 				this.listenTo(this.model, 'change:currentChartName', this.render);
 				this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
@@ -62,6 +64,15 @@ define([
 				} else {
 					$svg.css('opacity', 1);
 					this.$overlay.hide();
+				}
+			},
+			updateDimensions: function () {
+				if(!_.isUndefined(this.currentChildView)) {
+					this.currentChildView.updateDimensions();
+					/* Locating chart already auto resizes */
+					if(this.model.get('currentChartName') != 'locating') {
+						this.currentChildView.render();
+					}
 				}
 			}
 		});

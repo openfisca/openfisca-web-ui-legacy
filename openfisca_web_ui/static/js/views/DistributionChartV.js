@@ -57,9 +57,6 @@ define([
 			initialize: function (options) {
 				this.updateDimensions();
 
-				this.innerWidth = this.width - this.padding.left - this.padding.right;
-				this.innerHeight = this.height - this.padding.top - this.padding.bottom;
-
 				this.$el.append('<div id="sort-menu" class="btn-group"></div>');
 
 				this.g = d3.select(this.el).append('svg')
@@ -75,6 +72,8 @@ define([
 			},
 			render: function (sortType) {
 				if(typeof sortType != 'string') sortType = this.currentSort;
+
+				this.updateDimensions();
 
 				var data = this.model.get('distributionData', {type: sortType});
 
@@ -120,7 +119,7 @@ define([
 				this.sectionWidth = this.innerWidth / (this.packByLine);
 				this.quarterWidth = this.sectionWidth / 2;
 				this.sectionHeight = this.minSectionHeight + this.sectionBottomMargin;
-				this.rScale.range([2, this.sectionWidth/4]);
+				this.rScale.range([2, (this.sectionWidth < this.sectionHeight ? this.sectionWidth : this.sectionHeight)/4]);
 			},
 			/* Set prefix for number displays */
 			setPrefix: function (data) {
@@ -186,7 +185,9 @@ define([
 			/* Update chart dimensions */
 			updateDimensions: function() {
 				this.width = Math.min(this.$el.width(), this.maxWidth);
-				this.height = this.width * 0.66;
+				this.height = this.width;
+				this.innerWidth = this.width - this.padding.left - this.padding.right;
+				this.innerHeight = this.height - this.padding.top - this.padding.bottom;
 			},
 			/* Parse data to be able to use them with bubbles */
 			updateNodes: function (nodes) {
@@ -354,7 +355,7 @@ define([
 					/* If this bubble doesn't appear in this sort */
 					if(_.isUndefined(d.sorts[that.currentSort])) {
 						targetX = i % 2 ? - that.sectionWidth/2 : that.sectionWidth*1.5;
-						targetY = that.sectionHeight/3;
+						targetY = -that.sectionHeight/2;
 					} else {
 						var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sorts[that.currentSort]}).index;
 						targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth;

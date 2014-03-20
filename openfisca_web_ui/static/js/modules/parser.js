@@ -107,7 +107,6 @@ define([
 						else { loopDatum.parentNodes = [];}
 
 						if(i == dataLength-1) {
-							console.log(loopData.name, loopData.value);
 							loopDatum.parentNodes.push({
 									id: loopData._id,
 									name: loopData.name,

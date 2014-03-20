@@ -3,11 +3,8 @@
 #chart-wrapper .y-axis path { display: none; }
 #chart-wrapper .domain { display: none; }
 #chart-wrapper .y-axis line { stroke: #AAA; stroke-dasharray: 6,6; }
+#chart-wrapper .grid line { stroke: lightgrey; opacity: 0.7; }
 
-/*svg text {
-	font-size: 13^px
-}
-*/
 #chart-wrapper #waterfall .x-axis .tick text {
 	font-size: 13px;
 	font-weight: bold;
