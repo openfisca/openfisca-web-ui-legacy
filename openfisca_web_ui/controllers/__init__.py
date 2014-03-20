@@ -111,15 +111,18 @@ def make_router():
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
         (None, '^/test_cases(?=/|$)', test_cases.route_class),
         (None, '^/visualizations(?=/|$)', visualizations.route_user_class),
-        ('POST', '^/login/?$', auth.login),
-        (('GET', 'POST'), '^/logout/?$', auth.logout),
         ('GET', '^/terms/?$', terms),
         ]
-    if conf['debug']:
+    if conf['enabled.auth']:
         routings.extend([
-            ('GET', '^/login/admin?$', auth.become_admin),
-            ('GET', '^/login/user?$', auth.become_user),
+            ('POST', '^/login/?$', auth.login),
+            (('GET', 'POST'), '^/logout/?$', auth.logout),
             ])
+        if conf['debug']:
+            routings.extend([
+                ('GET', '^/login/admin?$', auth.become_admin),
+                ('GET', '^/login/user?$', auth.become_user),
+                ])
     router = urls.make_router(*routings)
     return router
 
