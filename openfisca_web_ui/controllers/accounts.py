@@ -56,19 +56,6 @@ inputs_to_account_admin_data = conv.struct(
         ),
     default = 'drop',
     )
-#inputs_to_account_data = conv.struct(
-#    dict(
-#        email = conv.pipe(
-#            conv.input_to_email,
-#            conv.not_none,
-#            ),
-#        full_name = conv.pipe(
-#            conv.cleanup_line,
-#            conv.not_none,
-#            ),
-#        ),
-#    default = 'drop',
-#    )
 log = logging.getLogger(__name__)
 
 
