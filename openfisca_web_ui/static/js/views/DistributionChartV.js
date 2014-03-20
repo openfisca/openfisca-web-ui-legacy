@@ -80,8 +80,10 @@ define([
 
 				this.setSortDataByDataset(data);
 
-				if(_.isUndefined(this.sortData[sortType])) var sortType = this.defaultSort;
-				var sortDatum = this.sortData[sortType]
+				if(_.isUndefined(this.sortData[sortType])) {
+					sortType = this.defaultSort;
+				}
+				var sortDatum = this.sortData[sortType];
 				this.packByLine = sortDatum.children.length < this.defaultPackByLine ? sortDatum.children.length : this.defaultPackByLine;
 
 				this.setSectionsDimensions();
@@ -348,15 +350,15 @@ define([
 			updateBubblePositions: function (alpha) {
 				var that = this;
 				return function (d, i) {
+					var targetX, targetY;
 					/* If this bubble doesn't appear in this sort */
 					if(_.isUndefined(d.sorts[that.currentSort])) {
-							targetX = i % 2 ? - that.sectionWidth/2 : that.sectionWidth*1.5,
-							targetY = that.sectionHeight/3;
-					}
-					else {
-						var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sorts[that.currentSort]}).index,
-							targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth,
-							targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.sectionHeight/3;
+						targetX = i % 2 ? - that.sectionWidth/2 : that.sectionWidth*1.5;
+						targetY = that.sectionHeight/3;
+					} else {
+						var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sorts[that.currentSort]}).index;
+						targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth;
+						targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.sectionHeight/3;
 					}
 					d.y = d.y + (targetY - d.y) * alpha * 1.1 * that.defaultGravity;
 					d.x = d.x + (targetX - d.x) * alpha * 1.1 * that.defaultGravity;

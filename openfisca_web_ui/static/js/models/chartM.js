@@ -63,11 +63,12 @@ define([
 			},
 			get_distributionData: function (args) {
 				/* Par défault on renvoie la décomposition revdisp */
-				var args = args || {sort: 'revdisp'},
-					parser = new Parser(this.get('source')),
-					outputData;
+				args = args || {sort: 'revdisp'};
+				var parser = new Parser(this.get('source'));
 
-				if(args.sort == 'all') args.sort = revdisp;
+				if(args.sort == 'all') {
+					args.sort = revdisp;
+				}
 
 				var _return = parser
 					.clean()
@@ -93,9 +94,9 @@ define([
 				this.set('currentChartName', chartName);
 			},
 			simulate: function (chartName) {
-				var decomposition = null,
-					axes = null,
-					chartName = chartName || this.get('currentChartName');
+				var decomposition = null;
+				var axes = null;
+				chartName = chartName || this.get('currentChartName');
 
 				/* Simulate */
 				if(this.chartDecompositions.hasOwnProperty(chartName)) {
@@ -104,7 +105,7 @@ define([
 				if(this.chartAxes.hasOwnProperty(chartName)) {
 					axes = this.chartAxes[chartName];
 				}
-				this.backendServiceM.simulate(decomposition, axes);				
+				this.backendServiceM.simulate(decomposition, axes);
 			}
 		});
 

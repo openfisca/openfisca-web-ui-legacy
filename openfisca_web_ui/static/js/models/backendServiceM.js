@@ -52,12 +52,13 @@ define([
 			},
 			simulate: function(decomposition, axes) {
 				/* Decomposition & axes */
-				var reqAdditionalData = {},
-					decomposition = decomposition || null,
-					axes = axes || null;
-				if(decomposition != null) reqAdditionalData.decomposition = JSON.stringify(decomposition);
-				if(axes != null) reqAdditionalData.axes = JSON.stringify(axes);
-
+				var reqAdditionalData = {};
+				if( ! _.isUndefined(decomposition)) {
+					reqAdditionalData.decomposition = JSON.stringify(decomposition);
+				}
+				if( ! _.isUndefined(axes)) {
+					reqAdditionalData.axes = JSON.stringify(axes);
+				}
 				this.set('simulationInProgress', true);
 				return $.ajax({
 					context: this,
@@ -72,7 +73,8 @@ define([
 					} else {
 						var result = data.output.value;
 						if ( ! _.isUndefined(result)) {
-							/* 	Si l'on n'ajoute pas cette propriété,
+							/*
+								Si l'on n'ajoute pas cette propriété,
 								et que deux retours de l'api sont identiques,
 								le chartM ne considère pas que "apiData" a été mis à jour
 								et n'appelle pas le render.
