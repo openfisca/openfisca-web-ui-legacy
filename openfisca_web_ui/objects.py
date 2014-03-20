@@ -282,6 +282,9 @@ class SmartWrapper(Wrapper):
     def after_delete(self, old_bson):
         pass
 
+    def before_delete(self, old_bson):
+        pass
+
     def after_upsert(self, old_bson, bson):
         pass
 
@@ -293,6 +296,7 @@ class SmartWrapper(Wrapper):
         assert id is not None
         old_bson = self.get_collection().find_one(id, as_class = collections.OrderedDict)
         if old_bson is not None:
+            self.before_delete(old_bson)
             self.remove(id, *args, **kwargs)
             self.after_delete(old_bson)
         del self._id  # Mark as deleted.

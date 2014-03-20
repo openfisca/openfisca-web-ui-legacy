@@ -40,6 +40,7 @@ from .. import conf, contexts, conv, model, templates, urls, uuidhelpers, wsgihe
 @wsgihelpers.wsgify
 def become_admin(req):
     """Fake admin login, used only in debug environment."""
+    # TODO add redirect_location param
     assert conf['debug']
     ctx = contexts.Ctx(req)
     admin_account = model.Account.find_one({'admin': True})
@@ -49,10 +50,6 @@ def become_admin(req):
             cnil_conditions_accepted = True,
             email = u'admin@domain.tld',
             )
-        admin_account._id = objectid.ObjectId()
-        test_case = model.TestCase(author_id = admin_account._id)
-        test_case.save(safe = True)
-        admin_account.current_test_case = test_case
         admin_account.save(safe = True)
     session = ctx.session
     if session is None:
@@ -69,6 +66,7 @@ def become_admin(req):
 @wsgihelpers.wsgify
 def become_user(req):
     """Fake user login, used only in debug environment."""
+    # TODO add redirect_location param
     assert conf['debug']
     ctx = contexts.Ctx(req)
     user_account = model.Account.find_one({
@@ -80,10 +78,6 @@ def become_user(req):
             cnil_conditions_accepted = True,
             email = u'user@domain.tld',
             )
-        user_account._id = objectid.ObjectId()
-        test_case = model.TestCase(author_id = user_account._id)
-        test_case.save(safe = True)
-        user_account.current_test_case = test_case
         user_account.save(safe = True)
     session = ctx.session
     if session is None:

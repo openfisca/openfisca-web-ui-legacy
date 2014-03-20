@@ -79,15 +79,17 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
             )).split(u'-'))) or None
 
     @property
-    def current_api_data(self):
-        # TODO remove this "double-link" method.
-        assert self.current_test_case is not None
-        return self.current_test_case.api_data
-
-    @property
     def current_test_case(self):
-        return TestCase.find_one(self.current_test_case_id, as_class = collections.OrderedDict) \
-            if self.current_test_case_id is not None else None
+        """Return current test case or create new if not exists."""
+        if self.current_test_case_id is None:
+            test_case = TestCase(author_id = self._id)
+            test_case.save(safe = True)
+            self.current_test_case = test_case
+            self.save(safe = True)
+        else:
+            test_case = TestCase.find_one(self.current_test_case_id, as_class = collections.OrderedDict)
+            assert test_case is not None
+        return test_case
 
     @current_test_case.setter
     def current_test_case(self, test_case):
@@ -386,6 +388,11 @@ class Session(objects.JsonMonoClassMapper, objects.Mapper, objects.SmartWrapper)
         return self, None
 
 
+class Status(objects.Mapper, objects.Wrapper):
+    collection_name = 'status'
+    last_upgrade_name = None
+
+
 class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
     api_data = None
     author_id = None
@@ -400,6 +407,12 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
             self.title = babel.dates.format_datetime(datetime.datetime.utcnow())
             # TODO slugify automatically?
             self.slug = strings.slugify(self.title)
+
+    def before_delete(self, old_bson):
+        account = Account.find_one({'current_test_case_id': self._id})
+        if account is not None:
+            account.current_test_case_id = None
+            account.save(safe = True)
 
     @classmethod
     def bson_to_json(cls, value, state = None):
@@ -487,11 +500,6 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
             value['id'] = unicode(id)
         value.pop('api_key', None)
         return value, None
-
-
-class Status(objects.Mapper, objects.Wrapper):
-    collection_name = 'status'
-    last_upgrade_name = None
 
 
 class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):

@@ -36,16 +36,6 @@ from formencode import variabledecode
 from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
 
 
-def get_user_api_data(ctx):
-    session = ctx.session
-    user_api_data = None
-    if session is not None and session.user is not None:
-        user_api_data = session.user.current_api_data
-    if user_api_data is None:
-        user_api_data = {}
-    return user_api_data
-
-
 @wsgihelpers.wsgify
 def situation_form_get(req):
     ctx = contexts.Ctx(req)
@@ -61,7 +51,10 @@ def situation_form_get(req):
                 secure = req.scheme == 'https',
                 )
 
-    user_api_data = get_user_api_data(ctx)
+    user = model.get_user(ctx)
+    user_api_data = None if user is None else user.current_test_case.api_data
+    if user_api_data is None:
+        user_api_data = {}
     filled_user_api_data = check(
         conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data)
         )
@@ -84,7 +77,8 @@ def situation_form_get(req):
 def situation_form_post(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
-    user_api_data = ctx.session.user.current_api_data or {}
+    current_test_case = user.current_test_case
+    user_api_data = user.current_test_case.api_data or {}
     if model.fields_api_data() is None:
         return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)
@@ -107,7 +101,6 @@ def situation_form_post(req):
             return templates.render(ctx, '/index.mako', root_question = root_question)
     if api_data is not None:
         user_api_data.update(api_data)
-        current_test_case = user.current_test_case
         current_test_case.api_data = user_api_data
         current_test_case.save(safe = True)
     return wsgihelpers.respond_json(ctx, None) if req.is_xhr else wsgihelpers.redirect(ctx, location = '')
@@ -123,15 +116,6 @@ def update_session(ctx):
         user = model.Account()
         user._id = uuidhelpers.generate_uuid()
         user.compute_words()
-        # TODO move default test_case into Account class?
-        test_case_title = babel.dates.format_datetime(datetime.datetime.utcnow())
-        test_case = model.TestCase(
-            author_id = user._id,
-            title = test_case_title,
-            slug = strings.slugify(test_case_title),
-            )
-        test_case.save(safe = True)
-        user.current_test_case = test_case
         user.save(safe = True)
         session.user = user
     session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)

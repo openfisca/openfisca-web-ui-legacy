@@ -36,10 +36,13 @@ from .. import contexts, conv, model, urls, wsgihelpers
 def delete(req):
     ctx = contexts.Ctx(req)
     test_case = ctx.node
-    user = ctx.user
+    user = model.get_user(ctx, check = True)
     if user.current_test_case_id == test_case._id:
         user_test_cases = user.test_cases
-        user.current_test_case = user_test_cases[0] if user_test_cases else None
+        if user_test_cases:
+            user.current_test_case = user_test_cases[0]
+        else:
+            user.current_test_case_id = None
         user.save(safe = True)
     test_case.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = user.get_user_url(ctx))
@@ -49,14 +52,13 @@ def delete(req):
 def duplicate(req):
     ctx = contexts.Ctx(req)
     test_case = ctx.node
-    user = ctx.user
-
+    user = model.get_user(ctx, check = True)
     new_test_case_title = ctx._(u'Copy of {}').format(test_case.title)
     new_test_case = model.TestCase(
         author_id = user._id,
         description = new_test_case_title,
         title = new_test_case_title,
-        slug = strings.slugify(new_test_case_title)
+        slug = strings.slugify(new_test_case_title),
         )
     new_test_case.save(safe = True)
     return wsgihelpers.redirect(ctx, location = user.get_user_url(ctx))
@@ -64,43 +66,50 @@ def duplicate(req):
 
 @wsgihelpers.wsgify
 def edit(req):
-    # TODO fix this function.
     ctx = contexts.Ctx(req)
-    user = ctx.user
+    user = model.get_user(ctx, check = True)
     params = req.params
     inputs = {
         'title': params.get('title'),
         'description': params.get('description'),
         }
-    data, errors = conv.pipe(
-        conv.struct({
-            'title': conv.cleanup_line,
-            'description': conv.cleanup_line,
-            'id_or_slug': conv.first_match(
-                conv.test(lambda id: id == 'new'),
-                model.TestCase.make_id_or_slug_or_words_to_instance(user_id = user._id),
-                ),
-            }),
-        conv.rename_item('id_or_slug', 'test_case'),
-        )(inputs, state = ctx)
+    data, errors = conv.struct({
+        'title': conv.cleanup_line,
+        'description': conv.cleanup_line,
+        })(inputs, state = ctx)
     if errors is not None:
         return wsgihelpers.bad_request(ctx, explanation = errors)
+    test_case = ctx.node
+    test_case.description = data['description']
+    test_case.slug = strings.slugify(data['title'])
+    test_case.title = data['title']
+    test_case.save(safe = True)
+    return wsgihelpers.redirect(ctx, location = user.get_user_url(ctx))
 
-    if data['test_case'] == 'new':
-        data['test_case'] = model.TestCase(
-            author_id = user._id,
-            description = data['description'],
-            title = data['title'],
-            slug = strings.slugify(data['title']),
-            )
-        data['test_case'].api_data = None
-        data['test_case'].save(safe = True)
-        return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
-    data['test_case'].title = data['title']
-    data['test_case'].slug = strings.slugify(data['title'])
-    data['test_case'].description = data['description']
-    data['test_case'].save(safe = True)
+@wsgihelpers.wsgify
+def new(req):
+    ctx = contexts.Ctx(req)
+    user = model.get_user(ctx, check = True)
+    params = req.params
+    inputs = {
+        'title': params.get('title'),
+        'description': params.get('description'),
+        }
+    data, errors = conv.struct({
+        'title': conv.cleanup_line,
+        'description': conv.cleanup_line,
+        })(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = errors)
+    test_case = ctx.node
+    test_case = model.TestCase(
+        author_id = user._id,
+        description = data['description'],
+        slug = strings.slugify(data['title']),
+        title = data['title'],
+        )
+    test_case.save(safe = True)
     return wsgihelpers.redirect(ctx, location = user.get_user_url(ctx))
 
 
@@ -120,7 +129,6 @@ def route(environ, start_response):
         return wsgihelpers.forbidden(ctx)
 
     ctx.node = test_case
-    ctx.user = user
 
     router = urls.make_router(
         ('POST', '^/delete/?$', delete),
@@ -134,6 +142,7 @@ def route(environ, start_response):
 def route_class(environ, start_response):
     router = urls.make_router(
         # TODO remove or_words
+        ('POST', '^/new/?$', new),
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route),
         )
     return router(environ, start_response)
@@ -143,7 +152,7 @@ def route_class(environ, start_response):
 def use(req):
     ctx = contexts.Ctx(req)
     test_case = ctx.node
-    user = ctx.user
+    user = model.get_user(ctx, check = True)
     user.current_test_case = test_case
     user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = req.params.get('redirect') or user.get_user_url(ctx))

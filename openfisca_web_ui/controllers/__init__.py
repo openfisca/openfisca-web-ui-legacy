@@ -74,22 +74,6 @@ def disclaimer_closed(req):
     return wsgihelpers.no_content(ctx)
 
 
-def get_api_data_and_errors(ctx, anonymous_token = None):
-    if anonymous_token is None:
-        session = ctx.session
-    else:
-        session = model.Session.find_one({'anonymous_token': anonymous_token})
-
-    user_api_data = session.user.current_api_data if session is not None and session.user is not None else None
-    if user_api_data is None:
-        user_api_data = {}
-    api_data, errors = pipe(
-        conv.base.make_fill_user_api_data(ensure_api_compliance = True),
-        conv.simulations.user_api_data_to_api_data,
-        )(user_api_data, state = ctx)
-    return api_data, errors
-
-
 def make_router():
     """Return a WSGI application that searches requests to controllers."""
     global router
@@ -130,9 +114,15 @@ def make_router():
 @wsgihelpers.wsgify
 def session(req):
     ctx = contexts.Ctx(req)
-    api_data, errors = get_api_data_and_errors(ctx)
-    data = api_data if errors is None else {'errors': errors}
-    return wsgihelpers.respond_json(ctx, data)
+    user = model.get_user(ctx)
+    user_api_data = None if user is None else user.current_test_case.api_data
+    if user_api_data is None:
+        user_api_data = {}
+    api_data, errors = pipe(
+        conv.base.make_fill_user_api_data(ensure_api_compliance = True),
+        conv.simulations.user_api_data_to_api_data,
+        )(user_api_data, state = ctx)
+    return wsgihelpers.respond_json(ctx, data = api_data if errors is None else {'errors': errors})
 
 
 @wsgihelpers.wsgify
@@ -164,7 +154,15 @@ def simulate(req):
         'token': conv.base.input_to_uuid,
         })(inputs, state = ctx)
     if errors is None:
-        api_data, errors = get_api_data_and_errors(ctx, anonymous_token = data['token'])
+        session = ctx.session if data['token'] is None else model.Session.find_one({'anonymous_token': data['token']})
+        user = session.user
+        user_api_data = None if user is None else user.current_test_case.api_data
+        if user_api_data is None:
+            user_api_data = {}
+        api_data, errors = pipe(
+            conv.base.make_fill_user_api_data(ensure_api_compliance = True),
+            conv.simulations.user_api_data_to_api_data,
+            )(user_api_data, state = ctx)
     if errors is None:
         if data['axes'] is not None:
             for scenario in api_data['scenarios']:
