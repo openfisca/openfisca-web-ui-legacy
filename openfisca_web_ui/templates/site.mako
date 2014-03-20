@@ -38,9 +38,6 @@ from openfisca_web_ui.templates import helpers
 %>
 
 
-<%namespace file="requireconfig.mako" name="requireconfig"/>
-
-
 <%def name="accept_cnil_conditions_modal(user)" filter="trim">
     <div class="modal fade bs-modal-lg" id="accept-cnil-conditions-modal" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -279,7 +276,7 @@ ${conf['app_name']}
 <%def name="scripts()" filter="trim">
     <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
-        <%requireconfig:requireconfig_script/>
+        require.config(${helpers.build_requireconfig(ctx) | n, js});
         <%self:appconfig_script/>
         require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
     </script>
