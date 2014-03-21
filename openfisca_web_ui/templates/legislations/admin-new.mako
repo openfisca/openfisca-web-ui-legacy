@@ -35,7 +35,7 @@ from openfisca_web_ui import conf, model, urls
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
             <li><a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u"Legislations")}</a></li>
-            <li class="active">${_(u'New')}</li>
+            <li class="active">${_(u'Create')}</li>
 </%def>
 
 

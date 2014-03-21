@@ -69,7 +69,7 @@ type="checkbox">
     error = errors.get('title') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="title">${_(u'Title')}</label>
+                    <label for="title">${_(u'Title')} *</label>
                     <input class="form-control" id="title" name="title" required type="text" value="${inputs['title'] or ''}">
     % if error:
                     <span class="help-block">${error}</span>
@@ -101,7 +101,7 @@ value="${inputs['thumbnail_url'] or ''}">
     error = errors.get('url') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="url">${_(u'Visualization URL')}</label>
+                    <label for="url">${_(u'Visualization URL')} *</label>
                     <input class="form-control" id="url" name="url" type="text" value="${inputs['url'] or ''}">
     % if error:
                     <pre class="help-block alert-danger">${error | n, js, h}</pre>
@@ -114,7 +114,7 @@ value="${inputs['thumbnail_url'] or ''}">
                     <label>
                         <input${' checked' if inputs['iframe'] else ''} id="iframe" name="iframe" type="checkbox" \
 value="1">
-                        ${_(u'Iframe')}
+                        ${_(u'This visualization accepts a "simulate_url" GET parameter.')}
                     </label>
     % if error:
                     <span class="help-block">${error}</span>

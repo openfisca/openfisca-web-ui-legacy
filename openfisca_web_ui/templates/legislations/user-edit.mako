@@ -56,7 +56,7 @@ from openfisca_web_ui import conf, model, urls
     error = errors.get('title') if errors is not None else None
 %>\
                 <div class="form-group${' has-error' if error else ''}">
-                    <label for="title">${_(u'Title')}</label>
+                    <label for="title">${_(u'Title')} *</label>
                     <input class="form-control" id="title" name="title" required type="text" value="${inputs['title'] or ''}">
     % if error:
                     <span class="help-block alert-danger">${error}</span>

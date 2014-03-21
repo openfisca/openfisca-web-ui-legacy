@@ -87,7 +87,7 @@ from openfisca_web_ui import model, urls
 %>\
     % if user is not None and user.email is not None:
         <div class="btn-toolbar">
-            <a class="btn btn-default" href="${model.Visualization.get_user_class_url(ctx, 'new')}">${_(u'New')}</a>
+            <a class="btn btn-default" href="${model.Visualization.get_user_class_url(ctx, 'new')}">${_(u'Create')}</a>
         </div>
     % endif
 </%def>
