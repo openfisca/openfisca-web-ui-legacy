@@ -1,2 +1,3 @@
+-e git+https://github.com/etalab/biryani.git@biryani1#egg=Biryani1
 -e git+https://git.gitorious.org/korma/korma.git#egg=Korma
 -e .
