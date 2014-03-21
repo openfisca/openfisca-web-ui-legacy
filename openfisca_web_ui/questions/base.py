@@ -28,7 +28,7 @@
 
 import logging
 
-from biryani1.baseconv import check, guess_bool, pipe
+from biryani1.baseconv import check, guess_bool, pipe, struct
 from korma.base import Button
 from korma.checkbox import Checkbox
 from korma.choice import Radio, Select
@@ -119,7 +119,16 @@ def make_categories_groups(entity):
     ctx = contexts.Ctx()
     fields_api_data = model.fields_api_data()
 
-    class ModalGroup(Group):
+    class CleanGroup(Group):
+        @property
+        def default_input_to_data(self):
+            return struct(
+                dict((question.name(), question.input_to_data) for question in self.iter_children()),
+                default='drop',
+                drop_none_values=True,
+            )
+
+    class ModalGroup(CleanGroup):
         _outer_html_template = u'''
 <a href="#" class="list-group-item" data-toggle="modal" data-target="#modal-{self.full_name_as_selector}">
   {self.label}
@@ -167,7 +176,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
     for entity_category in entity_categories:
         group_questions = build_category_questions(entity_category)
         if entity_category['label'] == u'Principal':
-            category_group = Group(
+            category_group = CleanGroup(
                 children_attributes = {'_outer_html_template': bootstrap_form_group},
                 name = 'principal',
                 outer_html_template = u'<div class="main-category">{self.inner_html}</div>',
