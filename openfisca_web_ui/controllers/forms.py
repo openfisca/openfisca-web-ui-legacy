@@ -26,12 +26,10 @@
 """Form controllers"""
 
 
-import babel.dates
 from bson import objectid
 import datetime
 
 from biryani1.baseconv import check, pipe
-from biryani1 import strings
 from formencode import variabledecode
 
 from .. import conf, contexts, conv, model, questions, templates, uuidhelpers, wsgihelpers
