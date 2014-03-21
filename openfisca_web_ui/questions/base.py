@@ -247,7 +247,14 @@ def make_question(column):
             )
         question.placeholder = default_str(question)
     elif column['@type'] == 'Date':
-        question = BootstrapFrenchDate(
+        question = BootstrapNumber(
+            label = question_label,
+            max = 2099,
+            min = 1870,
+            name = column['name'],
+            step = 1,
+            ) if column['name'] == 'birth' \
+        else BootstrapFrenchDate(
             label = question_label,
             name = column['name'],
             )
