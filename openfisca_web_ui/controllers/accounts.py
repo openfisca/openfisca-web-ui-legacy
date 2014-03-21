@@ -269,7 +269,6 @@ def user_reset(req):
     if current_test_case is not None:
         current_test_case.api_data = None
         current_test_case.save(safe = True)
-    user.save(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx))
 
 
