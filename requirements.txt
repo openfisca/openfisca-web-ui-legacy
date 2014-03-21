@@ -1,0 +1,2 @@
+-e git+https://git.gitorious.org/korma/korma.git
+-e .
