@@ -42,7 +42,7 @@ class TestLegislations(common.TestCaseWithApp):
             ]
         for method, route in routes:
             req = Request.blank(route, method = method)
-            res = req.get_response(self.app)
+            res = req.get_response(common.app)
             print '{} - {}'.format(res.status_code, route)
             #self.assertEqual(res.status_code, 200)
 
