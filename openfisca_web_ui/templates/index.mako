@@ -129,15 +129,13 @@ href="${user.get_user_url(ctx, 'reset') if user is not None else '/'}">
         ${root_question.html | n}
         <div class="buttons">
     % if user is None or user.email is None:
-            <a class="btn btn-default sign-in" href="#" title="${_(u'Save this simulation')}">
-                ${_(u'Save')}
-            </a>
+            <a class="btn btn-default sign-in" href="#" title="${_(u'Save this simulation')}">${_(u'Save')}</a>
     % endif
             <button class="btn btn-primary simulate">${_(u'Simulate')}</button>
             <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">${_(u'Export')}</button>
             <button class="btn btn-default" data-toggle="modal" data-target="#reset-dialog">${_(u'Reset')}</button>
         </div>
-    % if user is not None:
+    % if user is not None and user.email is not None:
         <p>
             <a href="${user.get_user_url(ctx)}">
                 ${_(u'Viewing simulation "{}"').format(user.current_test_case.title)}
