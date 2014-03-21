@@ -52,12 +52,13 @@ def situation_form_get(req):
                 )
 
     user = model.get_user(ctx)
-    user_api_data = None if user is None else user.current_test_case.api_data
-    if user_api_data is None:
+    if user is None:
+        # Allow user to be None for viewing simulation in background when accept cookie modal is displayed.
         user_api_data = {}
-    filled_user_api_data = check(
-        conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data)
-        )
+    else:
+        user.ensure_test_case()
+        user_api_data = user.current_test_case.api_data or {}
+    filled_user_api_data = check(conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data))
 
     if model.fields_api_data() is None:
         return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
@@ -77,8 +78,9 @@ def situation_form_get(req):
 def situation_form_post(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
+    user.ensure_test_case()
     current_test_case = user.current_test_case
-    user_api_data = user.current_test_case.api_data or {}
+    user_api_data = current_test_case.api_data or {}
     if model.fields_api_data() is None:
         return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)

@@ -115,6 +115,7 @@ def make_router():
 def session(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx)
+    user.ensure_test_case()
     user_api_data = None if user is None else user.current_test_case.api_data
     if user_api_data is None:
         user_api_data = {}
@@ -155,10 +156,13 @@ def simulate(req):
         })(inputs, state = ctx)
     if errors is None:
         session = ctx.session if data['token'] is None else model.Session.find_one({'anonymous_token': data['token']})
-        user = session.user
-        user_api_data = None if user is None else user.current_test_case.api_data
-        if user_api_data is None:
+        # session can be None when simulating in background while accept cookie modal is displayed.
+        user = session.user if session is not None else None
+        if user is None:
             user_api_data = {}
+        else:
+            user.ensure_test_case()
+            user_api_data = user.current_test_case.api_data or {}
         api_data, errors = pipe(
             conv.base.make_fill_user_api_data(ensure_api_compliance = True),
             conv.simulations.user_api_data_to_api_data,

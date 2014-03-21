@@ -80,21 +80,21 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     @property
     def current_test_case(self):
-        """Return current test case or create new if not exists."""
-        if self.current_test_case_id is None:
-            test_case = TestCase(author_id = self._id)
-            test_case.save(safe = True)
-            self.current_test_case = test_case
-            self.save(safe = True)
-        else:
-            test_case = TestCase.find_one(self.current_test_case_id, as_class = collections.OrderedDict)
-            assert test_case is not None
-        return test_case
+        return TestCase.find_one(self.current_test_case_id, as_class = collections.OrderedDict) \
+            if self.current_test_case_id is not None else None
 
     @current_test_case.setter
     def current_test_case(self, test_case):
         assert test_case.author_id == self._id
         self.current_test_case_id = test_case._id
+
+    def ensure_test_case(self):
+        """Create test case and set as current if not exists."""
+        if self.current_test_case_id is None:
+            test_case = TestCase(author_id = self._id)
+            test_case.save(safe = True)
+            self.current_test_case = test_case
+            self.save(safe = True)
 
     @classmethod
     def get_admin_class_full_url(cls, ctx, *path, **query):
