@@ -257,6 +257,8 @@ def route_user(environ, start_response):
 def user_delete(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
+    if user.email is None:
+        return wsgihelpers.forbidden(ctx)
     user.delete(safe = True)
     return wsgihelpers.redirect(ctx, location = urls.get_url(ctx, 'logout'))
 
@@ -276,4 +278,6 @@ def user_reset(req):
 def user_view(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
+    if user.email is None:
+        return wsgihelpers.forbidden(ctx)
     return templates.render(ctx, '/accounts/user-view.mako', account = user)
