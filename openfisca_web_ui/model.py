@@ -69,9 +69,9 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
 
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
-            fragment
+            unicode(fragment)
             for fragment in (
-                unicode(self._id),
+                self._id,
                 self.email,
                 self.full_name,
                 )
@@ -196,9 +196,9 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
 
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
-            fragment
+            unicode(fragment)
             for fragment in (
-                unicode(self._id),
+                self._id,
                 self.description,
                 self.title,
                 )
@@ -428,9 +428,9 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
 
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
-            fragment
+            unicode(fragment)
             for fragment in (
-                unicode(self._id),
+                self._id,
                 self.description,
                 self.title,
                 )
@@ -529,9 +529,9 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
 
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
-            fragment
+            unicode(fragment)
             for fragment in (
-                unicode(self._id),
+                self._id,
                 self.description,
                 self.title,
                 )

@@ -27,6 +27,7 @@
 
 
 import babel.dates
+from bson import objectid
 import datetime
 
 from biryani1.baseconv import check, pipe
@@ -115,8 +116,7 @@ def update_session(ctx):
         session.anonymous_token = uuidhelpers.generate_uuid()
         session.token = uuidhelpers.generate_uuid()
     if session.user is None:
-        user = model.Account()
-        user._id = uuidhelpers.generate_uuid()
+        user = model.Account(_id = objectid.ObjectId())
         user.compute_words()
         user.save(safe = True)
         session.user = user
