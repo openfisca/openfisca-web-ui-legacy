@@ -566,7 +566,7 @@ define([
 					.scale(that.scales.y)
 					.orient('left')
 					.tickSize(-that.width+that.padding.left, 0, 0)
-    				.tickFormat("");
+					.tickFormat("");
 
 				this.yGrid = this.g.append("g")
 					.attr('class', 'grid')
