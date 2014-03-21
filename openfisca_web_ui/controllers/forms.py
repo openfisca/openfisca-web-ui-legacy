@@ -78,6 +78,18 @@ def situation_form_get(req):
 @wsgihelpers.wsgify
 def situation_form_post(req):
     ctx = contexts.Ctx(req)
+
+    if conf['cookie'] in req.cookies:
+        update_session(ctx)
+        session = ctx.session
+        if req.cookies.get(conf['cookie']) != session.token:
+            req.response.set_cookie(
+                conf['cookie'],
+                session.token,
+                httponly = True,
+                secure = req.scheme == 'https',
+                )
+
     user = model.get_user(ctx, check = True)
     user.ensure_test_case()
     current_test_case = user.current_test_case
