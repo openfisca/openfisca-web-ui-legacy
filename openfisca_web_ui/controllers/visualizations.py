@@ -32,49 +32,67 @@ import pymongo
 import re
 import urllib
 
+from biryani1.states import default_state
 import webob
 
 from .. import contexts, conv, model, paginations, templates, urls, wsgihelpers
 
 
-inputs_to_visualization_data = conv.struct(
-    dict(
-        author_id = conv.base.input_to_uuid,
-        description = conv.cleanup_text,
-        enabled = conv.guess_bool,
-        featured = conv.guess_bool,
-        iframe = conv.guess_bool,
-        thumbnail_url = conv.make_input_to_url(full = True),
-        organization = conv.cleanup_line,
-        title = conv.pipe(
-            conv.base.cleanup_line,
-            conv.not_none,
-            ),
-        url = conv.pipe(
-            conv.make_input_to_url(full = True),
-            conv.not_none,
-            ),
-        ),
-    default = 'drop',
-    )
 log = logging.getLogger(__name__)
 
+
+# Converters
+
+def make_inputs_to_visualization_data(include_admin_fields):
+    def inputs_to_visualization_data(values, state = None):
+        if values is None:
+            return None, None
+        if state is None:
+            state = default_state
+
+        fields = dict(
+            description = conv.cleanup_text,
+            iframe = conv.guess_bool,
+            thumbnail_url = conv.make_input_to_url(full = True),
+            organization = conv.cleanup_line,
+            title = conv.pipe(
+                conv.base.cleanup_line,
+                conv.not_none,
+                ),
+            url = conv.pipe(
+                conv.make_input_to_url(full = True),
+                conv.not_none,
+                ),
+            )
+        if include_admin_fields:
+            fields.update(dict(
+                enabled = conv.guess_bool,
+                featured = conv.guess_bool,
+                ))
+
+        return conv.pipe(
+            conv.struct(
+                fields,
+                default = 'drop',
+                ),
+            conv.test(
+                lambda values: not values['iframe'] or '{simulate_url}' in values['url'],
+                error = {'iframe': state._(u'Visualization URL must contain the "{simulate_url}" pattern if checked.')},
+                ),
+            )(values, state)
+    return inputs_to_visualization_data
+
+
+# Controllers
 
 @wsgihelpers.wsgify
 def admin_delete(req):
     ctx = contexts.Ctx(req)
     visualization = ctx.node
-    user = model.get_user(ctx, check = True)
-
-    if not (visualization.author_id == user._id or model.is_admin(ctx)):
-        return wsgihelpers.forbidden(ctx)
-
+    model.is_admin(ctx, check = True)
     if req.method == 'POST':
         visualization.delete(safe = True)
-        if model.is_admin(ctx):
-            return wsgihelpers.redirect(ctx, location = model.Visualization.get_admin_class_url(ctx))
-        else:
-            return wsgihelpers.redirect(ctx, location = model.Visualization.get_class_url(ctx))
+        return wsgihelpers.redirect(ctx, location = model.Visualization.get_admin_class_url(ctx))
     return templates.render(ctx, '/visualizations/admin-delete.mako', visualization = visualization)
 
 
@@ -82,10 +100,7 @@ def admin_delete(req):
 def admin_edit(req):
     ctx = contexts.Ctx(req)
     visualization = ctx.node
-    user = model.get_user(ctx, check = True)
-
-    if not (visualization.author_id == user._id or model.is_admin(ctx)):
-        return wsgihelpers.forbidden(ctx)
+    model.is_admin(ctx, check = True)
 
     if req.method == 'GET':
         errors = None
@@ -102,8 +117,7 @@ def admin_edit(req):
     else:
         assert req.method == 'POST'
         inputs = extract_visualization_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = visualization.author_id
-        data, errors = inputs_to_visualization_data(inputs, state = ctx)
+        data, errors = make_inputs_to_visualization_data(include_admin_fields = True)(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
                 conv.input_to_slug,
@@ -120,18 +134,6 @@ def admin_edit(req):
                     as_class = collections.OrderedDict,
                     ).count() > 0:
                 errors = dict(title = ctx._(u'A visualization with the same name already exists.'))
-        if errors is None:
-            if not model.is_admin(ctx):
-                if visualization.enabled != data['enabled']:
-                    errors = dict(
-                        enabled = ctx._(
-                            u'You can\'t enable or disable this visualization because you aren\'t an administrator'
-                            ),
-                        )
-                if visualization.featured != data['featured']:
-                    errors = dict(
-                        enabled = ctx._(u'You can\'t promote this visualization because you aren\'t an administrator'),
-                        )
         if errors is None:
             visualization.set_attributes(**data)
             visualization.compute_words()
@@ -151,8 +153,7 @@ def admin_edit(req):
 @wsgihelpers.wsgify
 def admin_index(req):
     ctx = contexts.Ctx(req)
-    if not model.is_admin(ctx):
-        return wsgihelpers.redirect(ctx, location = model.Visualization.get_user_class_url(ctx))
+    model.is_admin(ctx, check = True)
     params = req.GET
     inputs = dict(
         advanced_search = params.get('advanced_search'),
@@ -207,10 +208,8 @@ def admin_index(req):
 @wsgihelpers.wsgify
 def admin_new(req):
     ctx = contexts.Ctx(req)
-    user = model.get_user(ctx)
-
-    if user is None or user.email is None:
-        return wsgihelpers.unauthorized(ctx)
+    user = model.get_user(ctx, check = True)
+    model.is_admin(ctx, check = True)
 
     visualization = model.Visualization()
     if req.method == 'GET':
@@ -219,8 +218,7 @@ def admin_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_visualization_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = user._id
-        data, errors = inputs_to_visualization_data(inputs, state = ctx)
+        data, errors = make_inputs_to_visualization_data(include_admin_fields = True)(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
                 conv.input_to_slug,
@@ -235,9 +233,10 @@ def admin_new(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(full_name = ctx._(u'A visualization with the same name already exists.'))
+                errors = dict(title = ctx._(u'A visualization with the same name already exists.'))
         if errors is None:
             visualization.set_attributes(**data)
+            visualization.author_id = user._id
             visualization.compute_words()
             visualization.save(safe = True)
 
@@ -308,7 +307,7 @@ def api1_search(req):
             {
                 'title': visualization.title,
                 'description': visualization.description,
-                'iframe': visualization.iframe or False,
+                'iframe': bool(visualization.iframe),
                 'sourceUrl': visualization.url.format(
                     simulate_url = urllib.quote(u'{}?{}'.format(
                         urls.get_full_url(ctx, 'api/1/simulate'),
@@ -387,9 +386,9 @@ def route_admin(environ, start_response):
     ctx.node = visualization
 
     router = urls.make_router(
-        ('GET', '^/?$', admin_view),
         (('GET', 'POST'), '^/delete/?$', admin_delete),
         (('GET', 'POST'), '^/edit/?$', admin_edit),
+        ('GET', '^/?$', admin_view),
         )
     return router(environ, start_response)
 
@@ -426,6 +425,8 @@ def route_user(environ, start_response):
     ctx.node = visualization
 
     router = urls.make_router(
+        (('GET', 'POST'), '^/delete/?$', user_delete),
+        (('GET', 'POST'), '^/edit/?$', user_edit),
         ('GET', '^/?$', user_view),
         )
     return router(environ, start_response)
@@ -434,9 +435,78 @@ def route_user(environ, start_response):
 def route_user_class(environ, start_response):
     router = urls.make_router(
         ('GET', '^/?$', user_index),
+        (('GET', 'POST'), '^/new/?$', user_new),
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_user),
         )
     return router(environ, start_response)
+
+
+@wsgihelpers.wsgify
+def user_delete(req):
+    ctx = contexts.Ctx(req)
+    visualization = ctx.node
+    user = model.get_user(ctx, check = True)
+    if user.email is None or user._id != visualization.author_id:
+        return wsgihelpers.forbidden(ctx)
+    if req.method == 'POST':
+        visualization.delete(safe = True)
+        return wsgihelpers.redirect(ctx, location = model.Visualization.get_user_class_url(ctx))
+    return templates.render(ctx, '/visualizations/user-delete.mako', visualization = visualization)
+
+
+@wsgihelpers.wsgify
+def user_edit(req):
+    ctx = contexts.Ctx(req)
+    visualization = ctx.node
+    user = model.get_user(ctx, check = True)
+    if user.email is None or user._id != visualization.author_id:
+        return wsgihelpers.forbidden(ctx)
+    if req.method == 'GET':
+        errors = None
+        inputs = dict(
+            description = visualization.description,
+            enabled = visualization.enabled,
+            featured = visualization.featured,
+            iframe = visualization.iframe,
+            thumbnail_url = visualization.thumbnail_url,
+            organization = visualization.organization,
+            title = visualization.title,
+            url = visualization.url,
+        )
+    else:
+        assert req.method == 'POST'
+        inputs = extract_visualization_inputs_from_params(ctx, req.POST)
+        data, errors = make_inputs_to_visualization_data(include_admin_fields = False)(inputs, state = ctx)
+        if errors is None:
+            data['slug'], error = conv.pipe(
+                conv.input_to_slug,
+                conv.not_none,
+                )(data['title'], state = ctx)
+            if error is not None:
+                errors = dict(title = error)
+        if errors is None:
+            if model.Visualization.find(
+                    dict(
+                        _id = {'$ne': visualization._id},
+                        slug = data['slug'],
+                        ),
+                    as_class = collections.OrderedDict,
+                    ).count() > 0:
+                errors = dict(title = ctx._(u'A visualization with the same name already exists.'))
+        if errors is None:
+            visualization.set_attributes(**data)
+            visualization.compute_words()
+            visualization.save(safe = True)
+
+            # View visualization.
+            return wsgihelpers.redirect(ctx, location = visualization.get_user_url(ctx))
+    return templates.render(
+        ctx,
+        '/visualizations/user-edit.mako',
+        errors = errors,
+        inputs = inputs,
+        visualization = visualization,
+        )
 
 
 @wsgihelpers.wsgify
@@ -497,11 +567,9 @@ def user_index(req):
 @wsgihelpers.wsgify
 def user_new(req):
     ctx = contexts.Ctx(req)
-    user = model.get_user(ctx)
-
-    if user is None or user.email is None:
-        return wsgihelpers.unauthorized(ctx)
-
+    user = model.get_user(ctx, check = True)
+    if user.email is None:
+        return wsgihelpers.forbidden(ctx)
     visualization = model.Visualization()
     if req.method == 'GET':
         errors = None
@@ -509,8 +577,7 @@ def user_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_visualization_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = user._id
-        data, errors = inputs_to_visualization_data(inputs, state = ctx)
+        data, errors = make_inputs_to_visualization_data(include_admin_fields = False)(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
                 conv.input_to_slug,
@@ -525,9 +592,10 @@ def user_new(req):
                         ),
                     as_class = collections.OrderedDict,
                     ).count() > 0:
-                errors = dict(full_name = ctx._(u'A visualization with the same name already exists.'))
+                errors = dict(title = ctx._(u'A visualization with the same name already exists.'))
         if errors is None:
             visualization.set_attributes(**data)
+            visualization.author_id = user._id
             visualization.compute_words()
             visualization.save(safe = True)
 

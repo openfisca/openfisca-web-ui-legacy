@@ -48,10 +48,15 @@ N_ = lambda message: message
 inputs_to_legislation_data = conv.pipe(
     conv.struct(
         dict(
-            author_id = conv.base.input_to_uuid,
             # TODO replace by babel.dates parser.
-            datetime_begin = make_formatted_str_to_datetime(u'%d/%m/%y'),
-            datetime_end = make_formatted_str_to_datetime(u'%d/%m/%y'),
+            datetime_begin = conv.pipe(
+                conv.cleanup_line,
+                make_formatted_str_to_datetime(u'%d/%m/%y'),
+                ),
+            datetime_end = conv.pipe(
+                conv.cleanup_line,
+                make_formatted_str_to_datetime(u'%d/%m/%y'),
+                ),
             description = conv.cleanup_text,
             json = conv.make_input_to_json(),
             url = conv.make_input_to_url(full = True),
@@ -73,7 +78,6 @@ def admin_delete(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     model.is_admin(ctx, check = True)
-
     if req.method == 'POST':
         legislation.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Legislation.get_admin_class_url(ctx))
@@ -84,9 +88,7 @@ def admin_delete(req):
 def admin_edit(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
-    model.get_user(ctx, check = True)
     model.is_admin(ctx, check = True)
-
     if req.method == 'GET':
         errors = None
         inputs = dict(
@@ -100,7 +102,6 @@ def admin_edit(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = legislation.author_id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -257,9 +258,7 @@ def admin_index(req):
 @wsgihelpers.wsgify
 def admin_new(req):
     ctx = contexts.Ctx(req)
-    user = model.get_user(ctx, check = True)
     model.is_admin(ctx, check = True)
-
     legislation = model.Legislation()
     if req.method == 'GET':
         errors = None
@@ -267,7 +266,6 @@ def admin_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = user._id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -376,10 +374,10 @@ def api1_edit(req):
     if not (legislation.author_id == user._id or model.is_admin(ctx)):
         return wsgihelpers.respond_json(
             ctx,
-            {'status': 'error', 'message': ctx._(u'You must be an administrator to edit a legislation.')},
+            {'status': 'error', 'message': ctx._(u'You must be the owner or an administrator to edit a legislation.')},
             )
+    # Is JSON a dated legislation?
     if 'datesim' not in legislation.json:
-        # Test is JSON is a dated legislation
         return wsgihelpers.respond_json(
             ctx,
             {'status': 'error', 'message': ctx._(u'You cannot edit a non-dated legislation.')},
@@ -573,10 +571,8 @@ def user_delete(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     user = model.get_user(ctx, check = True)
-
-    if not (legislation.author_id == user._id or model.is_admin(ctx)):
+    if legislation.author_id != user._id:
         return wsgihelpers.forbidden(ctx)
-
     if req.method == 'POST':
         legislation.delete(safe = True)
         return wsgihelpers.redirect(ctx, location = model.Legislation.get_class_url(ctx))
@@ -588,10 +584,8 @@ def user_edit(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     user = model.get_user(ctx, check = True)
-
-    if not (legislation.author_id == user._id or model.is_admin(ctx)):
+    if legislation.author_id != user._id:
         return wsgihelpers.forbidden(ctx)
-
     if req.method == 'GET':
         errors = None
         inputs = dict(
@@ -605,7 +599,6 @@ def user_edit(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = legislation.author_id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(
@@ -652,7 +645,7 @@ def user_extract(req):
     ctx = contexts.Ctx(req)
     user = model.get_user(ctx, check = True)
     if user.email is None:
-        return wsgihelpers.unauthorized(ctx)
+        return wsgihelpers.forbidden(ctx)
     params = req.GET
     inputs = {
         'date': params.get('date'),
@@ -760,8 +753,6 @@ def user_index(req):
 @wsgihelpers.wsgify
 def user_new(req):
     ctx = contexts.Ctx(req)
-    user = model.get_user(ctx, check = True)
-
     legislation = model.Legislation()
     if req.method == 'GET':
         errors = None
@@ -769,7 +760,6 @@ def user_new(req):
     else:
         assert req.method == 'POST'
         inputs = extract_legislation_inputs_from_params(ctx, req.POST)
-        inputs['author_id'] = user._id
         data, errors = inputs_to_legislation_data(inputs, state = ctx)
         if errors is None:
             data['slug'], error = conv.pipe(

@@ -45,6 +45,20 @@ from openfisca_web_ui import conf, model, urls
             <%self:hidden_fields/>
             <%self:error_alert/>
             <%self:form_fields/>
+            <div class="checkbox">
+                <label>
+                    <input${' checked' if inputs['featured'] else ''} disabled id="featured" name="featured" \
+type="checkbox">
+                    ${_(u'Featured')}
+                </label>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input${' checked' if inputs['enabled'] else ''} disabled id="enabled" name="enabled" \
+type="checkbox">
+                    ${_(u'Enabled')}
+                </label>
+            </div>
             <button class="btn btn-primary" name="submit" type="submit">${_(u'Save')}</button>
         </form>
 </%def>
@@ -116,20 +130,6 @@ value="${inputs['organization'] or ''}">
     % if error:
                     <pre class="help-block alert-danger">${error | n, js, h}</pre>
     % endif
-                </div>
-                <div class="checkbox">
-                    <label>
-                        <input${' checked' if inputs['featured'] else ''} id="featured" name="featured" readonly \
-type="checkbox">
-                        ${_(u'Featured')}
-                    </label>
-                </div>
-                <div class="checkbox">
-                    <label>
-                        <input${' checked' if inputs['enabled'] else ''} id="enabled" name="enabled" readonly \
-type="checkbox">
-                        ${_(u'Enabled')}
-                    </label>
                 </div>
 </%def>
 
