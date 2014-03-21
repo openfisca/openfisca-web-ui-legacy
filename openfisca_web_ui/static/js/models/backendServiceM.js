@@ -53,6 +53,7 @@ define([
 			simulate: function(decomposition, axes) {
 				/* Decomposition & axes */
 				var reqAdditionalData = {};
+				// FIXME do not send null values, and use data arg.
 				if( ! _.isUndefined(decomposition)) {
 					reqAdditionalData.decomposition = JSON.stringify(decomposition);
 				}
