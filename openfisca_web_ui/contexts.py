@@ -27,6 +27,7 @@
 
 
 import gettext
+import os
 import pkg_resources
 
 from biryani1.states import State
@@ -216,7 +217,7 @@ class Ctx(State):
                 languages = [languages]
             translator = gettext.NullTranslations()
             for name, i18n_dir in [
-                    ('biryani1', pkg_resources.get_distribution('biryani1').location),
+                    ('biryani1', os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n')),
                     ]:
                 if i18n_dir is not None:
                     translator = new_translator(name, i18n_dir, languages, fallback = translator)
