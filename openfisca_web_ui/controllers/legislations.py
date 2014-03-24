@@ -155,6 +155,7 @@ def admin_extract(req):
         }
     data, errors = conv.struct({
         'date': conv.pipe(
+            # TODO Replace by ISO date.
             make_formatted_str_to_datetime(u'%d/%m/%y'),
             conv.default(datetime.datetime.utcnow()),
             ),
@@ -311,6 +312,7 @@ def admin_view(req):
     ctx = contexts.Ctx(req)
     legislation = ctx.node
     params = req.GET
+    # TODO Replace by ISO date.
     date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)
     dated_legislation_json = None
     if legislation.json is not None and 'datesim' not in legislation.json and date is not None:
@@ -652,6 +654,7 @@ def user_extract(req):
         }
     data, errors = conv.struct({
         'date': conv.pipe(
+            # TODO Replace by ISO date.
             make_formatted_str_to_datetime(u'%d/%m/%y'),
             conv.default(datetime.datetime.utcnow()),
             ),
@@ -805,6 +808,7 @@ def user_view(req):
     ctx = contexts.Ctx(req)
     params = req.GET
     legislation = ctx.node
+    # TODO Replace by ISO date.
     date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)
