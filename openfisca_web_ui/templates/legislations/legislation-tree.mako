@@ -78,7 +78,7 @@ ${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%Y
 </%def>
 
 
-<%def name="render_dated_legislation_node(node, editable = False, path = None)" filter="trim">
+<%def name="render_dated_legislation_node(node, is_editable = False, path = None)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:
 <%
@@ -99,20 +99,20 @@ data-toggle="collapse" data-target="#${html_node_path}">
                         <div id="${html_node_path}" class="collapse collapse-node">
                             ${self.render_dated_legislation_node(
                                 node = node['children'][node_name],
-                                editable = editable,
+                                is_editable = is_editable,
                                 path = node_path,
                                 )}
                         </div>
         % endfor
     % elif node.get('@type') == 'Scale':
-        ${self.render_dated_legislation_scale(scale = node, editable = editable, path = path)}
+        ${self.render_dated_legislation_scale(scale = node, is_editable = is_editable, path = path)}
     % elif node.get('@type') == 'Parameter':
-        ${self.render_dated_legislation_parameter(parameter = node, editable = editable, path = path)}
+        ${self.render_dated_legislation_parameter(parameter = node, is_editable = is_editable, path = path)}
     % endif
 </%def>
 
 
-<%def name="render_dated_legislation_scale(scale, editable = False, path = None)" filter="trim">
+<%def name="render_dated_legislation_scale(scale, is_editable = False, path = None)" filter="trim">
     <table class="table table-condensed">
         <thead>
             <tr>
@@ -124,7 +124,7 @@ data-toggle="collapse" data-target="#${html_node_path}">
         <tbody>
     % for index, slice in enumerate(scale.get('slices')):
             <tr>
-        % if editable:
+        % if is_editable:
                 <td>
                     <a class="editable" data-name="${list(chain(path, ('slices', index, 'threshold'))) | n, js, h}">\
 ${slice['threshold'] if slice.get('threshold') else ''}</a>
@@ -149,8 +149,8 @@ ${slice['rate'] if slice.get('rate') else ''}</a>
 </%def>
 
 
-<%def name="render_dated_legislation_parameter(parameter, editable = False, path = None)" filter="trim">
-    % if editable:
+<%def name="render_dated_legislation_parameter(parameter, is_editable = False, path = None)" filter="trim">
+    % if is_editable:
     <a class="editable" data-name="${path | n, js, h}" href="#">${parameter.get('value')}</a>
     % else:
     <div data-name="${path | n, js, h}">${parameter.get('value')}</div>

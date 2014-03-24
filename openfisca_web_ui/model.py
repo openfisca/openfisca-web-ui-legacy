@@ -272,6 +272,14 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
             return None
         return self.get_user_class_url(ctx, self.slug or self._id, *path, **query)
 
+    @property
+    def is_dated(self):
+        return self.json is not None and self.json.get('datesim') is not None
+
+    def is_owner(self, ctx):
+        user = get_user(ctx)
+        return user is not None and user._id == self.author_id
+
     @classmethod
     def make_id_or_slug_or_words_to_instance(cls):
         def id_or_slug_or_words_to_instance(value, state = None):
