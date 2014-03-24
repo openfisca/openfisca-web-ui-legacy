@@ -67,10 +67,9 @@ def situation_form_get(req):
         root_question.root_data_to_str,
         )(filled_user_api_data, state = ctx)
     root_question.fill(values, errors)
-
-    return templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question) \
-        if req.is_xhr or req.params.get('xhr') \
-        else templates.render(ctx, '/index.mako', root_question = root_question)
+    form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
+    return wsgihelpers.respond_json(ctx, {'html': form_html}) \
+        if req.is_xhr else templates.render(ctx, '/index.mako', root_question = root_question)
 
 
 @wsgihelpers.wsgify
@@ -92,31 +91,38 @@ def situation_form_post(req):
     user.ensure_test_case()
     current_test_case = user.current_test_case
     user_api_data = current_test_case.api_data or {}
+
     if model.fields_api_data() is None:
         return wsgihelpers.internal_error(ctx, explanation = ctx._(u'Unable to retrieve form fields.'))
     root_question = questions.base.make_situation_form(user_api_data)
     inputs = variabledecode.variable_decode(req.params)
-    data, errors = root_question.root_input_to_data(inputs, state = ctx)
+    api_data, errors = pipe(
+        root_question.root_input_to_data,
+        conv.base.korma_data_to_api_data,
+        )(inputs, state = ctx)
     if errors is not None:
         root_question.fill(inputs, errors)
-        if req.is_xhr:
-            form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
-            return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
-        else:
-            return templates.render(ctx, '/index.mako', root_question = root_question)
-    api_data, errors = conv.base.korma_data_to_api_data(data, state = ctx)
-    if errors is not None:
-        root_question.fill(api_data, errors)
-        if req.is_xhr:
-            form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
-            return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html})
-        else:
-            return templates.render(ctx, '/index.mako', root_question = root_question)
+        form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
+        return wsgihelpers.respond_json(ctx, {'errors': errors, 'html': form_html}) \
+            if req.is_xhr else templates.render(ctx, '/index.mako', root_question = root_question)
+
     if api_data is not None:
         user_api_data.update(api_data)
         current_test_case.api_data = user_api_data
         current_test_case.save(safe = True)
-    return wsgihelpers.respond_json(ctx, None) if req.is_xhr else wsgihelpers.redirect(ctx, location = '')
+
+    if req.is_xhr:
+        root_question = questions.base.make_situation_form(user_api_data)
+        filled_user_api_data = check(conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data))
+        values, errors = pipe(
+            conv.base.api_data_to_korma_data,
+            root_question.root_data_to_str,
+            )(filled_user_api_data, state = ctx)
+        root_question.fill(values, errors)
+        form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
+        return wsgihelpers.respond_json(ctx, {'html': form_html})
+    else:
+        wsgihelpers.redirect(ctx, location = '')
 
 
 def update_session(ctx):

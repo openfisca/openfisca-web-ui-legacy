@@ -38,7 +38,7 @@ define([
 				require(['chartsV', 'router', 'SituationFormV'], function(chartsV, router, SituationFormV) {
 					this.router = router.init();
 					this.chartsV = chartsV;
-					this.situationFormV = new SituationFormV();
+					this.situationFormV = new SituationFormV({el: '#form-wrapper'});
 				});
 			}
 		}

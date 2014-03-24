@@ -13,7 +13,6 @@ define([
 		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
 
 		var SituationFormV = Backbone.View.extend({
-			el: 'form[name="situation"]',
 			events: {
 				'change :input': 'onInputChange',
 				'click :input.add': 'onAddButtonClicked',
@@ -26,10 +25,13 @@ define([
 				this.setupXeditable();
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
+			formDataStr: function() {
+				return this.$el.find('form[name="situation"]').serialize()
+			},
 			onAddButtonClicked: function(evt) {
 				evt.preventDefault();
 				var doReloadForm = false;
-				var formDataStr = this.$el.serialize();
+				var formDataStr = this.formDataStr();
 				// Add clicked button to form data.
 				var $button = $(evt.target);
 				var name = $button.attr('name');
@@ -43,31 +45,25 @@ define([
 			onInputChange: _.debounce(function(evt) {
 				var $input = $(evt.target);
 				if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length === 0) {
-					var formDataStr = this.$el.serialize();
-					this.submit(formDataStr, false);
+					this.submit(this.formDataStr(), false);
 				}
 			}, debounceDelay),
 			onKeyPress: function(evt) {
 				if (evt.keyCode === 13 && $(evt.target).parents('.editableform').length === 0) {
 					evt.preventDefault();
-					var formDataStr = this.$el.serialize();
 					var doReloadForm = endsWith(evt.target.name, '.prenom');
-					this.submit(formDataStr, doReloadForm);
+					this.submit(this.formDataStr(), doReloadForm);
 				}
 			},
 			onSimulateButtonClicked: function(evt) {
 				evt.preventDefault();
-				var formDataStr = this.$el.serialize();
-				this.submit(formDataStr, false);
+				this.submit(this.formDataStr(), false);
 			},
 			render: function() {
 				var formData = this.model.get('formData');
-				if ( ! _.isUndefined(formData.html)) {
-					this.$el.replaceWith($(formData.html));
+				if (! _.isUndefined(formData.html)) {
+					this.$el.html(formData.html);
 					this.setupXeditable();
-				}
-				if (_.isUndefined(formData.errors)) {
-					this.$el.find('.error').remove();
 				}
 				return this;
 			},
@@ -78,8 +74,7 @@ define([
 						$hidden.val(data.value);
 						var individuId = this.$el.find('[data-name="' + data.name + '"]').data('id');
 						this.updatePrenoms(individuId, data.value);
-						var formDataStr = this.$el.serialize();
-						this.submit(formDataStr, false);
+						this.submit(this.formDataStr(), false);
 					}, this)
 				});
 			},
@@ -92,13 +87,9 @@ define([
 					this.submitTriggered = false;
 					var formData = this.model.get('formData');
 					if (_.isUndefined(formData.errors)) {
-						if (doReloadForm) {
-							this.model.fetchForm();
-						} else {
-							chartM.simulate();
-						}
+						chartM.simulate();
 					}
-				}, this));
+				}, this), {silent: ! doReloadForm});
 			},
 			updatePrenoms: function(individuId, prenom) {
 				this.$el.find('option[value="' + individuId + '"]').text(prenom);

@@ -44,7 +44,9 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
 <%def name="container_content()" filter="trim">
         <div class="row">
             <div class="col-sm-4">
-                ${situation_form(root_question)}
+                <div id="form-wrapper">
+                    ${situation_form(root_question)}
+                </div>
             </div>
             <div class="col-sm-8">
                 <div id="chart-wrapper"></div>

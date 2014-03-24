@@ -4,12 +4,11 @@ define([
 	'backbone',
 
 	'backendServiceM',
-	'helpers',
 	'parser',
 
 	'json!data/vingtiles.json'
 	],
-	function ($, _, Backbone, backendServiceM, helpers, Parser, vingtiles) {
+	function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 
 		var ChartM = Backbone.Model.extend({
 			events: {},
@@ -34,6 +33,7 @@ define([
 			chartAxes: {},
 			initialize: function () {
 				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
+				this.listenTo(this.backendServiceM, 'change:formData', this.simulate);
 				this.listenTo(this.backendServiceM, 'change:simulationInProgress', _.bind(function () {
 					this.set('simulationInProgress', this.backendServiceM.get('simulationInProgress'));
 				}, this));
@@ -67,7 +67,7 @@ define([
 				var parser = new Parser(this.get('source'));
 
 				if(args.sort == 'all') {
-					args.sort = revdisp;
+					args.sort = 'revdisp';
 				}
 
 				var _return = parser
@@ -94,18 +94,17 @@ define([
 				this.set('currentChartName', chartName);
 			},
 			simulate: function (chartName) {
-				var decomposition = null;
-				var axes = null;
 				chartName = chartName || this.get('currentChartName');
+				var data = {};
 
 				/* Simulate */
 				if(this.chartDecompositions.hasOwnProperty(chartName)) {
-					decomposition = this.chartDecompositions[chartName];
+					data.decomposition = this.chartDecompositions[chartName];
 				}
 				if(this.chartAxes.hasOwnProperty(chartName)) {
-					axes = this.chartAxes[chartName];
+					data.axes = this.chartAxes[chartName];
 				}
-				this.backendServiceM.simulate(decomposition, axes);
+				this.backendServiceM.simulate(data);
 			}
 		});
 

@@ -16,30 +16,18 @@ define([
 			urlPaths: appconfig.api.urls,
 
 			initialize: function () {},
-			fetchForm: function() {
-				return $.ajax({
-					context: this,
-					url: this.urlPaths.form
-				})
-				.done(function(data) {
-					this.set('formData', {html: data});
-				})
-				.fail(function(jqXHR, textStatus, errorThrown) {
-					console.error('fetchForm fail', jqXHR, textStatus, errorThrown);
-				});
-			},
-			saveForm: function(data, callback) {
+			saveForm: function(data, callback, options) {
 				return $.ajax({
 					context: this,
 					data: data,
 					type: 'POST',
 					url: this.urlPaths.form
 				})
-				.done(function(data, textStatus, jqXHR) {
+				.done(function(data/*, textStatus, jqXHR*/) {
 					if (data !== null && ! _.isUndefined(data.errors)) {
 						console.error('Errors in form', data.errors);
 					}
-					this.set('formData', data === null ? {} : data);
+					this.set('formData', data, options);
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error(jqXHR, textStatus, errorThrown);
@@ -50,21 +38,19 @@ define([
 					}
 				});
 			},
-			simulate: function(decomposition, axes) {
-				/* Decomposition & axes */
-				var reqAdditionalData = {};
-				// FIXME do not send null values, and use data arg.
-				if( ! _.isUndefined(decomposition)) {
-					reqAdditionalData.decomposition = JSON.stringify(decomposition);
+			simulate: function(data) {
+				var reqData = {};
+				if (data.axes) {
+					reqData.axes = JSON.stringify(data.axes);
 				}
-				if( ! _.isUndefined(axes)) {
-					reqAdditionalData.axes = JSON.stringify(axes);
+				if (data.decomposition) {
+					reqData.decomposition = JSON.stringify(data.decomposition);
 				}
 				this.set('simulationInProgress', true);
 				return $.ajax({
 					context: this,
 					url: this.urlPaths.simulate,
-					data: reqAdditionalData
+					data: reqData
 				})
 				.done(function(data) {
 					if (data.errors) {
