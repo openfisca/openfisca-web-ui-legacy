@@ -27,6 +27,7 @@
 
 
 import datetime
+import json
 import logging
 
 from biryani1.baseconv import check, pipe
@@ -174,7 +175,9 @@ def simulate(req):
         api_data['decomposition'] = data['decomposition']
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is not None:
-            email_log.error(u'Simulation error returned by API:\napi_data = {}\nerrors = {}'.format(api_data, errors))
+            json_dumps = lambda data: json.dumps(data, encoding = 'utf-8', ensure_ascii = False, indent = 2)
+            email_log.error(u'Simulation error returned by API:\n\napi_data = {}\n\nerrors = {}'.format(
+                json_dumps(api_data), json_dumps(errors)))
         output_data = {'output': output, 'errors': errors}
     else:
         output_data = {'errors': errors}
