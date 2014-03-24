@@ -247,18 +247,21 @@ def make_question(column):
             )
         question.placeholder = default_str(question)
     elif column['@type'] == 'Date':
-        question = BootstrapNumber(
-            label = question_label,
-            max = 2099,
-            min = 1870,
-            name = column['name'],
-            step = 1,
-            ) if column['name'] == 'birth' \
-        else BootstrapFrenchDate(
-            label = question_label,
-            name = column['name'],
-            )
-        question.placeholder = default_str(question)
+        if column['name'] == 'birth':
+            question = BootstrapNumber(
+                label = question_label,
+                max = 2099,
+                min = 1870,
+                name = column['name'],
+                step = 1,
+                )
+            question.placeholder = u'1970'
+        else:
+            BootstrapFrenchDate(
+                label = question_label,
+                name = column['name'],
+                )
+            question.placeholder = default_str(question)
     return question
 
 
