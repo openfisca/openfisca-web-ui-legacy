@@ -61,8 +61,8 @@ def make_familles_repeat():
         def outer_html(self):
             index = self.parent_data['familles']['index']
             return u'''
-<div class="panel panel-primary">
-  <div class="panel-heading panel-form">
+<div class="panel panel-info">
+  <div class="panel-heading">
     <h4 class="panel-title">
       <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-famille-{self[id].value}" \
 title="afficher / masquer">
@@ -83,7 +83,7 @@ title="afficher / masquer">
             return u'''
 {self[id].html}
 <div class="panel panel-default">
-  <div class="panel-heading panel-form">
+  <div class="panel-heading">
     <div class="form-inline">
       <h4 class="panel-title">
         <a class="collapsed collapse-node-toggle" data-toggle="collapse" href="#collapse-individu-{self[id].value}" \
@@ -148,7 +148,7 @@ href="#" title="Modifier">
                     name = u'categories',
                     outer_html_template = u'''
 <div class="panel panel-default">
-  <div class="panel-heading panel-form">
+  <div class="panel-heading">
     <h4 class="panel-title">
       <a class="collapse-node-toggle collapsed" data-toggle="collapse" \
 href="#collapse-famille-{self.parent[id].value}-categories" title="affcher / masquer">

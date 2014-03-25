@@ -81,8 +81,8 @@ def make_foyers_fiscaux_repeat(prenom_select_choices):
         def outer_html(self):
             index = self.parent_data['foyers_fiscaux']['index']
             return u'''
-<div class="panel panel-primary">
-  <div class="panel-heading panel-form">
+<div class="panel panel-info">
+  <div class="panel-heading">
     <h4 class="panel-title">
       <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-foyer-fiscal-{self[id].value}" \
 title="afficher / masquer">
@@ -132,7 +132,7 @@ title="afficher / masquer">
                     name = u'categories',
                     outer_html_template = u'''
 <div class="panel panel-default">
-  <div class="panel-heading panel-form">
+  <div class="panel-heading">
     <h4 class="panel-title">
       <a class="collapse-node-toggle collapsed" data-toggle="collapse" \
 href="#collapse-foyer-fiscal-{self.parent[id].value}-categories" title="affcher / masquer">

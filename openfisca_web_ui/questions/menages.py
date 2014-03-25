@@ -74,8 +74,8 @@ def make_menages_repeat(prenom_select_choices):
         def outer_html(self):
             index = self.parent_data['menages']['index']
             return u'''
-<div class="panel panel-primary">
-  <div class="panel-heading panel-form">
+<div class="panel panel-info">
+  <div class="panel-heading">
     <h4 class="panel-title">
       <a class="collapse-node-toggle" data-toggle="collapse" href="#collapse-menage-{self[id].value}" \
 title="afficher / masquer">
@@ -126,7 +126,7 @@ title="afficher / masquer">
                     name = u'categories',
                     outer_html_template = u'''
 <div class="panel panel-default">
-  <div class="panel-heading panel-form">
+  <div class="panel-heading">
     <h4 class="panel-title">
       <a class="collapse-node-toggle collapsed" data-toggle="collapse" \
 href="#collapse-menage-{self.parent[id].value}-categories" title="affcher / masquer">
