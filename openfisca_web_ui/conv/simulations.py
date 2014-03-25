@@ -37,8 +37,6 @@ import requests
 
 DEFAULT_YEAR = 2013
 
-json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
-
 
 api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
 
@@ -58,7 +56,10 @@ def api_post_content_to_simulation_output(api_post_content, state = None):
         data = api_post_content,
         )
     response_data = response.json(object_pairs_hook = collections.OrderedDict)
-    return (response_data, None) if response.ok else (api_post_content, response_data.get('error'))
+    return (response_data, None) if response.ok else (api_post_content, response_data.get('error', {}).get('errors'))
+
+
+json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
 
 
 def user_api_data_to_api_data(user_data, state = None):
