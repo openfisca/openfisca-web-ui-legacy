@@ -29,7 +29,6 @@
 import collections
 import datetime
 import json
-import logging
 
 from biryani1.baseconv import function, pipe
 from biryani1.states import default_state
@@ -39,7 +38,6 @@ import requests
 DEFAULT_YEAR = 2013
 
 json_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
-log = logging.getLogger(__name__)
 
 
 api_data_to_api_post_content = function(lambda api_data: json.dumps(api_data, default = json_handler))
