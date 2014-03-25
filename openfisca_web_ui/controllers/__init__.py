@@ -174,16 +174,15 @@ def simulate(req):
                 scenario['axes'] = data['axes']
         api_data['decomposition'] = data['decomposition']
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
-        if errors is not None:
+        if errors is None:
+            output_data = {key: value for key, value in output.iteritems() if key != 'params'}
+        else:
+            output_data = {'errors': errors}
             json_dumps = lambda data: json.dumps(data, encoding = 'utf-8', ensure_ascii = False, indent = 2)
             email_log.error(u'Simulation error returned by API:\n\napi_data = {}\n\nerrors = {}'.format(
                 json_dumps(api_data), json_dumps(errors)))
-        output_data = {'output': output, 'errors': errors}
     else:
         output_data = {'errors': errors}
-    if data['token'] is not None and 'params' in output_data.get('output', {}):
-        # Call with token are anonymous. Remove params from json response
-        del output_data['output']['params']
     return wsgihelpers.respond_json(ctx, output_data, headers = headers)
 
 
