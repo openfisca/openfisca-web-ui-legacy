@@ -134,6 +134,7 @@ def simulate(req):
     params = req.params
     inputs = dict(
         axes = params.get('axes'),
+        context = params.get('context'),
         decomposition = params.get('decomposition'),
         token = params.get('token'),
         )
@@ -149,6 +150,7 @@ def simulate(req):
                     }),
                 ),
             ),
+        'context': conv.cleanup_line,
         'decomposition': conv.first_match(
             conv.make_input_to_json(),
             conv.cleanup_line,
@@ -172,7 +174,10 @@ def simulate(req):
         if data['axes'] is not None:
             for scenario in api_data['scenarios']:
                 scenario['axes'] = data['axes']
-        api_data['decomposition'] = data['decomposition']
+        api_data.update({
+            'context': data['context'],
+            'decomposition': data['decomposition'],
+            })
         output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
         if errors is None:
             output_data = {key: value for key, value in output.iteritems() if key != 'params'}
