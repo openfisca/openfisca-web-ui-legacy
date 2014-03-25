@@ -122,7 +122,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
         % endif
     % else:
 <%
-        json_from = legislation.json.get('from')
+        json_from = legislation.json.get('from') if legislation.json is not None else None
         value = datetime.datetime.strptime(json_from, '%Y-%m-%d') if json_from is not None else None
 %>\
         % if value is not None:
@@ -130,7 +130,7 @@ ${legislation.get_title(ctx)} - ${parent.title_content()}
             <dd>${babel.dates.format_date(value, format = 'short')}</dd>
         % endif
 <%
-        json_to = legislation.json.get('to')
+        json_to = legislation.json.get('to') if legislation.json is not None else None
         value = datetime.datetime.strptime(json_to, '%Y-%m-%d') if json_to is not None else None
 %>\
         % if value is not None:
