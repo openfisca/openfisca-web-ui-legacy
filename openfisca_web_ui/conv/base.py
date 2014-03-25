@@ -33,6 +33,7 @@ import re
 from biryani1.baseconv import cleanup_line, empty_to_none, function, input_to_slug, merge, pipe, test
 from biryani1.states import default_state
 
+from .. import uuidhelpers
 from . import familles as familles_conv
 from . import foyers_fiscaux as foyers_fiscaux_conv
 from . import menages as menages_conv
@@ -99,7 +100,8 @@ def make_fill_user_api_data(ensure_api_compliance):
         new_values = {}
 
         # individus
-        individus = questions.individus.fill_values(values.get('individus'), ensure_api_compliance)
+        individu_values = values.get('individus')
+        individus = individu_values if individu_values else {uuidhelpers.generate_uuid(): {u'prenom': u'Personne 1'}}
         new_values['individus'] = individus
         individu_ids = individus.keys()
 

@@ -88,7 +88,6 @@ def api_data_to_korma_data(values, state = None):
 
 
 def korma_data_to_api_data(values, state = None):
-    from ..questions import individus
     if values is None:
         return None, None
     if state is None:
@@ -123,7 +122,7 @@ def korma_data_to_api_data(values, state = None):
         # Add new individu after iterating over existing familles to compute the individu index correctly.
         if add_individu_in_famille_id is not None:
             new_individu_id = uuidhelpers.generate_uuid()
-            new_individus[new_individu_id] = individus.build_default_values(index = len(new_individus.keys()) + 1)
+            new_individus[new_individu_id] = {u'prenom': u'Personne {}'.format(len(new_individus.keys()) + 1)}
             new_famille = new_familles[add_individu_in_famille_id] or {}
             new_individu_role = u'parents' if len(new_famille.get(u'parents') or []) < 2 else u'enfants'
             new_famille.setdefault(new_individu_role, []).append(new_individu_id)
