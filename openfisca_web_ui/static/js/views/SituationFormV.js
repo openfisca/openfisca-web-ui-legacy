@@ -26,7 +26,7 @@ define([
 				this.listenTo(this.model, 'change:formData', this.render);
 			},
 			formDataStr: function() {
-				return this.$el.find('form[name="situation"]').serialize()
+				return this.$el.find('form[name="situation"]').serialize();
 			},
 			onAddButtonClicked: function(evt) {
 				evt.preventDefault();
