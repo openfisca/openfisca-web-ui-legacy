@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'x-editable',
 
-	'backendServiceM',
+	'situationFormM',
 	'chartM'
 	],
-	function ($, _, Backbone, xEditable, backendServiceM, chartM) {
+	function ($, _, Backbone, xEditable, situationFormM, chartM) {
 
 		var debounceDelay = 100;
 		var endsWith = function(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1; };
@@ -15,7 +15,7 @@ define([
 		$.fn.call = function (fn, args, thisp) {
 			fn.apply(thisp || this, args);
 			return this; // if you want to maintain chainability -- other wise, you can move the return up one line..
-		}
+		};
 
 		var SituationFormV = Backbone.View.extend({
 			events: {
@@ -24,12 +24,14 @@ define([
 				'click button.simulate': 'onSimulateButtonClicked',
 				'keypress :input': 'onKeyPress'
 			},
-			model: backendServiceM,
+			model: situationFormM,
 			submitTriggered: false,
 			initialize: function() {
 				this.setupXeditable();
-				this.listenTo(this.model, 'change:apiData', this.renderApiData);
-				this.listenTo(this.model, 'change:formData', this.renderFormData);
+				this.listenTo(this.model, 'change:apiErrors', this.renderApiErrors);
+				this.listenTo(this.model, 'change:apiSuggestions', this.renderApiSuggestions);
+				this.listenTo(this.model, 'change:formErrors', this.renderFormErrors);
+				this.listenTo(this.model, 'change:formHtml', this.renderFormHtml);
 			},
 			formDataStr: function() {
 				return this.$el.find('form[name="situation"]').serialize();
@@ -65,16 +67,28 @@ define([
 				evt.preventDefault();
 				this.submit(this.formDataStr(), false);
 			},
-			renderApiData: function() {
-				var apiData = this.model.get('apiData');
-				if ('errors' in apiData) {
-					this.renderApiDataTestCase(apiData.errors[0].scenarios[0].test_case);
-				}
-				if ('suggestions' in apiData) {
-					this.renderApiDataTestCase(apiData.suggestions.scenarios[0].test_case);
-				}
+			renderApiErrors: function() {
+				this.renderApiDataTestCase(this.model.get('apiErrors'), 'has-error');
+				return this;
 			},
-			renderApiDataTestCase: function(testCase) {
+			renderApiSuggestions: function() {
+				this.renderApiDataTestCase(this.model.get('apiSuggestions'), 'has-warning');
+				return this;
+			},
+			renderApiDataTestCase: function(testCase, className) {
+				if ('foyers_fiscaux' in testCase) {
+					_.each(testCase.foyers_fiscaux, function(foyerFiscal, foyerFiscalIdx) {
+						var $foyerFiscal = $('[id^="collapse-foyer-fiscal"]').eq(foyerFiscalIdx);
+						if ('declarants' in foyerFiscal) {
+							_.each(foyerFiscal.declarants, function(errorMessage, declarantIdx) {
+								var $declarant = $foyerFiscal.find('.individu').eq(declarantIdx);
+								$declarant
+									.addClass(className)
+									.append($('<p>', {'class': 'help-block', text: errorMessage}));
+							});
+						}
+					});
+				}
 				if ('individus' in testCase) {
 					_.each(testCase.individus, function(individu, individuId) {
 						_.each(individu, function(fieldValue, fieldName) {
@@ -92,9 +106,6 @@ define([
 							}
 							$individu
 								.find(':input[name$=".' + fieldName + '"]')
-									.attr({
-										title: 'Suggested value used in simulation'
-									})
 									.call(function() {
 										var $this = $(this);
 										var tagName = $this.prop('tagName').toLowerCase();
@@ -106,20 +117,22 @@ define([
 									})
 									.tooltip({
 										placement: 'top',
+										title: 'Suggested value used in simulation',
 										toggle: 'tooltip'
 									})
 									.parents('.form-group')
-										.addClass('has-warning');
+										.addClass(className);
 						});
 					});
 				}
+				return this;
 			},
-			renderFormData: function() {
-				var formData = this.model.get('formData');
-				if (! _.isUndefined(formData.html)) {
-					this.$el.html(formData.html);
-					this.setupXeditable();
-				}
+			renderFormErrors: function() {
+				console.error('renderFormErrors: not implemented');
+			},
+			renderFormHtml: function() {
+				this.$el.html(this.model.get('formHtml'));
+				this.setupXeditable();
 				return this;
 			},
 			setupXeditable: function() {
@@ -138,13 +151,12 @@ define([
 					return;
 				}
 				this.submitTriggered = true;
-				this.model.saveForm(formDataStr, _.bind(function() {
+				// TODO Use promises to chain calls.
+				this.model.save(formDataStr, _.bind(function() {
 					this.submitTriggered = false;
-					var formData = this.model.get('formData');
-					if (_.isUndefined(formData.errors)) {
-						chartM.simulate();
-					}
-				}, this), {silent: ! doReloadForm});
+					chartM.simulate();
+				}, this));
+				// FIXME Handle full form reload problem., {silent: ! doReloadForm}
 			},
 			updatePrenoms: function(individuId, prenom) {
 				this.$el.find('option[value="' + individuId + '"]').text(prenom);

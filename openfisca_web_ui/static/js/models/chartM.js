@@ -11,7 +11,6 @@ define([
 	function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 
 		var ChartM = Backbone.Model.extend({
-			events: {},
 			fetched: false,
 			defaults: {
 				source: {},
@@ -26,26 +25,23 @@ define([
 
 				simulationInProgress: false
 			},
-			backendServiceM: backendServiceM,
 			chartDecompositions: {
 				'distribution': 'decompositions-multiples.xml'
 			},
 			chartAxes: {},
 			initialize: function () {
-				this.listenTo(this.backendServiceM, 'change:apiData', this.parse);
-				this.listenTo(this.backendServiceM, 'change:formData', this.simulate);
-				this.listenTo(this.backendServiceM, 'change:simulationInProgress', _.bind(function () {
-					this.set('simulationInProgress', this.backendServiceM.get('simulationInProgress'));
+				this.listenTo(backendServiceM, 'change:apiData', this.parse);
+				this.listenTo(backendServiceM, 'change:formData', this.simulate);
+				this.listenTo(backendServiceM, 'change:simulationInProgress', _.bind(function () {
+					this.set('simulationInProgress', backendServiceM.get('simulationInProgress'));
 				}, this));
 			},
 			parse: function () {
 				// FIXME Remove "fetched". Rework asynchronisms.
 				this.fetched = true;
-				var apiData = this.backendServiceM.get('apiData');
-				if ( ! 'errors' in apiData) {
+				var apiData = backendServiceM.get('apiData');
+				if ( ! ('errors' in apiData)) {
 					this.set('source', $.extend(true, {}, apiData.value));
-				} else {
-					console.error('chartM.parse', apiData);
 				}
 			},
 
@@ -110,7 +106,7 @@ define([
 				if(this.chartAxes.hasOwnProperty(chartName)) {
 					data.axes = this.chartAxes[chartName];
 				}
-				this.backendServiceM.simulate(data);
+				backendServiceM.simulate(data);
 			}
 		});
 

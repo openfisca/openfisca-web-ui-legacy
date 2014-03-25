@@ -12,20 +12,15 @@ define([
 				formData: {},
 				simulationInProgress: false,
 			},
-			urlPaths: appconfig.api.urls,
-
-			saveForm: function(data, callback, options) {
+			saveForm: function(data, callback) {
 				return $.ajax({
 					context: this,
 					data: data,
 					type: 'POST',
-					url: this.urlPaths.form
+					url: appconfig.api.urls.form
 				})
 				.done(function(data/*, textStatus, jqXHR*/) {
-					if (data !== null && ! _.isUndefined(data.errors)) {
-						console.error('Errors in form', data.errors);
-					}
-					this.set('formData', data, options);
+					this.set('formData', data);
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
 					console.error(jqXHR, textStatus, errorThrown);
@@ -47,7 +42,7 @@ define([
 				this.set('simulationInProgress', true);
 				return $.ajax({
 					context: this,
-					url: this.urlPaths.simulate,
+					url: appconfig.api.urls.simulate,
 					data: reqData
 				})
 				.done(function(data) {

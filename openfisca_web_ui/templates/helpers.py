@@ -104,6 +104,7 @@ def build_requireconfig(ctx):
             # Models
             'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
             'chartM': urls.get_url(ctx, u'js/models/chartM'),
+            'situationFormM': urls.get_url(ctx, u'js/models/situationFormM'),
             'VisualizationsPaneM': urls.get_url(ctx, u'js/models/VisualizationsPaneM'),
 
             # Modules
