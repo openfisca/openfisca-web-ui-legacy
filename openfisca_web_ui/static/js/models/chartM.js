@@ -39,8 +39,14 @@ define([
 				}, this));
 			},
 			parse: function () {
+				// FIXME Remove "fetched". Rework asynchronisms.
 				this.fetched = true;
-				this.set('source', $.extend(true, {}, this.backendServiceM.get('apiData')));
+				var apiData = this.backendServiceM.get('apiData');
+				if ( ! 'errors' in apiData) {
+					this.set('source', $.extend(true, {}, apiData.value));
+				} else {
+					console.error('chartM.parse', apiData);
+				}
 			},
 
 			/* Overiding Backbone get method : Call custom get method if exists (can pass args) */

@@ -48,6 +48,7 @@ bootstrap_form_group = u'<div class="form-group">{self.inner_html}</div>'
 bootstrapize = lambda question_class, *args, **kwargs: \
     question_class(
         control_attributes = {'class': u'form-control'},
+        label_classes = set(['control-label']),
         *args, **kwargs)
 
 
@@ -88,12 +89,6 @@ BootstrapSelect = lambda *args, **kwargs: bootstrapize(Select, *args, **kwargs)
 
 
 BootstrapText = lambda *args, **kwargs: bootstrapize(Text, *args, **kwargs)
-
-
-custom_column_default_values = {
-    # TODO remove birth as it is no more needed by API.
-    u'birth': 1984,
-    }
 
 
 class MongoDate(Date):
@@ -195,7 +190,7 @@ aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
 def make_question(column):
     default = column.get('default')
     if default is None:
-        default = custom_column_default_values.get(column['name'])
+        default = ''
     default_str = lambda question: check(question.data_to_str(default))
     question_label = column.get('label')
     cerfa_field = column.get('cerfa_field')
@@ -248,6 +243,8 @@ def make_question(column):
         question.placeholder = default_str(question)
     elif column['@type'] == 'Date':
         if column['name'] == 'birth':
+            # Particular case for birth which is asked to user as a year by UI.
+            # API treats it as a Date @type and accepts it as a Number too.
             question = BootstrapNumber(
                 label = question_label,
                 max = 2099,
@@ -255,7 +252,7 @@ def make_question(column):
                 name = column['name'],
                 step = 1,
                 )
-            question.placeholder = u'1970'
+            question.placeholder = default[:4]
         else:
             BootstrapFrenchDate(
                 label = question_label,
