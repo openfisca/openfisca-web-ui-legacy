@@ -39,6 +39,7 @@ from . import conv, model, templates
 
 
 app_dir = os.path.dirname(os.path.abspath(__file__))
+db = None
 hostname = socket.gethostname().split('.')[0]
 
 
@@ -121,6 +122,7 @@ def load_environment(global_conf, app_conf):
         errorware['smtp_server'] = conf.get('smtp_server', 'localhost')
 
     # Load MongoDB database.
+    global db
     db = pymongo.Connection(conf['database.host'], conf['database.port'])[conf['database.name']]
     model.init(db)
 
