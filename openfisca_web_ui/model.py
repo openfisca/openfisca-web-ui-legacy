@@ -703,7 +703,7 @@ def is_admin(ctx, check = False):
     user = get_user(ctx)
     if user is None or user.email is None:
         if check:
-            raise wsgihelpers.forbidden(ctx,
+            raise wsgihelpers.unauthorized(ctx,
                 message = ctx._(u"You must be authenticated as an administrator to access this page."))
         return False
     if not user.admin:
