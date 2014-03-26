@@ -85,7 +85,9 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 				.values();
 		},
 		changeChart: function (chartName) {
-			this.simulate(chartName);
+			if (this.get('currentChartName') === null) {
+				this.simulate(chartName);
+			}
 			this.set('currentChartName', chartName);
 		},
 		simulate: function (chartName) {

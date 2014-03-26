@@ -21,6 +21,11 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Visuali
 		visualizations: VisualizationsPaneV,
 		waterfall: WaterfallChartV
 	};
+	if (enableLocatingChart) {
+		require(['LocatingChartV'], function(LocatingChartV) {
+			viewClassByChartName.locating = LocatingChartV;
+		});
+	}
 
 	var ChartV = Backbone.View.extend({
 		currentChildView: null,
@@ -35,12 +40,8 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Visuali
 				this.$el.sticky();
 			}
 			this.$overlay = this.$el.find('.overlay');
-			// TODO Move call to each graph.
-			$(window).on('resize', _.bind(this.updateDimensions, this));
-
 			this.listenTo(this.model, 'change:currentChartName', this.render);
 			this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
-
 			this.updateOverlay();
 		},
 		onTabShow: function(evt) {
@@ -55,7 +56,10 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Visuali
 				if (this.currentChildView !== null) {
 					this.currentChildView.remove();
 				}
-				this.currentChildView = new viewClassByChartName[chartName]({el: this.$el.find('#' + chartName)});
+				var $tabPane = $('<div>', {'class': 'active tab-pane'});
+				this.$el.find('.tab-content').append($tabPane);
+				this.currentChildView = new viewClassByChartName[chartName]({el: $tabPane});
+				this.currentChildView.render();
 			}
 			return this;
 		},
@@ -69,25 +73,10 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Visuali
 				$svg.css('opacity', 1);
 				this.$overlay.hide();
 			}
-		},
-		updateDimensions: function () {
-			if(!_.isUndefined(this.currentChildView)) {
-				this.currentChildView.updateDimensions();
-				/* Locating chart already auto resizes */
-				if(this.model.get('currentChartName') != 'locating') {
-					this.currentChildView.render();
-				}
-			}
 		}
 	});
 
 	var chartV = new ChartV();
-	if (enableLocatingChart) {
-		require(['LocatingChartV'], function(LocatingChartV) {
-			viewClassByChartName.locating = LocatingChartV;
-			chartV.render('locating');
-		});
-	}
 	return chartV;
 
 });
