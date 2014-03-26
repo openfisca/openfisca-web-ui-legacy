@@ -1,8 +1,9 @@
 define(['underscore'], function (_) {
+	'use strict';
 
 	function installConsolePolyfill() {
-		if (typeof console === "undefined") {
-			console = {};
+		if (typeof window.console === 'undefined') {
+			window.console = {};
 			var alertFallback = false;
 			var polyfillMethod = function(msg) {
 				if (alertFallback) {
@@ -12,8 +13,8 @@ define(['underscore'], function (_) {
 			var methodNames = ['error', 'info', 'log'];
 			for (var methodIndex in methodNames) {
 				var methodName = methodNames[methodIndex];
-				if (typeof console[methodName] === "undefined") {
-					console[methodName] = polyfillMethod;
+				if (typeof window.console[methodName] === 'undefined') {
+					window.console[methodName] = polyfillMethod;
 				}
 			}
 		}

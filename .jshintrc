@@ -1,0 +1,17 @@
+{
+  "browser": true,
+  "globals": {
+    "alert": false,
+    "console": false,
+    "define": false,
+    "require": false
+  },
+  "indent": 2,
+  "newcap": true,
+  "nonew": true,
+  "quotmark": "single",
+  "strict": true,
+  "trailing": true,
+  "undef": true,
+  "unused": true
+}

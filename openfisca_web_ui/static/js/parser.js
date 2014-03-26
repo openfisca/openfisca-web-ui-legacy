@@ -1,24 +1,22 @@
 define([
 	'jquery',
 	'underscore',
-	'helpers'
-	],
-	function ($, _, helpers) {
+],
+	function ($, _) {
+		'use strict';
 
-		/* Parsing methods (private) */
 		var Parser = function (data) {
 			this.outputValue = $.extend(true, {}, data);
 		};
 		Parser.prototype = {
 			clean: function () {
 				var json = this.outputValue;
-					json._id = 'root';
+				json._id = 'root';
 
 				var doIt = function (json) {
 					json.value = json.values[0];
-					var that = this,
-						old_children = json.children;
-						json.children = [];
+					var old_children = json.children;
+					json.children = [];
 
 					_.each(old_children, function (el) {
 						if(el.values[0] !== 0) {
@@ -42,7 +40,7 @@ define([
 				var data = this.outputValue,
 					groupedData = { positive: [], negative: [] };
 				var doIt = function (obj) {
-					_.each(obj, function (el, name) {
+					_.each(obj, function (el) {
 						if(el.hasOwnProperty('children')) {doIt(el.children);}
 						else {
 							if(el.values[0] > 0) groupedData.positive.push(el);
@@ -61,13 +59,13 @@ define([
 				Data requirements : cleaned
 			*/
 			listChildren: function () {
-				var data = this.outputValue,
-					groupedData = [];
-					doIt = function (obj) {
-						_.each(obj, function (el, name) {
-							if(el.hasOwnProperty('children')) { doIt(el.children); }
-							else { groupedData.push(el); }
-						});
+				var data = this.outputValue;
+				var groupedData = [];
+				var doIt = function (obj) {
+					_.each(obj, function (el) {
+						if(el.hasOwnProperty('children')) { doIt(el.children); }
+						else { groupedData.push(el); }
+					});
 				};
 				doIt(data.children);
 				this.outputValue = groupedData;
@@ -95,8 +93,7 @@ define([
 				Data requirements : cleaned
 			*/
 			setParentNodes: function () {
-				var that = this,
-					_data = this.outputValue;
+				var _data = this.outputValue;
 
 				var doIt = function (loopData) {
 					var	loopDataChildren = loopData.children,
@@ -108,9 +105,9 @@ define([
 
 						if(i == dataLength-1) {
 							loopDatum.parentNodes.push({
-									id: loopData._id,
-									name: loopData.name,
-									value: loopData.value
+								id: loopData._id,
+								name: loopData.name,
+								value: loopData.value
 							});
 						}
 						doIt(loopDatum);
@@ -130,27 +127,26 @@ define([
 				if(this.outputValue.code != 'root') return this;
 
 				/* On sélectionne l'ensemble des noeuds, la donnée non décomposée */
-				var sourceData = _.findWhere(this.outputValue.children, {code: 'revdisp'}),
-					sortData = _.filter(this.outputValue.children, function (node) {
+				var sourceData = _.findWhere(this.outputValue.children, {code: 'revdisp'});
+				var sortData = _.filter(this.outputValue.children, function (node) {
 						return node.code != 'revdisp';
-					}),
-					defineChildrenSortProperty = function (_sortNode, sortId) {
-						var sortValue = _sortNode.code;
-							doIt = function (_node) {
-							_.each(_node.children, function(_n) {
-								if(_n.hasOwnProperty('children')) {
-									doIt(_n);
+					});
+				var defineChildrenSortProperty = function (_sortNode, sortId) {
+					var sortValue = _sortNode.code;
+					var doIt = function (_node) {
+						_.each(_node.children, function(_n) {
+							if(_n.hasOwnProperty('children')) {
+								doIt(_n);
+							} else {
+								var sourceNode = _.findDeep(sourceData, {code: _n.code});
+								if(!_.isUndefined(sourceNode)) {
+									if(_.isUndefined(sourceNode.sorts)) sourceNode.sorts = {};
+									sourceNode.sorts[sortId] = sortValue;
 								}
-								else {
-									var sourceNode = _.findDeep(sourceData, {code: _n.code});
-									if(!_.isUndefined(sourceNode)) {
-										if(_.isUndefined(sourceNode.sorts)) sourceNode.sorts = {};
-										sourceNode.sorts[sortId] = sortValue;
-									}
-								}
-							});
-						};
-						doIt(_sortNode);
+							}
+						});
+					};
+					doIt(_sortNode);
 				};
 				_.each(sortData, function (sortNode) {
 					var sortId = sortNode.code;
@@ -170,7 +166,7 @@ define([
 			setPositiveSort: function () {
 				var data = this.outputValue;
 				var doIt = function (obj) {
-					_.each(obj, function (el, name) {
+					_.each(obj, function (el) {
 						if(!el.hasOwnProperty('sorts')) el.sorts = {};
 						if(el.hasOwnProperty('children')) { doIt(el.children); }
 						else {

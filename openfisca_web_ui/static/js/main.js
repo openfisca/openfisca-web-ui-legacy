@@ -1,9 +1,11 @@
 require([
 	'domReady',
+	'jquery',
 
 	'app',
 	'helpers'
-], function(domReady, app, helpers) {
+], function(domReady, $, app, helpers) {
+	'use strict';
 
 	$.noConflict();
 //	_.noConflict();

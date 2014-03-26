@@ -86,8 +86,13 @@ def build_requireconfig(ctx):
             'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
             'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
 
-            # App
+            # Modules
+            'auth': urls.get_url(ctx, u'js/auth'),
             'app': urls.get_url(ctx, u'js/app'),
+            'disclaimer': urls.get_url(ctx, u'js/disclaimer'),
+            'helpers': urls.get_url(ctx, 'js/helpers'),
+            'legislation': urls.get_url(ctx, u'js/legislation'),
+            'parser': urls.get_url(ctx, 'js/parser'),
             'router': urls.get_url(ctx, u'js/router'),
 
             # Views
@@ -107,15 +112,8 @@ def build_requireconfig(ctx):
             'situationFormM': urls.get_url(ctx, u'js/models/situationFormM'),
             'VisualizationsPaneM': urls.get_url(ctx, u'js/models/VisualizationsPaneM'),
 
-            # Modules
-            'auth': urls.get_url(ctx, u'js/modules/auth'),
-            'disclaimer': urls.get_url(ctx, u'js/modules/disclaimer'),
-            'helpers': urls.get_url(ctx, 'js/modules/helpers'),
-            'legislation': urls.get_url(ctx, u'js/modules/legislation'),
-            'parser': urls.get_url(ctx, 'js/modules/parser'),
-
             # External libs
-            # You must include this on every page which uses navigator.id functions.
+            # Quote from persona: You must include this on every page which uses navigator.id functions.
             # Because Persona is still in development, you should not self-host the include.js file.
             'persona': urlparse.urljoin(conf['persona.url'], 'include'),
             },

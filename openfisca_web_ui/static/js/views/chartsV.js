@@ -1,5 +1,6 @@
 define([
 	'jquery',
+	'underscore',
 	'backbone',
 	'sticky',
 
@@ -9,82 +10,84 @@ define([
 	'VisualizationsPaneV',
 	'WaterfallChartV',
 	'hbs!templates/chartsTabs'
-	],
-	function ($, Backbone, sticky, appconfig, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
-		chartsTabsT) {
-		'use strict';
+],
+function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
+	chartsTabsT) {
+	'use strict';
 
-		var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
-		var viewClassByChartName = {
-			distribution: DistributionChartV,
-			visualizations: VisualizationsPaneV,
-			waterfall: WaterfallChartV
-		};
+	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
+	var viewClassByChartName = {
+		distribution: DistributionChartV,
+		visualizations: VisualizationsPaneV,
+		waterfall: WaterfallChartV
+	};
 
-		var ChartV = Backbone.View.extend({
-			currentChildView: null,
-			el: '#chart-wrapper',
-			events: {
-				'show.bs.tab a[data-toggle="tab"]': 'onTabShow',
-			},
-			model: chartM,
-			initialize: function () {
-				this.$el
-					.html(chartsTabsT({enableLocatingChart: enableLocatingChart}))
-					.sticky();
-				this.$overlay = this.$el.find('.overlay');
+	var ChartV = Backbone.View.extend({
+		currentChildView: null,
+		el: '#chart-wrapper',
+		events: {
+			'show.bs.tab a[data-toggle="tab"]': 'onTabShow',
+		},
+		model: chartM,
+		initialize: function () {
+			this.$el
+				.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
+//					.sticky();
+			this.$overlay = this.$el.find('.overlay');
 
-				$(window).on("resize", _.bind(this.updateDimensions, this));
+			// TODO Move call to each graph.
+			$(window).on('resize', _.bind(this.updateDimensions, this));
 
-				this.listenTo(this.model, 'change:currentChartName', this.render);
-				this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
+			this.listenTo(this.model, 'change:currentChartName', this.render);
+			this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
 
-				this.updateOverlay();
-			},
-			onTabShow: function(evt) {
-				window.location.hash = $(evt.target).attr('href');
-			},
-			render: function () {
-				var chartName = this.model.get('currentChartName');
-				if (chartName in viewClassByChartName) {
-					if (this.$el.find('.nav .active').length === 0) {
-						this.$el.find('.nav a[href="#' + chartName + '"]').tab('show');
-					}
-					this.$el.find('.tab-pane.active').empty();
-					this.currentChildView = new viewClassByChartName[chartName]({el: this.$el.find('#' + chartName)});
+			this.updateOverlay();
+		},
+		onTabShow: function(evt) {
+			window.location.hash = $(evt.target).attr('href');
+		},
+		render: function () {
+			var chartName = this.model.get('currentChartName');
+			if (chartName in viewClassByChartName) {
+				if (this.$el.find('.nav .active').length === 0) {
+					this.$el.find('.nav a[href="#' + chartName + '"]').tab('show');
 				}
-				return this;
-			},
-			updateOverlay: function() {
-				var simulationInProgress = this.model.get('simulationInProgress');
-				var $svg = this.$el.find('svg');
-				if (simulationInProgress) {
-					$svg.css('opacity', 0.1);
-					this.$overlay.show();
-				} else {
-					$svg.css('opacity', 1);
-					this.$overlay.hide();
+				if (this.currentChildView !== null) {
+					this.currentChildView.remove();
 				}
-			},
-			updateDimensions: function () {
-				if(!_.isUndefined(this.currentChildView)) {
-					this.currentChildView.updateDimensions();
-					/* Locating chart already auto resizes */
-					if(this.model.get('currentChartName') != 'locating') {
-						this.currentChildView.render();
-					}
+				this.currentChildView = new viewClassByChartName[chartName]({el: this.$el.find('#' + chartName)});
+			}
+			return this;
+		},
+		updateOverlay: function() {
+			var simulationInProgress = this.model.get('simulationInProgress');
+			var $svg = this.$el.find('svg');
+			if (simulationInProgress) {
+				$svg.css('opacity', 0.1);
+				this.$overlay.show();
+			} else {
+				$svg.css('opacity', 1);
+				this.$overlay.hide();
+			}
+		},
+		updateDimensions: function () {
+			if(!_.isUndefined(this.currentChildView)) {
+				this.currentChildView.updateDimensions();
+				/* Locating chart already auto resizes */
+				if(this.model.get('currentChartName') != 'locating') {
+					this.currentChildView.render();
 				}
 			}
-		});
-
-		var chartV = new ChartV();
-		if (enableLocatingChart) {
-			require(['LocatingChartV'], function(LocatingChartV) {
-				viewClassByChartName.locating = LocatingChartV;
-				chartV.render('locating');
-			});
 		}
-		return chartV;
+	});
 
+	var chartV = new ChartV();
+	if (enableLocatingChart) {
+		require(['LocatingChartV'], function(LocatingChartV) {
+			viewClassByChartName.locating = LocatingChartV;
+			chartV.render('locating');
+		});
 	}
-);
+	return chartV;
+
+});

@@ -4,17 +4,10 @@ define([
 	'appconfig',
 	'chartM'
 ], function (Backbone, appconfig, chartM) {
+	'use strict';
 
 	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
 	var router = null;
-
-	function init () {
-		if (router === null) {
-			router = new Router();
-		}
-		return router;
-	}
-
 	var routes = {
 		'': 'defaultChart',
 		distribution: 'distributionChart',
@@ -32,7 +25,7 @@ define([
 			Backbone.history.start();
 		},
 		defaultChart: function () {
-			this.navigate(enableLocatingChart ? 'locating' : 'waterfall', {replace: true, trigger: true});
+			chartM.changeChart(enableLocatingChart ? 'locating' : 'waterfall');
 		},
 		distributionChart: function () {
 			chartM.changeChart('distribution');
@@ -52,6 +45,13 @@ define([
 			chartM.changeChart('visualizations');
 		}
 	});
+
+	function init () {
+		if (router === null) {
+			router = new Router();
+		}
+		return router;
+	}
 
 	return {init: init};
 
