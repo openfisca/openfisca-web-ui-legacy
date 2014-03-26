@@ -31,8 +31,7 @@ define([
 					});
 					return json;
 				};
-				var result = doIt(json);
-				this.outputValue = result;
+				this.outputValue = doIt(json);
 				return this;
 			},
 			/* Useless */

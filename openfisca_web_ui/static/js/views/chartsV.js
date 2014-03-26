@@ -7,25 +7,24 @@ define([
 	'appconfig',
 	'chartM',
 	'DistributionChartV',
+	'LocatingChartV',
+	'visualizationsServiceM',
 	'VisualizationsPaneV',
 	'WaterfallChartV',
+
 	'hbs!templates/chartsTabs'
 ],
-function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, VisualizationsPaneV, WaterfallChartV,
-	chartsTabsT) {
+function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, LocatingChartV, visualizationsServiceM,
+	VisualizationsPaneV, WaterfallChartV, chartsTabsT) {
 	'use strict';
 
 	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
 	var viewClassByChartName = {
 		distribution: DistributionChartV,
+		locating: LocatingChartV,
 		visualizations: VisualizationsPaneV,
-		waterfall: WaterfallChartV
+		waterfall: WaterfallChartV,
 	};
-	if (enableLocatingChart) {
-		require(['LocatingChartV'], function(LocatingChartV) {
-			viewClassByChartName.locating = LocatingChartV;
-		});
-	}
 
 	var ChartV = Backbone.View.extend({
 		currentChildView: null,
@@ -34,20 +33,29 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Visuali
 			'show.bs.tab a[data-toggle="tab"]': 'onTabShow',
 		},
 		model: chartM,
+		$overlay: null,
 		initialize: function () {
-			this.$el.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
-			if ($(window).width() >= 768) {
-				this.$el.sticky();
-			}
-			this.$overlay = this.$el.find('.overlay');
+			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(this.model, 'change:currentChartName', this.render);
 			this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
+			if ($(window).width() >= 768) {
+				this.$el.sticky({
+					getWidthFrom: this.$el.parent(),
+					topSpacing: 10,
+				});
+			}
+			this.render();
 			this.updateOverlay();
 		},
 		onTabShow: function(evt) {
 			window.location.hash = $(evt.target).attr('href');
 		},
 		render: function () {
+			this.$el.html(chartsTabsT({
+				enableLocatingChart: enableLocatingChart,
+				otherVisualizations: visualizationsServiceM.get('visualizations'),
+			}));
+			this.$overlay = this.$el.find('.overlay').hide();
 			var chartName = this.model.get('currentChartName');
 			if (chartName in viewClassByChartName) {
 				if (this.$el.find('.nav .active').length === 0) {

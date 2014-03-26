@@ -110,7 +110,7 @@ def build_requireconfig(ctx):
             'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
             'chartM': urls.get_url(ctx, u'js/models/chartM'),
             'situationFormM': urls.get_url(ctx, u'js/models/situationFormM'),
-            'VisualizationsPaneM': urls.get_url(ctx, u'js/models/VisualizationsPaneM'),
+            'visualizationsServiceM': urls.get_url(ctx, u'js/models/visualizationsServiceM'),
 
             # External libs
             # Quote from persona: You must include this on every page which uses navigator.id functions.

@@ -20,6 +20,7 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 	}).appendTo($('head'));
 
 	var LocatingChartV = Backbone.View.extend({
+		chart: null,
 		model: chartM,
 //			TODO parametrize year
 		year: 2011,
@@ -44,10 +45,9 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 			var that = this;
 			this.updateDimensions();
 			this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
+			that.listenTo(that.model, 'change:source', that.render);
 			nvd3.addGraph({
-				callback: function() {
-					that.listenTo(that.model, 'change:source', that.render);
-				},
+				callback: function() { that.render(); },
 				generate: function() {
 					that.chart = nvd3.models.lineChart()
 						.margin({left: 100})
@@ -56,30 +56,26 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 						.showYAxis(true)
 						.showXAxis(true)
 						.useInteractiveGuideline(true);
-
 					that.svg = d3.select(that.el).append('svg')
 						.attr('height', that.height)
 						.attr('width', that.width)
 						.datum(that.vingtiles)
 						.call(that.chart);
-			
 					nvd3.utils.windowResize(function () {
 						that.chart.update();
 					});
-
-					that.chart.interactiveLayer.tooltip
-						.contentGenerator(that.tooltipContentGenerator.bind(that));
-
+					that.chart.interactiveLayer.tooltip.contentGenerator(that.tooltipContentGenerator.bind(that));
 					that.svg.attr('opacity', 0);
-
 					return that.chart;
 				}
 			});
 		},
 		render: function () {
-			var that = this,
-				data = this.model.get('locatingData');
-
+			var that = this;
+			var data = this.model.get('locatingData');
+			if (this.chart === null) {
+				return;
+			}
 			this.vingtiles = this.updateVingtilesByUserData(_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }), data);
 
 			this.setPrefix();

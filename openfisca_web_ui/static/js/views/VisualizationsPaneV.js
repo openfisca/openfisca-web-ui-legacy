@@ -4,21 +4,20 @@ define([
 	'underscore',
 
 	'chartM',
-	'VisualizationsPaneM',
+	'visualizationsServiceM',
 	'hbs!templates/visualization',
 	'hbs!templates/visualizations'
-], function (Backbone, $, _, chartM, VisualizationsPaneM, visualizationT, visualizationsT) {
+], function (Backbone, $, _, chartM, visualizationsServiceM, visualizationT, visualizationsT) {
 	'use strict';
 
 	var VisualizationsPaneV = Backbone.View.extend({
 		events: {
 			'click .thumbnail-link[target!="_blank"]': 'renderVisualization',
-			'click button.back': 'renderVisualizations'
+			'click button.back': 'render'
 		},
-		model: null,
+		model: visualizationsServiceM,
 		initialize: function () {
-			this.model = new VisualizationsPaneM();
-			this.listenTo(this.model, 'change:visualizations', this.renderVisualizations);
+			this.listenTo(this.model, 'change:visualizations', this.render);
 		},
 		renderVisualization: function(evt) {
 			evt.preventDefault();
@@ -28,7 +27,7 @@ define([
 			});
 			this.$el.find('.row').replaceWith(visualizationT(visualization));
 		},
-		renderVisualizations: function() {
+		render: function() {
 			this.$el
 				.empty()
 				.append(visualizationsT({visualizations: this.model.get('visualizations')}));

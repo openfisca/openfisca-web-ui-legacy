@@ -18,7 +18,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 			distribution_data: {},
 			locating_data: {},
 			simulationInProgress: false,
-			source: {},
+			source: {values: {}},
 			vingtiles: vingtiles,
 			waterfall_data: {}
 		},
@@ -48,13 +48,12 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 
 		/* Custom get methods */
 		get_waterfallData: function () { /* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
-			var r = new Parser(this.get('source'))
+			return new Parser(this.get('source'))
 				.clean()
 				// .removeRootNode()
 				.setParentNodes()
 				.listChildren()
 				.values();
-			return r;
 		},
 		get_distributionData: function (args) {
 			/* Par défault on renvoie la décomposition revdisp */

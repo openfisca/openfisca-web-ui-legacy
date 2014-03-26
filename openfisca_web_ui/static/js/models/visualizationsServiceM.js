@@ -8,27 +8,28 @@ define([
 function ($, _, Backbone, appconfig) {
 	'use strict';
 
-	var VisualizationsPaneM = Backbone.Model.extend({
+	var VisualizationsServiceM = Backbone.Model.extend({
 		defaults: {
 			visualizations: null
 		},
-
 		initialize: function () {
 			this.fetch();
 		},
 		fetch: function() {
 			$.ajax({
+				context: this,
 				type: 'GET',
 				url: appconfig.enabledModules.visualizations.searchUrlPath,
 			})
-			.done(_.bind(function(data) {
+			.done(function(data) {
 				this.set('visualizations', data);
-			}, this))
+			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
 				console.error('Fetch fail', jqXHR, textStatus, errorThrown);
 			});
 		}
 	});
 
-	return VisualizationsPaneM;
+	var visualizationsServiceM = new VisualizationsServiceM();
+	return visualizationsServiceM;
 });

@@ -12,52 +12,47 @@ define([
 	d3.selection.prototype.moveToBack = function() {return this.each(function() {var firstChild = this.parentNode.firstChild;if (firstChild) {this.parentNode.insertBefore(this, firstChild);}});};
 
 	var WaterfallChartV = Backbone.View.extend({
-		model: chartM,
-
-		/* Settings */
-		padding: {
-			top: 50,
-			right: 40,
-			bottom: 90,
-			left: 60,
+		bars: [],
+		colors: {
+			negative: '#b22424',
+			positive: '#6aa632',
 		},
+		currentDataSet: {},
+		innerPadding: 10,
 		margin: {
 			top: 0,
 			left: 0,
 			bottom: 0,
 			right: 80
 		},
-		maxWidth: 1000,
-		innerPadding: 10,
-
-		title: '',
-
-		currentDataSet: {},
-		bars: [],
+		model: chartM,
+		padding: {
+			top: 50,
+			right: 40,
+			bottom: 90,
+			left: 60,
+		},
 		stopValues: {},
-
-		positiveColor: '#6aa632',
-		negativeColor: '#b22424',
-
+		svg: null,
 		initialize: function () {
+			_.bindAll(this, 'dataToColor');
 			this.updateDimensions();
-
-			this.g = d3.select(this.el)
+			this.svg = d3.select(this.el)
 				.append('svg')
 				.attr('height', this.height)
 				.attr('width', this.width);
-
 			this.listenTo(this.model, 'change:source', this.render);
+		},
+		dataToColor: function (data) {
+			return this.colors[data.value > 0 ? 'positive' : 'negative'];
 		},
 		render: function (args) {
 			args = args || {};
-
+//			FIXME Why give the name of nv since waterfall is not developed with nvd3?.
 			$('.nvtooltip').hide().remove();
-
 			if(_.isUndefined(args.getDatas) || args.getDatas) {
 				this.setData(this.model.get('waterfallData'));
 			}
-
 			this.buildBars(this.buildActiveBars);
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
 				this.buildLegend();
@@ -82,7 +77,7 @@ define([
 			this.updateScales();
 		},
 		updateDimensions: function() {
-			this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
+			this.width = this.$el.width() - this.margin.left - this.margin.right;
 			this.height = this.width * 0.8 - this.margin.bottom - this.margin.top;
 		},
 		updateScales: function () {
@@ -141,7 +136,7 @@ define([
 			var that = this;
 			var dataLength = this.currentDataSet.length;
 			var barWidth = (that.width - that.padding.left - that.padding.right - dataLength*that.innerPadding)/dataLength;
-			this.bars = this.g.selectAll('.bar')
+			this.bars = this.svg.selectAll('.bar')
 				.data(this.currentDataSet);
 			this.bars
 				.enter()
@@ -158,13 +153,7 @@ define([
 							that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 					})
 					.attr('x', function () { return 0; })
-					.attr('fill', function (d) {
-						if (d.value > 0) {
-							return that.positiveColor;
-						} else {
-							return that.negativeColor;
-						}
-					})
+					.attr('fill', that.dataToColor)
 					.attr('opacity', 0.8)
 					.attr('stroke-width', 1);
 			this.bars
@@ -188,10 +177,7 @@ define([
 							that.scales.y(d.waterfall.startValue) :
 							that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 					})
-					.attr('fill', function (d) {
-						if(d.value > 0) return that.positiveColor;
-						else return that.negativeColor;
-					})
+					.attr('fill', that.dataToColor)
 					.each('start', function () {
 						if(!_.isUndefined(that.activeBars)) {
 							that.activeBars.on('mouseover', null);
@@ -206,7 +192,6 @@ define([
 							endTransitionCallback.call(that);
 						}
 					});
-
 			this.bars.exit()
 				.transition()
 					.duration(300)
@@ -221,10 +206,8 @@ define([
 			var that = this,
 				dataLength = this.currentDataSet.length,
 				barWidth = (that.width - that.padding.left - that.padding.right)/dataLength;
-
-			this.activeBars = this.g.selectAll('.active-bar')
+			this.activeBars = this.svg.selectAll('.active-bar')
 				.data(this.currentDataSet);
-
 			this.activeBars
 				.enter()
 					.append('rect')
@@ -236,10 +219,7 @@ define([
 					.attr('x', function (d) {
 						return that.scales.x(d.short_name);
 					})
-					.attr('fill', function (d) {
-						if(d.value > 0) return that.positiveColor;
-						else return that.negativeColor;
-					})
+					.attr('fill', that.dataToColor)
 					.attr('opacity', 0)
 					.on('mouseover', function (d, i) {
 
@@ -293,7 +273,7 @@ define([
 								(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y +
 								(barData.value < 0 ? (barAttrs.height) : 0)))/2;
 
-							that.incomeLine = that.g.append('line')
+							that.incomeLine = that.svg.append('line')
 								.attr('stroke', function () { return '#333'; })
 								.attr('stroke-width', function () { return 2; })
 								.attr('stroke-dasharray', ('3, 3'))
@@ -305,7 +285,7 @@ define([
 								.attr('y2', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
 								.moveToBack();
 
-							that.incomeLine2 = that.g.append('line')
+							that.incomeLine2 = that.svg.append('line')
 								.attr('stroke', function () { return '#333'; })
 								.attr('stroke-width', function () { return 2; })
 								.attr('stroke-dasharray', ('3, 3'))
@@ -317,7 +297,7 @@ define([
 								.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
 								.moveToBack();
 
-							that.incomeLine3 = that.g.append('line')
+							that.incomeLine3 = that.svg.append('line')
 								.attr('stroke', function () { return '#333'; })
 								.attr('stroke-width', function () { return 7; })
 								.attr('opacity', 0)
@@ -326,7 +306,7 @@ define([
 								.attr('x2', function () { return that.width-10; })
 								.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); });
 							
-							that.incomeText = that.g.selectAll('.income-number')
+							that.incomeText = that.svg.selectAll('.income-number')
 								.data((that.prefix._scale(d.parentNodes[0].value) + that.prefix.symbolText).split('\n'));
 
 							that.incomeText
@@ -358,8 +338,7 @@ define([
 										return _d;
 									});
 
-							that.incomeLabel = that.g.selectAll('.income-label')
-								.data(parentNode.name);
+							that.incomeLabel = that.svg.selectAll('.income-label').data(parentNode.name);
 
 							that.incomeLabel
 								.text(function (d) { return d; })
@@ -441,10 +420,7 @@ define([
 						return that.scales.x(d.short_name);
 					})
 					.attr('y', this.padding.top)
-					.attr('fill', function (d) {
-						if(d.value > 0) return that.positiveColor;
-						else return that.negativeColor;
-					})
+					.attr('fill', that.dataToColor)
 					.attr('opacity', 0);
 
 			this.activeBars
@@ -478,7 +454,7 @@ define([
 				.duration(300)
 				.call(this.gridAxis);
 
-			this.g.selectAll('.x-axis .tick text')
+			this.svg.selectAll('.x-axis .tick text')
 				.attr('transform', function () {
 					var _dim = this.getBBox();
 					var deltax = _dim.width/2,
@@ -487,9 +463,8 @@ define([
 					return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
 				});
 
-
 			var legendTextSplited = this.legendText.split('\n');
-			this.legendTextObject = this.g.selectAll('.legendText_y')
+			this.legendTextObject = this.svg.selectAll('.legendText_y')
 				.data(legendTextSplited);
 
 			this.legendTextObject
@@ -521,8 +496,8 @@ define([
 					return that.prefix._scale(d);
 				});
 
-			this.yAxisLegend = this.g.append('g');
-			this.xAxisLegend = this.g.append('g');
+			this.yAxisLegend = this.svg.append('g');
+			this.xAxisLegend = this.svg.append('g');
 
 			this.yAxisLegend
 				.attr('class', 'y-axis')
@@ -545,7 +520,7 @@ define([
 				.tickSize(-that.width+that.padding.left, 0, 0)
 				.tickFormat('');
 
-			this.yGrid = this.g.append('g')
+			this.yGrid = this.svg.append('g')
 				.attr('class', 'grid')
 				.attr('transform', function () {
 					return 'translate('+that.padding.left+', 0)';
@@ -553,7 +528,7 @@ define([
 				.call(this.gridAxis)
 				.moveToBack();
 
-			this.g.selectAll('.x-axis .tick text')
+			this.svg.selectAll('.x-axis .tick text')
 				.attr('transform', function () {
 					var _dim = this.getBBox();
 					var deltax = _dim.width/2,
@@ -563,7 +538,7 @@ define([
 				});
 
 			var legendTextSplited = this.legendText.split('\n');
-			this.legendTextObject = this.g.selectAll('.legendText_y')
+			this.legendTextObject = this.svg.selectAll('.legendText_y')
 				.data(legendTextSplited);
 
 			this.legendTextObject
@@ -576,7 +551,6 @@ define([
 					.attr('font-weight', 'normal')
 					.attr('text-anchor', 'end')
 					.text(function (d) { return d; });
-
 		},
 		showTooltip: function (bar) {
 			var d = bar.data()[0],
@@ -599,11 +573,9 @@ define([
 							</tr>\
 						</tbody>\
 					</table>\
-				</div>\
-			');
+				</div>');
 			var barBBox = {};
 			bar.each(function () { barBBox = this.getBBox(); });
-
 			d3.select(this.el).select('#nvtooltip-'+d._id)
 				.style('left', function () {
 					var tooltipWidth = $(this).width();
