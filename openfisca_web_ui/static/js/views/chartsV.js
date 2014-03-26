@@ -30,11 +30,11 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Visuali
 		},
 		model: chartM,
 		initialize: function () {
-			this.$el
-				.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
-//					.sticky();
+			this.$el.html(chartsTabsT({enableLocatingChart: enableLocatingChart}));
+			if ($(window).width() >= 768) {
+				this.$el.sticky();
+			}
 			this.$overlay = this.$el.find('.overlay');
-
 			// TODO Move call to each graph.
 			$(window).on('resize', _.bind(this.updateDimensions, this));
 

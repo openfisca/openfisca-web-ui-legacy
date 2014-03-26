@@ -97,12 +97,6 @@ form[name=situation] button.add {
     top: 50%;
 }
 
-.sticky-wrapper.is-sticky #chart-wrapper {
-    margin-top: 1em;
-    /* Width is computed from col-sm-8 width multiplied by container width. Possibly hacky.*/
-    width: 60%;
-}
-
 .thumbnail-visualization img {
     /* We don't know image dimensions since its URL is external to the application. */
     max-height: 150px;
