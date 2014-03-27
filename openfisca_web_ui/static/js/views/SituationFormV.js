@@ -78,7 +78,7 @@ function ($, _, Backbone, xEditable, situationFormM, chartM) {
 		},
 		renderApiDataTestCase: function(testCase, className) {
 			if ('foyers_fiscaux' in testCase) {
-				_.each(testCase.foyers_fiscaux, function(foyerFiscal, foyerFiscalIdx) {
+				_.each(testCase.foyers_fiscaux, function(foyerFiscal, foyerFiscalIdx) { // jshint ignore:line
 					var $foyerFiscal = $('[id^="collapse-foyer-fiscal"]').eq(foyerFiscalIdx);
 					if ('declarants' in foyerFiscal) {
 						_.each(foyerFiscal.declarants, function(errorMessage, declarantIdx) {

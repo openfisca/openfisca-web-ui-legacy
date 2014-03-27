@@ -1,5 +1,6 @@
 {
   "browser": true,
+  "camelcase": true,
   "globals": {
     "alert": false,
     "console": false,
@@ -7,6 +8,7 @@
     "require": false
   },
   "indent": 2,
+  "maxlen": 120,
   "newcap": true,
   "nonew": true,
   "quotmark": "single",

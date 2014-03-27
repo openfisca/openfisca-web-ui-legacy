@@ -15,10 +15,10 @@ define([
 
 				var doIt = function (json) {
 					json.value = json.values[0];
-					var old_children = json.children;
+					var oldChildren = json.children;
 					json.children = [];
 
-					_.each(old_children, function (el) {
+					_.each(oldChildren, function (el) {
 						if(el.values[0] !== 0) {
 							var newEl = el;
 							newEl._id = el.code;

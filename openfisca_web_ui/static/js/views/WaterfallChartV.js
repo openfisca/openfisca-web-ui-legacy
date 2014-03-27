@@ -8,8 +8,17 @@ define([
 ], function ($, _, Backbone, d3, chartM) {
 	'use strict';
 
-	d3.selection.prototype.moveToFront = function() { return this.each(function(){ this.parentNode.appendChild(this); }); };
-	d3.selection.prototype.moveToBack = function() {return this.each(function() {var firstChild = this.parentNode.firstChild;if (firstChild) {this.parentNode.insertBefore(this, firstChild);}});};
+	d3.selection.prototype.moveToFront = function() {
+		return this.each(function(){ this.parentNode.appendChild(this); });
+	};
+	d3.selection.prototype.moveToBack = function() {
+		return this.each(function() {
+			var firstChild = this.parentNode.firstChild;
+			if (firstChild) {
+				this.parentNode.insertBefore(this, firstChild);
+			}
+		});
+	};
 
 	var WaterfallChartV = Backbone.View.extend({
 		bars: [],
@@ -93,7 +102,7 @@ define([
 			this.scales = {
 				x: d3.scale.ordinal()
 					.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-					.domain(that.currentDataSet.map(function(d) { return d.short_name; })),
+					.domain(that.currentDataSet.map(function(d) { return d.short_name; })), // jshint ignore:line
 				y: d3.scale.linear()
 					.domain([yMin, yMax])
 					.range([that.height - that.padding.bottom, that.padding.top])
@@ -102,7 +111,8 @@ define([
 			var magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax);
 			this.prefix = d3.formatPrefix(magnitude);
 			this.prefix._scale = function (val) {
-				if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' && that.prefix.symbol !== '') {
+				if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' &&
+					that.prefix.symbol !== '') {
 					return ('' + d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 				}
 				var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
@@ -150,7 +160,8 @@ define([
 					.attr('y', function (d) {
 						return d.value < 0 ?
 							that.scales.y(d.waterfall.startValue) :
-							that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
+							that.scales.y(d.waterfall.startValue) -
+								(that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 					})
 					.attr('x', function () { return 0; })
 					.attr('fill', that.dataToColor)
@@ -170,12 +181,13 @@ define([
 						return _return < 0.8 ? 0.8: _return;
 					})
 					.attr('x', function (d) {
-						return that.scales.x(d.short_name) + that.innerPadding/2;
+						return that.scales.x(d.short_name) + that.innerPadding/2; // jshint ignore:line
 					})
 					.attr('y', function (d) {
 						return d.value < 0 ?
 							that.scales.y(d.waterfall.startValue) :
-							that.scales.y(d.waterfall.startValue) - (that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
+							that.scales.y(d.waterfall.startValue) -
+								(that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 					})
 					.attr('fill', that.dataToColor)
 					.each('start', function () {
@@ -216,9 +228,7 @@ define([
 					.attr('width', barWidth)
 					.attr('height', that.height)
 					.attr('y', that.padding.top)
-					.attr('x', function (d) {
-						return that.scales.x(d.short_name);
-					})
+					.attr('x', function (d) { return that.scales.x(d.short_name); }) // jshint ignore:line
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0)
 					.on('mouseover', function (d, i) {
@@ -280,9 +290,13 @@ define([
 								.attr('opacity', 0)
 
 								.attr('x1', function () { return barAttrs.x; })
-								.attr('y1', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
+								.attr('y1', function () {
+									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
+								})
 								.attr('x2', function () { return that.width; })
-								.attr('y2', function () { return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0); })
+								.attr('y2', function () {
+									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
+								})
 								.moveToBack();
 
 							that.incomeLine2 = that.svg.append('line')
@@ -291,10 +305,16 @@ define([
 								.attr('stroke-dasharray', ('3, 3'))
 								.attr('opacity', 0)
 
-								.attr('x1', function () { return that.scales.x(parentNodeFirstChildren.short_name); })
-								.attr('y1', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
+								.attr('x1', function () {
+									return that.scales.x(parentNodeFirstChildren.short_name); // jshint ignore:line
+								})
+								.attr('y1', function () {
+									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
+								})
 								.attr('x2', function () { return that.width; })
-								.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); })
+								.attr('y2', function () {
+									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
+								})
 								.moveToBack();
 
 							that.incomeLine3 = that.svg.append('line')
@@ -417,7 +437,7 @@ define([
 					.attr('width', barWidth)
 					.attr('height', that.height)
 					.attr('x', function (d) {
-						return that.scales.x(d.short_name);
+						return that.scales.x(d.short_name); // jshint ignore:line
 					})
 					.attr('y', this.padding.top)
 					.attr('fill', that.dataToColor)

@@ -22,10 +22,10 @@ function ($, _, Backbone, backendServiceM) {
 		parseApiData: function () {
 			var apiData = backendServiceM.get('apiData');
 			if ('errors' in apiData) {
-				this.set('apiErrors', apiData.errors[0].scenarios[0].test_case);
+				this.set('apiErrors', apiData.errors[0].scenarios[0].test_case); // jshint ignore:line
 			}
 			if ('suggestions' in apiData) {
-				this.set('apiSuggestions', apiData.suggestions.scenarios[0].test_case);
+				this.set('apiSuggestions', apiData.suggestions.scenarios[0].test_case); // jshint ignore:line
 			}
 		},
 		parseFormData: function () {
