@@ -11,6 +11,10 @@ define([
 function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 	'use strict';
 
+	if ( ! appconfig.enabledModules.locatingChart) {
+		return;
+	}
+
 	nvd3.dev = false;
 
 	$('<link>', {
