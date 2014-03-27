@@ -11,10 +11,6 @@ define([
 function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 	'use strict';
 
-	if ( ! appconfig.enabledModules.locatingChart) {
-		return;
-	}
-
 	nvd3.dev = false;
 
 	$('<link>', {
@@ -22,6 +18,11 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 		media: 'screen',
 		rel: 'stylesheet'
 	}).appendTo($('head'));
+
+	// FIXME Here we return after CSS injection because Waterfall and Distribution charts use nvtooltip class.
+	if ( ! appconfig.enabledModules.locatingChart) {
+		return;
+	}
 
 	var LocatingChartV = Backbone.View.extend({
 		chart: null,
