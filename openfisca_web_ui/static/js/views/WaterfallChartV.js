@@ -92,7 +92,7 @@ define([
 		},
 		updateDimensions: function() {
 			this.width = this.$el.width() - this.margin.left - this.margin.right;
-			this.height = this.width * 0.8 - this.margin.bottom - this.margin.top;
+			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
 		},
 		updateScales: function () {
 			var that = this;
