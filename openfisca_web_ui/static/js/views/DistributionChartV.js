@@ -69,6 +69,11 @@ define([
 			this.currentSort = this.defaultSort;
 			
 			this.listenTo(this.model, 'change:source', this.render);
+			$(window).on('resize', _.bind(this.windowResize, this));
+		},
+		remove: function() {
+			Backbone.View.prototype.remove.apply(this, arguments);
+			$(window).off('resize');
 		},
 		render: function (sortType) {
 			if(typeof sortType != 'string') sortType = this.currentSort;
@@ -426,7 +431,11 @@ define([
 				this.g.transition().duration(400)
 					.attr('width', args.width);
 			}
-		}
+		},
+		windowResize: function () {
+			this.updateDimensions();
+			this.render();
+		},
 	});
 
 	return DistributionChartV;

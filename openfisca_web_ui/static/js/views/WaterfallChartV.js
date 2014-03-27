@@ -51,9 +51,14 @@ define([
 				.attr('height', this.height)
 				.attr('width', this.width);
 			this.listenTo(this.model, 'change:source', this.render);
+			$(window).on('resize', _.bind(this.windowResize, this));
 		},
 		dataToColor: function (data) {
 			return this.colors[data.value > 0 ? 'positive' : 'negative'];
+		},
+		remove: function() {
+			Backbone.View.prototype.remove.apply(this, arguments);
+			$(window).off('resize');
 		},
 		render: function (args) {
 			args = args || {};
@@ -620,7 +625,11 @@ define([
 					.style('opacity', 0)
 					.remove();
 			bar.attr('stroke-width', 1);
-		}
+		},
+		windowResize: function () {
+			this.updateDimensions();
+			this.render();
+		},
 	});
 
 	return WaterfallChartV;
