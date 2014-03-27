@@ -13,13 +13,6 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 
 	nvd3.dev = false;
 
-	$('<link>', {
-		href: appconfig.enabledModules.locatingChart.nvd3CssUrlPath,
-		media: 'screen',
-		rel: 'stylesheet'
-	}).appendTo($('head'));
-
-	// FIXME Here we return after CSS injection because Waterfall and Distribution charts use nvtooltip class.
 	if ( ! appconfig.enabledModules.locatingChart) {
 		return;
 	}

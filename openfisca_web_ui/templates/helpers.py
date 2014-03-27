@@ -58,9 +58,7 @@ def base_appconfig(ctx):
             'disclaimerClosedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
             }
     if conf['enabled.charts.locating']:
-        enabled_modules['locatingChart'] = {
-            'nvd3CssUrlPath': urls.get_url(ctx, u'bower/nvd3/nv.d3.css'),
-            }
+        enabled_modules['locatingChart'] = True
     appconfig = {
         'debug': conf['debug'],
         'enabledModules': enabled_modules,

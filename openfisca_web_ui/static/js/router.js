@@ -6,7 +6,7 @@ define([
 ], function (Backbone, appconfig, chartM) {
 	'use strict';
 
-	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
+	var enableLocatingChart = appconfig.enabledModules.locatingChart;
 	var router = null;
 	var routes = {
 		'': 'defaultChart',

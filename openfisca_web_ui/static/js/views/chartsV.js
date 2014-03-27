@@ -18,7 +18,7 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Locatin
 	VisualizationsPaneV, WaterfallChartV, chartsTabsT) {
 	'use strict';
 
-	var enableLocatingChart = !! appconfig.enabledModules.locatingChart;
+	var enableLocatingChart = appconfig.enabledModules.locatingChart;
 	var viewClassByChartName = {
 		distribution: DistributionChartV,
 		locating: LocatingChartV,
