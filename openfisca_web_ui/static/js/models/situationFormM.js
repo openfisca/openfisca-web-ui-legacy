@@ -19,14 +19,19 @@ function ($, _, Backbone, backendServiceM) {
 			this.listenTo(backendServiceM, 'change:apiData', this.parseApiData);
 			this.listenTo(backendServiceM, 'change:formData', this.parseFormData);
 		},
+		fetch: function() {
+			return backendServiceM.fetchForm();
+		},
 		parseApiData: function () {
 			var apiData = backendServiceM.get('apiData');
-			if ('errors' in apiData) {
-				this.set('apiErrors', apiData.errors[0].scenarios[0].test_case); // jshint ignore:line
-			}
-			if ('suggestions' in apiData) {
-				this.set('apiSuggestions', apiData.suggestions.scenarios[0].test_case); // jshint ignore:line
-			}
+			this.set(
+				'apiErrors',
+				'errors' in apiData ? apiData.errors[0].scenarios[0].test_case : null // jshint ignore:line
+			);
+			this.set(
+				'apiSuggestions',
+				'suggestions' in apiData ? apiData.suggestions.scenarios[0].test_case : null // jshint ignore:line
+			);
 		},
 		parseFormData: function () {
 			var formData = backendServiceM.get('formData');
@@ -37,8 +42,8 @@ function ($, _, Backbone, backendServiceM) {
 				this.set('formHtml', formData.html, {silent: 'errors' in formData});
 			}
 		},
-		save: function(data, callback) {
-			return backendServiceM.saveForm(data, callback);
+		save: function(data) {
+			return backendServiceM.saveForm(data);
 		}
 	});
 

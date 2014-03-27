@@ -5,9 +5,8 @@ define([
 	'x-editable',
 
 	'situationFormM',
-	'chartM'
 ],
-function ($, _, Backbone, xEditable, situationFormM, chartM) {
+function ($, _, Backbone, xEditable, situationFormM) {
 	'use strict';
 
 	var debounceDelay = 100;
@@ -22,11 +21,11 @@ function ($, _, Backbone, xEditable, situationFormM, chartM) {
 		events: {
 			'change :input': 'onInputChange',
 			'click :input.add': 'onAddButtonClicked',
+			'click :input.delete': 'onDeleteButtonClicked',
 			'click button.simulate': 'onSimulateButtonClicked',
 			'keypress :input': 'onKeyPress'
 		},
 		model: situationFormM,
-		submitTriggered: false,
 		initialize: function() {
 			this.setupXeditable();
 			this.listenTo(this.model, 'change:apiErrors', this.renderApiErrors);
@@ -39,91 +38,129 @@ function ($, _, Backbone, xEditable, situationFormM, chartM) {
 		},
 		onAddButtonClicked: function(evt) {
 			evt.preventDefault();
-			var doReloadForm = false;
+			var reloadForm = false;
 			var formDataStr = this.formDataStr();
-			// Add clicked button to form data.
+			// Add clicked button to form data (add or delete buttons).
 			var $button = $(evt.target);
 			var name = $button.attr('name');
 			if ( ! _.isUndefined(name)) {
-				doReloadForm = true;
 				var value = $button.attr('value');
 				formDataStr += '&' + name + '=' + value;
+				reloadForm = true;
 			}
-			this.submit(formDataStr, doReloadForm);
+			this.model.save(formDataStr)
+				.then(_.bind(function() {
+					if (reloadForm) {
+						this.model.fetch();
+					}
+				}, this));
+		},
+		onDeleteButtonClicked: function(evt) {
+			if ( ! confirm('Supprimer ?')) {
+				evt.preventDefault();
+			}
 		},
 		onInputChange: _.debounce(function(evt) {
 			var $input = $(evt.target);
-			if ($input.parents('.modal').length === 0 && $(evt.target).parents('.editableform').length === 0) {
-				this.submit(this.formDataStr(), false);
+			if ($input.parents('.modal').length === 0 && $input.parents('.editableform').length === 0) {
+				this.model.save(this.formDataStr());
 			}
 		}, debounceDelay),
 		onKeyPress: function(evt) {
 			if (evt.keyCode === 13 && $(evt.target).parents('.editableform').length === 0) {
 				evt.preventDefault();
-				var doReloadForm = endsWith(evt.target.name, '.prenom');
-				this.submit(this.formDataStr(), doReloadForm);
+				var reloadForm = false;
+				var formDataStr = this.formDataStr();
+				if (endsWith(evt.target.name, '.prenom')) {
+					reloadForm = true;
+				}
+				this.model.save(formDataStr)
+					.then(_.bind(function() {
+						if (reloadForm) {
+							this.model.fetch();
+						}
+					}, this));
+
 			}
 		},
 		onSimulateButtonClicked: function(evt) {
 			evt.preventDefault();
-			this.submit(this.formDataStr(), false);
+			this.model.save(this.formDataStr());
 		},
 		renderApiErrors: function() {
-			this.renderApiDataTestCase(this.model.get('apiErrors'), 'has-error');
+			this.renderApiDataTestCase(this.model.get('apiErrors'), 'error');
 			return this;
 		},
 		renderApiSuggestions: function() {
-			this.renderApiDataTestCase(this.model.get('apiSuggestions'), 'has-warning');
+			this.renderApiDataTestCase(this.model.get('apiSuggestions'), 'suggestion');
 			return this;
 		},
-		renderApiDataTestCase: function(testCase, className) {
-			if ('foyers_fiscaux' in testCase) {
-				_.each(testCase.foyers_fiscaux, function(foyerFiscal, foyerFiscalIdx) { // jshint ignore:line
-					var $foyerFiscal = $('[id^="collapse-foyer-fiscal"]').eq(foyerFiscalIdx);
-					if ('declarants' in foyerFiscal) {
-						_.each(foyerFiscal.declarants, function(errorMessage, declarantIdx) {
-							var $declarant = $foyerFiscal.find('.individu').eq(declarantIdx);
-							$declarant
-								.addClass(className)
-								.append($('<p>', {'class': 'help-block', text: errorMessage}));
-						});
-					}
-				});
-			}
-			if ('individus' in testCase) {
-				_.each(testCase.individus, function(individu, individuId) {
-					_.each(individu, function(fieldValue, fieldName) {
-						if (fieldName === 'birth') {
-							// Particular case for birth which is asked to user as a year by UI.
-							// API treats it as a Date @type and accepts it as a Number too.
-							fieldValue = fieldValue.slice(0, 4);
+		renderApiDataTestCase: function(testCase, annotationType) {
+			var className = {error: 'has-error', suggestion: 'has-warning'}[annotationType];
+			if (testCase === null) {
+				this.$el
+					.find('.help-block.' + annotationType).remove().end()
+					.find('.' + className).removeClass(className).end();
+			} else {
+				if ('foyers_fiscaux' in testCase) {
+					_.each(testCase.foyers_fiscaux, function(foyerFiscal, foyerFiscalIdx) { // jshint ignore:line
+						var $foyerFiscal = this.$el.find('[id^="collapse-foyer-fiscal"]').eq(foyerFiscalIdx);
+						if ('declarants' in foyerFiscal) {
+							_.each(foyerFiscal.declarants, function(errorMessage, declarantIdx) {
+								var $declarant = $foyerFiscal.find('.individu').eq(declarantIdx);
+								$declarant
+									.addClass(className)
+									.append($('<p>', {'class': 'help-block ' + annotationType, text: errorMessage}));
+							}, this);
 						}
-						var $individu;
-						// FIXME Quick hack to handle UUID regeneration when api data in DB is empty.
-						if (_.keys(testCase.individus).length === 1) {
-							$individu = $('[id^="collapse-individu-"]');
-						} else {
-							$individu = $('#collapse-individu-' + individuId);
+						if ('personnes_a_charge' in foyerFiscal) {
+							_.each(foyerFiscal.personnes_a_charge, function(errorMessage, personneAChargeIdx) {
+								var $personneACharge = $foyerFiscal.find('.individu').eq(personneAChargeIdx);
+								$personneACharge
+									.addClass(className)
+									.append($('<p>', {'class': 'help-block ' + annotationType, text: errorMessage}));
+							}, this);
 						}
-						$individu.find(':input[name$=".' + fieldName + '"]')
-							.call(function() {
-								var $this = $(this);
-								var tagName = $this.prop('tagName').toLowerCase();
-								if (tagName === 'input') {
-									$this.attr('placeholder', fieldValue);
-								} else if (tagName === 'select') {
-									$this.val(fieldValue);
-								}
-							})
-							.tooltip({
-								placement: 'top',
-								title: 'Suggested value used in simulation',
-								toggle: 'tooltip'
-							})
-							.parents('.form-group')
-								.addClass(className);
-					});
-				});
+					}, this);
+				}
+				if ('individus' in testCase) {
+					_.each(testCase.individus, function(individu, individuId) {
+						_.each(individu, function(fieldValue, fieldName) {
+							if (fieldName === 'birth') {
+								// Particular case for birth which is asked to user as a year by UI.
+								// API treats it as a Date @type and accepts it as a Number too.
+								fieldValue = fieldValue.slice(0, 4);
+							}
+							var $individu;
+							// FIXME Quick hack to handle UUID regeneration when api data in DB is empty.
+							if (_.keys(testCase.individus).length === 1) {
+								$individu = this.$el.find('[id^="collapse-individu-"]');
+							} else {
+								$individu = this.$el.find('#collapse-individu-' + individuId);
+							}
+							$individu.find(':input[name$=".' + fieldName + '"]')
+								.call(function() {
+									var $this = $(this);
+									var tagName = $this.prop('tagName').toLowerCase();
+									if (tagName === 'input') {
+										$this.attr('placeholder', fieldValue);
+									} else if (tagName === 'select') {
+										var $option = $this.find('option:selected');
+										$option.text($option.text() + ' ' +
+											$this.find('option[value="' + fieldValue + '"]').text());
+									}
+								})
+								.tooltip({
+									placement: 'top',
+									// TODO i18n
+									title: 'Valeur suggérée utilisée par la simulation',
+									toggle: 'tooltip'
+								})
+								.parents('.form-group')
+									.addClass(className);
+						}, this);
+					}, this);
+				}
 			}
 			return this;
 		},
@@ -142,21 +179,9 @@ function ($, _, Backbone, xEditable, situationFormM, chartM) {
 					$hidden.val(data.value);
 					var individuId = this.$el.find('[data-name="' + data.name + '"]').data('id');
 					this.updatePrenoms(individuId, data.value);
-					this.submit(this.formDataStr(), false);
+					this.model.save(this.formDataStr());
 				}, this)
 			});
-		},
-		submit: function(formDataStr/*, doReloadForm*/) {
-			// FIXME Handle full form reload problem., {silent: ! doReloadForm}
-			if (this.submitTriggered) {
-				return;
-			}
-			this.submitTriggered = true;
-			// TODO Use promises to chain calls.
-			this.model.save(formDataStr, _.bind(function() {
-				this.submitTriggered = false;
-				chartM.simulate();
-			}, this));
 		},
 		updatePrenoms: function(individuId, prenom) {
 			this.$el.find('option[value="' + individuId + '"]').text(prenom);

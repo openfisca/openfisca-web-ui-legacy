@@ -33,7 +33,10 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 			// FIXME Remove "fetched". Rework asynchronisms.
 			this.fetched = true;
 			var apiData = backendServiceM.get('apiData');
-			if ( ! ('errors' in apiData)) {
+			if ('errors' in apiData) {
+				// TODO i18n
+				alert('Erreurs de simulation.');
+			} else {
 				this.set('source', $.extend(true, {}, apiData.value));
 			}
 		},

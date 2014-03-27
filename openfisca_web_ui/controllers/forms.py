@@ -111,18 +111,7 @@ def situation_form_post(req):
         current_test_case.api_data = user_api_data
         current_test_case.save(safe = True)
 
-    if req.is_xhr:
-        root_question = questions.base.make_situation_form(user_api_data)
-        filled_user_api_data = check(conv.base.make_fill_user_api_data(ensure_api_compliance = False)(user_api_data))
-        values, errors = pipe(
-            conv.base.api_data_to_korma_data,
-            root_question.root_data_to_str,
-            )(filled_user_api_data, state = ctx)
-        root_question.fill(values, errors)
-        form_html = templates.render_def(ctx, '/index.mako', 'situation_form', root_question = root_question)
-        return wsgihelpers.respond_json(ctx, {'html': form_html})
-    else:
-        wsgihelpers.redirect(ctx, location = '')
+    return wsgihelpers.no_content(ctx) if req.is_xhr else wsgihelpers.redirect(ctx, location = '')
 
 
 def update_session(ctx):
