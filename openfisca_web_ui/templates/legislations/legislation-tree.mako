@@ -210,7 +210,7 @@ for index, date in enumerate(sorted(dates[:-1])):
     <form>
         <select class="period-select">
     % for index, period in enumerate(periods):
-            <option${u' checked="checked"' if index == len(periods) - 1 else '' | n} value="${index}">
+            <option${u' selected="selected"' if index == len(periods) - 1 else '' | n} value="${index}">
                 ${_(u'From {} to {}').format(
                     babel.dates.format_date(period[0], format = 'short'),
                     babel.dates.format_date(period[1], format = 'short'))}
