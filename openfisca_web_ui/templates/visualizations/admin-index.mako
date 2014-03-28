@@ -83,7 +83,7 @@ from openfisca_web_ui import model, urls
             % if description_text is not None:
                         <p>${description_text}</p>
             % endif
-                        <p><a class="btn btn-default" href="${visualization.get_user_url(ctx)}">${_(u'View')}</a></p>
+                        <p><a class="btn btn-default" href="${visualization.get_admin_url(ctx)}">${_(u'View')}</a></p>
                     </div>
                 </article>
             </div>
