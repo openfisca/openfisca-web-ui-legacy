@@ -34,6 +34,7 @@ define([
 			bottom: 0,
 			right: 80
 		},
+		minBarWidth: 100, // in pixels
 		model: chartM,
 		padding: {
 			top: 50,
@@ -150,7 +151,10 @@ define([
 			// Create waterfall bars.
 			var that = this;
 			var dataLength = this.currentDataSet.length;
-			var barWidth = (that.width - that.padding.left - that.padding.right - dataLength*that.innerPadding)/dataLength;
+			var barWidth = Math.min(
+				(that.width - that.padding.left - that.padding.right - dataLength * that.innerPadding) / dataLength,
+				this.minBarWidth
+			);
 			this.bars = this.svg.selectAll('.bar')
 				.data(this.currentDataSet);
 			this.bars
@@ -162,13 +166,13 @@ define([
 					.attr('height', 0)
 					.attr('rx', 4)
 					.attr('ry', 4)
+					.attr('x', function () { return 0; })
 					.attr('y', function (d) {
 						return d.value < 0 ?
 							that.scales.y(d.waterfall.startValue) :
 							that.scales.y(d.waterfall.startValue) -
 								(that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
 					})
-					.attr('x', function () { return 0; })
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0.8)
 					.attr('stroke-width', 1);
@@ -238,15 +242,15 @@ define([
 					.attr('opacity', 0)
 					.on('mouseover', function (d, i) {
 
-						var bar = d3.select('#bar-'+i),
-							barAttrs = {
-								x: parseInt(bar.attr('x')),
-								y: parseInt(bar.attr('y')),
-								width: parseInt(bar.attr('width')),
-								height: parseInt(bar.attr('height')),
-								fill: bar.attr('fill')
-							},
-							barData = bar.data()[0];
+						var bar = d3.select('#bar-' + i);
+						var barAttrs = {
+							x: parseInt(bar.attr('x')),
+							y: parseInt(bar.attr('y')),
+							width: parseInt(bar.attr('width')),
+							height: parseInt(bar.attr('height')),
+							fill: bar.attr('fill')
+						};
+						var barData = bar.data()[0];
 
 						d3.select(this)
 							.transition()
@@ -265,7 +269,6 @@ define([
 
 						if (!_.isUndefined(d.parentNodes[0])) {
 
-							/*	Helper : getDeeperFirstChild */
 							var getDeeperFirstChild = function (obj) {
 								var doIt = function (el) {
 									if(!_.isUndefined(el.children) && el.children.length > 0) {
