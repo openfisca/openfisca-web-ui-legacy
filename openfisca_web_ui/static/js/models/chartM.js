@@ -29,6 +29,12 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 				this.set('simulationInProgress', backendServiceM.get('simulationInProgress'));
 			}, this));
 		},
+		changeChart: function (chartName) {
+			this.simulate(chartName)
+				.then(_.bind(function() {
+					this.set('currentChartName', chartName);
+				}, this));
+		},
 		parse: function () {
 			// FIXME Remove "fetched". Rework asynchronisms.
 			this.fetched = true;
@@ -77,7 +83,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 
 			return _return;
 		},
-		get_locatingData: function () { /* Just cleaned up */
+		get_locatingData: function () {
 			return new Parser(this.get('source'))
 				.clean()
 				.values();
@@ -86,12 +92,6 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 			return new Parser(this.get('source'))
 				.clean()
 				.values();
-		},
-		changeChart: function (chartName) {
-			this.simulate(chartName)
-				.then(_.bind(function() {
-					this.set('currentChartName', chartName);
-				}, this));
 		},
 		simulate: function (chartName) {
 			chartName = chartName || this.get('currentChartName');

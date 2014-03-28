@@ -184,6 +184,7 @@ define([
 				Description : return parsed data this.outputValue
 			*/
 			values: function () {
+				// FIXME Avoid deep clone.
 				if(_.isObject(this.outputValue) && !_.isArray(this.outputValue)) return $.extend(true, {}, this.outputValue);
 				else return this.outputValue;
 			}
