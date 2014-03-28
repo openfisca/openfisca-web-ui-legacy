@@ -18,6 +18,10 @@ function ($, _, Backbone, appconfig) {
 		fetch: function() {
 			$.ajax({
 				context: this,
+				data: {
+					enabled: true,
+					iframe: true
+				},
 				type: 'GET',
 				url: appconfig.enabledModules.visualizations.searchUrlPath,
 			})
