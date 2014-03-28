@@ -88,18 +88,18 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 				.values();
 		},
 		changeChart: function (chartName) {
-			if (this.get('currentChartName') === null) {
-				this.simulate(chartName);
-			}
-			this.set('currentChartName', chartName);
+			this.simulate(chartName)
+				.then(_.bind(function() {
+					this.set('currentChartName', chartName);
+				}, this));
 		},
 		simulate: function (chartName) {
 			chartName = chartName || this.get('currentChartName');
-			var data = {};
-			if(chartName === 'decomposition') {
-				data.decomposition = 'decompositions-multiples.xml';
+			var options = {};
+			if(chartName === 'distribution') {
+				options.decomposition = 'decompositions-multiples.xml';
 			}
-			backendServiceM.simulate(data);
+			return backendServiceM.simulate(options);
 		}
 	});
 

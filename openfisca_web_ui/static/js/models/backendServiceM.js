@@ -48,11 +48,8 @@ function ($, _, Backbone, appconfig) {
 				options = {};
 			}
 			var data = {context: Date.now()};
-			if (options.axes) {
-				data.axes = JSON.stringify(options.axes);
-			}
-			if (options.decomposition) {
-				data.decomposition = JSON.stringify(options.decomposition);
+			if ('decomposition' in options) {
+				data.decomposition = options.decomposition;
 			}
 			this.set('simulationInProgress', true);
 			return $.ajax({
