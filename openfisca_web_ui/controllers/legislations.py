@@ -26,7 +26,6 @@
 """Controllers for legislations"""
 
 
-import babel.dates
 import collections
 import datetime
 import json
@@ -34,6 +33,7 @@ import logging
 import re
 import requests
 
+import babel.dates
 import pymongo
 import webob
 import webob.multidict

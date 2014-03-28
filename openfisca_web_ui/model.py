@@ -518,12 +518,12 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
     author_id = None
     collection_name = u'visualizations'
     description = None
-    enabled = None
-    featured = None
-    iframe = None
-    thumbnail_url = None
+    enabled = False
+    featured = False
+    iframe = False
     organization = None
     slug = None
+    thumbnail_url = None
     title = None
     url = None
 
@@ -759,3 +759,8 @@ def setup():
 
     Session.ensure_index('expiration')
     Session.ensure_index('token', unique = True)
+
+    Visualization.ensure_index('enabled')
+    Visualization.ensure_index('featured')
+    Visualization.ensure_index('iframe')
+    Visualization.ensure_index('words')

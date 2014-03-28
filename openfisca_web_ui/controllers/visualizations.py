@@ -52,7 +52,10 @@ def make_inputs_to_visualization_data(include_admin_fields):
 
         fields = dict(
             description = conv.cleanup_text,
-            iframe = conv.guess_bool,
+            iframe = conv.pipe(
+                conv.guess_bool,
+                conv.default(False),
+                ),
             thumbnail_url = conv.make_input_to_url(full = True),
             organization = conv.cleanup_line,
             title = conv.pipe(
@@ -66,8 +69,14 @@ def make_inputs_to_visualization_data(include_admin_fields):
             )
         if include_admin_fields:
             fields.update(dict(
-                enabled = conv.guess_bool,
-                featured = conv.guess_bool,
+                enabled = conv.pipe(
+                    conv.guess_bool,
+                    conv.default(False),
+                    ),
+                featured = conv.pipe(
+                    conv.guess_bool,
+                    conv.default(False),
+                    ),
                 ))
 
         return conv.pipe(
@@ -263,6 +272,9 @@ def api1_search(req):
 
     params = req.GET
     inputs = dict(
+        enabled = params.get('enabled'),
+        featured = params.get('featured'),
+        iframe = params.get('iframe'),
         page = params.get('page'),
         sort = params.get('sort'),
         term = params.get('term'),
@@ -270,6 +282,9 @@ def api1_search(req):
     data, errors = conv.pipe(
         conv.struct(
             dict(
+                enabled = conv.guess_bool,
+                featured = conv.guess_bool,
+                iframe = conv.guess_bool,
                 page = conv.pipe(
                     conv.input_to_int,
                     conv.test_greater_or_equal(1),
@@ -288,6 +303,9 @@ def api1_search(req):
         return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
+    for boolean_name in ('enabled', 'featured', 'iframe'):
+        if data[boolean_name] is not None:
+            criteria[boolean_name] = {'$exists': data[boolean_name]}
     if data['term'] is not None:
         criteria['words'] = {'$all': [
             re.compile(u'^{}'.format(re.escape(word)))
@@ -307,7 +325,10 @@ def api1_search(req):
             {
                 'title': visualization.title,
                 'description': visualization.description,
+                'enabled': bool(visualization.enabled),
+                'featured': bool(visualization.featured),
                 'iframe': bool(visualization.iframe),
+                'published': visualization.published.isoformat(),
                 'sourceUrl': visualization.url.format(
                     simulate_url = urllib.quote(
                         urls.get_full_url(ctx, 'api/1/simulate') if ctx.session is None else
@@ -318,6 +339,7 @@ def api1_search(req):
                         ),
                     ),
                 'thumbnailUrl': visualization.thumbnail_url,
+                'updated': visualization.updated.isoformat(),
                 'url': visualization.get_user_url(ctx),
                 }
             for visualization in visualizations
