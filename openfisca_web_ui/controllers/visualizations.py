@@ -309,10 +309,13 @@ def api1_search(req):
                 'description': visualization.description,
                 'iframe': bool(visualization.iframe),
                 'sourceUrl': visualization.url.format(
-                    simulate_url = urllib.quote(u'{}?{}'.format(
-                        urls.get_full_url(ctx, 'api/1/simulate'),
-                        urllib.urlencode({'token': ctx.session.anonymous_token}),
-                        )),
+                    simulate_url = urllib.quote(
+                        urls.get_full_url(ctx, 'api/1/simulate') if ctx.session is None else
+                        u'{}?{}'.format(
+                            urls.get_full_url(ctx, 'api/1/simulate'),
+                            urllib.urlencode({'token': ctx.session.anonymous_token}),
+                            )
+                        ),
                     ),
                 'thumbnailUrl': visualization.thumbnail_url,
                 'url': visualization.get_user_url(ctx),
