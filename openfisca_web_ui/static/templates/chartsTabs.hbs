@@ -1,21 +1,8 @@
-<ul class="nav nav-tabs">
-{{#if enableLocatingChart}}
-  <li>
-    <a data-toggle="tab" href="#locating">Se situer</a>
-  </li>
-{{/if}}
-  <li>
-    <a data-toggle="tab" href="#waterfall">Cascade</a>
-  </li>
-  <li>
-  <a data-toggle="tab" href="#distribution">Répartition</a>
-  </li>
-{{#if otherVisualizations}}
-  <li class="pull-right">
-    <a data-toggle="tab" href="#visualizations">Autres</a>
-  </li>
-{{/if}}
-</ul>
+<select>
+{{#charts}}
+  <option{{#active}} selected="selected"{{/active}} value="{{value}}">{{label}}</option>
+{{/charts}}
+</select>
 <div class="tab-content">
 </div>
 <div class="alert alert-info overlay">Simulation en cours…</div>

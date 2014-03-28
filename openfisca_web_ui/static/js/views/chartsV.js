@@ -51,22 +51,46 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Locatin
 			window.location.hash = $(evt.target).attr('href');
 		},
 		render: function () {
-			this.$el.html(chartsTabsT({
-				enableLocatingChart: enableLocatingChart,
-				otherVisualizations: visualizationsServiceM.get('visualizations'),
-			}));
+			var chartsData = [
+				{
+					label: 'Répartition',
+					value: 'distribution',
+				},
+				{
+					label: 'Cascade',
+					value: 'waterfall',
+				},
+			];
+			if (enableLocatingChart) {
+				chartsData.push({
+					label: 'Se situer',
+					value: 'locating',
+				});
+			}
+			var otherVisualizations = visualizationsServiceM.get('visualizations');
+			if (otherVisualizations) {
+				_.each(otherVisualizations, function(item) {
+					chartsData.push({
+						label: item.title,
+						// TODO Add slug.
+						value: item.title,
+					});
+				});
+			}
+			var currentChartName = this.model.get('currentChartName');
+			var currentChartData = _.findWhere(chartsData, {value: currentChartName});
+			if ( ! _.isUndefined(currentChartData)) {
+				currentChartData.active = true;
+			}
+			this.$el.html(chartsTabsT({charts: chartsData}));
 			this.$overlay = this.$el.find('.overlay').hide();
-			var chartName = this.model.get('currentChartName');
-			if (chartName in viewClassByChartName) {
-				if (this.$el.find('.nav .active').length === 0) {
-					this.$el.find('.nav a[href="#' + chartName + '"]').tab('show');
-				}
+			if (currentChartName in viewClassByChartName) {
 				if (this.currentChildView !== null) {
 					this.currentChildView.remove();
 				}
 				var $tabPane = $('<div>', {'class': 'active tab-pane'});
 				this.$el.find('.tab-content').append($tabPane);
-				this.currentChildView = new viewClassByChartName[chartName]({el: $tabPane});
+				this.currentChildView = new viewClassByChartName[currentChartName]({el: $tabPane});
 				this.currentChildView.render();
 			}
 			return this;
