@@ -5,7 +5,8 @@ define([
 	'sticky',
 
 	'appconfig',
-	'chartM',
+	'backendServiceM',
+	'chartsM',
 	'DistributionChartV',
 	'IframeChartV',
 	'LocatingChartV',
@@ -14,16 +15,11 @@ define([
 
 	'hbs!templates/charts'
 ],
-function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeChartV, LocatingChartV,
+function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV, LocatingChartV,
 	visualizationsServiceM, WaterfallChartV, chartsT) {
 	'use strict';
 
 	var enableLocatingChart = appconfig.enabledModules.locatingChart;
-	var viewClassByChartName = {
-		distribution: DistributionChartV,
-		locating: LocatingChartV,
-		waterfall: WaterfallChartV,
-	};
 
 	var ChartV = Backbone.View.extend({
 		currentChildView: null,
@@ -31,11 +27,11 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeC
 		events: {
 			'change select': 'changeChart',
 		},
-		model: chartM,
+		model: chartsM,
 		initialize: function () {
 			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(this.model, 'change:currentChartSlug', this.render);
-			this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
+			this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
 			if ($(window).width() >= 768) {
 				this.$el.sticky({
 					getWidthFrom: this.$el.parent(),
@@ -46,45 +42,50 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeC
 		changeChart: function (evt) {
 			Backbone.history.navigate($(evt.target).val(), {trigger: true});
 		},
-		chartsData: function() {
-			var chartsData = [];
+		chartsRenderData: function() {
+			var data = [];
 			if (enableLocatingChart) {
-				chartsData.push({label: 'Se situer', value: 'locating'});
+				data = data.concat([
+					{label: 'Situateur de revenu disponible', value: 'revdisp'},
+					{label: 'Situateur de salaire imposable', value: 'sal'},
+				]);
 			}
-			chartsData = chartsData.concat([
+			data = data.concat([
 				{label: 'Répartition', value: 'distribution'},
 				{label: 'Cascade', value: 'waterfall'},
 			]);
 			var otherVisualizations = visualizationsServiceM.get('visualizations');
 			if (otherVisualizations) {
 				_.each(otherVisualizations, function(item) {
-					chartsData.push({label: item.title, value: item.slug});
+					data.push({label: item.title, value: item.slug});
 				});
 			}
-			var currentChartData = _.findWhere(chartsData, {value: this.model.get('currentChartSlug')});
+			var currentChartData = _.findWhere(data, {value: this.model.get('currentChartSlug')});
 			if ( ! _.isUndefined(currentChartData)) {
 				currentChartData.active = true;
 			}
-			return chartsData;
+			return data;
 		},
 		render: function () {
-			this.$el.html(chartsT({charts: this.chartsData()}));
+			this.$el.html(chartsT({charts: this.chartsRenderData()}));
 			if (this.currentChildView !== null) {
 				this.currentChildView.remove();
 			}
 			var $chartWrapper = this.$el.find('.chart-wrapper');
 			var currentChartSlug = this.model.get('currentChartSlug');
-			if (currentChartSlug in viewClassByChartName) {
-				this.currentChildView = new viewClassByChartName[currentChartSlug]({el: $chartWrapper});
-				this.currentChildView.render();
+			if (_.contains(['revdisp', 'sal'], currentChartSlug)) {
+				this.currentChildView = new LocatingChartV({code: currentChartSlug, el: $chartWrapper});
+			} else if (currentChartSlug === 'distribution') {
+				this.currentChildView = new DistributionChartV({el: $chartWrapper});
+			} else if (currentChartSlug === 'waterfall') {
+				this.currentChildView = new WaterfallChartV({el: $chartWrapper});
 			} else {
 				this.currentChildView = new IframeChartV({el: $chartWrapper});
-				this.currentChildView.render();
 			}
 			return this;
 		},
 		updateOverlay: function() {
-			var simulationInProgress = this.model.get('simulationInProgress');
+			var simulationInProgress = backendServiceM.get('simulationInProgress');
 			var $overlay = this.$el.find('.overlay');
 			var $svg = this.$el.find('svg');
 			if (simulationInProgress) {

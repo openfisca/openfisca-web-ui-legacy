@@ -90,7 +90,9 @@ def build_requireconfig(ctx):
             'disclaimer': urls.get_url(ctx, u'js/disclaimer'),
             'helpers': urls.get_url(ctx, 'js/helpers'),
             'legislation': urls.get_url(ctx, u'js/legislation'),
+            # TODO Remove this alias.
             'parser': urls.get_url(ctx, 'js/parser'),
+            'polyfills': urls.get_url(ctx, 'js/polyfills'),
             'router': urls.get_url(ctx, u'js/router'),
 
             # Views
@@ -106,7 +108,8 @@ def build_requireconfig(ctx):
 
             # Models
             'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
-            'chartM': urls.get_url(ctx, u'js/models/chartM'),
+            'chartsM': urls.get_url(ctx, u'js/models/chartsM'),
+            'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
             'situationFormM': urls.get_url(ctx, u'js/models/situationFormM'),
             'visualizationsServiceM': urls.get_url(ctx, u'js/models/visualizationsServiceM'),
 

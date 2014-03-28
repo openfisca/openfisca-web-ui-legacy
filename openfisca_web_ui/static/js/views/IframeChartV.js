@@ -4,9 +4,9 @@ define([
 	'underscore',
 
 	'backendServiceM',
-	'chartM',
+	'chartsM',
 	'visualizationsServiceM',
-], function (Backbone, $, _, backendServiceM, chartM, visualizationsServiceM) {
+], function (Backbone, $, _, backendServiceM, chartsM, visualizationsServiceM) {
 	'use strict';
 
 	var IframeChartV = Backbone.View.extend({
@@ -15,7 +15,7 @@ define([
 		},
 		render: function() {
 			var visualizationData = _.find(visualizationsServiceM.get('visualizations'), function(item) {
-				return item.slug === chartM.get('currentChartSlug');
+				return item.slug === chartsM.get('currentChartSlug');
 			});
 			this.$el.empty().append($('<iframe>', {'class': 'visualization-iframe', src: visualizationData.sourceUrl}));
 		},

@@ -6,12 +6,14 @@ define([
 	'nvd3',
 
 	'appconfig',
-	'chartM',
+	'helpers',
+	'LocatingChartM',
+	'parser',
 ],
-function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
+function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM, Parser) {
 	'use strict';
 
-	nvd3.dev = false;
+	nv.dev = false;
 
 	if ( ! appconfig.enabledModules.locatingChart) {
 		return;
@@ -19,201 +21,130 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 
 	var LocatingChartV = Backbone.View.extend({
 		chart: null,
-		model: chartM,
-//			TODO parametrize year
-		year: 2011,
-		padding: {
-			top: 50,
-			right: 0,
-			bottom: 90,
-			left: 50,
-		},
+		code: null,
+		height: null,
+		// FIXME margin is a padding?
 		margin: {
 			top: 0,
 			left: 0,
 			bottom: 0,
 			right: 20
 		},
+		model: null,
 		maxWidth: 1000,
-		dataIsMissing: true,
-		userPointFill: '#a63232',
-		height: null,
+		userPointColor: '#a63232',
 		width: null,
-		initialize: function () {
-			var that = this;
+		initialize: function(options) {
+			this.code = options.code;
+			this.model = new LocatingChartM({code: this.code});
 			this.updateDimensions();
-			this.vingtiles = _.map(
-				this.model.get('vingtiles')['_'+this.year],
-				function (d) { return $.extend(true, {}, d); }
-			);
-			that.listenTo(that.model, 'change:source', that.render);
-			nvd3.addGraph({
-				callback: function() { that.render(); },
-				generate: function() {
-					that.chart = nvd3.models.lineChart()
-						.margin({left: 100})
-						.transitionDuration(300)
-						.showLegend(true)
-						.showYAxis(true)
-						.showXAxis(true)
-						.useInteractiveGuideline(true);
-					that.svg = d3.select(that.el).append('svg')
-						.attr('height', that.height)
-						.attr('width', that.width)
-						.datum(that.vingtiles)
-						.call(that.chart);
-					nvd3.utils.windowResize(function () {
-						that.chart.update();
-					});
-					that.chart.interactiveLayer.tooltip.contentGenerator(that.tooltipContentGenerator.bind(that));
-					that.svg.attr('opacity', 0);
-					return that.chart;
-				}
-			});
+			this.svg = d3.select(this.el).append('svg')
+				.attr('height', this.height)
+				.attr('width', this.width);
+			this.listenTo(this.model, 'change:data', this.render);
+		},
+		computeUserPoint: function() {
+			var data = this.model.get('data');
+			var vingtiles = this.model.get('vingtiles');
+			var userPoint = {
+				y: data.values[0],
+			};
+			var userPointYIndex = _.sortedIndex(vingtiles.values, userPoint, 'y');
+			var higher = vingtiles.values[userPointYIndex];
+			if (userPointYIndex === 0) {
+				userPoint.x = higher.x;
+			} else if (userPointYIndex === vingtiles.values.length) {
+				userPoint.x = 99;
+			} else {
+				var lower = vingtiles.values[userPointYIndex - 1];
+				var dY = higher.y - lower.y;
+				var dy = userPoint.y - lower.y;
+				var dX = higher.x - lower.x;
+				var dx = dX * dy / dY;
+				userPoint.x = d3.round(lower.x + dx);
+			}
+			return userPoint;
+		},
+		formatNumber: function(value) {
+			var scaledValue = this.prefix.scale(value);
+			if (this.prefix.symbol === 'k') {
+				scaledValue *= 1000;
+			}
+			return d3.round(scaledValue, 2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+		},
+		legendCurrencyText: function() {
+			var legendCurrencyTextBySymbol = {
+				G: 'milliards €',
+				M: 'millions €',
+			};
+			return this.prefix.symbol in legendCurrencyTextBySymbol ? legendCurrencyTextBySymbol[this.prefix.symbol] :
+				'€';
+		},
+		legendText: function() {
+			var legendTextBySymbol = {
+				G: 'revenu en milliards €',
+				k: 'revenu en milliers €',
+				M: 'revenu en millions €',
+			};
+			return this.prefix.symbol in legendTextBySymbol ? legendTextBySymbol[this.prefix.symbol] : 'revenu en €';
 		},
 		render: function () {
-			var that = this;
-			var data = this.model.get('locatingData');
-			if (this.chart === null) {
-				return;
-			}
-			this.vingtiles = this.updateVingtilesByUserData(
-				_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }),
-				data
-			);
-
-			this.setPrefix();
-
-			switch(this.yFormat.symbol) {
-				case 'G':
-					this.legendText = 'revenu en milliards €';
-					break;
-				case 'M':
-					this.legendText = 'revenu en millions €';
-					break;
-				case 'k':
-					this.legendText = 'revenu en milliers €';
-					break;
-				case '':
-					this.legendText = 'revenu en €';
-					break;
-				default:
-					this.legendText = '';
-			}
-
-			this.chart.xAxis
-				.axisLabel('% de la population')
-				.tickFormat(d3.format(',r'));
-
-			this.chart.yAxis
-				.axisLabel(this.legendText)
-				.tickFormat(function (d) {
-					return that.yFormat._scale(d);
-				});
-
-			that.svg.datum(this.vingtiles);
-			that.svg.attr('opacity', 1);
-
-			this.chart.update();
-
-			if(!this.dataIsMissing) {
-				if($('.nv-noData').length > 0) { $('.nv-noData').remove(); }
-				this.showUserPoints();
-			}
-			else { this.showMissingDataError(); }
-
-			$('.nv-legend').on('click', function () {
-				that.showUserPoints();
-			});
-		},
-		showUserPoints: function () {
-			var that = this;
-			_.each(this.vingtiles, function (d) {
-				_.each(d.values, function (_d, _i) {
-					if(_d.userPoint) {
-						d3.select('.nv-series-'+d.values[0].series+' .nv-point-'+_i)
+			var vingtiles = this.model.get('vingtiles');
+			nv.addGraph(_.bind(function() {
+				var vingtiles = this.model.get('vingtiles');
+				var userPoint = this.computeUserPoint();
+				userPoint.isUserPoint = true;
+				var values = _.sortBy(vingtiles.values.concat(userPoint), 'x');
+				var datum = {key: vingtiles.key, values: values};
+				this.prefix = d3.formatPrefix(d3.max(values, function (value) { return value.y; }));
+				var chart = nv.models.lineChart()
+					.transitionDuration(100)
+					.showLegend(true)
+					.showYAxis(true)
+					.showXAxis(true)
+					.useInteractiveGuideline(true);
+				chart.interactiveLayer.tooltip.contentGenerator(_.bind(this.tooltipContent, this));
+				chart.xAxis
+					.axisLabel('% de la population')
+					.tickFormat(d3.format(',r'));
+				chart.yAxis
+					.axisLabel(this.legendText())
+					.tickFormat(_.bind(this.formatNumber, this));
+				this.svg.datum([datum]).call(chart);
+				_.each(datum.values, function (value, valueIdx) {
+					var point = d3.select('.nv-series-' + value.series + ' .nv-point-' + valueIdx);
+					if (value.isUserPoint) {
+						point
+							.style('fill', this.userPointColor)
 							.style('fill-opacity', 1)
-							.style('stroke', that.userPointFill)
+							.style('stroke', this.userPointColor)
 							.style('stroke-opacity', 1)
-							.style('stroke-width', 4)
-							.style('fill', that.userPointFill);
-					}
-					else {
-						d3.select('.nv-series-'+d.values[0].series+' .nv-point-'+_i)
+							.style('stroke-width', 8);
+					} else {
+						// Reset point style from one render to another..
+						point
 							.style('fill-opacity', 0)
-							.style('stroke-opacity', 0);
+							.style('stroke-opacity', 0)
+							.style('stroke-width', 0);
 					}
-				});
-			});
+				}, this);
+				chart.update();
+				// FIXME resize event isn't destroyed when chart is destroyed.
+				nv.utils.windowResize(function () { chart.update(); });
+			}, this));
 		},
-		updateDimensions: function () {
-			this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
-			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
-		},
-		updateVingtilesByUserData: function (vingtiles, data) {
-			var r = {};
-			r.revdisp = _.findDeep(data, {_id: 'revdisp'});
-			r.sal = _.findDeep(data, {_id: 'sal'});
-			r.pat = _.findDeep(data, {_id: 'pat'});
-			r = _.filter(r, function (d) {
-				return !_.isUndefined(d);
-			});
-
-			if(_.isEmpty(r)) {
-				this.dataIsMissing = true;
-				return vingtiles;
-			}
-			else {
-				this.dataIsMissing = false;
-			}
-
-			vingtiles = _.filter(vingtiles, function (d) {
-				return !_.isUndefined(_.findWhere(r, {'_id': d.id}));
-			});
-			
-			/* Append user value to line */
-			_.each(r, function (d) {
-				var vingtile = _.findWhere(vingtiles, {'id': d._id});
-				_.chain(vingtile.values)
-					.push({
-						userPoint: true,
-						x: null,
-						y: (d.values[0] < 0) ? 0 : d.values[0] /* Si le revenu disp < 0 (impossible!) */
-					})
-					.sort(function (a, b) { return a.y-b.y; })
-					.each(function (d, i) {
-						/* Define x position */
-						if(d.userPoint) {
-							if(i === 0) { d.x = 0; }
-							else if(i == vingtile.values.length-1) { d.x = 99; }
-							else {
-								var dY = vingtile.values[i+1].y - vingtile.values[i-1].y,
-									dy = d.y - vingtile.values[i-1].y,
-									dX = vingtile.values[i+1].x - vingtile.values[i-1].x,
-									dx = dX * dy / dY;
-
-								d.x = d3.round(vingtile.values[i-1].x + dx);
-							}
-						}
-					});
-			});
-			return vingtiles;
-		},
-		tooltipContentGenerator: function (d) {
+		tooltipContent: function (d) {
 			var that = this;
-			if (_.isUndefined(this.yFormat)) return '';
-			if (d === null) return '';
 			var table = d3.select(document.createElement('table'));
 			var theadEnter = table.selectAll('thead')
 				.data([d])
 				.enter().append('thead');
 			theadEnter.append('tr')
 				.append('td')
-				.attr('colspan',3)
+				.attr('colspan', 3)
 				.append('strong')
-					.classed('x-value',true)
-					.html(d.value+' % des français ont un');
-
+					.classed('x-value', true)
+					.html(d.value + ' % des français ont un');
 			var tbodyEnter = table.selectAll('tbody')
 				.data([d])
 				.enter().append('tbody');
@@ -223,100 +154,31 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 				.append('tr')
 				.classed('highlight', function(p) { return p.highlight; })
 				;
-
 			trowEnter.append('td')
-				.classed('legend-color-guide',true)
+				.classed('legend-color-guide', true)
 				.append('div')
 				.style('background-color', function(p) { return p.color; });
 			trowEnter.append('td')
-				.classed('key',true)
-				.html(function (p) {
-					return p.key + ' inférieur à : ';
-				});
+				.classed('key', true)
+				.html(function (p) { return p.key + ' inférieur à : '; });
 			trowEnter.append('td')
-				.classed('value',true)
-				.html(function(p) { return that.yFormat._scale(p.value) + ' '+ that.yFormat.symbolText; });
-
+				.classed('value', true)
+				.html(function(p) { return that.formatNumber(p.value) + ' ' + that.legendCurrencyText(); });
 			trowEnter.selectAll('td').each(function(p) {
 				if (p.highlight) {
-					var opacityScale = d3.scale.linear().domain([0,1]).range(['#fff',p.color]);
+					var opacityScale = d3.scale.linear().domain([0, 1]).range(['#fff', p.color]);
 					var opacity = 0.6;
 					d3.select(this)
 						.style('border-bottom-color', opacityScale(opacity))
-						.style('border-top-color', opacityScale(opacity))
-						;
+						.style('border-top-color', opacityScale(opacity));
 				}
 			});
-
-			var html = table.node().outerHTML;
-			if (d.footer !== undefined) {
-				html += '<div class="footer">' + d.footer + '</div>';
-			}
-			return html;
+			return table.node().outerHTML;
 		},
-		setPrefix: function () {
-			var yMin = 0,
-				yMax = d3.max(
-					this.vingtiles,
-					function (vingtile) { return d3.max(_.map(vingtile.values, function (d) { return d.y; })); }
-				),
-				magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax),
-				that = this;
-
-			this.yFormat = d3.formatPrefix(magnitude);
-			/* Number formating */
-			this.yFormat._scale = function (val) {
-				if(that.yFormat.symbol !== 'G' && that.yFormat.symbol !== 'M' && that.yFormat.symbol !== 'k' &&
-					that.yFormat.symbol !== '') {
-					return (''+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-				}
-				var roundLevel = (that.yFormat.symbol == 'G' || that.yFormat.symbol == 'M') ? 2: 0;
-				if(that.yFormat.symbol == 'k') val = that.yFormat.scale(val)*1000;
-				else val = that.yFormat.scale(val);
-				return (''+ d3.round(val, roundLevel)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-			};
-
-			switch(this.yFormat.symbol) {
-				case 'G':
-					this.legendText = 'revenu en milliards €';
-					this.yFormat.symbolText = 'milliards €';
-					break;
-				case 'M':
-					this.legendText = 'revenu en millions €';
-					this.yFormat.symbolText = 'millions €';
-					break;
-				case 'k':
-					this.legendText = 'revenu en milliers €';
-					this.yFormat.symbolText = '€';
-					break;
-				case '':
-					this.legendText = 'revenu en €';
-					this.yFormat.symbolText = '€';
-					break;
-				default:
-					this.legendText = '';
-					this.yFormat.symbolText = '€';
-			}
+		updateDimensions: function () {
+			this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
+			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
 		},
-		showMissingDataError: function () {
-			if($('.nv-noData').length > 0) { $('.nv-noData').remove(); }
-			
-			d3.selectAll('.nv-point')
-				.attr('style', null);
-
-
-			var pos = {
-				x: d3.round(this.width/2, 0),
-				y: d3.round(this.height/2)
-			};
-
-			this.svg.append('svg:text')
-				.attr('class', 'nv-noData')
-				.attr('x', pos.x)
-				.attr('y', pos.y)
-				.style('text-anchor', 'middle')
-				.text('Vos revenus ne vous permettent pas d\'apparaitre sur cette courbe');
-		}
 	});
 
 	return LocatingChartV;

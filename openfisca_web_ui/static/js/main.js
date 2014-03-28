@@ -3,8 +3,8 @@ require([
 	'jquery',
 
 	'app',
-	'helpers'
-], function(domReady, $, app, helpers) {
+	'polyfills'
+], function(domReady, $, app, polyfills) {
 	'use strict';
 
 	$.noConflict();
@@ -12,7 +12,7 @@ require([
 //	Backbone.noConflict();
 	// TODO call noConflict with other libs (d3)
 
-	helpers.installPolyfills();
+	polyfills.init();
 	app.init();
 
 });

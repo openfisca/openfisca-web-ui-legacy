@@ -2,8 +2,8 @@ define([
 	'backbone',
 
 	'appconfig',
-	'chartM'
-], function (Backbone, appconfig, chartM) {
+	'chartsM'
+], function (Backbone, appconfig, chartsM) {
 	'use strict';
 
 	var enableLocatingChart = appconfig.enabledModules.locatingChart;
@@ -22,9 +22,9 @@ define([
 		},
 		chart: function (chartSlug) {
 			if (chartSlug === null) {
-				chartSlug = enableLocatingChart ? 'locating' : 'waterfall';
+				chartSlug = enableLocatingChart ? 'revdisp' : 'waterfall';
 			}
-			chartM.changeChart(chartSlug);
+			chartsM.changeChart(chartSlug);
 		},
 	});
 

@@ -4,9 +4,10 @@ define([
 	'backbone',
 	'd3',
 
-	'chartM',
+	'backendServiceM',
+	'helpers',
 	'parser',
-], function ($, _, Backbone, d3, chartM, Parser) {
+], function ($, _, Backbone, d3, backendServiceM, helpers, Parser) {
 	'use strict';
 
 	var WaterfallChartV = Backbone.View.extend({
@@ -26,7 +27,6 @@ define([
 		},
 		maxBarWidth: 100, // in pixels
 		minBarHeight: 1, // in pixels
-		model: chartM,
 		padding: {
 			top: 50,
 			right: 40,
@@ -38,11 +38,10 @@ define([
 		initialize: function () {
 			_.bindAll(this, 'dataToColor');
 			this.updateDimensions();
-			this.svg = d3.select(this.el)
-				.append('svg')
+			this.svg = d3.select(this.el).append('svg')
 				.attr('height', this.height)
 				.attr('width', this.width);
-			this.listenTo(this.model, 'change:source', this.render);
+			this.listenTo(backendServiceM, 'change:apiData', this.render);
 			// TODO Bind this global event to caller object.
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
@@ -212,8 +211,7 @@ define([
 				.attr('transform', function () {
 					return 'translate('+that.padding.left+', 0)';
 				})
-				.call(this.gridAxis)
-				.moveToBack();
+				.call(this.gridAxis);
 
 			this.svg.selectAll('.x-axis .tick text')
 				.attr('transform', function () {
@@ -227,7 +225,7 @@ define([
 		},
 		computeData: function() {
 			// TODO Internalize setParentNodes and listChildren in WaterfallChartM which are used only in waterfall.
-			var data = new Parser(chartM.get('source')).clean().setParentNodes().listChildren().values();
+			var data = new Parser(backendServiceM.get('apiData').value).clean().setParentNodes().listChildren().values();
 			var currentStartValue = 0, currentEndValue = 0;
 			_.each(data, function (item) {
 				currentEndValue += item.value;
@@ -242,43 +240,38 @@ define([
 		dataToColor: function (data) {
 			return this.colors[data.value > 0 ? 'positive' : 'negative'];
 		},
-		legendCurrencySymbol: function() {
-			var legendCurrencySymbol = {
+		legendCurrencyText: function() {
+			var legendCurrencyTextBySymbol = {
 				G: 'M €',
 				M: 'm €',
-			}[this.prefix.symbol];
-			if (_.isUndefined(legendCurrencySymbol)) {
-				legendCurrencySymbol = '€';
-			}
-			return legendCurrencySymbol;
+			};
+			return this.prefix.symbol in legendCurrencyTextBySymbol ? legendCurrencyTextBySymbol[this.prefix.symbol] :
+				'€';
 		},
 		legendText: function() {
-			var legendText = {
+			var legendTextBySymbol = {
 				G: 'Milliards €',
 				M: 'Millions €',
-			}[this.prefix.symbol];
-			if (_.isUndefined(legendText)) {
-				legendText = 'En euros';
-			}
-			return legendText;
+			};
+			return this.prefix.symbol in legendTextBySymbol ? legendTextBySymbol[this.prefix.symbol] : 'En euros';
 		},
 		remove: function() {
 			Backbone.View.prototype.remove.apply(this, arguments);
 			$(window).off('resize');
 		},
 		render: function() {
-			var that = this;
 			this.data = this.computeData();
 			this.updateScales();
 			if (this.data.length) {
 				this.buildBars(this.buildActiveBars);
 			}
+			// TODO Merge buildLegend and updateLegend and make it reentrant?
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
 				this.buildLegend();
 			} else {
 				this.updateLegend();
 			}
-//			var revdispData = _.findDeep(this.model.get('cleanData'), {code: 'revdisp' });
+//			var revdispData = helpers.findDeep(chartsM.get('cleanData'), {code: 'revdisp' });
 //			if ( ! _.isUndefined(revdispData)) {
 //				_.each(this.bars.data(), function(barData, barIdx) {
 //					if ( ! _.isUndefined(barData.parentNodes) && barData.parentNodes.length > 0 &&
@@ -310,7 +303,10 @@ define([
 				this.data,
 				{
 					_id: deeperFirstChild(
-						_.findDeep(this.model.get('cleanData'), {_id: firstParentNode.id })
+						helpers.findDeep(
+							new Parser(backendServiceM.get('apiData').value).clean().values(),
+							{_id: firstParentNode.id }
+						)
 					)._id,
 				});
 			var yMiddleTextPos = (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
@@ -326,8 +322,7 @@ define([
 				.attr('x1', barAttrs.x)
 				.attr('y1', y)
 				.attr('x2', this.width)
-				.attr('y2', y)
-				.moveToBack();
+				.attr('y2', y);
 
 			this.incomeLine2 = this.svg.append('line')
 				.attr('stroke', '#333')
@@ -341,8 +336,7 @@ define([
 					return that.scales.y(firstParentNodeFirstChild.waterfall.startValue);
 				})
 				.attr('x2', this.width)
-				.attr('y2', function () { return that.scales.y(firstParentNodeFirstChild.waterfall.startValue); })
-				.moveToBack();
+				.attr('y2', function () { return that.scales.y(firstParentNodeFirstChild.waterfall.startValue); });
 
 			this.incomeLine3 = this.svg.append('line')
 				.attr('stroke', '#333')
@@ -354,7 +348,7 @@ define([
 				.attr('y2', function () { return that.scales.y(firstParentNodeFirstChild.waterfall.startValue); });
 
 			this.incomeText = this.svg.selectAll('.income-number')
-				.data([this.prefix._scale(firstParentNode.value) + ' ' + this.legendCurrencySymbol()]);
+				.data([this.prefix._scale(firstParentNode.value) + ' ' + this.legendCurrencyText()]);
 
 			this.incomeText
 				.exit()
@@ -427,7 +421,7 @@ define([
 		</thead>\
 		<tbody>\
 			<tr class="nv-pointer-events-none">\
-				<td>' + this.prefix._scale(d.value) + ' ' + this.legendCurrencySymbol() + '</td>\
+				<td>' + this.prefix._scale(d.value) + ' ' + this.legendCurrencyText() + '</td>\
 			</tr>\
 		</tbody>\
 	</table>\

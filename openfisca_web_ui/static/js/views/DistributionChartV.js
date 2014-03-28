@@ -4,13 +4,13 @@ define([
 	'backbone',
 	'd3',
 
-	'chartM',
-], function ($, _, Backbone, d3, chartM) {
+	'backendServiceM',
+	'helpers',
+	'parser',
+], function ($, _, Backbone, d3, backendServiceM, helpers, Parser) {
 	'use strict';
 
 	var DistributionChartV = Backbone.View.extend({
-		model: chartM,
-
 		defaultSort: 'positive',
 		currentSort: null,
 		headHeight: 50,
@@ -65,7 +65,7 @@ define([
 
 			this.currentSort = this.defaultSort;
 			
-			this.listenTo(this.model, 'change:source', this.render);
+			this.listenTo(backendServiceM, 'change:apiData', this.render);
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
 		remove: function() {
@@ -73,11 +73,16 @@ define([
 			$(window).off('resize');
 		},
 		render: function (sortType) {
-			if(typeof sortType != 'string') sortType = this.currentSort;
-
+			if (typeof sortType != 'string') {
+				sortType = this.currentSort;
+			}
 			this.updateDimensions();
-
-			var data = this.model.get('distributionData', {type: sortType});
+			var data = new Parser(backendServiceM.get('apiData').value)
+				.clean()
+				.setPositiveSort()
+				.setDecompositionSort()
+				.listChildren()
+				.values();
 
 			this.setSortDataByDataset(data);
 
@@ -90,26 +95,26 @@ define([
 
 			this.setSectionsDimensions();
 			this.setPrefix(data);
-
 			this.sortBubblesBy(sortType, data);
 			this.setHeader(sortType);
 		},
 		/* Check 'sort' (decomposition) values in data and update sortData */
 		setSortDataByDataset: function (data) {
-			var sortData = $.extend(true, {}, this.defaultSortData),
-				cleanData = this.model.get('cleanData'); /* Get it to find decomposition names */
+			var sortData = $.extend(true, {}, this.defaultSortData);
+			/* Get it to find decomposition names */
+			var cleanData = new Parser(backendServiceM.get('apiData').value).clean().values();
 
 			_.each(data, function (d) {
 				_.each(d.sorts, function (sortValue, sortKey) {
 					if(!sortData.hasOwnProperty(sortKey)) {
 						sortData[sortKey] = {
-							name: _.findDeep(cleanData, {code: sortKey}).name,
+							name: helpers.findDeep(cleanData, {code: sortKey}).name,
 							children: []
 						};
 					}
 					if(_.isUndefined(_.findWhere(sortData[sortKey].children, {value: sortValue}))) {
 						sortData[sortKey].children.push({
-							name: _.findDeep(cleanData, {code: sortValue}).name,
+							name: helpers.findDeep(cleanData, {code: sortValue}).name,
 							value: sortValue
 						});
 					}
@@ -254,7 +259,6 @@ define([
 					.attr('x', x)
 					.attr('y', y + 20)
 					.text(that.prefix._scale(sectionValue) +' '+ that.prefix.symbolText);
-
 			});
 		},
 		/* Bubble chart bubbles */
@@ -282,8 +286,7 @@ define([
 					.attr('stroke-width', 1)
 					.attr('opacity', 0.8)
 					.on('mouseover', this.bubbleMouseover())
-					.on('mouseout', this.bubbleMouseout())
-					.moveToBack();
+					.on('mouseout', this.bubbleMouseout());
 
 			this.bubbles
 				.transition().duration(200)

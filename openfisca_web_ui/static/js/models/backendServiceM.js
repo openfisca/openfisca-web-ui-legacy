@@ -58,7 +58,12 @@ function ($, _, Backbone, appconfig) {
 				url: appconfig.api.urls.simulate,
 			})
 			.done(function(data) {
-				this.set('apiData', data);
+				if ('errors' in data) {
+					// TODO i18n
+					alert('Erreurs de simulation.');
+				} else {
+					this.set('apiData', data);
+				}
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
 				// TODO Show error to user.

@@ -1,11 +1,13 @@
 define([
 	'jquery',
 	'underscore',
+
+	'helpers',
 ],
-	function ($, _) {
+	function ($, _, helpers) {
 		'use strict';
 
-		// TODO Merge Parser with chartM.
+		// TODO Merge Parser with chartsM.
 		var Parser = function (data) {
 			this.outputValue = $.extend(true, {}, data);
 		};
@@ -141,7 +143,7 @@ define([
 							if(_n.hasOwnProperty('children')) {
 								doIt(_n);
 							} else {
-								var sourceNode = _.findDeep(sourceData, {code: _n.code});
+								var sourceNode = helpers.findDeep(sourceData, {code: _n.code});
 								if(!_.isUndefined(sourceNode)) {
 									if(_.isUndefined(sourceNode.sorts)) sourceNode.sorts = {};
 									sourceNode.sorts[sortId] = sortValue;
