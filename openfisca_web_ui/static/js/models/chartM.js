@@ -37,6 +37,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 				// TODO i18n
 				alert('Erreurs de simulation.');
 			} else {
+				// FIXME Do not duplicate data.
 				this.set('source', $.extend(true, {}, apiData.value));
 			}
 		},
