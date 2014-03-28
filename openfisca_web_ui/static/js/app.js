@@ -14,12 +14,12 @@ function (appconfig) {
 		}
 		if (enabledModules.acceptCookiesModal) {
 			require(['AcceptCookiesModalV'], function(AcceptCookiesModalV) {
-				this.acceptCookiesModalV = new AcceptCookiesModalV();
+				window.acceptCookiesModalV = new AcceptCookiesModalV();
 			});
 		}
 		else if (enabledModules.acceptCnilConditionsModal) {
 			require(['AcceptCnilConditionsModalV'], function(AcceptCnilConditionsModalV) {
-				this.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
+				window.acceptCnilConditionsModalV = new AcceptCnilConditionsModalV();
 			});
 		}
 		if ( ! enabledModules.acceptCookiesModal && ! enabledModules.acceptCnilConditionsModal) {
