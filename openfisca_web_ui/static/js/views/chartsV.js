@@ -7,33 +7,31 @@ define([
 	'appconfig',
 	'chartM',
 	'DistributionChartV',
+	'IframeChartV',
 	'LocatingChartV',
 	'visualizationsServiceM',
-	'VisualizationsPaneV',
 	'WaterfallChartV',
 
-	'hbs!templates/chartsTabs'
+	'hbs!templates/charts'
 ],
-function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, LocatingChartV, visualizationsServiceM,
-	VisualizationsPaneV, WaterfallChartV, chartsTabsT) {
+function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeChartV, LocatingChartV,
+	visualizationsServiceM, WaterfallChartV, chartsT) {
 	'use strict';
 
 	var enableLocatingChart = appconfig.enabledModules.locatingChart;
 	var viewClassByChartName = {
 		distribution: DistributionChartV,
 		locating: LocatingChartV,
-		visualizations: VisualizationsPaneV,
 		waterfall: WaterfallChartV,
 	};
 
 	var ChartV = Backbone.View.extend({
 		currentChildView: null,
-		el: '#chart-wrapper',
+		el: '#charts-wrapper',
 		events: {
-			'show.bs.tab a[data-toggle="tab"]': 'onTabShow',
+			'change select': 'changeChart',
 		},
 		model: chartM,
-		$overlay: null,
 		initialize: function () {
 			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(this.model, 'change:currentChartName', this.render);
@@ -44,66 +42,57 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, Locatin
 					topSpacing: 10,
 				});
 			}
-			this.render();
-			this.updateOverlay();
 		},
-		onTabShow: function(evt) {
-			window.location.hash = $(evt.target).attr('href');
+		changeChart: function (evt) {
+			Backbone.history.navigate($(evt.target).val(), {trigger: true});
 		},
-		render: function () {
-			var chartsData = [
-				{
-					label: 'Répartition',
-					value: 'distribution',
-				},
-				{
-					label: 'Cascade',
-					value: 'waterfall',
-				},
-			];
+		chartsData: function() {
+			var chartsData = [];
 			if (enableLocatingChart) {
-				chartsData.push({
-					label: 'Se situer',
-					value: 'locating',
-				});
+				chartsData.push({label: 'Se situer', value: 'locating'});
 			}
+			chartsData = chartsData.concat([
+				{label: 'Répartition', value: 'distribution'},
+				{label: 'Cascade', value: 'waterfall'},
+			]);
 			var otherVisualizations = visualizationsServiceM.get('visualizations');
 			if (otherVisualizations) {
 				_.each(otherVisualizations, function(item) {
-					chartsData.push({
-						label: item.title,
-						// TODO Add slug.
-						value: item.title,
-					});
+					chartsData.push({label: item.title, value: item.slug});
 				});
 			}
-			var currentChartName = this.model.get('currentChartName');
-			var currentChartData = _.findWhere(chartsData, {value: currentChartName});
+			var currentChartData = _.findWhere(chartsData, {value: this.model.get('currentChartName')});
 			if ( ! _.isUndefined(currentChartData)) {
 				currentChartData.active = true;
 			}
-			this.$el.html(chartsTabsT({charts: chartsData}));
-			this.$overlay = this.$el.find('.overlay').hide();
+			return chartsData;
+		},
+		render: function () {
+			this.$el.html(chartsT({charts: this.chartsData()}));
+			if (this.currentChildView !== null) {
+				this.currentChildView.remove();
+			}
+			var $chartWrapper = this.$el.find('.chart-wrapper');
+			var currentChartName = this.model.get('currentChartName');
 			if (currentChartName in viewClassByChartName) {
-				if (this.currentChildView !== null) {
-					this.currentChildView.remove();
-				}
-				var $tabPane = $('<div>', {'class': 'active tab-pane'});
-				this.$el.find('.tab-content').append($tabPane);
-				this.currentChildView = new viewClassByChartName[currentChartName]({el: $tabPane});
+				this.currentChildView = new viewClassByChartName[currentChartName]({el: $chartWrapper});
 				this.currentChildView.render();
+			} else {
+				this.currentChildView = new IframeChartV({el: $chartWrapper});
+				this.currentChildView.render(currentChartName);
 			}
 			return this;
 		},
 		updateOverlay: function() {
 			var simulationInProgress = this.model.get('simulationInProgress');
+			var $overlay = this.$el.find('.overlay');
 			var $svg = this.$el.find('svg');
 			if (simulationInProgress) {
 				$svg.css('opacity', 0.1);
-				this.$overlay.show();
+				$overlay.show();
 			} else {
 				$svg.css('opacity', 1);
-				this.$overlay.hide();
+				$overlay.hide();
 			}
 		}
 	});

@@ -49,7 +49,7 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
                 </div>
             </div>
             <div class="col-sm-8">
-                <div id="chart-wrapper"></div>
+                <div id="charts-wrapper"></div>
             </div>
         </div>
 </%def>

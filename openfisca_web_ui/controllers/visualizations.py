@@ -323,12 +323,12 @@ def api1_search(req):
         ctx,
         [
             {
-                'title': visualization.title,
                 'description': visualization.description,
                 'enabled': bool(visualization.enabled),
                 'featured': bool(visualization.featured),
                 'iframe': bool(visualization.iframe),
                 'published': visualization.published.isoformat(),
+                'slug': visualization.slug,
                 'sourceUrl': visualization.url.format(
                     simulate_url = urllib.quote(
                         urls.get_full_url(ctx, 'api/1/simulate') if ctx.session is None else
@@ -338,6 +338,7 @@ def api1_search(req):
                             )
                         ),
                     ),
+                'title': visualization.title,
                 'thumbnailUrl': visualization.thumbnail_url,
                 'updated': visualization.updated.isoformat(),
                 'url': visualization.get_user_url(ctx),

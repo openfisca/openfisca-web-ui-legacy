@@ -99,9 +99,9 @@ def build_requireconfig(ctx):
             'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
             'chartsV': urls.get_url(ctx, u'js/views/chartsV'),
             'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
+            'IframeChartV': urls.get_url(ctx, u'js/views/IframeChartV'),
             'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
             'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
-            'VisualizationsPaneV': urls.get_url(ctx, u'js/views/VisualizationsPaneV'),
             'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
 
             # Models

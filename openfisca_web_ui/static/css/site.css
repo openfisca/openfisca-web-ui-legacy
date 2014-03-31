@@ -83,11 +83,11 @@ form[name=situation] button.add {
     margin-right: 1em;
 }
 
-#chart-wrapper {
+#charts-wrapper {
     position: relative;
 }
 
-#chart-wrapper .overlay {
+#charts-wrapper .overlay {
     left: 40%;
     position: absolute;
     top: 50%;

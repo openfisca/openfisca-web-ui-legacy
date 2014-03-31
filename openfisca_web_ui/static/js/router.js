@@ -9,11 +9,7 @@ define([
 	var enableLocatingChart = appconfig.enabledModules.locatingChart;
 	var router = null;
 	var routes = {
-		'': 'defaultChart',
-		distribution: 'distributionChart',
-		other: 'otherCharts',
-		visualizations: 'visualizationsChart',
-		waterfall: 'waterfallChart'
+		'*chartSlug': 'chart',
 	};
 	if (enableLocatingChart) {
 		routes.locating = 'locatingChart';
@@ -24,26 +20,12 @@ define([
 		initialize: function () {
 			Backbone.history.start();
 		},
-		defaultChart: function () {
-			chartM.changeChart(enableLocatingChart ? 'locating' : 'waterfall');
-		},
-		distributionChart: function () {
-			chartM.changeChart('distribution');
-		},
-		locatingChart: function () {
-			if (enableLocatingChart) {
-				chartM.changeChart('locating');
+		chart: function (chartSlug) {
+			if (chartSlug === null) {
+				chartSlug = enableLocatingChart ? 'locating' : 'waterfall';
 			}
+			chartM.changeChart(chartSlug);
 		},
-		otherCharts: function () {
-			chartM.changeChart('other');
-		},
-		waterfallChart: function () {
-			chartM.changeChart('waterfall');
-		},
-		visualizationsChart: function () {
-			chartM.changeChart('visualizations');
-		}
 	});
 
 	function init () {

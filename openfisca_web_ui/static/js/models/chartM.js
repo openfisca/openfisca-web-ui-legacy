@@ -12,7 +12,6 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 	'use strict';
 
 	var ChartM = Backbone.Model.extend({
-		fetched: false,
 		defaults: {
 			currentChartName: null,
 			distribution_data: {},
@@ -30,14 +29,10 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 			}, this));
 		},
 		changeChart: function (chartName) {
-			this.simulate(chartName)
-				.then(_.bind(function() {
-					this.set('currentChartName', chartName);
-				}, this));
+			this.set('currentChartName', chartName);
+			this.simulate(chartName);
 		},
 		parse: function () {
-			// FIXME Remove "fetched". Rework asynchronisms.
-			this.fetched = true;
 			var apiData = backendServiceM.get('apiData');
 			if ('errors' in apiData) {
 				// TODO i18n
@@ -49,6 +44,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 		},
 
 		/* Overiding Backbone get method : Call custom get method if exists (can pass args) */
+		// TODO Remove this magic method.
 		get: function (attr, args) {
 			if (typeof this['get_'+attr] == 'function') {
 				return this['get_'+attr](args);

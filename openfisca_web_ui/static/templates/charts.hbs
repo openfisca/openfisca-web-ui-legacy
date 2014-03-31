@@ -1,0 +1,9 @@
+<div class="form-inline">
+  <select class="form-control">
+{{#charts}}
+    <option{{#active}} selected="selected"{{/active}} value="{{value}}">{{label}}</option>
+{{/charts}}
+  </select>
+</div>
+<div class="chart-wrapper"></div>
+<div class="alert alert-info overlay">Simulation en cours…</div>
