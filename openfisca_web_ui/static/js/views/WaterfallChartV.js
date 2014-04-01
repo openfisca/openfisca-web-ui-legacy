@@ -5,7 +5,8 @@ define([
 	'd3',
 
 	'chartM',
-], function ($, _, Backbone, d3, chartM) {
+	'parser',
+], function ($, _, Backbone, d3, chartM, Parser) {
 	'use strict';
 
 	var WaterfallChartV = Backbone.View.extend({
@@ -15,6 +16,7 @@ define([
 			negative: '#b22424',
 			positive: '#6aa632',
 		},
+		data: null,
 		duration: 100, // in ms
 		margin: {
 			top: 0,
@@ -46,9 +48,8 @@ define([
 		},
 		buildActiveBars: function () {
 			var that = this;
-			var waterfallData = this.model.get('waterfallData');
-			var barWidth = (that.width - that.padding.left - that.padding.right) / waterfallData.length;
-			this.activeBars = this.svg.selectAll('.active-bar').data(waterfallData);
+			var barWidth = (that.width - that.padding.left - that.padding.right) / this.data.length;
+			this.activeBars = this.svg.selectAll('.active-bar').data(this.data);
 			this.activeBars
 				.enter()
 					.append('rect')
@@ -60,191 +61,36 @@ define([
 					.attr('x', function (d) { return that.scales.x(d.short_name); }) // jshint ignore:line
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0)
-					.on('mouseover', function (d, i) {
-						var bar = d3.select('#bar-' + i);
-						var barAttrs = {
-							x: parseInt(bar.attr('x')),
-							y: parseInt(bar.attr('y')),
-							width: parseInt(bar.attr('width')),
-							height: parseInt(bar.attr('height')),
-							fill: bar.attr('fill')
-						};
-						var barData = bar.data()[0];
-
-						d3.select(this)
-							.transition()
-							.duration(50)
-								.attr('opacity', 0);
-
+					.on('mouseover', function (barData, barIdx) {
+						var bar = d3.select('#bar-' + barIdx);
 						that.showTooltip(bar);
-
 						that.bars
 							.transition()
-							.duration(100)
-							.attr('opacity', function (_d, _i) { return _i == i ? 1 : 0.8; });
-
-						if (!_.isUndefined(d.parentNodes[0])) {
-
-							var getDeeperFirstChild = function (obj) {
-								var doIt = function (el) {
-									if(!_.isUndefined(el.children) && el.children.length > 0) {
-										return doIt(el.children[0]);
-									}
-									return el;
-								};
-								return doIt(obj);
-							};
-
-							var parentNode = d.parentNodes[0];
-							parentNode.name = $.isArray(parentNode.name) ? parentNode.name : parentNode.name.split(' ');
-
-							var parentNodeFirstChildrenId = getDeeperFirstChild(
-								_.findDeep(that.model.get('cleanData'), {_id: parentNode.id })
-							)._id;
-							var parentNodeFirstChildren = _.findWhere(waterfallData, {_id: parentNodeFirstChildrenId});
-
-							var yMiddleTextPos = (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
-								(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y +
-								(barData.value < 0 ? (barAttrs.height) : 0)))/2;
-
-							that.incomeLine = that.svg.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 2; })
-								.attr('stroke-dasharray', ('3, 3'))
-								.attr('opacity', 0)
-								.attr('x1', function () { return barAttrs.x; })
-								.attr('y1', function () {
-									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
-								})
-								.attr('x2', function () { return that.width; })
-								.attr('y2', function () {
-									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
-								})
-								.moveToBack();
-
-							that.incomeLine2 = that.svg.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 2; })
-								.attr('stroke-dasharray', ('3, 3'))
-								.attr('opacity', 0)
-
-								.attr('x1', function () {
-									return that.scales.x(parentNodeFirstChildren.short_name); // jshint ignore:line
-								})
-								.attr('y1', function () {
-									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
-								})
-								.attr('x2', function () { return that.width; })
-								.attr('y2', function () {
-									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
-								})
-								.moveToBack();
-
-							that.incomeLine3 = that.svg.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 7; })
-								.attr('opacity', 0)
-								.attr('x1', function () { return that.width-10; })
-								.attr('y1', function () {
-									return (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0));
-								})
-								.attr('x2', function () { return that.width-10; })
-								.attr('y2', function () {
-									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
-								});
-							
-							that.incomeText = that.svg.selectAll('.income-number')
-								.data([that.prefix._scale(d.parentNodes[0].value) + ' ' + that.legendCurrencySymbol()]);
-
-							that.incomeText
-								.exit()
-									.transition().duration(50)
-									.attr('opacity', 0)
-									.remove();
-
-							that.incomeText
-								.attr('y', function (_d, _i) {
-									var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
-									return yMiddleTextPos + lineHeight * _i -
-										(that.incomeText.data().length * lineHeight-10);
-								})
-								.text(function (_d) {
-									return _d;
-								})
-								.attr('opacity', 1)
-								.enter()
-									.append('text')
-									.attr('class', 'income-number')
-									.attr('font-size', 15)
-									.attr('x', function () { return that.width + 5; })
-									.attr('y', function (_d, _i) {
-										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
-										return yMiddleTextPos + lineHeight * _i -
-											(that.incomeText.data().length * lineHeight-10);
-									})
-									.attr('font-weight', 'bold')
-									.text(function (_d) {
-										return _d;
-									});
-
-							that.incomeLabel = that.svg.selectAll('.income-label').data(parentNode.name);
-
-							that.incomeLabel
-								.text(function (d) { return d; })
-								.attr('y', function (_d, _i) {
-									var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
-									return yMiddleTextPos + lineHeight + _i * lineHeight;
-								})
-								.attr('x', function () { return that.width + 5; })
-								.enter()
-									.append('text')
-									.attr('class', 'income-label')
-									.attr('x', function () { return that.width + 5; })
-									.attr('font-size', 12)
-									.attr('font-weight', 'bold')
-									.attr('y', function (_d, _i) {
-										var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
-										return yMiddleTextPos + lineHeight + _i * lineHeight;
-									})
-									.text(function (d) { return d; });
-
-							that.incomeLabel
-								.exit()
-									.transition().duration(100)
-									.remove();
-
-							that.incomeLine
-								.transition().duration(100)
-								.attr('opacity', 1);
-
-							that.incomeLine2
-								.transition().duration(100)
-								.attr('opacity', 1);
-
-							that.incomeLine3
-								.transition().duration(100)
-								.attr('opacity', 1);
+							.duration(this.duration)
+							.attr('opacity', function (d, i) { return i == barIdx ? 1 : 0.8; });
+						if (barData.parentNodes.length > 0) {
+							that.renderIncome(barData, barIdx);
 						}
 					})
 					.on('mouseout', function (d, i) {
-						var bar = d3.select('#bar-'+i);
+						var bar = d3.select('#bar-' + i);
 						d3.select(this)
 							.transition()
-							.duration(50)
+							.duration(that.duration)
 							.attr('opacity', 0);
 						that.bars
 							.transition()
-							.duration(100)
-							.attr('opacity', 0.8);
+							.duration(that.duration)
+							.attr('opacity', 1);
 						bar.attr('stroke-width', 1);
 
 						d3.select(that.el).select('.nvtooltip')
 							.transition()
-							.duration(100)
+							.duration(that.duration)
 							.style('opacity', 0)
 							.remove();
 
-						if(!_.isUndefined(that.incomeLabel)) {
+						if( ! _.isUndefined(that.incomeLabel)) {
 							that.incomeLabel.remove();
 							that.incomeLine.remove();
 							that.incomeLine2.remove();
@@ -252,32 +98,23 @@ define([
 							that.incomeText.remove();
 						}
 					});
-
-			this.activeBars.moveToFront();
-
 			this.activeBars
 				.transition()
 					.duration(this.duration)
 					.attr('width', barWidth)
 					.attr('height', that.height)
-					.attr('x', function (d) {
-						return that.scales.x(d.short_name); // jshint ignore:line
-					})
+					.attr('x', function (d) { return that.scales.x(d.short_name); }) // jshint ignore:line
 					.attr('y', this.padding.top)
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0);
-
-			this.activeBars
-				.exit()
-				.remove();
+			this.activeBars.exit().remove();
 		},
 		buildBars: function (endTransitionCallback) {
 			var that = this;
-			var waterfallData = this.model.get('waterfallData');
 			var barWidth = (this.width - this.padding.left - this.padding.right -
-				this.barLeftAndRightPadding * waterfallData.length) / waterfallData.length;
+				this.barLeftAndRightPadding * this.data.length) / this.data.length;
 			var realBarWidth = Math.min(barWidth, this.maxBarWidth);
-			this.bars = this.svg.selectAll('.bar').data(waterfallData);
+			this.bars = this.svg.selectAll('.bar').data(this.data);
 			this.bars
 				.enter()
 					.append('rect')
@@ -286,7 +123,7 @@ define([
 					.attr('rx', 4)
 					.attr('ry', 4)
 					.attr('fill', that.dataToColor)
-					.attr('opacity', 0.8)
+					.attr('opacity', 1)
 					.attr('stroke-width', 1);
 			this.bars
 				.transition()
@@ -314,8 +151,12 @@ define([
 							that.activeBars.on('mouseout', null);
 							that.activeBars.remove();
 						}
-						if(!_.isUndefined(that.incomeLine)) that.incomeLine.transition().duration(100).remove();
-						if(!_.isUndefined(that.incomeText)) that.incomeText.transition().duration(100).remove();
+						if(!_.isUndefined(that.incomeLine)) {
+							that.incomeLine.transition().duration(that.duration).remove();
+						}
+						if(!_.isUndefined(that.incomeText)) {
+							that.incomeText.transition().duration(that.duration).remove();
+						}
 					})
 					.each('end',function (d, i) {
 						if(!_.isUndefined(endTransitionCallback) && i === 0) {
@@ -384,6 +225,20 @@ define([
 				});
 			this.renderLegendText();
 		},
+		computeData: function() {
+			// TODO Internalize setParentNodes and listChildren in WaterfallChartM which are used only in waterfall.
+			var data = new Parser(chartM.get('source')).clean().setParentNodes().listChildren().values();
+			var currentStartValue = 0, currentEndValue = 0;
+			_.each(data, function (item) {
+				currentEndValue += item.value;
+				item.waterfall = {
+					startValue: currentStartValue,
+					endValue: currentEndValue,
+				};
+				currentStartValue += item.value;
+			});
+			return data;
+		},
 		dataToColor: function (data) {
 			return this.colors[data.value > 0 ? 'positive' : 'negative'];
 		},
@@ -412,8 +267,10 @@ define([
 			$(window).off('resize');
 		},
 		render: function() {
+			var that = this;
+			this.data = this.computeData();
 			this.updateScales();
-			if (this.model.get('waterfallData').length) {
+			if (this.data.length) {
 				this.buildBars(this.buildActiveBars);
 			}
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
@@ -421,7 +278,122 @@ define([
 			} else {
 				this.updateLegend();
 			}
+//			var revdispData = _.findDeep(this.model.get('cleanData'), {code: 'revdisp' });
+//			if ( ! _.isUndefined(revdispData)) {
+//				_.each(this.bars.data(), function(barData, barIdx) {
+//					if ( ! _.isUndefined(barData.parentNodes) && barData.parentNodes.length > 0 &&
+//						barData.parentNodes[0].id === 'root') {
+//						that.renderIncome(barData, barIdx);
+//					}
+//				});
+//			}
 			return this;
+		},
+		renderIncome: function(barData, barIdx) {
+			var that = this;
+			var bar = d3.select('#bar-' + barIdx);
+			var barAttrs = {
+				fill: bar.attr('fill'),
+				x: parseInt(bar.attr('x')),
+				y: parseInt(bar.attr('y')),
+				width: parseInt(bar.attr('width')),
+				height: parseInt(bar.attr('height')),
+			};
+
+			var deeperFirstChild = function (node) {
+				return ! _.isUndefined(node.children) && node.children.length > 0 ?
+					deeperFirstChild(node.children[0]) : node;
+			};
+
+			var firstParentNode = barData.parentNodes[0];
+			var firstParentNodeFirstChild = _.findWhere(
+				this.data,
+				{
+					_id: deeperFirstChild(
+						_.findDeep(this.model.get('cleanData'), {_id: firstParentNode.id })
+					)._id,
+				});
+			var yMiddleTextPos = (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
+				(this.scales.y(firstParentNodeFirstChild.waterfall.startValue) - (barAttrs.y +
+				(barData.value < 0 ? (barAttrs.height) : 0)))/2;
+
+			var y = barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
+			this.incomeLine = this.svg.append('line')
+				.attr('stroke', '#333')
+				.attr('stroke-width', 2)
+				.attr('stroke-dasharray', ('3, 3'))
+				.attr('opacity', 0)
+				.attr('x1', barAttrs.x)
+				.attr('y1', y)
+				.attr('x2', this.width)
+				.attr('y2', y)
+				.moveToBack();
+
+			this.incomeLine2 = this.svg.append('line')
+				.attr('stroke', '#333')
+				.attr('stroke-width', 2)
+				.attr('stroke-dasharray', ('3, 3'))
+				.attr('opacity', 0)
+				.attr('x1', function () {
+					return that.scales.x(firstParentNodeFirstChild.short_name); // jshint ignore:line
+				})
+				.attr('y1', function () {
+					return that.scales.y(firstParentNodeFirstChild.waterfall.startValue);
+				})
+				.attr('x2', this.width)
+				.attr('y2', function () { return that.scales.y(firstParentNodeFirstChild.waterfall.startValue); })
+				.moveToBack();
+
+			this.incomeLine3 = this.svg.append('line')
+				.attr('stroke', '#333')
+				.attr('stroke-width', 7)
+				.attr('opacity', 0)
+				.attr('x1', this.width - 10)
+				.attr('y1', function () { return (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)); })
+				.attr('x2', this.width - 10)
+				.attr('y2', function () { return that.scales.y(firstParentNodeFirstChild.waterfall.startValue); });
+
+			this.incomeText = this.svg.selectAll('.income-number')
+				.data([this.prefix._scale(firstParentNode.value) + ' ' + this.legendCurrencySymbol()]);
+
+			this.incomeText
+				.exit()
+					.transition().duration(this.duration)
+					.attr('opacity', 0)
+					.remove();
+
+			this.incomeText
+				.enter()
+					.append('text')
+					.attr('class', 'income-number')
+					.attr('font-size', 15)
+					.attr('x', this.width + 5)
+					.attr('y', function (_d, _i) {
+						var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
+						return yMiddleTextPos + lineHeight * _i -
+							(that.incomeText.data().length * lineHeight-10);
+					})
+					.attr('font-weight', 'bold')
+					.text(function (_d) { return _d; });
+
+			this.incomeLabel = this.svg.selectAll('.income-label')
+				.data(firstParentNode.name.split(' '));
+			this.incomeLabel
+				.enter()
+					.append('text')
+					.attr('class', 'income-label')
+					.attr('font-size', 12)
+					.attr('font-weight', 'bold')
+					.attr('x', that.width + 5)
+					.attr('y', function (d, i) {
+						var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
+						return yMiddleTextPos + lineHeight + i * lineHeight;
+					})
+					.text(function (d) { return d; });
+			this.incomeLabel.exit().transition().duration(this.duration).remove();
+			this.incomeLine.transition().duration(this.duration).attr('opacity', 1);
+			this.incomeLine2.transition().duration(this.duration).attr('opacity', 1);
+			this.incomeLine3.transition().duration(this.duration).attr('opacity', 1);
 		},
 		renderLegendText: function () {
 			var legendTextObject = this.svg.selectAll('.legend-text-y').data([this.legendText()]);
@@ -474,7 +446,7 @@ define([
 				})
 				.style('top', function () { return bar.attr('y') + 'px'; })
 				.transition()
-					.duration(100)
+					.duration(this.duration)
 					.style('opacity', 1);
 		},
 		updateDimensions: function() {
@@ -519,19 +491,18 @@ define([
 		},
 		updateScales: function () {
 			var that = this;
-			var waterfallData = this.model.get('waterfallData');
-			var currentDataSetValues = _.map(waterfallData, function (data) {
+			var currentDataSetValues = _.map(this.data, function (data) {
 				return [data.waterfall.startValue, data.waterfall.endValue];
 			});
 			var yMin, yMax;
 
 			/* Set scales */
-			yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
-			yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
+			yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d); });
+			yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d); });
 			this.scales = {
 				x: d3.scale.ordinal()
 					.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-					.domain(_.map(waterfallData, function(d) { return d.short_name; })), // jshint ignore:line
+					.domain(_.map(this.data, function(d) { return d.short_name; })), // jshint ignore:line
 				y: d3.scale.linear()
 					.domain([yMin, yMax])
 					.range([that.height - that.padding.bottom, that.padding.top])

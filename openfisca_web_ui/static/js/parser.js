@@ -5,6 +5,7 @@ define([
 	function ($, _) {
 		'use strict';
 
+		// TODO Merge Parser with chartM.
 		var Parser = function (data) {
 			this.outputValue = $.extend(true, {}, data);
 		};
@@ -96,7 +97,7 @@ define([
 
 				var doIt = function (loopData) {
 					var	loopDataChildren = loopData.children,
-						dataLength = Object._length(loopDataChildren);
+						dataLength = _.keys(loopDataChildren).length;
 
 					_.each(loopDataChildren, function (loopDatum, i) {
 						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) {

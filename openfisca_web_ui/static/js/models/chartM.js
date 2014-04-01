@@ -53,25 +53,6 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 			return Backbone.Model.prototype.get.call(this, attr);
 		},
 
-		/* Custom get methods */
-		get_waterfallData: function () { // jshint ignore:line
-		/* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
-			var waterfallData = new Parser(this.get('source'))
-				.clean()
-				.setParentNodes()
-				.listChildren()
-				.values();
-			var currentStartValue = 0, currentEndValue = 0;
-			_.each(waterfallData, function (item) {
-				currentEndValue += item.value;
-				item.waterfall = {
-					startValue: currentStartValue,
-					endValue: currentEndValue,
-				};
-				currentStartValue += item.value;
-			});
-			return waterfallData;
-		},
 		get_distributionData: function (args) { // jshint ignore:line
 			/* Par défault on renvoie la décomposition revdisp */
 			args = args || {sort: 'revdisp'};
