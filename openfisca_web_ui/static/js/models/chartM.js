@@ -56,40 +56,40 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 		/* Custom get methods */
 		get_waterfallData: function () { // jshint ignore:line
 		/* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
-			return new Parser(this.get('source'))
+			var waterfallData = new Parser(this.get('source'))
 				.clean()
-				// .removeRootNode()
 				.setParentNodes()
 				.listChildren()
 				.values();
+			var currentStartValue = 0, currentEndValue = 0;
+			_.each(waterfallData, function (item) {
+				currentEndValue += item.value;
+				item.waterfall = {
+					startValue: currentStartValue,
+					endValue: currentEndValue,
+				};
+				currentStartValue += item.value;
+			});
+			return waterfallData;
 		},
 		get_distributionData: function (args) { // jshint ignore:line
 			/* Par défault on renvoie la décomposition revdisp */
 			args = args || {sort: 'revdisp'};
-			var parser = new Parser(this.get('source'));
-
 			if(args.sort == 'all') {
 				args.sort = 'revdisp';
 			}
-
-			var _return = parser
+			return new Parser(this.get('source'))
 				.clean()
 				.setPositiveSort()
 				.setDecompositionSort()
 				.listChildren()
 				.values();
-
-			return _return;
 		},
 		get_locatingData: function () { // jshint ignore:line
-			return new Parser(this.get('source'))
-				.clean()
-				.values();
+			return new Parser(this.get('source')).clean().values();
 		},
 		get_cleanData: function () { // jshint ignore:line
-			return new Parser(this.get('source'))
-				.clean()
-				.values();
+			return new Parser(this.get('source')).clean().values();
 		},
 		simulate: function (chartName) {
 			chartName = chartName || this.get('currentChartSlug');

@@ -1,4 +1,4 @@
-define(['underscore'], function (_) {
+define(['underscore', 'd3'], function (_, d3) {
 	'use strict';
 
 	function installConsolePolyfill() {
@@ -38,6 +38,18 @@ define(['underscore'], function (_) {
 
 		installConsolePolyfill();
 	}
+
+	d3.selection.prototype.moveToFront = function() {
+		return this.each(function(){ this.parentNode.appendChild(this); });
+	};
+	d3.selection.prototype.moveToBack = function() {
+		return this.each(function() {
+			var firstChild = this.parentNode.firstChild;
+			if (firstChild) {
+				this.parentNode.insertBefore(this, firstChild);
+			}
+		});
+	};
 
 	_.mixin({
 		findDeep: function(items, attrs) {

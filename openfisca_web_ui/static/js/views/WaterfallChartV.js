@@ -8,25 +8,12 @@ define([
 ], function ($, _, Backbone, d3, chartM) {
 	'use strict';
 
-	d3.selection.prototype.moveToFront = function() {
-		return this.each(function(){ this.parentNode.appendChild(this); });
-	};
-	d3.selection.prototype.moveToBack = function() {
-		return this.each(function() {
-			var firstChild = this.parentNode.firstChild;
-			if (firstChild) {
-				this.parentNode.insertBefore(this, firstChild);
-			}
-		});
-	};
-
 	var WaterfallChartV = Backbone.View.extend({
 		bars: [],
 		colors: {
 			negative: '#b22424',
 			positive: '#6aa632',
 		},
-		currentDataSet: {},
 		innerPadding: 10,
 		margin: {
 			top: 0,
@@ -52,111 +39,246 @@ define([
 				.attr('height', this.height)
 				.attr('width', this.width);
 			this.listenTo(this.model, 'change:source', this.render);
+			// TODO Bind this global event to caller object.
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
-		dataToColor: function (data) {
-			return this.colors[data.value > 0 ? 'positive' : 'negative'];
-		},
-		remove: function() {
-			Backbone.View.prototype.remove.apply(this, arguments);
-			$(window).off('resize');
-		},
-		render: function (args) {
-			args = args || {};
-//			FIXME Why give the name of nv since waterfall is not developed with nvd3?.
-			$('.nvtooltip').hide().remove();
-			if(_.isUndefined(args.getDatas) || args.getDatas) {
-				this.setData(this.model.get('waterfallData'));
-			}
-			this.buildBars(this.buildActiveBars);
-			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
-				this.buildLegend();
-			} else {
-				this.updateLegend();
-			}
-			return this;
-		},
-		setData: function (data) {
-			// Internalize data from model and add waterfall key to each item, containing start and end values.
-			/* Set stopvalues */
-			this.currentDataSet = data;
-			var baseHeight = 0, _baseHeight = 0;
-			_.each(this.currentDataSet, function (d) {
-				_baseHeight += d.value;
-				d.waterfall = {
-					'startValue': baseHeight,
-					'endValue': _baseHeight
-				};
-				baseHeight += d.value;
-			});
-			this.updateScales();
-		},
-		updateDimensions: function() {
-			this.width = this.$el.width() - this.margin.left - this.margin.right;
-			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
-		},
-		updateScales: function () {
+		buildActiveBars: function () {
 			var that = this;
-			var currentDataSetValues = _.map(this.currentDataSet, function (data) {
-				return [data.waterfall.startValue, data.waterfall.endValue];
-			});
-			var yMin, yMax;
+			var waterfallData = this.model.get('waterfallData');
+			var barWidth = (that.width - that.padding.left - that.padding.right) / waterfallData.length;
+			this.activeBars = this.svg.selectAll('.active-bar').data(waterfallData);
+			this.activeBars
+				.enter()
+					.append('rect')
+					.attr('id', function (d, i) { return 'active-bar-'+i; })
+					.attr('class', 'active-bar')
+					.attr('width', barWidth)
+					.attr('height', that.height)
+					.attr('y', that.padding.top)
+					.attr('x', function (d) { return that.scales.x(d.short_name); }) // jshint ignore:line
+					.attr('fill', that.dataToColor)
+					.attr('opacity', 0)
+					.on('mouseover', function (d, i) {
+						var bar = d3.select('#bar-' + i);
+						var barAttrs = {
+							x: parseInt(bar.attr('x')),
+							y: parseInt(bar.attr('y')),
+							width: parseInt(bar.attr('width')),
+							height: parseInt(bar.attr('height')),
+							fill: bar.attr('fill')
+						};
+						var barData = bar.data()[0];
 
-			/* Set scales */
-			yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
-			yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
-			this.scales = {
-				x: d3.scale.ordinal()
-					.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
-					.domain(that.currentDataSet.map(function(d) { return d.short_name; })), // jshint ignore:line
-				y: d3.scale.linear()
-					.domain([yMin, yMax])
-					.range([that.height - that.padding.bottom, that.padding.top])
-			};
+						d3.select(this)
+							.transition()
+							.duration(50)
+								.attr('opacity', 0);
 
-			var magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax);
-			this.prefix = d3.formatPrefix(magnitude);
-			this.prefix._scale = function (val) {
-				if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' &&
-					that.prefix.symbol !== '') {
-					return ('' + d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-				}
-				var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
-				if(that.prefix.symbol == 'k') val = that.prefix.scale(val)*1000;
-				else val = that.prefix.scale(val);
-				return (''+ d3.round(val, roundLevel)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-			};
-			switch(this.prefix.symbol) {
-				case 'G':
-					this.legendText = 'Milliards €';
-					this.prefix.symbolText = '\nmilliards €';
-					break;
-				case 'M':
-					this.legendText = 'Millions €';
-					this.prefix.symbolText = '\nmillions €';
-					break;
-				case 'k':
-					this.legendText = 'En euros';
-					this.prefix.symbolText = '€';
-					break;
-				case '':
-					this.legendText = 'En euros';
-					this.prefix.symbolText = '€';
-					break;
-				default:
-					this.legendText = '';
-			}
+						that.showTooltip(bar);
+
+						that.bars
+							.transition()
+							.duration(100)
+							.attr('opacity', function (_d, _i) { return _i == i ? 1 : 0.8; });
+
+						if (!_.isUndefined(d.parentNodes[0])) {
+
+							var getDeeperFirstChild = function (obj) {
+								var doIt = function (el) {
+									if(!_.isUndefined(el.children) && el.children.length > 0) {
+										return doIt(el.children[0]);
+									}
+									return el;
+								};
+								return doIt(obj);
+							};
+
+							var parentNode = d.parentNodes[0];
+							parentNode.name = $.isArray(parentNode.name) ? parentNode.name : parentNode.name.split(' ');
+
+							var parentNodeFirstChildrenId = getDeeperFirstChild(
+								_.findDeep(that.model.get('cleanData'), {_id: parentNode.id })
+							)._id;
+							var parentNodeFirstChildren = _.findWhere(waterfallData, {_id: parentNodeFirstChildrenId});
+
+							var yMiddleTextPos = (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
+								(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y +
+								(barData.value < 0 ? (barAttrs.height) : 0)))/2;
+
+							that.incomeLine = that.svg.append('line')
+								.attr('stroke', function () { return '#333'; })
+								.attr('stroke-width', function () { return 2; })
+								.attr('stroke-dasharray', ('3, 3'))
+								.attr('opacity', 0)
+								.attr('x1', function () { return barAttrs.x; })
+								.attr('y1', function () {
+									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
+								})
+								.attr('x2', function () { return that.width; })
+								.attr('y2', function () {
+									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
+								})
+								.moveToBack();
+
+							that.incomeLine2 = that.svg.append('line')
+								.attr('stroke', function () { return '#333'; })
+								.attr('stroke-width', function () { return 2; })
+								.attr('stroke-dasharray', ('3, 3'))
+								.attr('opacity', 0)
+
+								.attr('x1', function () {
+									return that.scales.x(parentNodeFirstChildren.short_name); // jshint ignore:line
+								})
+								.attr('y1', function () {
+									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
+								})
+								.attr('x2', function () { return that.width; })
+								.attr('y2', function () {
+									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
+								})
+								.moveToBack();
+
+							that.incomeLine3 = that.svg.append('line')
+								.attr('stroke', function () { return '#333'; })
+								.attr('stroke-width', function () { return 7; })
+								.attr('opacity', 0)
+								.attr('x1', function () { return that.width-10; })
+								.attr('y1', function () {
+									return (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0));
+								})
+								.attr('x2', function () { return that.width-10; })
+								.attr('y2', function () {
+									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
+								});
+							
+							that.incomeText = that.svg.selectAll('.income-number')
+								.data([that.prefix._scale(d.parentNodes[0].value) + ' ' + that.legendCurrencySymbol()]);
+
+							that.incomeText
+								.exit()
+									.transition().duration(50)
+									.attr('opacity', 0)
+									.remove();
+
+							that.incomeText
+								.attr('y', function (_d, _i) {
+									var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
+									return yMiddleTextPos + lineHeight * _i -
+										(that.incomeText.data().length * lineHeight-10);
+								})
+								.text(function (_d) {
+									return _d;
+								})
+								.attr('opacity', 1)
+								.enter()
+									.append('text')
+									.attr('class', 'income-number')
+									.attr('font-size', 15)
+									.attr('x', function () { return that.width + 5; })
+									.attr('y', function (_d, _i) {
+										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
+										return yMiddleTextPos + lineHeight * _i -
+											(that.incomeText.data().length * lineHeight-10);
+									})
+									.attr('font-weight', 'bold')
+									.text(function (_d) {
+										return _d;
+									});
+
+							that.incomeLabel = that.svg.selectAll('.income-label').data(parentNode.name);
+
+							that.incomeLabel
+								.text(function (d) { return d; })
+								.attr('y', function (_d, _i) {
+									var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
+									return yMiddleTextPos + lineHeight + _i * lineHeight;
+								})
+								.attr('x', function () { return that.width + 5; })
+								.enter()
+									.append('text')
+									.attr('class', 'income-label')
+									.attr('x', function () { return that.width + 5; })
+									.attr('font-size', 12)
+									.attr('font-weight', 'bold')
+									.attr('y', function (_d, _i) {
+										var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
+										return yMiddleTextPos + lineHeight + _i * lineHeight;
+									})
+									.text(function (d) { return d; });
+
+							that.incomeLabel
+								.exit()
+									.transition().duration(100)
+									.remove();
+
+							that.incomeLine
+								.transition().duration(100)
+								.attr('opacity', 1);
+
+							that.incomeLine2
+								.transition().duration(100)
+								.attr('opacity', 1);
+
+							that.incomeLine3
+								.transition().duration(100)
+								.attr('opacity', 1);
+						}
+					})
+					.on('mouseout', function (d, i) {
+						var bar = d3.select('#bar-'+i);
+						d3.select(this)
+							.transition()
+							.duration(50)
+							.attr('opacity', 0);
+						that.bars
+							.transition()
+							.duration(100)
+							.attr('opacity', 0.8);
+						bar.attr('stroke-width', 1);
+
+						d3.select(that.el).select('.nvtooltip')
+							.transition()
+							.duration(100)
+							.style('opacity', 0)
+							.remove();
+
+						if(!_.isUndefined(that.incomeLabel)) {
+							that.incomeLabel.remove();
+							that.incomeLine.remove();
+							that.incomeLine2.remove();
+							that.incomeLine3.remove();
+							that.incomeText.remove();
+						}
+					});
+
+			this.activeBars.moveToFront();
+
+			this.activeBars
+				.transition()
+					.duration(300)
+					.attr('width', barWidth)
+					.attr('height', that.height)
+					.attr('x', function (d) {
+						return that.scales.x(d.short_name); // jshint ignore:line
+					})
+					.attr('y', this.padding.top)
+					.attr('fill', that.dataToColor)
+					.attr('opacity', 0);
+
+			this.activeBars
+				.exit()
+				.remove();
 		},
 		buildBars: function (endTransitionCallback) {
 			// Create waterfall bars.
 			var that = this;
-			var dataLength = this.currentDataSet.length;
+			var waterfallData = this.model.get('waterfallData');
 			var barWidth = Math.min(
-				(that.width - that.padding.left - that.padding.right - dataLength * that.innerPadding) / dataLength,
+				(that.width - that.padding.left - that.padding.right - waterfallData.length * that.innerPadding) /
+					waterfallData.length,
 				this.minBarWidth
 			);
-			this.bars = this.svg.selectAll('.bar')
-				.data(this.currentDataSet);
+			this.bars = this.svg.selectAll('.bar').data(waterfallData);
 			this.bars
 				.enter()
 					.append('rect')
@@ -216,300 +338,9 @@ define([
 			this.bars.exit()
 				.transition()
 					.duration(300)
-					.attr('x', function () { return that.width*3; })
+					.attr('x', function () { return that.width * 3; })
 					.attr('opacity', 0)
-					.each('end', function () {
-						this.remove();
-					});
-		},
-		buildActiveBars: function () {
-			// Callback of buildBars.
-			var that = this,
-				dataLength = this.currentDataSet.length,
-				barWidth = (that.width - that.padding.left - that.padding.right)/dataLength;
-			this.activeBars = this.svg.selectAll('.active-bar')
-				.data(this.currentDataSet);
-			this.activeBars
-				.enter()
-					.append('rect')
-					.attr('id', function (d, i) { return 'active-bar-'+i; })
-					.attr('class', 'active-bar')
-					.attr('width', barWidth)
-					.attr('height', that.height)
-					.attr('y', that.padding.top)
-					.attr('x', function (d) { return that.scales.x(d.short_name); }) // jshint ignore:line
-					.attr('fill', that.dataToColor)
-					.attr('opacity', 0)
-					.on('mouseover', function (d, i) {
-
-						var bar = d3.select('#bar-' + i);
-						var barAttrs = {
-							x: parseInt(bar.attr('x')),
-							y: parseInt(bar.attr('y')),
-							width: parseInt(bar.attr('width')),
-							height: parseInt(bar.attr('height')),
-							fill: bar.attr('fill')
-						};
-						var barData = bar.data()[0];
-
-						d3.select(this)
-							.transition()
-							.duration(50)
-								.attr('opacity', 0);
-
-						that.showTooltip(bar);
-
-						that.bars
-							.transition()
-							.duration(100)
-							.attr('opacity', function (_d, _i) {
-								if(_i == i) return 1;
-								else return 0.8;
-							});
-
-						if (!_.isUndefined(d.parentNodes[0])) {
-
-							var getDeeperFirstChild = function (obj) {
-								var doIt = function (el) {
-									if(!_.isUndefined(el.children) && el.children.length > 0) {
-										return doIt(el.children[0]);
-									}
-									return el;
-								};
-								return doIt(obj);
-							};
-
-							var parentNode = d.parentNodes[0];
-							parentNode.name = $.isArray(parentNode.name) ? parentNode.name : parentNode.name.split(' ');
-
-							var parentNodeFirstChildrenId = getDeeperFirstChild(
-								_.findDeep(that.model.get('cleanData'), {_id: parentNode.id })
-							)._id;
-							var parentNodeFirstChildren = _.findWhere(that.currentDataSet, {_id: parentNodeFirstChildrenId});
-
-							var yMiddleTextPos = (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)) +
-								(that.scales.y(parentNodeFirstChildren.waterfall.startValue) - (barAttrs.y +
-								(barData.value < 0 ? (barAttrs.height) : 0)))/2;
-
-							that.incomeLine = that.svg.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 2; })
-								.attr('stroke-dasharray', ('3, 3'))
-								.attr('opacity', 0)
-
-								.attr('x1', function () { return barAttrs.x; })
-								.attr('y1', function () {
-									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
-								})
-								.attr('x2', function () { return that.width; })
-								.attr('y2', function () {
-									return barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0);
-								})
-								.moveToBack();
-
-							that.incomeLine2 = that.svg.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 2; })
-								.attr('stroke-dasharray', ('3, 3'))
-								.attr('opacity', 0)
-
-								.attr('x1', function () {
-									return that.scales.x(parentNodeFirstChildren.short_name); // jshint ignore:line
-								})
-								.attr('y1', function () {
-									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
-								})
-								.attr('x2', function () { return that.width; })
-								.attr('y2', function () {
-									return that.scales.y(parentNodeFirstChildren.waterfall.startValue);
-								})
-								.moveToBack();
-
-							that.incomeLine3 = that.svg.append('line')
-								.attr('stroke', function () { return '#333'; })
-								.attr('stroke-width', function () { return 7; })
-								.attr('opacity', 0)
-								.attr('x1', function () { return that.width-10; })
-								.attr('y1', function () { return (barAttrs.y + (barData.value < 0 ? (barAttrs.height) : 0)); })
-								.attr('x2', function () { return that.width-10; })
-								.attr('y2', function () { return that.scales.y(parentNodeFirstChildren.waterfall.startValue); });
-							
-							that.incomeText = that.svg.selectAll('.income-number')
-								.data((that.prefix._scale(d.parentNodes[0].value) + that.prefix.symbolText).split('\n'));
-
-							that.incomeText
-								.exit()
-									.transition().duration(50)
-									.attr('opacity', 0)
-									.remove();
-
-							that.incomeText
-								.attr('y', function (_d, _i) {
-									var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
-									return yMiddleTextPos + lineHeight * _i - (that.incomeText.data().length * lineHeight-10);
-								})
-								.text(function (_d) {
-									return _d;
-								})
-								.attr('opacity', 1)
-								.enter()
-									.append('text')
-									.attr('class', 'income-number')
-									.attr('font-size', 15)
-									.attr('x', function () { return that.width + 5; })
-									.attr('y', function (_d, _i) {
-										var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
-										return yMiddleTextPos + lineHeight * _i - (that.incomeText.data().length * lineHeight-10);
-									})
-									.attr('font-weight', 'bold')
-									.text(function (_d) {
-										return _d;
-									});
-
-							that.incomeLabel = that.svg.selectAll('.income-label').data(parentNode.name);
-
-							that.incomeLabel
-								.text(function (d) { return d; })
-								.attr('y', function (_d, _i) {
-									var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
-									return yMiddleTextPos + lineHeight + _i * lineHeight;
-								})
-								.attr('x', function () { return that.width + 5; })
-								.enter()
-									.append('text')
-									.attr('class', 'income-label')
-									.attr('x', function () { return that.width + 5; })
-									.attr('font-size', 12)
-									.attr('font-weight', 'bold')
-									.attr('y', function (_d, _i) {
-										var lineHeight = parseInt(d3.select(this).attr('font-size'))+3;
-										return yMiddleTextPos + lineHeight + _i * lineHeight;
-									})
-									.text(function (d) {
-										return d;
-									});
-
-							that.incomeLabel
-								.exit()
-									.transition().duration(100)
-									.remove();
-
-							that.incomeLine
-								.transition().duration(100)
-								.attr('opacity', 1);
-
-							that.incomeLine2
-								.transition().duration(100)
-								.attr('opacity', 1);
-
-							that.incomeLine3
-								.transition().duration(100)
-								.attr('opacity', 1);
-						}
-					})
-					.on('mouseout', function (d, i) {
-
-						var bar = d3.select('#bar-'+i);
-
-						d3.select(this)
-							.transition()
-							.duration(50)
-								.attr('opacity', 0);
-
-						that.bars
-							.transition()
-							.duration(100)
-							.attr('opacity', function () { return 0.8; });
-
-						that.hideTooltip(bar);
-
-						if(!_.isUndefined(that.incomeLabel)) {
-							that.incomeLabel
-								.remove();
-							that.incomeLine
-								.remove();
-							that.incomeLine2
-								.remove();
-							that.incomeLine3
-								.remove();
-							that.incomeText
-								.remove();
-						}
-					});
-
-			this.activeBars.moveToFront();
-
-			this.activeBars
-				.transition()
-					.duration(300)
-					.attr('width', barWidth)
-					.attr('height', that.height)
-					.attr('x', function (d) {
-						return that.scales.x(d.short_name); // jshint ignore:line
-					})
-					.attr('y', this.padding.top)
-					.attr('fill', that.dataToColor)
-					.attr('opacity', 0);
-
-			this.activeBars
-				.exit()
-				.remove();
-		},
-		updateLegend: function () {
-			var that = this;
-
-			this.xAxis.scale(this.scales.x);
-			this.yAxis.scale(this.scales.y);
-			this.gridAxis.scale(this.scales.y);
-
-			this.xAxisLegend
-				.transition()
-				.duration(300)
-				.attr('transform', function () {
-					var pos = that.height - that.padding.bottom;
-					return 'translate(0,' + pos + ')';
-				})
-				.call(this.xAxis);
-
-			this.yAxisLegend
-				.transition()
-				.duration(300)
-				.call(this.yAxis);
-
-
-			this.yGrid
-				.transition()
-				.duration(300)
-				.call(this.gridAxis);
-
-			this.svg.selectAll('.x-axis .tick text')
-				.attr('transform', function () {
-					var _dim = this.getBBox();
-					var deltax = _dim.width/2,
-						x = _dim.x+_dim.width,
-						y = _dim.y;
-					return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
-				});
-
-			var legendTextSplited = this.legendText.split('\n');
-			this.legendTextObject = this.svg.selectAll('.legendText_y')
-				.data(legendTextSplited);
-
-			this.legendTextObject
-				.text(function (d) { return d; })
-				.enter().append('svg:text')
-					.attr('class', 'legendText_y')
-					.attr('fill', '#333')
-					.attr('x', function () { return that.padding.left; })
-					.attr('y', function (d, i) { return 10 + i*10; })
-					.attr('font-size', 12)
-					.attr('font-weight', 'normal')
-					.attr('text-anchor', 'end')
-					.text(function (d) { return d; });
-
-			this.legendTextObject.moveToFront();
-
-			this.legendTextObject.exit().remove();
+					.each('end', function () { this.remove(); });
 		},
 		buildLegend: function () {
 			var that = this;
@@ -562,23 +393,61 @@ define([
 					var deltax = _dim.width/2,
 						x = _dim.x+_dim.width,
 						y = _dim.y;
-					return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
+					return 'translate(-' + deltax + ', 0) rotate(-45,' + x + ', ' + y + ')';
 				});
-
-			var legendTextSplited = this.legendText.split('\n');
-			this.legendTextObject = this.svg.selectAll('.legendText_y')
-				.data(legendTextSplited);
-
-			this.legendTextObject
-				.enter().append('svg:text')
-					.attr('class', 'legendText_y')
-					.attr('fill', '#333')
-					.attr('x', function () { return that.padding.left; })
-					.attr('y', function (d, i) { return 10 + i*10; })
-					.attr('font-size', 12)
-					.attr('font-weight', 'normal')
-					.attr('text-anchor', 'end')
-					.text(function (d) { return d; });
+			this.renderLegendText();
+		},
+		dataToColor: function (data) {
+			return this.colors[data.value > 0 ? 'positive' : 'negative'];
+		},
+		legendCurrencySymbol: function() {
+			var legendCurrencySymbol = {
+				G: 'M €',
+				M: 'm €',
+			}[this.prefix.symbol];
+			if (_.isUndefined(legendCurrencySymbol)) {
+				legendCurrencySymbol = '€';
+			}
+			return legendCurrencySymbol;
+		},
+		legendText: function() {
+			var legendText = {
+				G: 'Milliards €',
+				M: 'Millions €',
+			}[this.prefix.symbol];
+			if (_.isUndefined(legendText)) {
+				legendText = 'En euros';
+			}
+			return legendText;
+		},
+		remove: function() {
+			Backbone.View.prototype.remove.apply(this, arguments);
+			$(window).off('resize');
+		},
+		render: function() {
+			this.updateScales();
+			this.buildBars(this.buildActiveBars);
+			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
+				this.buildLegend();
+			} else {
+				this.updateLegend();
+			}
+			return this;
+		},
+		renderLegendText: function () {
+			var legendTextObject = this.svg.selectAll('.legend-text-y').data([this.legendText()]);
+			legendTextObject
+				.text(function (d) { return d; })
+				.enter()
+					.append('svg:text')
+						.attr('class', 'legend-text-y')
+						.attr('fill', '#333')
+						.attr('x', _.bind(function () { return this.padding.left; }, this))
+						.attr('y', function (d, i) { return 10 + i * 10; })
+						.attr('font-size', 12)
+						.attr('font-weight', 'normal')
+						.attr('text-anchor', 'end');
+			legendTextObject.exit().remove();
 		},
 		showTooltip: function (bar) {
 			var d = bar.data()[0],
@@ -586,49 +455,105 @@ define([
 			// TODO Use handlebars.
 			/* jshint multistr:true */
 			this.$el.append('\
-<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+
-'" style="opacity: 0; position: absolute;">\
+<div class="nvtooltip xy-tooltip nv-pointer-events-none" style="opacity: 0; position: absolute;">\
 	<table class="nv-pointer-events-none">\
 		<thead>\
 			<tr class="nv-pointer-events-none">\
 				<td colspan="3" class="nv-pointer-events-none">\
-					<strong class="x-value">'+d.name+'</strong>\
+					<strong class="x-value">' + d.name + '</strong>\
 				</td>\
 			</tr>\
 		</thead>\
 		<tbody>\
 			<tr class="nv-pointer-events-none">\
-				<td>'+that.prefix._scale(d.value)+' '+this.prefix.symbolText+'</td>\
+				<td>' + that.prefix._scale(d.value) + ' ' + this.legendCurrencySymbol() + '</td>\
 			</tr>\
 		</tbody>\
 	</table>\
 </div>');
-			var barBBox = {};
-			bar.each(function () { barBBox = this.getBBox(); });
-			d3.select(this.el).select('#nvtooltip-'+d._id)
+			d3.select(this.el).select('.nvtooltip')
 				.style('left', function () {
 					var tooltipWidth = $(this).width();
-					var xPos = bar.attr('x') - (that.width * 2/3 < bar.attr('x') ? (tooltipWidth - barBBox.width): 0);
+					var xPos = bar.attr('x') - (that.width * 2/3 < bar.attr('x') ? tooltipWidth: 0);
 					return xPos + 'px';
 				})
-				.style('top', function () {
-					var yPos = bar.attr('y');
-					return yPos + 'px';
-				})
+				.style('top', function () { return bar.attr('y') + 'px'; })
 				.transition()
 					.duration(100)
 					.style('opacity', 1);
-
-			/* Add bubble style */
-			bar.attr('stroke-width', 3);
 		},
-		hideTooltip: function (bar) {
-			var d = bar.data()[0];
-			d3.select(this.el).select('#nvtooltip-'+d._id)
-				.transition().duration(100)
-					.style('opacity', 0)
-					.remove();
-			bar.attr('stroke-width', 1);
+		updateDimensions: function() {
+			this.width = this.$el.width() - this.margin.left - this.margin.right;
+			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
+		},
+		updateLegend: function () {
+			var that = this;
+
+			this.xAxis.scale(this.scales.x);
+			this.yAxis.scale(this.scales.y);
+			this.gridAxis.scale(this.scales.y);
+
+			this.xAxisLegend
+				.transition()
+				.duration(300)
+				.attr('transform', function () {
+					var pos = that.height - that.padding.bottom;
+					return 'translate(0,' + pos + ')';
+				})
+				.call(this.xAxis);
+
+			this.yAxisLegend
+				.transition()
+				.duration(300)
+				.call(this.yAxis);
+
+			this.yGrid
+				.transition()
+				.duration(300)
+				.call(this.gridAxis);
+
+			this.svg.selectAll('.x-axis .tick text')
+				.attr('transform', function () {
+					var _dim = this.getBBox();
+					var deltax = _dim.width/2,
+						x = _dim.x+_dim.width,
+						y = _dim.y;
+					return 'translate(-'+deltax+', 0) rotate(-45,'+x+', '+y+')';
+				});
+			this.renderLegendText();
+		},
+		updateScales: function () {
+			var that = this;
+			var waterfallData = this.model.get('waterfallData');
+			var currentDataSetValues = _.map(waterfallData, function (data) {
+				return [data.waterfall.startValue, data.waterfall.endValue];
+			});
+			var yMin, yMax;
+
+			/* Set scales */
+			yMin = d3.min(currentDataSetValues, function (d) { return d3.min(d);});
+			yMax = d3.max(currentDataSetValues, function (d) { return d3.max(d);});
+			this.scales = {
+				x: d3.scale.ordinal()
+					.rangeBands([this.padding.left, that.width-this.padding.right], 0, 0)
+					.domain(_.map(waterfallData, function(d) { return d.short_name; })), // jshint ignore:line
+				y: d3.scale.linear()
+					.domain([yMin, yMax])
+					.range([that.height - that.padding.bottom, that.padding.top])
+			};
+
+			var magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax);
+			this.prefix = d3.formatPrefix(magnitude);
+			this.prefix._scale = function (val) {
+				if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' &&
+					that.prefix.symbol !== '') {
+					return ('' + d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+				}
+				var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
+				if(that.prefix.symbol == 'k') val = that.prefix.scale(val)*1000;
+				else val = that.prefix.scale(val);
+				return (''+ d3.round(val, roundLevel)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+			};
 		},
 		windowResize: function () {
 			this.updateDimensions();
