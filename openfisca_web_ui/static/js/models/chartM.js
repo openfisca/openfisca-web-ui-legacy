@@ -11,9 +11,10 @@ define([
 function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 	'use strict';
 
+	// TODO Rename to ChartsM.
 	var ChartM = Backbone.Model.extend({
 		defaults: {
-			currentChartName: null,
+			currentChartSlug: null,
 			distribution_data: {},
 			locating_data: {},
 			simulationInProgress: false,
@@ -29,7 +30,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 			}, this));
 		},
 		changeChart: function (chartName) {
-			this.set('currentChartName', chartName);
+			this.set('currentChartSlug', chartName);
 			this.simulate(chartName);
 		},
 		parse: function () {
@@ -90,7 +91,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 				.values();
 		},
 		simulate: function (chartName) {
-			chartName = chartName || this.get('currentChartName');
+			chartName = chartName || this.get('currentChartSlug');
 			var options = {};
 			if(chartName === 'distribution') {
 				options.decomposition = 'decompositions-multiples.xml';

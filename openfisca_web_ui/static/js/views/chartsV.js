@@ -34,7 +34,7 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeC
 		model: chartM,
 		initialize: function () {
 			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
-			this.listenTo(this.model, 'change:currentChartName', this.render);
+			this.listenTo(this.model, 'change:currentChartSlug', this.render);
 			this.listenTo(this.model, 'change:simulationInProgress', this.updateOverlay);
 			if ($(window).width() >= 768) {
 				this.$el.sticky({
@@ -61,7 +61,7 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeC
 					chartsData.push({label: item.title, value: item.slug});
 				});
 			}
-			var currentChartData = _.findWhere(chartsData, {value: this.model.get('currentChartName')});
+			var currentChartData = _.findWhere(chartsData, {value: this.model.get('currentChartSlug')});
 			if ( ! _.isUndefined(currentChartData)) {
 				currentChartData.active = true;
 			}
@@ -73,9 +73,9 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeC
 				this.currentChildView.remove();
 			}
 			var $chartWrapper = this.$el.find('.chart-wrapper');
-			var currentChartName = this.model.get('currentChartName');
-			if (currentChartName in viewClassByChartName) {
-				this.currentChildView = new viewClassByChartName[currentChartName]({el: $chartWrapper});
+			var currentChartSlug = this.model.get('currentChartSlug');
+			if (currentChartSlug in viewClassByChartName) {
+				this.currentChildView = new viewClassByChartName[currentChartSlug]({el: $chartWrapper});
 				this.currentChildView.render();
 			} else {
 				this.currentChildView = new IframeChartV({el: $chartWrapper});
