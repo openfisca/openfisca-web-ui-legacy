@@ -276,6 +276,7 @@ define([
 			var waterfallData = this.model.get('waterfallData');
 			var barWidth = (this.width - this.padding.left - this.padding.right -
 				this.barLeftAndRightPadding * waterfallData.length) / waterfallData.length;
+			var realBarWidth = Math.min(barWidth, this.maxBarWidth);
 			this.bars = this.svg.selectAll('.bar').data(waterfallData);
 			this.bars
 				.enter()
@@ -290,7 +291,7 @@ define([
 			this.bars
 				.transition()
 					.duration(this.duration)
-					.attr('width', Math.min(barWidth, this.maxBarWidth))
+					.attr('width', realBarWidth)
 					.attr('height', function (d) {
 						var height = d.value < 0 ?
 							that.scales.y(d.waterfall.endValue) - that.scales.y(d.waterfall.startValue) :
@@ -298,7 +299,7 @@ define([
 						return Math.max(height, that.minBarHeight);
 					})
 					.attr('x', function (d) {
-						return that.scales.x(d.short_name) + barWidth / 4; // jshint ignore:line
+						return that.scales.x(d.short_name) + barWidth / 2 - realBarWidth / 2; // jshint ignore:line
 					})
 					.attr('y', function (d) {
 						return d.value < 0 ?
