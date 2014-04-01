@@ -439,11 +439,11 @@ define([
 			legendTextObject.exit().remove();
 		},
 		showTooltip: function (bar) {
-			var d = bar.data()[0],
-				that = this;
+			var that = this;
+			var d = bar.data()[0];
 			// TODO Use handlebars.
 			/* jshint multistr:true */
-			this.$el.append('\
+			var tooltipHtml = '\
 <div class="nvtooltip xy-tooltip nv-pointer-events-none" style="opacity: 0; position: absolute;">\
 	<table class="nv-pointer-events-none">\
 		<thead>\
@@ -455,11 +455,17 @@ define([
 		</thead>\
 		<tbody>\
 			<tr class="nv-pointer-events-none">\
-				<td>' + that.prefix._scale(d.value) + ' ' + this.legendCurrencySymbol() + '</td>\
+				<td>' + this.prefix._scale(d.value) + ' ' + this.legendCurrencySymbol() + '</td>\
 			</tr>\
 		</tbody>\
 	</table>\
-</div>');
+</div>';
+			var $nvtooltip = this.$el.find('.nvtooltip');
+			if ($nvtooltip.size() === 0) {
+				this.$el.append(tooltipHtml);
+			} else {
+				$nvtooltip.replaceWith($(tooltipHtml));
+			}
 			d3.select(this.el).select('.nvtooltip')
 				.style('left', function () {
 					var tooltipWidth = $(this).width();
