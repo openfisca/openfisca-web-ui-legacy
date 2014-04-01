@@ -1,22 +1,20 @@
 define([
 	'backbone',
-	'jquery',
-	'underscore',
 
+	'backendServiceM',
 	'chartM',
 	'visualizationsServiceM',
 	'hbs!templates/visualization',
-], function (Backbone, $, _, chartM, visualizationsServiceM, visualizationT) {
+], function (Backbone, backendServiceM, chartM, visualizationsServiceM, visualizationT) {
 	'use strict';
 
 	var IframeChartV = Backbone.View.extend({
-		model: visualizationsServiceM,
 		initialize: function () {
-			this.listenTo(this.model, 'change:visualizations', this.render);
+			this.listenTo(backendServiceM, 'change:apiData', this.render);
 		},
-		render: function(chartSlug) {
-			this.$el.html(visualizationT(_.find(this.model.get('visualizations'), function(item) {
-				return item.slug === chartSlug;
+		render: function() {
+			this.$el.html(visualizationT(_.find(visualizationsServiceM.get('visualizations'), function(item) {
+				return item.slug === chartM.get('currentChartSlug');
 			})));
 		},
 	});

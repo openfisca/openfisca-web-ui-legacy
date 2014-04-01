@@ -79,7 +79,7 @@ function ($, _, Backbone, sticky, appconfig, chartM, DistributionChartV, IframeC
 				this.currentChildView.render();
 			} else {
 				this.currentChildView = new IframeChartV({el: $chartWrapper});
-				this.currentChildView.render(currentChartName);
+				this.currentChildView.render();
 			}
 			return this;
 		},
