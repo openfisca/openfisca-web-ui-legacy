@@ -9,19 +9,21 @@ define([
 	'use strict';
 
 	var WaterfallChartV = Backbone.View.extend({
+		barLeftAndRightPadding: 10,
 		bars: [],
 		colors: {
 			negative: '#b22424',
 			positive: '#6aa632',
 		},
-		innerPadding: 10,
+		duration: 100, // in ms
 		margin: {
 			top: 0,
 			left: 0,
 			bottom: 0,
 			right: 80
 		},
-		minBarWidth: 100, // in pixels
+		maxBarWidth: 100, // in pixels
+		minBarHeight: 1, // in pixels
 		model: chartM,
 		padding: {
 			top: 50,
@@ -255,7 +257,7 @@ define([
 
 			this.activeBars
 				.transition()
-					.duration(300)
+					.duration(this.duration)
 					.attr('width', barWidth)
 					.attr('height', that.height)
 					.attr('x', function (d) {
@@ -270,49 +272,33 @@ define([
 				.remove();
 		},
 		buildBars: function (endTransitionCallback) {
-			// Create waterfall bars.
 			var that = this;
 			var waterfallData = this.model.get('waterfallData');
-			var barWidth = Math.min(
-				(that.width - that.padding.left - that.padding.right - waterfallData.length * that.innerPadding) /
-					waterfallData.length,
-				this.minBarWidth
-			);
+			var barWidth = (this.width - this.padding.left - this.padding.right -
+				this.barLeftAndRightPadding * waterfallData.length) / waterfallData.length;
 			this.bars = this.svg.selectAll('.bar').data(waterfallData);
 			this.bars
 				.enter()
 					.append('rect')
-					.attr('id', function (d, i) { return 'bar-'+i; })
+					.attr('id', function (d, i) { return 'bar-' + i; })
 					.attr('class', 'bar')
-					.attr('width', barWidth)
-					.attr('height', 0)
 					.attr('rx', 4)
 					.attr('ry', 4)
-					.attr('x', function () { return 0; })
-					.attr('y', function (d) {
-						return d.value < 0 ?
-							that.scales.y(d.waterfall.startValue) :
-							that.scales.y(d.waterfall.startValue) -
-								(that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue));
-					})
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0.8)
 					.attr('stroke-width', 1);
 			this.bars
 				.transition()
-					.duration(300)
-					.attr('width', barWidth)
+					.duration(this.duration)
+					.attr('width', Math.min(barWidth, this.maxBarWidth))
 					.attr('height', function (d) {
-						var _return;
-						if (d.value < 0) {
-							_return = that.scales.y(d.waterfall.endValue) - that.scales.y(d.waterfall.startValue);
-						} else {
-							_return= that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue);
-						}
-						return _return < 0.8 ? 0.8: _return;
+						var height = d.value < 0 ?
+							that.scales.y(d.waterfall.endValue) - that.scales.y(d.waterfall.startValue) :
+							that.scales.y(d.waterfall.startValue) - that.scales.y(d.waterfall.endValue);
+						return Math.max(height, that.minBarHeight);
 					})
 					.attr('x', function (d) {
-						return that.scales.x(d.short_name) + that.innerPadding/2; // jshint ignore:line
+						return that.scales.x(d.short_name) + barWidth / 4; // jshint ignore:line
 					})
 					.attr('y', function (d) {
 						return d.value < 0 ?
@@ -337,7 +323,7 @@ define([
 					});
 			this.bars.exit()
 				.transition()
-					.duration(300)
+					.duration(this.duration)
 					.attr('x', function () { return that.width * 3; })
 					.attr('opacity', 0)
 					.each('end', function () { this.remove(); });
@@ -426,7 +412,9 @@ define([
 		},
 		render: function() {
 			this.updateScales();
-			this.buildBars(this.buildActiveBars);
+			if (this.model.get('waterfallData').length) {
+				this.buildBars(this.buildActiveBars);
+			}
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
 				this.buildLegend();
 			} else {
@@ -495,7 +483,7 @@ define([
 
 			this.xAxisLegend
 				.transition()
-				.duration(300)
+				.duration(this.duration)
 				.attr('transform', function () {
 					var pos = that.height - that.padding.bottom;
 					return 'translate(0,' + pos + ')';
@@ -504,12 +492,12 @@ define([
 
 			this.yAxisLegend
 				.transition()
-				.duration(300)
+				.duration(this.duration)
 				.call(this.yAxis);
 
 			this.yGrid
 				.transition()
-				.duration(300)
+				.duration(this.duration)
 				.call(this.gridAxis);
 
 			this.svg.selectAll('.x-axis .tick text')
