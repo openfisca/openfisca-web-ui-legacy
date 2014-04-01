@@ -22,6 +22,7 @@ function ($, _, Backbone, xEditable, situationFormM) {
 			'change :input': 'onInputChange',
 			'click :input.add': 'onAddButtonClicked',
 			'click :input.delete': 'onDeleteButtonClicked',
+			'click .modal button': 'onModalButtonClicked',
 			'click button.simulate': 'onSimulateButtonClicked',
 			'keypress :input': 'onKeyPress'
 		},
@@ -68,12 +69,17 @@ function ($, _, Backbone, xEditable, situationFormM) {
 			}
 		}, debounceDelay),
 		onKeyPress: function(evt) {
-			if (evt.keyCode === 13 && $(evt.target).parents('.editableform').length === 0) {
+			var $target = $(evt.target);
+			if (evt.keyCode === 13 && $target.parents('.editableform').length === 0) {
 				evt.preventDefault();
 				var reloadForm = false;
 				var formDataStr = this.formDataStr();
 				if (endsWith(evt.target.name, '.prenom')) {
 					reloadForm = true;
+				}
+				var $modal = $target.parents('.modal');
+				if ($modal.length !== 0) {
+					$modal.modal('hide');
 				}
 				this.model.save(formDataStr)
 					.then(_.bind(function() {
@@ -81,8 +87,10 @@ function ($, _, Backbone, xEditable, situationFormM) {
 							this.model.fetch();
 						}
 					}, this));
-
 			}
+		},
+		onModalButtonClicked: function() {
+			this.model.save(this.formDataStr());
 		},
 		onSimulateButtonClicked: function(evt) {
 			evt.preventDefault();

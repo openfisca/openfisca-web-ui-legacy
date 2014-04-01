@@ -128,26 +128,23 @@ def make_categories_groups(entity):
 <a href="#" class="list-group-item" data-toggle="modal" data-target="#modal-{self.full_name_as_selector}">
   {self.label}
 </a>
-<div class="modal fade" id="modal-{self.full_name}" tabindex="-1" role="dialog" \
-aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="modal-{self.full_name}" tabindex="-1" \
+role="dialog" aria-labelledby="modal-label-{self.full_name}" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title" id="modal-label-{self.full_name}">{self.label}</h4>
       </div>
       <div class="modal-body">
         {self.questions_html}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">{self.messages[close]}</button>
         <button type="submit" class="btn btn-primary" data-dismiss="modal">{self.messages[validate]}</button>
       </div>
     </div>
   </div>
 </div>'''
         messages = {
-            u'close': ctx._(u'Close'),
             u'validate': ctx._(u'Validate'),
             }
 
