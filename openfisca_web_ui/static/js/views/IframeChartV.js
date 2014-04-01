@@ -1,11 +1,12 @@
 define([
 	'backbone',
+	'underscore',
 
 	'backendServiceM',
 	'chartM',
 	'visualizationsServiceM',
 	'hbs!templates/visualization',
-], function (Backbone, backendServiceM, chartM, visualizationsServiceM, visualizationT) {
+], function (Backbone, _, backendServiceM, chartM, visualizationsServiceM, visualizationT) {
 	'use strict';
 
 	var IframeChartV = Backbone.View.extend({

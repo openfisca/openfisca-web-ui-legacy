@@ -99,8 +99,11 @@ define([
 						dataLength = Object._length(loopDataChildren);
 
 					_.each(loopDataChildren, function (loopDatum, i) {
-						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) { loopDatum.parentNodes = loopData.parentNodes;}
-						else { loopDatum.parentNodes = [];}
+						if(!_.isUndefined(loopData.parentNodes) && i == dataLength-1) {
+							loopDatum.parentNodes = loopData.parentNodes;
+						} else {
+							loopDatum.parentNodes = [];
+						}
 
 						if(i == dataLength-1) {
 							loopDatum.parentNodes.push({

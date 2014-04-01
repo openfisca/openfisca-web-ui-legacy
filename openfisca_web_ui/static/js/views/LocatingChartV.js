@@ -42,7 +42,10 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 		initialize: function () {
 			var that = this;
 			this.updateDimensions();
-			this.vingtiles = _.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); });
+			this.vingtiles = _.map(
+				this.model.get('vingtiles')['_'+this.year],
+				function (d) { return $.extend(true, {}, d); }
+			);
 			that.listenTo(that.model, 'change:source', that.render);
 			nvd3.addGraph({
 				callback: function() { that.render(); },
@@ -74,7 +77,10 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 			if (this.chart === null) {
 				return;
 			}
-			this.vingtiles = this.updateVingtilesByUserData(_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }), data);
+			this.vingtiles = this.updateVingtilesByUserData(
+				_.map(this.model.get('vingtiles')['_'+this.year], function (d) { return $.extend(true, {}, d); }),
+				data
+			);
 
 			this.setPrefix();
 
@@ -122,7 +128,7 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 		},
 		showUserPoints: function () {
 			var that = this;
-			_.each(this.vingtiles, function (d) {
+			_.each(this.vingtiles, function (d) {
 				_.each(d.values, function (_d, _i) {
 					if(_d.userPoint) {
 						d3.select('.nv-series-'+d.values[0].series+' .nv-point-'+_i)
@@ -250,14 +256,18 @@ function ($, _, Backbone, d3, nvd3, appconfig, chartM) {
 		},
 		setPrefix: function () {
 			var yMin = 0,
-				yMax = d3.max(this.vingtiles, function (vingtile) { return d3.max(_.map(vingtile.values, function (d) { return d.y; })); }),
+				yMax = d3.max(
+					this.vingtiles,
+					function (vingtile) { return d3.max(_.map(vingtile.values, function (d) { return d.y; })); }
+				),
 				magnitude = (Math.abs(yMin) > Math.abs(yMax)) ? Math.abs(yMin): Math.abs(yMax),
 				that = this;
 
 			this.yFormat = d3.formatPrefix(magnitude);
 			/* Number formating */
 			this.yFormat._scale = function (val) {
-				if(	that.yFormat.symbol !== 'G' && that.yFormat.symbol !== 'M' && that.yFormat.symbol !== 'k' && that.yFormat.symbol !== '') {
+				if(that.yFormat.symbol !== 'G' && that.yFormat.symbol !== 'M' && that.yFormat.symbol !== 'k' &&
+					that.yFormat.symbol !== '') {
 					return (''+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 				}
 				var roundLevel = (that.yFormat.symbol == 'G' || that.yFormat.symbol == 'M') ? 2: 0;

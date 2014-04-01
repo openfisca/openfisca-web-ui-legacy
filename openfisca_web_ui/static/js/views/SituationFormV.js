@@ -56,7 +56,8 @@ function ($, _, Backbone, xEditable, situationFormM) {
 				}, this));
 		},
 		onDeleteButtonClicked: function(evt) {
-			if ( ! confirm('Supprimer ?')) {
+			// TODO i18n
+			if ( ! confirm('Supprimer ?')) { // jshint ignore:line
 				evt.preventDefault();
 			}
 		},
@@ -114,7 +115,7 @@ function ($, _, Backbone, xEditable, situationFormM) {
 							}, this);
 						}
 						if ('personnes_a_charge' in foyerFiscal) {
-							_.each(foyerFiscal.personnes_a_charge, function(errorMessage, personneAChargeIdx) {
+							_.each(foyerFiscal.personnes_a_charge, function(errorMessage, personneAChargeIdx) { // jshint ignore:line
 								var $personneACharge = $foyerFiscal.find('.individu').eq(personneAChargeIdx);
 								$personneACharge
 									.addClass(className)

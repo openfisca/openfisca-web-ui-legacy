@@ -586,22 +586,23 @@ define([
 			// TODO Use handlebars.
 			/* jshint multistr:true */
 			this.$el.append('\
-				<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+'" style="opacity: 0; position: absolute;">\
-					<table class="nv-pointer-events-none">\
-						<thead>\
-							<tr class="nv-pointer-events-none">\
-								<td colspan="3" class="nv-pointer-events-none">\
-									<strong class="x-value">'+d.name+'</strong>\
-								</td>\
-							</tr>\
-						</thead>\
-						<tbody>\
-							<tr class="nv-pointer-events-none">\
-								<td>'+that.prefix._scale(d.value)+' '+this.prefix.symbolText+'</td>\
-							</tr>\
-						</tbody>\
-					</table>\
-				</div>');
+<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+
+'" style="opacity: 0; position: absolute;">\
+	<table class="nv-pointer-events-none">\
+		<thead>\
+			<tr class="nv-pointer-events-none">\
+				<td colspan="3" class="nv-pointer-events-none">\
+					<strong class="x-value">'+d.name+'</strong>\
+				</td>\
+			</tr>\
+		</thead>\
+		<tbody>\
+			<tr class="nv-pointer-events-none">\
+				<td>'+that.prefix._scale(d.value)+' '+this.prefix.symbolText+'</td>\
+			</tr>\
+		</tbody>\
+	</table>\
+</div>');
 			var barBBox = {};
 			bar.each(function () { barBBox = this.getBBox(); });
 			d3.select(this.el).select('#nvtooltip-'+d._id)

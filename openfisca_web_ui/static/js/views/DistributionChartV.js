@@ -8,8 +8,17 @@ define([
 ], function ($, _, Backbone, d3, chartM) {
 	'use strict';
 
-	d3.selection.prototype.moveToFront = function() { return this.each(function(){ this.parentNode.appendChild(this); }); };
-	d3.selection.prototype.moveToBack = function() {return this.each(function() {var firstChild = this.parentNode.firstChild;if (firstChild) {this.parentNode.insertBefore(this, firstChild);}});};
+	d3.selection.prototype.moveToFront = function() {
+		return this.each(function(){ this.parentNode.appendChild(this); });
+	};
+	d3.selection.prototype.moveToBack = function() {
+		return this.each(function() {
+			var firstChild = this.parentNode.firstChild;
+			if (firstChild) {
+				this.parentNode.insertBefore(this, firstChild);
+			}
+		});
+	};
 
 	var DistributionChartV = Backbone.View.extend({
 		model: chartM,
@@ -88,7 +97,8 @@ define([
 				sortType = this.defaultSort;
 			}
 			var sortDatum = this.sortData[sortType];
-			this.packByLine = sortDatum.children.length < this.defaultPackByLine ? sortDatum.children.length : this.defaultPackByLine;
+			this.packByLine = sortDatum.children.length < this.defaultPackByLine ? sortDatum.children.length :
+				this.defaultPackByLine;
 
 			this.setSectionsDimensions();
 			this.setPrefix(data);
@@ -136,7 +146,8 @@ define([
 			this.prefix = d3.formatPrefix(magnitude);
 			/* Number formating */
 			this.prefix._scale = function (val) {
-				if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' && that.prefix.symbol !== '') {
+				if (that.prefix.symbol !== 'G' && that.prefix.symbol !== 'M' && that.prefix.symbol !== 'k' &&
+					that.prefix.symbol !== '') {
 					return (''+ d3.round(val, 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 				}
 				var roundLevel = (that.prefix.symbol == 'G' || that.prefix.symbol == 'M') ? 2: 0;
@@ -189,7 +200,8 @@ define([
 			_.each(this.sortData[sortType].children, function (d, i) { d.index = i; });
 			this.buildBubbles(this.nodes);
 			this.buildTextLegend();
-			this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*this.sectionHeight + this.padding.top + this.padding.bottom});
+			this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*
+				this.sectionHeight + this.padding.top + this.padding.bottom});
 			this.start();
 		},
 		/* Update chart dimensions */
@@ -305,23 +317,23 @@ define([
 				// TODO Use handlebars.
 				/*jshint multistr: true */
 				that.$el.append('\
-					<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+'" style="opacity: 0; position: absolute;">\
-						<table class="nv-pointer-events-none">\
-							<thead>\
-								<tr class="nv-pointer-events-none">\
-									<td colspan="3" class="nv-pointer-events-none">\
-										<strong class="x-value">'+d.name+'</strong>\
-									</td>\
-								</tr>\
-							</thead>\
-							<tbody>\
-								<tr class="nv-pointer-events-none">\
-									<td>'+that.prefix._scale(d.value)+' '+that.prefix.symbolText+'</td>\
-								</tr>\
-							</tbody>\
-						</table>\
-					</div>\
-				');
+<div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-'+d._id+
+'" style="opacity: 0; position: absolute;">\
+	<table class="nv-pointer-events-none">\
+		<thead>\
+			<tr class="nv-pointer-events-none">\
+				<td colspan="3" class="nv-pointer-events-none">\
+					<strong class="x-value">'+d.name+'</strong>\
+				</td>\
+			</tr>\
+		</thead>\
+		<tbody>\
+			<tr class="nv-pointer-events-none">\
+				<td>'+that.prefix._scale(d.value)+' '+that.prefix.symbolText+'</td>\
+			</tr>\
+		</tbody>\
+	</table>\
+</div>');
 				d3.select(that.el).select('#nvtooltip-'+d._id)
 					.style('left', function () {
 						var xPos = d3.select(bubble).attr('cx');
@@ -366,7 +378,10 @@ define([
 					targetX = i % 2 ? - that.sectionWidth/2 : that.sectionWidth*1.5;
 					targetY = -that.sectionHeight/2;
 				} else {
-					var sortIndex = _.findWhere(that.sortData[that.currentSort].children, {value: d.sorts[that.currentSort]}).index;
+					var sortIndex = _.findWhere(
+						that.sortData[that.currentSort].children,
+						{value: d.sorts[that.currentSort]}
+					).index;
 					targetX = (that.sectionWidth * (sortIndex % that.packByLine)) + that.quarterWidth;
 					targetY = that.sectionHeight * (Math.floor(sortIndex / that.packByLine)) + that.sectionHeight/3;
 				}

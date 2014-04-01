@@ -15,12 +15,12 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 	var ChartM = Backbone.Model.extend({
 		defaults: {
 			currentChartSlug: null,
-			distribution_data: {},
-			locating_data: {},
+			distribution_data: {}, // jshint ignore:line
+			locating_data: {}, // jshint ignore:line
 			simulationInProgress: false,
 			source: {values: {}},
 			vingtiles: vingtiles,
-			waterfall_data: {}
+			waterfall_data: {} // jshint ignore:line
 		},
 		initialize: function () {
 			this.listenTo(backendServiceM, 'change:apiData', this.parse);
@@ -54,7 +54,8 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 		},
 
 		/* Custom get methods */
-		get_waterfallData: function () { /* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
+		get_waterfallData: function () { // jshint ignore:line
+		/* Cleaned up, ungrouped and add parentNodes parentNodes attributes */
 			return new Parser(this.get('source'))
 				.clean()
 				// .removeRootNode()
@@ -62,7 +63,7 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 				.listChildren()
 				.values();
 		},
-		get_distributionData: function (args) {
+		get_distributionData: function (args) { // jshint ignore:line
 			/* Par défault on renvoie la décomposition revdisp */
 			args = args || {sort: 'revdisp'};
 			var parser = new Parser(this.get('source'));
@@ -80,12 +81,12 @@ function ($, _, Backbone, backendServiceM, Parser, vingtiles) {
 
 			return _return;
 		},
-		get_locatingData: function () {
+		get_locatingData: function () { // jshint ignore:line
 			return new Parser(this.get('source'))
 				.clean()
 				.values();
 		},
-		get_cleanData: function () {
+		get_cleanData: function () { // jshint ignore:line
 			return new Parser(this.get('source'))
 				.clean()
 				.values();

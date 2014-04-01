@@ -3,6 +3,7 @@
   "camelcase": true,
   "globals": {
     "alert": false,
+    "confirm": false,
     "console": false,
     "define": false,
     "require": false
