@@ -1,12 +1,12 @@
 define([
 	'backbone',
+	'jquery',
 	'underscore',
 
 	'backendServiceM',
 	'chartM',
 	'visualizationsServiceM',
-	'hbs!templates/visualization',
-], function (Backbone, _, backendServiceM, chartM, visualizationsServiceM, visualizationT) {
+], function (Backbone, $, _, backendServiceM, chartM, visualizationsServiceM) {
 	'use strict';
 
 	var IframeChartV = Backbone.View.extend({
@@ -14,9 +14,10 @@ define([
 			this.listenTo(backendServiceM, 'change:apiData', this.render);
 		},
 		render: function() {
-			this.$el.html(visualizationT(_.find(visualizationsServiceM.get('visualizations'), function(item) {
+			var visualizationData = _.find(visualizationsServiceM.get('visualizations'), function(item) {
 				return item.slug === chartM.get('currentChartSlug');
-			})));
+			});
+			this.$el.empty().append($('<iframe>', {'class': 'visualization-iframe', src: visualizationData.sourceUrl}));
 		},
 	});
 
