@@ -39,7 +39,6 @@ from .. import conf, contexts, conv, model, templates, urls, uuidhelpers, wsgihe
 @wsgihelpers.wsgify
 def become_admin(req):
     """Fake admin login, used only in debug environment."""
-    # TODO add redirect_location param
     assert conf['debug']
     ctx = contexts.Ctx(req)
     admin_account = model.Account.find_one({'admin': True})
@@ -59,13 +58,13 @@ def become_admin(req):
     session.user = admin_account
     session.save(safe = True)
     req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
-    return wsgihelpers.redirect(ctx, location = admin_account.get_user_url(ctx))
+    location = req.params.get('redirect') or admin_account.get_user_url(ctx)
+    return wsgihelpers.redirect(ctx, location = location)
 
 
 @wsgihelpers.wsgify
 def become_user(req):
     """Fake user login, used only in debug environment."""
-    # TODO add redirect_location param
     assert conf['debug']
     ctx = contexts.Ctx(req)
     user_accounts = [account for account in model.Account.find({'email': {'$exists': True}}) if not account.admin]
@@ -86,7 +85,8 @@ def become_user(req):
     session.user = user_account
     session.save(safe = True)
     req.response.set_cookie(conf['cookie'], session.token, httponly = True, secure = req.scheme == 'https')
-    return wsgihelpers.redirect(ctx, location = user_account.get_user_url(ctx))
+    location = req.params.get('redirect') or user_account.get_user_url(ctx)
+    return wsgihelpers.redirect(ctx, location = location)
 
 
 @wsgihelpers.wsgify

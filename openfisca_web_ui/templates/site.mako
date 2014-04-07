@@ -375,10 +375,14 @@ ${conf['app_name']}
                         </li>
         % endif
                         <li>
-                            <a href="${urls.get_url(ctx, 'login', 'admin')}">${_(u'Become admin')}</a>
+                            <a href="${urls.get_url(ctx, 'login', 'admin', redirect = req.path)}">
+                                ${_(u'Become admin')}
+                            </a>
                         </li>
                         <li>
-                            <a href="${urls.get_url(ctx, 'login', 'user')}">${_(u'Become user')}</a>
+                            <a href="${urls.get_url(ctx, 'login', 'user', redirect = req.path)}">
+                                ${_(u'Become user')}
+                            </a>
                         </li>
         % if user is not None and user.email is not None:
                         <li>
