@@ -68,11 +68,10 @@ def become_user(req):
     # TODO add redirect_location param
     assert conf['debug']
     ctx = contexts.Ctx(req)
-    user_account = model.Account.find_one({
-        'admin': {'$ne': True},
-        'email': {'$exists': True},
-        })
-    if user_account is None:
+    user_accounts = [account for account in model.Account.find({'email': {'$exists': True}}) if not account.admin]
+    if user_accounts:
+        user_account = user_accounts[0]
+    else:
         user_account = model.Account(
             cnil_conditions_accepted = True,
             email = u'user@domain.tld',
