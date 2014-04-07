@@ -131,11 +131,13 @@ def build_requireconfig(ctx):
 
 def index_appconfig(ctx):
     appconfig = base_appconfig(ctx)
+    user = model.get_user(ctx)
     appconfig['enabledModules'].update({
-        'situationForm': True,
-        'visualizations': {
+        'charts': {
+            'enableSaveButton': conf['enabled.auth'] and (user is None or user.email is None),
             'searchUrlPath': urls.get_url(ctx, 'api/1/visualizations/search'),
             },
+        'situationForm': True,
         })
     appconfig['api'] = {
         'urls': {

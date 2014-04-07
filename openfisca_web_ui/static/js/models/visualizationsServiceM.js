@@ -23,7 +23,7 @@ function ($, _, Backbone, appconfig) {
 					iframe: true
 				},
 				type: 'GET',
-				url: appconfig.enabledModules.visualizations.searchUrlPath,
+				url: appconfig.enabledModules.charts.searchUrlPath,
 			})
 			.done(function(data) {
 				this.set('visualizations', data);

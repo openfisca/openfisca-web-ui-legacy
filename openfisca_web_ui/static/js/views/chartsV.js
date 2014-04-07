@@ -67,7 +67,10 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			return data;
 		},
 		render: function () {
-			this.$el.html(chartsT({charts: this.chartsRenderData()}));
+			this.$el.html(chartsT({
+				enableSaveButton: appconfig.enabledModules.charts.enableSaveButton,
+				charts: this.chartsRenderData(),
+			}));
 			if (this.currentChildView !== null) {
 				this.currentChildView.remove();
 			}

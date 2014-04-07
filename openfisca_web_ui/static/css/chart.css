@@ -1,7 +1,3 @@
-#charts-wrapper select {
-  margin-bottom: 1em;
-}
-
 /* SVG */
 #charts-wrapper .y-axis path { display: none; }
 #charts-wrapper .domain { display: none; }

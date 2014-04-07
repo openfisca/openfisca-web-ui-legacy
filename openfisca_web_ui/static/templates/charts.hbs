@@ -1,9 +1,14 @@
-<div class="form-inline">
-  <select class="form-control">
+<div class="chart-toolbar form-inline">
+  <select class="form-control" title="Graphique">
 {{#charts}}
     <option{{#active}} selected="selected"{{/active}} value="{{value}}">{{label}}</option>
 {{/charts}}
   </select>
+{{#enableSaveButton}}
+  <button class="btn btn-default sign-in">Enregistrer</button>
+{{/enableSaveButton}}
+  <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">Exporter</button>
 </div>
+<hr>
 <div class="chart-wrapper"></div>
 <div class="alert alert-info overlay">Simulation en cours…</div>
