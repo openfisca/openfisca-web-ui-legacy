@@ -46,7 +46,6 @@ from openfisca_web_ui import model, urls
 <%def name="container_content()" filter="trim">
 <%
     user = model.get_user(ctx)
-    is_owner = user._id == visualization.author_id
 %>\
         <div class="page-header">
             <h1>${_(u'Visualization')} <small>${visualization.get_title(ctx)}</small></h1>
@@ -58,14 +57,12 @@ from openfisca_web_ui import model, urls
                 <%self:view_content/>
     % endif
             </div>
-    % if is_owner:
             <div class="panel-footer">
                 <div class="btn-toolbar">
                     <a class="btn btn-default" href="${visualization.get_admin_url(ctx, 'edit')}">${_(u'Edit')}</a>
                     <a class="btn btn-danger"  href="${visualization.get_admin_url(ctx, 'delete')}">${_(u'Delete')}</a>
                 </div>
             </div>
-    % endif
         </div>
 </%def>
 
