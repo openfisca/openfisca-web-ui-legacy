@@ -13,7 +13,7 @@ function ($, _, Backbone, backendServiceM) {
 			apiErrors: {},
 			apiSuggestions: {},
 			formErrors: {},
-			formHtml: null
+			formHtml: null,
 		},
 		initialize: function () {
 			this.listenTo(backendServiceM, 'change:apiData', this.parseApiData);
@@ -37,9 +37,9 @@ function ($, _, Backbone, backendServiceM) {
 			var formData = backendServiceM.get('formData');
 			if ('errors' in formData) {
 				this.set('formErrors', formData.errors.situation);
-			}
-			if ('html' in formData) {
-				this.set('formHtml', formData.html, {silent: 'errors' in formData});
+				this.set('formHtml', null);
+			} else if ('html' in formData) {
+				this.set('formHtml', formData.html);
 			}
 		},
 		save: function(data) {

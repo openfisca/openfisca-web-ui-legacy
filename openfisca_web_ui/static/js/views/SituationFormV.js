@@ -4,9 +4,10 @@ define([
 	'backbone',
 	'x-editable',
 
+	'backendServiceM',
 	'situationFormM',
 ],
-function ($, _, Backbone, xEditable, situationFormM) {
+function ($, _, Backbone, xEditable, backendServiceM, situationFormM) {
 	'use strict';
 
 	var debounceDelay = 100;
@@ -31,8 +32,9 @@ function ($, _, Backbone, xEditable, situationFormM) {
 			this.setupXeditable();
 			this.listenTo(this.model, 'change:apiErrors', this.renderApiErrors);
 			this.listenTo(this.model, 'change:apiSuggestions', this.renderApiSuggestions);
-			this.listenTo(this.model, 'change:formErrors', this.renderFormErrors);
+			this.listenTo(this.model, 'change:formErrors', this.onFormErrors);
 			this.listenTo(this.model, 'change:formHtml', this.renderFormHtml);
+			this.listenTo(backendServiceM, 'change:formSaveErrors', this.onFormSaveErrors);
 		},
 		formDataStr: function() {
 			return this.$el.find('form[name="situation"]').serialize();
@@ -61,6 +63,16 @@ function ($, _, Backbone, xEditable, situationFormM) {
 			if ( ! confirm('Supprimer ?')) { // jshint ignore:line
 				evt.preventDefault();
 			}
+		},
+		onFormErrors: function() {
+			// TODO i18n
+			alert('Désolé, une erreur est survenue lors de l\'affichage du formulaire. La page va être rechargée.');
+			document.location.reload();
+		},
+		onFormSaveErrors: function() {
+			// TODO i18n
+			alert('Désolé, une erreur est survenue lors de la sauvegarde du formulaire. La page va être rechargée.');
+			document.location.reload();
 		},
 		onInputChange: _.debounce(function(evt) {
 			var $input = $(evt.target);
@@ -172,9 +184,6 @@ function ($, _, Backbone, xEditable, situationFormM) {
 				}
 			}
 			return this;
-		},
-		renderFormErrors: function() {
-			console.error('renderFormErrors: not implemented');
 		},
 		renderFormHtml: function() {
 			this.$el.html(this.model.get('formHtml'));

@@ -8,9 +8,8 @@ define([
 	'appconfig',
 	'helpers',
 	'LocatingChartM',
-	'parser',
 ],
-function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM, Parser) {
+function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM) {
 	'use strict';
 
 	nv.dev = false;
@@ -89,7 +88,6 @@ function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM, Parser) {
 			return this.prefix.symbol in legendTextBySymbol ? legendTextBySymbol[this.prefix.symbol] : 'revenu en €';
 		},
 		render: function () {
-			var vingtiles = this.model.get('vingtiles');
 			nv.addGraph(_.bind(function() {
 				var vingtiles = this.model.get('vingtiles');
 				var userPoint = this.computeUserPoint();

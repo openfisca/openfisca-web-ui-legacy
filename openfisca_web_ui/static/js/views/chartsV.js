@@ -31,7 +31,7 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 		initialize: function () {
 			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(this.model, 'change:currentChartSlug', this.render);
-			this.listenTo(backendServiceM, 'change:simulationInProgress', this.updateOverlay);
+			this.listenTo(backendServiceM, 'change:simulationStatus', this.updateOverlay);
 			if ($(window).width() >= 768) {
 				this.$el.sticky({
 					getWidthFrom: this.$el.parent(),
@@ -73,6 +73,7 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			}));
 			if (this.currentChildView !== null) {
 				this.currentChildView.remove();
+				this.currentChildView = null;
 			}
 			var $chartWrapper = this.$el.find('.chart-wrapper');
 			var currentChartSlug = this.model.get('currentChartSlug');
@@ -88,14 +89,23 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			return this;
 		},
 		updateOverlay: function() {
-			var simulationInProgress = backendServiceM.get('simulationInProgress');
 			var $overlay = this.$el.find('.overlay');
-			var $svg = this.$el.find('svg');
-			if (simulationInProgress) {
-				$svg.css('opacity', 0.1);
+			var simulationStatus = backendServiceM.get('simulationStatus');
+			var message;
+			if (simulationStatus === 'in-progress') {
+				message = 'Simulation en cours…';
+			} else if (_.contains(['error', 'fail'], simulationStatus)) {
+				message = 'Erreur de simulation';
+			} else if (_.contains([null, 'done'], simulationStatus)) {
+				message = null;
+			}
+			var $chartWrapper = this.$el.find('.chart-wrapper');
+			if (message !== null) {
+				$overlay.text(message);
+				$chartWrapper.css('opacity', 0.1);
 				$overlay.show();
 			} else {
-				$svg.css('opacity', 1);
+				$chartWrapper.css('opacity', 1);
 				$overlay.hide();
 			}
 		}

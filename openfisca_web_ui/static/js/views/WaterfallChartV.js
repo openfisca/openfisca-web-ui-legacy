@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'd3',
 
-	'backendServiceM',
+	'chartsM',
 	'helpers',
 	'parser',
-], function ($, _, Backbone, d3, backendServiceM, helpers, Parser) {
+], function ($, _, Backbone, d3, chartsM, helpers, Parser) {
 	'use strict';
 
 	var WaterfallChartV = Backbone.View.extend({
@@ -41,11 +41,12 @@ define([
 			this.svg = d3.select(this.el).append('svg')
 				.attr('height', this.height)
 				.attr('width', this.width);
-			this.listenTo(backendServiceM, 'change:apiData', this.render);
+			this.listenTo(chartsM, 'change:apiData', this.render);
 			// TODO Bind this global event to caller object.
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
 		buildActiveBars: function () {
+			// TODO Resize active bars.
 			var that = this;
 			var barWidth = (that.width - that.padding.left - that.padding.right) / this.data.length;
 			this.activeBars = this.svg.selectAll('.active-bar').data(this.data);
@@ -61,6 +62,9 @@ define([
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0)
 					.on('mouseover', function (barData, barIdx) {
+						if (chartsM.get('apiData') === null) {
+							return;
+						}
 						var bar = d3.select('#bar-' + barIdx);
 						that.showTooltip(bar);
 						that.bars
@@ -109,6 +113,7 @@ define([
 			this.activeBars.exit().remove();
 		},
 		buildBars: function (endTransitionCallback) {
+			// TODO Move bars to front.
 			var that = this;
 			var barWidth = (this.width - this.padding.left - this.padding.right -
 				this.barLeftAndRightPadding * this.data.length) / this.data.length;
@@ -225,7 +230,7 @@ define([
 		},
 		computeData: function() {
 			// TODO Internalize setParentNodes and listChildren in WaterfallChartM which are used only in waterfall.
-			var data = new Parser(backendServiceM.get('apiData').value).clean().setParentNodes().listChildren().values();
+			var data = new Parser(chartsM.get('apiData')).clean().setParentNodes().listChildren().values();
 			var currentStartValue = 0, currentEndValue = 0;
 			_.each(data, function (item) {
 				currentEndValue += item.value;
@@ -304,7 +309,7 @@ define([
 				{
 					_id: deeperFirstChild(
 						helpers.findDeep(
-							new Parser(backendServiceM.get('apiData').value).clean().values(),
+							new Parser(chartsM.get('apiData')).clean().values(),
 							{_id: firstParentNode.id }
 						)
 					)._id,

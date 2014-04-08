@@ -12,7 +12,8 @@ function ($, _, Backbone, appconfig) {
 		defaults: {
 			apiData: {},
 			formData: {},
-			simulationInProgress: false,
+			formSaveErrors: null,
+			simulationStatus: null,
 		},
 		fetchForm: function() {
 			return $.ajax({
@@ -23,9 +24,8 @@ function ($, _, Backbone, appconfig) {
 			.done(function(data/*, textStatus, jqXHR*/) {
 				this.set('formData', data);
 			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				// TODO Show error to user.
-				console.error(jqXHR, textStatus, errorThrown);
+			.fail(function(jqXHR/*, textStatus, errorThrown*/) {
+				this.set('formData', {errors: jqXHR.responseText});
 			});
 		},
 		saveForm: function(data) {
@@ -36,11 +36,11 @@ function ($, _, Backbone, appconfig) {
 				url: appconfig.api.urls.form
 			})
 			.done(function() {
+				this.set('formSaveErrors', null);
 				this.simulate();
 			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				// TODO Show error to user.
-				console.error(jqXHR, textStatus, errorThrown);
+			.fail(function(jqXHR/*, textStatus, errorThrown*/) {
+				this.set('formSaveErrors', {errors: jqXHR.responseText});
 			});
 		},
 		simulate: function(options) {
@@ -51,25 +51,20 @@ function ($, _, Backbone, appconfig) {
 			if ('decomposition' in options) {
 				data.decomposition = options.decomposition;
 			}
-			this.set('simulationInProgress', true);
+			this.set('simulationStatus', 'in-progress');
 			return $.ajax({
 				context: this,
 				data: data,
 				url: appconfig.api.urls.simulate,
 			})
 			.done(function(data) {
-				if ('errors' in data) {
-					// TODO i18n
-					alert('Erreurs de simulation.');
-				} else {
-					this.set('apiData', data);
-				}
+				this.set({
+					apiData: data,
+					simulationStatus: 'errors' in data ? 'error' : 'done',
+				});
 			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				// TODO Show error to user.
-				console.error(jqXHR, textStatus, errorThrown);
-			}).always(function() {
-				this.set('simulationInProgress', false);
+			.fail(function(/* jqXHR, textStatus, errorThrown */) {
+				this.set({apiData: null, simulationStatus: 'fail'});
 			});
 		}
 	});

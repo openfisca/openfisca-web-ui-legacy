@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'd3',
 
-	'backendServiceM',
+	'chartsM',
 	'helpers',
 	'parser',
-], function ($, _, Backbone, d3, backendServiceM, helpers, Parser) {
+], function ($, _, Backbone, d3, chartsM, helpers, Parser) {
 	'use strict';
 
 	var DistributionChartV = Backbone.View.extend({
@@ -65,7 +65,7 @@ define([
 
 			this.currentSort = this.defaultSort;
 			
-			this.listenTo(backendServiceM, 'change:apiData', this.render);
+			this.listenTo(chartsM, 'change:apiData', this.render);
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
 		remove: function() {
@@ -77,7 +77,7 @@ define([
 				sortType = this.currentSort;
 			}
 			this.updateDimensions();
-			var data = new Parser(backendServiceM.get('apiData').value)
+			var data = new Parser(chartsM.get('apiData'))
 				.clean()
 				.setPositiveSort()
 				.setDecompositionSort()
@@ -96,13 +96,29 @@ define([
 			this.setSectionsDimensions();
 			this.setPrefix(data);
 			this.sortBubblesBy(sortType, data);
-			this.setHeader(sortType);
+			this.renderSortButtons(sortType);
+		},
+		renderSortButtons: function (sortType) {
+			var $sortMenu = this.$el.find('#sort-menu'),
+				that = this;
+			$sortMenu.html('');
+			for(var prop in this.sortData) {
+				$sortMenu
+					.append('<input class="btn btn-default '+prop+'-sort '+((prop == sortType)?'active':'')+
+						'" data-sort="' + prop + '" type="button" value="' + this.sortData[prop].name + '">');
+			}
+			$sortMenu.off('click');
+			$sortMenu.on('click', 'input', function () {
+				if(!$(this).hasClass('active')) {
+					that.render($(this).data('sort'));
+				}
+			});
 		},
 		/* Check 'sort' (decomposition) values in data and update sortData */
 		setSortDataByDataset: function (data) {
 			var sortData = $.extend(true, {}, this.defaultSortData);
 			/* Get it to find decomposition names */
-			var cleanData = new Parser(backendServiceM.get('apiData').value).clean().values();
+			var cleanData = new Parser(chartsM.get('apiData')).clean().values();
 
 			_.each(data, function (d) {
 				_.each(d.sorts, function (sortValue, sortKey) {
@@ -165,23 +181,6 @@ define([
 				default:
 					this.legendText = '';
 			}
-		},
-		/* Set tabs in chart header */
-		setHeader: function (sortType) {
-			var $sortMenu = this.$el.find('#sort-menu'),
-				that = this;
-			$sortMenu.html('');
-			for(var prop in this.sortData) {
-				$sortMenu
-					.append('<input class="btn btn-default '+prop+'-sort '+((prop == sortType)?'active':'')+
-						'" data-sort="' + prop + '" type="button" value="' + this.sortData[prop].name + '">');
-			}
-			$sortMenu.off('click');
-			$sortMenu.on('click', 'input', function () {
-				if(!$(this).hasClass('active')) {
-					that.render($(this).data('sort'));
-				}
-			});
 		},
 		/* Make sort according to sort type and bubble data */
 		sortBubblesBy: function (sortType, data) {
