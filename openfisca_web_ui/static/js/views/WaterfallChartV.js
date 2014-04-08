@@ -112,8 +112,7 @@ define([
 					.attr('opacity', 0);
 			this.activeBars.exit().remove();
 		},
-		buildBars: function (endTransitionCallback) {
-			// TODO Move bars to front.
+		buildBars: function() {
 			var that = this;
 			var barWidth = (this.width - this.padding.left - this.padding.right -
 				this.barLeftAndRightPadding * this.data.length) / this.data.length;
@@ -163,16 +162,17 @@ define([
 						}
 					})
 					.each('end',function (d, i) {
-						if(!_.isUndefined(endTransitionCallback) && i === 0) {
-							endTransitionCallback.call(that);
+						if (i === 0) {
+							that.buildActiveBars.call(that);
 						}
 					});
-			this.bars.exit()
-				.transition()
-					.duration(this.duration)
-					.attr('x', function () { return that.width * 3; })
-					.attr('opacity', 0)
-					.each('end', function () { this.remove(); });
+			this.bars
+				.exit()
+					.transition()
+						.duration(this.duration)
+						.attr('x', function () { return that.width * 3; })
+						.attr('opacity', 0)
+						.each('end', function () { this.remove(); });
 		},
 		buildLegend: function () {
 			var that = this;
@@ -267,24 +267,15 @@ define([
 		render: function() {
 			this.data = this.computeData();
 			this.updateScales();
-			if (this.data.length) {
-				this.buildBars(this.buildActiveBars);
-			}
 			// TODO Merge buildLegend and updateLegend and make it reentrant?
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
 				this.buildLegend();
 			} else {
 				this.updateLegend();
 			}
-//			var revdispData = helpers.findDeep(chartsM.get('cleanData'), {code: 'revdisp' });
-//			if ( ! _.isUndefined(revdispData)) {
-//				_.each(this.bars.data(), function(barData, barIdx) {
-//					if ( ! _.isUndefined(barData.parentNodes) && barData.parentNodes.length > 0 &&
-//						barData.parentNodes[0].id === 'root') {
-//						that.renderIncome(barData, barIdx);
-//					}
-//				});
-//			}
+			if (this.data.length) {
+				this.buildBars();
+			}
 			return this;
 		},
 		renderIncome: function(barData, barIdx) {
