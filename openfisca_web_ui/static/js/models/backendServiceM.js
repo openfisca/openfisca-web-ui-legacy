@@ -44,12 +44,9 @@ function ($, _, Backbone, appconfig) {
 			});
 		},
 		simulate: function(options) {
-			if (_.isUndefined(options)) {
-				options = {};
-			}
 			var data = {context: Date.now()};
-			if ('decomposition' in options) {
-				data.decomposition = options.decomposition;
+			if ( ! _.isUndefined(options)) {
+				data = $.extend(data, options);
 			}
 			this.set('simulationStatus', 'in-progress');
 			return $.ajax({
