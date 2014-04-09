@@ -19,8 +19,7 @@ define([
         .done(function() {
           window.location.reload();
         })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-          console.error('onlogin fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+        .fail(function(/*jqXHR, textStatus, errorThrown*/) {
           navigator.id.logout();
           // TODO translate string
           alert('Login failure');
@@ -42,8 +41,7 @@ define([
               window.location.href = authconfig.redirectLocation;
             }
           })
-          .fail(function(jqXHR, textStatus, errorThrown) {
-            console.error('onlogout fail', jqXHR, textStatus, errorThrown, jqXHR.responseText);
+          .fail(function(/*jqXHR, textStatus, errorThrown*/) {
             // TODO translate string
             alert('Logout failure');
           });

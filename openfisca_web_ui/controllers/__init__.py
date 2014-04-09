@@ -30,7 +30,7 @@ import datetime
 import json
 import logging
 
-from biryani1.baseconv import check, pipe
+from biryani1.baseconv import check, input_to_int, pipe
 
 from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
 from . import accounts, auth, forms, legislations, sessions, test_cases, visualizations
@@ -92,6 +92,7 @@ def make_router():
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/session$', session),
         (None, '^/api/1/simulate/?$', simulate),
+        (None, '^/api/1/test_cases(?=/|$)', test_cases.route_api1_class),
         (None, '^/api/1/visualizations(?=/|$)', visualizations.route_api1_class),
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
         (None, '^/test_cases(?=/|$)', test_cases.route_class),
@@ -155,7 +156,9 @@ def simulate(req):
             conv.make_input_to_json(),
             conv.cleanup_line,
             ),
+        'legislation_slug': conv.cleanup_line,
         'token': conv.base.input_to_uuid,
+        'year': input_to_int,
         })(inputs, state = ctx)
     if errors is None:
         session = ctx.session if data['token'] is None else model.Session.find_one({'anonymous_token': data['token']})
@@ -171,9 +174,16 @@ def simulate(req):
             conv.simulations.user_api_data_to_api_data,
             )(user_api_data, state = ctx)
     if errors is None:
-        if data['axes'] is not None:
-            for scenario in api_data['scenarios']:
+        legislation = None
+        if data['legislation_slug'] is not None:
+            legislation = model.Legislation.find_one({'slug': data['legislation_slug']})
+        for scenario in api_data['scenarios']:
+            if data['axes'] is not None:
                 scenario['axes'] = data['axes']
+            if legislation is not None:
+                scenario['legislation_url'] = legislation.url
+            if data['year'] is not None:
+                scenario['year'] = data['year']
         api_data.update({
             'context': data['context'],
             'decomposition': data['decomposition'],

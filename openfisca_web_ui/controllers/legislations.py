@@ -440,6 +440,68 @@ def api1_json(req):
 
 
 @wsgihelpers.wsgify
+def api1_search(req):
+    ctx = contexts.Ctx(req)
+
+    params = req.GET
+    inputs = dict(
+        page = params.get('page'),
+        sort = params.get('sort'),
+        term = params.get('term'),
+        )
+    data, errors = conv.pipe(
+        conv.struct(
+            dict(
+                page = conv.pipe(
+                    conv.input_to_int,
+                    conv.test_greater_or_equal(1),
+                    conv.default(1),
+                    ),
+                sort = conv.pipe(
+                    conv.cleanup_line,
+                    conv.test_in(['slug', 'updated']),
+                    ),
+                term = conv.base.input_to_words,
+                ),
+            ),
+        conv.rename_item('page', 'page_number'),
+        )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = errors)
+
+    criteria = {}
+    if data['term'] is not None:
+        criteria['words'] = {'$all': [
+            re.compile(u'^{}'.format(re.escape(word)))
+            for word in data['term']
+            ]}
+    cursor = model.Legislation.find(criteria, as_class = collections.OrderedDict)
+    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
+    if data['sort'] == 'slug':
+        cursor.sort([('slug', pymongo.ASCENDING)])
+    elif data['sort'] == 'updated':
+        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
+    legislations = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+
+    return wsgihelpers.respond_json(
+        ctx,
+        [
+            {
+                'description': legislation.description,
+                'datetimeBegin': legislation.datetime_begin.isoformat(),
+                'datetimeEnd': legislation.datetime_end.isoformat(),
+                'published': legislation.published.isoformat(),
+                'slug': legislation.slug,
+                'title': legislation.title,
+                'updated': legislation.updated.isoformat(),
+                'url': legislation.url,
+                }
+            for legislation in legislations
+            ],
+        )
+
+
+@wsgihelpers.wsgify
 def api1_typeahead(req):
     ctx = contexts.Ctx(req)
     headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
@@ -540,6 +602,7 @@ def route_api1(environ, start_response):
 
 def route_api1_class(environ, start_response):
     router = urls.make_router(
+        ('GET', '^/search/?$', api1_search),
         ('GET', '^/typeahead/?$', api1_typeahead),
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route_api1),
         )

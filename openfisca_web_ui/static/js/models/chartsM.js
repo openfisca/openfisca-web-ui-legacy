@@ -12,14 +12,24 @@ function ($, _, Backbone, backendServiceM) {
 		defaults: {
 			apiData: null,
 			currentChartSlug: null,
+			legislation: null,
+			year: null,
 		},
 		initialize: function () {
 			this.listenTo(backendServiceM, 'change:formData', this.simulate);
 		},
 		simulate: function () {
 			var options = {};
-			if(this.get('currentChartSlug') === 'distribution') {
+			var year = this.get('year');
+			if (year !== null) {
+				options.year = year;
+			}
+			if (this.get('currentChartSlug') === 'distribution') {
 				options.decomposition = 'decompositions-multiples.xml';
+			}
+			var legislation = this.get('legislation');
+			if (legislation !== null) {
+				options.legislation = legislation;
 			}
 			return backendServiceM.simulate(options);
 		}

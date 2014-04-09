@@ -2,11 +2,6 @@
  * Common site styles and helpers
  */
 
-.chart-toolbar select {
-    display: inline-block;
-    width: auto;
-}
-
 article.cgu h1{
     font-size: 2.3em;
     text-align: center;

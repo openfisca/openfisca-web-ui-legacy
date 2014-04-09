@@ -42,8 +42,6 @@ define([
 				.attr('height', this.height)
 				.attr('width', this.width);
 			this.listenTo(backendServiceM, 'change:apiData', this.render);
-			// TODO Bind this global event to caller object.
-			$(window).on('resize', _.bind(this.windowResize, this));
 		},
 		buildActiveBars: function () {
 			// TODO Resize active bars.
@@ -230,7 +228,11 @@ define([
 		},
 		computeData: function() {
 			// TODO Internalize setParentNodes and listChildren in WaterfallChartM which are used only in waterfall.
-			var data = new Parser(backendServiceM.get('apiData').value).clean().setParentNodes().listChildren().values();
+			var apiData = backendServiceM.get('apiData');
+			if (apiData === null) {
+				return null;
+			}
+			var data = new Parser(apiData.value).clean().setParentNodes().listChildren().values();
 			var currentStartValue = 0, currentEndValue = 0;
 			_.each(data, function (item) {
 				currentEndValue += item.value;
@@ -260,12 +262,12 @@ define([
 			};
 			return this.prefix.symbol in legendTextBySymbol ? legendTextBySymbol[this.prefix.symbol] : 'En euros';
 		},
-		remove: function() {
-			Backbone.View.prototype.remove.apply(this, arguments);
-			$(window).off('resize');
-		},
 		render: function() {
+			// TODO Make data stateless.
 			this.data = this.computeData();
+			if (this.data === null) {
+				return this;
+			}
 			this.updateScales();
 			// TODO Merge buildLegend and updateLegend and make it reentrant?
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {
@@ -510,10 +512,6 @@ define([
 				else val = that.prefix.scale(val);
 				return (''+ d3.round(val, roundLevel)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 			};
-		},
-		windowResize: function () {
-			this.updateDimensions();
-			this.render();
 		},
 	});
 

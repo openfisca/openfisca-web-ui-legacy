@@ -127,8 +127,6 @@ function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM) {
 					}
 				}, this);
 				chart.update();
-				// FIXME resize event isn't destroyed when chart is destroyed.
-				nv.utils.windowResize(function () { chart.update(); });
 			}, this));
 		},
 		tooltipContent: function (d) {

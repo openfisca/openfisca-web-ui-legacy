@@ -9,14 +9,16 @@ define([
 	'chartsM',
 	'DistributionChartV',
 	'IframeChartV',
+	'legislationsServiceM',
 	'LocatingChartV',
+	'testCasesServiceM',
 	'visualizationsServiceM',
 	'WaterfallChartV',
 
 	'hbs!templates/charts'
 ],
-function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV, LocatingChartV,
-	visualizationsServiceM, WaterfallChartV, chartsT) {
+function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV,
+	legislationsServiceM, LocatingChartV, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {
 	'use strict';
 
 	var enableLocatingChart = appconfig.enabledModules.locatingChart;
@@ -25,17 +27,22 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 		currentChildView: null,
 		el: '#charts-wrapper',
 		events: {
-			'change select': 'changeChart',
+			'change select[name="chart"]': 'onChartChange',
+			'change select[name="legislation"]': 'onLegislationChange',
+			'change select[name="test_case"]': 'onTestCaseChange',
+			'change input[name="year"]': 'onYearChange',
 		},
 		model: chartsM,
 		initialize: function () {
-			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(this.model, 'change:currentChartSlug', this.render);
+			this.listenTo(this.model, 'change:legislation', _.bind(this.model.simulate, this.model));
+			this.listenTo(this.model, 'change:year', _.bind(this.model.simulate, this.model));
+			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(backendServiceM, 'change:simulationStatus', this.updateOverlay);
 			if ($(window).width() >= 768) {
 				this.$el.sticky({
 					getWidthFrom: this.$el.parent(),
-					topSpacing: 10,
+//					topSpacing: 10,
 				});
 			}
 		},
@@ -43,33 +50,45 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			var data = [];
 			if (enableLocatingChart) {
 				data = data.concat([
-					{label: 'Situateur de revenu disponible', value: 'revdisp'},
-					{label: 'Situateur de salaire imposable', value: 'sal'},
+					{title: 'Situateur de revenu disponible', slug: 'revdisp'},
+					{title: 'Situateur de salaire imposable', slug: 'sal'},
 				]);
 			}
 			data = data.concat([
-				{label: 'Répartition', value: 'distribution'},
-				{label: 'Cascade', value: 'waterfall'},
+				{title: 'Répartition', slug: 'distribution'},
+				{title: 'Cascade', slug: 'waterfall'},
 			]);
 			var otherVisualizations = visualizationsServiceM.get('visualizations');
-			if (otherVisualizations) {
-				_.each(otherVisualizations, function(item) {
-					data.push({label: item.title, value: item.slug});
-				});
+			if (otherVisualizations !== null) {
+				data = data.concat(otherVisualizations);
 			}
-			var currentChartData = _.findWhere(data, {value: this.model.get('currentChartSlug')});
+			var currentChartData = _.findWhere(data, {slug: this.model.get('currentChartSlug')});
 			if ( ! _.isUndefined(currentChartData)) {
 				currentChartData.active = true;
 			}
 			return data;
 		},
-		changeChart: function (evt) {
+		onChartChange: function (evt) {
 			Backbone.history.navigate($(evt.target).val(), {trigger: true});
+		},
+		onLegislationChange: function (evt) {
+			this.model.set('legislation', $(evt.target).val());
+		},
+		onTestCaseChange: function (evt) {
+			// TODO Configure URL.
+			window.location.href = '/test_cases/' + $(evt.target).val() + '/use?redirect=/';
+		},
+		onYearChange: function (evt) {
+			this.model.set('year', $(evt.target).val());
 		},
 		render: function () {
 			this.$el.html(chartsT({
-				enableSaveButton: appconfig.enabledModules.charts.enableSaveButton,
 				charts: this.buildChartsRenderData(),
+				isUserAuthenticated: 'auth' in appconfig.enabledModules &&
+					appconfig.enabledModules.auth.currentUser !== null,
+				legislations: legislationsServiceM.get('legislations') || [],
+				testCases: testCasesServiceM.get('testCases') || [],
+				year: this.model.get('year'),
 			}));
 			if (this.currentChildView !== null) {
 				this.currentChildView.remove();

@@ -26,10 +26,75 @@
 """Controllers for test cases"""
 
 
+import collections
+import re
+
 from biryani1 import strings
+import pymongo
 import webob
 
-from .. import contexts, conv, model, urls, wsgihelpers
+from .. import contexts, conv, model, paginations, urls, wsgihelpers
+
+
+@wsgihelpers.wsgify
+def api1_search(req):
+    ctx = contexts.Ctx(req)
+    user = model.get_user(ctx, check = True)
+
+    params = req.GET
+    inputs = dict(
+        page = params.get('page'),
+        sort = params.get('sort'),
+        term = params.get('term'),
+        )
+    data, errors = conv.pipe(
+        conv.struct(
+            dict(
+                page = conv.pipe(
+                    conv.input_to_int,
+                    conv.test_greater_or_equal(1),
+                    conv.default(1),
+                    ),
+                sort = conv.pipe(
+                    conv.cleanup_line,
+                    conv.test_in(['slug', 'updated']),
+                    ),
+                term = conv.base.input_to_words,
+                ),
+            ),
+        conv.rename_item('page', 'page_number'),
+        )(inputs, state = ctx)
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = errors)
+
+    criteria = {'author_id': user._id}
+    if data['term'] is not None:
+        criteria['words'] = {'$all': [
+            re.compile(u'^{}'.format(re.escape(word)))
+            for word in data['term']
+            ]}
+    cursor = model.TestCase.find(criteria, as_class = collections.OrderedDict)
+    pager = paginations.Pager(item_count = cursor.count(), page_number = data['page_number'])
+    if data['sort'] == 'slug':
+        cursor.sort([('slug', pymongo.ASCENDING)])
+    elif data['sort'] == 'updated':
+        cursor.sort([(data['sort'], pymongo.DESCENDING), ('slug', pymongo.ASCENDING)])
+    test_cases = cursor.skip(pager.first_item_index or 0).limit(pager.page_size)
+
+    return wsgihelpers.respond_json(
+        ctx,
+        [
+            {
+                'description': test_case.description,
+                'isCurrentTestCase': user.current_test_case_id == test_case._id,
+                'published': test_case.published.isoformat(),
+                'slug': test_case.slug,
+                'title': test_case.title,
+                'updated': test_case.updated.isoformat(),
+                }
+            for test_case in test_cases
+            ],
+        )
 
 
 @wsgihelpers.wsgify
@@ -135,6 +200,13 @@ def route(environ, start_response):
         ('GET', '^/duplicate/?$', duplicate),
         ('POST', '^/edit/?$', edit),
         ('GET', '^/use/?$', use),
+        )
+    return router(environ, start_response)
+
+
+def route_api1_class(environ, start_response):
+    router = urls.make_router(
+        ('GET', '^/search/?$', api1_search),
         )
     return router(environ, start_response)
 

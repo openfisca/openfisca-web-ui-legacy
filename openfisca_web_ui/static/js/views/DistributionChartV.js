@@ -53,24 +53,13 @@ define([
 		},
 		initialize: function () {
 			this.updateDimensions();
-
 			this.$el.append('<div id="sort-menu" class="btn-group"></div>');
-
 			this.g = d3.select(this.el).append('svg')
 				.attr('height', this.height)
 				.attr('width', this.width);
-
-			this.legendText = this.g.append('g')
-				.attr('class', 'text-label');
-
+			this.legendText = this.g.append('g').attr('class', 'text-label');
 			this.currentSort = this.defaultSort;
 			this.listenTo(backendServiceM, 'change:apiData', this.render);
-			
-			$(window).on('resize', _.bind(this.windowResize, this));
-		},
-		remove: function() {
-			Backbone.View.prototype.remove.apply(this, arguments);
-			$(window).off('resize');
 		},
 		render: function (sortType) {
 			if (typeof sortType != 'string') {
@@ -436,10 +425,6 @@ define([
 				this.g.transition().duration(400)
 					.attr('width', args.width);
 			}
-		},
-		windowResize: function () {
-			this.updateDimensions();
-			this.render();
 		},
 	});
 

@@ -12,24 +12,21 @@ function ($, _, Backbone, appconfig) {
 		defaults: {
 			visualizations: null
 		},
-		initialize: function () {
+		initialize: function() {
 			this.fetch();
 		},
 		fetch: function() {
-			$.ajax({
+			return $.ajax({
 				context: this,
 				data: {
 					enabled: true,
 					iframe: true
 				},
 				type: 'GET',
-				url: appconfig.enabledModules.charts.searchUrlPath,
+				url: appconfig.enabledModules.charts.urlPaths.visualizationsSearch,
 			})
 			.done(function(data) {
 				this.set('visualizations', data);
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				console.error('Fetch fail', jqXHR, textStatus, errorThrown);
 			});
 		}
 	});

@@ -1,13 +1,40 @@
-<div class="chart-toolbar form-inline">
-  <select class="form-control" title="Graphique">
+<div class="form-inline" role="form">
+  <div class="form-group">
+    <select class="form-control" name="chart" title="Graphique">
 {{#charts}}
-    <option{{#active}} selected="selected"{{/active}} value="{{value}}">{{label}}</option>
+      <option{{#active}} selected="selected"{{/active}} value="{{slug}}">{{title}}</option>
 {{/charts}}
-  </select>
-{{#enableSaveButton}}
-  <button class="btn btn-default sign-in">Enregistrer</button>
-{{/enableSaveButton}}
-  <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">Exporter</button>
+    </select>
+  </div>
+{{#isUserAuthenticated}}
+  <div class="form-group">
+    <select class="form-control" name="test_case" title="Simulation">
+  {{#testCases}}
+      <option{{#isCurrentTestCase}} selected="selected"{{/isCurrentTestCase}} value="{{slug}}">{{title}}</option>
+  {{/testCases}}
+    </select>
+  </div>
+{{/isUserAuthenticated}}
+{{^isUserAuthenticated}}
+  <div class="form-group">
+    <button class="btn btn-default sign-in">Enregistrer</button>
+  </div>
+{{/isUserAuthenticated}}
+  <div class="form-group">
+    <input class="form-control" max="1870" min="2099" name="year" placeholder="2013" step="1" title="Année"
+type="number" value="{{year}}">
+  </div>
+  <div class="form-group">
+    <select class="form-control" name="legislation" title="Législation">
+      <option>Législation par défaut</option>
+{{#legislations}}
+      <option{{#active}} selected="selected"{{/active}} value="{{slug}}">{{title}}</option>
+{{/legislations}}
+    </select>
+  </div>
+  <div class="form-group">
+    <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">Exporter</button>
+  </div>
 </div>
 <hr>
 <div class="chart-wrapper"></div>

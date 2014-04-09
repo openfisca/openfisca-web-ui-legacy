@@ -108,8 +108,10 @@ def build_requireconfig(ctx):
             # Models
             'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
             'chartsM': urls.get_url(ctx, u'js/models/chartsM'),
+            'legislationsServiceM': urls.get_url(ctx, u'js/models/legislationsServiceM'),
             'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
             'situationFormM': urls.get_url(ctx, u'js/models/situationFormM'),
+            'testCasesServiceM': urls.get_url(ctx, u'js/models/testCasesServiceM'),
             'visualizationsServiceM': urls.get_url(ctx, u'js/models/visualizationsServiceM'),
 
             # External libs
@@ -133,11 +135,13 @@ def build_requireconfig(ctx):
 
 def index_appconfig(ctx):
     appconfig = base_appconfig(ctx)
-    user = model.get_user(ctx)
     appconfig['enabledModules'].update({
         'charts': {
-            'enableSaveButton': conf['enabled.auth'] and (user is None or user.email is None),
-            'searchUrlPath': urls.get_url(ctx, 'api/1/visualizations/search'),
+            'urlPaths': {
+                'legislationsSearch': urls.get_url(ctx, 'api/1/legislations/search'),
+                'testCasesSearch': urls.get_url(ctx, 'api/1/test_cases/search'),
+                'visualizationsSearch': urls.get_url(ctx, 'api/1/visualizations/search'),
+                },
             },
         'situationForm': True,
         })
