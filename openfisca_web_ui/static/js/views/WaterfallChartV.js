@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'd3',
 
-	'chartsM',
+	'backendServiceM',
 	'helpers',
 	'parser',
-], function ($, _, Backbone, d3, chartsM, helpers, Parser) {
+], function ($, _, Backbone, d3, backendServiceM, helpers, Parser) {
 	'use strict';
 
 	var WaterfallChartV = Backbone.View.extend({
@@ -41,7 +41,7 @@ define([
 			this.svg = d3.select(this.el).append('svg')
 				.attr('height', this.height)
 				.attr('width', this.width);
-			this.listenTo(chartsM, 'change:apiData', this.render);
+			this.listenTo(backendServiceM, 'change:apiData', this.render);
 			// TODO Bind this global event to caller object.
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
@@ -62,7 +62,7 @@ define([
 					.attr('fill', that.dataToColor)
 					.attr('opacity', 0)
 					.on('mouseover', function (barData, barIdx) {
-						if (chartsM.get('apiData') === null) {
+						if (backendServiceM.get('apiData') === null) {
 							return;
 						}
 						var bar = d3.select('#bar-' + barIdx);
@@ -230,7 +230,7 @@ define([
 		},
 		computeData: function() {
 			// TODO Internalize setParentNodes and listChildren in WaterfallChartM which are used only in waterfall.
-			var data = new Parser(chartsM.get('apiData')).clean().setParentNodes().listChildren().values();
+			var data = new Parser(backendServiceM.get('apiData').value).clean().setParentNodes().listChildren().values();
 			var currentStartValue = 0, currentEndValue = 0;
 			_.each(data, function (item) {
 				currentEndValue += item.value;
@@ -300,7 +300,7 @@ define([
 				{
 					_id: deeperFirstChild(
 						helpers.findDeep(
-							new Parser(chartsM.get('apiData')).clean().values(),
+							new Parser(backendServiceM.get('apiData').value).clean().values(),
 							{_id: firstParentNode.id }
 						)
 					)._id,

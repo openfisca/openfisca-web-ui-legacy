@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'd3',
 
-	'chartsM',
+	'backendServiceM',
 	'helpers',
 	'parser',
-], function ($, _, Backbone, d3, chartsM, helpers, Parser) {
+], function ($, _, Backbone, d3, backendServiceM, helpers, Parser) {
 	'use strict';
 
 	var DistributionChartV = Backbone.View.extend({
@@ -64,8 +64,8 @@ define([
 				.attr('class', 'text-label');
 
 			this.currentSort = this.defaultSort;
+			this.listenTo(backendServiceM, 'change:apiData', this.render);
 			
-			this.listenTo(chartsM, 'change:apiData', this.render);
 			$(window).on('resize', _.bind(this.windowResize, this));
 		},
 		remove: function() {
@@ -77,7 +77,7 @@ define([
 				sortType = this.currentSort;
 			}
 			this.updateDimensions();
-			var data = new Parser(chartsM.get('apiData'))
+			var data = new Parser(backendServiceM.get('apiData').value)
 				.clean()
 				.setPositiveSort()
 				.setDecompositionSort()
@@ -118,7 +118,7 @@ define([
 		setSortDataByDataset: function (data) {
 			var sortData = $.extend(true, {}, this.defaultSortData);
 			/* Get it to find decomposition names */
-			var cleanData = new Parser(chartsM.get('apiData')).clean().values();
+			var cleanData = new Parser(backendServiceM.get('apiData').value).clean().values();
 
 			_.each(data, function (d) {
 				_.each(d.sorts, function (sortValue, sortKey) {
