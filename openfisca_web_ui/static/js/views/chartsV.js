@@ -39,10 +39,7 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 				});
 			}
 		},
-		changeChart: function (evt) {
-			Backbone.history.navigate($(evt.target).val(), {trigger: true});
-		},
-		chartsRenderData: function() {
+		buildChartsRenderData: function() {
 			var data = [];
 			if (enableLocatingChart) {
 				data = data.concat([
@@ -66,10 +63,13 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			}
 			return data;
 		},
+		changeChart: function (evt) {
+			Backbone.history.navigate($(evt.target).val(), {trigger: true});
+		},
 		render: function () {
 			this.$el.html(chartsT({
 				enableSaveButton: appconfig.enabledModules.charts.enableSaveButton,
-				charts: this.chartsRenderData(),
+				charts: this.buildChartsRenderData(),
 			}));
 			if (this.currentChildView !== null) {
 				this.currentChildView.remove();
