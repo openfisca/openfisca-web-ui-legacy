@@ -16,14 +16,9 @@ function ($, _, Backbone, backendServiceM) {
 		initialize: function () {
 			this.listenTo(backendServiceM, 'change:formData', this.simulate);
 		},
-		changeChart: function (chartName) {
-			this.set('currentChartSlug', chartName);
-			this.simulate(chartName);
-		},
-		simulate: function (chartName) {
-			chartName = chartName || this.get('currentChartSlug');
+		simulate: function () {
 			var options = {};
-			if(chartName === 'distribution') {
+			if(this.get('currentChartSlug') === 'distribution') {
 				options.decomposition = 'decompositions-multiples.xml';
 			}
 			return backendServiceM.simulate(options);

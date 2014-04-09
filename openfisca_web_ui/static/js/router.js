@@ -24,7 +24,7 @@ define([
 			if (chartSlug === null) {
 				chartSlug = enableLocatingChart ? 'revdisp' : 'waterfall';
 			}
-			chartsM.changeChart(chartSlug);
+			chartsM.set('currentChartSlug', chartSlug);
 		},
 	});
 

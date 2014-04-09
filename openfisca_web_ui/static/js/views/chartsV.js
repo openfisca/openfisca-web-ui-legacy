@@ -86,6 +86,7 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			} else {
 				this.currentChildView = new IframeChartV({el: $chartWrapper});
 			}
+			this.model.simulate();
 			return this;
 		},
 		updateOverlay: function() {
