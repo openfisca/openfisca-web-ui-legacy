@@ -67,8 +67,7 @@ def base_appconfig(ctx):
 
 
 def build_requireconfig(ctx):
-    return {
-        'urlArgs': u'bust={}'.format(uuidhelpers.url_bust()),
+    requireconfig = {
         'paths': {
             # Bower components
             'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
@@ -127,6 +126,9 @@ def build_requireconfig(ctx):
             'underscore': {'exports': '_'},
             },
         }
+    if conf['debug']:
+        requireconfig['urlArgs'] = u'bust={}'.format(uuidhelpers.url_bust())
+    return requireconfig
 
 
 def index_appconfig(ctx):
