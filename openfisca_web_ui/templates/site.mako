@@ -346,8 +346,7 @@ ${conf['app_name']}
     % endif
         <li><a href="http://www.openfisca.fr/a-propos">${_(u'About')}</a></li>
         <li><a href="http://www.openfisca.fr/api">${_(u'API')}</a></li>
-## FIXME Translate abbreviation of CGU!
-        <li><a href="/terms" title="${_(u'Terms of use')}">${_(u'CGU')}</a></li>
+        <li><a href="/terms" title="${_(u'Terms of use')}">${_(u'EULA')}</a></li>
 </%def>
 
 
