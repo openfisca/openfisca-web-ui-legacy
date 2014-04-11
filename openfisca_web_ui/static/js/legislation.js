@@ -9,7 +9,7 @@ define(['jquery', 'x-editable'], function ($) {
 		// editable
 		$('.editable').editable({
 			type: 'text',
-			url: config.legislationUrl,
+			url: config.legislationEditUrl,
 			pk: 1,
 			title: 'Nouvelle valeur',
 		});
