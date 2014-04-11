@@ -136,7 +136,7 @@ define('appconfig', ${helpers.base_appconfig(ctx) | n, js});
 
 <%def name="body_content()" filter="trim">
     <div class="container">
-    % if ctx.session is None or not ctx.session.disclaimer_closed:
+    % if not conf['debug'] and (ctx.session is None or not ctx.session.disclaimer_closed):
         <%self:disclaimer/>
     % endif
         <%self:breadcrumb/>
@@ -292,22 +292,27 @@ ${conf['app_name']}
 
 <%def name="topbar()" filter="trim">
     <nav class="navbar navbar-default" role="navigation">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-topbar-collapse">
-                <span class="sr-only">${_(u'Toggle navigation')}</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/"><%self:brand/> <span class="label label-warning">pre-alpha</span></a>
-        </div>
-        <div class="collapse navbar-collapse navbar-topbar-collapse">
-            <ul class="nav navbar-nav">
-                <%self:topbar_links/>
-            </ul>
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topbar-collapse">
+                    <span class="sr-only">${_(u'Toggle navigation')}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                    <%self:brand/>
+                    <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'pre-alpha')}</span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="topbar-collapse">
+                <ul class="nav navbar-nav">
+                    <%self:topbar_links/>
+                </ul>
     % if conf['enabled.auth']:
-            <%self:topbar_user/>
+                <%self:topbar_user/>
     % endif
+            </div>
         </div>
     </nav>
 </%def>
