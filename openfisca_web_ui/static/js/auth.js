@@ -22,7 +22,7 @@ define([
         .fail(function(/*jqXHR, textStatus, errorThrown*/) {
           navigator.id.logout();
           // TODO translate string
-          alert('Login failure');
+          alert('Erreur d\'authentification');
         });
       },
       onlogout: function () {
@@ -43,7 +43,7 @@ define([
           })
           .fail(function(/*jqXHR, textStatus, errorThrown*/) {
             // TODO translate string
-            alert('Logout failure');
+            alert('Erreur de déconnexion');
           });
         }
       }
