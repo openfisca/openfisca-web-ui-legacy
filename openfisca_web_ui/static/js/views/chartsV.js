@@ -83,7 +83,7 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 		onYearChange: function (evt) {
 			this.model.set('year', $(evt.target).val());
 		},
-		onWindowResize: function(evt) {
+		onWindowResize: function() {
 			this.currentChildView.render();
 		},
 		render: function () {
