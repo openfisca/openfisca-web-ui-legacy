@@ -16,7 +16,7 @@ define([
 		headHeight: 50,
 		height: null,
 		width: null,
-		maxWidth: 1000,
+		minHeight: 300,
 		padding: {top: 100, left: 20, bottom: 40, right: 20},
 		minSectionHeight: 300,
 		sectionWidth: null,
@@ -52,12 +52,9 @@ define([
 			}
 		},
 		initialize: function () {
-			this.updateDimensions();
 			this.$el.append('<div id="sort-menu" class="btn-group"></div>');
-			this.g = d3.select(this.el).append('svg')
-				.attr('height', this.height)
-				.attr('width', this.width);
-			this.legendText = this.g.append('g').attr('class', 'text-label');
+			this.svg = d3.select(this.el).append('svg');
+			this.legendText = this.svg.append('g').attr('class', 'text-label');
 			this.currentSort = this.defaultSort;
 			this.listenTo(backendServiceM, 'change:apiData', this.render);
 		},
@@ -66,6 +63,9 @@ define([
 				sortType = this.currentSort;
 			}
 			this.updateDimensions();
+			this.svg
+				.attr('height', this.height)
+				.attr('width', this.width);
 			var data = new Parser(backendServiceM.get('apiData').value)
 				.clean()
 				.setPositiveSort()
@@ -181,14 +181,14 @@ define([
 			_.each(this.sortData[sortType].children, function (d, i) { d.index = i; });
 			this.buildBubbles(this.nodes);
 			this.buildTextLegend();
-			this.resize({'height': Math.ceil(this.sortData[sortType].children.length / this.packByLine)*
-				this.sectionHeight + this.padding.top + this.padding.bottom});
+			var height = Math.ceil(this.sortData[sortType].children.length / this.packByLine) *
+				this.sectionHeight + this.padding.top + this.padding.bottom;
+			this.svg.transition().duration(300).attr('height', height);
 			this.start();
 		},
-		/* Update chart dimensions */
 		updateDimensions: function() {
-			this.width = Math.min(this.$el.width(), this.maxWidth);
-			this.height = this.width;
+			this.width = this.$el.width();
+			this.height = Math.max(this.minHeight, this.width * 0.66);
 			this.innerWidth = this.width - this.padding.left - this.padding.right;
 			this.innerHeight = this.height - this.padding.top - this.padding.bottom;
 		},
@@ -208,6 +208,7 @@ define([
 				out._id = node._id;
 				out.value = node.value;
 				out.radius = that.rScale(Math.abs(node.value));
+				/* TODO Move to CSS, use class */
 				out.fillColor = (node.value > 0) ? that.positiveColor: that.negativeColor;
 				out.name = node.name;
 				out.description = node.description;
@@ -254,7 +255,7 @@ define([
 			var that = this;
 			data = data || this.nodes;
 
-			this.bubbles = this.g.selectAll('._bubble')
+			this.bubbles = this.svg.selectAll('._bubble')
 				.data(data);
 
 			/* Trouver nombre d'éléments et faire marcher exit */
@@ -265,11 +266,7 @@ define([
 					.attr('cx', function () { return _.random(that.padding.left, that.innerWidth); })
 					.attr('cy', function () { return _.random(that.padding.top, that.innerHeight); })
 					.attr('r', function (d) { return d.radius; })
-
-					/* MOVE TO CSS */
-					.attr('fill', function (d) {
-						return d.fillColor;
-					})
+					.attr('fill', function (d) { return d.fillColor; })
 					.attr('stroke', 'black')
 					.attr('stroke-width', 1)
 					.attr('opacity', 0.8)
@@ -414,17 +411,6 @@ define([
 						.attr('cy', function(d) { return d.y + that.padding.top; });
 				})
 				.start();
-		},
-		/* Resize for example when bubble groups number changes */
-		resize: function (args) {
-			if(!_.isUndefined(args.height)) {
-				this.g.transition().duration(400)
-					.attr('height', args.height);
-			}
-			else if(!_.isUndefined(args.width)) {
-				this.g.transition().duration(400)
-					.attr('width', args.width);
-			}
 		},
 	});
 

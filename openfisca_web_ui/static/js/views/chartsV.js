@@ -39,10 +39,11 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			this.listenTo(this.model, 'change:year', _.bind(this.model.simulate, this.model));
 			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(backendServiceM, 'change:simulationStatus', this.updateOverlay);
+			$(window).on('resize', _.bind(this.onWindowResize, this));
 			if ($(window).width() >= 768) {
 				this.$el.sticky({
 					getWidthFrom: this.$el.parent(),
-//					topSpacing: 10,
+					topSpacing: 10,
 				});
 			}
 		},
@@ -76,10 +77,14 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 		},
 		onTestCaseChange: function (evt) {
 			// TODO Configure URL.
-			window.location.href = '/test_cases/' + $(evt.target).val() + '/use?redirect=/';
+			window.location.href = '/test_cases/' + $(evt.target).val() + '/use?redirect=' +
+				window.location.pathname + window.location.hash;
 		},
 		onYearChange: function (evt) {
 			this.model.set('year', $(evt.target).val());
+		},
+		onWindowResize: function(evt) {
+			this.currentChildView.render();
 		},
 		render: function () {
 			this.$el.html(chartsT({

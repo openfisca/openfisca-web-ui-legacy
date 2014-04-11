@@ -29,17 +29,14 @@ function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM) {
 			bottom: 0,
 			right: 20
 		},
+		minHeight: 300,
 		model: null,
-		maxWidth: 1000,
 		userPointColor: '#a63232',
 		width: null,
 		initialize: function(options) {
 			this.code = options.code;
 			this.model = new LocatingChartM({code: this.code});
-			this.updateDimensions();
-			this.svg = d3.select(this.el).append('svg')
-				.attr('height', this.height)
-				.attr('width', this.width);
+			this.svg = d3.select(this.el).append('svg');
 			this.listenTo(this.model, 'change:data', this.render);
 		},
 		computeUserPoint: function() {
@@ -88,6 +85,10 @@ function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM) {
 			return this.prefix.symbol in legendTextBySymbol ? legendTextBySymbol[this.prefix.symbol] : 'revenu en €';
 		},
 		render: function () {
+			this.updateDimensions();
+			this.svg
+				.attr('height', this.height)
+				.attr('width', this.width);
 			nv.addGraph(_.bind(function() {
 				var vingtiles = this.model.get('vingtiles');
 				var userPoint = this.computeUserPoint();
@@ -172,8 +173,8 @@ function ($, _, Backbone, d3, nv, appconfig, helpers, LocatingChartM) {
 			return table.node().outerHTML;
 		},
 		updateDimensions: function () {
-			this.width = Math.min(this.$el.width(), this.maxWidth) - this.margin.left - this.margin.right;
-			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
+			this.width = this.$el.width() - this.margin.left - this.margin.right;
+			this.height = Math.max(this.minHeight, this.width * 0.66) - this.margin.bottom - this.margin.top;
 		},
 	});
 

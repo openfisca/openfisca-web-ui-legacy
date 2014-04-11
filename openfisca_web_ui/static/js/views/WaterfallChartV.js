@@ -26,6 +26,7 @@ define([
 			right: 80
 		},
 		maxBarWidth: 100, // in pixels
+		minHeight: 300,
 		minBarHeight: 1, // in pixels
 		padding: {
 			top: 50,
@@ -37,10 +38,7 @@ define([
 		svg: null,
 		initialize: function () {
 			_.bindAll(this, 'dataToColor');
-			this.updateDimensions();
-			this.svg = d3.select(this.el).append('svg')
-				.attr('height', this.height)
-				.attr('width', this.width);
+			this.svg = d3.select(this.el).append('svg');
 			this.listenTo(backendServiceM, 'change:apiData', this.render);
 		},
 		buildActiveBars: function () {
@@ -263,6 +261,11 @@ define([
 			return this.prefix.symbol in legendTextBySymbol ? legendTextBySymbol[this.prefix.symbol] : 'En euros';
 		},
 		render: function() {
+			this.updateDimensions();
+			this.svg
+				.attr('height', this.height)
+				.attr('width', this.width);
+
 			// TODO Make data stateless.
 			this.data = this.computeData();
 			if (this.data === null) {
@@ -381,7 +384,7 @@ define([
 						var lineHeight = parseInt(d3.select(this).attr('font-size')) + 3;
 						return yMiddleTextPos + lineHeight + i * lineHeight;
 					})
-					.text(function (d) { return d; });
+					.text(_.identity);
 			this.incomeLabel.exit().transition().duration(this.duration).remove();
 			this.incomeLine.transition().duration(this.duration).attr('opacity', 1);
 			this.incomeLine2.transition().duration(this.duration).attr('opacity', 1);
@@ -390,7 +393,7 @@ define([
 		renderLegendText: function () {
 			var legendTextObject = this.svg.selectAll('.legend-text-y').data([this.legendText()]);
 			legendTextObject
-				.text(function (d) { return d; })
+				.text(_.identity)
 				.enter()
 					.append('svg:text')
 						.attr('class', 'legend-text-y')
@@ -443,7 +446,7 @@ define([
 		},
 		updateDimensions: function() {
 			this.width = this.$el.width() - this.margin.left - this.margin.right;
-			this.height = this.width * 0.66 - this.margin.bottom - this.margin.top;
+			this.height = Math.max(this.minHeight, this.width * 0.66 - this.margin.bottom - this.margin.top);
 		},
 		updateLegend: function () {
 			var that = this;
