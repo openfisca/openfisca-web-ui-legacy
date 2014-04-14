@@ -2,7 +2,6 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'sticky',
 
 	'appconfig',
 	'backendServiceM',
@@ -17,7 +16,7 @@ define([
 
 	'hbs!templates/charts'
 ],
-function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV,
+function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV,
 	legislationsServiceM, LocatingChartV, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {
 	'use strict';
 
@@ -40,12 +39,6 @@ function ($, _, Backbone, sticky, appconfig, backendServiceM, chartsM, Distribut
 			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			this.listenTo(backendServiceM, 'change:simulationStatus', this.updateOverlay);
 			$(window).on('resize', _.bind(this.onWindowResize, this));
-			if ($(window).width() >= 768) {
-				this.$el.sticky({
-					getWidthFrom: this.$el.parent(),
-					topSpacing: 10,
-				});
-			}
 		},
 		buildChartsRenderData: function() {
 			var data = [];
