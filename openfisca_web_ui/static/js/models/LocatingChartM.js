@@ -6,7 +6,7 @@ define([
 	'backendServiceM',
 	'helpers',
 
-	'json!data/vingtiles.json'
+	'json!vingtilesD'
 ],
 function ($, _, Backbone, backendServiceM, helpers, vingtiles) {
 	'use strict';

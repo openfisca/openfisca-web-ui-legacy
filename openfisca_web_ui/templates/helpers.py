@@ -26,8 +26,6 @@
 """Template helpers"""
 
 
-import urlparse
-
 from .. import conf, model, urls, uuidhelpers
 
 
@@ -67,69 +65,85 @@ def base_appconfig(ctx):
 
 
 def build_requireconfig(ctx):
-    requireconfig = {
-        'paths': {
-            # Bower components
-            'backbone': urls.get_url(ctx, u'bower/backbone/backbone'),
-            'bootstrap': urls.get_url(ctx, u'bower/bootstrap/dist/js/bootstrap'),
-            'd3': urls.get_url(ctx, u'bower/d3/d3'),
-            'domReady': urls.get_url(ctx, u'bower/requirejs-domready/domReady'),
-            'hbs': urls.get_url(ctx, u'bower/require-handlebars-plugin/hbs'),
-            'jquery': urls.get_url(ctx, u'bower/jquery/dist/jquery'),
-            'json': urls.get_url(ctx, u'bower/requirejs-json/json'),
-            'nvd3': urls.get_url(ctx, u'bower/nvd3/nv.d3'),
-            'text': urls.get_url(ctx, u'bower/requirejs-text/text'),
-            'underscore': urls.get_url(ctx, u'/bower/underscore/underscore'),
-            'x-editable': urls.get_url(ctx, u'/bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
-
-            # Modules
-            'auth': urls.get_url(ctx, u'js/auth'),
-            'app': urls.get_url(ctx, u'js/app'),
-            'disclaimer': urls.get_url(ctx, u'js/disclaimer'),
-            'helpers': urls.get_url(ctx, 'js/helpers'),
-            'legislation': urls.get_url(ctx, u'js/legislation'),
-            # TODO Remove this alias.
-            'parser': urls.get_url(ctx, 'js/parser'),
-            'polyfills': urls.get_url(ctx, 'js/polyfills'),
-            'router': urls.get_url(ctx, u'js/router'),
-
-            # Views
-            'AcceptCnilConditionsModalV': urls.get_url(ctx, u'js/views/AcceptCnilConditionsModalV'),
-            'AcceptCookiesModalV': urls.get_url(ctx, u'js/views/AcceptCookiesModalV'),
-            'AggregateChartV': urls.get_url(ctx, u'js/views/modals/AggregateChartV'),
-            'chartsV': urls.get_url(ctx, u'js/views/chartsV'),
-            'DistributionChartV': urls.get_url(ctx, u'js/views/DistributionChartV'),
-            'IframeChartV': urls.get_url(ctx, u'js/views/IframeChartV'),
-            'LocatingChartV': urls.get_url(ctx, u'js/views/LocatingChartV'),
-            'SituationFormV': urls.get_url(ctx, u'js/views/SituationFormV'),
-            'WaterfallChartV': urls.get_url(ctx, u'js/views/WaterfallChartV'),
-
-            # Models
-            'backendServiceM': urls.get_url(ctx, u'js/models/backendServiceM'),
-            'chartsM': urls.get_url(ctx, u'js/models/chartsM'),
-            'legislationsServiceM': urls.get_url(ctx, u'js/models/legislationsServiceM'),
-            'LocatingChartM': urls.get_url(ctx, u'js/models/LocatingChartM'),
-            'situationFormM': urls.get_url(ctx, u'js/models/situationFormM'),
-            'testCasesServiceM': urls.get_url(ctx, u'js/models/testCasesServiceM'),
-            'visualizationsServiceM': urls.get_url(ctx, u'js/models/visualizationsServiceM'),
-
-            # External libs
-            # Quote from persona: You must include this on every page which uses navigator.id functions.
-            # Because Persona is still in development, you should not self-host the include.js file.
-            'persona': urlparse.urljoin(conf['persona.url'], 'include'),
-            },
-        'shim': {
-            'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
-            'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
-            'd3': {'exports': 'd3'},
-            'jquery': {'exports': '$'},
-            'nvd3': {'exports': 'nv', 'deps': ['d3']},
-            'underscore': {'exports': '_'},
-            },
-        }
+    requireconfig = {'shim': build_requireconfig_shim()}
     if conf['debug']:
         requireconfig['urlArgs'] = u'bust={}'.format(uuidhelpers.url_bust())
+    if conf['debug'] and not conf['dev.build_js']:
+        requireconfig['paths'] = build_requireconfig_paths(static_prefix = urls.get_url(ctx))
     return requireconfig
+
+
+def build_requireconfig_paths(static_prefix):
+    """This function is shared between build_requireconfig and build.js used by r.js."""
+    bower_prefix = static_prefix + u'bower/'
+    data_prefix = static_prefix + u'data/'
+    js_prefix = static_prefix + u'js/'
+    templates_prefix = static_prefix + u'templates/'
+    models_prefix = js_prefix + u'models/'
+    views_prefix = js_prefix + u'views/'
+    return {
+        # Bower components
+        'backbone': bower_prefix + u'backbone/backbone',
+        'bootstrap': bower_prefix + u'bootstrap/dist/js/bootstrap',
+        'd3': bower_prefix + u'd3/d3',
+        'domReady': bower_prefix + u'requirejs-domready/domReady',
+        'hbs': bower_prefix + u'require-handlebars-plugin/hbs',
+        'jquery': bower_prefix + u'jquery/dist/jquery',
+        'json': bower_prefix + u'requirejs-json/json',
+        'nvd3': bower_prefix + u'nvd3/nv.d3',
+        'text': bower_prefix + u'requirejs-text/text',
+        'underscore': bower_prefix + u'underscore/underscore',
+        'x-editable': bower_prefix + u'x-editable/dist/bootstrap3-editable/js/bootstrap-editable',
+
+        # Data
+        'vingtilesD': data_prefix + 'vingtiles.json',
+
+        # Modules
+        'auth': js_prefix + u'auth',
+        'app': js_prefix + u'app',
+        'disclaimer': js_prefix + u'disclaimer',
+        'helpers': js_prefix + 'helpers',
+        'legislation': js_prefix + u'legislation',
+        'parser': js_prefix + 'parser',
+        'polyfills': js_prefix + 'polyfills',
+        'router': js_prefix + u'router',
+
+        # Models
+        'backendServiceM': models_prefix + u'backendServiceM',
+        'chartsM': models_prefix + u'chartsM',
+        'legislationsServiceM': models_prefix + u'legislationsServiceM',
+        'LocatingChartM': models_prefix + u'LocatingChartM',
+        'situationFormM': models_prefix + u'situationFormM',
+        'testCasesServiceM': models_prefix + u'testCasesServiceM',
+        'visualizationsServiceM': models_prefix + u'visualizationsServiceM',
+
+        # Templates
+        'chartsT': templates_prefix + u'charts',
+
+        # Views
+        'AcceptCnilConditionsModalV': views_prefix + u'AcceptCnilConditionsModalV',
+        'AcceptCookiesModalV': views_prefix + u'AcceptCookiesModalV',
+        'AggregateChartV': views_prefix + u'modals/AggregateChartV',
+        'chartsV': views_prefix + u'chartsV',
+        'DistributionChartV': views_prefix + u'DistributionChartV',
+        'IframeChartV': views_prefix + u'IframeChartV',
+        'LocatingChartV': views_prefix + u'LocatingChartV',
+        'SituationFormV': views_prefix + u'SituationFormV',
+        'WaterfallChartV': views_prefix + u'WaterfallChartV',
+        }
+
+
+def build_requireconfig_shim():
+    """This function is shared between build_requireconfig and build.js used by r.js."""
+    return {
+        'backbone': {'exports': 'Backbone', 'deps': ['jquery', 'underscore']},
+        'bootstrap': {'exports': 'Bootstrap', 'deps': ['jquery']},
+        'd3': {'exports': 'd3'},
+        'jquery': {'exports': '$'},
+        'nvd3': {'exports': 'nv', 'deps': ['d3']},
+        'underscore': {'exports': '_'},
+        'x-editable': {'deps': ['bootstrap']},
+        }
 
 
 def index_appconfig(ctx):

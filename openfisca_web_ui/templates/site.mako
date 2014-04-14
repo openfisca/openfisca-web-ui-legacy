@@ -30,6 +30,7 @@
 
 <%!
 import datetime
+import urlparse
 
 from biryani1 import strings
 
@@ -276,11 +277,17 @@ ${conf['app_name']}
 
 
 <%def name="scripts()" filter="trim">
+    ## Quote from persona: You must include this on every page which uses navigator.id functions.
+    ## Because Persona is still in development, you should not self-host the include.js file.
+    <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
     <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
         require.config(${helpers.build_requireconfig(ctx) | n, js});
         <%self:appconfig_script/>
-        require([${urls.get_url(ctx, u'js/main.js') | n, js}]);
+<%
+main_js_url_path = u'js/main-built.js' if not conf['debug'] or conf['dev.build_js'] else u'js/main.js'
+%>
+        require([${urls.get_url(ctx, main_js_url_path) | n, js}]);
     </script>
 </%def>
 

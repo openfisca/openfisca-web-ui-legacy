@@ -1,7 +1,6 @@
 define([
   'jquery',
   'underscore',
-  'persona'
 ], function($, _) {
   'use strict';
 

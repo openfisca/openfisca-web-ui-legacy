@@ -14,7 +14,7 @@ define([
 	'visualizationsServiceM',
 	'WaterfallChartV',
 
-	'hbs!templates/charts'
+	'hbs!chartsT',
 ],
 function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV,
 	legislationsServiceM, LocatingChartV, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {

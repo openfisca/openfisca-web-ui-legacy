@@ -72,6 +72,7 @@ def load_environment(global_conf, app_conf):
             'database.name': conv.default('openfisca_web_ui'),
             'database.port': conv.pipe(conv.input_to_int, conv.default(27017)),
             'debug': conv.pipe(conv.guess_bool, conv.default(False)),
+            'dev.build_js': conv.pipe(conv.guess_bool, conv.default(False)),
             'enabled.auth': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.charts.locating': conv.pipe(conv.guess_bool, conv.default(True)),
             'global_conf': conv.set_value(global_conf),
