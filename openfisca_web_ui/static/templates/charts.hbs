@@ -15,11 +15,6 @@
     </select>
   </div>
 {{/isUserAuthenticated}}
-{{^isUserAuthenticated}}
-  <div class="form-group">
-    <button class="btn btn-default sign-in">Enregistrer</button>
-  </div>
-{{/isUserAuthenticated}}
   <div class="form-group">
     <input class="form-control" max="1870" min="2099" name="year" placeholder="2013" step="1" title="Année"
 type="number" value="{{year}}">
@@ -33,7 +28,15 @@ type="number" value="{{year}}">
     </select>
   </div>
 </div>
-<hr>
 <div class="chart-wrapper"></div>
-<button class="btn btn-default pull-right" data-toggle="modal" data-target="#export-modal">Exporter</button>
+<div class="form-inline pull-right" role="form">
+{{^isUserAuthenticated}}
+  <div class="form-group">
+    <button class="btn btn-primary sign-in">Enregistrer</button>
+  </div>
+{{/isUserAuthenticated}}
+  <div class="form-group">
+    <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">Exporter</button>
+  </div>
+</div>
 <div class="alert alert-info overlay"></div>
