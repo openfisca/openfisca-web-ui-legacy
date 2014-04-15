@@ -92,6 +92,10 @@ form[name=situation] button.add {
     top: 50%;
 }
 
+.thumbnail-visualization {
+    height: 400px;
+}
+
 .thumbnail-visualization img {
     /* We don't know image dimensions since its URL is external to the application. */
     max-height: 150px;
