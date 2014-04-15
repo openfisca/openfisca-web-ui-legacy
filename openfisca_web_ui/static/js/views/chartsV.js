@@ -36,7 +36,9 @@ function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChart
 			this.listenTo(this.model, 'change:currentChartSlug', this.render);
 			this.listenTo(this.model, 'change:legislation', _.bind(this.model.simulate, this.model));
 			this.listenTo(this.model, 'change:year', _.bind(this.model.simulate, this.model));
-			this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
+			if ( ! _.isUndefined(appconfig.enabledModules.charts)) {
+				this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
+			}
 			this.listenTo(backendServiceM, 'change:simulationStatus', this.updateOverlay);
 			$(window).on('resize', _.bind(this.onWindowResize, this));
 		},

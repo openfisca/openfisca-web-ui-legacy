@@ -8,6 +8,10 @@ define([
 function ($, _, Backbone, appconfig) {
 	'use strict';
 
+	if (_.isUndefined(appconfig.enabledModules.charts)) {
+		return;
+	}
+
 	var TestCasesServiceM = Backbone.Model.extend({
 		defaults: {
 			testCases: null

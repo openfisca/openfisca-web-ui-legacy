@@ -8,6 +8,10 @@ define([
 function ($, _, Backbone, appconfig) {
 	'use strict';
 
+	if (_.isUndefined(appconfig.enabledModules.charts)) {
+		return;
+	}
+
 	var LegislationsServiceM = Backbone.Model.extend({
 		defaults: {
 			legislations: null
