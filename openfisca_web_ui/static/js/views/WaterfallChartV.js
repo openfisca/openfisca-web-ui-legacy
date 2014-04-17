@@ -265,12 +265,11 @@ define([
 			this.svg
 				.attr('height', this.height)
 				.attr('width', this.width);
-
+			if (backendServiceM.get('simulationStatus') !== 'done') {
+				return;
+			}
 			// TODO Make data stateless.
 			this.data = this.computeData();
-			if (this.data === null) {
-				return this;
-			}
 			this.updateScales();
 			// TODO Merge buildLegend and updateLegend and make it reentrant?
 			if(_.isUndefined(this.xAxis) && _.isUndefined(this.yAxis)) {

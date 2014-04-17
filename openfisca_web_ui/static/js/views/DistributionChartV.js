@@ -66,6 +66,9 @@ define([
 			this.svg
 				.attr('height', this.height)
 				.attr('width', this.width);
+			if (backendServiceM.get('simulationStatus') !== 'done') {
+				return;
+			}
 			var data = new Parser(backendServiceM.get('apiData').value)
 				.clean()
 				.setPositiveSort()
