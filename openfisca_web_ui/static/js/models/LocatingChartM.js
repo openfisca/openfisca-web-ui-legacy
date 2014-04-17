@@ -19,13 +19,15 @@ function ($, _, Backbone, backendServiceM, helpers, vingtiles) {
 		},
 		initialize: function(options) {
 			this.code = options.code;
+			this.set('vingtiles', _.findWhere(vingtiles, {id: this.code}));
 			this.listenTo(backendServiceM, 'change:apiData', this.parseApiData);
 		},
 		parseApiData: function() {
-			this.set({
-				data: helpers.findDeep(backendServiceM.get('apiData').value, {code: this.code}),
-				vingtiles: _.findWhere(vingtiles, {id: this.code}),
-			});
+			this.set('data',
+				backendServiceM.get('simulationStatus') === 'done' ?
+					helpers.findDeep(backendServiceM.get('apiData').value, {code: this.code}) :
+					null
+			);
 		},
 	});
 
