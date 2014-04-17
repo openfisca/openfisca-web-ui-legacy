@@ -13,6 +13,9 @@ require([
 	// TODO call noConflict with other libs (d3)
 
 	polyfills.init();
-	app.init();
+
+	domReady(function() {
+		app.init();
+	});
 
 });
