@@ -200,9 +200,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             values: _.clone(event.context),
           }))
           .then(function() {
-            $(this.find('#edit-entity-modal'))
-              .on('hide.bs.modal', function() { this.set('modal', null); }.bind(this))
-              .modal('show');
+            $(this.find('#edit-entity-modal')).modal('show');
           }.bind(this))
           .done();
         },
@@ -213,9 +211,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             values: _.clone(event.context),
           }))
           .then(function() {
-            $(this.find('#edit-individu-modal'))
-              .on('hide.bs.modal', function() { this.set('modal', null); }.bind(this))
-              .modal('show');
+            $(this.find('#edit-individu-modal')).modal('show');
           }.bind(this))
           .done();
         },
@@ -230,9 +226,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             type: 'moveIndividu',
           }))
           .then(function() {
-            $(this.find('#move-individu-modal'))
-              .on('hide.bs.modal', function() { this.set('modal', null); }.bind(this))
-              .modal('show');
+            $(this.find('#move-individu-modal')).modal('show');
           }.bind(this))
           .done();
         },
