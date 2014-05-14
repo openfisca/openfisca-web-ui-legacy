@@ -68,7 +68,7 @@ def build_requireconfig(ctx):
     requireconfig = {'shim': build_requireconfig_shim()}
 #    if conf['debug']:
 #        requireconfig['urlArgs'] = u'bust={}'.format(uuidhelpers.url_bust())
-    if conf['debug'] and not conf['dev.build_js']:
+    if not conf['dev.build_js']:
         requireconfig['paths'] = build_requireconfig_paths(static_prefix = urls.get_url(ctx))
     return requireconfig
 

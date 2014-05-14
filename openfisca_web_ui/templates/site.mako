@@ -287,7 +287,7 @@ ${conf['app_name']}
         require.config(${helpers.build_requireconfig(ctx) | n, js});
         <%self:appconfig_script/>
 <%
-main_js_url_path = u'js/main-built.js' if not conf['debug'] or conf['dev.build_js'] else u'js/main.js'
+main_js_url_path = u'js/main-built.js' if conf['dev.build_js'] else u'js/main.js'
 %>
         require([${urls.get_url(ctx, main_js_url_path) | n, js}]);
     </script>
