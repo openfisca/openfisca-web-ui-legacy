@@ -24,16 +24,17 @@
   {{/}}
 
 <button accesskey="s" class="btn btn-primary" on-click="simulate">Simuler</button>
-<div class="btn-group pull-right" style="margin-bottom: 1em;" title="Actions">
+<div class="btn-group dropup pull-right" style="margin-bottom: 1em;" title="Actions">
   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-    <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
+    <span class="glyphicon glyphicon-cog"></span>
   </button>
   <ul class="dropdown-menu" role="menu">
     <li><a href="#" on-click="addEntity:familles">Ajouter une famille</a></li>
     <li><a href="#" on-click="addEntity:foyers_fiscaux">Ajouter une déclaration d'impôt</a></li>
     <li><a href="#" on-click="addEntity:menages">Ajouter un ménage</a></li>
+    <li class="divider"></li>
     <li><a href="#" on-click="reset">Réinitialiser</a></li>
-    <li><a href="#" on-click="repair">Réparer</a></li>
+<!--    <li><a href="#" on-click="repair">Réparer</a></li>-->
   </ul>
 </div>
 
