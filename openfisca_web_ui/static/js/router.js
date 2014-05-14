@@ -28,7 +28,7 @@ define([
 		},
 	});
 
-	function init () {
+	function init() {
 		if (router === null) {
 			router = new Router();
 		}

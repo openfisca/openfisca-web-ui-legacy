@@ -39,7 +39,6 @@ import webob
 import webob.multidict
 
 from biryani1 import strings
-from korma.date import make_formatted_str_to_datetime
 
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 
@@ -51,11 +50,11 @@ inputs_to_legislation_data = conv.pipe(
             # TODO replace by babel.dates parser.
             datetime_begin = conv.pipe(
                 conv.cleanup_line,
-                make_formatted_str_to_datetime(u'%d/%m/%y'),
+                conv.french_formatted_str_to_datetime,
                 ),
             datetime_end = conv.pipe(
                 conv.cleanup_line,
-                make_formatted_str_to_datetime(u'%d/%m/%y'),
+                conv.french_formatted_str_to_datetime,
                 ),
             description = conv.cleanup_text,
             json = conv.make_input_to_json(),
@@ -159,7 +158,7 @@ def admin_extract(req):
     data, errors = conv.struct({
         'date': conv.pipe(
             # TODO Replace by ISO date.
-            make_formatted_str_to_datetime(u'%d/%m/%y'),
+            conv.french_formatted_str_to_datetime,
             conv.default(datetime.datetime.utcnow()),
             ),
         })(inputs, state = ctx)
@@ -231,7 +230,7 @@ def admin_index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -314,7 +313,7 @@ def admin_view(req):
     legislation = ctx.node
     params = req.GET
     # TODO Replace by ISO date.
-    date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)
+    date, error = conv.french_formatted_str_to_datetime(params.get('date'), state = ctx)
     dated_legislation_json = None
     if date is not None and not legislation.is_dated:
         # TODO Do not slow down controller with external query.
@@ -461,7 +460,7 @@ def api1_search(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -512,7 +511,7 @@ def api1_typeahead(req):
         )
     data, errors = conv.struct(
         dict(
-            q = conv.base.input_to_words,
+            q = conv.input_to_words,
             ),
         )(inputs, state = ctx)
     if errors is not None:
@@ -733,7 +732,7 @@ def user_extract(req):
     data, errors = conv.struct({
         'date': conv.pipe(
             # TODO Replace by ISO date.
-            make_formatted_str_to_datetime(u'%d/%m/%y'),
+            conv.french_formatted_str_to_datetime,
             conv.default(datetime.datetime.utcnow()),
             ),
         })(inputs, state = ctx)
@@ -804,7 +803,7 @@ def user_index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -884,7 +883,7 @@ def user_view(req):
     params = req.GET
     legislation = ctx.node
     # TODO Replace by ISO date.
-    date, error = make_formatted_str_to_datetime(u'%d/%m/%y')(params.get('date'), state = ctx)
+    date, error = conv.french_formatted_str_to_datetime(params.get('date'), state = ctx)
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)
     dated_legislation_json = None

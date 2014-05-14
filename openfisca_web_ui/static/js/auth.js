@@ -5,6 +5,9 @@ define([
   'use strict';
 
   function init (authconfig) {
+    if (_.isUndefined(navigator.id)) {
+      return;
+    }
     navigator.id.watch({
       loggedInUser: authconfig.currentUser,
       onlogin: function (assertion) {

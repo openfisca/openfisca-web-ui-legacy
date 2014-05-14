@@ -3,12 +3,12 @@ define([
 	'underscore',
 	'backbone',
 
-	'backendServiceM',
+	'chartsM',
 	'helpers',
 
 	'json!vingtilesD'
 ],
-function ($, _, Backbone, backendServiceM, helpers, vingtiles) {
+function ($, _, Backbone, chartsM, helpers, vingtiles) {
 	'use strict';
 
 	var LocatingChartM = Backbone.Model.extend({
@@ -20,12 +20,12 @@ function ($, _, Backbone, backendServiceM, helpers, vingtiles) {
 		initialize: function(options) {
 			this.code = options.code;
 			this.set('vingtiles', _.findWhere(vingtiles, {id: this.code}));
-			this.listenTo(backendServiceM, 'change:apiData', this.parseApiData);
+			this.listenTo(chartsM, 'change:apiData', this.parseApiData);
 		},
 		parseApiData: function() {
 			this.set('data',
-				backendServiceM.get('simulationStatus') === 'done' ?
-					helpers.findDeep(backendServiceM.get('apiData').value, {code: this.code}) :
+				chartsM.get('simulationStatus') === 'done' ?
+					helpers.findDeep(chartsM.get('apiData').value, {code: this.code}) :
 					null
 			);
 		},

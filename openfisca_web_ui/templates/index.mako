@@ -44,12 +44,10 @@ define('appconfig', ${helpers.index_appconfig(ctx) | n, js});
 <%def name="container_content()" filter="trim">
         <div class="row">
             <div class="col-sm-4">
-                <div id="form-wrapper">
-                    ${situation_form(root_question)}
-                </div>
+                <div id="form-wrapper"></div>
             </div>
             <div class="col-sm-8">
-                <div id="charts-wrapper">${_(u'Loading…')}</div>
+                <div id="charts-wrapper"></div>
             </div>
         </div>
 </%def>
@@ -73,12 +71,11 @@ aria-hidden="true">
             <h4 class="modal-title" id="export-modal-label">${_(u'Export')}</h4>
           </div>
           <div class="modal-body">
-            <a class="btn btn-primary" href="/api/1/session" rel="external" target="_blank">
+            <a class="btn btn-primary" href="${urls.get_url(ctx, u'/api/1/test_cases/current')}" rel="external"
+target="_blank">
               ${_(u'Export simulation input')}
             </a>
-            <a class="btn btn-primary" href="/api/1/simulate" rel="external" target="_blank">
-              ${_(u'Export simulation output')}
-            </a>
+            <button class="btn btn-primary">${_(u'Export simulation output')}</button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">${_(u'Close')}</button>
@@ -120,18 +117,4 @@ href="${user.get_user_url(ctx, 'reset') if user is not None else '/'}">
             </div>
         </div>
     </div>
-</%def>
-
-
-<%def name="situation_form(root_question)" filter="trim">
-<%
-    user = model.get_user(ctx)
-%>\
-    <form method="POST" name="situation" role="form">
-        ${root_question.html | n}
-        <div class="buttons">
-            <button class="btn btn-primary simulate">${_(u'Simulate')}</button>
-            <button class="btn btn-default" data-toggle="modal" data-target="#reset-dialog">${_(u'Reset')}</button>
-        </div>
-    </form>
 </%def>

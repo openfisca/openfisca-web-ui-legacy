@@ -170,7 +170,7 @@ def admin_index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),

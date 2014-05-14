@@ -27,13 +27,12 @@
 
 
 import datetime
-import json
 import logging
 
-from biryani1.baseconv import check, input_to_int, pipe
+from bson import objectid
 
 from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
-from . import accounts, auth, forms, legislations, sessions, test_cases, visualizations
+from . import accounts, auth, legislations, sessions, test_cases, visualizations
 
 
 email_log = logging.getLogger('email')
@@ -43,7 +42,7 @@ router = None
 @wsgihelpers.wsgify
 def accept_cookies(req):
     ctx = contexts.Ctx(req)
-    if not ('accept' in req.params and check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
+    if not ('accept' in req.params and conv.check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
         # User doesn't accept the use of cookies => Bye bye.
         return wsgihelpers.redirect(ctx, location = conf['www.url'])
     session = ctx.session
@@ -75,13 +74,27 @@ def disclaimer_closed(req):
     return wsgihelpers.no_content(ctx)
 
 
+@wsgihelpers.wsgify
+def index(req):
+    ctx = contexts.Ctx(req)
+    if conf['cookie'] in req.cookies:
+        update_session(ctx)
+        session = ctx.session
+        if req.cookies.get(conf['cookie']) != session.token:
+            req.response.set_cookie(
+                conf['cookie'],
+                session.token,
+                httponly = True,
+                secure = req.scheme == 'https',
+                )
+    return templates.render(ctx, '/index.mako')
+
+
 def make_router():
     """Return a WSGI application that searches requests to controllers."""
     global router
     routings = [
-        # TODO merge with test_cases controllers.
-        ('GET', '^/?$', forms.situation_form_get),
-        ('POST', '^/?$', forms.situation_form_post),
+        ('GET', '^/?$', index),
         ('POST', '^/accept-cookies/?$', accept_cookies),
         (None, '^/account(?=/|$)', accounts.route_user),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
@@ -90,8 +103,6 @@ def make_router():
         (None, '^/admin/visualizations(?=/|$)', visualizations.route_admin_class),
         (None, '^/api/1/disclaimer_closed$', disclaimer_closed),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
-        (None, '^/api/1/session$', session),
-        (None, '^/api/1/simulate/?$', simulate),
         (None, '^/api/1/test_cases(?=/|$)', test_cases.route_api1_class),
         (None, '^/api/1/visualizations(?=/|$)', visualizations.route_api1_class),
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
@@ -114,94 +125,22 @@ def make_router():
 
 
 @wsgihelpers.wsgify
-def session(req):
-    ctx = contexts.Ctx(req)
-    user = model.get_user(ctx)
-    user.ensure_test_case()
-    user_api_data = None if user is None else user.current_test_case.api_data
-    if user_api_data is None:
-        user_api_data = {}
-    api_data, errors = pipe(
-        conv.base.make_fill_user_api_data(ensure_api_compliance = True),
-        conv.simulations.user_api_data_to_api_data,
-        )(user_api_data, state = ctx)
-    return wsgihelpers.respond_json(ctx, data = api_data if errors is None else {'errors': errors})
-
-
-@wsgihelpers.wsgify
-def simulate(req):
-    ctx = contexts.Ctx(req)
-    headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
-    params = req.params
-    inputs = dict(
-        axes = params.get('axes'),
-        context = params.get('context'),
-        decomposition = params.get('decomposition'),
-        token = params.get('token'),
-        )
-    data, errors = conv.struct({
-        'axes': conv.pipe(
-            conv.make_input_to_json(),
-            conv.uniform_sequence(
-                conv.struct({
-                    'count': conv.test_greater_or_equal(1),
-                    'min': conv.test_isinstance(int),
-                    'max': conv.test_isinstance(int),
-                    'name': conv.cleanup_line,
-                    }),
-                ),
-            ),
-        'context': conv.cleanup_line,
-        'decomposition': conv.first_match(
-            conv.make_input_to_json(),
-            conv.cleanup_line,
-            ),
-        'legislation_slug': conv.cleanup_line,
-        'token': conv.base.input_to_uuid,
-        'year': input_to_int,
-        })(inputs, state = ctx)
-    if errors is None:
-        session = ctx.session if data['token'] is None else model.Session.find_one({'anonymous_token': data['token']})
-        # session can be None when simulating in background while accept cookie modal is displayed.
-        user = session.user if session is not None else None
-        if user is None:
-            user_api_data = {}
-        else:
-            user.ensure_test_case()
-            user_api_data = user.current_test_case.api_data or {}
-        api_data, errors = pipe(
-            conv.base.make_fill_user_api_data(ensure_api_compliance = True),
-            conv.simulations.user_api_data_to_api_data,
-            )(user_api_data, state = ctx)
-    if errors is None:
-        legislation = None
-        if data['legislation_slug'] is not None:
-            legislation = model.Legislation.find_one({'slug': data['legislation_slug']})
-        for scenario in api_data['scenarios']:
-            if data['axes'] is not None:
-                scenario['axes'] = data['axes']
-            if legislation is not None:
-                scenario['legislation_url'] = legislation.url
-            if data['year'] is not None:
-                scenario['year'] = data['year']
-        api_data.update({
-            'context': data['context'],
-            'decomposition': data['decomposition'],
-            })
-        output, errors = conv.simulations.api_data_to_simulation_output(api_data, state = ctx)
-        if errors is None:
-            output_data = {key: value for key, value in output.iteritems() if key != 'params'}
-        else:
-            output_data = {'errors': errors}
-            json_dumps = lambda data: json.dumps(data, encoding = 'utf-8', ensure_ascii = False, indent = 2)
-            email_log.error(u'Simulation error returned by API:\n\napi_data = {}\n\nerrors = {}'.format(
-                json_dumps(api_data), json_dumps(errors)))
-    else:
-        output_data = {'errors': errors}
-    return wsgihelpers.respond_json(ctx, output_data, headers = headers)
-
-
-@wsgihelpers.wsgify
 def terms(req):
     ctx = contexts.Ctx(req)
     return templates.render(ctx, '/terms.mako')
+
+
+def update_session(ctx):
+    session = ctx.session
+    if session is None:
+        session = model.Session()
+        session.anonymous_token = uuidhelpers.generate_uuid()
+        session.token = uuidhelpers.generate_uuid()
+    if session.user is None:
+        user = model.Account(_id = objectid.ObjectId())
+        user.compute_words()
+        user.save(safe = True)
+        session.user = user
+    session.expiration = datetime.datetime.utcnow() + datetime.timedelta(hours = 4)
+    session.save(safe = True)
+    ctx.session = session

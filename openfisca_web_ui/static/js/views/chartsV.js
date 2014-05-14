@@ -4,21 +4,25 @@ define([
 	'backbone',
 
 	'appconfig',
-	'backendServiceM',
 	'chartsM',
 	'DistributionChartV',
 	'IframeChartV',
 	'legislationsServiceM',
 	'LocatingChartV',
+	'situationFormV',
 	'testCasesServiceM',
 	'visualizationsServiceM',
 	'WaterfallChartV',
 
 	'hbs!chartsT',
 ],
-function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChartV, IframeChartV,
-	legislationsServiceM, LocatingChartV, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {
+function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, legislationsServiceM, LocatingChartV,
+	situationFormV, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {
 	'use strict';
+
+	if ( ! ('situationForm' in appconfig.enabledModules)) {
+		return;
+	}
 
 	var enableLocatingChart = appconfig.enabledModules.locatingChart;
 
@@ -33,13 +37,17 @@ function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChart
 		},
 		model: chartsM,
 		initialize: function () {
-			this.listenTo(this.model, 'change:currentChartSlug', this.render);
-			this.listenTo(this.model, 'change:legislation', _.bind(this.model.simulate, this.model));
-			this.listenTo(this.model, 'change:year', _.bind(this.model.simulate, this.model));
+			var simulate = function() { this.model.simulate(situationFormV.get('testCaseForAPI')); }.bind(this);
+			this.listenTo(this.model, 'change:year', simulate);
+			this.listenTo(this.model, 'change:legislation', simulate);
+			this.listenTo(this.model, 'change:currentChartSlug', function() {
+				simulate();
+				this.render();
+			});
 			if ( ! _.isUndefined(appconfig.enabledModules.charts)) {
 				this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
 			}
-			this.listenTo(backendServiceM, 'change:simulationStatus', this.updateOverlay);
+			this.listenTo(chartsM, 'change:simulationStatus', this.updateOverlay);
 			$(window).on('resize', _.bind(this.onWindowResize, this));
 		},
 		buildChartsRenderData: function() {
@@ -76,7 +84,7 @@ function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChart
 				window.location.pathname + window.location.hash;
 		},
 		onYearChange: function (evt) {
-			this.model.set('year', $(evt.target).val());
+			this.model.set('year', parseInt($(evt.target).val()));
 		},
 		onWindowResize: function() {
 			this.currentChildView.render();
@@ -84,9 +92,12 @@ function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChart
 		render: function () {
 			this.$el.html(chartsT({
 				charts: this.buildChartsRenderData(),
+				defaultYear: appconfig.constants.defaultYear,
 				isUserAuthenticated: 'auth' in appconfig.enabledModules &&
 					appconfig.enabledModules.auth.currentUser !== null,
 				legislations: legislationsServiceM.get('legislations') || [],
+				maxYear: appconfig.constants.maxYear,
+				minYear: appconfig.constants.minYear,
 				testCases: testCasesServiceM.get('testCases') || [],
 				year: this.model.get('year'),
 			}));
@@ -105,12 +116,11 @@ function ($, _, Backbone, appconfig, backendServiceM, chartsM, DistributionChart
 			} else {
 				this.currentChildView = new IframeChartV({el: $chartWrapper});
 			}
-			this.model.simulate();
 			return this;
 		},
 		updateOverlay: function() {
 			var $overlay = this.$el.find('.overlay');
-			var simulationStatus = backendServiceM.get('simulationStatus');
+			var simulationStatus = chartsM.get('simulationStatus');
 			var message;
 			if (simulationStatus === 'in-progress') {
 				message = 'Simulation en cours…';

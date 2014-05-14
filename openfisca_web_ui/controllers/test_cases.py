@@ -27,6 +27,7 @@
 
 
 import collections
+import json
 import re
 
 from biryani1 import strings
@@ -34,6 +35,29 @@ import pymongo
 import webob
 
 from .. import contexts, conv, model, paginations, urls, wsgihelpers
+
+
+@wsgihelpers.wsgify
+def api1_current(req):
+    ctx = contexts.Ctx(req)
+    if req.method == 'POST':
+        user = model.get_user(ctx, check = True)
+        # TODO use biryani
+        data = json.loads(req.body)
+        test_case = data.get('test_case')
+        user.ensure_test_case()
+        current_test_case = user.current_test_case
+        current_test_case.api_data = test_case
+        current_test_case.save(safe = True)
+        return wsgihelpers.no_content(ctx)
+    else:
+        user = model.get_user(ctx)
+        if user is None:
+            api_data = None
+        else:
+            user.ensure_test_case()
+            api_data = user.current_test_case.api_data
+        return wsgihelpers.respond_json(ctx, data = api_data)
 
 
 @wsgihelpers.wsgify
@@ -59,7 +83,7 @@ def api1_search(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -206,6 +230,7 @@ def route(environ, start_response):
 
 def route_api1_class(environ, start_response):
     router = urls.make_router(
+        (('GET', 'POST'), '^/current?$', api1_current),
         ('GET', '^/search/?$', api1_search),
         )
     return router(environ, start_response)

@@ -1,40 +1,66 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
+  'backbone',
+  'jquery',
+  'Q',
+  'underscore',
 
-	'backendServiceM',
+  'appconfig',
 ],
-function ($, _, Backbone, backendServiceM) {
-	'use strict';
+function (Backbone, $, Q, _, appconfig) {
+  'use strict';
 
-	var ChartsM = Backbone.Model.extend({
-		defaults: {
-			apiData: null,
-			currentChartSlug: null,
-			legislation: null,
-			year: null,
-		},
-		initialize: function () {
-			this.listenTo(backendServiceM, 'change:formData', this.simulate);
-		},
-		simulate: function () {
-			var options = {};
-			var year = this.get('year');
-			if (year !== null) {
-				options.year = year;
-			}
-			if (this.get('currentChartSlug') === 'distribution') {
-				options.decomposition = 'decompositions-multiples.xml';
-			}
-			var legislation = this.get('legislation');
-			if (legislation !== null) {
-				options.legislation = legislation;
-			}
-			return backendServiceM.simulate(options);
-		}
-	});
+  if ( ! ('situationForm' in appconfig.enabledModules)) {
+    return;
+  }
 
-	var chartsM = new ChartsM();
-	return chartsM;
+  var ChartsM = Backbone.Model.extend({
+    defaults: {
+      apiData: null,
+      currentChartSlug: null,
+      legislation: null,
+      simulationStatus: null,
+      year: appconfig.constants.defaultYear,
+    },
+    simulate: function(testCase) { this.simulateAsync(testCase).done(); },
+    simulateAsync: function(testCase) {
+      this.set('simulationStatus', 'in-progress');
+      var data = {
+        context: Date.now().toString(),
+        scenarios: [
+          {
+            legislation_url: this.get('legislation'), // jshint ignore:line
+            test_case: testCase, // jshint ignore:line
+            year: this.get('year'),
+          },
+        ],
+      };
+      if (this.get('currentChartSlug') === 'distribution') {
+        data.decomposition = 'decompositions-multiples.xml';
+      }
+      return Q($.ajax({
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        dataType: 'json',
+        method: 'POST',
+        url: appconfig.api.urls.simulate,
+        xhrFields: {
+          withCredentials: true,
+        },
+      }))
+      .then(
+        function(data) {
+          this.set({
+            apiData: data,
+            simulationStatus: 'errors' in data ? 'error' : 'done',
+          });
+        }.bind(this),
+        function() {
+          this.set({apiData: null, simulationStatus: 'fail'});
+        }.bind(this)
+      );
+    },
+  });
+
+  var chartsM = new ChartsM();
+  return chartsM;
 });

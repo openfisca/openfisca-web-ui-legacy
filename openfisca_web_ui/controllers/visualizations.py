@@ -59,7 +59,7 @@ def make_inputs_to_visualization_data(include_admin_fields):
             thumbnail_url = conv.make_input_to_url(full = True),
             organization = conv.cleanup_line,
             title = conv.pipe(
-                conv.base.cleanup_line,
+                conv.cleanup_line,
                 conv.not_none,
                 ),
             url = conv.pipe(
@@ -183,7 +183,7 @@ def admin_index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -294,7 +294,7 @@ def api1_search(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),
@@ -359,7 +359,7 @@ def api1_typeahead(req):
         )
     data, errors = conv.struct(
         dict(
-            q = conv.base.input_to_words,
+            q = conv.input_to_words,
             ),
         )(inputs, state = ctx)
     if errors is not None:
@@ -559,7 +559,7 @@ def user_index(req):
                     conv.cleanup_line,
                     conv.test_in(['slug', 'updated']),
                     ),
-                term = conv.base.input_to_words,
+                term = conv.input_to_words,
                 ),
             ),
         conv.rename_item('page', 'page_number'),

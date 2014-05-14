@@ -55,6 +55,7 @@ def main():
         'name': 'main',
         'out': 'openfisca_web_ui/static/js/main-built.js',
         'preserveLicenseComments': False,
+        'stubModules': ['amd-loader', 'hbs', 'json', 'rv', 'text'],
         })
     print json.dumps(requireconfig, encoding = 'utf-8', ensure_ascii = False, indent = 2)
     return 0

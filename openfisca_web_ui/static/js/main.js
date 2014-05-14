@@ -1,10 +1,9 @@
 require([
-	'domReady',
 	'jquery',
 
 	'app',
 	'polyfills'
-], function(domReady, $, app, polyfills) {
+], function($, app, polyfills) {
 	'use strict';
 
 	$.noConflict();
@@ -14,8 +13,5 @@ require([
 
 	polyfills.init();
 
-	domReady(function() {
-		app.init();
-	});
-
+	app.init();
 });
