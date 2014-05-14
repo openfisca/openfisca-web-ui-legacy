@@ -337,7 +337,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       var individu = {id: individuId, prenom: 'Personne ' + individuId};
       var individus = {};
       individus[individuId] = individu;
-      var testCase = {familles: null, foyers_fiscaux: null, individus: individus, menages: null};
+      var testCase = {familles: null, foyers_fiscaux: null, individus: individus, menages: null}; // jshint ignore:line
       return Q(this.set({errors: null, suggestions: null, testCase: testCase}));
     },
 
