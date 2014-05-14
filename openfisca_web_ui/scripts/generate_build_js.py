@@ -52,9 +52,12 @@ def main():
     requireconfig['paths']['appconfig'] = 'empty:'
     requireconfig.update({
         'baseUrl': 'openfisca_web_ui/static/js',
+        'generateSourceMaps': True,
         'name': 'main',
+        'optimize': 'uglify2',
         'out': 'openfisca_web_ui/static/js/main-built.js',
         'preserveLicenseComments': False,
+        'useSourceUrl': True,
         'stubModules': ['amd-loader', 'hbs', 'json', 'rv', 'text'],
         })
     print json.dumps(requireconfig, encoding = 'utf-8', ensure_ascii = False, indent = 2)
