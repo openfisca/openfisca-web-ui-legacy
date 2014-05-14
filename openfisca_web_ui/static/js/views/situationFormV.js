@@ -145,9 +145,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
         },
         deleteIndividu: function(event) {
           if (confirm('Supprimer « ' + event.context.values.prenom + ' »')) { // jshint ignore:line
-            $(this.find('#edit-individu-modal')).modal('hide');
-            Q(this.set('modal', null))
-            .then(function() { return this.deleteIndividuAsync(event.context.values.id); }.bind(this))
+            Q(this.deleteIndividuAsync(event.context.values.id))
             .then(function() { return saveRepairSimulateAsync(); }.bind(this))
             .done();
           }
