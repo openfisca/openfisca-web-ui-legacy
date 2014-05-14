@@ -67,7 +67,7 @@
             >
               <div class="panel-heading">
     {{#_.keys(_.pick((((suggestions || {})[entityKey] || {})[entityId] || {}), children)).length}}
-                <span class="glyphicon glyphicon-exclamation-sign pull-right"
+                <span class="glyphicon glyphicon glyphicon-info-sign pull-right" on-click="explainSuggestion:category"
                   title="Cette catégorie contient des valeurs suggérées par le simulateur."></span>
     {{/}}
                 <h4 class="panel-title">
@@ -133,7 +133,7 @@
             >
               <div class="panel-heading">
     {{#_.keys(_.pick(((suggestions.individus || {})[values.id] || {}), children)).length}}
-                <span class="glyphicon glyphicon-exclamation-sign pull-right"
+                <span class="glyphicon glyphicon glyphicon-info-sign pull-right" on-click="explainSuggestion:category"
                   title="Cette catégorie contient des valeurs suggérées par le simulateur."></span>
     {{/}}
                 <h4 class="panel-title">
@@ -334,13 +334,13 @@
 
 <!-- {{>formControlColumnLink}} -->
 <a href="{{.}}" rel="external" target="_blank" title="Plus d'informations">
-  <span class="glyphicon glyphicon-info-sign"></span>
+  <span class="glyphicon glyphicon-link"></span>
 </a>
 <!-- {{/formControlColumnLink}} -->
 
 <!-- {{>formControlSuggestionGlyphicon}} -->
-<span class="glyphicon glyphicon-exclamation-sign" on-click="explainSuggestion"
-  title="Valeur suggérée par le simulateur et utilisée dans ses calculs"></span>
+<span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:formControl"
+  title="Valeur suggérée par le simulateur et utilisée dans ses calculs."></span>
 <!-- {{/formControlSuggestionGlyphicon}} -->
 
 
@@ -447,7 +447,7 @@
   <span class="glyphicon glyphicon-move"></span>
 </a>
 {{#_.isObject((suggestions.individus || {})[id])}}
-<span class="glyphicon glyphicon-exclamation-sign"
+<span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:individu"
   title="Cette personne contient des valeurs suggérées par le simulateur."></span>
 {{/}}
 <!-- {{/individuLinks}} -->

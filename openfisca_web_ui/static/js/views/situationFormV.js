@@ -150,9 +150,17 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             .done();
           }
         },
-        explainSuggestion: function() {
-          alert('Le simulateur a suggéré cette valeur et l\'a utilisée dans ses calculs. ' +
-            'Vous pouvez la modifier ou la conserver en la saisissant explicitement.');
+        explainSuggestion: function(event, context) {
+          var message;
+          if (context === 'category') {
+            message = 'Cette catégorie contient des valeurs suggérées par le simulateur.';
+          } else if (context === 'formControl') {
+            message = 'Le simulateur a suggéré cette valeur et l\'a utilisée dans ses calculs. ' +
+              'Vous pouvez la modifier ou la conserver en la saisissant explicitement.';
+          } else if (context === 'individu') {
+            message = 'Cette personne contient des valeurs suggérées par le simulateur.';
+          }
+          alert(message);
         },
         moveIndividu: function(event) {
           Q.all([
@@ -420,7 +428,10 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             throw error;
           }
         }.bind(this)
-      );
+      )
+      .catch(function(error) {
+        debugger
+      });
     },
     saveTestCaseAsync: function() {
       return Q($.ajax({
