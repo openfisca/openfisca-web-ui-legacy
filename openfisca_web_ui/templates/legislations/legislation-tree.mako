@@ -45,8 +45,8 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
 <%
     current_datetime = date if date is not None else datetime.datetime.utcnow()
 %>
-    <div class="modal fade bs-modal-lg" id="modal-change-legislation-date" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="modal-change-legislation-date" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <form>
                     <div class="modal-header">

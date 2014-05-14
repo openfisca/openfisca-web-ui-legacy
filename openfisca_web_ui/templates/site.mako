@@ -40,8 +40,8 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="accept_cnil_conditions_modal(user)" filter="trim">
-    <div class="modal fade bs-modal-lg" id="accept-cnil-conditions-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="accept-cnil-conditions-modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <form method="post" action="${user.get_user_url(ctx, 'accept-cnil-conditions')}">
                     <div class="modal-header">
@@ -81,8 +81,8 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="accept_cookies_modal()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="accept-cookies-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="accept-cookies-modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <form method="post" action="/accept-cookies">
                     <div class="modal-header">
@@ -277,9 +277,11 @@ ${conf['app_name']}
 
 
 <%def name="scripts()" filter="trim">
+% if conf['enabled.auth']:
     ## Quote from persona: You must include this on every page which uses navigator.id functions.
     ## Because Persona is still in development, you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
+% endif
     <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
         require.config(${helpers.build_requireconfig(ctx) | n, js});

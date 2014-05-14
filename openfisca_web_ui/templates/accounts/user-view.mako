@@ -65,8 +65,8 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
 
 
 <%def name="delete_test_case_modal(test_case)" filter="trim">
-    <div class="modal fade bs-modal-lg" id="${u'delete-test-case-{}-modal'.format(test_case.slug)}" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="${u'delete-test-case-{}-modal'.format(test_case.slug)}" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -86,8 +86,8 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
 
 
 <%def name="delete_user_modal()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="delete-user-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="delete-user-modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -106,8 +106,8 @@ define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
 
 
 <%def name="edit_test_case_modal(test_case)" filter="trim">
-    <div class="modal fade bs-modal-lg" id="${u'edit-test-case-{}-modal'.format(test_case.slug)}" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="${u'edit-test-case-{}-modal'.format(test_case.slug)}" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -155,8 +155,8 @@ ${test_case.description or ''}</textarea>
 
 
 <%def name="new_test_case_modal()" filter="trim">
-    <div class="modal fade bs-modal-lg" id="new-test-case-modal" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="new-test-case-modal" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

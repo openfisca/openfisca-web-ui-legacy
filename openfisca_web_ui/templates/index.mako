@@ -97,8 +97,8 @@ target="_blank">
 <%
     user = model.get_user(ctx)
 %>\
-    <div class="modal fade bs-modal-lg" id="reset-dialog" role="dialog">
-        <div class="modal-dialog modal-sm">
+    <div class="modal fade" id="reset-dialog" role="dialog">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
