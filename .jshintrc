@@ -10,7 +10,7 @@
   },
   "indent": 2,
   "maxlen": 120,
-  "newcap": true,
+  "newcap": false,
   "nonbsp": true,
   "nonew": true,
   "quotmark": "single",
