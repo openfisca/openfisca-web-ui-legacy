@@ -106,7 +106,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           _.each(newValue, function(value, columnName) {
             if (value !== '') {
               var columnType = this.get('columns.' + columnName + '.@type');
-              if (columnType === 'Boolean') {
+              if (columnType === 'Boolean' && _.isString(value)) {
                 this.set(keypath + '.' + columnName, parseInt(value));
               }
             }
