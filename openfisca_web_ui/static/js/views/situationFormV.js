@@ -82,12 +82,19 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
         }
         return null;
       },
-      entityLabel: function(entityKey) {
-        return {
+      entityLabel: function(entityKey, entityId) {
+        var noun = {
           familles: 'famille',
           foyers_fiscaux: 'déclaration d\'impôt', // jshint ignore:line
           menages: 'ménage',
         }[entityKey];
+        var entityNameKey = {
+          familles: 'nom_famille',
+          foyers_fiscaux: 'nom_foyer_fiscal', // jshint ignore:line
+          menages: 'nom_menage',
+        }[entityKey];
+        var name = this.get(['testCase', entityKey, entityId, entityNameKey].join('.'));
+        return {name: name, noun: noun};
       },
       errors: null,
       getKey: function(obj, key) { return ! _.isUndefined(key) && key in obj ? obj[key.toString()] : null; },
@@ -120,33 +127,36 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       var saveRepairSimulateAsync = function() {
         return this.saveTestCaseAsync()
         .then(function() { return this.repairTestCaseAsync(); }.bind(this))
-        .then(function() { return chartsM.simulateAsync(this.get('testCaseForAPI')); }.bind(this));
+        .then(function() { return chartsM.simulateAsync(this.get('testCaseForAPI')); }.bind(this))
       }.bind(this);
       this.on({
         addEntity: function(event, entityKey) {
           event.original.preventDefault();
           this.addEntityAsync(entityKey)
-          .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+          .then(function() { return saveRepairSimulateAsync(); })
           .done();
         },
         addIndividu: function(event, entityKey, roleKey) {
+          event.original.preventDefault();
           this.addIndividuAsync(entityKey, event.index.entityId, roleKey)
-          .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+          .then(function() { return saveRepairSimulateAsync(); })
           .done();
         },
-        deleteEntity: function(event) {
-          var confirmMessage = 'Supprimer « ' + this.get('entityLabel')(event.context.entityKey) + ' ' + // jshint ignore:line
-            event.context.entityId +' »'; // jshint ignore:line
+        deleteEntity: function(event, entityKey) {
+          var entityId = event.index.entityId;
+          var label = this.get('entityLabel').call(this, entityKey, entityId);
+          var confirmMessage = 'Supprimer ' + label.noun + (label.name ? ' « ' + label.name +' »' : '') + ' ?'; // jshint ignore:line
           if (confirm(confirmMessage)) {
-            this.deleteEntityAsync(event.context.entityKey, event.context.entityId)
-            .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+            this.deleteEntityAsync(entityKey, entityId)
+            .then(function() { return saveRepairSimulateAsync(); })
             .done();
           }
         },
         deleteIndividu: function(event) {
-          if (confirm('Supprimer « ' + event.context.values.prenom + ' »')) { // jshint ignore:line
-            Q(this.deleteIndividuAsync(event.context.values.id))
-            .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+          if (confirm('Supprimer ?')) { // jshint ignore:line
+            debugger
+            Q(this.deleteIndividuAsync(event.context.id))
+            .then(function() { return saveRepairSimulateAsync(); })
             .done();
           }
         },
@@ -171,30 +181,29 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             this.moveToEntityAsync(event.context.individuId, 'menages', event.context.menage.id,
               event.context.menage.roleKey),
           ])
-          .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+          .then(function() { return saveRepairSimulateAsync(); })
           .done();
         },
-        repair: function(event) {
+        repairTestCase: function(event) {
           event.original.preventDefault();
           return saveRepairSimulateAsync().done();
         },
-        reset: function(event) {
+        resetTestCase: function(event) {
           event.original.preventDefault();
-          if (confirm('Réinitialiser le formulaire ?')) { // jshint ignore:line
+          if (confirm('Réinitialiser à la situation par défaut ?')) { // jshint ignore:line
             this.resetTestCaseAsync()
-            .then(function() { return this.saveTestCaseAsync(); }.bind(this))
-            .then(function() { window.location.reload(); })
+            .then(function() { return saveRepairSimulateAsync(); })
             .done();
           }
         },
         saveEntity: function(event) {
           Q(this.set(['testCase', event.context.entityKey, event.context.entityId].join('.'), event.context.values))
-          .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+          .then(function() { return saveRepairSimulateAsync(); })
           .done();
         },
         saveIndividu: function(event) {
           Q(this.set('testCase.individus.' + event.context.values.id, event.context.values))
-          .then(function() { return saveRepairSimulateAsync(); }.bind(this))
+          .then(function() { return saveRepairSimulateAsync(); })
           .done();
         },
         showEditEntityModal: function(event, entityKey) {
@@ -236,7 +245,8 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           }.bind(this))
           .done();
         },
-        simulate: function() {
+        simulate: function(event) {
+          event.original.preventDefault();
           chartsM.simulate(this.get('testCaseForAPI'));
         },
       });
@@ -258,7 +268,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       var newIndividuId = (_.keys((this.get('testCase.individus') || {})).length + 1).toString();
       return Q(this.set('testCase.individus.' + newIndividuId, {
         id: newIndividuId,
-        prenom: 'Personne ' + newIndividuId,
+        nom_individu: 'Personne ' + newIndividuId, // jshint ignore:line
       }))
       .then(function() { return this.addToEntityAsync(newIndividuId, entityKey, entityId, roleKey); }.bind(this));
     },
@@ -334,7 +344,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
     },
     resetTestCaseAsync: function() {
       var individuId = '1';
-      var individu = {id: individuId, prenom: 'Personne ' + individuId};
+      var individu = {id: individuId, nom_individu: 'Personne ' + individuId}; // jshint ignore:line
       var individus = {};
       individus[individuId] = individu;
       var testCase = {familles: null, foyers_fiscaux: null, individus: individus, menages: null}; // jshint ignore:line
@@ -358,7 +368,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           birth.max = appconfig.constants.maxYear;
           birth.min = appconfig.constants.minYear;
           birth.val_type = 'year'; // jshint ignore:line
-          data.columns.prenom.required = true;
+          data.columns.nom_individu.required = true; // jshint ignore:line
           return Q(this.set({
             columns: data.columns,
             columnsTree: data.columns_tree, // jshint ignore:line
@@ -428,10 +438,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             throw error;
           }
         }.bind(this)
-      )
-      .catch(function(error) {
-        debugger
-      });
+      );
     },
     saveTestCaseAsync: function() {
       return Q($.ajax({

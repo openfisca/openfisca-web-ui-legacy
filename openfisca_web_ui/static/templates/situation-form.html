@@ -10,35 +10,45 @@
   {{/}}
 {{/}}
 
+{{>buttonsBar}}
+
 {{#testCase}}
   {{#familles:entityId}}
     {{>famille}}
   {{/}}
-
   {{#foyers_fiscaux:entityId}}
     {{>foyerFiscal}}
   {{/}}
-
   {{#menages:entityId}}
     {{>menage}}
   {{/}}
+{{/}}
 
-<button accesskey="s" class="btn btn-primary" on-click="simulate">Simuler</button>
-<div class="btn-group dropup pull-right" style="margin-bottom: 1em;" title="Actions">
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-    <span class="glyphicon glyphicon-cog"></span>
+
+<!-- {{>buttonsBar}} -->
+<div class="btn-group">
+  <button accesskey="s" class="btn btn-primary" on-click="simulate" type="button">Simuler</button>
+  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+    <span class="caret"></span>
+    <span class="sr-only">Toggle Dropdown</span>
   </button>
   <ul class="dropdown-menu" role="menu">
-    <li><a href="#" on-click="addEntity:familles">Ajouter une famille</a></li>
-    <li><a href="#" on-click="addEntity:foyers_fiscaux">Ajouter une déclaration d'impôt</a></li>
-    <li><a href="#" on-click="addEntity:menages">Ajouter un ménage</a></li>
-    <li class="divider"></li>
-    <li><a href="#" on-click="reset">Réinitialiser</a></li>
-<!--    <li><a href="#" on-click="repair">Réparer</a></li>-->
+    <li><a href="#" on-click="resetTestCase">Réinitialiser</a></li>
+<!--    <li><a href="#" on-click="repairTestCase">Réparer</a></li>-->
   </ul>
 </div>
-
-{{/}}
+<div class="btn-group">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+    Ajouter <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu">
+    <li><a href="#" on-click="addEntity:familles">une famille</a></li>
+    <li><a href="#" on-click="addEntity:foyers_fiscaux">une déclaration d'impôt</a></li>
+    <li><a href="#" on-click="addEntity:menages">un ménage</a></li>
+  </ul>
+</div>
+<hr>
+<!-- {{/buttonsBar}} -->
 
 
 <!-- {{>editEntityModal}} -->
@@ -50,13 +60,15 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
           &times;
         </button>
-        <h4 class="modal-title" id="edit-entity-modal-title">Éditer {{entityLabel(entityKey)}} {{entityId}}</h4>
-{{#((errors || {})[entityKey] || )[entityId]}}
-        <p class="text-danger">Il y a des erreurs sur cette {{entityLabel(entityKey)}}.</p>
+        <h4 class="modal-title" id="edit-entity-modal-title">
+          Éditer {{#entityLabel(entityKey, entityId)}}{{noun}}{{#name}} « {{name}} »{{/}}{{/}}
+        </h4>
+{{#((errors || {})[entityKey] || {})[entityId]}}
+        <p class="text-danger">Il y a des erreurs.</p>
 {{/}}
       </div>
-      <div class="modal-body">
-        <form role="form">
+      <form role="form">
+        <div class="modal-body">
           <div class="panel-group" id="accordion">
 {{#columnsTree[entityKey.toString()]}}
   {{#children:categoryIdx}}
@@ -90,15 +102,12 @@
   {{/}}
 {{/}}
           </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
-        <button class="btn btn-danger pull-left" data-dismiss="modal" on-click="deleteEntity" type="button">
-          Supprimer
-        </button>
-        <button class="btn btn-primary" data-dismiss="modal" on-click="saveEntity" type="submit">Valider</button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
+          <button class="btn btn-primary" data-dismiss="modal" on-click="saveEntity" type="submit">Valider</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -115,14 +124,14 @@
           &times;
         </button>
         <h4 class="modal-title" id="edit-individu-modal-title">
-          Éditer {{(getKey(testCase.individus, values.id) || {}).prenom}}
+          Éditer {{(getKey(testCase.individus, values.id) || {}).nom_individu}}
         </h4>
 {{#errors.individus[values.id]}}
-        <p class="text-danger">Il y a des erreurs sur cette personne.</p>
+        <p class="text-danger">Il y a des erreurs.</p>
 {{/}}
       </div>
-      <div class="modal-body">
-        <form role="form">
+      <form role="form">
+        <div class="modal-body">
           <div class="panel-group" id="accordion">
 {{#columnsTree.individus}}
   {{#children:categoryIdx}}
@@ -156,17 +165,14 @@
   {{/}}
 {{/}}
           </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
-        <button class="btn btn-danger pull-left" data-dismiss="modal" on-click="deleteIndividu" type="button">
-          Supprimer
-        </button>
-        <button class="btn btn-primary" data-dismiss="modal" on-click="saveIndividu" type="submit">
-          Valider
-        </button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
+          <button class="btn btn-primary" data-dismiss="modal" on-click="saveIndividu" type="submit">
+            Valider
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -176,19 +182,27 @@
 <!-- {{>famille}} -->
 <div class="panel {{#(errors.familles || {})[entityId]}}panel-danger {{/}}panel-default">
   <div class="panel-heading">
+    <div class="btn-group pull-right">
+      <button accesskey="s" class="btn btn-default btn-xs" on-click="showEditEntityModal:familles" type="button">
+        Éditer
+      </button>
+      <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="#" on-click="deleteEntity:familles">Supprimer</a></li>
+      </ul>
+    </div>
     <h3 class="panel-title">
-      Famille {{entityId}}
-      <a class="pull-right" href="#" on-click="showEditEntityModal:familles" title="Cliquez pour éditer">
-        <span class="glyphicon glyphicon-edit"></span>
+      <a data-toggle="collapse" href="#collapse-famille-{{entityId}}">
+        Famille{{#nom_famille}} « {{nom_famille}} »{{/}}
       </a>
     </h3>
   </div>
-  <div class="list-group">
+  <div id="collapse-famille-{{entityId}}" class="collapse in list-group panel-collapse">
     <div class="list-group-item">
-      <p>
-        Parents
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'familles','parents'">+</button>
-      </p>
+      <p>Parents</p>
 {{#_.isString(((errors.familles || {})[entityId] || {}).parents)}}
       <p class="text-danger">{{errors.familles[entityId].parents}}</p>
 {{/}}
@@ -204,13 +218,11 @@
         </li>
   {{/}}
 {{/}}
+        <li><a href="#" on-click="addIndividu:'familles','parents'">Ajouter</a></li>
       </ul>
     </div>
     <div class="list-group-item">
-      <p>
-        Enfants
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'familles','enfants'">+</button>
-      </p>
+      <p>Enfants</p>
 {{#_.isString(((errors.familles || {})[entityId] || {}).enfants)}}
       <p class="text-danger">{{errors.familles[entityId].enfants}}</p>
 {{/}}
@@ -226,6 +238,7 @@
         </li>
   {{/}}
 {{/}}
+        <li><a href="#" on-click="addIndividu:'familles','enfants'">Ajouter</a></li>
       </ul>
     </div>
   </div>
@@ -368,19 +381,27 @@
 <!-- {{>foyerFiscal}} -->
 <div class="panel {{#errors.foyers_fiscaux[entityId]}}panel-danger {{/}}panel-default">
   <div class="panel-heading">
+    <div class="btn-group pull-right">
+      <button accesskey="s" class="btn btn-default btn-xs" on-click="showEditEntityModal:foyers_fiscaux" type="button">
+        Éditer
+      </button>
+      <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="#" on-click="deleteEntity:foyers_fiscaux">Supprimer</a></li>
+      </ul>
+    </div>
     <h3 class="panel-title">
-      Déclaration d'impôt {{entityId}}
-      <a class="pull-right" href="#" on-click="showEditEntityModal:foyers_fiscaux" title="Cliquez pour éditer">
-        <span class="glyphicon glyphicon-edit"></span>
+      <a data-toggle="collapse" href="#collapse-foyer-fiscal-{{entityId}}">
+        Déclaration d'impôt{{#nom_foyer_fiscal}} « {{nom_foyer_fiscal}} »{{/}}
       </a>
     </h3>
   </div>
-  <div class="list-group">
+  <div id="collapse-foyer-fiscal-{{entityId}}" class="collapse in list-group panel-collapse">
     <div class="list-group-item">
-      <p>
-        Déclarants
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'foyers_fiscaux','declarants'">+</button>
-      </p>
+      <p>Déclarants</p>
 {{#_.isString(((errors.foyers_fiscaux || {})[entityId] || {}).declarants)}}
       <p class="text-danger">{{errors.foyers_fiscaux[entityId].declarants}}</p>
 {{/}}
@@ -396,15 +417,11 @@
         </li>
   {{/}}
 {{/}}
+        <li><a href="#" on-click="addIndividu:'foyers_fiscaux','declarants'">Ajouter</a></li>
       </ul>
     </div>
     <div class="list-group-item">
-      <p>
-        Personnes à charge
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'foyers_fiscaux','personnes_a_charge'">
-          +
-        </button>
-      </p>
+      <p>Personnes à charge</p>
 {{#_.isString(((errors.foyers_fiscaux || {})[entityId] || {}).personnes_a_charge)}}
       <p class="text-danger">{{errors.foyers_fiscaux[entityId].personnes_a_charge}}</p>
 {{/}}
@@ -420,6 +437,7 @@
         </li>
   {{/}}
 {{/}}
+        <li><a href="#" on-click="addIndividu:'foyers_fiscaux','personnes_a_charge'">Ajouter</a></li>
       </ul>
     </div>
   </div>
@@ -439,40 +457,47 @@
 
 
 <!-- {{>individuLinks}} -->
-{{prenom}}
- <a href="#" on-click="showEditIndividuModal" title="Cliquez pour éditer">
-  <span class="glyphicon glyphicon-edit"></span>
-</a>
-<a href="#" on-click="showMoveIndividuModal" title="Cliquez pour déplacer">
-  <span class="glyphicon glyphicon-move"></span>
-</a>
+<div class="dropdown">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{nom_individu}}</a>
 {{#_.isObject((suggestions.individus || {})[id])}}
 <span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:individu"
   title="Cette personne contient des valeurs suggérées par le simulateur."></span>
 {{/}}
+  <ul class="dropdown-menu" role="menu">
+    <li role="presentation">
+      <a href="#" on-click="showEditIndividuModal" role="menuitem" tabindex="-1">Éditer</a>
+      <a href="#" on-click="showMoveIndividuModal" role="menuitem" tabindex="-1">Déplacer</a>
+      <a href="#" on-click="deleteIndividu" role="menuitem" tabindex="-1">Supprimer</a>
+    </li>
+  </ul>
+</div>
 <!-- {{/individuLinks}} -->
 
 
 <!-- {{>menage}} -->
 <div class="panel {{#errors.menages[entityId]}}panel-danger {{/}}panel-default">
   <div class="panel-heading">
+    <div class="btn-group pull-right">
+      <button accesskey="s" class="btn btn-default btn-xs" on-click="showEditEntityModal:menages" type="button">
+        Éditer
+      </button>
+      <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="#" on-click="deleteEntity:menages">Supprimer</a></li>
+      </ul>
+    </div>
     <h3 class="panel-title">
-      Ménage {{entityId}}
-      <a class="pull-right" href="#" on-click="showEditEntityModal:menages" title="Cliquez pour éditer">
-        <span class="glyphicon glyphicon-edit"></span>
+      <a data-toggle="collapse" href="#collapse-menage-{{entityId}}">
+        Ménage{{#nom_menage}} « {{nom_menage}} »{{/}}
       </a>
     </h3>
   </div>
-  <div class="list-group">
+  <div id="collapse-menage-{{entityId}}" class="collapse in list-group panel-collapse">
     <div class="list-group-item">
-      <p>
-        Personne de référence
-{{^personne_de_reference}}
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'menages','personne_de_reference'">
-          +
-        </button>
-{{/}}
-      </p>
+      <p>Personne de référence</p>
 {{#_.isString(((errors.menages || {})[entityId] || {}).personne_de_reference)}}
       <p class="text-danger">{{errors.menages[entityId].personne_de_reference}}</p>
 {{/}}
@@ -482,14 +507,12 @@
         {{>individuError}}
       </p>
 {{/}}
+{{^personne_de_reference}}
+      <p><a href="#" on-click="addIndividu:'menages','personne_de_reference'">Ajouter</a></p>
+{{/}}
     </div>
     <div class="list-group-item">
-      <p>
-        Conjoint de la personne de référence
-{{^conjoint}}
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'menages','conjoint'">+</button>
-{{/}}
-      </p>
+      <p>Conjoint de la personne de référence</p>
 {{#_.isString(((errors.menages || {})[entityId] || {}).conjoint)}}
       <p class="text-danger">{{errors.menages[entityId].conjoint}}</p>
 {{/}}
@@ -499,12 +522,12 @@
         {{>individuError}}
       </p>
 {{/}}
+{{^conjoint}}
+      <p><a href="#" on-click="addIndividu:'menages','conjoint'">Ajouter</a></p>
+{{/}}
     </div>
     <div class="list-group-item">
-      <p>
-        Enfants
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'menages','enfants'">+</button>
-      </p>
+      <p>Enfants</p>
 {{#_.isString(((errors.menages || {})[entityId] || {}).enfants)}}
       <p class="text-danger">{{errors.menages[entityId].enfants}}</p>
 {{/}}
@@ -520,11 +543,9 @@
         </li>
   {{/}}
 {{/}}
+        <li><a href="#" on-click="addIndividu:'menages','enfants'">Ajouter</a></li>
       </ul>
-      <p>
-        Autres
-        <button class="btn btn-default btn-xs" on-click="addIndividu:'menages','autres'">+</button>
-      </p>
+      <p>Autres</p>
 {{#_.isString(((errors.menages || {})[entityId] || {}).autres)}}
       <p class="text-danger">{{errors.menages[entityId].autres}}</p>
 {{/}}
@@ -540,6 +561,7 @@
         </li>
   {{/}}
 {{/}}
+        <li><a href="#" on-click="addIndividu:'menages','autres'">Ajouter</a></li>
       </ul>
     </div>
   </div>
@@ -557,11 +579,11 @@
           &times;
         </button>
         <h4 class="modal-title" id="move-individu-modal-title">
-          Déplacer {{(getKey(testCase.individus, individuId) || {}).prenom}}
+          Déplacer {{(getKey(testCase.individus, individuId) || {}).nom_individu}}
         </h4>
       </div>
-      <div class="modal-body">
-        <form role="form">
+      <form role="form">
+        <div class="modal-body">
 {{#famille}}
           {{>moveIndividuModalFamille}}
 {{/}}
@@ -571,14 +593,14 @@
 {{#menage}}
           {{>moveIndividuModalMenage}}
 {{/}}
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
-        <button class="btn btn-primary" data-dismiss="modal" on-click="moveIndividu" type="submit">
-          Valider
-        </button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
+          <button class="btn btn-primary" data-dismiss="modal" on-click="moveIndividu" type="submit">
+            Valider
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -591,7 +613,7 @@
   <select class="form-control" id="famille" value="{{.id}}">
     <option value="">Aucune</option>
 {{#testCase.familles:familleId}}
-    <option value="{{familleId}}">Famille {{familleId}}</option>
+    <option value="{{familleId}}">Famille{{#nom_famille}} « {{nom_famille}} »{{/}}</option>
 {{/}}
   </select>
 </div>
@@ -616,7 +638,7 @@
   <select class="form-control" id="foyer-fiscal" value="{{.id}}">
     <option value="">Aucune</option>
 {{#testCase.foyers_fiscaux:foyerFiscalId}}
-    <option value="{{foyerFiscalId}}">Déclaration d'impôt {{foyerFiscalId}}</option>
+    <option value="{{foyerFiscalId}}">Déclaration d'impôt{{#nom_foyer_fiscal}} « {{nom_foyer_fiscal}} »{{/}}</option>
 {{/}}
   </select>
 </div>
@@ -641,7 +663,7 @@
   <select class="form-control" id="menage" value="{{.id}}">
     <option value="">Aucun</option>
 {{#testCase.menages:menageId}}
-    <option value="{{menageId}}">Ménage {{menageId}}</option>
+    <option value="{{menageId}}">Ménage{{#nom_menage}} « {{nom_menage}} »{{/}}</option>
 {{/}}
   </select>
 </div>
