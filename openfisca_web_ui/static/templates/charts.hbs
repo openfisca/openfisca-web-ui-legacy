@@ -32,11 +32,11 @@
 <div class="chart-wrapper"></div>
 <hr>
 <div class="form-inline pull-right" role="form">
-{{^isUserAuthenticated}}
+{{#displaySaveButton}}
   <div class="form-group">
     <button class="btn btn-primary sign-in">Enregistrer</button>
   </div>
-{{/isUserAuthenticated}}
+{{/displaySaveButton}}
   <div class="form-group">
     <button class="btn btn-default" data-toggle="modal" data-target="#export-modal">Exporter</button>
   </div>

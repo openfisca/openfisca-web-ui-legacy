@@ -93,6 +93,8 @@ function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, 
 			this.$el.html(chartsT({
 				charts: this.buildChartsRenderData(),
 				defaultYear: appconfig.constants.defaultYear,
+				displaySaveButton: 'auth' in appconfig.enabledModules &&
+					appconfig.enabledModules.auth.currentUser === null,
 				isUserAuthenticated: 'auth' in appconfig.enabledModules &&
 					appconfig.enabledModules.auth.currentUser !== null,
 				legislations: legislationsServiceM.get('legislations') || [],
