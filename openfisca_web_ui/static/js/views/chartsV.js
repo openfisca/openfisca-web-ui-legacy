@@ -9,7 +9,7 @@ define([
 	'IframeChartV',
 	'legislationsServiceM',
 	'LocatingChartV',
-	'situationFormV',
+	'situationForm',
 	'testCasesServiceM',
 	'visualizationsServiceM',
 	'WaterfallChartV',
@@ -17,7 +17,7 @@ define([
 	'hbs!chartsT',
 ],
 function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, legislationsServiceM, LocatingChartV,
-	situationFormV, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {
+	situationForm, testCasesServiceM, visualizationsServiceM, WaterfallChartV, chartsT) {
 	'use strict';
 
 	if ( ! ('situationForm' in appconfig.enabledModules)) {
@@ -37,7 +37,7 @@ function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, 
 		},
 		model: chartsM,
 		initialize: function () {
-			var simulate = function() { this.model.simulate(situationFormV.get('testCaseForAPI')); }.bind(this);
+			var simulate = function() { this.model.simulate(situationForm.get('testCaseForAPI')); }.bind(this);
 			this.listenTo(this.model, 'change:year', simulate);
 			this.listenTo(this.model, 'change:legislation', simulate);
 			this.listenTo(this.model, 'change:currentChartSlug', function() {

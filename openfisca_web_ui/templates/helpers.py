@@ -78,6 +78,7 @@ def build_requireconfig_paths(static_prefix):
     bower_prefix = static_prefix + u'bower/'
     data_prefix = static_prefix + u'data/'
     js_prefix = static_prefix + u'js/'
+    components_prefix = js_prefix + u'components/'
     templates_prefix = static_prefix + u'templates/'
     models_prefix = js_prefix + u'models/'
     views_prefix = js_prefix + u'views/'
@@ -97,6 +98,9 @@ def build_requireconfig_paths(static_prefix):
         'text': bower_prefix + u'requirejs-text/text',
         'underscore': bower_prefix + u'underscore/underscore',
         'x-editable': bower_prefix + u'x-editable/dist/bootstrap3-editable/js/bootstrap-editable',
+
+        # Components
+        'situationForm': components_prefix + u'situationForm',
 
         # Data
         'vingtilesD': data_prefix + 'vingtiles.json',
@@ -130,7 +134,6 @@ def build_requireconfig_paths(static_prefix):
         'DistributionChartV': views_prefix + u'DistributionChartV',
         'IframeChartV': views_prefix + u'IframeChartV',
         'LocatingChartV': views_prefix + u'LocatingChartV',
-        'situationFormV': views_prefix + u'situationFormV',
         'WaterfallChartV': views_prefix + u'WaterfallChartV',
         }
 

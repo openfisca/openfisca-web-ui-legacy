@@ -1,25 +1,22 @@
 {{#modal}}
-  {{#type === 'editEntity'}}
-    {{>editEntityModal}}
+  {{#type === 'edit'}}
+    {{>editModal}}
   {{/}}
-  {{#type === 'editIndividu'}}
-    {{>editIndividuModal}}
-  {{/}}
-  {{#type === 'moveIndividu'}}
-    {{>moveIndividuModal}}
+  {{#type === 'move'}}
+    {{>moveModal}}
   {{/}}
 {{/}}
 
 {{>buttonsBar}}
 
 {{#testCase}}
-  {{#familles:entityId}}
+  {{#withLinkedObjects('familles', familles, errors, suggestions):entityId}}
     {{>famille}}
   {{/}}
-  {{#foyers_fiscaux:entityId}}
+  {{#withLinkedObjects('foyers_fiscaux', foyers_fiscaux, errors, suggestions):entityId}}
     {{>foyerFiscal}}
   {{/}}
-  {{#menages:entityId}}
+  {{#withLinkedObjects('menages', menages, errors, suggestions):entityId}}
     {{>menage}}
   {{/}}
 {{/}}
@@ -27,7 +24,10 @@
 
 <!-- {{>buttonsBar}} -->
 <div class="btn-group">
-  <button accesskey="s" class="btn btn-primary" on-click="simulate" type="button">Simuler</button>
+  <button accesskey="s" class="btn btn-primary" disabled="{{#simulateInProgress}}disabled{{/}}" on-click="simulate"
+    type="button">
+    Simuler
+  </button>
   <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
     <span class="caret"></span>
     <span class="sr-only">Toggle Dropdown</span>
@@ -47,38 +47,36 @@
     <li><a href="#" on-click="addEntity:menages">un ménage</a></li>
   </ul>
 </div>
+{{#status}}
+<span class="label {{type === 'error' ? 'label-danger' : 'label-default'}}"
+  title="{{#type === 'error'}}{{message}}{{/}}">
+  {{type === 'error' ? 'Erreur' : message}}
+</span>
+{{/}}
 <hr>
 <!-- {{/buttonsBar}} -->
 
 
-<!-- {{>editEntityModal}} -->
-<div class="modal" id="edit-entity-modal" tabindex="-1" role="dialog" aria-labelledby="edit-entity-modal-title"
-  aria-hidden="true">
+<!-- {{>editModal}} -->
+<div class="modal" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modal-title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-          &times;
-        </button>
-        <h4 class="modal-title" id="edit-entity-modal-title">
-          Éditer {{#entityLabel(entityKey, entityId)}}{{noun}}{{#name}} « {{name}} »{{/}}{{/}}
-        </h4>
-{{#((errors || {})[entityKey] || {})[entityId]}}
-        <p class="text-danger">Il y a des erreurs.</p>
-{{/}}
+      <div class="{{#.errors}}bg-danger {{/}}modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="edit-modal-title">Éditer {{entityLabel(.entityKey, .entityId)}}</h4>
       </div>
-      <form role="form">
+{{#{
+  categories: categories(.entityKey, .entityId, errors, suggestions),
+  entityKey: entityKey,
+  entityId: entityId
+}}}
+      <form on-submit="saveEntity:{{entityKey}}" role="form">
         <div class="modal-body">
           <div class="panel-group" id="accordion">
-{{#columnsTree[entityKey.toString()]}}
-  {{#children:categoryIdx}}
-            <div
-              class="panel
-              {{#_.keys(_.pick((((errors || {})[entityKey] || {})[entityId] || {}), children)).length}}panel-danger{{/}}
-              panel-default"
-            >
+  {{#categories:categoryIdx}}
+            <div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
               <div class="panel-heading">
-    {{#_.keys(_.pick((((suggestions || {})[entityKey] || {})[entityId] || {}), children)).length}}
+    {{#.hasSuggestions}}
                 <span class="glyphicon glyphicon glyphicon-info-sign pull-right" on-click="explainSuggestion:category"
                   title="Cette catégorie contient des valeurs suggérées par le simulateur."></span>
     {{/}}
@@ -88,11 +86,8 @@
               </div>
               <div id="category-{{categoryIdx}}" class="panel-collapse collapse{{#categoryIdx === 0}} in{{/}}">
                 <div class="panel-body">
-    {{#_.pick(columns, children):columnName}}
-                  <div class="
-                    form-group
-                    {{#(((errors || {})[entityKey] || {})[modal.entityId] || {})[name]}}has-error{{/}}
-                  ">
+    {{#.columns}}
+                  <div class="form-group{{#error}} has-error{{/}}">
                     {{>formControl}}
                   </div>
     {{/}}
@@ -100,90 +95,25 @@
               </div>
             </div>
   {{/}}
-{{/}}
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
-          <button class="btn btn-primary" data-dismiss="modal" on-click="saveEntity" type="submit">Valider</button>
+          <button class="btn btn-primary" type="submit">Valider</button>
         </div>
       </form>
+{{/}}
     </div>
   </div>
 </div>
-<!-- {{/editEntityModal}} -->
-
-
-<!-- {{>editIndividuModal}} -->
-<div class="modal" id="edit-individu-modal" tabindex="-1" role="dialog" aria-labelledby="edit-individu-modal-title"
-  aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="{{#errors.individus[values.id]}}bg-danger {{/}}modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-          &times;
-        </button>
-        <h4 class="modal-title" id="edit-individu-modal-title">
-          Éditer {{(getKey(testCase.individus, values.id) || {}).nom_individu}}
-        </h4>
-{{#errors.individus[values.id]}}
-        <p class="text-danger">Il y a des erreurs.</p>
-{{/}}
-      </div>
-      <form role="form">
-        <div class="modal-body">
-          <div class="panel-group" id="accordion">
-{{#columnsTree.individus}}
-  {{#children:categoryIdx}}
-            <div
-              class="panel
-              {{#_.keys(_.pick(((errors.individus || {})[values.id] || {}), children)).length}}panel-danger{{/}}
-              panel-default"
-            >
-              <div class="panel-heading">
-    {{#_.keys(_.pick(((suggestions.individus || {})[values.id] || {}), children)).length}}
-                <span class="glyphicon glyphicon glyphicon-info-sign pull-right" on-click="explainSuggestion:category"
-                  title="Cette catégorie contient des valeurs suggérées par le simulateur."></span>
-    {{/}}
-                <h4 class="panel-title">
-                  <a data-toggle="collapse" data-parent="#accordion" href="#category-{{categoryIdx}}">{{label}}</a>
-                </h4>
-              </div>
-              <div id="category-{{categoryIdx}}" class="panel-collapse collapse{{#categoryIdx === 0}} in{{/}}">
-                <div class="panel-body">
-    {{#_.pick(columns, children):columnName}}
-                  <div class="
-                    form-group
-                    {{#((errors.individus || {})[modal.values.id] || {})[name]}}has-error{{/}}
-                  ">
-                    {{>formControl}}
-                  </div>
-    {{/}}
-                </div>
-              </div>
-            </div>
-  {{/}}
-{{/}}
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
-          <button class="btn btn-primary" data-dismiss="modal" on-click="saveIndividu" type="submit">
-            Valider
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!-- {{/editIndividuModal}} -->
+<!-- {{/editModal}} -->
 
 
 <!-- {{>famille}} -->
-<div class="panel {{#(errors.familles || {})[entityId]}}panel-danger {{/}}panel-default">
+<div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
   <div class="panel-heading">
     <div class="btn-group pull-right">
-      <button accesskey="s" class="btn btn-default btn-xs" on-click="showEditEntityModal:familles" type="button">
+      <button class="btn btn-default btn-xs" on-click="showEditModal:'familles',{{entityId}}" type="button">
         Éditer
       </button>
       <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -196,141 +126,133 @@
     </div>
     <h3 class="panel-title">
       <a data-toggle="collapse" href="#collapse-famille-{{entityId}}">
-        Famille{{#nom_famille}} « {{nom_famille}} »{{/}}
+        {{entityLabel('familles', entityId)}}
       </a>
     </h3>
   </div>
   <div id="collapse-famille-{{entityId}}" class="collapse in list-group panel-collapse">
+{{#.parents}}
     <div class="list-group-item">
       <p>Parents</p>
-{{#_.isString(((errors.familles || {})[entityId] || {}).parents)}}
-      <p class="text-danger">{{errors.familles[entityId].parents}}</p>
-{{/}}
-      <ul>
-{{#parents:roleIdx}}
-  {{#getKey(testCase.individus, this)}}
-        <li class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-          {{>individuLinks}}
-          {{>individuError}}
-    {{#_.isObject(((errors.familles || {})[entityId] || {}).parents)}}
-          <p class="text-danger">{{errors.familles[entityId].parents[roleIdx]}}</p>
-    {{/}}
-        </li>
+  {{#.error}}
+      <p class="text-danger">{{.error}}</p>
   {{/}}
-{{/}}
+      <ul>
+  {{#.individus}}
+        <li>{{>individu}}</li>
+  {{/}}
         <li><a href="#" on-click="addIndividu:'familles','parents'">Ajouter</a></li>
       </ul>
     </div>
+{{/}}
+{{#.enfants}}
     <div class="list-group-item">
       <p>Enfants</p>
-{{#_.isString(((errors.familles || {})[entityId] || {}).enfants)}}
-      <p class="text-danger">{{errors.familles[entityId].enfants}}</p>
-{{/}}
-      <ul>
-{{#enfants:roleIdx}}
-  {{#getKey(testCase.individus, this)}}
-        <li class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-          {{>individuLinks}}
-          {{>individuError}}
-    {{#_.isObject(((errors.familles || {})[entityId] || {}).enfants)}}
-          <p class="text-danger">{{errors.familles[entityId].enfants[roleIdx]}}</p>
-    {{/}}
-        </li>
+  {{#.error)}}
+      <p class="text-danger">{{.error}}</p>
   {{/}}
-{{/}}
+      <ul>
+  {{#.individus}}
+        <li>{{>individu}}</li>
+  {{/}}
         <li><a href="#" on-click="addIndividu:'familles','enfants'">Ajouter</a></li>
       </ul>
     </div>
+{{/}}
   </div>
 </div>
 <!-- {{/famille}} -->
 
 
 <!-- {{>formControl}} -->
-{{#this['@type'] === 'Boolean'}}
-<label class="control-label">{{label}}</label> {{#url}}{{>formControlColumnLink}}{{/url}}
-<div class="radio">
-  <label>
-    <input name="{{modal.values[name]}}" type="radio" value="1">
-    Oui
-  </label>
-</div>
-<div class="radio">
-  <label>
-    <input name="{{modal.values[name]}}" type="radio" value="0">
-    Non
-  </label>
-</div>
-<div class="radio">
-  {{defaultLabel(.)}}
-  {{#((suggestions.individus || {})[modal.values.id] || {})[name]}}
-    {{>formControlSuggestionGlyphicon}}
-  {{/}}
+{{#this && this['@type'] === 'Boolean'}}
+<label class="control-label">{{label}}</label>
+<div class="row">
+  <div class="col-sm-6">
+    <label class="radio-inline">
+      <input name="{{value}}" type="radio" value="">
+      Non renseigné
+    </label>
+    <label class="radio-inline">
+      <input name="{{value}}" type="radio" value="1">
+      Oui
+    </label>
+    <label class="radio-inline">
+      <input name="{{value}}" type="radio" value="0">
+      Non
+    </label>
+  </div>
+  <div class="col-sm-6">
+    <span class="help-block">
+      {{this && defaultLabel(this)}}
+      {{#suggestion && ! error}}
+        {{formControlSuggestionGlyphicon}}
+      {{/}}
+    </span>
+  </div>
 </div>
 {{/}}
 
-{{#this['@type'] === 'Date'}}
-<label class="control-label" for="{{name}}">{{label}}</label> {{#url}}{{>formControlColumnLink}}{{/url}}
-<input class="form-control" id="{{name}}"
-  placeholder="{{((suggestions.individus || {})[modal.values.id] || {})[name] || default}}" type="date"
-  value="{{modal.values[name]}}">
+{{#this && this['@type'] === 'Date'}}
+<label class="control-label" for="{{name}}">{{label}}</label>
+<input class="form-control" id="{{name}}" placeholder="{{suggestion || default}}" type="date" value="{{value}}">
 {{/}}
 
-{{#this['@type'] === 'Enumeration'}}
-<label class="control-label" for="{{name}}">{{label}}</label> {{#url}}{{>formControlColumnLink}}{{/url}}
-  {{#((suggestions.individus || {})[modal.values.id] || {})[name]}}
+{{#this && this['@type'] === 'Enumeration'}}
+<label class="control-label" for="{{name}}">{{label}}</label>
+  {{#suggestion && ! error}}
 <div class="input-group">
   {{>formSelectControl}}
   <span class="input-group-addon">{{>formControlSuggestionGlyphicon}}</span>
 </div>
   {{/}}
-  {{^((suggestions.individus || {})[modal.values.id] || {})[name]}}
+  {{^suggestion}}
 {{>formSelectControl}}
   {{/}}
 {{/}}
 
-{{#this['@type'] === 'Float'}}
-<label class="control-label" for="{{name}}">{{label}}</label> {{#url}}{{>formControlColumnLink}}{{/url}}
+{{#this && this['@type'] === 'Float'}}
+<label class="control-label" for="{{name}}">{{label}}</label>
 <input class="form-control" id="{{name}}" placeholder="{{default}}" type="number"
-  value="{{modal.values[name]}}">
+  value="{{value}}">
 {{/}}
 
-{{#this['@type'] === 'Integer'}}
-<label class="control-label" for="{{name}}">{{label}}</label> {{#url}}{{>formControlColumnLink}}{{/url}}
+{{#this && this['@type'] === 'Integer'}}
+<label class="control-label" for="{{name}}">{{label}}</label>
 <div class="row">
-  <div class="col-xs-4">
-  {{#val_type === 'monetary' || ((suggestions.individus || {})[modal.values.id] || {})[name]}}
+  <div class="col-md-4">
+  {{#val_type === 'monetary' || suggestion}}
     <div class="input-group">
       {{>formIntegerControl}}
       <span class="input-group-addon">
     {{#val_type === 'monetary'}}
         <span class="glyphicon glyphicon-euro"></span>
     {{/}}
-    {{#((suggestions.individus || {})[modal.values.id] || {})[name]}}
+    {{#suggestion && ! error}}
         {{>formControlSuggestionGlyphicon}}
     {{/}}
       </span>
     </div>
   {{/}}
-  {{^val_type === 'monetary' || ((suggestions.individus || {})[modal.values.id] || {})[name]}}
+  {{^val_type === 'monetary' || suggestion}}
     {{>formIntegerControl}}
   {{/}}
   </div>
-  <div class="col-xs-8">
+  <div class="col-md-8">
     {{>formControlCerfaField}}
   </div>
 </div>
 {{/}}
 
-{{#this['@type'] === 'String'}}
-<label class="control-label" for="{{name}}">{{label}}</label> {{#url}}{{>formControlColumnLink}}{{/url}}
+{{#this && this['@type'] === 'String'}}
+<label class="control-label" for="{{name}}">{{label}}</label>
 <input class="form-control" id="{{name}}" placeholder="{{default}}" required="{{#required}}required{{/}}" type="text"
-  value="{{modal.values[name]}}">
+  value="{{value}}">
 {{>formControlCerfaField}}
 {{/}}
 
-{{#((errors.individus || {})[modal.values.id] || {})[name]}}
-<p class="text-danger">{{errors.individus[modal.values.id][name]}}</p>
+{{#error}}
+<p class="text-danger">{{error}}</p>
 {{/}}
 <!-- {{/formControl}} -->
 
@@ -345,12 +267,6 @@
 <!-- {{/formControlCerfaField}} -->
 
 
-<!-- {{>formControlColumnLink}} -->
-<a href="{{.}}" rel="external" target="_blank" title="Plus d'informations">
-  <span class="glyphicon glyphicon-link"></span>
-</a>
-<!-- {{/formControlColumnLink}} -->
-
 <!-- {{>formControlSuggestionGlyphicon}} -->
 <span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:formControl"
   title="Valeur suggérée par le simulateur et utilisée dans ses calculs."></span>
@@ -358,17 +274,16 @@
 
 
 <!-- {{>formIntegerControl}} -->
-<input class="form-control" id="{{name}}" max="{{max}}" min={{min}}
-  placeholder="{{((suggestions.individus || {})[modal.values.id] || {})[name] || default}}" step="1"
-  type="number" value="{{modal.values[name]}}">
+<input class="form-control" id="{{name}}" max="{{max}}" min={{min}} placeholder="{{suggestion || default}}" step="1"
+  type="number" value="{{value}}">
 <!-- {{/formIntegerControl}} -->
 
 
 <!-- {{>formSelectControl}} -->
 <div class="row">
   <div class="col-lg-6">
-    <select class="form-control" id="{{name}}" value="{{modal.values[name]}}">
-      <option value="">{{defaultLabel(.)}}</option>
+    <select class="form-control" id="{{name}}" value="{{value}}">
+      <option value="">Non renseigné ({{this && defaultLabel(this)}})</option>
 {{#labels:labelKey}}
       <option value="{{labelKey}}">{{.}}</option>
 {{/labels}}
@@ -379,10 +294,10 @@
 
 
 <!-- {{>foyerFiscal}} -->
-<div class="panel {{#errors.foyers_fiscaux[entityId]}}panel-danger {{/}}panel-default">
+<div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
   <div class="panel-heading">
     <div class="btn-group pull-right">
-      <button accesskey="s" class="btn btn-default btn-xs" on-click="showEditEntityModal:foyers_fiscaux" type="button">
+      <button class="btn btn-default btn-xs" on-click="showEditModal:'foyers_fiscaux',{{entityId}}" type="button">
         Éditer
       </button>
       <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -395,90 +310,77 @@
     </div>
     <h3 class="panel-title">
       <a data-toggle="collapse" href="#collapse-foyer-fiscal-{{entityId}}">
-        Déclaration d'impôt{{#nom_foyer_fiscal}} « {{nom_foyer_fiscal}} »{{/}}
+        {{entityLabel('foyers_fiscaux', entityId)}}
       </a>
     </h3>
   </div>
   <div id="collapse-foyer-fiscal-{{entityId}}" class="collapse in list-group panel-collapse">
+{{#.declarants}}
     <div class="list-group-item">
       <p>Déclarants</p>
-{{#_.isString(((errors.foyers_fiscaux || {})[entityId] || {}).declarants)}}
-      <p class="text-danger">{{errors.foyers_fiscaux[entityId].declarants}}</p>
-{{/}}
-      <ul>
-{{#declarants:roleIdx}}
-  {{#getKey(testCase.individus, this)}}
-        <li class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-          {{>individuLinks}}
-          {{>individuError}}
-    {{#_.isObject(((errors.foyers_fiscaux || {})[entityId] || {}).declarants)}}
-          <p class="text-danger">{{errors.foyers_fiscaux[entityId].declarants[roleIdx]}}</p>
-    {{/}}
-        </li>
+  {{#.error}}
+      <p class="text-danger">{{.error}}</p>
   {{/}}
-{{/}}
+      <ul>
+  {{#.individus}}
+        <li>{{>individu}}</li>
+  {{/}}
         <li><a href="#" on-click="addIndividu:'foyers_fiscaux','declarants'">Ajouter</a></li>
       </ul>
     </div>
+{{/}}
+{{#.personnes_a_charge}}
     <div class="list-group-item">
       <p>Personnes à charge</p>
-{{#_.isString(((errors.foyers_fiscaux || {})[entityId] || {}).personnes_a_charge)}}
-      <p class="text-danger">{{errors.foyers_fiscaux[entityId].personnes_a_charge}}</p>
-{{/}}
-      <ul>
-{{#personnes_a_charge:roleIdx}}
-  {{#getKey(testCase.individus, this)}}
-        <li class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-          {{>individuLinks}}
-          {{>individuError}}
-    {{#_.isObject(((errors.foyers_fiscaux || {})[entityId] || {}).personnes_a_charge)}}
-          <p class="text-danger">{{errors.foyers_fiscaux[entityId].personnes_a_charge[roleIdx]}}</p>
-    {{/}}
-        </li>
+  {{#.error)}}
+      <p class="text-danger">{{.error}}</p>
   {{/}}
-{{/}}
+      <ul>
+  {{#.individus}}
+        <li>{{>individu}}</li>
+  {{/}}
         <li><a href="#" on-click="addIndividu:'foyers_fiscaux','personnes_a_charge'">Ajouter</a></li>
       </ul>
     </div>
+{{/}}
   </div>
 </div>
 <!-- {{/foyerFiscal}} -->
 
 
-<!-- {{>individuError}} -->
-{{#_.isObject((errors.individus || {})[id])}}
-<p class="text-danger">
-  {{#errors.individus[id]:columnName}}
-  {{columns[columnName].label}} : {{.}}
-  {{/}}
-</p>
-{{/}}
-<!-- {{/individuError}} -->
-
-
-<!-- {{>individuLinks}} -->
-<div class="dropdown">
-  <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{nom_individu}}</a>
-{{#_.isObject((suggestions.individus || {})[id])}}
-<span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:individu"
-  title="Cette personne contient des valeurs suggérées par le simulateur."></span>
+<!-- {{>individu}} -->
+<div class="btn-group" style="margin-bottom: 0.3em;">
+  <button class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-xs"
+    on-click="showEditModal:'individus',{{.entityId}}" title="Éditer" type="button">
+    {{.label}}
+  </button>
+  <button type="button" class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-xs dropdown-toggle"
+    data-toggle="dropdown">
+    <span class="caret"></span>
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+{{#.hasSuggestions}}
+  <span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:individu"
+    style="margin-left: 0.3em" title="Cette personne contient des valeurs suggérées par le simulateur."></span>
 {{/}}
   <ul class="dropdown-menu" role="menu">
     <li role="presentation">
-      <a href="#" on-click="showEditIndividuModal" role="menuitem" tabindex="-1">Éditer</a>
-      <a href="#" on-click="showMoveIndividuModal" role="menuitem" tabindex="-1">Déplacer</a>
+      <a href="#" on-click="showMoveModal" role="menuitem" tabindex="-1">Déplacer</a>
       <a href="#" on-click="deleteIndividu" role="menuitem" tabindex="-1">Supprimer</a>
     </li>
   </ul>
 </div>
-<!-- {{/individuLinks}} -->
+{{#.roleError}}
+<p class="text-danger">{{.roleError}}</p>
+{{/}}
+<!-- {{/individu}} -->
 
 
 <!-- {{>menage}} -->
-<div class="panel {{#errors.menages[entityId]}}panel-danger {{/}}panel-default">
+<div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
   <div class="panel-heading">
     <div class="btn-group pull-right">
-      <button accesskey="s" class="btn btn-default btn-xs" on-click="showEditEntityModal:menages" type="button">
+      <button class="btn btn-default btn-xs" on-click="showEditModal:'menages',{{entityId}}" type="button">
         Éditer
       </button>
       <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -491,123 +393,108 @@
     </div>
     <h3 class="panel-title">
       <a data-toggle="collapse" href="#collapse-menage-{{entityId}}">
-        Ménage{{#nom_menage}} « {{nom_menage}} »{{/}}
+        {{entityLabel('menages', entityId)}}
       </a>
     </h3>
   </div>
   <div id="collapse-menage-{{entityId}}" class="collapse in list-group panel-collapse">
+{{#.personne_de_reference}}
     <div class="list-group-item">
       <p>Personne de référence</p>
-{{#_.isString(((errors.menages || {})[entityId] || {}).personne_de_reference)}}
-      <p class="text-danger">{{errors.menages[entityId].personne_de_reference}}</p>
-{{/}}
-{{#getKey(testCase.individus, personne_de_reference)}}
-      <p class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-        {{>individuLinks}}
-        {{>individuError}}
-      </p>
-{{/}}
-{{^personne_de_reference}}
+  {{#.error}}
+      <p class="text-danger">{{.error}}</p>
+  {{/}}
+  {{#.individu}}
+      <p>{{>individu}}</p>
+  {{/}}
+  {{^.individu}}
       <p><a href="#" on-click="addIndividu:'menages','personne_de_reference'">Ajouter</a></p>
-{{/}}
+  {{/}}
     </div>
+{{/}}
+{{#.conjoint}}
     <div class="list-group-item">
-      <p>Conjoint de la personne de référence</p>
-{{#_.isString(((errors.menages || {})[entityId] || {}).conjoint)}}
-      <p class="text-danger">{{errors.menages[entityId].conjoint}}</p>
-{{/}}
-{{#getKey(testCase.individus, conjoint)}}
-      <p class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-        {{>individuLinks}}
-        {{>individuError}}
-      </p>
-{{/}}
-{{^conjoint}}
+      <p>Conjoint</p>
+  {{#.error}}
+      <p class="text-danger">{{.error}}</p>
+  {{/}}
+  {{#.individu}}
+      <p>{{>individu}}</p>
+  {{/}}
+  {{^.individu}}
       <p><a href="#" on-click="addIndividu:'menages','conjoint'">Ajouter</a></p>
-{{/}}
+  {{/}}
     </div>
+{{/}}
+{{#.enfants}}
     <div class="list-group-item">
       <p>Enfants</p>
-{{#_.isString(((errors.menages || {})[entityId] || {}).enfants)}}
-      <p class="text-danger">{{errors.menages[entityId].enfants}}</p>
-{{/}}
-      <ul>
-{{#enfants:roleIdx}}
-  {{#getKey(testCase.individus, this)}}
-        <li class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-          {{>individuLinks}}
-          {{>individuError}}
-    {{#_.isObject(((errors.menages || {})[entityId] || {}).enfants)}}
-          <p class="text-danger">{{errors.menages[entityId].enfants[roleIdx]}}</p>
-    {{/}}
-        </li>
+  {{#.error}}
+      <p class="text-danger">{{.error}}</p>
   {{/}}
-{{/}}
+      <ul>
+  {{#.individus}}
+        <li>{{>individu}}</li>
+  {{/}}
         <li><a href="#" on-click="addIndividu:'menages','enfants'">Ajouter</a></li>
       </ul>
+    </div>
+{{/}}
+{{#.autres}}
+    <div class="list-group-item">
       <p>Autres</p>
-{{#_.isString(((errors.menages || {})[entityId] || {}).autres)}}
-      <p class="text-danger">{{errors.menages[entityId].autres}}</p>
-{{/}}
-      <ul>
-{{#autres:roleIdx}}
-  {{#getKey(testCase.individus, this)}}
-        <li class="{{#_.isObject((errors.individus || {})[id])}}alert alert-danger{{/}}">
-          {{>individuLinks}}
-          {{>individuError}}
-    {{#_.isObject(((errors.menages || {})[entityId] || {}).autres)}}
-          <p class="text-danger">{{errors.menages[entityId].autres[roleIdx]}}</p>
-    {{/}}
-        </li>
+  {{#.error}}
+      <p class="text-danger">{{.error}}</p>
   {{/}}
-{{/}}
+      <ul>
+  {{#.individus}}
+        <li>{{>individu}}</li>
+  {{/}}
         <li><a href="#" on-click="addIndividu:'menages','autres'">Ajouter</a></li>
       </ul>
     </div>
+{{/}}
   </div>
 </div>
 <!-- {{/menage}} -->
 
 
-<!-- {{>moveIndividuModal}} -->
-<div class="modal" id="move-individu-modal" tabindex="-1" role="dialog" aria-labelledby="move-individu-modal-title"
-  aria-hidden="true">
+<!-- {{>moveModal}} -->
+<div class="modal" id="move-modal" tabindex="-1" role="dialog" aria-labelledby="move-modal-title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
           &times;
         </button>
-        <h4 class="modal-title" id="move-individu-modal-title">
-          Déplacer {{(getKey(testCase.individus, individuId) || {}).nom_individu}}
+        <h4 class="modal-title" id="move-modal-title">
+          Déplacer {{entityLabel(.individuId)}}
         </h4>
       </div>
-      <form role="form">
+      <form on-submit="move" role="form">
         <div class="modal-body">
-{{#famille}}
-          {{>moveIndividuModalFamille}}
+{{#.famille}}
+          {{>moveModalFamille}}
 {{/}}
-{{#foyerFiscal}}
-          {{>moveIndividuModalFoyerFiscal}}
+{{#.foyerFiscal}}
+          {{>moveModalFoyerFiscal}}
 {{/}}
-{{#menage}}
-          {{>moveIndividuModalMenage}}
+{{#.menage}}
+          {{>moveModalMenage}}
 {{/}}
         </div>
         <div class="modal-footer">
           <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Annuler</button>
-          <button class="btn btn-primary" data-dismiss="modal" on-click="moveIndividu" type="submit">
-            Valider
-          </button>
+          <button class="btn btn-primary" type="submit">Valider</button>
         </div>
       </form>
     </div>
   </div>
 </div>
-<!-- {{/moveIndividuModal}} -->
+<!-- {{/moveModal}} -->
 
 
-<!-- {{>moveIndividuModalFamille}} -->
+<!-- {{>moveModalFamille}} -->
 <div class="form-group">
   <label class="control-label" for="famille">Famille</label>
   <select class="form-control" id="famille" value="{{.id}}">
@@ -629,10 +516,10 @@
 {{/}}
   </select>
 </div>
-<!-- {{/moveIndividuModalFamille}} -->
+<!-- {{/moveModalFamille}} -->
 
 
-<!-- {{>moveIndividuModalFoyerFiscal}} -->
+<!-- {{>moveModalFoyerFiscal}} -->
 <div class="form-group">
   <label class="control-label" for="foyer-fiscal">Déclaration d'impôt</label>
   <select class="form-control" id="foyer-fiscal" value="{{.id}}">
@@ -654,10 +541,10 @@
 {{/}}
   </select>
 </div>
-<!-- {{/moveIndividuModalFoyerFiscal}} -->
+<!-- {{/moveModalFoyerFiscal}} -->
 
 
-<!-- {{>moveIndividuModalMenage}} -->
+<!-- {{>moveModalMenage}} -->
 <div class="form-group">
   <label class="control-label" for="menage">Ménage</label>
   <select class="form-control" id="menage" value="{{.id}}">
@@ -681,4 +568,4 @@
 {{/}}
   </select>
 </div>
-<!-- {{/moveIndividuModalMenage}} -->
+<!-- {{/moveModalMenage}} -->

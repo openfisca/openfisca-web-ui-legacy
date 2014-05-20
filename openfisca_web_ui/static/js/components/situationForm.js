@@ -15,6 +15,11 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
     return;
   }
 
+  var guid = (function() {
+    function s4() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); }
+    return function() { return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4(); };
+  })();
+
   var entitiesMetadata = {
     familles: {
       lists: ['enfants', 'parents'],
@@ -28,55 +33,40 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
     },
   };
 
-  var SituationFormV = Ractive.extend({
+  var SituationForm = Ractive.extend({
     computed: {
       testCaseForAPI: function() {
         // Returns a copy of testCase reworked to be compliant with the API inputs.
         var testCase = this.get('testCase');
-        if (testCase === null) {
-          return null;
-        } else {
+        if (testCase) {
           // Remove individu IDs.
           var testCaseForAPI = _.omit(testCase, 'individus'); // This is a copy.
           testCaseForAPI.individus = _.object(
             _.map(testCase.individus, function(individu, id) { return [id, _.omit(individu, 'id')];})
           );
           return testCaseForAPI;
+        } else {
+          return null;
         }
-      }
+      },
     },
     data: {
       _: _,
-      columns: null,
-      columnsTree: null,
       defaultLabel: function(column) {
-        var modalType = this.get('modal.type');
-        var suggestedValue;
-        switch (modalType) {
-          case 'editEntity':
-            var entityId = this.get('modal.entityId');
-            var entityKey = this.get('modal.entityKey');
-            suggestedValue = this.get(['suggestions', entityKey, entityId, column.name].join('.'));
-            break;
-          case 'editIndividu':
-            var individuId = this.get('modal.values.id');
-            suggestedValue = this.get('suggestions.individus.' + individuId + '.' + column.name);
-            break;
-        }
         function booleanToString(value) { return value ? 'Oui' : 'Non'; }
         switch (column['@type']) {
           case 'Boolean':
-            if (_.isUndefined(suggestedValue)) {
+            if (_.isUndefined(column.suggestion)) {
               return 'valeur par défaut : ' + booleanToString(column.default); // jshint ignore:line
             } else {
-              return 'valeur suggérée : ' + booleanToString(suggestedValue); // jshint ignore:line
+              return 'valeur suggérée : ' + booleanToString(column.suggestion); // jshint ignore:line
             }
             break;
           case 'Enumeration':
-            if (_.isUndefined(suggestedValue)) {
-              return column.labels[column.default] + ' (valeur par défaut)';
+            if (_.isUndefined(column.suggestion)) {
+              return 'valeur par défaut : ' + column.labels[column.default]; // jshint ignore:line
             } else {
-              return column.labels[suggestedValue] + ' (valeur suggérée)';
+              return 'valeur suggérée : ' + column.labels[column.suggestion]; // jshint ignore:line
             }
             break;
         }
@@ -84,50 +74,146 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       },
       entityLabel: function(entityKey, entityId) {
         var noun = {
-          familles: 'famille',
-          foyers_fiscaux: 'déclaration d\'impôt', // jshint ignore:line
-          menages: 'ménage',
+          familles: 'Famille',
+          foyers_fiscaux: 'Déclaration d\'impôt', // jshint ignore:line
+          individus: '',
+          menages: 'Ménage',
         }[entityKey];
         var entityNameKey = {
           familles: 'nom_famille',
           foyers_fiscaux: 'nom_foyer_fiscal', // jshint ignore:line
+          individus: 'nom_individu',
           menages: 'nom_menage',
         }[entityKey];
         var name = this.get(['testCase', entityKey, entityId, entityNameKey].join('.'));
-        return {name: name, noun: noun};
+        var label = noun;
+        if (name) {
+          label += ' ' + name;
+        }
+        return label;
       },
-      errors: null,
-      getKey: function(obj, key) { return ! _.isUndefined(key) && key in obj ? obj[key.toString()] : null; },
-      modal: null,
-      suggestions: null,
-      testCase: null,
+      categories: function(entityKey, entityId, errors, suggestions) {
+        // Create an entity with categories, columns, errors and suggestions.
+        if (_.isUndefined(entityKey)) {
+          return [];
+        }
+        errors = errors || {};
+        suggestions = suggestions || {};
+        var entity = this.get(['testCase', entityKey, entityId].join('.'));
+        var enrichColumn = function(columnName) {
+          var column = _.clone(this.get('columns.' + columnName));
+          column.value = columnName in entity ? entity[columnName] : '';
+          var entityErrors = (errors[entityKey] || {})[entityId];
+          if ( ! _.isUndefined(entityErrors) && columnName in entityErrors) {
+            column.error = errors[entityKey][entityId][columnName];
+          }
+          var entitySuggestions = (suggestions[entityKey] || {})[entityId];
+          if ( ! _.isUndefined(entitySuggestions) && columnName in entitySuggestions) {
+            column.suggestion = suggestions[entityKey][entityId][columnName];
+          }
+          return column;
+        }.bind(this);
+        var categories = _.map(this.get('columnsTree.' + entityKey + '.children'), function(category) {
+          var columns = _.map(category.children, enrichColumn);
+          var hasKey = function(key) {
+            return _(columns).chain().pluck(key).reject(_.isUndefined).value().length > 0;
+          };
+          return {
+            columns: columns,
+            hasErrors: hasKey('error'),
+            hasSuggestions: hasKey('suggestion'),
+            label: category.label,
+          };
+        });
+        return categories;
+      },
+      withLinkedObjects: function(entityKey, entities, errors, suggestions) {
+        // Resolve links and return a unique object containing the entities with its "individus" (instead of IDs),
+        // errors and suggestions at the right imbrication level.
+        errors = errors || {};
+        suggestions = suggestions || {};
+        var individuData = function(individuId) {
+          return {
+            entityId: individuId,
+            hasErrors: !! (errors.individus || {})[individuId],
+            hasSuggestions: !! (suggestions.individus || {})[individuId],
+            label: this.get('testCase.individus.' + individuId + '.nom_individu'),
+          };
+        }.bind(this);
+        var entitiesWithLinkedObjects = _(entities).chain().map(function(entity, entityId) {
+          var newEntity = this.createEntity(entityKey);
+          var individualHasErrors = false;
+          var setErrors = function(newEntityRole, roleKey) {
+            var newEntityRoleErrors = (((errors || {})[entityKey] || {})[entityId] || {})[roleKey];
+            if (_.isString(newEntityRoleErrors)) {
+              newEntityRole.error = newEntityRoleErrors;
+            } else if (_.isObject(newEntityRoleErrors)) {
+              // Add role specific error.
+              _.each(newEntityRoleErrors, function(error, individuIdx) {
+                newEntityRole.individus[individuIdx].roleError = error;
+              });
+            }
+          };
+          // Add "individus".
+          if ('lists' in entitiesMetadata[entityKey]) {
+            _.each(entitiesMetadata[entityKey].lists, function(roleKey) {
+              var individus = _.map(entity[roleKey], individuData, this);
+              if ( ! individualHasErrors) {
+                individualHasErrors = _(individus).chain()
+                  .map(function(individu) { return individu.hasErrors; }).some().value();
+              }
+              var newEntityRole = {individus: individus};
+              setErrors(newEntityRole, roleKey);
+              newEntity[roleKey] = newEntityRole;
+            }, this);
+          }
+          if ('singletons' in entitiesMetadata[entityKey]) {
+            _.each(entitiesMetadata[entityKey].singletons, function(roleKey) {
+              var individuId = entity[roleKey];
+              var newEntityRole;
+              if (_.isUndefined(individuId)) {
+                newEntityRole = {individu: null};
+              } else {
+                var individu = individuData(individuId);
+                if ( ! individualHasErrors) {
+                  individualHasErrors = individu.hasErrors;
+                }
+                newEntityRole = {individu: individu};
+              }
+              setErrors(newEntityRole, roleKey);
+              newEntity[roleKey] = newEntityRole;
+            }, this);
+          }
+          // Entity has errors if it has errors itself or at least one of its individuals has an error.
+          newEntity.hasErrors = !! ((errors || {})[entityKey] || {})[entityId] || individualHasErrors;
+          newEntity.hasSuggestions = !! ((suggestions || {})[entityKey] || {})[entityId];
+          return [entityId, newEntity];
+        }, this).object().value();
+        return entitiesWithLinkedObjects;
+      },
     },
     template: situationFormT,
 
     init: function() {
-      this.fetchFieldsAsync();
+      this.fetchFieldsAsync().catch(function() {
+        this.set('status', {message: null, type: 'error'});
+        alert('Impossible de charger les questions du simulateur.');
+      }.bind(this))
+      .done();
       this.initEvents();
-      this.observe({
-        'testCase.*.*': function(newValue, oldValue, keypath) {
-          // Transform boolean as strings ("0" or "1") into integers.
-          _.each(newValue, function(value, columnName) {
-            if (value !== '') {
-              var columnType = this.get('columns.' + columnName + '.@type');
-              if (columnType === 'Boolean' && _.isString(value)) {
-                this.set(keypath + '.' + columnName, parseInt(value));
-              }
-            }
-          }, this);
-        },
-      }, {debug: appconfig.debug, init: false});
     },
 
     // Event methods
     initEvents: function() {
-      var saveRepairSimulateAsync = function() {
-        return this.saveTestCaseAsync()
-        .then(function() { return this.repairTestCaseAsync(); }.bind(this))
+      var simulateAsync = function() {
+        return Q(this.set('simulateInProgress', true))
         .then(function() { return chartsM.simulateAsync(this.get('testCaseForAPI')); }.bind(this))
+        .then(function() { return this.set('simulateInProgress', false); }.bind(this));
+      }.bind(this);
+      var saveRepairSimulateAsync = function() {
+        return Q.fcall(function() { this.saveTestCaseAsync(); }.bind(this))
+        .then(function() { return this.repairTestCaseAsync(); }.bind(this))
+        .then(simulateAsync);
       }.bind(this);
       this.on({
         addEntity: function(event, entityKey) {
@@ -143,9 +229,10 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           .done();
         },
         deleteEntity: function(event, entityKey) {
+          event.original.preventDefault();
           var entityId = event.index.entityId;
           var label = this.get('entityLabel').call(this, entityKey, entityId);
-          var confirmMessage = 'Supprimer ' + label.noun + (label.name ? ' « ' + label.name +' »' : '') + ' ?'; // jshint ignore:line
+          var confirmMessage = 'Supprimer ' + label + ' ?'; // jshint ignore:line
           if (confirm(confirmMessage)) {
             this.deleteEntityAsync(entityKey, entityId)
             .then(function() { return saveRepairSimulateAsync(); })
@@ -153,9 +240,9 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           }
         },
         deleteIndividu: function(event) {
+          event.original.preventDefault();
           if (confirm('Supprimer ?')) { // jshint ignore:line
-            debugger
-            Q(this.deleteIndividuAsync(event.context.id))
+            Q(this.deleteIndividuAsync(event.context.entityId))
             .then(function() { return saveRepairSimulateAsync(); })
             .done();
           }
@@ -172,7 +259,8 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           }
           alert(message);
         },
-        moveIndividu: function(event) {
+        move: function(event) {
+          event.original.preventDefault();
           Q.all([
             this.moveToEntityAsync(event.context.individuId, 'familles', event.context.famille.id,
               event.context.famille.roleKey),
@@ -182,6 +270,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
               event.context.menage.roleKey),
           ])
           .then(function() { return saveRepairSimulateAsync(); })
+          .then(function() { $(this.find('#move-modal')).modal('hide'); }.bind(this))
           .done();
         },
         repairTestCase: function(event) {
@@ -196,79 +285,88 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             .done();
           }
         },
-        saveEntity: function(event) {
-          Q(this.set(['testCase', event.context.entityKey, event.context.entityId].join('.'), event.context.values))
+        saveEntity: function(event, entityKey) {
+          event.original.preventDefault();
+          var extractValues = function(categories) {
+            return _(categories).chain()
+              .map(function(category) {
+                return _(category.columns).chain()
+                  .reject(function(column) { return column.value === ''; })
+                  .map(function(column) { return [column.name, column.value]; })
+                  .value();
+              })
+              .flatten(true)
+              .object().value();
+          };
+          var entityKeypath = ['testCase', entityKey, event.context.entityId].join('.');
+          var newEntity = extractValues(event.context.categories);
+          if (entityKey !== 'individus') {
+            var entityRoles = _.extend(entitiesMetadata[entityKey].lists, entitiesMetadata[entityKey].singletons);
+            var roleValues = _.pick(this.get(entityKeypath), entityRoles);
+            _.extend(newEntity, roleValues);
+            
+          }
+          Q(this.set(entityKeypath, newEntity))
           .then(function() { return saveRepairSimulateAsync(); })
+          .then(function() { $(this.find('#edit-modal')).modal('hide'); }.bind(this))
           .done();
         },
-        saveIndividu: function(event) {
-          Q(this.set('testCase.individus.' + event.context.values.id, event.context.values))
-          .then(function() { return saveRepairSimulateAsync(); })
-          .done();
-        },
-        showEditEntityModal: function(event, entityKey) {
+        showEditModal: function(event, entityKey, entityId) {
           event.original.preventDefault();
           Q(this.set('modal', {
-            entityId: event.index.entityId,
+            entityId: entityId,
             entityKey: entityKey,
-            type: 'editEntity',
-            values: _.clone(event.context),
+            type: 'edit',
           }))
-          .then(function() {
-            $(this.find('#edit-entity-modal')).modal('show');
-          }.bind(this))
+          .then(function() { $(this.find('#edit-modal')).modal('show'); }.bind(this))
           .done();
         },
-        showEditIndividuModal: function(event) {
+        showMoveModal: function(event) {
           event.original.preventDefault();
-          Q(this.set('modal', {
-            type: 'editIndividu',
-            values: _.clone(event.context),
-          }))
-          .then(function() {
-            $(this.find('#edit-individu-modal')).modal('show');
-          }.bind(this))
-          .done();
-        },
-        showMoveIndividuModal: function(event) {
-          event.original.preventDefault();
-          var individuId = event.context.id;
+          var individuId = event.context.entityId;
           Q(this.set('modal', {
             famille: this.findEntityInfos(individuId, 'familles') || {roleKey: 'parents'},
             foyerFiscal: this.findEntityInfos(individuId, 'foyers_fiscaux') || {roleKey: 'declarants'}, // jshint ignore:line
             individuId: individuId,
             menage: this.findEntityInfos(individuId, 'menages') || {roleKey: 'personne_de_reference'},
-            type: 'moveIndividu',
+            type: 'move',
           }))
           .then(function() {
-            $(this.find('#move-individu-modal')).modal('show');
+            $(this.find('#move-modal')).modal('show');
           }.bind(this))
           .done();
         },
         simulate: function(event) {
           event.original.preventDefault();
-          chartsM.simulate(this.get('testCaseForAPI'));
+          return simulateAsync().done();
         },
       });
     },
 
     // Data methods
     addEntityAsync: function(entityKey) {
-      var newEntityId = (_.keys((this.get('testCase.' + entityKey) || {})).length + 1).toString();
-      var newEntity = {};
-      _.each(entitiesMetadata[entityKey].lists, function(roleKey) {
-        newEntity[roleKey] = [];
-      });
-      _.each(entitiesMetadata[entityKey].singletons, function(roleKey) {
-        newEntity[roleKey] = null;
-      });
+      var newEntityId = guid();
+      var newEntity = this.createEntity(entityKey);
       return Q(this.set(['testCase', entityKey, newEntityId].join('.'), newEntity));
     },
     addIndividuAsync: function(entityKey, entityId, roleKey) {
-      var newIndividuId = (_.keys((this.get('testCase.individus') || {})).length + 1).toString();
+      var guessNextIndividuName = function() {
+        var prefix = 'Personne ';
+        var values = _(this.get('testCase.individus')).chain()
+          .map(function(individu) {
+            if (individu.nom_individu && individu.nom_individu.indexOf(prefix) === 0) { // jshint ignore:line
+              return parseInt(individu.nom_individu.slice(prefix.length, individu.nom_individu.length)); // jshint ignore:line
+            }
+          })
+          .reject(_.isUndefined)
+        .value();
+        var maxValue = values.length ? Math.max.apply(null, values) : 0;
+        return prefix + (maxValue + 1);
+      }.bind(this);
+      var newIndividuId = guid();
       return Q(this.set('testCase.individus.' + newIndividuId, {
         id: newIndividuId,
-        nom_individu: 'Personne ' + newIndividuId, // jshint ignore:line
+        nom_individu: guessNextIndividuName(), // jshint ignore:line
       }))
       .then(function() { return this.addToEntityAsync(newIndividuId, entityKey, entityId, roleKey); }.bind(this));
     },
@@ -289,6 +387,17 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
         .then(function() { return this.repairTestCaseAsync(); }.bind(this));
       }
       return promise;
+    },
+    createEntity: function(entityKey) {
+      // Create a new entity with roles initialized.
+      var newEntity = {};
+      _.each(entitiesMetadata[entityKey].lists, function(roleKey) {
+        newEntity[roleKey] = [];
+      });
+      _.each(entitiesMetadata[entityKey].singletons, function(roleKey) {
+        newEntity[roleKey] = null;
+      });
+      return newEntity;
     },
     deleteEntityAsync: function(entityKey, entityId) {
       var entityKeypath = 'testCase.' + entityKey;
@@ -343,12 +452,12 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       }
     },
     resetTestCaseAsync: function() {
-      var individuId = '1';
-      var individu = {id: individuId, nom_individu: 'Personne ' + individuId}; // jshint ignore:line
+      var individuId = guid();
+      var individu = {id: individuId, nom_individu: 'Personne 1'}; // jshint ignore:line
       var individus = {};
       individus[individuId] = individu;
       var testCase = {familles: null, foyers_fiscaux: null, individus: individus, menages: null}; // jshint ignore:line
-      return Q(this.set({errors: null, suggestions: null, testCase: testCase}));
+      return Q(this).invoke('set', {errors: null, suggestions: null, testCase: testCase});
     },
 
     // Webservices methods
@@ -365,7 +474,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           birth['@type'] = 'Integer';
           birth.default = parseInt(birth.default.slice(0, 4));
           birth.label = 'Année de naissance';
-          birth.max = appconfig.constants.maxYear;
+          birth.max = new Date().getFullYear();
           birth.min = appconfig.constants.minYear;
           birth.val_type = 'year'; // jshint ignore:line
           data.columns.nom_individu.required = true; // jshint ignore:line
@@ -379,12 +488,11 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       }.bind(this));
     },
     repairTestCaseAsync: function() {
-      var testCaseForAPI = this.get('testCaseForAPI');
       var data = {
         context: Date.now().toString(),
         scenarios: [
           {
-            test_case: testCaseForAPI, // jshint ignore:line
+            test_case: this.get('testCaseForAPI'), // jshint ignore:line
             year: chartsM.get('year'),
           },
         ],
@@ -432,7 +540,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             if ('errors' in error.responseJSON.error) {
               return Q(this.set('errors', error.responseJSON.error.errors[0].scenarios[0].test_case)); // jshint ignore:line
             } else {
-              throw new Error(error.responseJSON.error.message);
+              return Q(this.set('status', {message: error.responseJSON.error.message, type: 'error'}));
             }
           } else {
             throw error;
@@ -441,22 +549,26 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       );
     },
     saveTestCaseAsync: function() {
-      return Q($.ajax({
-        contentType: 'application/json',
-        data: JSON.stringify({
-          context: Date.now().toString(),
-          test_case: this.get('testCase'), // jshint ignore:line
-        }),
-        method: 'POST',
-        url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
-      }));
+      return Q(this.set('status', {message: 'Sauvegarde', type: 'info'}))
+      .then(function() {
+        return $.ajax({
+          contentType: 'application/json',
+          data: JSON.stringify({
+            context: Date.now().toString(),
+            test_case: this.get('testCase'), // jshint ignore:line
+          }),
+          method: 'POST',
+          url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
+        });
+      }.bind(this))
+      .then(function() { this.set('status', null); }.bind(this));
     },
   });
 
-  var situationFormV = new SituationFormV({
+  var situationForm = new SituationForm({
     debug: appconfig.debug,
     el: '#form-wrapper',
   });
 
-  return situationFormV;
+  return situationForm;
 });

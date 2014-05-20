@@ -10,11 +10,11 @@ define([
   'disclaimer',
   'legislation',
   'router',
-  'situationFormV',
+  'situationForm',
   'testCasesServiceM',
 ],
 function ($, Q, AcceptCnilConditionsModalV, AcceptCookiesModalV, appconfig, auth, chartsV, disclaimer,
-  legislation, router, situationFormV, testCasesServiceM) {
+  legislation, router, situationForm, testCasesServiceM) {
   'use strict';
 
   function init() {
@@ -44,10 +44,15 @@ function ($, Q, AcceptCnilConditionsModalV, AcceptCookiesModalV, appconfig, auth
     if (enabledModules.situationForm) {
       testCasesServiceM.fetchCurrentTestCaseAsync()
       .then(function(data) {
-        var promise = (data === null) ? situationFormV.resetTestCaseAsync() : Q(situationFormV.set('testCase', data));
+        var promise;
+        if (data === null) {
+          promise = situationForm.resetTestCaseAsync();
+        } else {
+          promise = Q(situationForm).invoke('set', 'testCase', data);
+        }
         return promise
-        .then(function() { return situationFormV.repairTestCaseAsync(); })
-        .then(function() { return chartsV.model.simulateAsync(situationFormV.get('testCaseForAPI')); });
+        .then(function() { return situationForm.repairTestCaseAsync(); })
+        .then(function() { return chartsV.model.simulateAsync(situationForm.get('testCaseForAPI')); });
       })
       .then(function() { router.init(); })
       .done();
