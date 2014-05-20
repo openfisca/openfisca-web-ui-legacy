@@ -10,7 +10,7 @@ build-js:
 clean:
 	rm -Rf cache/templates/
 	find -name '*.pyc' -exec rm \{\} \;
-	rm -f $(MAIN_BUILT_JS)
+	rm -f $(MAIN_BUILT_JS) $(MAIN_BUILT_JS).map
 
 flake8:
 	flake8
