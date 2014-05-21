@@ -68,7 +68,7 @@ setup(
         'Biryani1 >= 0.9dev',
         #'bleach >= 1.2',
         'Mako >= 0.7',
-        'pymongo >= 2.2',
+#        'pymongo >= 2.2',
         'requests >= 1.0',
         'WebError >= 0.10',
         'WebOb >= 1.1',
