@@ -127,6 +127,15 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
         });
         return categories;
       },
+      individuButtonTitle: function(individu) {
+        if (individu.hasErrors) {
+            return 'Cette personne contient des erreurs. Cliquez pour l\'éditer.';
+        } else if (individu.hasSuggestions) {
+            return 'Cette personne contient des valeurs suggérées par le simulateur. Cliquez pour l\'éditer.';
+        } else {
+            return 'Éditer';
+        }
+      },
       withLinkedObjects: function(entityKey, entities, errors, suggestions) {
         // Resolve links and return a unique object containing the entities with its "individus" (instead of IDs),
         // errors and suggestions at the right imbrication level.
@@ -247,18 +256,6 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             .done();
           }
         },
-        explainSuggestion: function(event, context) {
-          var message;
-          if (context === 'category') {
-            message = 'Cette catégorie contient des valeurs suggérées par le simulateur.';
-          } else if (context === 'formControl') {
-            message = 'Le simulateur a suggéré cette valeur et l\'a utilisée dans ses calculs. ' +
-              'Vous pouvez la modifier ou la conserver en la saisissant explicitement.';
-          } else if (context === 'individu') {
-            message = 'Cette personne contient des valeurs suggérées par le simulateur.';
-          }
-          alert(message);
-        },
         move: function(event) {
           event.original.preventDefault();
           Q.all([
@@ -306,18 +303,21 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             _.extend(newEntity, roleValues);
             
           }
-          Q(this.set(entityKeypath, newEntity))
+          Q.fcall(function() { $(this.find('#edit-modal')).modal('hide'); }.bind(this))
+          .then(function() { return this.set('modal', null); }.bind(this))
+          .then(function() { return this.set(entityKeypath, newEntity); }.bind(this))
           .then(function() { return saveRepairSimulateAsync(); })
-          .then(function() { $(this.find('#edit-modal')).modal('hide'); }.bind(this))
           .done();
         },
         showEditModal: function(event, entityKey, entityId) {
           event.original.preventDefault();
-          Q(this.set('modal', {
-            entityId: entityId,
-            entityKey: entityKey,
-            type: 'edit',
-          }))
+          Q.fcall(function() {
+              return this.set('modal', {
+                entityId: entityId,
+                entityKey: entityKey,
+                type: 'edit',
+              });
+          }.bind(this))
           .then(function() { $(this.find('#edit-modal')).modal('show'); }.bind(this))
           .done();
         },

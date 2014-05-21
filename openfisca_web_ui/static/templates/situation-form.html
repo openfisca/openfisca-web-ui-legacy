@@ -66,7 +66,7 @@
         <h4 class="modal-title" id="edit-modal-title">Éditer {{entityLabel(.entityKey, .entityId)}}</h4>
       </div>
 {{#{
-  categories: categories(.entityKey, .entityId, errors, suggestions),
+  categories: .entityKey && categories(.entityKey, .entityId, errors, suggestions),
   entityKey: entityKey,
   entityId: entityId
 }}}
@@ -77,7 +77,7 @@
             <div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
               <div class="panel-heading">
     {{#.hasSuggestions}}
-                <span class="glyphicon glyphicon glyphicon-info-sign pull-right" on-click="explainSuggestion:category"
+                <span class="glyphicon glyphicon glyphicon-info-sign pull-right"
                   title="Cette catégorie contient des valeurs suggérées par le simulateur."></span>
     {{/}}
                 <h4 class="panel-title">
@@ -112,11 +112,11 @@
 <!-- {{>famille}} -->
 <div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
   <div class="panel-heading">
-    <div class="btn-group pull-right">
-      <button class="btn btn-default btn-xs" on-click="showEditModal:'familles',{{entityId}}" type="button">
-        Éditer
+    <div class="btn-group">
+      <button class="btn btn-default btn-sm" on-click="showEditModal:'familles',{{entityId}}" type="button">
+        {{entityLabel('familles', entityId)}}
       </button>
-      <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>
       </button>
@@ -124,13 +124,8 @@
         <li><a href="#" on-click="deleteEntity:familles">Supprimer</a></li>
       </ul>
     </div>
-    <h3 class="panel-title">
-      <a data-toggle="collapse" href="#collapse-famille-{{entityId}}">
-        {{entityLabel('familles', entityId)}}
-      </a>
-    </h3>
   </div>
-  <div id="collapse-famille-{{entityId}}" class="collapse in list-group panel-collapse">
+  <div class="list-group">
 {{#.parents}}
     <div class="list-group-item">
       <p>Parents</p>
@@ -221,7 +216,7 @@
 <label class="control-label" for="{{name}}">{{label}}</label>
 <div class="row">
   <div class="col-md-4">
-  {{#val_type === 'monetary' || suggestion}}
+  {{#val_type === 'monetary' || (suggestion && ! error)}}
     <div class="input-group">
       {{>formIntegerControl}}
       <span class="input-group-addon">
@@ -234,7 +229,7 @@
       </span>
     </div>
   {{/}}
-  {{^val_type === 'monetary' || suggestion}}
+  {{^val_type === 'monetary' || (suggestion && ! error)}}
     {{>formIntegerControl}}
   {{/}}
   </div>
@@ -268,7 +263,7 @@
 
 
 <!-- {{>formControlSuggestionGlyphicon}} -->
-<span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:formControl"
+<span class="glyphicon glyphicon glyphicon-info-sign"
   title="Valeur suggérée par le simulateur et utilisée dans ses calculs."></span>
 <!-- {{/formControlSuggestionGlyphicon}} -->
 
@@ -296,11 +291,11 @@
 <!-- {{>foyerFiscal}} -->
 <div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
   <div class="panel-heading">
-    <div class="btn-group pull-right">
-      <button class="btn btn-default btn-xs" on-click="showEditModal:'foyers_fiscaux',{{entityId}}" type="button">
-        Éditer
+    <div class="btn-group">
+      <button class="btn btn-default btn-sm" on-click="showEditModal:'foyers_fiscaux',{{entityId}}" type="button">
+        {{entityLabel('foyers_fiscaux', entityId)}}
       </button>
-      <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>
       </button>
@@ -308,13 +303,8 @@
         <li><a href="#" on-click="deleteEntity:foyers_fiscaux">Supprimer</a></li>
       </ul>
     </div>
-    <h3 class="panel-title">
-      <a data-toggle="collapse" href="#collapse-foyer-fiscal-{{entityId}}">
-        {{entityLabel('foyers_fiscaux', entityId)}}
-      </a>
-    </h3>
   </div>
-  <div id="collapse-foyer-fiscal-{{entityId}}" class="collapse in list-group panel-collapse">
+  <div class="list-group">
 {{#.declarants}}
     <div class="list-group-item">
       <p>Déclarants</p>
@@ -350,19 +340,18 @@
 
 <!-- {{>individu}} -->
 <div class="btn-group" style="margin-bottom: 0.3em;">
-  <button class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-xs"
-    on-click="showEditModal:'individus',{{.entityId}}" title="Éditer" type="button">
+  <button class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-sm"
+    on-click="showEditModal:'individus',{{.entityId}}" title="{{this && individuButtonTitle(.)}}" type="button">
     {{.label}}
+{{#.hasSuggestions}}
+    <span class="glyphicon glyphicon glyphicon-info-sign"></span>
+{{/}}
   </button>
-  <button type="button" class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-xs dropdown-toggle"
+  <button type="button" class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-sm dropdown-toggle"
     data-toggle="dropdown">
     <span class="caret"></span>
     <span class="sr-only">Toggle Dropdown</span>
   </button>
-{{#.hasSuggestions}}
-  <span class="glyphicon glyphicon glyphicon-info-sign" on-click="explainSuggestion:individu"
-    style="margin-left: 0.3em" title="Cette personne contient des valeurs suggérées par le simulateur."></span>
-{{/}}
   <ul class="dropdown-menu" role="menu">
     <li role="presentation">
       <a href="#" on-click="showMoveModal" role="menuitem" tabindex="-1">Déplacer</a>
@@ -379,11 +368,11 @@
 <!-- {{>menage}} -->
 <div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
   <div class="panel-heading">
-    <div class="btn-group pull-right">
-      <button class="btn btn-default btn-xs" on-click="showEditModal:'menages',{{entityId}}" type="button">
-        Éditer
+    <div class="btn-group">
+      <button class="btn btn-default btn-sm" on-click="showEditModal:'menages',{{entityId}}" type="button">
+        {{entityLabel('menages', entityId)}}
       </button>
-      <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>
       </button>
@@ -391,13 +380,8 @@
         <li><a href="#" on-click="deleteEntity:menages">Supprimer</a></li>
       </ul>
     </div>
-    <h3 class="panel-title">
-      <a data-toggle="collapse" href="#collapse-menage-{{entityId}}">
-        {{entityLabel('menages', entityId)}}
-      </a>
-    </h3>
   </div>
-  <div id="collapse-menage-{{entityId}}" class="collapse in list-group panel-collapse">
+  <div class="list-group">
 {{#.personne_de_reference}}
     <div class="list-group-item">
       <p>Personne de référence</p>
