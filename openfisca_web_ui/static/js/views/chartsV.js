@@ -87,9 +87,8 @@ function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, 
 			this.model.set('legislation', $(evt.target).val());
 		},
 		onTestCaseChange: function (evt) {
-			// TODO Configure URL.
-			window.location.href = '/test_cases/' + $(evt.target).val() + '/use?redirect=' +
-				window.location.pathname + window.location.hash;
+			window.location.href = appconfig.enabledModules.charts.urlPaths.testCasesBaseUrl + '/' +
+				$(evt.target).val() + '/use?redirect=' + window.location.pathname + window.location.hash;
 		},
 		onYearChange: function (evt) {
 			this.model.set('year', parseInt($(evt.target).val()));

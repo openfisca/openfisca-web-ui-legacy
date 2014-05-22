@@ -164,6 +164,7 @@ def index_appconfig(ctx):
             'urlPaths': {
                 'legislationsSearch': urls.get_url(ctx, 'api/1/legislations/search'),
                 'testCasesSearch': urls.get_url(ctx, 'api/1/test_cases/search'),
+                'testCasesBaseUrl': urls.get_url(ctx, u'test_cases'),
                 'visualizationsSearch': urls.get_url(ctx, 'api/1/visualizations/search'),
                 },
             },
