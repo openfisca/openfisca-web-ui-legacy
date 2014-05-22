@@ -16,11 +16,13 @@ define([
 			var visualizationData = _.find(visualizationsServiceM.get('visualizations'), function(item) {
 				return item.slug === chartsM.get('currentChartSlug');
 			});
-			this.$el.empty().append($('<iframe>', {
-				'class': 'visualization-iframe',
-				src: visualizationData.iframeSrcUrl + '&height=' + this.$el.height() + '&width=' + this.$el.width() +
-					'&legislation_url=' + (chartsM.get('legislation') || '') + '&year=' + chartsM.get('year'),
-			}));
+			if ( ! _.isUndefined(visualizationData)) {
+				this.$el.empty().append($('<iframe>', {
+					'class': 'visualization-iframe',
+					src: visualizationData.iframeSrcUrl + '&height=' + this.$el.height() + '&width=' + this.$el.width() +
+						'&legislation_url=' + (chartsM.get('legislation') || '') + '&year=' + chartsM.get('year'),
+				}));
+			}
 		},
 	});
 
