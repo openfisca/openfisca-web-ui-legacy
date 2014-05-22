@@ -219,22 +219,22 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
         .then(function() { return chartsM.simulateAsync(this.get('testCaseForAPI')); }.bind(this))
         .then(function() { return this.set('simulateInProgress', false); }.bind(this));
       }.bind(this);
-      var saveRepairSimulateAsync = function() {
-        return Q.fcall(function() { this.saveTestCaseAsync(); }.bind(this))
-        .then(function() { return this.repairTestCaseAsync(); }.bind(this))
+      var repairSaveSimulateAsync = function() {
+        return Q.fcall(function() { return this.repairTestCaseAsync(); }.bind(this))
+        .then(function() { this.saveTestCaseAsync(); }.bind(this))
         .then(simulateAsync);
       }.bind(this);
       this.on({
         addEntity: function(event, entityKey) {
           event.original.preventDefault();
           this.addEntityAsync(entityKey)
-          .then(function() { return saveRepairSimulateAsync(); })
+          .then(function() { return repairSaveSimulateAsync(); })
           .done();
         },
         addIndividu: function(event, entityKey, roleKey) {
           event.original.preventDefault();
           this.addIndividuAsync(entityKey, event.index.entityId, roleKey)
-          .then(function() { return saveRepairSimulateAsync(); })
+          .then(function() { return repairSaveSimulateAsync(); })
           .done();
         },
         deleteEntity: function(event, entityKey) {
@@ -244,7 +244,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           var confirmMessage = 'Supprimer ' + label + ' ?'; // jshint ignore:line
           if (confirm(confirmMessage)) {
             this.deleteEntityAsync(entityKey, entityId)
-            .then(function() { return saveRepairSimulateAsync(); })
+            .then(function() { return repairSaveSimulateAsync(); })
             .done();
           }
         },
@@ -252,7 +252,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           event.original.preventDefault();
           if (confirm('Supprimer ?')) { // jshint ignore:line
             Q(this.deleteIndividuAsync(event.context.entityId))
-            .then(function() { return saveRepairSimulateAsync(); })
+            .then(function() { return repairSaveSimulateAsync(); })
             .done();
           }
         },
@@ -266,19 +266,19 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             this.moveToEntityAsync(event.context.individuId, 'menages', event.context.menage.id,
               event.context.menage.roleKey),
           ])
-          .then(function() { return saveRepairSimulateAsync(); })
+          .then(function() { return repairSaveSimulateAsync(); })
           .then(function() { $(this.find('#move-modal')).modal('hide'); }.bind(this))
           .done();
         },
         repairTestCase: function(event) {
           event.original.preventDefault();
-          return saveRepairSimulateAsync().done();
+          return repairSaveSimulateAsync().done();
         },
         resetTestCase: function(event) {
           event.original.preventDefault();
           if (confirm('Réinitialiser à la situation par défaut ?')) { // jshint ignore:line
             this.resetTestCaseAsync()
-            .then(function() { return saveRepairSimulateAsync(); })
+            .then(function() { return repairSaveSimulateAsync(); })
             .done();
           }
         },
@@ -306,7 +306,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           Q.fcall(function() { $(this.find('#edit-modal')).modal('hide'); }.bind(this))
           .then(function() { return this.set('modal', null); }.bind(this))
           .then(function() { return this.set(entityKeypath, newEntity); }.bind(this))
-          .then(function() { return saveRepairSimulateAsync(); })
+          .then(function() { return repairSaveSimulateAsync(); })
           .done();
         },
         showEditModal: function(event, entityKey, entityId) {
@@ -555,7 +555,7 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           contentType: 'application/json',
           data: JSON.stringify({
             context: Date.now().toString(),
-            test_case: this.get('testCase'), // jshint ignore:line
+            test_case: this.get('testCaseForAPI'), // jshint ignore:line
           }),
           method: 'POST',
           url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
