@@ -81,15 +81,11 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
             <dd>${value}</dd>
     % endif
 <%
-    test_case_url = urllib.quote('{}?{}'.format(
-        urls.get_full_url(ctx, 'api/1/test_cases/current'),
-        urllib.urlencode({'token': ctx.session.anonymous_token if ctx.session is not None else ''}),
-        ))
     value = visualization.url
 %>\
     % if value is not None:
             <dt>${_(u'Visualization URL')}</dt>
-            <dd><a href="${value.format(test_case_url = test_case_url)}" target="_blank">${value}</a></dd>
+            <dd><a href="${value}" target="_blank">${value}</a></dd>
     % endif
 <%
     value = visualization.enabled
