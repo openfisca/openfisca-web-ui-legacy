@@ -22,10 +22,7 @@ function ($, _, Backbone, appconfig) {
 		fetch: function() {
 			return $.ajax({
 				context: this,
-				data: {
-					enabled: true,
-					iframe: true
-				},
+				data: {enabled: true},
 				type: 'GET',
 				url: appconfig.enabledModules.charts.urlPaths.visualizationsSearch,
 			})

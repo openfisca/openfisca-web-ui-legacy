@@ -30,7 +30,6 @@ import collections
 import logging
 import pymongo
 import re
-import urllib
 
 from biryani1.states import default_state
 import webob
@@ -52,10 +51,6 @@ def make_inputs_to_visualization_data(include_admin_fields):
 
         fields = dict(
             description = conv.cleanup_text,
-            iframe = conv.pipe(
-                conv.guess_bool,
-                conv.default(False),
-                ),
             thumbnail_url = conv.make_input_to_url(full = True),
             organization = conv.cleanup_line,
             title = conv.pipe(
@@ -78,17 +73,7 @@ def make_inputs_to_visualization_data(include_admin_fields):
                     conv.default(False),
                     ),
                 ))
-
-        return conv.pipe(
-            conv.struct(
-                fields,
-                default = 'drop',
-                ),
-            conv.test(
-                lambda values: not values['iframe'] or '{simulate_url}' in values['url'],
-                error = {'iframe': state._(u'Visualization URL must contain the "{simulate_url}" pattern if checked.')},
-                ),
-            )(values, state)
+        return conv.struct(fields, default = 'drop')(values, state)
     return inputs_to_visualization_data
 
 
@@ -117,7 +102,6 @@ def admin_edit(req):
             description = visualization.description,
             enabled = visualization.enabled,
             featured = visualization.featured,
-            iframe = visualization.iframe,
             thumbnail_url = visualization.thumbnail_url,
             organization = visualization.organization,
             title = visualization.title,
@@ -274,7 +258,6 @@ def api1_search(req):
     inputs = dict(
         enabled = params.get('enabled'),
         featured = params.get('featured'),
-        iframe = params.get('iframe'),
         page = params.get('page'),
         sort = params.get('sort'),
         term = params.get('term'),
@@ -284,7 +267,6 @@ def api1_search(req):
             dict(
                 enabled = conv.guess_bool,
                 featured = conv.guess_bool,
-                iframe = conv.guess_bool,
                 page = conv.pipe(
                     conv.input_to_int,
                     conv.test_greater_or_equal(1),
@@ -303,7 +285,7 @@ def api1_search(req):
         return wsgihelpers.bad_request(ctx, explanation = errors)
 
     criteria = {}
-    for boolean_name in ('enabled', 'featured', 'iframe'):
+    for boolean_name in ('enabled', 'featured'):
         if data[boolean_name] is not None:
             criteria[boolean_name] = {'$exists': data[boolean_name]}
     if data['term'] is not None:
@@ -326,18 +308,9 @@ def api1_search(req):
                 'description': visualization.description,
                 'enabled': bool(visualization.enabled),
                 'featured': bool(visualization.featured),
-                'iframe': bool(visualization.iframe),
+                'iframeSrcUrl': visualization.iframe_src_url(ctx),
                 'published': visualization.published.isoformat(),
                 'slug': visualization.slug,
-                'sourceUrl': visualization.url.format(
-                    simulate_url = urllib.quote(
-                        urls.get_full_url(ctx, 'api/1/simulate') if ctx.session is None else
-                        u'{}?{}'.format(
-                            urls.get_full_url(ctx, 'api/1/simulate'),
-                            urllib.urlencode({'token': ctx.session.anonymous_token}),
-                            )
-                        ),
-                    ),
                 'title': visualization.title,
                 'thumbnailUrl': visualization.thumbnail_url,
                 'updated': visualization.updated.isoformat(),
@@ -389,7 +362,6 @@ def extract_visualization_inputs_from_params(ctx, params = None):
         description = params.get('description'),
         enabled = params.get('enabled'),
         featured = params.get('featured'),
-        iframe = params.get('iframe'),
         thumbnail_url = params.get('thumbnail-url'),
         organization = params.get('organization'),
         title = params.get('title'),
@@ -493,7 +465,6 @@ def user_edit(req):
             description = visualization.description,
             enabled = visualization.enabled,
             featured = visualization.featured,
-            iframe = visualization.iframe,
             thumbnail_url = visualization.thumbnail_url,
             organization = visualization.organization,
             title = visualization.title,

@@ -134,6 +134,11 @@ form[name=situation] button.add {
     margin-right: 1em;
 }
 
+.chart-wrapper {
+    height: 600px;
+    width: 100%;
+}
+
 #charts-wrapper {
     position: relative;
 }
@@ -154,7 +159,7 @@ form[name=situation] button.add {
 }
 
 .visualization-iframe {
-    width: 100%;
-    height: 600px;
     border: none;
+    height: 600px;
+    width: 100%;
 }

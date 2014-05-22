@@ -53,9 +53,8 @@ from openfisca_web_ui import model, urls
         <div class="panel panel-default">
             <div class="panel-body">
                 <%self:view_fields/>
-    % if visualization.iframe is True:
-                <%self:view_content/>
-    % endif
+                <h4>Prévisualisation pour l'année 2013</h4>
+                <iframe class="visualization-iframe" src="${visualization.iframe_src_url(ctx, year=2013)}"></iframe>
             </div>
             <div class="panel-footer">
                 <div class="btn-toolbar">
@@ -72,28 +71,6 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
 </%def>
 
 
-<%def name="view_content()" filter="trim">
-<%
-    anonymous_token = ctx.session.anonymous_token if ctx.session is not None else ''
-    value = visualization.url
-    if value is None:
-        return ''
-    simulate_url = urllib.quote('{}?{}'.format(
-        urls.get_full_url(ctx, 'api/1/simulate'),
-        urllib.urlencode({'token': anonymous_token}),
-        ))
-    iframe_src_url = value.format(simulate_url = simulate_url) if '{simulate_url}' in value else None
-%>\
-    % if iframe_src_url is None:
-        <div class="alert alert-danger">
-            ${'Visualization URL does not contain "{simulate_url}" pattern.'}
-        </div>
-    % else:
-        <iframe class="visualization-iframe" src="${iframe_src_url}"></iframe>
-    % endif
-</%def>
-
-
 <%def name="view_fields()" filter="trim">
         <dl class="dl-horizontal">
 <%
@@ -104,23 +81,15 @@ ${visualization.get_title(ctx)} - ${parent.title_content()}
             <dd>${value}</dd>
     % endif
 <%
-    anonymous_token = ctx.session.anonymous_token if ctx.session is not None else ''
-    simulate_url = urllib.quote('{}?{}'.format(
-        urls.get_full_url(ctx, 'api/1/simulate'),
-        urllib.urlencode({'token': anonymous_token}),
+    test_case_url = urllib.quote('{}?{}'.format(
+        urls.get_full_url(ctx, 'api/1/test_cases/current'),
+        urllib.urlencode({'token': ctx.session.anonymous_token if ctx.session is not None else ''}),
         ))
     value = visualization.url
 %>\
     % if value is not None:
             <dt>${_(u'Visualization URL')}</dt>
-            <dd><a href="${value.format(simulate_url = simulate_url)}" target="_blank">${value}</a></dd>
-    % endif
-<%
-    value = visualization.iframe
-%>\
-    % if value is not None:
-            <dt>${_(u'Iframe')}</dt>
-            <dd>${_(u'Yes') if value else _(u'No')}</dd>
+            <dd><a href="${value.format(test_case_url = test_case_url)}" target="_blank">${value}</a></dd>
     % endif
 <%
     value = visualization.enabled

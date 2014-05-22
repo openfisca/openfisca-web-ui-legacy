@@ -31,6 +31,7 @@ import datetime
 import logging
 import re
 import requests
+import urllib
 
 import babel.dates
 from biryani1 import strings
@@ -520,7 +521,6 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
     description = None
     enabled = False
     featured = False
-    iframe = False
     organization = None
     slug = None
     thumbnail_url = None
@@ -611,6 +611,14 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
         if self._id is None and self.slug is None:
             return None
         return self.get_user_class_url(ctx, self.slug or self._id, *path, **query)
+
+    def iframe_src_url(self, ctx, year = None):
+        test_case_url = urls.get_full_url(ctx, 'api/1/test_cases/current') + '?' + \
+            urllib.urlencode({'token': '' if ctx.session is None else ctx.session.anonymous_token})
+        data = {'test_case_url': test_case_url}
+        if year is not None:
+            data['year'] = year
+        return self.url + '?' + urllib.urlencode(data)
 
     @classmethod
     def make_id_or_slug_or_words_to_instance(cls):
@@ -762,5 +770,4 @@ def setup():
 
     Visualization.ensure_index('enabled')
     Visualization.ensure_index('featured')
-    Visualization.ensure_index('iframe')
     Visualization.ensure_index('words')

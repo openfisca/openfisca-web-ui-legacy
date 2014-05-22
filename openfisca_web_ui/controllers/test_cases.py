@@ -51,13 +51,19 @@ def api1_current(req):
         current_test_case.save(safe = True)
         return wsgihelpers.no_content(ctx)
     else:
-        user = model.get_user(ctx)
+        headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
+        token, error = conv.input_to_uuid(req.params.get('token'))
+        if error is not None:
+            return wsgihelpers.respond_json(ctx, data = error, headers = headers)
+        session = ctx.session if token is None else model.Session.find_one({'anonymous_token': token})
+        # session can be None when simulating in background while accept cookie modal is displayed.
+        user = session.user if session is not None else None
         if user is None:
             api_data = None
         else:
             user.ensure_test_case()
             api_data = user.current_test_case.api_data
-        return wsgihelpers.respond_json(ctx, data = api_data)
+        return wsgihelpers.respond_json(ctx, data = api_data, headers = headers)
 
 
 @wsgihelpers.wsgify
