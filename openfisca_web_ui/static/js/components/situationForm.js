@@ -129,11 +129,11 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
       },
       individuButtonTitle: function(individu) {
         if (individu.hasErrors) {
-            return 'Cette personne contient des erreurs. Cliquez pour l\'éditer.';
+          return 'Cette personne contient des erreurs. Cliquez pour l\'éditer.';
         } else if (individu.hasSuggestions) {
-            return 'Cette personne contient des valeurs suggérées par le simulateur. Cliquez pour l\'éditer.';
+          return 'Cette personne contient des valeurs suggérées par le simulateur. Cliquez pour l\'éditer.';
         } else {
-            return 'Éditer';
+          return 'Éditer';
         }
       },
       withLinkedObjects: function(entityKey, entities, errors, suggestions) {
@@ -312,11 +312,11 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
         showEditModal: function(event, entityKey, entityId) {
           event.original.preventDefault();
           Q.fcall(function() {
-              return this.set('modal', {
-                entityId: entityId,
-                entityKey: entityKey,
-                type: 'edit',
-              });
+            return this.set('modal', {
+              entityId: entityId,
+              entityKey: entityKey,
+              type: 'edit',
+            });
           }.bind(this))
           .then(function() { $(this.find('#edit-modal')).modal('show'); }.bind(this))
           .done();
