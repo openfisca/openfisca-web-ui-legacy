@@ -196,13 +196,13 @@
 {{#this && this['@type'] === 'Enumeration'}}
 <label class="control-label" for="{{name}}">{{label}}</label>
   {{#suggestion && ! error}}
-<div class="input-group">
-  {{>formSelectControl}}
-  <span class="input-group-addon">{{>formControlSuggestionGlyphicon}}</span>
-</div>
+    <div class="input-group">
+      {{>formSelectControl}}
+      <span class="input-group-addon">{{>formControlSuggestionGlyphicon}}</span>
+    </div>
   {{/}}
   {{^suggestion}}
-{{>formSelectControl}}
+    {{>formSelectControl}}
   {{/}}
 {{/}}
 
@@ -275,16 +275,12 @@
 
 
 <!-- {{>formSelectControl}} -->
-<div class="row">
-  <div class="col-lg-6">
-    <select class="form-control" id="{{name}}" value="{{value}}">
-      <option value="">Non renseigné ({{this && defaultLabel(this)}})</option>
+<select class="form-control" id="{{name}}" value="{{value}}">
+  <option value="">Non renseigné ({{this && defaultLabel(this)}})</option>
 {{#labels:labelKey}}
-      <option value="{{labelKey}}">{{.}}</option>
+  <option value="{{labelKey}}">{{.}}</option>
 {{/labels}}
-    </select>
-  </div>
-</div>
+</select>
 <!-- {{/formSelectControl}} -->
 
 
