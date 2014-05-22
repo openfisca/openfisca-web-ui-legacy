@@ -37,16 +37,18 @@ function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, 
 		},
 		model: chartsM,
 		initialize: function () {
-			var simulate = function() { this.model.simulate(situationForm.get('testCaseForAPI')); }.bind(this);
-			var update = function() {
+			var simulate = function() {
 				var iframeVisualizationsNames = _.pluck(visualizationsServiceM.get('visualizations'), 'slug');
 				if ( ! _.contains(iframeVisualizationsNames, visualizationsServiceM.get('currentChartSlug'))) {
-					simulate();
+					this.model.simulate(situationForm.get('testCaseForAPI'));
 				}
+			}.bind(this);
+			var update = function() {
+				simulate();
 				this.render();
 			}.bind(this);
-			this.listenTo(this.model, 'change:year', update);
-			this.listenTo(this.model, 'change:legislation', update);
+			this.listenTo(this.model, 'change:year', simulate);
+			this.listenTo(this.model, 'change:legislation', simulate);
 			this.listenTo(this.model, 'change:currentChartSlug', update);
 			if ( ! _.isUndefined(appconfig.enabledModules.charts)) {
 				this.listenTo(visualizationsServiceM, 'change:visualizations', this.render);
@@ -68,7 +70,9 @@ function ($, _, Backbone, appconfig, chartsM, DistributionChartV, IframeChartV, 
 			]);
 			var otherVisualizations = visualizationsServiceM.get('visualizations');
 			if (otherVisualizations !== null) {
-				data = data.concat(otherVisualizations);
+				data = data.concat(_.map(otherVisualizations, function(otherVisualization) {
+					return _.clone(otherVisualization);
+				}));
 			}
 			var currentChartData = _.findWhere(data, {slug: this.model.get('currentChartSlug')});
 			if ( ! _.isUndefined(currentChartData)) {
