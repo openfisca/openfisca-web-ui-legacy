@@ -229,12 +229,20 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           event.original.preventDefault();
           this.addEntityAsync(entityKey)
           .then(function() { return repairSaveSimulateAsync(); })
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
           .done();
         },
         addIndividu: function(event, entityKey, roleKey) {
           event.original.preventDefault();
           this.addIndividuAsync(entityKey, event.index.entityId, roleKey)
           .then(function() { return repairSaveSimulateAsync(); })
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
           .done();
         },
         deleteEntity: function(event, entityKey) {
@@ -245,6 +253,10 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           if (confirm(confirmMessage)) {
             this.deleteEntityAsync(entityKey, entityId)
             .then(function() { return repairSaveSimulateAsync(); })
+            .catch(function(error) {
+              console.error(error);
+              window.location.reload();
+            }.bind(this))
             .done();
           }
         },
@@ -253,6 +265,10 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           if (confirm('Supprimer ?')) { // jshint ignore:line
             Q(this.deleteIndividuAsync(event.context.entityId))
             .then(function() { return repairSaveSimulateAsync(); })
+            .catch(function(error) {
+              console.error(error);
+              window.location.reload();
+            }.bind(this))
             .done();
           }
         },
@@ -268,17 +284,30 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           ])
           .then(function() { return repairSaveSimulateAsync(); })
           .then(function() { $(this.find('#move-modal')).modal('hide'); }.bind(this))
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
           .done();
         },
         repairTestCase: function(event) {
           event.original.preventDefault();
-          return repairSaveSimulateAsync().done();
+          return repairSaveSimulateAsync()
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
+          .done();
         },
         resetTestCase: function(event) {
           event.original.preventDefault();
           if (confirm('Réinitialiser à la situation par défaut ?')) { // jshint ignore:line
             this.resetTestCaseAsync()
             .then(function() { return repairSaveSimulateAsync(); })
+            .catch(function(error) {
+              console.error(error);
+              window.location.reload();
+            }.bind(this))
             .done();
           }
         },
@@ -307,6 +336,10 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           .then(function() { return this.set('modal', null); }.bind(this))
           .then(function() { return this.set(entityKeypath, newEntity); }.bind(this))
           .then(function() { return repairSaveSimulateAsync(); })
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
           .done();
         },
         showEditModal: function(event, entityKey, entityId) {
@@ -319,6 +352,14 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
             });
           }.bind(this))
           .then(function() { $(this.find('#edit-modal')).modal('show'); }.bind(this))
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
           .done();
         },
         showMoveModal: function(event) {
@@ -334,11 +375,20 @@ function ($, Q, Ractive, _, appconfig, chartsM, situationFormT) {
           .then(function() {
             $(this.find('#move-modal')).modal('show');
           }.bind(this))
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
           .done();
         },
         simulate: function(event) {
           event.original.preventDefault();
-          return simulateAsync().done();
+          return simulateAsync()
+          .catch(function(error) {
+            console.error(error);
+            window.location.reload();
+          }.bind(this))
+          .done();
         },
       });
     },
