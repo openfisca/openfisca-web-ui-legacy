@@ -33,7 +33,7 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="appconfig_script()" filter="trim">
-define('appconfig', ${helpers.user_view_appconfig(ctx) | n, js});
+window.appconfig = ${helpers.user_view_appconfig(ctx) | n, js};
 </%def>
 
 

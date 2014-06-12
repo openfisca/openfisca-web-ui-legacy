@@ -37,7 +37,7 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="appconfig_script()" filter="trim">
-define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_url(ctx, 'edit')) | n, js});
+window.appconfig = ${helpers.legislation_appconfig(ctx, legislation.get_api1_url(ctx, 'edit')) | n, js};
 </%def>
 
 

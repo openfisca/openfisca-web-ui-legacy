@@ -9,10 +9,6 @@
 /config-*.ini
 /development-*.ini
 /dist/
-/openfisca_web_ui/static/bareme*.png
-/openfisca_web_ui/static/bower/
-/openfisca_web_ui/static/js/main-built.js
-/openfisca_web_ui/static/js/main-built.js.map
-/openfisca_web_ui/static/waterfall*.png
+/node_modules
+/openfisca_web_ui/static/js/*bundle.js
 .DS_Store
-

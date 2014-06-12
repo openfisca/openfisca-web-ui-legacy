@@ -1,44 +1,43 @@
-define([
-  'jquery',
-  'Q',
-  'underscore',
-  'backbone',
+'use strict';
 
-  'appconfig'
-],
-function ($, Q, _, Backbone, appconfig) {
-  'use strict';
+var Backbone = require('backbone'),
+  $ = require('jquery'),
+  Q = require('q'),
+  _ = require('underscore');
 
-  if (_.isUndefined(appconfig.enabledModules.charts)) {
-    return;
-  }
+var appconfig = global.appconfig;
 
-  var TestCasesServiceM = Backbone.Model.extend({
-    defaults: {
-      testCases: null
-    },
-    initialize: function() {
-      this.fetch();
-    },
-    fetch: function() {
-      return $.ajax({
-        context: this,
-        type: 'GET',
-        url: appconfig.enabledModules.charts.urlPaths.testCasesSearch,
-      })
-      .done(function(data) {
-        this.set('testCases', data);
-      });
-    },
-    fetchCurrentTestCaseAsync: function() {
-      return Q($.ajax({
-        data: {context: Date.now().toString()},
-        dataType: 'json',
-        url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
-      }));
-    },
-  });
 
-  var testCasesServiceM = new TestCasesServiceM();
-  return testCasesServiceM;
+if (_.isUndefined(appconfig.enabledModules.charts)) {
+  return;
+}
+
+var TestCasesServiceM = Backbone.Model.extend({
+  defaults: {
+    testCases: null
+  },
+  initialize: function() {
+    this.fetch();
+  },
+  fetch: function() {
+    return $.ajax({
+      context: this,
+      type: 'GET',
+      url: appconfig.enabledModules.charts.urlPaths.testCasesSearch,
+    })
+    .done(function(data) {
+      this.set('testCases', data);
+    });
+  },
+  fetchCurrentTestCaseAsync: function() {
+    return Q($.ajax({
+      data: {context: Date.now().toString()},
+      dataType: 'json',
+      url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
+    }));
+  },
 });
+
+var testCasesServiceM = new TestCasesServiceM();
+
+module.exports = testCasesServiceM;

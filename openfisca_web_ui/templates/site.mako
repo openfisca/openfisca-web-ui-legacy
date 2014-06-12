@@ -131,7 +131,7 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="appconfig_script()" filter="trim">
-define('appconfig', ${helpers.base_appconfig(ctx) | n, js});
+window.appconfig = ${helpers.base_appconfig(ctx) | n, js};
 </%def>
 
 
@@ -282,15 +282,10 @@ ${conf['app_name']}
     ## Because Persona is still in development, you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
-    <script src="${urls.get_url(ctx, u'bower/requirejs/require.js')}"></script>
     <script>
-        require.config(${helpers.build_requireconfig(ctx) | n, js});
         <%self:appconfig_script/>
-<%
-main_js_url_path = u'js/main-built.js' if conf['dev.build_js'] else u'js/main.js'
-%>
-        require([${urls.get_url(ctx, main_js_url_path) | n, js}]);
     </script>
+    <script src="${urls.get_url(ctx, u'js/bundle.js')}"></script>
 </%def>
 
 
