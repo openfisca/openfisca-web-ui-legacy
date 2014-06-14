@@ -474,7 +474,6 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
         id = value.pop('_id', None)
         if id is not None:
             value['id'] = unicode(id)
-        value.pop('api_key', None)
         return value, None
 
 
