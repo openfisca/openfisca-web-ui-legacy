@@ -288,8 +288,11 @@ class SmartWrapper(Wrapper):
     def after_upsert(self, old_bson, bson):
         pass
 
+    def before_compare(self, old_bson, bson):
+        bson['draft_id'] = old_bson['draft_id']
+
     def before_upsert(self, old_bson, bson):
-        pass
+        self.draft_id = bson['draft_id'] = objectid.ObjectId()
 
     def delete(self, *args, **kwargs):
         id = self._id
@@ -297,6 +300,7 @@ class SmartWrapper(Wrapper):
         old_bson = self.get_collection().find_one(id, as_class = collections.OrderedDict)
         if old_bson is not None:
             self.before_delete(old_bson)
+            old_bson = dict(old_bson)
             self.remove(id, *args, **kwargs)
             self.after_delete(old_bson)
         del self._id  # Mark as deleted.
@@ -312,10 +316,12 @@ class SmartWrapper(Wrapper):
             old_bson = None
         else:
             old_bson = collection.find_one(id, as_class = collections.OrderedDict)
-            if bson == old_bson:
-                return False
-        self.draft_id = bson['draft_id'] = objectid.ObjectId()
-        self.before_upsert(old_bson, bson)
+            if old_bson is not None:
+                old_bson = dict(old_bson)
+                self.before_compare(old_bson, bson)
+                if bson == old_bson:
+                    return False
+        self.before_upsert(ctx, old_bson, bson)
         collection.save(bson, *args, **kwargs)
         if id is None:
             self._id = bson['_id']
@@ -331,7 +337,13 @@ class ActivityStreamWrapper(SmartWrapper):
     updated = None
     words = None
 
+    def before_compare(self, old_bson, bson):
+        super(ActivityStreamWrapper, self).before_compare(old_bson, bson)
+        bson['published'] = old_bson['published']
+        bson['updated'] = old_bson['updated']
+
     def before_upsert(self, old_bson, bson):
-        self.updated = bson['updated'] = updated = datetime.datetime.utcnow()
+        super(ActivityStreamWrapper, self).before_upsert(old_bson, bson)
+        self.updated = bson['updated'] = updated = datetime.datetime.utcnow().isoformat() + 'Z'
         if self.published is None:
             self.published = bson['published'] = updated
