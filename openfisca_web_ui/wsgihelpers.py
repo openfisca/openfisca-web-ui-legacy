@@ -66,17 +66,6 @@ def bad_request(ctx, **kw):
     return error(ctx, 400, **kw)
 
 
-def discard_empty_items(data):
-    if isinstance(data, collections.Mapping):
-        # Use type(data) to keep OrderedDicts.
-        data = type(data)(
-            (name, discard_empty_items(value))
-            for name, value in data.iteritems()
-            if value is not None
-            )
-    return data
-
-
 def error(ctx, code, **kw):
     response = webob.exc.status_map[code](headers = kw.pop('headers', None))
     if code != 204:  # No content
@@ -191,8 +180,18 @@ def respond_json(ctx, data, code = None, headers = None, jsonp = None):
     """
     if isinstance(data, collections.Mapping):
         # Remove null properties as recommended by Google JSON Style Guide.
-        data = discard_empty_items(data)
+        data = type(data)(
+            (name, value)
+            for name, value in data.iteritems()
+            if value is not None
+            )
         error = data.get('error')
+        if isinstance(error, collections.Mapping):
+            error = data['error'] = type(error)(
+                (name, value)
+                for name, value in error.iteritems()
+                if value is not None
+                )
     else:
         error = None
     if headers is None:
