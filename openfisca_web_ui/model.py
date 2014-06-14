@@ -55,19 +55,6 @@ class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, obj
     slug = None
     stats_accepted = None
 
-    @classmethod
-    def bson_to_json(cls, value, state = None):
-        if value is None:
-            return value, None
-        value = value.copy()
-        if value.get('draft_id') is not None:
-            value['draft_id'] = unicode(value['draft_id'])
-        id = value.pop('_id', None)
-        if id is not None:
-            value['id'] = unicode(id)
-        value.pop('api_key', None)
-        return value, None
-
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
             unicode(fragment)
@@ -182,18 +169,6 @@ class Legislation(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper,
     slug = None
     title = None
     url = None
-
-    @classmethod
-    def bson_to_json(cls, value, state = None):
-        if value is None:
-            return value, None
-        value = value.copy()
-        if value.get('draft_id') is not None:
-            value['draft_id'] = unicode(value['draft_id'])
-        id = value.pop('_id', None)
-        if id is not None:
-            value['id'] = unicode(id)
-        return value, None
 
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
@@ -427,18 +402,6 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
             account.current_test_case_id = None
             account.save(safe = True)
 
-    @classmethod
-    def bson_to_json(cls, value, state = None):
-        if value is None:
-            return value, None
-        value = value.copy()
-        if value.get('draft_id') is not None:
-            value['draft_id'] = unicode(value['draft_id'])
-        id = value.pop('_id', None)
-        if id is not None:
-            value['id'] = unicode(id)
-        return value, None
-
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
             unicode(fragment)
@@ -526,18 +489,6 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
     thumbnail_url = None
     title = None
     url = None
-
-    @classmethod
-    def bson_to_json(cls, value, state = None):
-        if value is None:
-            return value, None
-        value = value.copy()
-        if value.get('draft_id') is not None:
-            value['draft_id'] = unicode(value['draft_id'])
-        id = value.pop('_id', None)
-        if id is not None:
-            value['id'] = unicode(id)
-        return value, None
 
     def compute_words(self):
         self.words = sorted(set(strings.slugify(u'-'.join(
