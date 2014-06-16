@@ -23,30 +23,6 @@
 
 
 <!-- {{>buttonsBar}} -->
-<div class="btn-group">
-  <button accesskey="s" class="btn btn-primary" disabled="{{#simulateInProgress}}disabled{{/}}" on-click="simulate"
-    type="button">
-    Simuler
-  </button>
-  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-    <span class="caret"></span>
-    <span class="sr-only">Toggle Dropdown</span>
-  </button>
-  <ul class="dropdown-menu" role="menu">
-    <li><a href="#" on-click="resetTestCase">Réinitialiser</a></li>
-<!--    <li><a href="#" on-click="repairTestCase">Réparer</a></li>-->
-  </ul>
-</div>
-<div class="btn-group">
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-    Ajouter <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" role="menu">
-    <li><a href="#" on-click="addEntity:familles">une famille</a></li>
-    <li><a href="#" on-click="addEntity:foyers_fiscaux">une déclaration d'impôt</a></li>
-    <li><a href="#" on-click="addEntity:menages">un ménage</a></li>
-  </ul>
-</div>
 {{#status}}
 <span class="label {{type === 'error' ? 'label-danger' : 'label-default'}}"
   title="{{#type === 'error'}}{{message}}{{/}}">

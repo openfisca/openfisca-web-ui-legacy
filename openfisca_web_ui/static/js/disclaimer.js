@@ -1,12 +1,12 @@
-define(['jquery'], function ($) {
-	'use strict';
+'use strict';
 
-	function init (config) {
-		$('.alert.disclaimer').on('close.bs.alert', function () {
-			$.get(config.disclaimerClosedUrlPath);
-		});
-	}
+var $ = require('jquery');
 
-	return {init: init};
 
-});
+function init (config) {
+  $('.alert.disclaimer').on('close.bs.alert', function () {
+    $.get(config.disclaimerClosedUrlPath);
+  });
+}
+
+module.exports = {init: init};

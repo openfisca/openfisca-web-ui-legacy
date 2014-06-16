@@ -1,9 +1,8 @@
 'use strict';
 
-var backbone = require('backbone'),
+var Backbone = require('backbone'),
   $ = require('jquery'),
-  Q = require('q'),
-  _ = require('underscore');
+  Q = require('q');
 
 var appconfig = global.appconfig;
 

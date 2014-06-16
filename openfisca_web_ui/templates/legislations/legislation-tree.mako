@@ -78,6 +78,12 @@ ${u'placeholder' if date is None else u'value'}="${current_datetime.strftime('%Y
 </%def>
 
 
+<%def name="page_scripts()" filter="trim">
+<script src="${urls.get_url(ctx, u'node_modules/X-editable/dist/bootstrap3-editable/js/bootstrap-editable.js')}">\
+</script>
+</%def>
+
+
 <%def name="render_dated_legislation_node(node, is_editable = False, path = None)" filter="trim">
     % if node.get('@type') == 'Node':
         % for node_name in node['children']:

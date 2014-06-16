@@ -29,13 +29,6 @@ var TestCasesServiceM = Backbone.Model.extend({
       this.set('testCases', data);
     });
   },
-  fetchCurrentTestCaseAsync: function() {
-    return Q($.ajax({
-      data: {context: Date.now().toString()},
-      dataType: 'json',
-      url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
-    }));
-  },
 });
 
 var testCasesServiceM = new TestCasesServiceM();

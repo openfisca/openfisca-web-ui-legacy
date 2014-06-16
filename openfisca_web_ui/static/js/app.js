@@ -1,16 +1,20 @@
+/** @jsx React.DOM */
 'use strict';
 
-var Q = require('q');
+var Q = require('q'),
+  React = require('react');
+
 
 var AcceptCnilConditionsModalV = require('./views/AcceptCnilConditionsModalV'),
   AcceptCookiesModalV = require('./views/AcceptCookiesModalV'),
   auth = require('./auth'),
-  chartsV = require('./views/chartsV'),
+//  chartsV = require('./views/chartsV'),
   disclaimer = require('./disclaimer'),
   legislation = require('./legislation'),
-  router = require('./router'),
-  situationForm = require('./components/situationForm'),
-  testCasesServiceM = require('./models/testCasesServiceM');
+//  router = require('./router'),
+  Simulator = require('./components/simulator');
+//  situationForm = require('./components/situationForm'),
+//  testCasesServiceM = require('./models/testCasesServiceM');
 
 var appconfig = global.appconfig;
 
@@ -40,20 +44,22 @@ function init() {
     legislation.init(enabledModules.legislation);
   }
   if (enabledModules.situationForm) {
-    testCasesServiceM.fetchCurrentTestCaseAsync()
-    .then(function(data) {
-      var promise;
-      if (data === null) {
-        promise = situationForm.resetTestCaseAsync();
-      } else {
-        promise = Q(situationForm).invoke('set', 'testCase', data);
-      }
-      return promise
-      .then(function() { return situationForm.repairTestCaseAsync(); })
-      .then(function() { return chartsV.model.simulateAsync(situationForm.get('testCaseForAPI')); });
-    })
-    .then(function() { router.init(); })
-    .done();
+    var mountNode = document.getElementById('simulator-container');
+    React.renderComponent(<Simulator />, mountNode);
+//    testCasesServiceM.fetchCurrentTestCaseAsync()
+//    .then(function(/*data*/) {
+//      var promise;
+//      if (data === null) {
+//        promise = situationForm.resetTestCaseAsync();
+//      } else {
+//        promise = Q(situationForm).invoke('set', 'testCase', data);
+//      }
+//      return promise
+//      .then(function() { return situationForm.repairTestCaseAsync(); })
+//      .then(function() { return chartsV.model.simulateAsync(situationForm.get('testCaseForAPI')); });
+//    })
+//    .then(function() { router.init(); })
+//    .done();
   }
 }
 

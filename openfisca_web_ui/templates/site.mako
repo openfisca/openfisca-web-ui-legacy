@@ -169,9 +169,9 @@ ${conf['app_name']}
 
 
 <%def name="css()" filter="trim">
-    <link href="${urls.get_url(ctx, u'bower/bootstrap/dist/css/bootstrap.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'node_modules/bootstrap/dist/css/bootstrap.css')}" media="screen" rel="stylesheet">
     ## FIXME Remove nvd3 CSS when waterfall and distribution charts stop using nv tooltips.
-    <link href="${urls.get_url(ctx, u'bower/nvd3/nv.d3.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'node_modules/nvd3/nv.d3.css')}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
 </%def>
 
@@ -250,8 +250,8 @@ ${conf['app_name']}
 
 <%def name="ie_scripts()" filter="trim">
     <!--[if lt IE 9]>
-    <script src="${urls.get_url(ctx, u'bower/html5shiv/src/html5shiv.js')}"></script>
-    <script src="${urls.get_url(ctx, u'bower/respond/respond.src.js')}"></script>
+    <script src="${urls.get_url(ctx, u'node_modules/html5shiv/src/html5shiv.js')}"></script>
+    <script src="${urls.get_url(ctx, u'node_modules/respond/respond.src.js')}"></script>
     <![endif]-->
 </%def>
 
@@ -276,6 +276,10 @@ ${conf['app_name']}
 </%def>
 
 
+<%def name="page_scripts()" filter="trim">
+</%def>
+
+
 <%def name="scripts()" filter="trim">
 % if conf['enabled.auth']:
     ## Quote from persona: You must include this on every page which uses navigator.id functions.
@@ -286,6 +290,7 @@ ${conf['app_name']}
         <%self:appconfig_script/>
     </script>
     <script src="${urls.get_url(ctx, u'js/bundle.js')}"></script>
+    <%self:page_scripts/>
 </%def>
 
 

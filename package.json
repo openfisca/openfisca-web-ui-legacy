@@ -1,7 +1,17 @@
 {
   "name": "openfisca-web-ui",
-  "version": "0.0.1",
-  "description": "Web user interface for OpenFisca.",
+  "version": "0.2.0",
+  "description": "Web user interface for OpenFisca -- a versatile microsimulation free software",
+  "keywords": [
+    "benefit",
+    "interface",
+    "microsimulation",
+    "social",
+    "tax",
+    "user",
+    "server",
+    "web"
+  ],
   "main": "openfisca_web_ui/static/js/index.js",
   "scripts": {
     "build": "NODE_ENV=production browserify . > openfisca_web_ui/static/js/bundle.js",
@@ -20,6 +30,22 @@
   "dependencies": {
     "bootstrap": "^3.1.1",
     "jquery": "^2.1.1",
-    "q": "^1.0.1"
+    "q": "^1.0.1",
+    "underscore": "^1.6.0",
+    "backbone": "^1.1.2",
+    "X-editable": "git+https://github.com/vitalets/x-editable.git",
+    "d3": "^3.4.8",
+    "nvd3": "git+https://github.com/novus/nvd3.git",
+    "envify": "^1.2.1",
+    "react": "^0.10.0",
+    "reactify": "^0.13.1",
+    "map-object": "0.0.2",
+    "superagent": "^0.18.0"
+  },
+  "private": true,
+  "browserify": {
+    "transform": [
+      "reactify"
+    ]
   }
 }
