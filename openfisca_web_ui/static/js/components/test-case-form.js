@@ -4,33 +4,43 @@
 var mapObject = require('map-object'),
   React = require('react');
 
-var Famille = require('./famille'),
-  FoyerFiscal = require('./foyer-fiscal'),
-  Menage = require('./menage');
+var Entity = require('./entity');
 
 
 var TestCaseForm = React.createClass({
   propTypes: {
-    testCase: React.PropTypes.object.isRequired
-  },
-  getEntities: function(entityName) {
-    return this.props.testCase[entityName] || {};
+    errors: React.PropTypes.object,
+    onAddIndividu: React.PropTypes.func.isRequired,
+    onDeleteEntity: React.PropTypes.func.isRequired,
+    onDeleteIndividu: React.PropTypes.func.isRequired,
+    onEditEntity: React.PropTypes.func.isRequired,
+    onEditIndividu: React.PropTypes.func.isRequired,
+    onMoveIndividu: React.PropTypes.func.isRequired,
+    suggestions: React.PropTypes.object,
+    testCase: React.PropTypes.object.isRequired,
   },
   render: function() {
-    var familles = mapObject(this.getEntities('familles'), function(famille, familleId) {
-      return <Famille key={familleId} value={famille} />;
-    });
-    var foyersFiscaux = mapObject(this.getEntities('foyers_fiscaux'), function(foyerFiscal, foyerFiscalId) {
-      return <FoyerFiscal key={foyerFiscalId} value={foyerFiscal} />;
-    });
-    var menages = mapObject(this.getEntities('menages'), function(menage, menageId) {
-      return <Menage key={menageId} value={menage} />;
-    });
+    var familles = this.props.testCase.familles ?
+      mapObject(this.props.testCase.familles, function(famille, familleId) {
+        return <Entity
+          errors={/*this.props.errors[familleId]*/null}
+          entityName='familles'
+          individuIdsByRole={famille}
+          individus={this.props.testCase.individus}
+          key={familleId}
+          label="Famille"
+          onAddIndividu={this.props.onAddIndividu}
+          onDelete={this.props.onDeleteEntity}
+          onDeleteIndividu={this.props.onDeleteIndividu}
+          onEdit={this.props.onEditEntity}
+          onEditIndividu={this.props.onEditIndividu}
+          onMoveIndividu={this.props.onMoveIndividu}
+          suggestions={this.props.suggestions[familleId]}
+        />;
+      }, this) : null;
     return (
       <div>
         {familles}
-        {foyersFiscaux}
-        {menages}
       </div>
     );
   }

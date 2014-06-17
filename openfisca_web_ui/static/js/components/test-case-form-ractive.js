@@ -34,22 +34,6 @@ var entitiesMetadata = {
 };
 
 var SituationForm = Ractive.extend({
-  computed: {
-    testCaseForAPI: function() {
-      // Returns a copy of testCase reworked to be compliant with the API inputs.
-      var testCase = this.get('testCase');
-      if (testCase) {
-        // Remove individu IDs.
-        var testCaseForAPI = _.omit(testCase, 'individus'); // This is a copy.
-        testCaseForAPI.individus = _.object(
-          _.map(testCase.individus, function(individu, id) { return [id, _.omit(individu, 'id')];})
-        );
-        return testCaseForAPI;
-      } else {
-        return null;
-      }
-    },
-  },
   data: {
     _: _,
     defaultLabel: function(column) {
@@ -126,15 +110,6 @@ var SituationForm = Ractive.extend({
         };
       });
       return categories;
-    },
-    individuButtonTitle: function(individu) {
-      if (individu.hasErrors) {
-        return 'Cette personne contient des erreurs. Cliquez pour l\'éditer.';
-      } else if (individu.hasSuggestions) {
-        return 'Cette personne contient des valeurs suggérées par le simulateur. Cliquez pour l\'éditer.';
-      } else {
-        return 'Éditer';
-      }
     },
     withLinkedObjects: function(entityKey, entities, errors, suggestions) {
       // Resolve links and return a unique object containing the entities with its "individus" (instead of IDs),
@@ -298,18 +273,6 @@ var SituationForm = Ractive.extend({
           window.location.reload();
         }.bind(this))
         .done();
-      },
-      resetTestCase: function(event) {
-        event.original.preventDefault();
-        if (confirm('Réinitialiser à la situation par défaut ?')) { // jshint ignore:line
-          this.resetTestCaseAsync()
-          .then(function() { return repairSaveSimulateAsync(); })
-          .catch(function(error) {
-            console.error(error);
-            window.location.reload();
-          }.bind(this))
-          .done();
-        }
       },
       saveEntity: function(event, entityKey) {
         event.original.preventDefault();
@@ -501,14 +464,6 @@ var SituationForm = Ractive.extend({
       .then(function() { this.addToEntityAsync(individuId, entityKey, entityId, roleKey); }.bind(this));
     }
   },
-  resetTestCaseAsync: function() {
-    var individuId = guid();
-    var individu = {id: individuId, nom_individu: 'Personne 1'}; // jshint ignore:line
-    var individus = {};
-    individus[individuId] = individu;
-    var testCase = {familles: null, foyers_fiscaux: null, individus: individus, menages: null}; // jshint ignore:line
-    return Q(this).invoke('set', {errors: null, suggestions: null, testCase: testCase});
-  },
 
   // Webservices methods
   fetchFieldsAsync: function() {
@@ -538,16 +493,16 @@ var SituationForm = Ractive.extend({
     }.bind(this));
   },
   repairTestCaseAsync: function() {
-    var data = {
-      context: Date.now().toString(),
-      scenarios: [
-        {
-          test_case: this.get('testCaseForAPI'), // jshint ignore:line
-          year: chartsM.get('year'),
-        },
-      ],
-      validate: true,
-    };
+//    var data = {
+//      context: Date.now().toString(),
+//      scenarios: [
+//        {
+//          test_case: this.get('testCaseForAPI'), // jshint ignore:line
+//          year: chartsM.get('year'),
+//        },
+//      ],
+//      validate: true,
+//    };
     return Q($.ajax({
       contentType: 'application/json',
       data: JSON.stringify(data),

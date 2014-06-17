@@ -85,56 +85,6 @@
 <!-- {{/editModal}} -->
 
 
-<!-- {{>famille}} -->
-<div class="panel {{.hasErrors ? 'panel-danger' : 'panel-default'}}">
-  <div class="panel-heading">
-    <div class="btn-group">
-      <button class="btn btn-default btn-sm" on-click="showEditModal:'familles',{{entityId}}" type="button">
-        {{entityLabel('familles', entityId)}}
-      </button>
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
-        <span class="caret"></span>
-        <span class="sr-only">Toggle Dropdown</span>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-        <li><a href="#" on-click="deleteEntity:familles">Supprimer</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="list-group">
-{{#.parents}}
-    <div class="list-group-item">
-      <p>Parents</p>
-  {{#.error}}
-      <p class="text-danger">{{.error}}</p>
-  {{/}}
-      <ul>
-  {{#.individus}}
-        <li>{{>individu}}</li>
-  {{/}}
-        <li><a href="#" on-click="addIndividu:'familles','parents'">Ajouter</a></li>
-      </ul>
-    </div>
-{{/}}
-{{#.enfants}}
-    <div class="list-group-item">
-      <p>Enfants</p>
-  {{#.error)}}
-      <p class="text-danger">{{.error}}</p>
-  {{/}}
-      <ul>
-  {{#.individus}}
-        <li>{{>individu}}</li>
-  {{/}}
-        <li><a href="#" on-click="addIndividu:'familles','enfants'">Ajouter</a></li>
-      </ul>
-    </div>
-{{/}}
-  </div>
-</div>
-<!-- {{/famille}} -->
-
-
 <!-- {{>formControl}} -->
 {{#this && this['@type'] === 'Boolean'}}
 <label class="control-label">{{label}}</label>
@@ -309,32 +259,6 @@
 </div>
 <!-- {{/foyerFiscal}} -->
 
-
-<!-- {{>individu}} -->
-<div class="btn-group" style="margin-bottom: 0.3em;">
-  <button class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-sm"
-    on-click="showEditModal:'individus',{{.entityId}}" title="{{this && individuButtonTitle(.)}}" type="button">
-    {{.label}}
-{{#.hasSuggestions}}
-    <span class="glyphicon glyphicon glyphicon-info-sign"></span>
-{{/}}
-  </button>
-  <button type="button" class="btn {{.hasErrors ? 'btn-danger' : 'btn-default'}} btn-sm dropdown-toggle"
-    data-toggle="dropdown">
-    <span class="caret"></span>
-    <span class="sr-only">Toggle Dropdown</span>
-  </button>
-  <ul class="dropdown-menu" role="menu">
-    <li role="presentation">
-      <a href="#" on-click="showMoveModal" role="menuitem" tabindex="-1">Déplacer</a>
-      <a href="#" on-click="deleteIndividu" role="menuitem" tabindex="-1">Supprimer</a>
-    </li>
-  </ul>
-</div>
-{{#.roleError}}
-<p class="text-danger">{{.roleError}}</p>
-{{/}}
-<!-- {{/individu}} -->
 
 
 <!-- {{>menage}} -->
