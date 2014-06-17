@@ -321,7 +321,7 @@ class SmartWrapper(Wrapper):
                 self.before_compare(old_bson, bson)
                 if bson == old_bson:
                     return False
-        self.before_upsert(ctx, old_bson, bson)
+        self.before_upsert(old_bson, bson)
         collection.save(bson, *args, **kwargs)
         if id is None:
             self._id = bson['_id']
