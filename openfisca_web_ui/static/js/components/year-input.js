@@ -11,13 +11,16 @@ var YearInput = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.number.isRequired,
   },
+  handleChange: function(event) {
+    this.props.onChange(event.target.valueAsNumber);
+  },
   render: function() {
     return (
       <input
         className="form-control"
         max={appconfig.constants.maxYear}
         min={appconfig.constants.minYear}
-        onChange={this.props.onChange}
+        onChange={this.handleChange}
         placeholder={appconfig.constants.defaultYear}
         step="1"
         title="Année"

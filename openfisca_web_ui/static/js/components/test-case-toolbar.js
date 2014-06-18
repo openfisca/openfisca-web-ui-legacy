@@ -14,6 +14,10 @@ var TestCaseToolbar = React.createClass({
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
   },
+  preventDefaultThen: function(callback, event) {
+    event.preventDefault();
+    callback();
+  },
   render: function() {
     return (
       <div>
@@ -22,7 +26,7 @@ var TestCaseToolbar = React.createClass({
             accessKey="s"
             className="btn btn-primary"
             disabled={this.props.isSimulationInProgress}
-            onClick={this.props.onSimulate}
+            onClick={this.preventDefaultThen.bind(null, this.props.onSimulate)}
             type="button">
             Simuler
           </button>
@@ -31,8 +35,12 @@ var TestCaseToolbar = React.createClass({
             <span className="sr-only">Toggle Dropdown</span>
           </button>
           <ul className="dropdown-menu" role="menu">
-            <li><a href="#" onClick={this.props.onReset}>Réinitialiser</a></li>
-            <li><a href="#" onClick={this.props.onRepair}>Réparer</a></li>
+            <li>
+              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onReset)}>Réinitialiser</a>
+            </li>
+            <li>
+              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}>Réparer</a>
+            </li>
           </ul>
         </div>
         <div className="btn-group">
@@ -41,15 +49,25 @@ var TestCaseToolbar = React.createClass({
           </button>
           <ul className="dropdown-menu" role="menu">
             <li>
-              <a href="#" onClick={this.props.onAddEntity.bind(null, 'familles')}>une famille</a>
+              <a
+                href="#"
+                onClick={this.preventDefaultThen.bind(null, this.props.onAddEntity.bind(null, 'familles'))}>
+                une famille
+              </a>
             </li>
             <li>
-              <a href="#" onClick={this.props.onAddEntity.bind(null, 'foyers_fiscaux')}>
+              <a
+                href="#"
+                onClick={this.preventDefaultThen.bind(null, this.props.onAddEntity.bind(null, 'foyers_fiscaux'))}>
                 une déclaration d'impôt
               </a>
             </li>
             <li>
-              <a href="#" onClick={this.props.onAddEntity.bind(null, 'menages')}>un ménage</a>
+              <a
+                href="#"
+                onClick={this.preventDefaultThen.bind(null, this.props.onAddEntity.bind(null, 'menages'))}>
+                un ménage
+              </a>
             </li>
           </ul>
         </div>

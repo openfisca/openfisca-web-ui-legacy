@@ -3,17 +3,18 @@
 
 var React = require('react');
 
-var Individu = require('./individu');
+var Individu = require('./individu'),
+  models = require('../models');
 
 
 var Entity = React.createClass({
   propTypes: {
-    entityName: React.PropTypes.string.isRequired,
     errors: React.PropTypes.object,
+    id: React.PropTypes.string.isRequired,
     individuIdsByRole: React.PropTypes.object.isRequired,
     individus: React.PropTypes.object.isRequired,
-    label: React.PropTypes.string.isRequired,
-    onAddIndividu: React.PropTypes.func.isRequired,
+    kind: React.PropTypes.string.isRequired,
+    onAddIndividuInEntity: React.PropTypes.func.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onDeleteIndividu: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
@@ -21,15 +22,20 @@ var Entity = React.createClass({
     onMoveIndividu: React.PropTypes.func.isRequired,
     suggestions: React.PropTypes.object,
   },
+  preventDefaultThen: function(callback, event) {
+    event.preventDefault();
+    callback();
+  },
   render: function() {
-    var parents = this.props.individuIdsByRole.parents ? this.renderRole('parents', 'Parents') : null;
-    var enfants = this.props.individuIdsByRole.enfants ? this.renderRole('enfants', 'Enfants') : null;
     return (
       <div className="panel panel-default">
         <div className="panel-heading">
           <div className="btn-group">
-            <button className="btn btn-default btn-sm" onClick={this.props.onEdit} type="button">
-              {this.props.label}
+            <button
+              className="btn btn-default btn-sm"
+              onClick={this.preventDefaultThen.bind(null, this.props.onEdit.bind(null, this.props.kind, this.props.id))}
+              type="button">
+              {models.TestCase.getEntityLabel(this.props.kind, this.props.individuIdsByRole)}
             </button>
             <button
               className="btn btn-default btn-sm dropdown-toggle"
@@ -39,39 +45,57 @@ var Entity = React.createClass({
               <span className="sr-only">Toggle Dropdown</span>
             </button>
             <ul className="dropdown-menu" role="menu">
-              <li><a href="#" onClick={this.props.onDelete}>Supprimer</a></li>
+              <li>
+                <a
+                  href="#"
+                  onClick={
+                    this.preventDefaultThen.bind(null, this.props.onDelete.bind(null, this.props.kind, this.props.id))
+                  }>
+                  Supprimer
+                </a>
+              </li>
             </ul>
           </div>
         </div>
         <div className="list-group">
-          {parents}
-          {enfants}
+          {this.renderRole('parents', 'Parents')}
+          {this.renderRole('enfants', 'Enfants')}
         </div>
       </div>
     );
   },
-  renderRole: function(roleName, label) {
+  renderRole: function(role, label) {
     return (
       <div className="list-group-item">
         <p>{label}</p>
         {/* this.props.errors ? <p className="text-danger">{{.error}}</p> : null */}
         <ul>
           {
-            this.props.individuIdsByRole[roleName].map(function(individuId) {
-              return (
-                <li key={individuId}>
-                  <Individu
-                    onDelete={this.props.onDeleteIndividu}
-                    onEdit={this.props.onEditIndividu}
-                    onMove={this.props.onMoveIndividu}
-                    value={this.props.individus[individuId]}
-                  />
-                </li>
-              );
-            }, this)
+            role in this.props.individuIdsByRole ?
+              this.props.individuIdsByRole[role].map(function(individuId) {
+                return (
+                  <li key={individuId}>
+                    <Individu
+                      id={individuId}
+                      onDelete={this.props.onDeleteIndividu}
+                      onEdit={this.props.onEditIndividu}
+                      onMove={this.props.onMoveIndividu}
+                      value={this.props.individus[individuId]}
+                    />
+                  </li>
+                );
+              }, this) : null
           }
           <li>
-            <a href="#" onClick={this.props.onAddIndividu.bind(null, this.props.entityName, roleName)}>Ajouter</a>
+            <a
+              href="#"
+              onClick={
+                this.preventDefaultThen.bind(null, this.props.onAddIndividuInEntity.bind(
+                  null, this.props.kind, this.props.id, role
+                ))
+              }>
+              Ajouter
+            </a>
           </li>
         </ul>
       </div>

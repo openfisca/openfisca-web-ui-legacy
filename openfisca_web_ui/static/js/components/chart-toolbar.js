@@ -11,8 +11,8 @@ var ChartSelect = require('./chart-select'),
 
 var ChartToolbar = React.createClass({
   propTypes: {
-    chart: React.PropTypes.string,
     charts: React.PropTypes.array.isRequired,
+    chartSlug: React.PropTypes.string,
     legislation: React.PropTypes.string,
     legislations: React.PropTypes.array.isRequired,
     onChartChange: React.PropTypes.func.isRequired,
@@ -24,7 +24,7 @@ var ChartToolbar = React.createClass({
     return (
       <div className="form-inline" role="form">
         <div className="form-group">
-          <ChartSelect charts={this.props.charts} onChange={this.props.onChartChange} value={this.props.chart} />
+          <ChartSelect charts={this.props.charts} onChange={this.props.onChartChange} value={this.props.chartSlug} />
         </div>
         <div className="form-group">
           <YearInput

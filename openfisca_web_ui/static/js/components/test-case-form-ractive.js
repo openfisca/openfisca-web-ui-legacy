@@ -20,18 +20,6 @@ var guid = (function() {
   return function() { return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4(); };
 })();
 
-var entitiesMetadata = {
-  familles: {
-    lists: ['enfants', 'parents'],
-  },
-  foyers_fiscaux: { // jshint ignore:line
-    lists: ['declarants', 'personnes_a_charge'],
-  },
-  menages: {
-    lists: ['autres', 'enfants'],
-    singletons: ['conjoint', 'personne_de_reference'],
-  },
-};
 
 var SituationForm = Ractive.extend({
   data: {
@@ -220,33 +208,6 @@ var SituationForm = Ractive.extend({
         }.bind(this))
         .done();
       },
-      deleteEntity: function(event, entityKey) {
-        event.original.preventDefault();
-        var entityId = event.index.entityId;
-        var label = this.get('entityLabel').call(this, entityKey, entityId);
-        var confirmMessage = 'Supprimer ' + label + ' ?'; // jshint ignore:line
-        if (confirm(confirmMessage)) {
-          this.deleteEntityAsync(entityKey, entityId)
-          .then(function() { return repairSaveSimulateAsync(); })
-          .catch(function(error) {
-            console.error(error);
-            window.location.reload();
-          }.bind(this))
-          .done();
-        }
-      },
-      deleteIndividu: function(event) {
-        event.original.preventDefault();
-        if (confirm('Supprimer ?')) { // jshint ignore:line
-          Q(this.deleteIndividuAsync(event.context.entityId))
-          .then(function() { return repairSaveSimulateAsync(); })
-          .catch(function(error) {
-            console.error(error);
-            window.location.reload();
-          }.bind(this))
-          .done();
-        }
-      },
       move: function(event) {
         event.original.preventDefault();
         Q.all([
@@ -401,30 +362,9 @@ var SituationForm = Ractive.extend({
     }
     return promise;
   },
-  createEntity: function(entityKey) {
-    // Create a new entity with roles initialized.
-    var newEntity = {};
-    _.each(entitiesMetadata[entityKey].lists, function(roleKey) {
-      newEntity[roleKey] = [];
-    });
-    _.each(entitiesMetadata[entityKey].singletons, function(roleKey) {
-      newEntity[roleKey] = null;
-    });
-    return newEntity;
-  },
   deleteEntityAsync: function(entityKey, entityId) {
     var entityKeypath = 'testCase.' + entityKey;
     return Q(this.set(entityKeypath, _.omit(this.get(entityKeypath), entityId)));
-  },
-  deleteIndividuAsync: function(individuId) {
-    return Q.all(
-      _.chain(entitiesMetadata).keys().map(function(entityKey) {
-        return this.detachFromEntityAsync(individuId, entityKey);
-      }, this)
-    )
-    .then(function() {
-      return Q(this.set('testCase.individus', _.omit(this.get('testCase.individus'), individuId)));
-    }.bind(this));
   },
   detachFromEntityAsync: function(individuId, entityKey) {
     var individuEntityInfos = this.findEntityInfos(individuId, entityKey);

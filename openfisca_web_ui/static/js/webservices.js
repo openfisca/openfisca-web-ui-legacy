@@ -6,23 +6,25 @@ var request = require('superagent'),
 var appconfig = global.appconfig;
 
 
-function fetchCurrentTestCase(onSuccess, onError) {
+function fetchCurrentTestCase(onComplete) {
   request
     .get(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
     .end(function(res) {
-      if (res.error) {
-        onError(res.error);
+      if (res.body && res.body.error) {
+        onComplete(res.body);
+      } else if (res.error) {
+        onComplete(res);
       } else {
-        onSuccess(res.body);
+        onComplete(res.body);
       }
     });
 }
 
-function repairTestCase(testCase, year, onSuccess, onError) {
+function repairTestCase(testCase, year, onComplete) {
   var data = {
     scenarios: [
       {
-        test_case: testCaseForApi(testCase), // jshint ignore:line
+        test_case: testCase, // jshint ignore:line
         year: year,
       },
     ],
@@ -32,13 +34,15 @@ function repairTestCase(testCase, year, onSuccess, onError) {
     .post(appconfig.api.urls.simulate)
     .send(data)
     .end(function(res) {
-      if (res.error) {
-        onError(res.error);
+      if (res.body && res.body.error) {
+        onComplete(res.body);
+      } else if (res.error) {
+        onComplete(res);
       } else {
         var errors = null, // TODO
           testCase = res.body.repaired_scenarios[0].test_case, // jshint ignore:line
           suggestions = res.body.suggestions.scenarios['0'].test_case; // jshint ignore:line
-        onSuccess({
+        onComplete({
           errors: errors,
           suggestions: suggestions,
           testCase: testCase,
@@ -47,12 +51,12 @@ function repairTestCase(testCase, year, onSuccess, onError) {
     });
 }
 
-function simulate(legislationUrl, testCase, year, onSuccess, onError) {
+function simulate(legislationUrl, testCase, year, onComplete) {
   var data = {
     scenarios: [
       {
         legislation_url: legislationUrl, // jshint ignore:line
-        test_case: testCaseForApi(testCase), // jshint ignore:line
+        test_case: testCase, // jshint ignore:line
         year: year,
       },
     ],
@@ -61,25 +65,14 @@ function simulate(legislationUrl, testCase, year, onSuccess, onError) {
     .post(appconfig.api.urls.simulate)
     .send(data)
     .end(function(res) {
-      if (res.error) {
-        onError(res.error);
+      if (res.body && res.body.error) {
+        onComplete(res.body);
+      } else if (res.error) {
+        onComplete(res);
       } else {
-        onSuccess(res.body.value);
+        onComplete(res.body.value);
       }
     });
-}
-
-function testCaseForApi(testCase) {
-  // Returns a copy of testCase which is compliant with API input.
-  var newValue = _.omit(testCase, 'individus'); // This is a copy.
-  newValue.individus = _(testCase.individus)
-    .chain()
-    .map(function(individu, id) {
-      return [id, _.omit(individu, 'id')];
-    })
-    .object()
-    .value();
-  return newValue;
 }
 
 module.exports = {
