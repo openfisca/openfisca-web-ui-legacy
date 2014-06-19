@@ -20,7 +20,7 @@ function fetchCurrentTestCase(onComplete) {
     });
 }
 
-function repairTestCase(testCase, year, onComplete) {
+function repair(testCase, year, onComplete) {
   var data = {
     scenarios: [
       {
@@ -35,18 +35,34 @@ function repairTestCase(testCase, year, onComplete) {
     .send(data)
     .end(function(res) {
       if (res.body && res.body.error) {
-        onComplete(res.body);
+        onComplete({
+          errors: res.body.error.errors[0].scenarios['0'].test_case, // jshint ignore:line
+          suggestions: null,
+        });
       } else if (res.error) {
         onComplete(res);
       } else {
-        var errors = null, // TODO
-          testCase = res.body.repaired_scenarios[0].test_case, // jshint ignore:line
+        var testCase = res.body.repaired_scenarios[0].test_case, // jshint ignore:line
           suggestions = res.body.suggestions.scenarios['0'].test_case; // jshint ignore:line
         onComplete({
-          errors: errors,
+          errors: null,
           suggestions: suggestions,
           testCase: testCase,
         });
+      }
+    });
+}
+
+function saveCurrentTestCase(testCase, onComplete) {
+  var data = {test_case: testCase}; // jshint ignore:line
+  request
+    .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
+    .send(data)
+    .end(function(res) {
+      if (res.error) {
+        onComplete(res);
+      } else {
+        onComplete(res.body);
       }
     });
 }
@@ -77,6 +93,7 @@ function simulate(legislationUrl, testCase, year, onComplete) {
 
 module.exports = {
   fetchCurrentTestCase: fetchCurrentTestCase,
-  repairTestCase: repairTestCase,
+  repair: repair,
+  saveCurrentTestCase: saveCurrentTestCase,
   simulate: simulate,
 };

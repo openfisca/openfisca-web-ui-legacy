@@ -9,7 +9,7 @@ var React = require('react');
 var TestCaseToolbar = React.createClass({
   propTypes: {
     isSimulationInProgress: React.PropTypes.bool,
-    onAddEntity: React.PropTypes.func.isRequired,
+    onCreateEntity: React.PropTypes.func.isRequired,
     onReset: React.PropTypes.func.isRequired,
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
@@ -21,7 +21,7 @@ var TestCaseToolbar = React.createClass({
   render: function() {
     return (
       <div>
-        <div className="btn-group">
+        <div className="btn-group" style={{marginRight: 5}}>
           <button
             accessKey="s"
             className="btn btn-primary"
@@ -43,7 +43,7 @@ var TestCaseToolbar = React.createClass({
             </li>
           </ul>
         </div>
-        <div className="btn-group">
+        <div className="btn-group" style={{marginRight: 5}}>
           <button className="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
             Ajouter <span className="caret"></span>
           </button>
@@ -51,22 +51,22 @@ var TestCaseToolbar = React.createClass({
             <li>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onAddEntity.bind(null, 'familles'))}>
+                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'familles'))}>
                 une famille
               </a>
             </li>
             <li>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onAddEntity.bind(null, 'foyers_fiscaux'))}>
+                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'foyers_fiscaux'))}>
                 une déclaration d'impôt
               </a>
             </li>
             <li>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onAddEntity.bind(null, 'menages'))}>
-                un ménage
+                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'menages'))}>
+                un logement principal
               </a>
             </li>
           </ul>

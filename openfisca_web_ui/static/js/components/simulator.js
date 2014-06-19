@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var React = require('react/addons'),
+  uuid = require('uuid');
 
 var ChartToolbar = require('./chart-toolbar'),
   models = require('../models'),
@@ -28,8 +29,21 @@ var DummyChart = React.createClass({
 
 
 var Simulator = React.createClass({
-  componentDidMount: function() {
-    webservices.fetchCurrentTestCase(this.handleCurrentTestCaseFetched);
+  componentWillMount: function() {
+    webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
+  },
+  currentTestCaseFetched: function(data) {
+    console.debug('currentTestCaseFetched', data);
+    if (data && data.error) {
+      console.error(data.error.message);
+      var newState = React.addons.update(this.state, {testCase: {$set: null}});
+      this.setState(newState);
+    } else {
+      this.repair(data || models.TestCase.getInitialTestCase());
+    }
+  },
+  currentTestCaseSaved: function(data) {
+    console.debug('currentTestCaseSaved', data);
   },
   getInitialState: function() {
     return {
@@ -43,29 +57,38 @@ var Simulator = React.createClass({
       year: appconfig.constants.defaultYear,
     };
   },
-  handleAddEntity: function(kind) {
-    console.debug('handleAddEntity', kind);
-    var newEntities = models.TestCase.createEntities(kind);
+  handleChartChange: function(slug) {
+    var newState = React.addons.update(this.state, {chartSlug: {$set: slug}});
+    this.setState(newState, function() {
+      this.simulate();
+    });
+  },
+  handleCreateEntity: function(kind) {
+    console.debug('handleCreateEntity', kind);
+    var newEntity = models.TestCase.createEntity(kind, this.state.testCase);
+    var newEntities = {};
+    newEntities[uuid.v4()] = newEntity;
     var spec = {testCase: {}};
     spec.testCase[kind] = {$merge: newEntities};
     var newState = React.addons.update(this.state, spec);
-    this.setState(newState);
+    this.setState(newState, function() {
+      this.repair();
+    });
   },
-  handleAddIndividuInEntity: function(kind, id, role) {
-    console.debug('handleAddIndividuInEntity', kind, id, role);
-  },
-  handleChartChange: function(slug) {
-    var newState = React.addons.update(this.state, {chartSlug: {$set: slug}});
-    this.setState(newState);
-  },
-  handleCurrentTestCaseFetched: function(data) {
-    if (data && data.error) {
-      console.error(data.error.message);
-      var newState = React.addons.update(this.state, {testCase: {$set: null}});
-      this.setState(newState);
-    } else {
-      this.repairTestCase(data || models.TestCase.getInitialTestCase());
-    }
+  handleCreateIndividuInEntity: function(kind, id, role) {
+    console.debug('handleCreateIndividuInEntity', kind, id, role);
+    var newIndividu = models.TestCase.createIndividu(this.state.testCase);
+    var newIndividus = {};
+    var newIndividuId = uuid.v4();
+    newIndividus[newIndividuId] = newIndividu;
+    var spec = {};
+    spec.individus = {$merge: newIndividus};
+    var newTestCase = React.addons.update(this.state.testCase, spec);
+    newTestCase = models.TestCase.withIndividuInEntity(newIndividuId, kind, id, role, newTestCase);
+    var newState = React.addons.update(this.state, {testCase: {$set: newTestCase}});
+    this.setState(newState, function() {
+      this.repair();
+    });
   },
   handleDeleteEntity: function(kind, id) {
     console.debug('handleDeleteEntity', kind, id);
@@ -73,9 +96,10 @@ var Simulator = React.createClass({
     var entityLabel = models.TestCase.getEntityLabel(kind, entity);
     var message = 'Supprimer ' + entityLabel + ' ?'; // jshint ignore:line
     if (confirm(message)) {
-      TestCase.deleteEntity(kind, id);
+      var newTestCase = models.TestCase.withoutEntity(kind, id, this.state.testCase);
+      var newState = React.addons.update(this.state, {testCase: {$set: newTestCase}});
+      this.setState(newState);
     }
-
   },
   handleDeleteIndividu: function(id) {
     console.debug('handleDeleteIndividu', id);
@@ -94,44 +118,30 @@ var Simulator = React.createClass({
   },
   handleLegislationChange: function(legislationUrl) {
     var newState = React.addons.update(this.state, {legislationUrl: {$set: legislationUrl}});
-    this.setState(newState);
+    this.setState(newState, function() {
+      this.simulate();
+    });
   },
   handleMoveIndividu: function(id) {
     console.debug('handleMoveIndividu', id);
   },
   handleRepair: function() {
-    this.repairTestCase(this.state.testCase);
-  },
-  handleRepairCompleted: function(data) {
-    console.debug('handleRepairCompleted', data);
-    var newState = React.addons.update(this.state, {
-      errors: {$set: data.errors},
-      suggestions: {$set: data.suggestions},
-      testCase: {$set: data.testCase},
-    });
-    this.setState(newState);
+    console.debug('handleRepair');
+    this.repair();
   },
   handleReset: function() {
+    console.debug('handleReset');
     if (confirm('Réinitialiser la situation ?')) { // jshint ignore:line
       var initialTestCase = models.TestCase.getInitialTestCase();
-      this.repairTestCase(initialTestCase);
+      this.repair(initialTestCase);
     }
   },
-  handleSimulate: function() {
-    webservices.simulate(this.state.legislationUrl, this.state.testCase, this.state.year, this.handleSimulateCompleted);
-  },
-  handleSimulateCompleted: function(data) {
-    console.debug('handleSimulateCompleted', data);
-    var spec = {
-      errors: {$set: data.error ? data.error : null},
-      simulationResult: {$set: data.error ? null : data},
-    };
-    var newState = React.addons.update(this.state, spec);
-    this.setState(newState);
-  },
   handleYearChange: function(year) {
+    console.debug('handleYearChange', year);
     var newState = React.addons.update(this.state, {year: {$set: year}});
-    this.setState(newState);
+    this.setState(newState, function() {
+      this.simulate();
+    });
   },
   render: function() {
     var dummyCharts = [
@@ -144,17 +154,17 @@ var Simulator = React.createClass({
         <div className="col-sm-4">
           <TestCaseToolbar
             isSimulationInProgress={this.state.isSimulationInProgress}
-            onAddEntity={this.handleAddEntity}
+            onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
             onRepair={this.handleRepair}
-            onSimulate={this.handleSimulate}
+            onSimulate={this.simulate}
           />
           <hr/>
           {
             this.state.testCase ?
               <TestCaseForm
                 errors={this.state.errors}
-                onAddIndividuInEntity={this.handleAddIndividuInEntity}
+                onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
                 onDeleteEntity={this.handleDeleteEntity}
                 onDeleteIndividu={this.handleDeleteIndividu}
                 onEditEntity={this.handleEditEntity}
@@ -162,14 +172,15 @@ var Simulator = React.createClass({
                 onMoveIndividu={this.handleMoveIndividu}
                 suggestions={this.state.suggestions}
                 testCase={this.state.testCase}
-              /> :
-              null
+              />
+              : null
           }
         </div>
         <div className="col-sm-8">
           <ChartToolbar
             charts={dummyCharts}
             chartSlug={this.state.chartSlug}
+            isSimulationInProgress={this.state.isSimulationInProgress}
             legislation={this.state.legislationUrl}
             legislations={dummyLegislations}
             onChartChange={this.handleChartChange}
@@ -180,18 +191,63 @@ var Simulator = React.createClass({
           <hr/>
           {
             this.state.simulationResult ?
-            <DummyChart data={this.state.simulationResult} /> : (
-              this.state.errors ?
-              <p>Erreurs dans le formulaire</p> :
-              <p>No result</p>
-            )
+              <DummyChart data={this.state.simulationResult} />
+              : (
+                this.state.errors ?
+                  <p>Erreurs dans le formulaire</p> :
+                  <p>No result</p>
+              )
           }
         </div>
       </div>
     );
   },
-  repairTestCase: function(testCase) {
-    webservices.repairTestCase(testCase, this.state.year, this.handleRepairCompleted);
+  repair: function(testCase) {
+    console.debug('repair', testCase);
+    webservices.repair(testCase || this.state.testCase, this.state.year, this.repairCompleted);
+  },
+  repairCompleted: function(data) {
+    console.debug('repairCompleted', data);
+    var errors = data.errors,
+      suggestions = data.suggestions,
+      testCase = data.testCase;
+    var spec = {
+      errors: {$set: errors},
+      suggestions: {$set: suggestions},
+    };
+    if (errors) {
+      spec.simulationResult = {$set: null};
+    } else {
+      if (testCase) {
+        testCase = models.TestCase.withEntitiesNamesFilled(testCase);
+      }
+      spec.testCase = {$set: testCase};
+    }
+    var newState = React.addons.update(this.state, spec);
+    this.setState(newState, function() {
+      if ( ! this.state.errors) {
+        this.simulate();
+      }
+    });
+  },
+  simulate: function() {
+    console.debug('simulate');
+    webservices.saveCurrentTestCase(this.state.testCase, this.currentTestCaseSaved);
+    var newState = React.addons.update(this.state, {isSimulationInProgress: {$set: true}});
+    this.setState(newState, function() {
+      webservices.simulate(this.state.legislationUrl, this.state.testCase, this.state.year,
+        this.simulationCompleted);
+    });
+  },
+  simulationCompleted: function(data) {
+    console.debug('simulationCompleted', data);
+    var spec = {
+      errors: {$set: data.error ? data.error : null},
+      isSimulationInProgress: {$set: false},
+      simulationResult: {$set: data.error ? null : data},
+    };
+    var newState = React.addons.update(this.state, spec);
+    this.setState(newState);
   },
 });
 

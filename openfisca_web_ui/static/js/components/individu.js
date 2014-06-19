@@ -6,10 +6,12 @@ var React = require('react');
 
 var Individu = React.createClass({
   propTypes: {
+    errors: React.PropTypes.object,
     id: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
     onMove: React.PropTypes.func.isRequired,
+    suggestions: React.PropTypes.object,
     value: React.PropTypes.object.isRequired,
   },
   preventDefaultThen: function(callback, event) {

@@ -13,6 +13,7 @@ var ChartToolbar = React.createClass({
   propTypes: {
     charts: React.PropTypes.array.isRequired,
     chartSlug: React.PropTypes.string,
+    isSimulationInProgress: React.PropTypes.bool.isRequired,
     legislation: React.PropTypes.string,
     legislations: React.PropTypes.array.isRequired,
     onChartChange: React.PropTypes.func.isRequired,
@@ -23,23 +24,28 @@ var ChartToolbar = React.createClass({
   render: function() {
     return (
       <div className="form-inline" role="form">
-        <div className="form-group">
+        <div className="form-group" style={{marginRight: 5}}>
           <ChartSelect charts={this.props.charts} onChange={this.props.onChartChange} value={this.props.chartSlug} />
         </div>
-        <div className="form-group">
+        <div className="form-group" style={{marginRight: 5}}>
           <YearInput
             charts={this.props.charts}
             onChange={this.props.onYearChange}
             value={this.props.year}
           />
         </div>
-        <div className="form-group">
+        <div className="form-group" style={{marginRight: 5}}>
           <LegislationSelect
             legislations={this.props.legislations}
             onChange={this.props.onLegislationChange}
             value={this.props.legislation}
           />
         </div>
+        {
+          this.props.isSimulationInProgress ?
+            <span className="label label-default" title="">Simulation</span>
+            : null
+        }
       </div>
     );
   }
