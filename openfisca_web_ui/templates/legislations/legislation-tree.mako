@@ -54,11 +54,11 @@ define('appconfig', ${helpers.legislation_appconfig(ctx, legislation.get_api1_ur
                     </div>
                     <div class="modal-body">
                         <p>
-                            Les paramétres de législation peuvent contenir plusieurs valeurs. Chacune de ces valeurs est
-                            appliquée pour un inteval de date donné.
+                            Les paramètres de législation peuvent contenir plusieurs valeurs. Chacune de ces valeurs est
+                            appliquée pour un intervalle de dates données.
                         </p>
                         <p>
-                            Changer la date vous permez de visualiser les paramètres de le législation appliquable à la
+                            Changer la date vous permet de visualiser les paramètres de le législation applicable à la
                             date choisie.
                         </p>
                         <div class="form-group">
