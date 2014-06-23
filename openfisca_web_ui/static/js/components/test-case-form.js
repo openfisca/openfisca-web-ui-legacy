@@ -10,12 +10,12 @@ var Entity = require('./entity'),
 
 var TestCaseForm = React.createClass({
   propTypes: {
+    disabled: React.PropTypes.bool,
     errors: React.PropTypes.object,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
     onDeleteIndividu: React.PropTypes.func.isRequired,
     onEditEntity: React.PropTypes.func.isRequired,
-    onEditIndividu: React.PropTypes.func.isRequired,
     onMoveIndividu: React.PropTypes.func.isRequired,
     suggestions: React.PropTypes.object,
     testCase: React.PropTypes.object.isRequired,
@@ -27,14 +27,19 @@ var TestCaseForm = React.createClass({
     var kinds = Object.keys(models.entitiesMetadata);
     var entities = {};
     kinds.forEach(function(kind) {
-      entities[kind] =
-        kind in this.props.testCase ?
-          mapObject(this.props.testCase[kind], function(entity, id) {
-            return this.renderEntity(entity, kind, id);
-          }, this) : null;
+      entities[kind] = kind in this.props.testCase && this.props.testCase[kind] ?
+        mapObject(this.props.testCase[kind], function(entity, id) {
+          return this.renderEntity(entity, kind, id);
+        }, this)
+        : null;
     }, this);
     return (
       <div>
+        {
+          this.props.errors && this.props.errors.individus ?
+            <p className="text-danger">Individus : {this.props.errors.individus}</p>
+            : null
+        }
         {entities.familles}
         {entities.foyers_fiscaux /* jshint ignore:line */}
         {entities.menages}
@@ -43,7 +48,7 @@ var TestCaseForm = React.createClass({
   },
   renderEntity: function(entity, kind, id) {
     return <Entity
-      entity={entity}
+      disabled={this.props.disabled}
       errors={this.forEntity(kind, id, 'errors')}
       id={id}
       individus={this.props.testCase.individus}
@@ -54,14 +59,18 @@ var TestCaseForm = React.createClass({
       onDelete={this.props.onDeleteEntity}
       onDeleteIndividu={this.props.onDeleteIndividu}
       onEdit={this.props.onEditEntity}
-      onEditIndividu={this.props.onEditIndividu}
       onMoveIndividu={this.props.onMoveIndividu}
       roles={
         models.entitiesMetadata[kind].roles.map(function(role) {
-          return {isSingleton: models.TestCase.isSingleton(kind, role), label: models.roleLabels[role], role: role};
+          return {
+            label: models.roleLabels[role],
+            maxCardinality: models.entitiesMetadata[kind].maxCardinality[role],
+            role: role,
+          };
        })
       }
       suggestions={this.forEntity(kind, id, 'suggestions')}
+      value={entity}
     />;
   },
 });

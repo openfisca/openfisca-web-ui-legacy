@@ -1,8 +1,12 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Q = require('q'),
-  React = require('react');
+
+var React = require('react');
+
+// Required by some deep parts of the application.
+require('bootstrap/js/collapse');
+require('bootstrap/js/dropdown');
 
 
 var AcceptCnilConditionsModalV = require('./views/AcceptCnilConditionsModalV'),
@@ -20,11 +24,6 @@ var appconfig = global.appconfig;
 
 
 function init() {
-  Q.longStackSupport = appconfig.debug;
-  Q.onerror = function(error) {
-    console.error(error.stack);
-  };
-
   var enabledModules = appconfig.enabledModules;
   if (enabledModules.auth) {
     auth.init(enabledModules.auth);

@@ -54,7 +54,14 @@ from openfisca_web_ui import model, urls
             <div class="panel-body">
                 <%self:view_fields/>
                 <h4>Prévisualisation pour l'année 2013</h4>
-                <iframe class="visualization-iframe" src="${visualization.iframe_src_url(ctx, year=2013)}"></iframe>
+<%
+    src_url_data = {
+        'test_case_url': model.TestCase.get_current_test_case_url(ctx),
+        'year': 2013,
+        }
+    src_url = visualization.url + '?' + urllib.urlencode(src_url_data)
+%>\
+                <iframe class="visualization-iframe" src="${src_url}"></iframe>
             </div>
             <div class="panel-footer">
                 <div class="btn-toolbar">

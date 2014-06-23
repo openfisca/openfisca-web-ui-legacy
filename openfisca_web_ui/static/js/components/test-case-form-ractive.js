@@ -406,32 +406,7 @@ var SituationForm = Ractive.extend({
   },
 
   // Webservices methods
-  fetchFieldsAsync: function() {
-    return Q($.ajax({
-      data: {context: Date.now().toString()},
-      dataType: 'json',
-      url: appconfig.api.urls.fields,
-    }))
-    .then(function(data) {
-      if ('columns' in data && 'columns_tree' in data) {
-        // Change "birth" column from date to year.
-        var birth = data.columns.birth;
-        birth['@type'] = 'Integer';
-        birth.default = parseInt(birth.default.slice(0, 4));
-        birth.label = 'Année de naissance';
-        birth.max = new Date().getFullYear();
-        birth.min = appconfig.constants.minYear;
-        birth.val_type = 'year'; // jshint ignore:line
-        data.columns.nom_individu.required = true; // jshint ignore:line
-        return Q(this.set({
-          columns: data.columns,
-          columnsTree: data.columns_tree, // jshint ignore:line
-        }));
-      } else {
-        throw new Error('invalid fields data: no columns or no columns_tree');
-      }
-    }.bind(this));
-  },
+
   repairTestCaseAsync: function() {
 //    var data = {
 //      context: Date.now().toString(),
@@ -492,21 +467,6 @@ var SituationForm = Ractive.extend({
         }
       }.bind(this)
     );
-  },
-  saveTestCaseAsync: function() {
-    return Q(this.set('status', {message: 'Sauvegarde', type: 'info'}))
-    .then(function() {
-      return $.ajax({
-        contentType: 'application/json',
-        data: JSON.stringify({
-          context: Date.now().toString(),
-          test_case: this.get('testCaseForAPI'), // jshint ignore:line
-        }),
-        method: 'POST',
-        url: appconfig.enabledModules.situationForm.urlPaths.currentTestCase,
-      });
-    }.bind(this))
-    .then(function() { this.set('status', null); }.bind(this));
   },
 });
 

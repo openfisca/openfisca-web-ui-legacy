@@ -9,19 +9,21 @@ var mapObject = require('map-object'),
 var entitiesMetadata = {
   familles: {
     label: 'Famille',
+    maxCardinality: {enfants: 2, parents: 2},
     nameKey: 'nom_famille',
     roles: ['parents', 'enfants'],
   },
   foyers_fiscaux: { // jshint ignore:line
     label: 'Déclaration d\'impôt',
+    maxCardinality: {declarants: 2},
     nameKey: 'nom_foyer_fiscal',
     roles: ['declarants', 'personnes_a_charge'],
   },
   menages: {
     label: 'Logement principal',
+    maxCardinality: {conjoint: 1, personne_de_reference: 1}, // jshint ignore:line
     nameKey: 'nom_menage',
     roles: ['personne_de_reference', 'conjoint', 'enfants', 'autres'],
-    singletons: ['conjoint', 'personne_de_reference'],
   },
 };
 
@@ -120,7 +122,7 @@ var TestCase = {
     return name;
   },
   isSingleton: function(kind, role) {
-    return 'singletons' in entitiesMetadata[kind] && entitiesMetadata[kind].singletons.indexOf(role) !== -1;
+    return entitiesMetadata[kind].maxCardinality[role] === 1;
   },
   withEntitiesNamesFilled: function(testCase) {
     var spec = {};
@@ -172,15 +174,19 @@ var TestCase = {
         var entityMetadata = entitiesMetadata[kind];
         var newEntity = _.omit(entity, entityMetadata.roles);
         entityMetadata.roles.forEach(function(role) {
-          if (role in entity) {
+          if (entity[role]) {
             if (TestCase.isSingleton(kind, role)) {
               if (entity[role] !== id) {
                 newEntity[role] = entity[role];
               }
-            } else if (entity[role] && entity[role].indexOf(id) !== -1) {
-              var newRoleIndividus = _.without(entity[role], id);
-              if (newRoleIndividus.length) {
-                newEntity[role] = newRoleIndividus;
+            } else {
+              if (entity[role].indexOf(id) === -1) {
+                newEntity[role] = [].concat(entity[role]); // This is a copy.
+              } else {
+                var newRoleIndividus = _.without(entity[role], id); // This is a copy.
+                if (newRoleIndividus.length) {
+                  newEntity[role] = newRoleIndividus;
+                }
               }
             }
           }

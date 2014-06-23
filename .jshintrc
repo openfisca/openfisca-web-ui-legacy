@@ -5,6 +5,9 @@
     "alert": false,
     "confirm": false,
     "console": false,
+    "describe": false,
+    "expect": false,
+    "it": false,
     "module": false,
     "require": false
   },

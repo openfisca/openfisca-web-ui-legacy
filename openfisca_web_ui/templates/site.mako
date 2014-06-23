@@ -170,8 +170,6 @@ ${conf['app_name']}
 
 <%def name="css()" filter="trim">
     <link href="${urls.get_url(ctx, u'node_modules/bootstrap/dist/css/bootstrap.css')}" media="screen" rel="stylesheet">
-    ## FIXME Remove nvd3 CSS when waterfall and distribution charts stop using nv tooltips.
-    <link href="${urls.get_url(ctx, u'node_modules/nvd3/nv.d3.css')}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
 </%def>
 

@@ -4,25 +4,26 @@
 var React = require('react');
 
 
-var ChartSelect = React.createClass({
+var VisualizationSelect = React.createClass({
   propTypes: {
-    charts: React.PropTypes.array.isRequired,
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.string,
+    visualizations: React.PropTypes.array.isRequired,
   },
   handleChange: function(event) {
     this.props.onChange(event.target.value);
   },
   render: function() {
-    var options = this.props.charts.map(function(chart) {
-      return <option key={chart.slug} value={chart.slug}>{chart.name}</option>;
+    var options = this.props.visualizations.map(function(visualization) {
+      return <option key={visualization.slug} value={visualization.slug}>{visualization.title}</option>;
     });
     return (
       <select className="form-control" onChange={this.handleChange} value={this.props.value}>
         {options}
+        <option value="json">JSON</option>
       </select>
     );
   }
 });
 
-module.exports = ChartSelect;
+module.exports = VisualizationSelect;

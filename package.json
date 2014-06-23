@@ -14,7 +14,7 @@
   ],
   "main": "openfisca_web_ui/static/js/index.js",
   "scripts": {
-    "build": "NODE_ENV=production browserify . > openfisca_web_ui/static/js/bundle.js",
+    "build": "browserify . > openfisca_web_ui/static/js/bundle.js",
     "start": "watchify -o openfisca_web_ui/static/js/bundle.js -v -d .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -30,18 +30,17 @@
   "dependencies": {
     "bootstrap": "^3.1.1",
     "jquery": "^2.1.1",
-    "q": "^1.0.1",
     "underscore": "^1.6.0",
     "backbone": "^1.1.2",
     "X-editable": "git+https://github.com/vitalets/x-editable.git",
-    "d3": "^3.4.8",
-    "nvd3": "git+https://github.com/novus/nvd3.git",
-    "envify": "^1.2.1",
     "react": "^0.10.0",
     "reactify": "^0.13.1",
     "map-object": "0.0.2",
     "superagent": "^0.18.0",
-    "uuid": "^1.4.1"
+    "uuid": "^1.4.1",
+    "jasmine-node": "^1.14.3",
+    "lodash.find": "^2.4.1",
+    "node-qs-serialization": "0.0.2"
   },
   "private": true,
   "browserify": {

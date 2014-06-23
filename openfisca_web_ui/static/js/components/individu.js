@@ -1,11 +1,12 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
 
 
 var Individu = React.createClass({
   propTypes: {
+    disabled: React.PropTypes.bool,
     errors: React.PropTypes.object,
     id: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
@@ -16,21 +17,29 @@ var Individu = React.createClass({
   },
   preventDefaultThen: function(callback, event) {
     event.preventDefault();
-    callback(this.props.id);
+    callback();
   },
   render: function() {
     return (
-      <div>
+      <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
           <button
             className="btn btn-default btn-sm"
-            onClick={this.preventDefaultThen.bind(null, this.props.onEdit)}
+            disabled={this.props.disabled}
+            onClick={this.props.onEdit.bind(null, 'individus', this.props.id)}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
-            <span className="glyphicon glyphicon glyphicon-info-sign"></span>
+            {
+              this.props.suggestions ?
+                <span className="glyphicon glyphicon glyphicon-info-sign"></span>
+                : null
+            }
           </button>
           <button
-            className="btn btn-default btn-sm dropdown-toggle"
+            className={
+              React.addons.classSet('btn', 'btn-default', 'btn-sm', 'dropdown-toggle',
+                this.props.disabled ? 'disabled' : null)
+            }
             data-toggle="dropdown"
             type="button">
             <span className="caret"></span>
@@ -40,14 +49,14 @@ var Individu = React.createClass({
             <li role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onMove)}
+                onClick={this.preventDefaultThen.bind(null, this.props.onMove.bind(null, this.props.id))}
                 role="menuitem"
                 tabIndex="-1">
                 Déplacer
               </a>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onDelete)}
+                onClick={this.preventDefaultThen.bind(null, this.props.onDelete.bind(null, this.props.id))}
                 role="menuitem"
                 tabIndex="-1">
                 Supprimer
@@ -55,7 +64,11 @@ var Individu = React.createClass({
             </li>
           </ul>
         </div>
-        <p className="text-danger">Erreur</p>
+        {
+          this.props.errors ?
+            <p className="text-danger">Erreur</p>
+            : null
+        }
       </div>
     );
   }

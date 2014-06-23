@@ -24,3 +24,4 @@ jshint: clean
 
 test:
 	python setup.py test
+	./node_modules/.bin/jasmine-node openfisca_web_ui/static/js/spec/

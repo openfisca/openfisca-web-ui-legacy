@@ -3,36 +3,39 @@
 
 var React = require('react');
 
-var ChartSelect = require('./chart-select'),
+var VisualizationSelect = require('./visualization-select'),
   LegislationSelect = require('./legislation-select'),
 //  SituationForm = require('./situation-form'),
   YearInput = require('./year-input');
 
 
-var ChartToolbar = React.createClass({
+var VisualizationToolbar = React.createClass({
   propTypes: {
-    charts: React.PropTypes.array.isRequired,
-    chartSlug: React.PropTypes.string,
-    isSimulationInProgress: React.PropTypes.bool.isRequired,
     legislation: React.PropTypes.string,
-    legislations: React.PropTypes.array.isRequired,
-    onChartChange: React.PropTypes.func.isRequired,
+    legislations: React.PropTypes.array,
+    onVisualizationChange: React.PropTypes.func.isRequired,
     onLegislationChange: React.PropTypes.func.isRequired,
     onYearChange: React.PropTypes.func.isRequired,
+    visualizations: React.PropTypes.array,
+    visualizationSlug: React.PropTypes.string,
     year: React.PropTypes.number.isRequired,
   },
   render: function() {
     return (
       <div className="form-inline" role="form">
+        {
+          this.props.visualizations ?
+            <div className="form-group" style={{marginRight: 5}}>
+              <VisualizationSelect
+                visualizations={this.props.visualizations}
+                onChange={this.props.onVisualizationChange}
+                value={this.props.visualizationSlug}
+              />
+            </div>
+            : null
+        }
         <div className="form-group" style={{marginRight: 5}}>
-          <ChartSelect charts={this.props.charts} onChange={this.props.onChartChange} value={this.props.chartSlug} />
-        </div>
-        <div className="form-group" style={{marginRight: 5}}>
-          <YearInput
-            charts={this.props.charts}
-            onChange={this.props.onYearChange}
-            value={this.props.year}
-          />
+          <YearInput onChange={this.props.onYearChange} value={this.props.year} />
         </div>
         <div className="form-group" style={{marginRight: 5}}>
           <LegislationSelect
@@ -41,14 +44,9 @@ var ChartToolbar = React.createClass({
             value={this.props.legislation}
           />
         </div>
-        {
-          this.props.isSimulationInProgress ?
-            <span className="label label-default" title="">Simulation</span>
-            : null
-        }
       </div>
     );
   }
 });
 
-module.exports = ChartToolbar;
+module.exports = VisualizationToolbar;

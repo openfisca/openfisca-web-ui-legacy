@@ -8,7 +8,7 @@ var Individu = require('./individu');
 
 var Entity = React.createClass({
   propTypes: {
-    entity: React.PropTypes.object.isRequired,
+    disabled: React.PropTypes.bool,
     errors: React.PropTypes.object,
     id: React.PropTypes.string.isRequired,
     individus: React.PropTypes.object.isRequired,
@@ -18,10 +18,10 @@ var Entity = React.createClass({
     onDelete: React.PropTypes.func.isRequired,
     onDeleteIndividu: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
-    onEditIndividu: React.PropTypes.func.isRequired,
     onMoveIndividu: React.PropTypes.func.isRequired,
     roles: React.PropTypes.array.isRequired,
     suggestions: React.PropTypes.object,
+    value: React.PropTypes.object.isRequired,
   },
   forIndividu: function(id, key) {
     return this.props[key] && this.props[key].individus ? this.props[key].individus[id] : null;
@@ -40,12 +40,16 @@ var Entity = React.createClass({
           <div className="btn-group">
             <button
               className="btn btn-default btn-sm"
-              onClick={this.preventDefaultThen.bind(null, this.props.onEdit.bind(null, this.props.kind, this.props.id))}
+              disabled={this.props.disabled}
+              onClick={this.props.onEdit.bind(null, this.props.kind, this.props.id)}
               type="button">
               {this.props.label}
             </button>
             <button
-              className="btn btn-default btn-sm dropdown-toggle"
+              className={
+                React.addons.classSet('btn', 'btn-default', 'btn-sm', 'dropdown-toggle',
+                  this.props.disabled ? 'disabled' : null)
+              }
               data-toggle="dropdown"
               type="button">
               <span className="caret"></span>
@@ -67,7 +71,7 @@ var Entity = React.createClass({
         <div className="list-group">
           {
             this.props.roles.map(function(item) {
-              return this.renderRole(item.role, item.label, item.isSingleton);
+              return this.renderRole(item.role, item.label, item.maxCardinality);
             }, this)
           }
         </div>
@@ -77,22 +81,23 @@ var Entity = React.createClass({
   renderIndividu: function(id) {
     return (
       <Individu
+        disabled={this.props.disabled}
         errors={this.forIndividu(id, 'errors')}
         id={id}
         key={id}
         onDelete={this.props.onDeleteIndividu}
-        onEdit={this.props.onEditIndividu}
+        onEdit={this.props.onEdit}
         onMove={this.props.onMoveIndividu}
         suggestions={this.forIndividu(id, 'suggestions')}
         value={this.props.individus[id]}
       />
     );
   },
-  renderRole: function(role, label, isSingleton) {
+  renderRole: function(role, label, maxCardinality) {
     var individus;
-    var roleData = this.props.entity[role];
+    var roleData = this.props.value[role];
     if (roleData) {
-      if (isSingleton) {
+      if (maxCardinality === 1) {
         individus = this.renderIndividu(roleData);
       } else {
         individus = roleData.map(function(id) {
@@ -100,7 +105,13 @@ var Entity = React.createClass({
         }, this);
       }
     }
-    var addLink = ( ! isSingleton || ! roleData) ? (
+    var addLink = (
+      ! this.props.disabled && (
+        ! roleData ||
+        maxCardinality === 1 && roleData ||
+        maxCardinality > 1 && roleData.length < maxCardinality
+      )
+    ) ? (
       <a
         href="#"
         onClick={

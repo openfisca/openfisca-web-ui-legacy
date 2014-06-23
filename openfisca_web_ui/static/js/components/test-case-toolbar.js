@@ -1,13 +1,13 @@
 /** @jsx React.DOM */
 'use strict';
 
-require('bootstrap/js/dropdown');
-
-var React = require('react');
+var React = require('react/addons');
 
 
 var TestCaseToolbar = React.createClass({
   propTypes: {
+    disabled: React.PropTypes.bool,
+    hasErrors: React.PropTypes.bool,
     isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
     onReset: React.PropTypes.func.isRequired,
@@ -25,12 +25,17 @@ var TestCaseToolbar = React.createClass({
           <button
             accessKey="s"
             className="btn btn-primary"
-            disabled={this.props.isSimulationInProgress}
+            disabled={this.props.disabled || this.props.hasErrors || this.props.isSimulationInProgress}
             onClick={this.preventDefaultThen.bind(null, this.props.onSimulate)}
             type="button">
             Simuler
           </button>
-          <button className="btn btn-primary dropdown-toggle" data-toggle="dropdown" type="button">
+          <button
+            className={
+              React.addons.classSet('btn', 'btn-primary', 'dropdown-toggle', this.props.disabled ? 'disabled' : null)
+            }
+            data-toggle="dropdown"
+            type="button">
             <span className="caret"></span>
             <span className="sr-only">Toggle Dropdown</span>
           </button>
@@ -44,7 +49,11 @@ var TestCaseToolbar = React.createClass({
           </ul>
         </div>
         <div className="btn-group" style={{marginRight: 5}}>
-          <button className="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
+          <button
+            className="btn btn-default dropdown-toggle"
+            data-toggle="dropdown"
+            disabled={this.props.disabled}
+            type="button">
             Ajouter <span className="caret"></span>
           </button>
           <ul className="dropdown-menu" role="menu">
@@ -71,6 +80,11 @@ var TestCaseToolbar = React.createClass({
             </li>
           </ul>
         </div>
+        {
+          this.props.isSimulationInProgress ?
+            <span className="label label-default">Simulation</span>
+            : null
+        }
       </div>
     );
   }
