@@ -20,7 +20,7 @@ install:
 	cd ${STATIC_DIR}; if [ ! -e node_modules ]; then ln -s ../../node_modules .; fi
 
 jshint: clean
-	jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
+	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 
 test:
 	python setup.py test

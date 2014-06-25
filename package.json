@@ -15,7 +15,7 @@
   "main": "openfisca_web_ui/static/js/index.js",
   "scripts": {
     "build": "browserify . > openfisca_web_ui/static/js/bundle.js",
-    "start": "watchify -o openfisca_web_ui/static/js/bundle.js -v -d .",
+    "start": "./node_modules/.bin/watchify -o openfisca_web_ui/static/js/bundle.js -v -d .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -52,6 +52,7 @@
     ]
   },
   "devDependencies": {
-    "watchify": "^0.10.2"
+    "watchify": "^0.10.2",
+    "jsxhint": "^0.4.10"
   }
 }
