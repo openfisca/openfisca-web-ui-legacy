@@ -7,6 +7,7 @@ var React = require('react/addons');
 var Individu = React.createClass({
   propTypes: {
     disabled: React.PropTypes.bool,
+    edited: React.PropTypes.bool,
     errors: React.PropTypes.object,
     id: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
@@ -20,25 +21,26 @@ var Individu = React.createClass({
     callback();
   },
   render: function() {
+    var btnColorClass = this.props.edited ? 'btn-info' : 'btn-default';
     return (
       <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
           <button
-            className="btn btn-default btn-sm"
+            className={React.addons.classSet('btn', btnColorClass, 'btn-sm')}
             disabled={this.props.disabled}
             onClick={this.props.onEdit.bind(null, 'individus', this.props.id)}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
             {
               this.props.suggestions ?
-                <span className="glyphicon glyphicon glyphicon-info-sign"></span>
+                <span className="glyphicon glyphicon-info-sign"></span>
                 : null
             }
           </button>
           <button
             className={
-              React.addons.classSet('btn', 'btn-default', 'btn-sm', 'dropdown-toggle',
-                this.props.disabled ? 'disabled' : null)
+              React.addons.classSet('btn', btnColorClass, 'btn-sm', 'dropdown-toggle',
+                this.props.disabled && 'disabled')
             }
             data-toggle="dropdown"
             type="button">

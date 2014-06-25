@@ -5,12 +5,12 @@ var mapObject = require('map-object'),
   React = require('react');
 
 var Entity = require('./entity'),
-  models = require('../models');
+  models = require('../../models');
 
 
 var TestCaseForm = React.createClass({
   propTypes: {
-    disabled: React.PropTypes.bool,
+    editedEntity: React.PropTypes.object,
     errors: React.PropTypes.object,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
@@ -37,7 +37,7 @@ var TestCaseForm = React.createClass({
       <div>
         {
           this.props.errors && this.props.errors.individus ?
-            <p className="text-danger">Individus : {this.props.errors.individus}</p>
+            <p className="text-danger">Individus : {this.props.errors.individus}</p> // jshint ignore:line
             : null
         }
         {entities.familles}
@@ -48,7 +48,7 @@ var TestCaseForm = React.createClass({
   },
   renderEntity: function(entity, kind, id) {
     return <Entity
-      disabled={this.props.disabled}
+      editedEntity={this.props.editedEntity}
       errors={this.forEntity(kind, id, 'errors')}
       id={id}
       individus={this.props.testCase.individus}

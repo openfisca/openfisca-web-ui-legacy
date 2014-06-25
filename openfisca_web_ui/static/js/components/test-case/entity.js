@@ -8,7 +8,7 @@ var Individu = require('./individu');
 
 var Entity = React.createClass({
   propTypes: {
-    disabled: React.PropTypes.bool,
+    editedEntity: React.PropTypes.object,
     errors: React.PropTypes.object,
     id: React.PropTypes.string.isRequired,
     individus: React.PropTypes.object.isRequired,
@@ -34,21 +34,23 @@ var Entity = React.createClass({
     callback();
   },
   render: function() {
+    var editedEntity = this.props.editedEntity;
+    var disabled = !! editedEntity;
+    var btnColorClass = editedEntity && editedEntity.id === this.props.id ? 'btn-info' : 'btn-default';
     return (
       <div className={React.addons.classSet('panel', this.hasErrors() ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">
           <div className="btn-group">
             <button
-              className="btn btn-default btn-sm"
-              disabled={this.props.disabled}
+              className={React.addons.classSet('btn', btnColorClass, 'btn-sm')}
+              disabled={disabled}
               onClick={this.props.onEdit.bind(null, this.props.kind, this.props.id)}
               type="button">
               {this.props.label}
             </button>
             <button
               className={
-                React.addons.classSet('btn', 'btn-default', 'btn-sm', 'dropdown-toggle',
-                  this.props.disabled ? 'disabled' : null)
+                React.addons.classSet('btn', btnColorClass, 'btn-sm', 'dropdown-toggle', disabled && 'disabled')
               }
               data-toggle="dropdown"
               type="button">
@@ -79,9 +81,13 @@ var Entity = React.createClass({
     );
   },
   renderIndividu: function(id) {
+    var editedEntity = this.props.editedEntity;
+    var disabled = !! editedEntity;
+    var edited = editedEntity && editedEntity.id === id;
     return (
       <Individu
-        disabled={this.props.disabled}
+        disabled={disabled}
+        edited={edited}
         errors={this.forIndividu(id, 'errors')}
         id={id}
         key={id}
@@ -105,8 +111,9 @@ var Entity = React.createClass({
         }, this);
       }
     }
+    var disabled = !! this.props.editedEntity;
     var addLink = (
-      ! this.props.disabled && (
+      ! disabled && (
         ! roleData ||
         maxCardinality === 1 && roleData ||
         maxCardinality > 1 && roleData.length < maxCardinality

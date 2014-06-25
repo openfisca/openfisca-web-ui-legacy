@@ -1,6 +1,10 @@
 'use strict';
 
-var request = require('superagent');
+var mapObject = require('map-object'),
+  React = require('react/addons'),
+  request = require('superagent');
+
+var models = require('./models');
 
 var appconfig = global.appconfig;
 
@@ -34,7 +38,11 @@ function fetchFields(onComplete) {
       } else if (res.error) {
         onComplete(res);
       } else if (res.body && 'columns' in res.body && 'columns_tree' in res.body) {
-        onComplete(res.body);
+        var data = {
+          columns: patchColumns(res.body.columns),
+          columnsTree: res.body.columns_tree, // jshint ignore:line
+        };
+        onComplete(data);
       } else {
         onComplete({error: 'invalid fields data: no columns or no columns_tree'});
       }
@@ -75,6 +83,46 @@ function fetchVisualizations(onComplete) {
     });
 }
 
+function patchColumns(columns) {
+  // Patch columns definitions to match UI specificities.
+  var birth = columns.birth;
+  var spec = {
+    birth: {
+      '@type': {$set: 'Integer'},
+      default: {$set: parseInt(birth.default.slice(0, 4))},
+      label: {$set: 'Année de naissance'},
+      max: {$set: new Date().getFullYear()},
+      min: {$set: appconfig.constants.minYear},
+      val_type: {$set: 'year'}, // jshint ignore:line
+    },
+  };
+  var entitiesNameKeys = mapObject(models.entitiesMetadata, function(entity) { return entity.nameKey; });
+  var requiredColumnNames = ['nom_individu'].concat(entitiesNameKeys);
+  var requiredColumnNamesSpec = {};
+  requiredColumnNames.map(function(requiredColumnName) {
+    requiredColumnNamesSpec[requiredColumnName] = {required: {$set: true}};
+  });
+  spec = React.addons.update(spec, {$merge: requiredColumnNamesSpec});
+  var newColumns = React.addons.update(columns, spec);
+  return newColumns;
+}
+
+function patchValuesForColumns(data) {
+  // Change values according to UI-specific columns.
+  if (data.individus) {
+    var spec = {individus: {}};
+    mapObject(data.individus, function(individu, id) {
+      if (individu.birth) {
+        spec.individus[id] = {birth: {$set: parseInt(individu.birth.slice(0, 4))}};
+      }
+    });
+    var newData = React.addons.update(data, spec);
+    return newData;
+  } else {
+    return data;
+  }
+}
+
 function repair(testCase, year, onComplete) {
   var data = {
     scenarios: [
@@ -103,6 +151,8 @@ function repair(testCase, year, onComplete) {
       } else {
         var testCase = res.body.repaired_scenarios[0].test_case, // jshint ignore:line
           suggestions = res.body.suggestions.scenarios['0'].test_case; // jshint ignore:line
+        suggestions = patchValuesForColumns(suggestions);
+        testCase = patchValuesForColumns(testCase);
         onComplete({
           errors: null,
           originalTestCase: res.body.params.scenarios[0].test_case, // jshint ignore:line

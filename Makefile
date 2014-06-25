@@ -13,7 +13,7 @@ clean:
 	rm -f $(BUNDLE_JS)
 
 flake8: clean
-	flake8
+	flake8 --exclude node_modules
 
 install:
 	npm install

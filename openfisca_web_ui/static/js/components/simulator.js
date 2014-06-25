@@ -2,18 +2,20 @@
 'use strict';
 
 var find = require('lodash.find'),
+  getObjectPath = require('get-object-path'),
   invariant = require('react/lib/invariant'),
   mapObject = require('map-object'),
   React = require('react/addons'),
   uuid = require('uuid');
 
-var VisualizationToolbar = require('./visualization-toolbar'),
-  FieldsForm = require('./fields-form'),
-  IframeVisualization = require('./iframe-visualization'),
-  JsonVisualization = require('./json-visualization'),
+var FieldsForm = require('./fields/fields-form'),
+  IframeVisualization = require('./visualizations/iframe-visualization'),
+  JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
-  TestCaseForm = require('./test-case-form'),
-  TestCaseToolbar = require('./test-case-toolbar'),
+  MoveIndividuForm = require('./move-individu-form'),
+  TestCaseForm = require('./test-case/test-case-form'),
+  TestCaseToolbar = require('./test-case/test-case-toolbar'),
+  VisualizationToolbar = require('./visualizations/visualization-toolbar'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig;
@@ -35,45 +37,30 @@ var Simulator = React.createClass({
   currentTestCaseFetched: function(data) {
     console.debug('currentTestCaseFetched', data);
     var newState;
-    if (data) {
-      if (data.error) {
-        console.error(data.error);
-        newState = React.addons.update(this.state, {testCase: {$set: null}});
-        this.setState(newState);
-      } else {
-        newState = React.addons.update(this.state, {testCase: {$set: data}});
-        this.setState(newState, function() {
-          this.repair(data || models.TestCase.getInitialTestCase());
-        });
-      }
+    if (data && data.error) {
+      console.error(data.error);
+      newState = React.addons.update(this.state, {testCase: {$set: null}});
+      this.setState(newState);
+    } else {
+      newState = React.addons.update(this.state, {testCase: {$set: data}});
+      this.setState(newState, function() {
+        this.repair(data || models.TestCase.getInitialTestCase());
+      });
     }
   },
   currentTestCaseSaved: function(data) {
     console.debug('currentTestCaseSaved', data);
   },
   fieldsFetched: function(data) {
-    console.debug('currentTestCaseFetched', data);
+    console.debug('fieldsFetched', data);
     if (data) {
       if (data.error) {
         console.error(data.error);
       } else {
-        // Change columns definition, in particular "birth" column from date to year.
-        var birth = data.columns.birth;
-        var columnsSpec = {
-          birth: {
-            '@type': {$set: 'Integer'},
-            default: {$set: parseInt(birth.default.slice(0, 4))},
-            label: {$set: 'Année de naissance'},
-            max: {$set: new Date().getFullYear()},
-            min: {$set: appconfig.constants.minYear},
-            val_type: {$set: 'year'}, // jshint ignore:line
-          },
-          nom_individu: { // jshint ignore:line
-            required: {$set: true},
-          },
+        var spec = {
+          columns: {$set: data.columns},
+          columnsTree: {$set: data.columnsTree},
         };
-        var newColumns = React.addons.update(data.columns, columnsSpec);
-        var spec = {columns: {$set: newColumns}, columnsTree: {$set: data.columns_tree}}; // jshint ignore:line
         var newProps = React.addons.update(this.props, spec);
         this.setProps(newProps);
       }
@@ -85,6 +72,7 @@ var Simulator = React.createClass({
       errors: null,
       isSimulationInProgress: false,
       legislationUrl: null,
+      movedIndividu: null,
       simulationResult: null,
       suggestions: null,
       testCase: null,
@@ -158,10 +146,34 @@ var Simulator = React.createClass({
     var newState = React.addons.update(this.state, {editedEntity: {$set: null}});
     this.setState(newState);
   },
+  handleFieldsFormChange: function(kind, id, columnName, value) {
+    console.debug('handleFieldsFormChange', kind, id, columnName, value);
+    // Create values empty object in editedEntity if it doesn't exist.
+    var state = this.state.editedEntity.values ? this.state :
+      React.addons.update(this.state, {editedEntity: {values: {$set: {}}}});
+    // Write in this.state.editedEntity.values only values that actually changed. The other stay in this.state.testCase.
+    var spec = {editedEntity: {values: {}}};
+    spec.editedEntity.values[columnName] = {$set: value};
+    var newState = React.addons.update(state, spec);
+    this.setState(newState);
+  },
   handleFieldsFormSave: function() {
     console.debug('handleFieldsFormSave');
-    var newState = React.addons.update(this.state, {editedEntity: {$set: null}});
-    this.setState(newState);
+    var spec = {
+      editedEntity: {$set: null},
+    };
+    var id = this.state.editedEntity.id,
+      kind = this.state.editedEntity.kind,
+      values = this.state.editedEntity.values;
+    if (values && Object.keys(values).length) {
+      spec.testCase = {};
+      spec.testCase[kind] = {};
+      spec.testCase[kind][id] = {$merge: values};
+    }
+    var newState = React.addons.update(this.state, spec);
+    this.setState(newState, function() {
+      this.repair();
+    });
   },
   handleLegislationChange: function(legislationUrl) {
     var newState = React.addons.update(this.state, {legislationUrl: {$set: legislationUrl}});
@@ -171,6 +183,22 @@ var Simulator = React.createClass({
   },
   handleMoveIndividu: function(id) {
     console.debug('handleMoveIndividu', id);
+    var editedEntity = this.state.editedEntity;
+    invariant(editedEntity === null, 'editedEntity: %s when requesting move individu action.', editedEntity);
+    var movedIndividu = {id: id};
+    var newState = React.addons.update(this.state, {movedIndividu: {$set: movedIndividu}});
+    this.setState(newState);
+  },
+  handleMoveIndividuFormCancel: function() {
+    console.debug('handleMoveIndividuFormCancel');
+    var newState = React.addons.update(this.state, {movedIndividu: {$set: null}});
+    this.setState(newState);
+  },
+  handleMoveIndividuFormChange: function(individuId, entityKind, entityId) {
+    console.debug('handleMoveIndividuFormChange', individuId, entityKind, entityId);
+  },
+  handleMoveIndividuFormSave: function() {
+    console.debug('handleMoveIndividuFormSave');
   },
   handleRepair: function() {
     console.debug('handleRepair');
@@ -210,6 +238,17 @@ var Simulator = React.createClass({
     }
   },
   render: function() {
+    var rightPanel = this.state.editedEntity ?
+      this.renderFieldsFormPanel() : (
+        this.state.movedIndividu ? (
+          <MoveIndividuForm
+            onCancel={this.handleMoveIndividuFormCancel}
+            onChange={this.handleMoveIndividuFormChange.bind(null, this.state.movedIndividu.id)}
+            onSave={this.handleMoveIndividuFormSave}
+            title={this.state.testCase.individus[this.state.movedIndividu.id].nom_individu /* jshint ignore:line */}
+          />
+        ) : this.renderVisualizationPanel()
+      );
     return (
       <div className="row">
         <div className="col-sm-4">
@@ -226,7 +265,7 @@ var Simulator = React.createClass({
           {
             this.state.testCase ?
               <TestCaseForm
-                disabled={ !! this.state.editedEntity}
+                editedEntity={this.state.editedEntity}
                 errors={this.state.errors}
                 onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
                 onDeleteEntity={this.handleDeleteEntity}
@@ -240,14 +279,15 @@ var Simulator = React.createClass({
           }
         </div>
         <div className="col-sm-8">
-          {this.state.editedEntity ? this.renderFieldsFormPanel() : this.renderVisualizationPanel()}
+          {rightPanel}
         </div>
       </div>
     );
   },
   renderFieldsFormPanel: function() {
-    var kind = this.state.editedEntity.kind;
-    var entity = this.state.testCase[kind][this.state.editedEntity.id];
+    var id = this.state.editedEntity.id,
+      kind = this.state.editedEntity.kind;
+    var entity = this.state.testCase[kind][id];
     var title = kind === 'individus' ?
       entity.nom_individu : // jshint ignore:line
       models.TestCase.getEntityLabel(kind, entity);
@@ -261,13 +301,23 @@ var Simulator = React.createClass({
         label: category.label,
       };
     }, this);
+    var errors = getObjectPath(this.state.errors, kind + '.' + id);
+    var suggestions = getObjectPath(this.state.suggestions, kind + '.' + id);
+    var values = this.state.testCase[kind][id];
+    if (this.state.editedEntity.values) {
+      values = React.addons.update(values, {$merge: this.state.editedEntity.values});
+    }
     return (
       <FieldsForm
         categories={categories}
+        errors={errors}
         onCancel={this.handleFieldsFormCancel}
+        onChange={this.handleFieldsFormChange.bind(null, kind, id)}
         onSave={this.handleFieldsFormSave}
+        suggestions={suggestions}
         title={title}
-        />
+        values={values}
+      />
     );
   },
   renderVisualization: function() {

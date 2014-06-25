@@ -7,6 +7,7 @@ var React = require('react');
 // Required by some deep parts of the application.
 require('bootstrap/js/collapse');
 require('bootstrap/js/dropdown');
+require('bootstrap/js/transition');
 
 
 var AcceptCnilConditionsModalV = require('./views/AcceptCnilConditionsModalV'),
@@ -45,20 +46,6 @@ function init() {
   if (enabledModules.situationForm) {
     var mountNode = document.getElementById('simulator-container');
     React.renderComponent(<Simulator />, mountNode);
-//    testCasesServiceM.fetchCurrentTestCaseAsync()
-//    .then(function(/*data*/) {
-//      var promise;
-//      if (data === null) {
-//        promise = situationForm.resetTestCaseAsync();
-//      } else {
-//        promise = Q(situationForm).invoke('set', 'testCase', data);
-//      }
-//      return promise
-//      .then(function() { return situationForm.repairTestCaseAsync(); })
-//      .then(function() { return chartsV.model.simulateAsync(situationForm.get('testCaseForAPI')); });
-//    })
-//    .then(function() { router.init(); })
-//    .done();
   }
 }
 
