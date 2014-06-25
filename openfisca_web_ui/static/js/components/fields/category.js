@@ -3,7 +3,7 @@
 
 var React = require('react');
 
-var SuggestionGlyphicon = require('./suggestion-glyphicon')
+var SuggestionGlyphicon = require('./suggestion-glyphicon');
 
 var Category = React.createClass({
   propTypes: {
@@ -15,7 +15,9 @@ var Category = React.createClass({
   },
   render: function() {
     return (
-      <div className={React.addons.classSet('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
+      <div className={
+        React.addons.classSet('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')
+      }>
         <div className="panel-heading">
           {
             this.props.hasSuggestions ?
