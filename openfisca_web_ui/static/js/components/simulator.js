@@ -436,7 +436,7 @@ var Simulator = React.createClass({
     if (data) {
       if (data.error) {
         console.error(data.error);
-      } else {
+      } else if (data.length) {
         var newProps = React.addons.update(this.props, {visualizations: {$set: data}});
         this.setProps(newProps);
         var newState = React.addons.update(this.state, {visualizationSlug: {$set: data[0].slug}});
