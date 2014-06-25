@@ -322,9 +322,7 @@ var Simulator = React.createClass({
   },
   renderVisualization: function() {
     invariant(this.state.simulationResult, 'this.state.simulationResult is empty');
-    if ( ! this.props.visualizations) {
-      return <p className="text-danger">Aucune visualisation disponible.</p>;
-    } else if (this.state.simulationResult.error) {
+    if (this.state.simulationResult.error) {
       return (
         <p className="text-danger">
           Erreur de simulation sur le serveur, veuillez nous excuser.
@@ -334,6 +332,8 @@ var Simulator = React.createClass({
     } else {
       if (this.state.visualizationSlug === 'json') {
         return <JsonVisualization data={this.state.simulationResult} />;
+      } else if ( ! this.props.visualizations) {
+        return <p className="text-danger">Aucune visualisation disponible.</p>;
       } else {
         var visualization = find(this.props.visualizations, {slug: this.state.visualizationSlug});
         invariant(visualization, 'selected visualization not found in vizualisations prop');
@@ -436,10 +436,13 @@ var Simulator = React.createClass({
     if (data) {
       if (data.error) {
         console.error(data.error);
-      } else if (data.length) {
-        var newProps = React.addons.update(this.props, {visualizations: {$set: data}});
-        this.setProps(newProps);
-        var newState = React.addons.update(this.state, {visualizationSlug: {$set: data[0].slug}});
+      } else {
+        if (data.length) {
+          var newProps = React.addons.update(this.props, {visualizations: {$set: data}});
+          this.setProps(newProps);
+        }
+        var spec = {visualizationSlug: {$set: data.length ? data[0].slug : 'json'}};
+        var newState = React.addons.update(this.state, spec);
         this.setState(newState);
       }
     }
