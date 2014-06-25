@@ -13,6 +13,7 @@ var FieldsForm = require('./fields/fields-form'),
   JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
   MoveIndividuForm = require('./move-individu-form'),
+  RattachementEnfantVisualization = require('./visualizations/rattachement-enfant-visualization'),
   TestCaseForm = require('./test-case/test-case-form'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   VisualizationToolbar = require('./visualizations/visualization-toolbar'),
@@ -217,6 +218,13 @@ var Simulator = React.createClass({
       this.simulate();
     });
   },
+  handleVisualizationStateChange: function(visualizationState) {
+    console.debug('handleVisualizationStateChange', visualizationState);
+    var spec = {};
+    spec[this.state.visualizationSlug] = {$set: visualizationState};
+    var newState = React.addons.update(this.state, spec);
+    this.setState(newState);
+  },
   handleYearChange: function(year) {
     console.debug('handleYearChange', year);
     var newState = React.addons.update(this.state, {year: {$set: year}});
@@ -332,6 +340,20 @@ var Simulator = React.createClass({
     } else {
       if (this.state.visualizationSlug === 'json') {
         return <JsonVisualization data={this.state.simulationResult} />;
+      } else if (this.state.visualizationSlug === 'rattachement-enfant') {
+        var simulationResult = this.state.simulationResult && ! this.state.simulationResult.errors &&
+          this.state.simulationResult.values[0];
+        return (
+          <RattachementEnfantVisualization
+            legislationUrl={this.state.legislationUrl}
+            localState={this.state[this.state.visualizationSlug]}
+            onChange={this.handleVisualizationStateChange}
+            onSimulate={this.simulate}
+            simulationResult={simulationResult}
+            testCase={this.state.testCase}
+            year={this.state.year}
+          />
+        );
       } else if ( ! this.props.visualizations) {
         return <p className="text-danger">Aucune visualisation disponible.</p>;
       } else {
@@ -404,13 +426,13 @@ var Simulator = React.createClass({
       }
     });
   },
-  simulate: function() {
-    console.debug('simulate');
+  simulate: function(legislationUrl, testCase, year) {
+    console.debug('simulate', legislationUrl, testCase, year);
     if ( ! this.state.isSimulationInProgress && ! this.state.errors) {
       var newState = React.addons.update(this.state, {isSimulationInProgress: {$set: true}});
       this.setState(newState, function() {
-        webservices.simulate(this.state.legislationUrl, this.state.testCase, this.state.year,
-          this.simulationCompleted);
+        webservices.simulate(legislationUrl || this.state.legislationUrl, testCase || this.state.testCase,
+          year || this.state.year, this.simulationCompleted);
       });
     }
   },
@@ -441,7 +463,8 @@ var Simulator = React.createClass({
           var newProps = React.addons.update(this.props, {visualizations: {$set: data}});
           this.setProps(newProps);
         }
-        var spec = {visualizationSlug: {$set: data.length ? data[0].slug : 'json'}};
+//        var spec = {visualizationSlug: {$set: data.length ? data[0].slug : 'json'}};
+        var spec = {visualizationSlug: {$set: 'rattachement-enfant'}};
         var newState = React.addons.update(this.state, spec);
         this.setState(newState);
       }

@@ -67,6 +67,19 @@ var TestCase = {
     var name = namePrefix + value.toString();
     return {nom_individu: name}; // jshint ignore:line
   },
+  findEntity: function(individuId, kind, role, testCase) {
+    if ( ! (kind in testCase)) {
+      return null;
+    }
+    var entities = testCase[kind];
+    for (var entityId in entities) {
+      var entity = entities[entityId];
+      if (role in entity && entity[role].indexOf(individuId) !== -1) {
+        return {id: entityId, entity: entity};
+      }
+    }
+    return null;
+  },
   getEntityLabel: function(kind, entity) {
     var label = entitiesMetadata[kind].label;
     var name = entity[entitiesMetadata[kind].nameKey];
@@ -120,6 +133,9 @@ var TestCase = {
     }
     var name = value.toString();
     return name;
+  },
+  hasRole: function (individuId, kind, role, testCase) {
+    return !! TestCase.findEntity(individuId, kind, role, testCase);
   },
   isSingleton: function(kind, role) {
     return entitiesMetadata[kind].maxCardinality[role] === 1;
