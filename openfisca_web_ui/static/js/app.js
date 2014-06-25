@@ -7,6 +7,7 @@ var React = require('react');
 // Required by some deep parts of the application.
 require('bootstrap/js/collapse');
 require('bootstrap/js/dropdown');
+require('bootstrap/js/modal');
 require('bootstrap/js/transition');
 
 
