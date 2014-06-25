@@ -115,8 +115,9 @@ var Entity = React.createClass({
     var addLink = (
       ! disabled && (
         ! roleData ||
-        maxCardinality === 1 && roleData ||
-        maxCardinality > 1 && roleData.length < maxCardinality
+        typeof maxCardinality === 'undefined' ||
+        maxCardinality === 1 && ! roleData ||
+        maxCardinality !== 1 && roleData.length < maxCardinality
       )
     ) ? (
       <a

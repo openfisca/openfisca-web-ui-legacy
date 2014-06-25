@@ -9,7 +9,7 @@ var mapObject = require('map-object'),
 var entitiesMetadata = {
   familles: {
     label: 'Famille',
-    maxCardinality: {enfants: 2, parents: 2},
+    maxCardinality: {parents: 2},
     nameKey: 'nom_famille',
     roles: ['parents', 'enfants'],
   },
