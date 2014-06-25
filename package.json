@@ -50,5 +50,8 @@
     "transform": [
       "reactify"
     ]
+  },
+  "devDependencies": {
+    "watchify": "^0.10.2"
   }
 }
