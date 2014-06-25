@@ -23,17 +23,13 @@ var VisualizationToolbar = React.createClass({
   render: function() {
     return (
       <div className="form-inline" role="form">
-        {
-          this.props.visualizations ?
-            <div className="form-group" style={{marginRight: 5}}>
-              <VisualizationSelect
-                visualizations={this.props.visualizations}
-                onChange={this.props.onVisualizationChange}
-                value={this.props.visualizationSlug}
-              />
-            </div>
-            : null
-        }
+        <div className="form-group" style={{marginRight: 5}}>
+          <VisualizationSelect
+            visualizations={this.props.visualizations}
+            onChange={this.props.onVisualizationChange}
+            value={this.props.visualizationSlug}
+          />
+        </div>
         <div className="form-group" style={{marginRight: 5}}>
           <YearInput onChange={this.props.onYearChange} value={this.props.year} />
         </div>
