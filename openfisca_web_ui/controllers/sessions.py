@@ -82,7 +82,7 @@ def route_admin(environ, start_response):
     ctx = contexts.Ctx(req)
 
     session, error = conv.pipe(
-        conv.input_to_uuid,
+        conv.input_to_uuid_str,
         conv.not_none,
         model.Session.uuid_to_instance,
         )(req.urlvars.get('token'), state = ctx)
