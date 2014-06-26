@@ -89,8 +89,9 @@ def index_appconfig(ctx):
         })
     appconfig['api'] = {
         'urls': {
+            'calculate': conf['api.urls.calculate'],
             'fields': conf['api.urls.fields'],
-            'simulate': conf['api.urls.simulate'],
+            'simulate': conf['api.urls.simulate'],          
             },
         }
     return appconfig

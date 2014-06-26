@@ -69,8 +69,10 @@ var Simulator = React.createClass({
   },
   getInitialState: function() {
     return {
+      calculationResult: null,
       editedEntity: null,
       errors: null,
+      isCalculationInProgress: false,
       isSimulationInProgress: false,
       legislationUrl: null,
       movedIndividu: null,
@@ -342,14 +344,12 @@ var Simulator = React.createClass({
         return <JsonVisualization data={this.state.simulationResult} />;
       } else if (this.state.visualizationSlug === 'rattachement-enfant') {
         var simulationResult = this.state.simulationResult && ! this.state.simulationResult.errors &&
-          this.state.simulationResult.values[0];
+          this.state.simulationResult;
         return (
           <RattachementEnfantVisualization
             legislationUrl={this.state.legislationUrl}
             localState={this.state[this.state.visualizationSlug]}
             onChange={this.handleVisualizationStateChange}
-            onSimulate={this.simulate}
-            simulationResult={simulationResult}
             testCase={this.state.testCase}
             year={this.state.year}
           />
@@ -432,7 +432,7 @@ var Simulator = React.createClass({
       var newState = React.addons.update(this.state, {isSimulationInProgress: {$set: true}});
       this.setState(newState, function() {
         webservices.simulate(legislationUrl || this.state.legislationUrl, testCase || this.state.testCase,
-          year || this.state.year, this.simulationCompleted);
+          year || this.state.year, null, this.simulationCompleted);
       });
     }
   },

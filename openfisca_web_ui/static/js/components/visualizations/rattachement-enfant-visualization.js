@@ -6,7 +6,19 @@ var mapObject = require('map-object'),
   _ = require('underscore'),
   uuid = require('uuid');
 
-var models = require('../../models');
+var models = require('../../models'),
+    webservices = require('../../webservices');
+
+function extractVariable (variable, dict) {
+  var n = dict.length;
+  var num, i;
+  for (i=0; i<n; i++) {
+    if (dict[i]['code'] == variable) {
+      num = i;
+    }
+  }
+  return dict[num]['values'][0].toFixed(0);
+}
 
 
 var RattachementEnfantVisualization = React.createClass({
@@ -14,8 +26,6 @@ var RattachementEnfantVisualization = React.createClass({
     legislationUrl: React.PropTypes.string,
     localState: React.PropTypes.object,
     onChange: React.PropTypes.func.isRequired,
-    onSimulate: React.PropTypes.func.isRequired,
-    simulationResult: React.PropTypes.number,
     testCase: React.PropTypes.object.isRequired,
     year: React.PropTypes.number.isRequired,
   },
@@ -39,7 +49,7 @@ var RattachementEnfantVisualization = React.createClass({
     if (fieldName === 'alr') {
       value = event.target.valueAsNumber;
     } else if (fieldName === 'detached') {
-      value = event.target.value;
+      value = event.target.checked;
     }
     var spec = {};
     var valueSpec = {};
@@ -53,7 +63,7 @@ var RattachementEnfantVisualization = React.createClass({
     var localState = this.props.localState;
     var newTestCase = this.props.testCase;
     var testCaseSpec;
-    mapObject(this.getValidChildren(), function(child, childId) {
+    mapObject(this.getValidChildren(), function(child, childId) { console.log('toto', localState[childId]);
       if (localState[childId] && localState[childId].detached) {
         var foyerFiscalData = models.TestCase.findEntity(childId, 'foyers_fiscaux', 'personnes_a_charge',
           newTestCase);
@@ -118,9 +128,11 @@ var RattachementEnfantVisualization = React.createClass({
         }
       }
     }, this);
-    this.props.onSimulate(this.props.legislationUrl, newTestCase, this.props.year);
+    this.simulate(this.props.legislationUrl, newTestCase, this.props.year, ['revdisp', 'irpp']);
   },
   render: function() {
+    var simulationResult = this.props.localState.simulationResult;
+    console.log('simulationResult', simulationResult);
     return (
       <div>
         <form onSubmit={this.handleSubmit} role="form">
@@ -135,13 +147,14 @@ var RattachementEnfantVisualization = React.createClass({
                       id={childId + '-detached'}
                       onChange={this.handleChange.bind(null, childId, 'detached')}
                       type="checkbox"
-                      value={(this.props.localState[childId] || {}).detached}
+                      checked={(this.props.localState[childId] || {}).detached}
                     />
-                    <label htmlFor={childId + '-detached'}>Détaché</label>
+                    <label htmlFor={childId + '-detached'}> Détaché</label>
                   </p>
                   <p>
-                    <label htmlFor={childId + '-pension'}>Montant de la pension</label>
+                    <label htmlFor={childId + '-pension'}>Montant de la pension </label>
                     <input
+                      disabled={! (this.props.localState[childId] || {}).detached}
                       id={childId + '-pension'}
                       onChange={this.handleChange.bind(null, childId, 'alr')}
                       type="number"
@@ -154,10 +167,34 @@ var RattachementEnfantVisualization = React.createClass({
           }
           <button className="btn btn-primary" type="submit">Simuler</button>
         </form>
-        {this.props.simulationResult && <h1>Revenu disponible : {this.props.simulationResult.toFixed(0)} €</h1>}
+        {simulationResult && simulationResult.length > 0 && <div> <h1>Revenu disponible : {extractVariable('revdisp', simulationResult)} € </h1> <h1>Impôt total : {-extractVariable('irpp', simulationResult)} €</h1> </div>}
       </div>
     );
   },
+  simulate: function (legislationUrl, testCase, year, variables) {
+    console.debug('simulate', legislationUrl, testCase, year, variables);
+    if ( ! this.props.localState.isSimulationInProgress) {
+      var newLocalState = _.clone(this.props.localState);
+      newLocalState.isSimulationInProgress = true;  
+      this.props.onChange(newLocalState);
+      webservices.simulate(legislationUrl || this.props.legislationUrl, testCase || this.props.testCase,
+          year || this.props.year, variables, this.simulationCompleted);
+    }
+  },
+  simulationCompleted: function (data) {
+    console.debug('simulationCompleted', data);
+    var newLocalState = _.clone(this.props.localState);
+    newLocalState.isSimulationInProgress = false;  
+    if (data) {
+      if (data.error) {
+        console.error(data.error);
+        newLocalState.simulationResult = {error: data.error};
+      } else {
+        newLocalState.simulationResult = data;
+      }
+    }
+    this.props.onChange(newLocalState);
+  }
 });
 
 module.exports = RattachementEnfantVisualization;

@@ -50,6 +50,10 @@ def load_environment(global_conf, app_conf):
     conf.update(strings.deep_decode(app_conf))
     conf.update(conv.check(conv.struct(
         {
+            'api.urls.calculate': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
             'api.urls.fields': conv.pipe(
                 conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
                 conv.not_none,
