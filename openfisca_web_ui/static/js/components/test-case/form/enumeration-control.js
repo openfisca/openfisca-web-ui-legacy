@@ -4,7 +4,7 @@
 var mapObject = require('map-object'),
   React = require('react');
 
-var SuggestionGlyphicon = require('./suggestion-glyphicon');
+var SuggestionGlyphicon = require('../suggestion-glyphicon');
 
 
 var EnumerationControl = React.createClass({

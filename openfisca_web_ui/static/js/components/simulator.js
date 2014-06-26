@@ -8,13 +8,14 @@ var find = require('lodash.find'),
   React = require('react/addons'),
   uuid = require('uuid');
 
-var FieldsForm = require('./fields/fields-form'),
+var FieldsForm = require('./test-case/form/fields-form'),
+  FormWithHeader = require('./form-with-header'),
   IframeVisualization = require('./visualizations/iframe-visualization'),
   JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
   MoveIndividuForm = require('./move-individu-form'),
   RattachementEnfantVisualization = require('./visualizations/rattachement-enfant-visualization'),
-  TestCaseForm = require('./test-case/test-case-form'),
+  TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   VisualizationToolbar = require('./visualizations/visualization-toolbar'),
   webservices = require('../webservices');
@@ -87,7 +88,7 @@ var Simulator = React.createClass({
     var newEntities = {};
     newEntities[uuid.v4()] = newEntity;
     var spec = {testCase: {}};
-    spec.testCase[kind] = {$merge: newEntities};
+    spec.testCase[kind] = kind in this.state.testCase ? {$merge: newEntities} : {$set: newEntities};
     var newState = React.addons.update(this.state, spec);
     this.setState(newState, function() {
       this.repair();
@@ -246,17 +247,25 @@ var Simulator = React.createClass({
     }
   },
   render: function() {
-    var rightPanel = this.state.editedEntity ?
-      this.renderFieldsFormPanel() : (
-        this.state.movedIndividu ? (
+    var rightPanel;
+    if (this.state.editedEntity) {
+      rightPanel = this.renderFieldsFormPanel();
+    } else if (this.state.movedIndividu) {
+      rightPanel = (
+        <FormWithHeader
+          onCancel={this.handleMoveIndividuFormCancel}
+          onSave={this.handleMoveIndividuFormSave}
+          title={
+            'Déplacer ' + this.state.testCase.individus[this.state.movedIndividu.id].nom_individu /* jshint ignore:line */
+          }>
           <MoveIndividuForm
-            onCancel={this.handleMoveIndividuFormCancel}
             onChange={this.handleMoveIndividuFormChange.bind(null, this.state.movedIndividu.id)}
-            onSave={this.handleMoveIndividuFormSave}
-            title={this.state.testCase.individus[this.state.movedIndividu.id].nom_individu /* jshint ignore:line */}
           />
-        ) : this.renderVisualizationPanel()
+        </FormWithHeader>
       );
+    } else {
+      rightPanel = this.renderVisualizationPanel();
+    }
     return (
       <div className="row">
         <div className="col-sm-4">
@@ -271,19 +280,21 @@ var Simulator = React.createClass({
           />
           <hr/>
           {
-            this.state.testCase ?
-              <TestCaseForm
-                editedEntity={this.state.editedEntity}
-                errors={this.state.errors}
-                onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
-                onDeleteEntity={this.handleDeleteEntity}
-                onDeleteIndividu={this.handleDeleteIndividu}
-                onEditEntity={this.handleEditEntity}
-                onMoveIndividu={this.handleMoveIndividu}
-                suggestions={this.state.suggestions}
-                testCase={this.state.testCase}
-              />
-              : null
+            this.state.testCase &&
+            <TestCase
+              editedEntity={this.state.editedEntity}
+              entitiesMetadata={models.entitiesMetadata}
+              errors={this.state.errors}
+              getEntityLabel={models.TestCase.getEntityLabel}
+              onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
+              onDeleteEntity={this.handleDeleteEntity}
+              onDeleteIndividu={this.handleDeleteIndividu}
+              onEditEntity={this.handleEditEntity}
+              onMoveIndividu={this.handleMoveIndividu}
+              roleLabels={models.roleLabels}
+              suggestions={this.state.suggestions}
+              testCase={this.state.testCase}
+            />
           }
         </div>
         <div className="col-sm-8">
@@ -316,16 +327,18 @@ var Simulator = React.createClass({
       values = React.addons.update(values, {$merge: this.state.editedEntity.values});
     }
     return (
-      <FieldsForm
-        categories={categories}
-        errors={errors}
+      <FormWithHeader
         onCancel={this.handleFieldsFormCancel}
-        onChange={this.handleFieldsFormChange.bind(null, kind, id)}
         onSave={this.handleFieldsFormSave}
-        suggestions={suggestions}
-        title={title}
-        values={values}
-      />
+        title={'Éditer ' + title}>
+        <FieldsForm
+          categories={categories}
+          errors={errors}
+          onChange={this.handleFieldsFormChange.bind(null, kind, id)}
+          suggestions={suggestions}
+          values={values}
+        />
+      </FormWithHeader>
     );
   },
   renderVisualization: function() {

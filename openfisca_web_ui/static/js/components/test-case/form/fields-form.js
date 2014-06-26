@@ -17,11 +17,8 @@ var FieldsForm = React.createClass({
   propTypes: {
     categories: React.PropTypes.array.isRequired,
     errors: React.PropTypes.object,
-    onCancel: React.PropTypes.func.isRequired,
     onChange: React.PropTypes.func.isRequired,
-    onSave: React.PropTypes.func.isRequired,
     suggestions: React.PropTypes.object,
-    title: React.PropTypes.string.isRequired,
     values: React.PropTypes.object,
   },
   preventDefaultThen: function(callback, event) {
@@ -30,49 +27,31 @@ var FieldsForm = React.createClass({
   },
   render: function() {
     return (
-      <form onSubmit={this.preventDefaultThen.bind(null, this.props.onSave)} role="form">
-        <div className="row">
-          <div className="col-sm-2">
-            <button className="btn btn-default" onClick={this.props.onCancel} type="button">
-              Annuler
-            </button>
-          </div>
-          <div className="col-sm-8">
-            <h2 style={{margin: 0, textAlign: 'center'}}>{this.props.title}</h2>
-          </div>
-          <div className="col-sm-2">
-            <button className="btn btn-primary" style={{marginRight: 5}} type="submit">
-              Enregistrer
-            </button>
-          </div>
-        </div>
-        <hr/>
-        <div className="panel-group" id="accordion">
-          {
-            this.props.categories.map(function(category, index) {
-              var categoryColumnNames = category.columns.map(function(column) { return column.name; });
-              var hasErrors = !! (
-                this.props.errors &&
-                intersection(categoryColumnNames, Object.keys(this.props.errors)).length
-              );
-              var hasSuggestions = !! (
-                this.props.suggestions &&
-                intersection(categoryColumnNames, Object.keys(this.props.suggestions)).length
-              );
-              return category.columns ? (
-                <Category
-                  hasErrors={hasErrors}
-                  hasSuggestions={hasSuggestions}
-                  index={index}
-                  key={'category-' + index}
-                  label={category.label}>
-                  {category.columns.map(this.renderControl)}
-                </Category>
-              ) : null;
-            }, this)
-          }
-        </div>
-      </form>
+      <div className="panel-group" id="accordion">
+        {
+          this.props.categories.map(function(category, index) {
+            var categoryColumnNames = category.columns.map(function(column) { return column.name; });
+            var hasErrors = !! (
+              this.props.errors &&
+              intersection(categoryColumnNames, Object.keys(this.props.errors)).length
+            );
+            var hasSuggestions = !! (
+              this.props.suggestions &&
+              intersection(categoryColumnNames, Object.keys(this.props.suggestions)).length
+            );
+            return category.columns ? (
+              <Category
+                hasErrors={hasErrors}
+                hasSuggestions={hasSuggestions}
+                index={index}
+                key={'category-' + index}
+                label={category.label}>
+                {category.columns.map(this.renderControl)}
+              </Category>
+            ) : null;
+          }, this)
+        }
+      </div>
     );
   },
   renderControl: function(column) {

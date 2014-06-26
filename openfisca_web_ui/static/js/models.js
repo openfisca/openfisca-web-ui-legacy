@@ -119,7 +119,7 @@ var TestCase = {
   guessEntityName: function(kind, testCase) {
     var nameKey = entitiesMetadata[kind].nameKey;
     var value;
-    if (testCase) {
+    if (testCase && testCase[kind]) {
       var values = mapObject(testCase[kind], function(entity) {
         var name = entity[nameKey];
         if (name) {

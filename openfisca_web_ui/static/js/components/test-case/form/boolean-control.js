@@ -4,7 +4,7 @@
 var React = require('react'),
   invariant = require('react/lib/invariant');
 
-var SuggestionGlyphicon = require('./suggestion-glyphicon');
+var SuggestionGlyphicon = require('../suggestion-glyphicon');
 
 
 var BooleanControl = React.createClass({

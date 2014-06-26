@@ -4,7 +4,7 @@
 var React = require('react');
 
 var CerfaField = require('./cerfa-field'),
-  SuggestionGlyphicon = require('./suggestion-glyphicon');
+  SuggestionGlyphicon = require('../suggestion-glyphicon');
 
 
 var IntegerControl = React.createClass({

@@ -3,6 +3,8 @@
 
 var React = require('react/addons');
 
+var SuggestionGlyphicon = require('./suggestion-glyphicon')
+
 
 var Individu = React.createClass({
   propTypes: {
@@ -31,11 +33,7 @@ var Individu = React.createClass({
             onClick={this.props.onEdit.bind(null, 'individus', this.props.id)}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
-            {
-              this.props.suggestions ?
-                <span className="glyphicon glyphicon-info-sign"></span>
-                : null
-            }
+            {this.props.suggestions && <SuggestionGlyphicon />}
           </button>
           <button
             className={

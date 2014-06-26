@@ -3,7 +3,7 @@
 
 var React = require('react');
 
-var SuggestionGlyphicon = require('./suggestion-glyphicon');
+var SuggestionGlyphicon = require('../suggestion-glyphicon');
 
 var Category = React.createClass({
   propTypes: {
