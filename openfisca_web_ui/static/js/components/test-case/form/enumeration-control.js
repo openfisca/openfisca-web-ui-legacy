@@ -11,19 +11,25 @@ var EnumerationControl = React.createClass({
   propTypes: {
     default: React.PropTypes.string,
     error: React.PropTypes.string,
-    label: React.PropTypes.string.isRequired,
+    label: React.PropTypes.component.isRequired,
     labels: React.PropTypes.object.isRequired,
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
-    value: React.PropTypes.string,
+    value: React.PropTypes.oneOfType([
+      React.PropTypes.number,
+      React.PropTypes.string,
+    ]),
+  },
+  handleChange: function(event) {
+    this.props.onChange(event.target.value);
   },
   render: function() {
     var select = (
       <select
         className="form-control"
         id={this.props.name}
-        onChange={this.props.onChange}
+        onChange={this.handleChange}
         value={this.props.value}>
         <option value="">Non renseigné ({
           this.props.suggestion ?
@@ -39,7 +45,7 @@ var EnumerationControl = React.createClass({
     );
     return (
       <div>
-        <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
+        {this.props.label}
         {
           this.props.suggestion && ! this.props.error ? (
             <div className="input-group">

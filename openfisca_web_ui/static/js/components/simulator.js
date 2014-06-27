@@ -95,7 +95,7 @@ var Simulator = React.createClass({
     });
   },
   handleCreateIndividuInEntity: function(kind, id, role) {
-    console.debug('handleCreateIndividuInEntity', kind, id, role);
+    console.debug('handleCreateIndividuInEntity', arguments);
     var newIndividu = models.TestCase.createIndividu(this.state.testCase);
     var newIndividus = {};
     var newIndividuId = uuid.v4();
@@ -110,7 +110,7 @@ var Simulator = React.createClass({
     });
   },
   handleDeleteEntity: function(kind, id) {
-    console.debug('handleDeleteEntity', kind, id);
+    console.debug('handleDeleteEntity', arguments);
     var entity = this.state.testCase[kind][id];
     var entityLabel = models.TestCase.getEntityLabel(kind, entity);
     var message = 'Supprimer ' + entityLabel + ' ?'; // jshint ignore:line
@@ -149,7 +149,7 @@ var Simulator = React.createClass({
     this.setState(newState);
   },
   handleFieldsFormChange: function(kind, id, columnName, value) {
-    console.debug('handleFieldsFormChange', kind, id, columnName, value);
+    console.debug('handleFieldsFormChange', arguments);
     // Create values empty object in editedEntity if it doesn't exist.
     var state = this.state.editedEntity.values ? this.state :
       React.addons.update(this.state, {editedEntity: {values: {$set: {}}}});
@@ -197,7 +197,7 @@ var Simulator = React.createClass({
     this.setState(newState);
   },
   handleMoveIndividuFormChange: function(individuId, entityKind, entityId) {
-    console.debug('handleMoveIndividuFormChange', individuId, entityKind, entityId);
+    console.debug('handleMoveIndividuFormChange', arguments);
   },
   handleMoveIndividuFormSave: function() {
     console.debug('handleMoveIndividuFormSave');
@@ -476,8 +476,7 @@ var Simulator = React.createClass({
           var newProps = React.addons.update(this.props, {visualizations: {$set: data}});
           this.setProps(newProps);
         }
-//        var spec = {visualizationSlug: {$set: data.length ? data[0].slug : 'json'}};
-        var spec = {visualizationSlug: {$set: 'rattachement-enfant'}};
+        var spec = {visualizationSlug: {$set: data.length ? data[0].slug : 'json'}};
         var newState = React.addons.update(this.state, spec);
         this.setState(newState);
       }

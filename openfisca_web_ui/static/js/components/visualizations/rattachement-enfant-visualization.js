@@ -34,7 +34,7 @@ var RattachementEnfantVisualization = React.createClass({
     return children;
   },
   handleChange: function (childId, fieldName, event) {
-    console.debug('RattachementEnfantVisualization.handleChange', fieldName, event);
+    console.debug('RattachementEnfantVisualization.handleChange', arguments);
     var value;
     if (fieldName === 'alr') {
       value = event.target.valueAsNumber;

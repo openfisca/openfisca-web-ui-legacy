@@ -10,6 +10,7 @@ var BooleanControl = require('./boolean-control'),
   DateControl = require('./date-control'),
   EnumerationControl = require('./enumeration-control'),
   IntegerControl = require('./integer-control'),
+  Label = require('./label'),
   StringControl = require('./string-control');
 
 
@@ -59,15 +60,18 @@ var FieldsForm = React.createClass({
     var error = this.props.errors && this.props.errors[column.name],
       suggestion = this.props.suggestions && this.props.suggestions[column.name],
       value = this.props.values && this.props.values[column.name];
+    var label = (
+      <Label name={column.name} required={column.required}>{column.label}</Label>
+    );
     switch(column['@type']) {
       case 'Boolean':
         control = (
           <BooleanControl
             default={column.default}
             error={error}
-            label={column.label}
+            label={label}
             name={column.name}
-            onChange={this.props.onChange}
+            onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
             value={value}
           />
@@ -78,27 +82,27 @@ var FieldsForm = React.createClass({
           <DateControl
             default={column.default}
             error={error}
-            label={column.label}
+            label={label}
             name={column.name}
-            onChange={this.props.onChange}
+            onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
             value={value}
           />
         );
         break;
       case 'Enumeration':
-          control = (
-            <EnumerationControl
-              default={column.default}
-              error={error}
-              label={column.label}
-              labels={column.labels}
-              name={column.name}
-              onChange={this.props.onChange}
-              suggestion={suggestion}
-              value={value}
-            />
-          );
+        control = (
+          <EnumerationControl
+            default={column.default}
+            error={error}
+            label={label}
+            labels={column.labels}
+            name={column.name}
+            onChange={this.props.onChange.bind(null, column.name)}
+            suggestion={suggestion}
+            value={value}
+          />
+        );
         break;
       case 'Integer':
         control = (
@@ -106,11 +110,11 @@ var FieldsForm = React.createClass({
             cerfaField={this.props.cerfaField}
             default={column.default}
             error={error}
-            label={column.label}
+            label={label}
             max={column.max}
             min={column.min}
             name={column.name}
-            onChange={this.props.onChange}
+            onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
             value={value}
             valType={column.val_type} // jshint ignore:line
@@ -123,9 +127,9 @@ var FieldsForm = React.createClass({
             cerfaField={this.props.cerfaField}
             default={column.default}
             error={error}
-            label={column.label}
+            label={label}
             name={column.name}
-            onChange={this.props.onChange}
+            onChange={this.props.onChange.bind(null, column.name)}
             required={column.required}
             suggestion={suggestion}
             value={value}
@@ -136,8 +140,9 @@ var FieldsForm = React.createClass({
         invariant(false, 'column type not expected for column: %s', column);
     }
     return (
-      <div className={React.addons.classSet('form-group', error ? 'has-error' : null)} key={column.name}>
+      <div className={React.addons.classSet('form-group', error && 'has-error')} key={column.name}>
         {control}
+        {error && <span className="help-block">{error}</span>}
       </div>
     );
   },

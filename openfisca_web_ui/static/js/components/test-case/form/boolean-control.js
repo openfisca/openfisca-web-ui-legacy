@@ -11,7 +11,7 @@ var BooleanControl = React.createClass({
   propTypes: {
     default: React.PropTypes.bool,
     error: React.PropTypes.string,
-    label: React.PropTypes.string.isRequired,
+    label: React.PropTypes.component.isRequired,
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
@@ -27,13 +27,13 @@ var BooleanControl = React.createClass({
       invariant(value in booleanByValue, 'unexpected value: ' + value);
       return booleanByValue[value];
     };
-    this.props.onChange(this.props.name, valueToBoolean(event.target.value));
+    this.props.onChange(valueToBoolean(event.target.value));
   },
   render: function() {
     var booleanToString = function(value) { return value ? 'Oui' : 'Non'; };
     return (
       <div>
-        <label className="control-label">{this.props.label}</label>
+        {this.props.label}
         <div className="row">
           <div className="col-sm-6">
             <label className="radio-inline">

@@ -66,6 +66,12 @@ def base_appconfig(ctx):
 
 def index_appconfig(ctx):
     appconfig = base_appconfig(ctx)
+    appconfig['api'] = {
+        'urls': {
+            'fields': conf['api.urls.fields'],
+            'simulate': conf['api.urls.simulate'],
+            },
+        }
     appconfig['constants'] = {
         # TODO parametrize year values
         'defaultYear': 2013,
@@ -87,12 +93,7 @@ def index_appconfig(ctx):
                 },
             },
         })
-    appconfig['api'] = {
-        'urls': {
-            'fields': conf['api.urls.fields'],
-            'simulate': conf['api.urls.simulate'],
-            },
-        }
+    appconfig['www.url'] = conf['www.url']
     return appconfig
 
 

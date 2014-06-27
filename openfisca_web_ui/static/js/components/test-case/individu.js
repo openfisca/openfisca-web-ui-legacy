@@ -23,7 +23,12 @@ var Individu = React.createClass({
     callback();
   },
   render: function() {
-    var btnColorClass = this.props.edited ? 'btn-info' : 'btn-default';
+    var btnColorClass = 'btn-default';
+    if (this.props.edited) {
+      btnColorClass = 'btn-info';
+    } else if (this.props.errors) {
+      btnColorClass = 'btn-danger';
+    }
     return (
       <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
@@ -64,11 +69,6 @@ var Individu = React.createClass({
             </li>
           </ul>
         </div>
-        {
-          this.props.errors ?
-            <p className="text-danger">Erreur</p>
-            : null
-        }
       </div>
     );
   }

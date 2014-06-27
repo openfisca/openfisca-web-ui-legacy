@@ -12,7 +12,7 @@ var IntegerControl = React.createClass({
     cerfaField: React.PropTypes.any,
     default: React.PropTypes.number,
     error: React.PropTypes.string,
-    label: React.PropTypes.string.isRequired,
+    label: React.PropTypes.component.isRequired,
     max: React.PropTypes.number,
     min: React.PropTypes.number,
     name: React.PropTypes.string.isRequired,
@@ -22,7 +22,7 @@ var IntegerControl = React.createClass({
     valType: React.PropTypes.string,
   },
   handleChange: function(event) {
-    this.props.onChange(this.props.name, event.target.valueAsNumber);
+    this.props.onChange(event.target.valueAsNumber);
   },
   render: function() {
     var input = (
@@ -40,7 +40,7 @@ var IntegerControl = React.createClass({
     );
     return (
       <div>
-        <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
+        {this.props.label}
         <div className="row">
           <div className="col-md-4">
             {
