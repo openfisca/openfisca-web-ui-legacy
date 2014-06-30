@@ -12,13 +12,17 @@ var FieldsForm = require('./test-case/form/fields-form'),
   FormWithHeader = require('./form-with-header'),
   IframeVisualization = require('./visualizations/iframe-visualization'),
   JsonVisualization = require('./visualizations/json-visualization'),
+  Line = require('./visualizations/line'),
   models = require('../models'),
   MoveIndividuForm = require('./move-individu-form'),
   RattachementEnfantVisualization = require('./visualizations/rattachement-enfant-visualization'),
+  SituateurVisualization = require('./visualizations/situateur-visualization'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
+  vingtiles = require('../../data/vingtiles.json'),
   VisualizationToolbar = require('./visualizations/visualization-toolbar'),
-  webservices = require('../webservices');
+  webservices = require('../webservices'),
+  YAxis = require('./visualizations/y-axis');
 
 var appconfig = global.appconfig;
 
@@ -34,7 +38,8 @@ var Simulator = React.createClass({
     webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
     webservices.fetchFields(this.fieldsFetched);
     webservices.fetchLegislations(this.legislationsFetched);
-    webservices.fetchVisualizations(this.visualizationsFetched);
+//    webservices.fetchVisualizations(this.visualizationsFetched);
+    this.setState({visualizationSlug: 'situateur'});
   },
   currentTestCaseFetched: function(data) {
     console.debug('currentTestCaseFetched', data);
@@ -366,6 +371,29 @@ var Simulator = React.createClass({
             testCase={this.state.testCase}
             year={this.state.year}
           />
+        );
+      } else if (this.state.visualizationSlug === 'situateur') {
+        var revdispData = find(vingtiles, {id: 'revdisp'});
+        var salData = find(vingtiles, {id: 'sal'});
+        return (
+          <SituateurVisualization
+            height={400}
+            width={600}
+            xMaxValue={100}
+            yMaxValue={100000}>
+            <YAxis />
+            <Line
+              label={revdispData.key}
+              name={revdispData.id}
+              points={revdispData.values}
+            />
+            <Line
+              label={salData.key}
+              name={salData.id}
+              points={salData.values}
+              strokeColor='red'
+            />
+          </SituateurVisualization>
         );
       } else if ( ! this.props.visualizations) {
         return <p className="text-danger">Aucune visualisation disponible.</p>;
