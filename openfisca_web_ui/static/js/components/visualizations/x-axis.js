@@ -5,7 +5,7 @@ var range = require('lodash.range'),
   React = require('react');
 
 
-var YAxis = React.createClass({
+var XAxis = React.createClass({
   propTypes: {
     height: React.PropTypes.number.isRequired,
     label: React.PropTypes.string,
@@ -32,20 +32,20 @@ var YAxis = React.createClass({
     var steps = range(0, this.props.maxValue + stepSize, stepSize);
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};
     return (
-      <g className="axis y-axis">
-        <line style={lineStyle} x2={0} y2={this.props.height} />
+      <g className="axis x-axis">
+        <line style={lineStyle} x2={this.props.width} y2={0} />
         {
           steps.map(function(value, idx) {
-            var translateY = this.props.height - idx * stepSizePx;
+            var translateX = idx * stepSizePx;
             return (
-              <g key={'tick-' + idx} transform={'translate(0, ' + translateY + ')'}>
+              <g key={'tick-' + idx} transform={'translate(' + translateX + ', 0)'}>
                 <text
-                  style={{textAnchor: 'end', fontSize: this.props.tickFontSize}}
-                  x={- this.props.tickSize * 1.66}
-                  y={this.props.tickFontSize * 0.4}>
+                  style={{textAnchor: 'middle', fontSize: this.props.tickFontSize}}
+                  x={0}
+                  y={this.props.tickSize + this.props.tickFontSize * 1.4}>
                   {value}
                 </text>
-                <line style={lineStyle} x2={- this.props.tickSize} y2={0} />
+                <line style={lineStyle} x2={0} y2={this.props.tickSize} />
               </g>
             );
           }, this)
@@ -55,9 +55,8 @@ var YAxis = React.createClass({
             <text
               className='axis-label'
               style={{textAnchor: 'middle', fontSize: this.props.labelFontSize}}
-              transform='rotate(-90)'
-              x={- (this.props.height / 2)}
-              y={- this.props.width + this.props.labelFontSize}>
+              x={this.props.width / 2}
+              y={this.props.height - this.props.labelFontSize}>
               {this.props.label}
             </text>
           )
@@ -66,8 +65,8 @@ var YAxis = React.createClass({
     );
   },
   valueToPixel: function(value) {
-    return (value / this.props.maxValue) * this.props.height;
+    return (value / this.props.maxValue) * this.props.width;
   },
 });
 
-module.exports = YAxis;
+module.exports = XAxis;

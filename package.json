@@ -43,7 +43,9 @@
     "node-qs-serialization": "0.0.2",
     "get-object-path": "0.0.2",
     "lodash.values": "^2.4.1",
-    "lodash.intersection": "^2.4.1"
+    "lodash.intersection": "^2.4.1",
+    "lodash.range": "^2.4.1",
+    "lodash.sortedindex": "^2.4.1"
   },
   "private": true,
   "browserify": {

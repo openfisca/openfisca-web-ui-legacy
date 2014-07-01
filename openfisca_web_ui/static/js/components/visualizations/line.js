@@ -6,8 +6,8 @@ var React = require('react');
 
 var Line = React.createClass({
   propTypes: {
-    strokeColor: React.PropTypes.string,
-    strokeWidth: React.PropTypes.number,
+    strokeColor: React.PropTypes.string.isRequired,
+    strokeWidth: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     label: React.PropTypes.string.isRequired,
     name: React.PropTypes.string.isRequired,
@@ -23,26 +23,27 @@ var Line = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      height: 100,
-      strokeColor: 'blue',
-      strokeWidth: 2,
-      width: 100,
-      xMaxValue: 100,
-      yMaxValue: 100,
+      strokeColor: 'rgb(31, 119, 180)',
+      strokeWidth: 1.5,
     };
   },
-  pointsToPixels: function() {
-    return this.props.points.map(function(point) {
-      var x = (point.x / this.props.xMaxValue) * this.props.width,
-        y = (1 - point.y / this.props.yMaxValue) * this.props.height;
-      return x.toString() + ',' + y.toString();
+  pointToPixel: function(x, y) {
+    return {
+      x: (x / this.props.xMaxValue) * this.props.width,
+      y: (1 - y / this.props.yMaxValue) * this.props.height,
+    };
+  },
+  pointsToPixelsStr: function(points) {
+    return points.map(function(point) {
+      var point = this.pointToPixel(point.x, point.y);
+      return point.x.toString() + ',' + point.y.toString();
     }, this).join(' ');
   },
   render: function() {
     return (
       <polyline
         fill='none'
-        points={this.pointsToPixels()}
+        points={this.pointsToPixelsStr(this.props.points)}
         stroke={this.props.strokeColor}
         strokeWidth={this.props.strokeWidth}
       />
