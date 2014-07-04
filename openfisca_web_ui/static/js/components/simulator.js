@@ -380,7 +380,7 @@ var Simulator = React.createClass({
             width={600}
             xMaxValue={100}
             xSnapIntervalValue={5}
-            yMaxValue={100000}
+            yMaxValue={Math.max(100000, value)}
           />
         );
       } else if ( ! this.props.visualizations) {

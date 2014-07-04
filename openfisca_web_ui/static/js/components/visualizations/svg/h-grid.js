@@ -2,7 +2,7 @@
 'use strict';
 
 var range = require('lodash.range'),
-  React = require('react');
+  React = require('react/addons');
 
 
 var HGrid = React.createClass({
@@ -11,29 +11,34 @@ var HGrid = React.createClass({
     maxValue: React.PropTypes.number.isRequired,
     startStep: React.PropTypes.number.isRequired,
     steps: React.PropTypes.number.isRequired,
-    strokeColor: React.PropTypes.string.isRequired,
+    style: React.PropTypes.object,
     width: React.PropTypes.number.isRequired,
   },
   getDefaultProps: function() {
     return {
+      defaultStyle: {
+        stroke: '#e5e5e5',
+        shapeRendering: 'crispedges',
+      },
       startStep: 0,
       steps: 10,
-      strokeColor: '#e5e5e5',
     };
   },
   render: function() {
     var stepSize = this.props.maxValue / this.props.steps;
     var stepSizePx = this.valueToPixel(stepSize);
     var steps = range(this.props.startStep, this.props.steps + 1);
-    var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};
+    var style = this.props.style ?
+      React.addons.update(this.props.defaultStyle, {$merge: this.props.style}) :
+      this.props.defaultStyle;
     return (
-      <g className="grid y-grid">
+      <g className="grid h-grid">
         {
           steps.map(function(step) {
             var translateY = this.props.height - step * stepSizePx;
             return (
               <g key={'line-' + step} transform={'translate(0, ' + translateY + ')'}>
-                <line style={lineStyle} x2={this.props.width} />
+                <line style={style} x2={this.props.width} />
               </g>
             );
           }, this)

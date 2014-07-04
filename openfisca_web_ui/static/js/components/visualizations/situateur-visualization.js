@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var find = require('lodash.find'),
+var last = require('lodash.last'),
   range = require('lodash.range'),
   React = require('react/addons'),
   sortedIndex = require('lodash.sortedindex');
@@ -33,6 +33,8 @@ var SituateurVisualization = React.createClass({
   componentWillMount: function() {
     this.curveZoneHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
     this.curveZoneWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    var lastPoints = last(this.props.points, 2);
+    this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
   },
   curveZonePixelToPoint: function(pixel) {
     return {
@@ -46,31 +48,53 @@ var SituateurVisualization = React.createClass({
       y: (1 - point.y / this.props.yMaxValue) * this.curveZoneHeight,
     };
   },
+  extrapolatePoint: function(low, high) {
+    var slope = (high.y - low.y) / (high.x - low.x);
+    var extrapolatedPointY = high.y + slope * (this.props.xMaxValue - high.x);
+    return {x: this.props.xMaxValue, y: extrapolatedPointY};
+  },
   findXFromY: function(y) {
     // Works with values, not pixels.
-    var points = this.props.points;
+    var points = this.props.points.concat(this.extrapolatedLastPoint);
     var yIndex = sortedIndex(points, {y: y}, 'y');
-    var higher = points[yIndex];
+    var high = points[yIndex];
     var x;
     if (yIndex === 0) {
-      x = higher.x;
+      x = high.x;
     } else if (yIndex === points.length) {
-      x = 99;
+      x = this.props.xMaxValue;
     } else {
-      var lower = points[yIndex - 1];
-      var dY = higher.y - lower.y;
-      var dy = y - lower.y;
-      var dX = higher.x - lower.x;
+      var low = points[yIndex - 1];
+      var dY = high.y - low.y;
+      var dy = y - low.y;
+      var dX = high.x - low.x;
       var dx = dX * dy / dY;
-      x = lower.x + dx;
+      x = low.x + dx;
     }
     return x;
   },
   findYFromX: function(x) {
     // Works with values, not pixels.
-    var points = this.props.points;
-    var point = find(points, {x: x});
-    return point ? point.y : null;
+    var points = this.props.points.concat(this.extrapolatedLastPoint);
+    var xIndex = sortedIndex(points, {x: x}, 'x');
+    var high = points[xIndex];
+    var y;
+    if (xIndex === 0) {
+      y = high.y;
+    } else if (xIndex === points.length) {
+      y = this.extrapolatedLastPoint.y;
+    } else {
+      var low = points[xIndex - 1];
+      var dX = high.x - low.x;
+      var dx = x - low.x;
+      var dY = high.y - low.y;
+      var dy = dY * dx / dX;
+      y = low.y + dy;
+    }
+    return y;
+  },
+  formatNumber: function(number) {
+    return Math.floor(number) === number ? number : number.toFixed(2);
   },
   getDefaultProps: function() {
     return {
@@ -80,68 +104,100 @@ var SituateurVisualization = React.createClass({
       yAxisWidth: 80,
     };
   },
+  getInitialState: function() {
+    return {snapPoint: null};
+  },
+  handleHoverLegendHover: function(point) {
+    this.setState({snapPoint: point});
+  },
   render: function() {
     var revdispLabel = 'Revenu disponible';
     var xValue = this.findXFromY(this.props.value);
-    var xSnapValues = range(0, 105, 5).concat(xValue).sort(function(a, b) { return a - b; });
+    var numericSort = function(a, b) { return a - b; };
+    var xSnapValues = range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort(numericSort);
     return (
-      <svg height={this.props.height} width={this.props.width}>
-        <g transform={
-          'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
-        }>
-          <VGrid
-            height={this.curveZoneHeight}
-            maxValue={this.props.xMaxValue}
-            startStep={1}
-            width={this.curveZoneWidth}
-          />
-          <XAxis
-            height={this.props.xAxisHeight}
-            label='% de la population'
-            maxValue={this.props.xMaxValue}
-            width={this.curveZoneWidth}
-          />
-        </g>
-        <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
-          <HGrid
-            height={this.curveZoneHeight}
-            maxValue={this.props.xMaxValue}
-            startStep={1}
-            width={this.curveZoneWidth}
-          />
-          <YAxis
-            height={this.curveZoneHeight}
-            label='revenu en milliers €'
-            maxValue={this.props.yMaxValue}
-            width={this.props.yAxisWidth}
-          />
-          <Curve
-            color='rgb(31, 119, 180)'
-            points={this.props.points}
-            pointToPixel={this.curveZonePointToPixel}
-          />
-          <Point
-            color='rgb(166, 50, 50)'
-            pointToPixel={this.curveZonePointToPixel}
-            x={xValue}
-            y={this.props.value}
-          />
-          <HoverLegend
-            findYFromX={this.findYFromX}
-            height={this.curveZoneHeight}
-            pixelToPoint={this.curveZonePixelToPoint}
-            pointToPixel={this.curveZonePointToPixel}
-            width={this.curveZoneWidth}
-            xSnapValues={xSnapValues}
-          />
-        </g>
-        <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
-          <Legend color='rgb(31, 119, 180)'>{revdispLabel}</Legend>
-          <g transform={'translate(' + 12 * 0.7 * revdispLabel.length + ', 0)'}>
-            <Legend color='rgb(166, 50, 50)'>Votre revenu disponible</Legend>
+      <div>
+        <svg height={this.props.height} width={this.props.width}>
+          <g transform={
+            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
+          }>
+            <VGrid
+              height={this.curveZoneHeight}
+              maxValue={this.props.xMaxValue}
+              startStep={1}
+              width={this.curveZoneWidth}
+            />
+            <XAxis
+              height={this.props.xAxisHeight}
+              label='% de la population'
+              maxValue={this.props.xMaxValue}
+              width={this.curveZoneWidth}
+            />
           </g>
-        </g>
-      </svg>
+          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
+            <HGrid
+              height={this.curveZoneHeight}
+              maxValue={this.props.xMaxValue}
+              startStep={1}
+              width={this.curveZoneWidth}
+            />
+            <YAxis
+              height={this.curveZoneHeight}
+              label='revenu en milliers €'
+              maxValue={this.props.yMaxValue}
+              width={this.props.yAxisWidth}
+            />
+            <Curve
+              points={this.props.points}
+              pointToPixel={this.curveZonePointToPixel}
+              style={{stroke: 'rgb(31, 119, 180)'}}
+            />
+            <Curve
+              points={[last(this.props.points), this.extrapolatedLastPoint]}
+              pointToPixel={this.curveZonePointToPixel}
+              style={{
+                stroke: 'rgb(31, 119, 180)',
+                strokeDasharray: '5 5',
+              }}
+            />
+            <Point
+              color='rgb(166, 50, 50)'
+              pointToPixel={this.curveZonePointToPixel}
+              x={xValue}
+              y={this.props.value}
+            />
+            <HoverLegend
+              findYFromX={this.findYFromX}
+              formatNumber={this.formatNumber}
+              height={this.curveZoneHeight}
+              onHover={this.handleHoverLegendHover}
+              pixelToPoint={this.curveZonePixelToPoint}
+              pointToPixel={this.curveZonePointToPixel}
+              snapPoint={this.state.snapPoint}
+              width={this.curveZoneWidth}
+              xMaxValue={this.props.xMaxValue}
+              xSnapValues={xSnapValues}
+            />
+          </g>
+          <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
+            <Legend color='rgb(31, 119, 180)'>{revdispLabel}</Legend>
+            <g transform={'translate(' + 12 * 0.7 * revdispLabel.length + ', 0)'}>
+              <Legend color='rgb(166, 50, 50)'>Votre revenu disponible</Legend>
+            </g>
+          </g>
+        </svg>
+        {
+          this.state.snapPoint &&
+          <p className='well' style={{textAlign: 'center'}}>
+            {
+              this.formatNumber(this.state.snapPoint.x) +
+              ' % des français ont un revenu disponible inférieur à ' + // jshint ignore:line
+              this.formatNumber(this.state.snapPoint.y) +
+              ' €.' // jshint ignore:line
+            }
+          </p>
+        }
+      </div>
     );
   },
 });
