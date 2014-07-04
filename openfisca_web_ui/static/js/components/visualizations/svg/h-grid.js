@@ -5,7 +5,7 @@ var range = require('lodash.range'),
   React = require('react');
 
 
-var YGrid = React.createClass({
+var HGrid = React.createClass({
   propTypes: {
     height: React.PropTypes.number.isRequired,
     maxValue: React.PropTypes.number.isRequired,
@@ -33,7 +33,7 @@ var YGrid = React.createClass({
             var translateY = this.props.height - step * stepSizePx;
             return (
               <g key={'line-' + step} transform={'translate(0, ' + translateY + ')'}>
-                <line style={lineStyle} x2={this.props.width} y2={0} />
+                <line style={lineStyle} x2={this.props.width} />
               </g>
             );
           }, this)
@@ -46,4 +46,4 @@ var YGrid = React.createClass({
   },
 });
 
-module.exports = YGrid;
+module.exports = HGrid;

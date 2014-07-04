@@ -15,6 +15,7 @@ var FieldsForm = require('./test-case/form/fields-form'),
   models = require('../models'),
   MoveIndividuForm = require('./move-individu-form'),
   RattachementEnfantVisualization = require('./visualizations/rattachement-enfant-visualization'),
+  revdispDistribution = require('../../data/revdisp-distribution.json'),
   SituateurVisualization = require('./visualizations/situateur-visualization'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
@@ -372,7 +373,15 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'situateur') {
         var value = this.state.simulationResult && this.state.simulationResult.values[0];
         return (
-          <SituateurVisualization height={400} value={value} width={600} xMaxValue={100} yMaxValue={100000} />
+          <SituateurVisualization
+            height={400}
+            points={revdispDistribution}
+            value={value}
+            width={600}
+            xMaxValue={100}
+            xSnapIntervalValue={5}
+            yMaxValue={100000}
+          />
         );
       } else if ( ! this.props.visualizations) {
         return <p className="text-danger">Aucune visualisation disponible.</p>;

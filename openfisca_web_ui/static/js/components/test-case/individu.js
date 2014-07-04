@@ -3,7 +3,7 @@
 
 var React = require('react/addons');
 
-var SuggestionGlyphicon = require('./suggestion-glyphicon')
+var SuggestionGlyphicon = require('./suggestion-glyphicon');
 
 
 var Individu = React.createClass({
