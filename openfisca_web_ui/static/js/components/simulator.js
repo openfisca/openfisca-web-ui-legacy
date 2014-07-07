@@ -4,6 +4,7 @@
 var find = require('lodash.find'),
   getObjectPath = require('get-object-path'),
   invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   mapObject = require('map-object'),
   React = require('react/addons'),
   uuid = require('uuid');
@@ -20,6 +21,7 @@ var FieldsForm = require('./test-case/form/fields-form'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   VisualizationToolbar = require('./visualizations/visualization-toolbar'),
+  WaterfallVisualization = require('./visualizations/waterfall-visualization'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig;
@@ -36,8 +38,6 @@ var Simulator = React.createClass({
     webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
     webservices.fetchFields(this.fieldsFetched);
     webservices.fetchLegislations(this.legislationsFetched);
-//    webservices.fetchVisualizations(this.visualizationsFetched);
-    this.setState({visualizationSlug: 'situateur'});
   },
   currentTestCaseFetched: function(data) {
     console.debug('currentTestCaseFetched', data);
@@ -81,7 +81,8 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
-      visualizationSlug: null,
+      visualizationSlug: 'cascade',
+      waterfallOpenedVariables: {},
       year: appconfig.constants.defaultYear,
     };
   },
@@ -215,6 +216,13 @@ var Simulator = React.createClass({
       var initialTestCase = models.TestCase.getInitialTestCase();
       this.repair(initialTestCase);
     }
+  },
+  handleWaterfallBarClick: function(bar) {
+    var status = this.state.waterfallOpenedVariables[bar.code];
+    var newState = Lazy(this.state).merge({
+      waterfallOpenedVariables: Lazy([[bar.code, ! status]]).toObject(),
+    }).toObject();
+    this.setState(newState);
   },
   handleVisualizationChange: function(slug) {
     var newState = React.addons.update(this.state, {visualizationSlug: {$set: slug}});
@@ -354,6 +362,8 @@ var Simulator = React.createClass({
         </p>
       );
     } else {
+      var height = 400,
+        width = 600;
       if (this.state.visualizationSlug === 'json') {
         return <JsonVisualization data={this.state.simulationResult} />;
       } else if (this.state.visualizationSlug === 'rattachement-enfant') {
@@ -371,15 +381,25 @@ var Simulator = React.createClass({
           />
         );
       } else if (this.state.visualizationSlug === 'situateur') {
-        var value = this.state.simulationResult && this.state.simulationResult.values[0];
+        var value = this.state.simulationResult.values[0];
         return (
           <SituateurVisualization
-            height={400}
+            height={height}
             points={revdispDistribution}
             value={value}
-            width={600}
-            xMaxValue={100}
+            width={width}
             xSnapIntervalValue={5}
+            yMaxValue={Math.max(100000, value)}
+          />
+        );
+      } else if (this.state.visualizationSlug === 'cascade') {
+        return (
+          <WaterfallVisualization
+            height={height}
+            openedVariables={this.state.waterfallOpenedVariables}
+            onBarClick={this.handleWaterfallBarClick}
+            variablesTree={this.state.simulationResult}
+            width={width}
             yMaxValue={Math.max(100000, value)}
           />
         );
@@ -390,11 +410,11 @@ var Simulator = React.createClass({
         invariant(visualization, 'selected visualization not found in vizualisations prop');
         invariant(visualization.iframeSrcUrl, 'selected visualization has no iframeSrcUrl');
         return <IframeVisualization
-          height={400}
+          height={height}
           legislationUrl={this.state.legislationUrl}
           testCaseUrl={visualization.testCaseUrl}
           url={visualization.iframeSrcUrl}
-          width={600}
+          width={width}
           year={this.state.year}
         />;
       }

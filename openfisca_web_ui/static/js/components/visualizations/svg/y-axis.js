@@ -11,7 +11,7 @@ var YAxis = React.createClass({
     label: React.PropTypes.string,
     labelFontSize: React.PropTypes.number.isRequired,
     maxValue: React.PropTypes.number.isRequired,
-    steps: React.PropTypes.number.isRequired,
+    nbSteps: React.PropTypes.number.isRequired,
     strokeColor: React.PropTypes.string.isRequired,
     tickFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,
@@ -20,14 +20,14 @@ var YAxis = React.createClass({
   getDefaultProps: function() {
     return {
       labelFontSize: 14,
-      steps: 10,
+      nbSteps: 10,
       strokeColor: 'black',
       tickFontSize: 12,
       tickSize: 6,
     };
   },
   render: function() {
-    var stepSize = this.props.maxValue / this.props.steps;
+    var stepSize = this.props.maxValue / this.props.nbSteps;
     var stepSizePx = this.valueToPixel(stepSize);
     var steps = range(0, this.props.maxValue + stepSize, stepSize);
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};

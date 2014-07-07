@@ -20,6 +20,7 @@ var VisualizationSelect = React.createClass({
     return (
       <select className="form-control" onChange={this.handleChange} value={this.props.value}>
         {options}
+        <option value="cascade">Cascade</option>
         <option value="situateur">Situateur</option>
         <option value="rattachement-enfant">Rattachement enfants</option>
         <option value="json">JSON</option>

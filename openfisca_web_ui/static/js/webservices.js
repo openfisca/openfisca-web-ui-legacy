@@ -66,22 +66,22 @@ function fetchLegislations(onComplete) {
     });
 }
 
-function fetchVisualizations(onComplete) {
-  request
-    .get(appconfig.enabledModules.charts.urlPaths.visualizationsSearch)
-    .on('error', function(error) {
-      onComplete({error: error.message});
-    })
-    .end(function(res) {
-      if (res.body && res.body.error) {
-        onComplete(res.body);
-      } else if (res.error) {
-        onComplete(res);
-      } else {
-        onComplete(res.body);
-      }
-    });
-}
+//function fetchVisualizations(onComplete) {
+//  request
+//    .get(appconfig.enabledModules.charts.urlPaths.visualizationsSearch)
+//    .on('error', function(error) {
+//      onComplete({error: error.message});
+//    })
+//    .end(function(res) {
+//      if (res.body && res.body.error) {
+//        onComplete(res.body);
+//      } else if (res.error) {
+//        onComplete(res);
+//      } else {
+//        onComplete(res.body);
+//      }
+//    });
+//}
 
 function patchColumns(columns) {
   // Patch columns definitions to match UI specificities.
@@ -213,7 +213,7 @@ module.exports = {
   fetchCurrentTestCase: fetchCurrentTestCase,
   fetchFields: fetchFields,
   fetchLegislations: fetchLegislations,
-  fetchVisualizations: fetchVisualizations,
+//  fetchVisualizations: fetchVisualizations,
   repair: repair,
   saveCurrentTestCase: saveCurrentTestCase,
   simulate: simulate,

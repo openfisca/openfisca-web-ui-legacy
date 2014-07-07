@@ -27,26 +27,16 @@ var SituateurVisualization = React.createClass({
     xAxisHeight: React.PropTypes.number.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xSnapIntervalValue: React.PropTypes.number.isRequired,
+    xSteps: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
     yMaxValue: React.PropTypes.number.isRequired,
+    ySteps: React.PropTypes.number.isRequired,
   },
   componentWillMount: function() {
-    this.curveZoneHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
-    this.curveZoneWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
+    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var lastPoints = last(this.props.points, 2);
     this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
-  },
-  curveZonePixelToPoint: function(pixel) {
-    return {
-      x: (pixel.x / this.curveZoneWidth) * this.props.xMaxValue,
-      y: (1 - pixel.y / this.curveZoneHeight) * this.props.yMaxValue,
-    };
-  },
-  curveZonePointToPixel: function(point) {
-    return {
-      x: (point.x / this.props.xMaxValue) * this.curveZoneWidth,
-      y: (1 - point.y / this.props.yMaxValue) * this.curveZoneHeight,
-    };
   },
   extrapolatePoint: function(low, high) {
     var slope = (high.y - low.y) / (high.x - low.x);
@@ -101,11 +91,26 @@ var SituateurVisualization = React.createClass({
       legendHeight: 30,
       marginRight: 10,
       xAxisHeight: 60,
+      xMaxValue: 100,
+      xSteps: 10,
       yAxisWidth: 80,
+      ySteps: 10,
     };
   },
   getInitialState: function() {
     return {snapPoint: null};
+  },
+  gridPixelToPoint: function(pixel) {
+    return {
+      x: (pixel.x / this.gridWidth) * this.props.xMaxValue,
+      y: (1 - pixel.y / this.gridHeight) * this.props.yMaxValue,
+    };
+  },
+  gridPointToPixel: function(point) {
+    return {
+      x: (point.x / this.props.xMaxValue) * this.gridWidth,
+      y: (1 - point.y / this.props.yMaxValue) * this.gridHeight,
+    };
   },
   handleHoverLegendHover: function(point) {
     this.setState({snapPoint: point});
@@ -115,46 +120,40 @@ var SituateurVisualization = React.createClass({
     var xValue = this.findXFromY(this.props.value);
     var numericSort = function(a, b) { return a - b; };
     var xSnapValues = range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort(numericSort);
+    var xStepWidth = this.gridWidth / this.props.xSteps;
+    var xStepsPositions = range(1, this.props.xSteps + 1).map(function(value) { return value * xStepWidth; });
+    var yStepHeight = this.gridHeight / this.props.ySteps;
+    var yStepsPositions = range(1, this.props.ySteps + 1).map(function(value) { return value * yStepHeight; });
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
           <g transform={
             'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
           }>
-            <VGrid
-              height={this.curveZoneHeight}
-              maxValue={this.props.xMaxValue}
-              startStep={1}
-              width={this.curveZoneWidth}
-            />
             <XAxis
               height={this.props.xAxisHeight}
               label='% de la population'
               maxValue={this.props.xMaxValue}
-              width={this.curveZoneWidth}
+              width={this.gridWidth}
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
-            <HGrid
-              height={this.curveZoneHeight}
-              maxValue={this.props.xMaxValue}
-              startStep={1}
-              width={this.curveZoneWidth}
-            />
+            <HGrid stepsPositions={yStepsPositions} width={this.gridWidth} />
+            <VGrid height={this.gridHeight} stepsPositions={xStepsPositions} />
             <YAxis
-              height={this.curveZoneHeight}
+              height={this.gridHeight}
               label='revenu en milliers €'
-              maxValue={this.props.yMaxValue}
+              stepsPositions={yStepsPositions}
               width={this.props.yAxisWidth}
             />
             <Curve
               points={this.props.points}
-              pointToPixel={this.curveZonePointToPixel}
+              pointToPixel={this.gridPointToPixel}
               style={{stroke: 'rgb(31, 119, 180)'}}
             />
             <Curve
               points={[last(this.props.points), this.extrapolatedLastPoint]}
-              pointToPixel={this.curveZonePointToPixel}
+              pointToPixel={this.gridPointToPixel}
               style={{
                 stroke: 'rgb(31, 119, 180)',
                 strokeDasharray: '5 5',
@@ -162,19 +161,19 @@ var SituateurVisualization = React.createClass({
             />
             <Point
               color='rgb(166, 50, 50)'
-              pointToPixel={this.curveZonePointToPixel}
+              pointToPixel={this.gridPointToPixel}
               x={xValue}
               y={this.props.value}
             />
             <HoverLegend
               findYFromX={this.findYFromX}
               formatNumber={this.formatNumber}
-              height={this.curveZoneHeight}
+              height={this.gridHeight}
               onHover={this.handleHoverLegendHover}
-              pixelToPoint={this.curveZonePixelToPoint}
-              pointToPixel={this.curveZonePointToPixel}
+              pixelToPoint={this.gridPixelToPoint}
+              pointToPixel={this.gridPointToPixel}
               snapPoint={this.state.snapPoint}
-              width={this.curveZoneWidth}
+              width={this.gridWidth}
               xMaxValue={this.props.xMaxValue}
               xSnapValues={xSnapValues}
             />

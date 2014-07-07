@@ -1,43 +1,37 @@
 /** @jsx React.DOM */
 'use strict';
 
-var range = require('lodash.range'),
-  React = require('react/addons');
+var Lazy = require('lazy.js'),
+  React = require('react');
 
 
 var HGrid = React.createClass({
   propTypes: {
     height: React.PropTypes.number.isRequired,
-    maxValue: React.PropTypes.number.isRequired,
+    nbSteps: React.PropTypes.number.isRequired,
     startStep: React.PropTypes.number.isRequired,
-    steps: React.PropTypes.number.isRequired,
     style: React.PropTypes.object,
     width: React.PropTypes.number.isRequired,
   },
   getDefaultProps: function() {
     return {
       defaultStyle: {
-        stroke: '#e5e5e5',
         shapeRendering: 'crispedges',
+        stroke: '#e5e5e5',
       },
       startStep: 0,
-      steps: 10,
     };
   },
   render: function() {
-    var stepSize = this.props.maxValue / this.props.steps;
-    var stepSizePx = this.valueToPixel(stepSize);
-    var steps = range(this.props.startStep, this.props.steps + 1);
-    var style = this.props.style ?
-      React.addons.update(this.props.defaultStyle, {$merge: this.props.style}) :
-      this.props.defaultStyle;
+    var style = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
+    var stepHeight = this.props.height / this.props.nbSteps;
     return (
       <g className="grid h-grid">
         {
-          steps.map(function(step) {
-            var translateY = this.props.height - step * stepSizePx;
+          Lazy.range(this.props.startStep, this.props.nbSteps + this.props.startStep).toArray().map(function(stepIdx) {
+            var translateY = - stepIdx * stepHeight;
             return (
-              <g key={'line-' + step} transform={'translate(0, ' + translateY + ')'}>
+              <g key={'line-' + stepIdx} transform={'translate(0, ' + translateY + ')'}>
                 <line style={style} x2={this.props.width} />
               </g>
             );
@@ -45,9 +39,6 @@ var HGrid = React.createClass({
         }
       </g>
     );
-  },
-  valueToPixel: function(value) {
-    return (value / this.props.maxValue) * this.props.height;
   },
 });
 
