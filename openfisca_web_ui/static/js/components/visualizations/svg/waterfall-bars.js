@@ -2,12 +2,14 @@
 'use strict';
 
 var invariant = require('react/lib/invariant'),
-  Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react/addons');
 
+
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var WaterfallBars = React.createClass({
   propTypes: {
+    activeVariableCode: React.PropTypes.string,
     blueFillColor: React.PropTypes.string.isRequired,
     blueStrokeColor: React.PropTypes.string.isRequired,
     greenFillColor: React.PropTypes.string.isRequired,
@@ -19,38 +21,8 @@ var WaterfallBars = React.createClass({
     redStrokeColor: React.PropTypes.string.isRequired,
     valueMax: React.PropTypes.number.isRequired,
     valueMin: React.PropTypes.number.isRequired,
-    variablesByCode: React.PropTypes.object.isRequired,
+    variables: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
-  },
-  componentWillMount: function() {
-    this.unitHeight = this.props.height / (this.props.valueMax - this.props.valueMin);
-  },
-  computeBarsData: function() {
-    var y0 = this.props.valueMax > 0 ? this.props.valueMax * this.unitHeight : 0;
-    var bars = Lazy(this.props.variablesByCode).map(function(variable) {
-      return {
-        baseValue: variable.baseValue,
-        code: variable.code,
-        hasChildren: variable.children ? true : false,
-        height: Math.abs(variable.value) * this.unitHeight,
-        name: variable.name,
-        type: variable.type,
-        value: variable.value,
-        y: y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * this.unitHeight,
-      };
-    }.bind(this)).toArray();
-    return {bars: bars};
-//    var yAxisLabels = [];
-//    for (var value = valueMin; value <= valueMax; value += tickValue) {
-//      yAxisLabels.push(value.toString());
-//    }
-//    return {
-//      bars: bars,
-//      tickHeight: tickValue * this.unitHeight,
-//      tickWidth: this.gridWidth / bars.length,
-//      y0: y0,
-//      yAxisLabels: yAxisLabels,
-//    };
   },
   getDefaultProps: function() {
     return {
@@ -64,33 +36,51 @@ var WaterfallBars = React.createClass({
     };
   },
   render: function() {
-    var barsData = this.computeBarsData();
-    var barWidth = this.props.width / barsData.bars.length;
+    var unitHeight = this.props.height / (this.props.valueMax - this.props.valueMin);
+    var y0 = this.props.valueMax > 0 ? this.props.valueMax * unitHeight : 0;
+    var bars = this.props.variables.map(function(variable) {
+      return {
+        baseValue: variable.baseValue,
+        code: variable.code,
+        color: variable.color,
+        hasChildren: !! variable.children,
+        height: Math.abs(variable.value) * unitHeight,
+        name: variable.name,
+        type: variable.type,
+        value: variable.value,
+        y: y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * unitHeight,
+      };
+    }, this);
+    var tickWidth = this.props.width / bars.length;
     return (
-      <g>
+      <ReactCSSTransitionGroup component={React.DOM.g} transitionName="bar">
         {
-          barsData.bars.map(function(bar, barIndex) {
+          bars.map(function(bar, barIndex) {
             invariant(bar.type === 'bar' || bar.type === 'var', 'bar.type is neither "bar" nor "var": %s', bar.type);
-            var fillColor = bar.type === 'bar' ? this.props.blueFillColor :
-              bar.value > 0 ? this.props.greenFillColor : this.props.redFillColor;
-            var stroke = bar.type === 'bar' ? this.props.blueStrokeColor :
-              bar.value > 0 ? this.props.greenStrokeColor : this.props.redStrokeColor;
+            var style = {
+              fill: bar.color ? 'rgb(' + bar.color.join(',') + ')' : 'gray',
+//              fill: bar.type === 'bar' ? this.props.blueFillColor :
+//                bar.value > 0 ? this.props.greenFillColor : this.props.redFillColor,
+              opacity: bar.code === this.props.activeVariableCode ? 1 : this.props.rectOpacity,
+//              stroke: bar.type === 'bar' ? this.props.blueStrokeColor :
+//                bar.value > 0 ? this.props.greenStrokeColor : this.props.redStrokeColor,
+              shapeRendering: 'crispedges',
+              stroke: bar.code === this.props.activeVariableCode ? 'black' : 'gray',
+            };
             return (
               <rect
-                fill={fillColor}
                 height={bar.height}
-                key={'bar-' + barIndex}
+                key={bar.code}
                 onClick={bar.hasChildren && this.props.onBarClick.bind(null, bar)}
-                opacity={this.props.rectOpacity}
-                stroke={stroke}
-                width={barWidth * 0.8}
-                x={barIndex * barWidth + 0.1 * barWidth}
+                style={style}
+                width={tickWidth * 0.8}
+                x={(barIndex + 0.1) * tickWidth}
                 y={bar.y}
               />
             );
           }, this)
         }
-      </g>
+      </ReactCSSTransitionGroup>
     );
   }
 });

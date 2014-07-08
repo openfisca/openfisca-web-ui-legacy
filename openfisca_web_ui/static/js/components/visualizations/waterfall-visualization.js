@@ -4,32 +4,14 @@
 var Lazy = require('lazy.js'),
   React = require('react');
 
-var HGrid = require('./svg/h-grid'),
+var axes = require('../../axes'),
+  HGrid = require('./svg/h-grid'),
+  HoverBar = require('./svg/hover-bar'),
+  VariablesTree = require('./variables-tree'),
   WaterfallBars = require('./svg/waterfall-bars'),
   XAxisLabelled = require('./svg/x-axis-labelled'),
   YAxis = require('./svg/y-axis');
 
-
-function calculateStepSize(range, stepsCount) {
-  // cf http://stackoverflow.com/questions/361681/algorithm-for-nice-grid-line-intervals-on-a-graph
-  // Calculate an initial guess at step size.
-  var ln10 = Math.log(10);
-  var tempStepSize = range / stepsCount;
-  // Get the magnitude of the step size.
-  var mag = Math.floor(Math.log(tempStepSize) / ln10);
-  var magPow = Math.pow(10, mag);
-  // Calculate most significant digit of the new step size.
-  var magMsd = Math.round(tempStepSize / magPow + 0.5);
-  // Promote the MSD to either 2, 5 or 10.
-  if (magMsd > 5.0) {
-    magMsd = 10.0;
-  } else if (magMsd > 2.0) {
-    magMsd = 5.0;
-  } else if (magMsd > 1.0) {
-    magMsd = 2.0;
-  }
-  return magMsd * magPow;
-}
 
 var WaterfallVisualization = React.createClass({
   propTypes: {
@@ -37,10 +19,6 @@ var WaterfallVisualization = React.createClass({
     legendHeight: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     onBarClick: React.PropTypes.func.isRequired,
-    // The flags indicating whether a variable (with children) is closed or open (default).
-    // This is stored in a separate dictionnary, to ensure that the flag will not be lost each time the variables
-    // are updated by OpenFisca API.
-    openedVariables: React.PropTypes.object.isRequired,
     // OpenFisca API simulation results.
     variablesTree: React.PropTypes.object.isRequired,
     // Values key is a list. This tells which index to use.
@@ -56,7 +34,8 @@ var WaterfallVisualization = React.createClass({
   },
   extractVariablesFromTree: function(variablesByCode, node, baseValue, depth, hidden) {
     var children = node.children;
-    var opened = this.props.openedVariables[node.code] || depth === 0;
+//    var opened = this.props.openedVariables[node.code] || depth === 0;
+    var opened = true;
     if (children) {
       var childBaseValue = baseValue;
       for (var childIndex = 0; childIndex < children.length; childIndex++) {
@@ -79,18 +58,27 @@ var WaterfallVisualization = React.createClass({
       legendHeight: 30,
       marginRight: 10,
       variablesTreeValueIndex: 0,
-      xAxisHeight: 150,
+      xAxisHeight: 100,
       yAxisWidth: 80,
       ySteps: 8,
     };
   },
+  getInitialState: function() {
+    return {
+      hoveredBar: null,
+    };
+  },
+  handleVariableHover: function(variable) {
+    this.setState({hoveredBar: variable});
+  },
   render: function() {
     var variablesByCode = {};
     this.extractVariablesFromTree(variablesByCode, this.props.variablesTree, 0, 0, false);
-    var xSteps = Lazy(variablesByCode).keys().size();
+    var variables = Lazy(variablesByCode).values().toArray();
+    var xSteps = variables.length;
     var valueMax = 0;
     var valueMin = 0;
-    Lazy(variablesByCode).each(function(variable) {
+    variables.forEach(function(variable) {
       var value = variable.baseValue + variable.value;
       if (value > valueMax) {
         valueMax = value;
@@ -99,45 +87,86 @@ var WaterfallVisualization = React.createClass({
       }
     });
     var valuesRange = valueMax - valueMin;
-    var tickValue = calculateStepSize(valuesRange, this.props.ySteps);
+    var tickValue = axes.calculateStepSize(valuesRange, this.props.ySteps);
     var smartValueMax = Math.round(valueMax / tickValue + 0.5) * tickValue;
     var smartValueMin = Math.round(valueMin / tickValue - 0.5) * tickValue;
+    var xLabels = variables.map(function(variable) {
+      var style = {};
+      if (variable.children) {
+        style.fill = 'red';
+      }
+      if (this.state.hoveredBar && variable.code === this.state.hoveredBar.code) {
+        style.fontWeight = 'bold';
+      }
+      return {
+        name: variable.short_name, // jshint ignore:line
+        style: style,
+      };
+    }, this);
+    var tickWidth = this.gridWidth / xSteps;
     return (
-      <svg height={this.props.height} width={this.props.width}>
-        <g transform={
-          'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
-        }>
-          <HGrid
-            height={this.gridHeight}
-            nbSteps={this.props.ySteps}
-            startStep={1}
-            width={this.gridWidth}
-          />
-          <XAxisLabelled
-            height={this.props.xAxisHeight}
-            labels={Lazy(variablesByCode).pluck('name').toArray()}
-            nbSteps={xSteps}
-            width={this.gridWidth}
-          />
-        </g>
-        <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
-          <YAxis
-            height={this.gridHeight}
-            label='revenu en milliers €'
-            maxValue={smartValueMax}
-            nbSteps={this.props.ySteps}
-            width={this.props.yAxisWidth}
-          />
-          <WaterfallBars
-            height={this.gridHeight}
-            onBarClick={this.props.onBarClick}
-            valueMax={smartValueMax}
-            valueMin={smartValueMin}
-            variablesByCode={variablesByCode}
-            width={this.gridWidth}
-          />
-        </g>
-      </svg>
+      <div>
+        <svg height={this.props.height} width={this.props.width}>
+          <g transform={
+            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
+          }>
+            <HGrid
+              height={this.gridHeight}
+              nbSteps={this.props.ySteps}
+              startStep={1}
+              width={this.gridWidth}
+            />
+            <XAxisLabelled
+              height={this.props.xAxisHeight}
+              labels={xLabels}
+              nbSteps={xSteps}
+              width={this.gridWidth}
+            />
+          </g>
+          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
+            <YAxis
+              height={this.gridHeight}
+              label='revenu en milliers €'
+              maxValue={smartValueMax}
+              nbSteps={this.props.ySteps}
+              width={this.props.yAxisWidth}
+            />
+            <WaterfallBars
+              activeVariableCode={this.state.hoveredBar && this.state.hoveredBar.code}
+              height={this.gridHeight}
+              onBarClick={this.props.onBarClick}
+              valueMax={smartValueMax}
+              valueMin={smartValueMin}
+              variables={variables}
+              width={this.gridWidth}
+            />
+          </g>
+          <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
+            {
+              variables.map(function(variable, idx) {
+                return (
+                  <HoverBar
+                    height={this.props.height}
+                    key={variable.code}
+                    onMouseOut={this.handleVariableHover.bind(null, null)}
+                    onMouseOver={this.handleVariableHover.bind(null, variable)}
+                    width={tickWidth}
+                    x={tickWidth * idx}
+                  />
+                );
+              }, this)
+            }
+          </g>
+        </svg>
+        <p className='well' style={{textAlign: 'center'}}>
+          {this.state.hoveredBar ? this.state.hoveredBar.name : 'Survolez le graphique'}
+        </p>
+        <VariablesTree
+          activeVariableCode={this.state.hoveredBar && this.state.hoveredBar.code}
+          onHover={this.handleVariableHover}
+          variables={Lazy(variables).reverse().toArray()}
+        />
+      </div>
     );
   },
 });

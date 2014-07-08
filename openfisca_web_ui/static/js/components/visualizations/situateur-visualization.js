@@ -98,7 +98,9 @@ var SituateurVisualization = React.createClass({
     };
   },
   getInitialState: function() {
-    return {snapPoint: null};
+    return {
+      snapPoint: null,
+    };
   },
   gridPixelToPoint: function(pixel) {
     return {
@@ -122,14 +124,18 @@ var SituateurVisualization = React.createClass({
     var xSnapValues = range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort(numericSort);
     var xStepWidth = this.gridWidth / this.props.xSteps;
     var xStepsPositions = range(1, this.props.xSteps + 1).map(function(value) { return value * xStepWidth; });
-    var yStepHeight = this.gridHeight / this.props.ySteps;
-    var yStepsPositions = range(1, this.props.ySteps + 1).map(function(value) { return value * yStepHeight; });
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
           <g transform={
             'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
           }>
+            <HGrid
+              height={this.gridHeight}
+              nbSteps={this.props.ySteps}
+              startStep={1}
+              width={this.gridWidth}
+            />
             <XAxis
               height={this.props.xAxisHeight}
               label='% de la population'
@@ -138,12 +144,12 @@ var SituateurVisualization = React.createClass({
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
-            <HGrid stepsPositions={yStepsPositions} width={this.gridWidth} />
             <VGrid height={this.gridHeight} stepsPositions={xStepsPositions} />
             <YAxis
               height={this.gridHeight}
               label='revenu en milliers €'
-              stepsPositions={yStepsPositions}
+              maxValue={this.props.yMaxValue}
+              nbSteps={this.props.ySteps}
               width={this.props.yAxisWidth}
             />
             <Curve
