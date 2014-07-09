@@ -34,10 +34,16 @@ var Simulator = React.createClass({
     legislations: React.PropTypes.array,
     visualizations: React.PropTypes.array,
   },
+  componentDidMount: function() {
+    window.onresize = this.handleResize;
+  },
   componentWillMount: function() {
     webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
     webservices.fetchFields(this.fieldsFetched);
     webservices.fetchLegislations(this.legislationsFetched);
+  },
+  componentWillUnmount: function() {
+    window.onresize = null;
   },
   currentTestCaseFetched: function(data) {
     console.debug('currentTestCaseFetched', data);
@@ -217,6 +223,9 @@ var Simulator = React.createClass({
       this.repair(initialTestCase);
     }
   },
+  handleResize: function() {
+    this.forceUpdate();
+  },
   handleWaterfallBarClick: function(bar) {
     var status = this.state.waterfallOpenedVariables[bar.code];
     var newState = Lazy(this.state).merge({
@@ -308,7 +317,7 @@ var Simulator = React.createClass({
             />
           }
         </div>
-        <div className="col-sm-8">
+        <div className="col-sm-8" ref='rightPanel'>
           {rightPanel}
         </div>
       </div>
@@ -354,6 +363,9 @@ var Simulator = React.createClass({
   },
   renderVisualization: function() {
     invariant(this.state.simulationResult, 'this.state.simulationResult is empty');
+    var rightPanelNode = this.refs.rightPanel.getDOMNode();
+    var rightPanelWidth = rightPanelNode.clientWidth;
+    var visualizationHeight = rightPanelWidth * 0.66;
     if (this.state.simulationResult.error) {
       return (
         <p className="text-danger">
@@ -362,8 +374,6 @@ var Simulator = React.createClass({
         </p>
       );
     } else {
-      var height = 400,
-        width = 600;
       if (this.state.visualizationSlug === 'json') {
         return <JsonVisualization data={this.state.simulationResult} />;
       } else if (this.state.visualizationSlug === 'rattachement-enfant') {
@@ -384,10 +394,10 @@ var Simulator = React.createClass({
         var value = this.state.simulationResult.values[0];
         return (
           <SituateurVisualization
-            height={height}
+            height={visualizationHeight}
             points={revdispDistribution}
             value={value}
-            width={width}
+            width={rightPanelWidth}
             xSnapIntervalValue={5}
             yMaxValue={Math.max(100000, value)}
           />
@@ -395,12 +405,11 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'cascade') {
         return (
           <WaterfallVisualization
-            height={height}
+            height={visualizationHeight}
             openedVariables={this.state.waterfallOpenedVariables}
-            onBarClick={this.handleWaterfallBarClick}
+//            onBarClick={this.handleWaterfallBarClick}
             variablesTree={this.state.simulationResult}
-            width={width}
-            yMaxValue={Math.max(100000, value)}
+            width={rightPanelWidth}
           />
         );
       } else if ( ! this.props.visualizations) {
@@ -410,11 +419,11 @@ var Simulator = React.createClass({
         invariant(visualization, 'selected visualization not found in vizualisations prop');
         invariant(visualization.iframeSrcUrl, 'selected visualization has no iframeSrcUrl');
         return <IframeVisualization
-          height={height}
+          height={visualizationHeight}
           legislationUrl={this.state.legislationUrl}
           testCaseUrl={visualization.testCaseUrl}
           url={visualization.iframeSrcUrl}
-          width={width}
+          width={rightPanelWidth}
           year={this.state.year}
         />;
       }

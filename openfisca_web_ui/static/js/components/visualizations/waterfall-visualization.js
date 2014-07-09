@@ -18,7 +18,6 @@ var WaterfallVisualization = React.createClass({
     height: React.PropTypes.number.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
-    onBarClick: React.PropTypes.func.isRequired,
     // OpenFisca API simulation results.
     variablesTree: React.PropTypes.object.isRequired,
     // Values key is a list. This tells which index to use.
@@ -27,10 +26,6 @@ var WaterfallVisualization = React.createClass({
     xAxisHeight: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
     ySteps: React.PropTypes.number.isRequired,
-  },
-  componentWillMount: function() {
-    this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
-    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
   },
   extractVariablesFromTree: function(variablesByCode, node, baseValue, depth, hidden) {
     var children = node.children;
@@ -65,11 +60,11 @@ var WaterfallVisualization = React.createClass({
   },
   getInitialState: function() {
     return {
-      hoveredBar: null,
+      hoveredBarCode: null,
     };
   },
   handleVariableHover: function(variable) {
-    this.setState({hoveredBar: variable});
+    this.setState({hoveredBarCode: variable && variable.code});
   },
   render: function() {
     var variablesByCode = {};
@@ -92,18 +87,19 @@ var WaterfallVisualization = React.createClass({
     var smartValueMin = Math.round(valueMin / tickValue - 0.5) * tickValue;
     var xLabels = variables.map(function(variable) {
       var style = {};
-      if (variable.children) {
-        style.fill = 'red';
-      }
-      if (this.state.hoveredBar && variable.code === this.state.hoveredBar.code) {
+      if (variable.code === this.state.hoveredBarCode) {
         style.fontWeight = 'bold';
       }
-      return {
-        name: variable.short_name, // jshint ignore:line
-        style: style,
-      };
+      var name = variable.short_name; // jshint ignore:line
+      if (variable.children) {
+        name = '▾ ' + name;
+      }
+      return {name: name, style: style};
     }, this);
-    var tickWidth = this.gridWidth / xSteps;
+    var hoveredBar = variablesByCode[this.state.hoveredBarCode];
+    var gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight,
+      gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    var tickWidth = gridWidth / xSteps;
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -111,34 +107,33 @@ var WaterfallVisualization = React.createClass({
             'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
           }>
             <HGrid
-              height={this.gridHeight}
+              height={gridHeight}
               nbSteps={this.props.ySteps}
               startStep={1}
-              width={this.gridWidth}
+              width={gridWidth}
             />
             <XAxisLabelled
               height={this.props.xAxisHeight}
               labels={xLabels}
               nbSteps={xSteps}
-              width={this.gridWidth}
+              width={gridWidth}
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
             <YAxis
-              height={this.gridHeight}
+              height={gridHeight}
               label='revenu en milliers €'
               maxValue={smartValueMax}
               nbSteps={this.props.ySteps}
               width={this.props.yAxisWidth}
             />
             <WaterfallBars
-              activeVariableCode={this.state.hoveredBar && this.state.hoveredBar.code}
-              height={this.gridHeight}
-              onBarClick={this.props.onBarClick}
+              activeVariableCode={this.state.hoveredBarCode}
+              height={gridHeight}
               valueMax={smartValueMax}
               valueMin={smartValueMin}
               variables={variables}
-              width={this.gridWidth}
+              width={gridWidth}
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
@@ -158,13 +153,10 @@ var WaterfallVisualization = React.createClass({
             }
           </g>
         </svg>
-        <p className='well' style={{textAlign: 'center'}}>
-          {this.state.hoveredBar ? this.state.hoveredBar.name : 'Survolez le graphique'}
-        </p>
         <VariablesTree
-          activeVariableCode={this.state.hoveredBar && this.state.hoveredBar.code}
+          activeVariableCode={this.state.hoveredBarCode}
           onHover={this.handleVariableHover}
-          variables={Lazy(variables).reverse().toArray()}
+          variablesTree={this.props.variablesTree}
         />
       </div>
     );

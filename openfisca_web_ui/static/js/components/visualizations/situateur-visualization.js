@@ -32,12 +32,6 @@ var SituateurVisualization = React.createClass({
     yMaxValue: React.PropTypes.number.isRequired,
     ySteps: React.PropTypes.number.isRequired,
   },
-  componentWillMount: function() {
-    this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
-    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var lastPoints = last(this.props.points, 2);
-    this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
-  },
   extrapolatePoint: function(low, high) {
     var slope = (high.y - low.y) / (high.x - low.x);
     var extrapolatedPointY = high.y + slope * (this.props.xMaxValue - high.x);
@@ -83,6 +77,12 @@ var SituateurVisualization = React.createClass({
     }
     return y;
   },
+  formatHint: function(point) {
+    return this.formatNumber(point.x) +
+      ' % des français ont un revenu disponible inférieur à ' + // jshint ignore:line
+      this.formatNumber(point.y) +
+      ' €.'; // jshint ignore:line
+  },
   formatNumber: function(number) {
     return Math.floor(number) === number ? number : number.toFixed(2);
   },
@@ -118,6 +118,10 @@ var SituateurVisualization = React.createClass({
     this.setState({snapPoint: point});
   },
   render: function() {
+    this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
+    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    var lastPoints = last(this.props.points, 2);
+    this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
     var revdispLabel = 'Revenu disponible';
     var xValue = this.findXFromY(this.props.value);
     var numericSort = function(a, b) { return a - b; };
@@ -192,14 +196,8 @@ var SituateurVisualization = React.createClass({
           </g>
         </svg>
         {
-          this.state.snapPoint &&
           <p className='well' style={{textAlign: 'center'}}>
-            {
-              this.formatNumber(this.state.snapPoint.x) +
-              ' % des français ont un revenu disponible inférieur à ' + // jshint ignore:line
-              this.formatNumber(this.state.snapPoint.y) +
-              ' €.' // jshint ignore:line
-            }
+            {this.formatHint(this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value})}
           </p>
         }
       </div>
