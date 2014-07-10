@@ -48,27 +48,19 @@ var IntegerControl = React.createClass({
                 <div className="input-group">
                   {input}
                   <span className="input-group-addon">
-                  {
-                    this.props.valType === 'monetary' ?
-                      <span className="glyphicon glyphicon-euro"></span>
-                      : null
-                  }
-                  {
-                    this.props.suggestion && ! this.props.error ?
-                      <SuggestionGlyphicon />
-                      : null
-                  }
+                    {this.props.valType === 'monetary' && <span className="glyphicon glyphicon-euro"></span>}
+                    {this.props.suggestion && ! this.props.error && <SuggestionGlyphicon />}
                   </span>
                 </div>
               ) : input
             }
           </div>
           {
-            this.props.cerfaField ?
+            this.props.cerfaField && (
               <div className="col-md-8">
                 <CerfaField value={this.props.cerfaFields} />
               </div>
-              : null
+            )
           }
         </div>
       </div>

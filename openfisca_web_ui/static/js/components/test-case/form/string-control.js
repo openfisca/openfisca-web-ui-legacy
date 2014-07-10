@@ -35,11 +35,11 @@ var StringControl = React.createClass({
           value={this.props.value}
         />
         {
-          this.props.cerfaField ?
+          this.props.cerfaField && (
             <div className="col-md-8">
               <CerfaField value={this.props.cerfaFields} />
             </div>
-            : null
+          )
         }
       </div>
     );

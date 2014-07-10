@@ -14,13 +14,9 @@ require('bootstrap/js/transition');
 var AcceptCnilConditionsModalV = require('./views/AcceptCnilConditionsModalV'),
   AcceptCookiesModalV = require('./views/AcceptCookiesModalV'),
   auth = require('./auth'),
-//  chartsV = require('./views/chartsV'),
   disclaimer = require('./disclaimer'),
   legislation = require('./legislation'),
-//  router = require('./router'),
   Simulator = require('./components/simulator');
-//  situationForm = require('./components/situationForm'),
-//  testCasesServiceM = require('./models/testCasesServiceM');
 
 var appconfig = global.appconfig;
 

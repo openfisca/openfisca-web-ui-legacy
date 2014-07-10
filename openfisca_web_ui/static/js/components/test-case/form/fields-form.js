@@ -40,7 +40,7 @@ var FieldsForm = React.createClass({
               this.props.suggestions &&
               intersection(categoryColumnNames, Object.keys(this.props.suggestions)).length
             );
-            return category.columns ? (
+            return category.columns && (
               <Category
                 hasErrors={hasErrors}
                 hasSuggestions={hasSuggestions}
@@ -49,7 +49,7 @@ var FieldsForm = React.createClass({
                 label={category.label}>
                 {category.columns.map(this.renderControl)}
               </Category>
-            ) : null;
+            );
           }, this)
         }
       </div>

@@ -19,11 +19,7 @@ var Category = React.createClass({
         React.addons.classSet('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')
       }>
         <div className="panel-heading">
-          {
-            this.props.hasSuggestions ?
-              <SuggestionGlyphicon className="pull-right" />
-              : null
-          }
+          {this.props.hasSuggestions && <SuggestionGlyphicon className="pull-right" />}
           <h4 className="panel-title">
             <a
               data-parent="#accordion"

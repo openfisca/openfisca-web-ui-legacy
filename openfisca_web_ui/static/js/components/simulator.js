@@ -271,15 +271,26 @@ var Simulator = React.createClass({
     if (this.state.editedEntity) {
       rightPanel = this.renderFieldsFormPanel();
     } else if (this.state.movedIndividu) {
+      var movedIndividuId = this.state.movedIndividu.id;
+      var selectedByKind = {};
+      models.kinds.forEach(function(kind) {
+        var entityAndRole = models.TestCase.findEntityAndRole(movedIndividuId, kind, this.state.testCase);
+        selectedByKind[kind] = Lazy(entityAndRole).pick(['id', 'role']).toObject();
+      }, this);
       rightPanel = (
         <FormWithHeader
           onCancel={this.handleMoveIndividuFormCancel}
           onSave={this.handleMoveIndividuFormSave}
           title={
-            'Déplacer ' + this.state.testCase.individus[this.state.movedIndividu.id].nom_individu /* jshint ignore:line */
+            'Déplacer ' + this.state.testCase.individus[movedIndividuId].nom_individu /* jshint ignore:line */
           }>
           <MoveIndividuForm
-            onChange={this.handleMoveIndividuFormChange.bind(null, this.state.movedIndividu.id)}
+            entitiesMetadata={models.entitiesMetadata}
+            getEntityLabel={models.TestCase.getEntityLabel}
+            onChange={this.handleMoveIndividuFormChange.bind(null, movedIndividuId)}
+            roleLabels={models.roleLabels}
+            selectedByKind={selectedByKind}
+            testCase={this.state.testCase}
           />
         </FormWithHeader>
       );
@@ -445,9 +456,7 @@ var Simulator = React.createClass({
         <hr/>
         {
           this.state.simulationResult ? this.renderVisualization() : (
-            this.state.errors ?
-              <p>Erreurs dans le formulaire</p>
-              : null
+            this.state.errors && <p>Erreurs dans le formulaire</p>
           )
         }
       </div>

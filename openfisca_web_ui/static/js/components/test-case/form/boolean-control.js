@@ -74,11 +74,7 @@ var BooleanControl = React.createClass({
                   'valeur suggérée : ' + booleanToString(this.props.suggestion) : // jshint ignore:line
                   'valeur par défaut : ' + booleanToString(this.props.default) // jshint ignore:line
               }
-              {
-                this.props.suggestion && ! this.props.error ?
-                  <SuggestionGlyphicon />
-                  : null
-              }
+              {this.props.suggestion && ! this.props.error && <SuggestionGlyphicon />}
             </span>
           </div>
         </div>

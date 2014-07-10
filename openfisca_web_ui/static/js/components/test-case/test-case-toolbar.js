@@ -3,6 +3,8 @@
 
 var React = require('react/addons');
 
+var cx = React.addons.classSet;
+
 
 var TestCaseToolbar = React.createClass({
   propTypes: {
@@ -31,9 +33,7 @@ var TestCaseToolbar = React.createClass({
             Simuler
           </button>
           <button
-            className={
-              React.addons.classSet('btn', 'btn-primary', 'dropdown-toggle', this.props.disabled ? 'disabled' : null)
-            }
+            className={cx('btn', 'btn-primary', 'dropdown-toggle', this.props.disabled && 'disabled')}
             data-toggle="dropdown"
             type="button">
             <span className="caret"></span>
@@ -80,11 +80,7 @@ var TestCaseToolbar = React.createClass({
             </li>
           </ul>
         </div>
-        {
-          this.props.isSimulationInProgress ?
-            <span className="label label-default">Simulation</span>
-            : null
-        }
+        {this.props.isSimulationInProgress && <span className="label label-default">Simulation</span>}
       </div>
     );
   }

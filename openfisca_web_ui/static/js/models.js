@@ -1,6 +1,7 @@
 'use strict';
 
-var mapObject = require('map-object'),
+var Lazy = require('lazy.js'),
+  mapObject = require('map-object'),
   React = require('react/addons'),
   _ = require('underscore'),
   uuid = require('uuid');
@@ -74,9 +75,23 @@ var TestCase = {
     var entities = testCase[kind];
     for (var entityId in entities) {
       var entity = entities[entityId];
+      // FIXME role can be a singleton.
       if (role in entity && entity[role].indexOf(individuId) !== -1) {
         return {id: entityId, entity: entity};
       }
+    }
+    return null;
+  },
+  findEntityAndRole: function(individuId, kind, testCase) {
+    if ( ! (kind in testCase)) {
+      return null;
+    }
+    var entities = testCase[kind];
+    var hasRole = function(role) { return TestCase.hasRoleInEntity(individuId, kind, entity, role); };
+    for (var entityId in entities) {
+      var entity = entities[entityId];
+      var role = Lazy(entitiesMetadata[kind].roles).find(hasRole);
+      return role ? {entity: entity, id: entityId, role: role} : null;
     }
     return null;
   },
@@ -134,8 +149,15 @@ var TestCase = {
     var name = value.toString();
     return name;
   },
-  hasRole: function (individuId, kind, role, testCase) {
+  hasRole: function(individuId, kind, role, testCase) {
     return !! TestCase.findEntity(individuId, kind, role, testCase);
+  },
+  hasRoleInEntity: function(individuId, kind, entity, role) {
+    if (TestCase.isSingleton(kind, role)) {
+      return entity[role] === individuId;
+    } else {
+      return entity[role] && entity[role].indexOf(individuId) !== -1;
+    }
   },
   isSingleton: function(kind, role) {
     return entitiesMetadata[kind].maxCardinality[role] === 1;
@@ -185,8 +207,7 @@ var TestCase = {
     kinds.forEach(function(kind) {
       var entities = testCase[kind];
       var newEntities = {};
-      Object.keys(entities).forEach(function(entityId) {
-        var entity = entities[entityId];
+      mapObject(entities, function(entity, entityId) {
         var entityMetadata = entitiesMetadata[kind];
         var newEntity = _.omit(entity, entityMetadata.roles);
         entityMetadata.roles.forEach(function(role) {
@@ -217,6 +238,7 @@ var TestCase = {
 
 module.exports = {
   entitiesMetadata: entitiesMetadata,
+  kinds: kinds,
   roleLabels: roleLabels,
   TestCase: TestCase,
 };
