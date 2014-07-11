@@ -2,7 +2,7 @@
 'use strict';
 
 var getObjectPath = require('get-object-path'),
-  mapObject = require('map-object'),
+  Lazy = require('lazy.js'),
   React = require('react');
 
 var Entity = require('./entity'),
@@ -12,9 +12,9 @@ var Entity = require('./entity'),
 
 var TestCase = React.createClass({
   propTypes: {
-    editedEntity: React.PropTypes.object,
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
+    frozenEntity: React.PropTypes.object,
     getEntityLabel: React.PropTypes.func.isRequired,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
@@ -27,68 +27,79 @@ var TestCase = React.createClass({
   },
   render: function() {
     var entitiesMetadata = this.props.entitiesMetadata;
+    var kinds = Object.keys(entitiesMetadata);
     return (
       <div>
         {
-          Object.keys(entitiesMetadata).map(function(kind) {
+          kinds.map(function(kind) {
             if (this.props.testCase[kind]) {
-              return mapObject(this.props.testCase[kind], function(entity, entityId) {
-                var disabled =  !! this.props.editedEntity;
-                return (
-                  <Entity
-                    disabled={disabled}
-                    hasErrors={ !! getObjectPath(this.props.errors, kind + '.' + entityId)}
-                    id={entityId}
-                    isEdited={ !! (this.props.editedEntity && this.props.editedEntity.id === entityId)}
-                    key={entityId}
-                    kind={kind}
-                    label={this.props.getEntityLabel(kind, entity)}
-                    onDelete={this.props.onDeleteEntity}
-                    onEdit={this.props.onEditEntity}>
-                    {
-                      entitiesMetadata[kind].roles.map(function(role) {
-                        var maxCardinality = entitiesMetadata[kind].maxCardinality[role];
-                        var renderIndividu = function(individuId) {
+              return Lazy(this.props.testCase[kind])
+                .map(function(entity, entityId) {
+                  return Lazy(entity).assign({
+                    id: entityId,
+                    label: this.props.getEntityLabel(kind, entity),
+                  }).toObject();
+                }.bind(this))
+                .sortBy('label')
+                .map(function(entity) {
+                  var disabled =  !! this.props.frozenEntity;
+                  return (
+                    <Entity
+                      disabled={disabled}
+                      hasErrors={ !! getObjectPath(this.props.errors, kind + '.' + entity.id)}
+                      isEdited={ !! (this.props.frozenEntity && this.props.frozenEntity.id === entity.id)}
+                      key={entity.id}
+                      label={entity.label}
+                      onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}
+                      onEdit={this.props.onEditEntity.bind(null, kind, entity.id)}>
+                      {
+                        entitiesMetadata[kind].roles.map(function(role) {
+                          var maxCardinality = entitiesMetadata[kind].maxCardinality[role];
+                          var renderIndividu = function(individuId) {
+                            return (
+                              <Individu
+                                disabled={disabled}
+                                edited={ !! (this.props.frozenEntity && this.props.frozenEntity.id === individuId)}
+                                errors={getObjectPath(this.props.errors, 'individus.' + individuId)}
+                                id={individuId}
+                                key={individuId}
+                                onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
+                                onEdit={this.props.onEditEntity.bind(null, 'individus', individuId)}
+                                onMove={this.props.onMoveIndividu.bind(null, individuId)}
+                                suggestions={getObjectPath(this.props.suggestions, 'individus.' + individuId)}
+                                value={this.props.testCase.individus[individuId]}
+                              />
+                            );
+                          }.bind(this);
+                          var error = getObjectPath(this.props.errors, kind + '.' + entity.id + '.' + role);
+                          if (typeof(error) === 'object') {
+                            error = Lazy(error).values().join(', ');
+                          };
                           return (
-                            <Individu
+                            <Role
                               disabled={disabled}
-                              edited={ !! (this.props.editedEntity && this.props.editedEntity.id === individuId)}
-                              errors={getObjectPath(this.props.errors, 'individus.' + individuId)}
-                              id={individuId}
-                              key={individuId}
-                              onDelete={this.props.onDeleteIndividu}
-                              onEdit={this.props.onEditEntity}
-                              onMove={this.props.onMoveIndividu}
-                              suggestions={getObjectPath(this.props.suggestions, 'individus.' + individuId)}
-                              value={this.props.testCase.individus[individuId]}
-                            />
+                              error={error}
+                              key={role}
+                              label={this.props.roleLabels[role]}
+                              maxCardinality={maxCardinality}
+                              onCreateIndividuInEntity={
+                                this.props.onCreateIndividuInEntity.bind(null, kind, entity.id, role)
+                              }
+                              role={role}>
+                              {
+                                entity[role] && (
+                                  maxCardinality === 1 ?
+                                    renderIndividu(entity[role]) :
+                                    entity[role].map(renderIndividu)
+                                  )
+                              }
+                            </Role>
                           );
-                        }.bind(this);
-                        return (
-                          <Role
-                            disabled={disabled}
-                            error={getObjectPath(this.props.errors, kind + '.' + entityId + '.' + role)}
-                            key={role}
-                            label={this.props.roleLabels[role]}
-                            maxCardinality={maxCardinality}
-                            onCreateIndividuInEntity={
-                              this.props.onCreateIndividuInEntity.bind(null, kind, entityId, role)
-                            }
-                            role={role}>
-                            {
-                              entity[role] && (
-                                maxCardinality === 1 ?
-                                  renderIndividu(entity[role]) :
-                                  entity[role].map(renderIndividu)
-                                )
-                            }
-                          </Role>
-                        );
-                     }, this)
-                    }
-                  </Entity>
-                );
-              }, this);
+                       }, this)
+                      }
+                    </Entity>
+                  );
+                }.bind(this)).toArray();
             }
           }, this)
         }

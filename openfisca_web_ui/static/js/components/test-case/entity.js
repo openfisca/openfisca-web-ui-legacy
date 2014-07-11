@@ -8,9 +8,7 @@ var Entity = React.createClass({
   propTypes: {
     disabled: React.PropTypes.bool,
     hasErrors: React.PropTypes.bool,
-    id: React.PropTypes.string.isRequired,
     isEdited: React.PropTypes.bool,
-    kind: React.PropTypes.string.isRequired,
     label: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
@@ -31,7 +29,7 @@ var Entity = React.createClass({
             <button
               className={React.addons.classSet('btn', btnColorClass, 'btn-sm')}
               disabled={this.props.disabled}
-              onClick={this.props.onEdit.bind(null, this.props.kind, this.props.id)}
+              onClick={this.props.onEdit}
               type="button">
               {this.props.label}
             </button>
@@ -50,7 +48,7 @@ var Entity = React.createClass({
                 <a
                   href="#"
                   onClick={
-                    this.preventDefaultThen.bind(null, this.props.onDelete.bind(null, this.props.kind, this.props.id))
+                    this.preventDefaultThen.bind(null, this.props.onDelete)
                   }>
                   Supprimer
                 </a>

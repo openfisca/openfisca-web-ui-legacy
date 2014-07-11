@@ -1,9 +1,9 @@
 'use strict';
 
-var Lazy = require('lazy.js'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   mapObject = require('map-object'),
   React = require('react/addons'),
-  _ = require('underscore'),
   uuid = require('uuid');
 
 
@@ -29,6 +29,9 @@ var entitiesMetadata = {
 };
 
 var kinds = Object.keys(entitiesMetadata);
+
+// obj('a', 1, 'b', 2) returns {a: 1, b: 2}
+var obj = function() { return Lazy(Array.prototype.slice.call(arguments)).chunk(2).toObject(); };
 
 var roleLabels = {
   autres: 'Autres',
@@ -91,7 +94,9 @@ var TestCase = {
     for (var entityId in entities) {
       var entity = entities[entityId];
       var role = Lazy(entitiesMetadata[kind].roles).find(hasRole);
-      return role ? {entity: entity, id: entityId, role: role} : null;
+      if (role) {
+        return {entity: entity, id: entityId, role: role};
+      }
     }
     return null;
   },
@@ -162,6 +167,15 @@ var TestCase = {
   isSingleton: function(kind, role) {
     return entitiesMetadata[kind].maxCardinality[role] === 1;
   },
+  moveIndividuInEntity: function(individuId, kind, id, role, testCase) {
+    var oldEntity = TestCase.findEntityAndRole(individuId, kind, testCase);
+    var newTestCase = testCase;
+    if (oldEntity) {
+      newTestCase = TestCase.withoutIndividuInEntity(individuId, kind, oldEntity.id, oldEntity.role, newTestCase);
+    }
+    newTestCase = TestCase.withIndividuInEntity(individuId, kind, id, role, newTestCase);
+    return newTestCase;
+  },
   withEntitiesNamesFilled: function(testCase) {
     var spec = {};
     kinds.forEach(function(kind) {
@@ -191,7 +205,7 @@ var TestCase = {
     return newTestCase;
   },
   withoutEntity: function (kind, id, testCase) {
-    var newEntity = _.omit(testCase[kind], id);
+    var newEntity = Lazy(testCase[kind]).omit([id]).toObject();
     if (Object.keys(newEntity).length === 0) {
       newEntity = null;
     }
@@ -201,37 +215,28 @@ var TestCase = {
     return newTestCase;
   },
   withoutIndividu: function(id, testCase) {
-    var newTestCase = {};
-    var newIndividus = _.omit(testCase.individus, id);
-    newTestCase.individus = newIndividus;
+    var newTestCase = testCase;
     kinds.forEach(function(kind) {
-      var entities = testCase[kind];
-      var newEntities = {};
-      mapObject(entities, function(entity, entityId) {
-        var entityMetadata = entitiesMetadata[kind];
-        var newEntity = _.omit(entity, entityMetadata.roles);
-        entityMetadata.roles.forEach(function(role) {
-          if (entity[role]) {
-            if (TestCase.isSingleton(kind, role)) {
-              if (entity[role] !== id) {
-                newEntity[role] = entity[role];
-              }
-            } else {
-              if (entity[role].indexOf(id) === -1) {
-                newEntity[role] = [].concat(entity[role]); // This is a copy.
-              } else {
-                var newRoleIndividus = _.without(entity[role], id); // This is a copy.
-                if (newRoleIndividus.length) {
-                  newEntity[role] = newRoleIndividus;
-                }
-              }
-            }
-          }
-        });
-        newEntities[entityId] = newEntity;
-      });
-      newTestCase[kind] = newEntities;
+      var oldEntity = TestCase.findEntityAndRole(id, kind, testCase);
+      if (oldEntity) {
+        newTestCase = TestCase.withoutIndividuInEntity(id, kind, oldEntity.id, oldEntity.role, newTestCase);
+      }
     });
+    var newIndividus = Lazy(testCase.individus).without(id).toArray();
+    newTestCase.individus = newIndividus;
+    return newTestCase;
+  },
+  withoutIndividuInEntity: function(individuId, kind, id, role, testCase) {
+    var newValue;
+    if (TestCase.isSingleton(kind, role)) {
+      invariant(testCase[kind][id][role] === individuId, 'individuId is not referenced by entity role in testCase');
+      newValue = null;
+    } else {
+      newValue = Lazy(testCase[kind][id][role]).without(individuId).toArray();
+    }
+    var newEntity = Lazy(testCase[kind][id]).assign(obj(role, newValue)).toObject();
+    var newEntities = Lazy(testCase[kind]).assign(obj(id, newEntity)).toObject();
+    var newTestCase = Lazy(testCase).assign(obj(kind, newEntities)).toObject();
     return newTestCase;
   },
 };

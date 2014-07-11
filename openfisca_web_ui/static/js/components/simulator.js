@@ -14,7 +14,7 @@ var FieldsForm = require('./test-case/form/fields-form'),
   IframeVisualization = require('./visualizations/iframe-visualization'),
   JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
-  MoveIndividuForm = require('./move-individu-form'),
+  MoveIndividuForm = require('./test-case/move-individu-form'),
   RattachementEnfantVisualization = require('./visualizations/rattachement-enfant-visualization'),
   revdispDistribution = require('../../data/revdisp-distribution.json'),
   SituateurVisualization = require('./visualizations/situateur-visualization'),
@@ -25,6 +25,10 @@ var FieldsForm = require('./test-case/form/fields-form'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig;
+
+
+// obj('a', 1, 'b', 2) returns {a: 1, b: 2}
+var obj = function() { return Lazy(Array.prototype.slice.call(arguments)).chunk(2).toObject(); };
 
 
 var Simulator = React.createClass({
@@ -145,6 +149,7 @@ var Simulator = React.createClass({
   },
   handleEditEntity: function(kind, id) {
     console.debug('handleEditEntity', kind, id);
+    invariant(this.state.movedIndividu === null, 'movedIndividu exists when requesting edit entity action.');
     if (this.props.columns && this.props.columnsTree) {
       var editedEntity = {id: id, kind: kind};
       var newState = React.addons.update(this.state, {editedEntity: {$set: editedEntity}});
@@ -195,9 +200,15 @@ var Simulator = React.createClass({
   },
   handleMoveIndividu: function(id) {
     console.debug('handleMoveIndividu', id);
-    var editedEntity = this.state.editedEntity;
-    invariant(editedEntity === null, 'editedEntity: %s when requesting move individu action.', editedEntity);
-    var movedIndividu = {id: id};
+    invariant(this.state.editedEntity === null, 'editedEntity exists when requesting move individu action.');
+    var movedIndividu = Lazy({id: id}).merge(
+      Lazy(models.kinds.map(function(kind) {
+        return [
+          kind,
+          Lazy(models.TestCase.findEntityAndRole(id, kind, this.state.testCase)).pick(['id', 'role']).toObject(),
+        ];
+      }.bind(this))).toObject()
+    ).toObject();
     var newState = React.addons.update(this.state, {movedIndividu: {$set: movedIndividu}});
     this.setState(newState);
   },
@@ -206,11 +217,25 @@ var Simulator = React.createClass({
     var newState = React.addons.update(this.state, {movedIndividu: {$set: null}});
     this.setState(newState);
   },
-  handleMoveIndividuFormChange: function(individuId, entityKind, entityId) {
+  handleMoveIndividuFormChange: function(kind, entityId, role) {
     console.debug('handleMoveIndividuFormChange', arguments);
+    var newMovedIndividu = Lazy(this.state.movedIndividu).assign(
+      obj(kind, {id: entityId, role: role})
+    ).toObject();
+    this.setState({movedIndividu: newMovedIndividu});
   },
   handleMoveIndividuFormSave: function() {
     console.debug('handleMoveIndividuFormSave');
+    var movedIndividuId = this.state.movedIndividu.id;
+    var newTestCase = this.state.testCase;
+    Lazy(this.state.movedIndividu).omit(['id']).each(function(entityData, kind) {
+      newTestCase = models.TestCase.moveIndividuInEntity(movedIndividuId, kind, entityData.id, entityData.role,
+        newTestCase);
+    }.bind(this));
+    var changes = {movedIndividu: null, testCase: newTestCase};
+    this.setState(changes, function() {
+      this.repair();
+    });
   },
   handleRepair: function() {
     console.debug('handleRepair');
@@ -272,11 +297,13 @@ var Simulator = React.createClass({
       rightPanel = this.renderFieldsFormPanel();
     } else if (this.state.movedIndividu) {
       var movedIndividuId = this.state.movedIndividu.id;
-      var selectedByKind = {};
-      models.kinds.forEach(function(kind) {
-        var entityAndRole = models.TestCase.findEntityAndRole(movedIndividuId, kind, this.state.testCase);
-        selectedByKind[kind] = Lazy(entityAndRole).pick(['id', 'role']).toObject();
-      }, this);
+      var selectedByKind = Lazy(this.state.movedIndividu).omit(['id']).toObject();
+      var currentEntityIdByKind = Lazy(models.kinds.map(function(kind) {
+        return [
+          kind,
+          Lazy(models.TestCase.findEntityAndRole(movedIndividuId, kind, this.state.testCase)).get('id'),
+        ];
+      }.bind(this))).toObject();
       rightPanel = (
         <FormWithHeader
           onCancel={this.handleMoveIndividuFormCancel}
@@ -285,9 +312,10 @@ var Simulator = React.createClass({
             'Déplacer ' + this.state.testCase.individus[movedIndividuId].nom_individu /* jshint ignore:line */
           }>
           <MoveIndividuForm
+            currentEntityIdByKind={currentEntityIdByKind}
             entitiesMetadata={models.entitiesMetadata}
             getEntityLabel={models.TestCase.getEntityLabel}
-            onChange={this.handleMoveIndividuFormChange.bind(null, movedIndividuId)}
+            onChange={this.handleMoveIndividuFormChange}
             roleLabels={models.roleLabels}
             selectedByKind={selectedByKind}
             testCase={this.state.testCase}
@@ -301,7 +329,7 @@ var Simulator = React.createClass({
       <div className="row">
         <div className="col-sm-4">
           <TestCaseToolbar
-            disabled={ !! this.state.editedEntity}
+            disabled={ !! this.state.editedEntity || !! this.state.movedIndividu}
             hasErrors={ !! this.state.errors}
             isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
@@ -313,9 +341,9 @@ var Simulator = React.createClass({
           {
             this.state.testCase &&
             <TestCase
-              editedEntity={this.state.editedEntity}
               entitiesMetadata={models.entitiesMetadata}
               errors={this.state.errors}
+              frozenEntity={this.state.editedEntity || this.state.movedIndividu}
               getEntityLabel={models.TestCase.getEntityLabel}
               onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
               onDeleteEntity={this.handleDeleteEntity}

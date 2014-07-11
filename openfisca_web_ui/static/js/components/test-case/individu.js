@@ -11,7 +11,6 @@ var Individu = React.createClass({
     disabled: React.PropTypes.bool,
     edited: React.PropTypes.bool,
     errors: React.PropTypes.object,
-    id: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
     onMove: React.PropTypes.func.isRequired,
@@ -35,7 +34,7 @@ var Individu = React.createClass({
           <button
             className={React.addons.classSet('btn', btnColorClass, 'btn-sm')}
             disabled={this.props.disabled}
-            onClick={this.props.onEdit.bind(null, 'individus', this.props.id)}
+            onClick={this.props.onEdit}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
             {this.props.suggestions && <SuggestionGlyphicon />}
@@ -54,14 +53,14 @@ var Individu = React.createClass({
             <li role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onMove.bind(null, this.props.id))}
+                onClick={this.preventDefaultThen.bind(null, this.props.onMove)}
                 role="menuitem"
                 tabIndex="-1">
                 Déplacer
               </a>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onDelete.bind(null, this.props.id))}
+                onClick={this.preventDefaultThen.bind(null, this.props.onDelete)}
                 role="menuitem"
                 tabIndex="-1">
                 Supprimer
