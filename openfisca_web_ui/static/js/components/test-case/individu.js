@@ -37,7 +37,6 @@ var Individu = React.createClass({
             onClick={this.props.onEdit}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
-            {this.props.suggestions && <SuggestionGlyphicon />}
           </button>
           <button
             className={
@@ -67,6 +66,7 @@ var Individu = React.createClass({
               </a>
             </li>
           </ul>
+          {this.props.suggestions && <span style={{marginLeft: 10}}><SuggestionGlyphicon /></span>}
         </div>
       </div>
     );
