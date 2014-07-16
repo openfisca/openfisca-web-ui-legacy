@@ -229,8 +229,10 @@ var Simulator = React.createClass({
     var movedIndividuId = this.state.movedIndividu.id;
     var newTestCase = this.state.testCase;
     Lazy(this.state.movedIndividu).omit(['id']).each(function(entityData, kind) {
-      newTestCase = models.TestCase.moveIndividuInEntity(movedIndividuId, kind, entityData.id, entityData.role,
-        newTestCase);
+      if (entityData.id) {
+        newTestCase = models.TestCase.moveIndividuInEntity(movedIndividuId, kind, entityData.id, entityData.role,
+          newTestCase);
+      }
     }.bind(this));
     var changes = {movedIndividu: null, testCase: newTestCase};
     this.setState(changes, function() {
@@ -299,11 +301,14 @@ var Simulator = React.createClass({
       var movedIndividuId = this.state.movedIndividu.id;
       var selectedByKind = Lazy(this.state.movedIndividu).omit(['id']).toObject();
       var currentEntityIdByKind = Lazy(models.kinds.map(function(kind) {
-        return [
-          kind,
-          Lazy(models.TestCase.findEntityAndRole(movedIndividuId, kind, this.state.testCase)).get('id'),
-        ];
-      }.bind(this))).toObject();
+        var entityData = models.TestCase.findEntityAndRole(movedIndividuId, kind, this.state.testCase);
+        if (entityData) {
+          return [
+            kind,
+            Lazy(entityData).get('id'),
+          ];
+        }
+      }.bind(this))).compact().toObject();
       rightPanel = (
         <FormWithHeader
           onCancel={this.handleMoveIndividuFormCancel}

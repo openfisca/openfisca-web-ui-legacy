@@ -2,6 +2,7 @@
 'use strict';
 
 var getObjectPath = require('get-object-path'),
+  invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   React = require('react');
 
@@ -56,6 +57,8 @@ var TestCase = React.createClass({
                         entitiesMetadata[kind].roles.map(function(role) {
                           var maxCardinality = entitiesMetadata[kind].maxCardinality[role];
                           var renderIndividu = function(individuId) {
+                            invariant(individuId in this.props.testCase.individus,
+                              'individuId is not in testCase.individus');
                             return (
                               <Individu
                                 disabled={disabled}
@@ -74,7 +77,7 @@ var TestCase = React.createClass({
                           var error = getObjectPath(this.props.errors, kind + '.' + entity.id + '.' + role);
                           if (typeof(error) === 'object') {
                             error = Lazy(error).values().join(', ');
-                          };
+                          }
                           return (
                             <Role
                               disabled={disabled}

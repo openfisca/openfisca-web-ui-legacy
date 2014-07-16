@@ -222,8 +222,8 @@ var TestCase = {
         newTestCase = TestCase.withoutIndividuInEntity(id, kind, oldEntity.id, oldEntity.role, newTestCase);
       }
     });
-    var newIndividus = Lazy(testCase.individus).without(id).toArray();
-    newTestCase.individus = newIndividus;
+    var newIndividus = Lazy(testCase.individus).omit([id]).toObject();
+    newTestCase = Lazy(newTestCase).assign({individus: newIndividus}).toObject();
     return newTestCase;
   },
   withoutIndividuInEntity: function(individuId, kind, id, role, testCase) {
