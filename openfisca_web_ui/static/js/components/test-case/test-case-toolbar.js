@@ -41,10 +41,10 @@ var TestCaseToolbar = React.createClass({
           </button>
           <ul className="dropdown-menu" role="menu">
             <li>
-              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onReset)}>Réinitialiser</a>
+              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}>Réparer</a>
             </li>
             <li>
-              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}>Réparer</a>
+              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onReset)}>Réinitialiser</a>
             </li>
           </ul>
         </div>
