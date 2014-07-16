@@ -52,7 +52,7 @@ def api1_current(req):
         return wsgihelpers.no_content(ctx)
     else:
         headers = wsgihelpers.handle_cross_origin_resource_sharing(ctx)
-        token, error = conv.input_to_uuid(req.params.get('token'))
+        token, error = conv.input_to_uuid_str(req.params.get('token'))
         if error is not None:
             return wsgihelpers.respond_json(ctx, data = error, headers = headers)
         session = ctx.session if token is None else model.Session.find_one({'anonymous_token': token})

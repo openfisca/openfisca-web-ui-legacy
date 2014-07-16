@@ -1,38 +1,38 @@
-define(['jquery', 'x-editable'], function ($) {
-	'use strict';
+'use strict';
 
-	function init (config) {
+var $ = require('jquery');
 
-		//turn to inline mode
-		$.fn.editable.defaults.mode = 'inline';
+function init (config) {
+  // X-editable is loaded in the DOM.
 
-		// editable
-		$('.editable').editable({
-			type: 'text',
-			url: config.legislationEditUrl,
-			pk: 1,
-			title: 'Nouvelle valeur',
-		});
+  //turn to inline mode
+  $.fn.editable.defaults.mode = 'inline';
 
-		$('.collapse-node-toggle').on('click', function(evt) {
-			evt.preventDefault();
-		});
+  // editable
+  $('.editable').editable({
+    type: 'text',
+    url: config.legislationEditUrl,
+    pk: 1,
+    title: 'Nouvelle valeur',
+  });
 
-		$('.btn-expand-all').on('click', function() {
-			$('.collapse-node-toggle.collapsed').removeClass('collapsed');
-			$('.collapse-node.collapse').addClass('in').removeClass('collapse').css({height: ''});
-		});
+  $('.collapse-node-toggle').on('click', function(evt) {
+    evt.preventDefault();
+  });
 
-		$('.btn-collapse-all').on('click', function() {
-			$('.collapse-node-toggle').addClass('collapsed');
-			$('.collapse-node').addClass('collapse').removeClass('in');
-		});
+  $('.btn-expand-all').on('click', function() {
+    $('.collapse-node-toggle.collapsed').removeClass('collapsed');
+    $('.collapse-node.collapse').addClass('in').removeClass('collapse').css({height: ''});
+  });
 
-		$('.period-select').on('change', function() {
-			$(this).parent().next().find('li a').eq($(this).val()).tab('show');
-		});
-	}
+  $('.btn-collapse-all').on('click', function() {
+    $('.collapse-node-toggle').addClass('collapsed');
+    $('.collapse-node').addClass('collapse').removeClass('in');
+  });
 
-	return {init: init};
+  $('.period-select').on('change', function() {
+    $(this).parent().next().find('li a').eq($(this).val()).tab('show');
+  });
+}
 
-});
+module.exports = {init: init};

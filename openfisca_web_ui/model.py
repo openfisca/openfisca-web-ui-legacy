@@ -421,6 +421,12 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
     def get_class_full_url(cls, ctx, *path, **query):
         return urls.get_full_url(ctx, 'test_cases', *path, **query)
 
+    @classmethod
+    def get_current_test_case_url(cls, ctx):
+        test_case_url = urls.get_full_url(ctx, 'api/1/test_cases/current') + '?' + \
+            urllib.urlencode({'token': '' if ctx.session is None else ctx.session.anonymous_token})
+        return test_case_url
+
     def get_full_url(self, ctx, *path, **query):
         if self._id is None and self.slug is None:
             return None
@@ -561,14 +567,6 @@ class Visualization(objects.Initable, objects.JsonMonoClassMapper, objects.Mappe
         if self._id is None and self.slug is None:
             return None
         return self.get_user_class_url(ctx, self.slug or self._id, *path, **query)
-
-    def iframe_src_url(self, ctx, year = None):
-        test_case_url = urls.get_full_url(ctx, 'api/1/test_cases/current') + '?' + \
-            urllib.urlencode({'token': '' if ctx.session is None else ctx.session.anonymous_token})
-        data = {'test_case_url': test_case_url}
-        if year is not None:
-            data['year'] = year
-        return self.url + '?' + urllib.urlencode(data)
 
     @classmethod
     def make_id_or_slug_or_words_to_instance(cls):

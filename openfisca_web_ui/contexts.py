@@ -192,7 +192,7 @@ class Ctx(State):
             else:
                 from . import model
                 session, error = conv.pipe(
-                    conv.input_to_uuid,
+                    conv.input_to_uuid_str,
                     conv.not_none,
                     model.Session.uuid_to_instance,
                     )(self.req.cookies.get(conf['cookie']), state = self)

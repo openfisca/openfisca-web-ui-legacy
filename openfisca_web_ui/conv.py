@@ -54,7 +54,7 @@ def debug(value, state = None):
     return value, None
 
 
-input_to_uuid = pipe(
+input_to_uuid_str = pipe(
     cleanup_line,
     test(uuid_re.match, error = N_(u'Invalid UUID format')),
     )

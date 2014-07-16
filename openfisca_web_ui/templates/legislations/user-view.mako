@@ -80,7 +80,7 @@ title="${_(u'Duplicate legislation for today values')}">
 
 <%def name="css()" filter="trim">
     <%parent:css/>
-    <link href="${urls.get_url(ctx, u'bower/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')}" \
+    <link href="${urls.get_url(ctx, u'node_modules/X-editable/dist/bootstrap3-editable/css/bootstrap-editable.css')}" \
 media="screen" rel="stylesheet">
 </%def>
 

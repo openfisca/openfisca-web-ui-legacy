@@ -1,23 +1,27 @@
-.PHONY: clean flake8 jshint
+.PHONY: clean flake8 install jshint
 
-MAIN_BUILT_JS=openfisca_web_ui/static/js/main-built.js
+STATIC_DIR=openfisca_web_ui/static
+BUNDLE_JS=${STATIC_DIR}/js/bundle.js
 
-all: clean flake8 jshint test
+all: check test
 
-build-js:
-	./openfisca_web_ui/scripts/generate_build_js.py > build.js && r.js -o build.js && /bin/rm build.js
+check: flake8 jshint
 
 clean:
 	rm -Rf cache/templates/
 	find -name '*.pyc' -exec rm \{\} \;
-	rm -f $(MAIN_BUILT_JS) $(MAIN_BUILT_JS).map
+	rm -f $(BUNDLE_JS)
 
-flake8:
-	flake8
+flake8: clean
+	flake8 --exclude node_modules
 
-jshint:
-	jshint --exclude $(MAIN_BUILT_JS) openfisca_web_ui/static/js | \
-		sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
+install:
+	npm install
+	cd ${STATIC_DIR}; if [ ! -e node_modules ]; then ln -s ../../node_modules .; fi
+
+jshint: clean
+	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 
 test:
 	python setup.py test
+	./node_modules/.bin/jasmine-node openfisca_web_ui/static/js/spec/
