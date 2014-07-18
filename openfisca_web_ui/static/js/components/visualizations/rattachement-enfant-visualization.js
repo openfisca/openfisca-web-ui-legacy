@@ -6,7 +6,19 @@ var mapObject = require('map-object'),
   _ = require('underscore'),
   uuid = require('uuid');
 
-var models = require('../../models');
+var models = require('../../models'),
+    webservices = require('../../webservices');
+
+function extractVariable (variable, dict) {
+  var n = dict.length;
+  var num, i;
+  for (i=0; i<n; i++) {
+    if (dict[i].code == variable) {
+      num = i;
+    }
+  }
+  return dict[num].values[0].toFixed(0);
+}
 
 
 var RattachementEnfantVisualization = React.createClass({
@@ -14,8 +26,6 @@ var RattachementEnfantVisualization = React.createClass({
     legislationUrl: React.PropTypes.string,
     localState: React.PropTypes.object,
     onChange: React.PropTypes.func.isRequired,
-    onSimulate: React.PropTypes.func.isRequired,
-    simulationResult: React.PropTypes.number,
     testCase: React.PropTypes.object.isRequired,
     year: React.PropTypes.number.isRequired,
   },
@@ -39,7 +49,7 @@ var RattachementEnfantVisualization = React.createClass({
     if (fieldName === 'alr') {
       value = event.target.valueAsNumber;
     } else if (fieldName === 'detached') {
-      value = event.target.value;
+      value = event.target.checked;
     }
     var spec = {};
     var valueSpec = {};
@@ -74,9 +84,9 @@ var RattachementEnfantVisualization = React.createClass({
           foyerFiscalSpec.f6el = {$set: f6el + alr};
           var newFoyerFiscal = React.addons.update(foyerFiscal, foyerFiscalSpec);
           if ( ! ('foyers_fiscaux' in testCaseSpec)) {
-            testCaseSpec.foyers_fiscaux = {};
+            testCaseSpec.foyers_fiscaux = {}; // jshint ignore:line
           }
-          testCaseSpec.foyers_fiscaux[foyerFiscalId] = {$set: newFoyerFiscal};
+          testCaseSpec.foyers_fiscaux[foyerFiscalId] = {$set: newFoyerFiscal}; // jshint ignore:line
           newTestCase = React.addons.update(newTestCase, testCaseSpec);
         }
       }
@@ -103,24 +113,25 @@ var RattachementEnfantVisualization = React.createClass({
         var foyerFiscalData = models.TestCase.findEntity(childId, 'foyers_fiscaux', 'personnes_a_charge',
           newTestCase);
         if (foyerFiscalData) {
-          var testCaseSpec = {};
+          testCaseSpec = {};
           var foyerFiscal = foyerFiscalData.entity;
           var foyerFiscalId = foyerFiscalData.id;
-          var foyerFiscalSpec = {personnes_a_charge: {$set: _.without(foyerFiscal.personnes_a_charge, childId)}};
+          var foyerFiscalSpec = {personnes_a_charge: {$set: _.without(foyerFiscal.personnes_a_charge, childId)}}; // jshint ignore:line
           var newFoyerFiscal = React.addons.update(foyerFiscal, foyerFiscalSpec);
           if ( ! ('foyers_fiscaux' in testCaseSpec)) {
-            testCaseSpec.foyers_fiscaux = {};
+            testCaseSpec.foyers_fiscaux = {}; // jshint ignore:line
           }
-          testCaseSpec.foyers_fiscaux[foyerFiscalId] = {$set: newFoyerFiscal};
+          testCaseSpec.foyers_fiscaux[foyerFiscalId] = {$set: newFoyerFiscal}; // jshint ignore:line
           var secondFoyerFiscalId = uuid.v4();
-          testCaseSpec.foyers_fiscaux[secondFoyerFiscalId] = {$set: {declarants: [childId]}};
+          testCaseSpec.foyers_fiscaux[secondFoyerFiscalId] = {$set: {declarants: [childId]}}; // jshint ignore:line
           newTestCase = React.addons.update(newTestCase, testCaseSpec);
         }
       }
     }, this);
-    this.props.onSimulate(this.props.legislationUrl, newTestCase, this.props.year);
+    this.simulate(this.props.legislationUrl, newTestCase, this.props.year, ['revdisp', 'irpp']);
   },
   render: function() {
+    var simulationResult = this.props.localState.simulationResult;
     return (
       <div>
         <form onSubmit={this.handleSubmit} role="form">
@@ -130,34 +141,69 @@ var RattachementEnfantVisualization = React.createClass({
               return (
                 <div key={childId}>
                   <h2>{child.nom_individu /* jshint ignore:line */}</h2>
-                  <p>
-                    <input
-                      id={childId + '-detached'}
-                      onChange={this.handleChange.bind(null, childId, 'detached')}
-                      type="checkbox"
-                      value={(this.props.localState[childId] || {}).detached}
-                    />
-                    <label htmlFor={childId + '-detached'}>Détaché</label>
-                  </p>
-                  <p>
-                    <label htmlFor={childId + '-pension'}>Montant de la pension</label>
-                    <input
-                      id={childId + '-pension'}
-                      onChange={this.handleChange.bind(null, childId, 'alr')}
-                      type="number"
-                      value={(this.props.localState[childId] || {}).alr}
-                    />
-                  </p>
+                  <div className='form-group'>
+                    <div className="input-group">
+                      <span className="input-group-addon">
+                        <label>
+                          <input
+                            id={childId + '-detached'}
+                            onChange={this.handleChange.bind(null, childId, 'detached')}
+                            type='checkbox'
+                            checked={(this.props.localState[childId] || {}).detached}
+                          /> Détaché
+                        </label>
+                      </span>
+                      <input
+                        className='form-control'
+                        disabled={! (this.props.localState[childId] || {}).detached}
+                        onChange={this.handleChange.bind(null, childId, 'alr')}
+                        placeholder='Montant de la pension'
+                        type="number"
+                        value={(this.props.localState[childId] || {}).alr}
+                      />
+                    </div>
+                  </div>
                 </div>
               );
             }, this)
           }
           <button className="btn btn-primary" type="submit">Simuler</button>
         </form>
-        {this.props.simulationResult && <h1>Revenu disponible : {this.props.simulationResult.toFixed(0)} €</h1>}
+        {
+          simulationResult && simulationResult.length > 0 && (
+            <div>
+              <h1>Revenu disponible : {extractVariable('revdisp', simulationResult)} € </h1> {/* jshint ignore:line */}
+              <h1>Impôt total : { - extractVariable('irpp', simulationResult)} €</h1> {/* jshint ignore:line */}
+            </div>
+          )
+        }
       </div>
     );
   },
+  simulate: function (legislationUrl, testCase, year, variables) {
+    console.debug('simulate', legislationUrl, testCase, year, variables);
+    if ( ! this.props.localState.isSimulationInProgress) {
+      var newLocalState = _.clone(this.props.localState);
+      newLocalState.isSimulationInProgress = true;  
+      this.props.onChange(newLocalState);
+      webservices.simulate(legislationUrl || this.props.legislationUrl, testCase || this.props.testCase,
+          year || this.props.year, variables, this.simulationCompleted);
+    }
+  },
+  simulationCompleted: function (data) {
+    console.debug('simulationCompleted', data);
+    var newLocalState = _.clone(this.props.localState);
+    newLocalState.isSimulationInProgress = false;  
+    if (data) {
+      if (data.error) {
+        console.error(data.error);
+        newLocalState.simulationResult = {error: data.error};
+      } else {
+        newLocalState.simulationResult = data;
+      }
+    }
+    this.props.onChange(newLocalState);
+  }
 });
 
 module.exports = RattachementEnfantVisualization;

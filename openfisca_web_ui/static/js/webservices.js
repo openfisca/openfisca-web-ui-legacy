@@ -180,7 +180,7 @@ function saveCurrentTestCase(testCase, onComplete) {
     });
 }
 
-function simulate(legislationUrl, testCase, year, onComplete) {
+function simulate(legislationUrl, testCase, year, variables, onComplete) {
   var data = {
     scenarios: [
       {
@@ -189,6 +189,7 @@ function simulate(legislationUrl, testCase, year, onComplete) {
         year: year,
       },
     ],
+    decomposition: variables || null,
   };
   request
     .post(appconfig.api.urls.simulate)
