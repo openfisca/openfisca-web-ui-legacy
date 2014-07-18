@@ -92,7 +92,7 @@ var Simulator = React.createClass({
       suggestions: null,
       testCase: null,
       visualizationSlug: 'cascade',
-      waterfallOpenedVariables: {},
+      waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
   },
@@ -253,12 +253,13 @@ var Simulator = React.createClass({
   handleResize: function() {
     this.forceUpdate();
   },
-  handleWaterfallBarClick: function(bar) {
-    var status = this.state.waterfallOpenedVariables[bar.code];
-    var newState = Lazy(this.state).merge({
-      waterfallOpenedVariables: Lazy([[bar.code, ! status]]).toObject(),
-    }).toObject();
-    this.setState(newState);
+  handleWaterfallVariableToggle: function(variable) {
+    console.debug('handleWaterfallVariableToggle', variable);
+    var status = this.state.waterfallExpandedVariables[variable.code];
+    var newwaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
+      .assign(obj(variable.code, ! status))
+      .toObject();
+    this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
   },
   handleVisualizationChange: function(slug) {
     var newState = React.addons.update(this.state, {visualizationSlug: {$set: slug}});
@@ -449,9 +450,9 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'cascade') {
         return (
           <WaterfallVisualization
+            expandedVariables={this.state.waterfallExpandedVariables}
             height={visualizationHeight}
-            openedVariables={this.state.waterfallOpenedVariables}
-//            onBarClick={this.handleWaterfallBarClick}
+            onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
           />

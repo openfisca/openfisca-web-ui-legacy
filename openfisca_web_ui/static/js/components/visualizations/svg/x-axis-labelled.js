@@ -5,8 +5,6 @@ var Lazy = require('lazy.js'),
   React = require('react');
 
 
-
-
 var XAxisLabelled = React.createClass({
   propTypes: {
     height: React.PropTypes.number.isRequired,
@@ -32,7 +30,7 @@ var XAxisLabelled = React.createClass({
     var lineStyle = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     var stepWidth = this.props.width / this.props.nbSteps;
     return (
-      <g className="axis x-axis x-axis-labelled">
+      <g className='axis x-axis x-axis-labelled'>
         <line style={lineStyle} x2={this.props.width} y2={0} />
         {
           Lazy.range(this.props.nbSteps).toArray().map(function(stepIdx) {

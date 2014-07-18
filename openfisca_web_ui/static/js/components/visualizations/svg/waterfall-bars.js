@@ -9,16 +9,10 @@ var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var WaterfallBars = React.createClass({
   propTypes: {
-    activeVariableCode: React.PropTypes.string,
-//    blueFillColor: React.PropTypes.string.isRequired,
-//    blueStrokeColor: React.PropTypes.string.isRequired,
-//    greenFillColor: React.PropTypes.string.isRequired,
-//    greenStrokeColor: React.PropTypes.string.isRequired,
     height: React.PropTypes.number.isRequired,
+    highlightedVariableCode: React.PropTypes.string,
     noColorFill: React.PropTypes.string.isRequired,
     rectOpacity: React.PropTypes.number.isRequired,
-//    redFillColor: React.PropTypes.string.isRequired,
-//    redStrokeColor: React.PropTypes.string.isRequired,
     strokeActive: React.PropTypes.string.isRequired,
     strokeInactive: React.PropTypes.string.isRequired,
     valueMax: React.PropTypes.number.isRequired,
@@ -28,16 +22,10 @@ var WaterfallBars = React.createClass({
   },
   getDefaultProps: function() {
     return {
-//      blueFillColor: '#80B1D3',
-//      blueStrokeColor: '#6B94B0',
-//      greenFillColor: '#B3DE69',
-//      greenStrokeColor: '#95B957',
       noColorFill: 'gray',
       rectOpacity: 0.8,
       strokeActive: 'black',
       strokeInactive: 'gray',
-//      redFillColor: '#FB8072',
-//      redStrokeColor: '#D26B5F',
     };
   },
   render: function() {
@@ -58,19 +46,16 @@ var WaterfallBars = React.createClass({
     }, this);
     var tickWidth = this.props.width / bars.length;
     return (
-      <ReactCSSTransitionGroup component={React.DOM.g} transitionName="bar">
+      <ReactCSSTransitionGroup component={React.DOM.g} transitionName='bar'>
         {
           bars.map(function(bar, barIndex) {
             invariant(bar.type === 'bar' || bar.type === 'var', 'bar.type is neither "bar" nor "var": %s', bar.type);
             var style = {
               fill: bar.color ? 'rgb(' + bar.color.join(',') + ')' : this.props.noColorFill,
-//              fill: bar.type === 'bar' ? this.props.blueFillColor :
-//                bar.value > 0 ? this.props.greenFillColor : this.props.redFillColor,
-              opacity: bar.code === this.props.activeVariableCode ? 1 : this.props.rectOpacity,
-//              stroke: bar.type === 'bar' ? this.props.blueStrokeColor :
-//                bar.value > 0 ? this.props.greenStrokeColor : this.props.redStrokeColor,
+              opacity: bar.code === this.props.highlightedVariableCode ? 1 : this.props.rectOpacity,
               shapeRendering: 'crispedges',
-              stroke: bar.code === this.props.activeVariableCode ? this.props.strokeActive : this.props.strokeInactive,
+              stroke: bar.code === this.props.highlightedVariableCode ?
+                this.props.strokeActive : this.props.strokeInactive,
               strokeWidth: bar.type === 'bar' && 3,
             };
             return (
