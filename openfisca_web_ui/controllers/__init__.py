@@ -32,7 +32,7 @@ import logging
 from bson import objectid
 
 from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
-from . import accounts, auth, legislations, sessions, test_cases, visualizations
+from . import accounts, auth, legislations, sessions, test_cases
 
 
 email_log = logging.getLogger('email')
@@ -100,14 +100,11 @@ def make_router():
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
         (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
-        (None, '^/admin/visualizations(?=/|$)', visualizations.route_admin_class),
         (None, '^/api/1/disclaimer_closed$', disclaimer_closed),
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/test_cases(?=/|$)', test_cases.route_api1_class),
-        (None, '^/api/1/visualizations(?=/|$)', visualizations.route_api1_class),
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
         (None, '^/test_cases(?=/|$)', test_cases.route_class),
-        (None, '^/visualizations(?=/|$)', visualizations.route_user_class),
         ('GET', '^/terms/?$', terms),
         ]
     if conf['enabled.auth']:

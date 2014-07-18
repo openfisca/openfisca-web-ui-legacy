@@ -11,7 +11,6 @@ var find = require('lodash.find'),
 
 var FieldsForm = require('./test-case/form/fields-form'),
   FormWithHeader = require('./form-with-header'),
-  IframeVisualization = require('./visualizations/iframe-visualization'),
   JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
@@ -466,18 +465,6 @@ var Simulator = React.createClass({
         );
       } else if ( ! this.props.visualizations) {
         return <p className="text-danger">Aucune visualisation disponible.</p>;
-      } else {
-        var visualization = find(this.props.visualizations, {slug: this.state.visualizationSlug});
-        invariant(visualization, 'selected visualization not found in vizualisations prop');
-        invariant(visualization.iframeSrcUrl, 'selected visualization has no iframeSrcUrl');
-        return <IframeVisualization
-          height={visualizationHeight}
-          legislationUrl={this.state.legislationUrl}
-          testCaseUrl={visualization.testCaseUrl}
-          url={visualization.iframeSrcUrl}
-          width={rightPanelWidth}
-          year={this.state.year}
-        />;
       }
     }
   },

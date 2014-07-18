@@ -103,65 +103,11 @@ article.cgu h2{
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
-.container {
-    width: 90%;
-}
-
 .nav-tabs {
     margin-bottom: 30px;
 }
 .nav-hidden {
     display: none;
-}
-
-img.media-object {
-    height: 100px;
-}
-
-form[name=situation] button.add {
-    margin-bottom: 1em;
-}
-
-#familles button.delete {
-    margin-top: 1em;
-}
-#foyers-fiscaux .form-inline.individu,
-#menages .form-inline.individu {
-    margin-bottom: 1em;
-}
-#foyers-fiscaux .form-inline select,
-#menages .form-inline select {
-    margin-right: 1em;
-}
-
-.chart-wrapper {
-    height: 600px;
-    width: 100%;
-}
-
-#charts-wrapper {
-    position: relative;
-}
-
-#charts-wrapper .overlay {
-    left: 40%;
-    position: absolute;
-    top: 50%;
-}
-
-.thumbnail-visualization {
-    height: 400px;
-}
-
-.thumbnail-visualization img {
-    /* We don't know image dimensions since its URL is external to the application. */
-    max-height: 150px;
-}
-
-.visualization-iframe {
-    border: none;
-    height: 600px;
-    width: 100%;
 }
 
 .bar-enter {

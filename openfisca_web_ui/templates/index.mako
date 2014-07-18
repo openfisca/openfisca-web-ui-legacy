@@ -44,9 +44,3 @@ window.appconfig = ${helpers.index_appconfig(ctx) | n, js};
 <%def name="container_content()" filter="trim">
 <div id="simulator-container"></div>
 </%def>
-
-
-<%def name="css()" filter="trim">
-    <%parent:css/>
-    <link href="${urls.get_url(ctx, u'css/chart.css')}" media="screen" rel="stylesheet">
-</%def>
