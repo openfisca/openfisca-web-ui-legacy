@@ -17,6 +17,7 @@ var FieldsForm = require('./test-case/form/fields-form'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
   RattachementEnfantVisualization = require('./visualizations/rattachement-enfant-visualization'),
   revdispDistribution = require('../../data/revdisp-distribution.json'),
+  salDistribution = require('../../data/sal-distribution.json'),
   SituateurVisualization = require('./visualizations/situateur-visualization'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
@@ -435,12 +436,18 @@ var Simulator = React.createClass({
             year={this.state.year}
           />
         );
-      } else if (this.state.visualizationSlug === 'situateur') {
+      } else if (Lazy(this.state.visualizationSlug).startsWith('situateur-')) {
         var value = this.state.simulationResult.values[0];
+        var points;
+        if (this.state.visualizationSlug === 'situateur-revdisp') {
+          points = revdispDistribution;
+        } else if (this.state.visualizationSlug === 'situateur-sal') {
+          points = salDistribution;
+        }
         return (
           <SituateurVisualization
             height={visualizationHeight}
-            points={revdispDistribution}
+            points={points}
             value={value}
             width={rightPanelWidth}
             xSnapIntervalValue={5}
