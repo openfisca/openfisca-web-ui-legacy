@@ -3,7 +3,8 @@
 
 var React = require('react');
 
-var SuggestionGlyphicon = require('../suggestion-glyphicon');
+var cx = React.addons.classSet;
+
 
 var Category = React.createClass({
   propTypes: {
@@ -15,11 +16,16 @@ var Category = React.createClass({
   },
   render: function() {
     return (
-      <div className={
-        React.addons.classSet('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')
-      }>
+      <div className={cx('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">
-          {this.props.hasSuggestions && <SuggestionGlyphicon className="pull-right" />}
+          {
+            this.props.hasSuggestions && (
+              <span
+                className='glyphicon glyphicon-info-sign pull-right'
+                title='Dans cette catégorie certaines valeurs sont suggérées par le simulateur.'
+              />
+            )
+          }
           <h4 className="panel-title">
             <a
               data-parent="#accordion"
@@ -30,7 +36,7 @@ var Category = React.createClass({
           </h4>
         </div>
         <div
-          className={React.addons.classSet('panel-collapse', 'collapse', this.props.index === 0 ? 'in' : null)}
+          className={cx('panel-collapse', 'collapse', this.props.index === 0 ? 'in' : null)}
           id={'category-' + this.props.index}>
          <div className="panel-body">
             {this.props.children}

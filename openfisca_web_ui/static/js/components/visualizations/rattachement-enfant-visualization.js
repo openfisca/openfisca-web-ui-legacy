@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var mapObject = require('map-object'),
+var Lazy = require('lazy.js'),
   React = require('react/addons'),
   _ = require('underscore'),
   uuid = require('uuid');
@@ -35,12 +35,9 @@ var RattachementEnfantVisualization = React.createClass({
     };
   },
   getValidChildren: function () {
-    var children = {};
-    mapObject(this.props.testCase.individus, function(individu, individuId) {
-      if (models.TestCase.hasRole(individuId, 'familles', 'enfants', this.props.testCase)) {
-        children[individuId] = individu;
-      }
-    }, this);
+    var children = Lazy(this.props.testCase.individus).filter(function(individu, individuId) {
+      return models.TestCase.hasRole(individuId, 'familles', 'enfants', this.props.testCase);
+    }.bind(this)).toArray();
     return children;
   },
   handleChange: function (childId, fieldName, event) {
@@ -63,7 +60,8 @@ var RattachementEnfantVisualization = React.createClass({
     var localState = this.props.localState;
     var newTestCase = this.props.testCase;
     var testCaseSpec;
-    mapObject(this.getValidChildren(), function(child, childId) {
+    var validChildren = this.getValidChildren();
+    Lazy(validChildren).map(function(child, childId) {
       if (localState[childId] && localState[childId].detached) {
         var foyerFiscalData = models.TestCase.findEntity(childId, 'foyers_fiscaux', 'personnes_a_charge',
           newTestCase);
@@ -90,8 +88,8 @@ var RattachementEnfantVisualization = React.createClass({
           newTestCase = React.addons.update(newTestCase, testCaseSpec);
         }
       }
-    }, this);
-    mapObject(this.getValidChildren(), function(child, childId) {
+    }).toArray();
+    Lazy(validChildren).map(function(child, childId) {
       if (localState[childId] && localState[childId].detached) {
         var familleData = models.TestCase.findEntity(childId, 'familles', 'enfants',
           newTestCase);
@@ -109,7 +107,6 @@ var RattachementEnfantVisualization = React.createClass({
           testCaseSpec.familles[secondFamilleId] = {$set: {parents: [childId]}};
           newTestCase = React.addons.update(newTestCase, testCaseSpec);
         }
-
         var foyerFiscalData = models.TestCase.findEntity(childId, 'foyers_fiscaux', 'personnes_a_charge',
           newTestCase);
         if (foyerFiscalData) {
@@ -127,7 +124,7 @@ var RattachementEnfantVisualization = React.createClass({
           newTestCase = React.addons.update(newTestCase, testCaseSpec);
         }
       }
-    }, this);
+    }).toArray();
     this.simulate(this.props.legislationUrl, newTestCase, this.props.year, ['revdisp', 'irpp']);
   },
   render: function() {
@@ -137,7 +134,7 @@ var RattachementEnfantVisualization = React.createClass({
         <form onSubmit={this.handleSubmit} role="form">
           <h1>Enfants</h1>
           {
-            mapObject(this.getValidChildren(), function(child, childId) {
+            Lazy(this.getValidChildren()).map(function(child, childId) {
               return (
                 <div key={childId}>
                   <h2>{child.nom_individu /* jshint ignore:line */}</h2>
@@ -165,7 +162,7 @@ var RattachementEnfantVisualization = React.createClass({
                   </div>
                 </div>
               );
-            }, this)
+            }.bind(this)).toArray()
           }
           <button className="btn btn-primary" type="submit">Simuler</button>
         </form>

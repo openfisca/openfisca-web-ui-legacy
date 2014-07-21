@@ -4,8 +4,6 @@
 var React = require('react'),
   invariant = require('react/lib/invariant');
 
-var SuggestionGlyphicon = require('../suggestion-glyphicon');
-
 
 var BooleanControl = React.createClass({
   propTypes: {
@@ -15,6 +13,7 @@ var BooleanControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
+    suggestionExplanation: React.PropTypes.string,
     value: React.PropTypes.bool,
   },
   handleChange: function(event) {
@@ -34,6 +33,15 @@ var BooleanControl = React.createClass({
     return (
       <div>
         {this.props.label}
+        {
+          this.props.suggestion && ! this.props.error && (
+            <span
+              className='glyphicon glyphicon-info-sign'
+              style={{marginLeft: 10}}
+              title={this.props.suggestionExplanation}
+            />
+          )
+        }
         <div className="row">
           <div className="col-sm-6">
             <label className="radio-inline">
@@ -68,14 +76,11 @@ var BooleanControl = React.createClass({
             </label>
           </div>
           <div className="col-sm-6">
-            <span className="help-block">
-              {
-                this.props.suggestion ?
-                  'valeur suggérée : ' + booleanToString(this.props.suggestion) : // jshint ignore:line
-                  'valeur par défaut : ' + booleanToString(this.props.default) // jshint ignore:line
-              }
-              {this.props.suggestion && ! this.props.error && <SuggestionGlyphicon />}
-            </span>
+            {
+              this.props.suggestion ?
+                'valeur suggérée : ' + booleanToString(this.props.suggestion) : // jshint ignore:line
+                'valeur par défaut : ' + booleanToString(this.props.default) // jshint ignore:line
+            }
           </div>
         </div>
       </div>

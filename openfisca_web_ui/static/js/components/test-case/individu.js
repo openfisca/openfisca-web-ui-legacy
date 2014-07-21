@@ -3,7 +3,7 @@
 
 var React = require('react/addons');
 
-var SuggestionGlyphicon = require('./suggestion-glyphicon');
+var cx = React.addons.classSet;
 
 
 var Individu = React.createClass({
@@ -32,17 +32,14 @@ var Individu = React.createClass({
       <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
           <button
-            className={React.addons.classSet('btn', btnColorClass, 'btn-sm')}
+            className={cx('btn', btnColorClass, 'btn-sm')}
             disabled={this.props.disabled}
             onClick={this.props.onEdit}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
           </button>
           <button
-            className={
-              React.addons.classSet('btn', btnColorClass, 'btn-sm', 'dropdown-toggle',
-                this.props.disabled && 'disabled')
-            }
+            className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle', this.props.disabled && 'disabled')}
             data-toggle="dropdown"
             type="button">
             <span className="caret"></span>
@@ -66,8 +63,16 @@ var Individu = React.createClass({
               </a>
             </li>
           </ul>
-          {this.props.suggestions && <span style={{marginLeft: 10}}><SuggestionGlyphicon /></span>}
         </div>
+        {
+          this.props.suggestions && (
+            <span
+              className='glyphicon glyphicon-info-sign'
+              style={{marginLeft: 10}}
+              title='Cet individu contient des valeurs suggérées par le simulateur.'
+            />
+          )
+        }
       </div>
     );
   }

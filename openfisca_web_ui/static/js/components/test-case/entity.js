@@ -3,6 +3,8 @@
 
 var React = require('react/addons');
 
+var cx = React.addons.classSet;
+
 
 var Entity = React.createClass({
   propTypes: {
@@ -21,23 +23,18 @@ var Entity = React.createClass({
     var isEdited = this.props.isEdited;
     var btnColorClass = isEdited ? 'btn-info' : 'btn-default';
     return (
-      <div className={
-        React.addons.classSet('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')
-      }>
+      <div className={cx('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">
           <div className="btn-group">
             <button
-              className={React.addons.classSet('btn', btnColorClass, 'btn-sm')}
+              className={cx('btn', btnColorClass, 'btn-sm')}
               disabled={this.props.disabled}
               onClick={this.props.onEdit}
               type="button">
               {this.props.label}
             </button>
             <button
-              className={
-                React.addons.classSet('btn', btnColorClass, 'btn-sm', 'dropdown-toggle',
-                  this.props.disabled && 'disabled')
-              }
+              className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle', this.props.disabled && 'disabled')}
               data-toggle="dropdown"
               type="button">
               <span className="caret"></span>
@@ -47,9 +44,7 @@ var Entity = React.createClass({
               <li>
                 <a
                   href="#"
-                  onClick={
-                    this.preventDefaultThen.bind(null, this.props.onDelete)
-                  }>
+                  onClick={this.preventDefaultThen.bind(null, this.props.onDelete)}>
                   Supprimer
                 </a>
               </li>

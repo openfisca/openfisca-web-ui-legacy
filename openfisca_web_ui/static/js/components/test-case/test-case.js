@@ -1,12 +1,12 @@
 /** @jsx React.DOM */
 'use strict';
 
-var getObjectPath = require('get-object-path'),
-  invariant = require('react/lib/invariant'),
+var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   React = require('react');
 
 var Entity = require('./entity'),
+  helpers = require('../../helpers'),
   Individu = require('./individu'),
   Role = require('./role');
 
@@ -47,7 +47,7 @@ var TestCase = React.createClass({
                   return (
                     <Entity
                       disabled={disabled}
-                      hasErrors={ !! getObjectPath(this.props.errors, kind + '.' + entity.id)}
+                      hasErrors={ !! helpers.getObjectPath(this.props.errors, kind, entity.id)}
                       isEdited={ !! (this.props.frozenEntity && this.props.frozenEntity.id === entity.id)}
                       key={entity.id}
                       label={entity.label}
@@ -63,18 +63,18 @@ var TestCase = React.createClass({
                               <Individu
                                 disabled={disabled}
                                 edited={ !! (this.props.frozenEntity && this.props.frozenEntity.id === individuId)}
-                                errors={getObjectPath(this.props.errors, 'individus.' + individuId)}
+                                errors={helpers.getObjectPath(this.props.errors, 'individus', individuId)}
                                 id={individuId}
                                 key={individuId}
                                 onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
                                 onEdit={this.props.onEditEntity.bind(null, 'individus', individuId)}
                                 onMove={this.props.onMoveIndividu.bind(null, individuId)}
-                                suggestions={getObjectPath(this.props.suggestions, 'individus.' + individuId)}
+                                suggestions={helpers.getObjectPath(this.props.suggestions, 'individus', individuId)}
                                 value={this.props.testCase.individus[individuId]}
                               />
                             );
                           }.bind(this);
-                          var error = getObjectPath(this.props.errors, kind + '.' + entity.id + '.' + role);
+                          var error = helpers.getObjectPath(this.props.errors, kind, entity.id, role);
                           if (typeof(error) === 'object') {
                             error = Lazy(error).values().join(', ');
                           }

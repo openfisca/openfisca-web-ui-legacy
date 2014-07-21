@@ -2,9 +2,10 @@
 
 var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
-  mapObject = require('map-object'),
   React = require('react/addons'),
   uuid = require('uuid');
+
+var helpers = require('./helpers');
 
 
 var entitiesMetadata = {
@@ -30,9 +31,6 @@ var entitiesMetadata = {
 
 var kinds = Object.keys(entitiesMetadata);
 
-// obj('a', 1, 'b', 2) returns {a: 1, b: 2}
-var obj = function() { return Lazy(Array.prototype.slice.call(arguments)).chunk(2).toObject(); };
-
 var roleLabels = {
   autres: 'Autres',
   conjoint: 'Conjoint',
@@ -57,12 +55,12 @@ var TestCase = {
     var namePrefix = 'Personne ';
     var value;
     if (testCase) {
-      var values = mapObject(testCase.individus, function(individu) {
+      var values = Lazy(testCase.individus).map(function(individu) {
         var name = individu.nom_individu; // jshint ignore:line
          if (name) {
           return parseInt(name.slice(namePrefix.length, name.length));
         }
-      }).filter(function(value) { return value; });
+      }).compact().toArray();
       var maxValue = values.length ? Math.max.apply(null, values) : 0;
       value = maxValue + 1;
     } else {
@@ -140,12 +138,10 @@ var TestCase = {
     var nameKey = entitiesMetadata[kind].nameKey;
     var value;
     if (testCase && testCase[kind]) {
-      var values = mapObject(testCase[kind], function(entity) {
+      var values = Lazy(testCase[kind]).map(function(entity) {
         var name = entity[nameKey];
-        if (name) {
-          return parseInt(name);
-        }
-      }).filter(function(value) { return value; });
+        return name ? parseInt(name) : null;
+      }).compact().toArray();
       var maxValue = values.length ? Math.max.apply(null, values) : 0;
       value = maxValue + 1;
     } else {
@@ -179,7 +175,7 @@ var TestCase = {
   withEntitiesNamesFilled: function(testCase) {
     var spec = {};
     kinds.forEach(function(kind) {
-      mapObject(testCase[kind], function(entity, id) {
+      Lazy(testCase[kind]).map(function(entity, id) {
         var nameKey = entitiesMetadata[kind].nameKey;
         if ( ! entity[nameKey]) {
           var newName = TestCase.guessEntityName(kind, testCase);
@@ -187,7 +183,7 @@ var TestCase = {
           spec[kind][id] = {};
           spec[kind][id][nameKey] = {$set: newName};
         }
-      });
+      }).toArray();
     });
     var newTestCase = React.addons.update(testCase, spec);
     return newTestCase;
@@ -234,9 +230,9 @@ var TestCase = {
     } else {
       newValue = Lazy(testCase[kind][id][role]).without(individuId).toArray();
     }
-    var newEntity = Lazy(testCase[kind][id]).assign(obj(role, newValue)).toObject();
-    var newEntities = Lazy(testCase[kind]).assign(obj(id, newEntity)).toObject();
-    var newTestCase = Lazy(testCase).assign(obj(kind, newEntities)).toObject();
+    var newEntity = Lazy(testCase[kind][id]).assign(helpers.obj(role, newValue)).toObject();
+    var newEntities = Lazy(testCase[kind]).assign(helpers.obj(id, newEntity)).toObject();
+    var newTestCase = Lazy(testCase).assign(helpers.obj(kind, newEntities)).toObject();
     return newTestCase;
   },
 };

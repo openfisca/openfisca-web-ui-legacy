@@ -1,16 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var find = require('lodash.find'),
-  getObjectPath = require('get-object-path'),
-  invariant = require('react/lib/invariant'),
+var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
-  mapObject = require('map-object'),
   React = require('react/addons'),
   uuid = require('uuid');
 
 var FieldsForm = require('./test-case/form/fields-form'),
   FormWithHeader = require('./form-with-header'),
+  helpers = require('../helpers'),
   JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
@@ -25,10 +23,6 @@ var FieldsForm = require('./test-case/form/fields-form'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig;
-
-
-// obj('a', 1, 'b', 2) returns {a: 1, b: 2}
-var obj = function() { return Lazy(Array.prototype.slice.call(arguments)).chunk(2).toObject(); };
 
 
 var Simulator = React.createClass({
@@ -222,7 +216,7 @@ var Simulator = React.createClass({
   handleMoveIndividuFormChange: function(kind, entityId, role) {
     console.debug('handleMoveIndividuFormChange', arguments);
     var newMovedIndividu = Lazy(this.state.movedIndividu).assign(
-      obj(kind, {id: entityId, role: role})
+      helpers.obj(kind, {id: entityId, role: role})
     ).toObject();
     this.setState({movedIndividu: newMovedIndividu});
   },
@@ -259,7 +253,7 @@ var Simulator = React.createClass({
     console.debug('handleWaterfallVariableToggle', variable);
     var status = this.state.waterfallExpandedVariables[variable.code];
     var newwaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
-      .assign(obj(variable.code, ! status))
+      .assign(helpers.obj(variable.code, ! status))
       .toObject();
     this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
   },
@@ -378,7 +372,7 @@ var Simulator = React.createClass({
       entity.nom_individu : // jshint ignore:line
       models.TestCase.getEntityLabel(kind, entity);
     invariant('children' in this.props.columnsTree[kind], 'columnsTree.' + kind + ' has no children');
-    var categories = mapObject(this.props.columnsTree[kind].children, function(category) {
+    var categories = Lazy(this.props.columnsTree[kind].children).map(function(category) {
       return {
         columns: category.children ? category.children.map(function(columnName) {
           invariant(columnName in this.props.columns, 'column "' + columnName + '" is not in columns prop');
@@ -386,9 +380,9 @@ var Simulator = React.createClass({
         }, this) : null,
         label: category.label,
       };
-    }, this);
-    var errors = getObjectPath(this.state.errors, kind + '.' + id);
-    var suggestions = getObjectPath(this.state.suggestions, kind + '.' + id);
+    }.bind(this)).toArray();
+    var errors = helpers.getObjectPath(this.state.errors, kind, id);
+    var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var values = this.state.testCase[kind][id];
     if (this.state.editedEntity.values) {
       values = React.addons.update(values, {$merge: this.state.editedEntity.values});

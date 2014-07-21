@@ -13,6 +13,8 @@ var BooleanControl = require('./boolean-control'),
   Label = require('./label'),
   StringControl = require('./string-control');
 
+var cx = React.addons.classSet;
+
 
 var FieldsForm = React.createClass({
   propTypes: {
@@ -63,6 +65,7 @@ var FieldsForm = React.createClass({
     var label = (
       <Label name={column.name} required={column.required}>{column.label}</Label>
     );
+    var suggestionExplanation = 'Valeur suggérée par le simulateur et utilisée dans ses calculs.';
     switch(column['@type']) {
       case 'Boolean':
         control = (
@@ -73,6 +76,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
+            suggestionExplanation={suggestionExplanation}
             value={value}
           />
         );
@@ -86,6 +90,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
+            suggestionExplanation={suggestionExplanation}
             value={value}
           />
         );
@@ -100,6 +105,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
+            suggestionExplanation={suggestionExplanation}
             value={value}
           />
         );
@@ -116,6 +122,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
+            suggestionExplanation={suggestionExplanation}
             value={value}
             valType={column.val_type} // jshint ignore:line
           />
@@ -132,6 +139,7 @@ var FieldsForm = React.createClass({
             onChange={this.props.onChange.bind(null, column.name)}
             required={column.required}
             suggestion={suggestion}
+            suggestionExplanation={suggestionExplanation}
             value={value}
           />
         );
@@ -140,7 +148,7 @@ var FieldsForm = React.createClass({
         invariant(false, 'column type not expected for column: %s', column);
     }
     return (
-      <div className={React.addons.classSet('form-group', error && 'has-error')} key={column.name}>
+      <div className={cx('form-group', error && 'has-error')} key={column.name}>
         {control}
         {error && <span className="help-block">{error}</span>}
       </div>

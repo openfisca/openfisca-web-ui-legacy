@@ -1,10 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var mapObject = require('map-object'),
+var Lazy = require('lazy.js'),
   React = require('react');
-
-var SuggestionGlyphicon = require('../suggestion-glyphicon');
 
 
 var EnumerationControl = React.createClass({
@@ -16,6 +14,7 @@ var EnumerationControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
+    suggestionExplanation: React.PropTypes.string,
     value: React.PropTypes.oneOfType([
       React.PropTypes.number,
       React.PropTypes.string,
@@ -25,37 +24,34 @@ var EnumerationControl = React.createClass({
     this.props.onChange(event.target.value);
   },
   render: function() {
-    var select = (
-      <select
-        className="form-control"
-        id={this.props.name}
-        onChange={this.handleChange}
-        value={this.props.value}>
-        <option value="">Non renseigné ({
-          this.props.suggestion ?
-            'valeur suggérée : ' + this.props.labels[this.props.suggestion] : // jshint ignore:line
-            'valeur par défaut : ' + this.props.labels[this.props.default] // jshint ignore:line
-        })</option>
-        {
-          mapObject(this.props.labels, function(label, labelId) {
-            return <option key={'label-' + labelId} value={labelId}>{label}</option>;
-          })
-        }
-      </select>
-    );
     return (
       <div>
         {this.props.label}
         {
-          this.props.suggestion && ! this.props.error ? (
-            <div className="input-group">
-              {select}
-              <span className="input-group-addon">
-                <SuggestionGlyphicon />
-              </span>
-            </div>
-          ) : select
+          this.props.suggestion && ! this.props.error && (
+            <span
+              className='glyphicon glyphicon-info-sign'
+              style={{marginLeft: 10}}
+              title={this.props.suggestionExplanation}
+            />
+          )
         }
+        <select
+          className="form-control"
+          id={this.props.name}
+          onChange={this.handleChange}
+          value={this.props.value}>
+          <option value="">Non renseigné ({
+            this.props.suggestion ?
+              'valeur suggérée : ' + this.props.labels[this.props.suggestion] : // jshint ignore:line
+              'valeur par défaut : ' + this.props.labels[this.props.default] // jshint ignore:line
+          })</option>
+          {
+            Lazy(this.props.labels).map(function(label, labelId) {
+              return <option key={'label-' + labelId} value={labelId}>{label}</option>;
+            }).toArray()
+          }
+        </select>
       </div>
     );
   }

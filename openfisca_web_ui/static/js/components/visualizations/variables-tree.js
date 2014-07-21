@@ -83,13 +83,13 @@ var VariablesTree = React.createClass({
             )
           }
         </td>
-        <td>
-          <p className='text-right' style={{
+        <td
+          className='text-right'
+          style={{
             color: isSubtotal && ! variable.collapsed && this.props.expandedSubtotalColor,
             fontStyle: isSubtotal && 'italic',
           }}>
-            {Math.round(variable.value) + ' €' /* jshint ignore:line */}
-          </p>
+          {Math.round(variable.value) + ' €' /* jshint ignore:line */}
         </td>
       </tr>
     );

@@ -3,8 +3,7 @@
 
 var React = require('react');
 
-var CerfaField = require('./cerfa-field'),
-  SuggestionGlyphicon = require('../suggestion-glyphicon');
+var CerfaField = require('./cerfa-field');
 
 
 var IntegerControl = React.createClass({
@@ -18,6 +17,7 @@ var IntegerControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.number,
+    suggestionExplanation: React.PropTypes.string,
     value: React.PropTypes.number,
     valType: React.PropTypes.string,
   },
@@ -41,15 +41,23 @@ var IntegerControl = React.createClass({
     return (
       <div>
         {this.props.label}
+        {
+          this.props.suggestion && ! this.props.error && (
+            <span
+              className='glyphicon glyphicon-info-sign'
+              style={{marginLeft: 10}}
+              title={this.props.suggestionExplanation}
+            />
+          )
+        }
         <div className="row">
           <div className="col-md-4">
             {
-              this.props.valType === 'monetary' || this.props.suggestion && ! this.props.error ? (
+              this.props.valType === 'monetary' ? (
                 <div className="input-group">
                   {input}
                   <span className="input-group-addon">
                     {this.props.valType === 'monetary' && <span className="glyphicon glyphicon-euro"></span>}
-                    {this.props.suggestion && ! this.props.error && <SuggestionGlyphicon />}
                   </span>
                 </div>
               ) : input

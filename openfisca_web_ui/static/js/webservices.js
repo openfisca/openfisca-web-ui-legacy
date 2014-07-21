@@ -1,6 +1,6 @@
 'use strict';
 
-var mapObject = require('map-object'),
+var Lazy = require('lazy.js'),
   React = require('react/addons'),
   request = require('superagent');
 
@@ -66,23 +66,6 @@ function fetchLegislations(onComplete) {
     });
 }
 
-//function fetchVisualizations(onComplete) {
-//  request
-//    .get(appconfig.enabledModules.charts.urlPaths.visualizationsSearch)
-//    .on('error', function(error) {
-//      onComplete({error: error.message});
-//    })
-//    .end(function(res) {
-//      if (res.body && res.body.error) {
-//        onComplete(res.body);
-//      } else if (res.error) {
-//        onComplete(res);
-//      } else {
-//        onComplete(res.body);
-//      }
-//    });
-//}
-
 function patchColumns(columns) {
   // Patch columns definitions to match UI specificities.
   var birth = columns.birth;
@@ -96,7 +79,7 @@ function patchColumns(columns) {
       val_type: {$set: 'year'}, // jshint ignore:line
     },
   };
-  var entitiesNameKeys = mapObject(models.entitiesMetadata, function(entity) { return entity.nameKey; });
+  var entitiesNameKeys = Lazy(models.entitiesMetadata).pluck('nameKey').toArray();
   var requiredColumnNames = ['nom_individu'].concat(entitiesNameKeys);
   var requiredColumnNamesSpec = {};
   requiredColumnNames.map(function(requiredColumnName) {
@@ -111,7 +94,7 @@ function patchValuesForColumns(data) {
   // Change values according to UI-specific columns.
   if (data.individus) {
     var spec = {individus: {}};
-    mapObject(data.individus, function(individu, id) {
+    Lazy(data.individus).each(function(individu, id) {
       if (individu.birth) {
         spec.individus[id] = {birth: {$set: parseInt(individu.birth.slice(0, 4))}};
       }
@@ -214,7 +197,6 @@ module.exports = {
   fetchCurrentTestCase: fetchCurrentTestCase,
   fetchFields: fetchFields,
   fetchLegislations: fetchLegislations,
-//  fetchVisualizations: fetchVisualizations,
   repair: repair,
   saveCurrentTestCase: saveCurrentTestCase,
   simulate: simulate,

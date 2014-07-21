@@ -46,7 +46,7 @@ var WaterfallBars = React.createClass({
     }, this);
     var tickWidth = this.props.width / bars.length;
     return (
-      <ReactCSSTransitionGroup component={React.DOM.g} transitionName='bar'>
+      <g>
         {
           bars.map(function(bar, barIndex) {
             invariant(bar.type === 'bar' || bar.type === 'var', 'bar.type is neither "bar" nor "var": %s', bar.type);
@@ -81,7 +81,7 @@ var WaterfallBars = React.createClass({
             );
           }, this)
         }
-      </ReactCSSTransitionGroup>
+      </g>
     );
   }
 });
