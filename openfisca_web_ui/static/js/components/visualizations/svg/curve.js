@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var Lazy = require('lazy.js'),
+  React = require('react/addons');
 
 
 var Curve = React.createClass({
@@ -32,7 +33,7 @@ var Curve = React.createClass({
   },
   render: function() {
     var style = this.props.style ?
-      React.addons.update(this.props.defaultStyle, {$merge: this.props.style}) :
+      Lazy(this.props.style).defaults(this.props.defaultStyle).toObject() :
       this.props.defaultStyle;
     return (
       <polyline points={this.pointsToPixelsStr(this.props.points)} style={style} />

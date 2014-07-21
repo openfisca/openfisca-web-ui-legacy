@@ -183,7 +183,7 @@ var RattachementEnfantVisualization = React.createClass({
       var newLocalState = _.clone(this.props.localState);
       newLocalState.isSimulationInProgress = true;  
       this.props.onChange(newLocalState);
-      webservices.simulate(legislationUrl || this.props.legislationUrl, testCase || this.props.testCase,
+      webservices.simulate(null, legislationUrl || this.props.legislationUrl, testCase || this.props.testCase,
           year || this.props.year, variables, this.simulationCompleted);
     }
   },

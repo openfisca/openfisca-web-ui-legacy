@@ -6,7 +6,8 @@ var invariant = require('react/lib/invariant'),
   React = require('react/addons'),
   uuid = require('uuid');
 
-var FieldsForm = require('./test-case/form/fields-form'),
+var BaremeVisualization = require('./visualizations/bareme-visualization'),
+  FieldsForm = require('./test-case/form/fields-form'),
   FormWithHeader = require('./form-with-header'),
   helpers = require('../helpers'),
   JsonVisualization = require('./visualizations/json-visualization'),
@@ -22,7 +23,8 @@ var FieldsForm = require('./test-case/form/fields-form'),
   WaterfallVisualization = require('./visualizations/waterfall-visualization'),
   webservices = require('../webservices');
 
-var appconfig = global.appconfig;
+var appconfig = global.appconfig,
+  obj = helpers.obj;
 
 
 var Simulator = React.createClass({
@@ -48,10 +50,10 @@ var Simulator = React.createClass({
     var newState;
     if (data && data.error) {
       console.error(data.error);
-      newState = React.addons.update(this.state, {testCase: {$set: null}});
+      newState = Lazy(this.state).assign({testCase: null}).toObject();
       this.setState(newState);
     } else {
-      newState = React.addons.update(this.state, {testCase: {$set: data}});
+      newState = Lazy(this.state).assign({testCase: data}).toObject();
       this.setState(newState, function() {
         this.repair(data || models.TestCase.getInitialTestCase());
       });
@@ -66,12 +68,10 @@ var Simulator = React.createClass({
       if (data.error) {
         console.error(data.error);
       } else {
-        var spec = {
-          columns: {$set: data.columns},
-          columnsTree: {$set: data.columnsTree},
-        };
-        var newProps = React.addons.update(this.props, spec);
-        this.setProps(newProps);
+        this.setProps({
+          columns: data.columns,
+          columnsTree: data.columnsTree,
+        });
       }
     }
   },
@@ -87,7 +87,7 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
-      visualizationSlug: 'cascade',
+      visualizationSlug: 'bareme',
       waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
@@ -97,25 +97,19 @@ var Simulator = React.createClass({
     var newEntity = models.TestCase.createEntity(kind, this.state.testCase);
     var newEntities = {};
     newEntities[uuid.v4()] = newEntity;
-    var spec = {testCase: {}};
-    spec.testCase[kind] = kind in this.state.testCase ? {$merge: newEntities} : {$set: newEntities};
-    var newState = React.addons.update(this.state, spec);
-    this.setState(newState, function() {
+    var newTestCase = Lazy(this.state.testCase).merge(obj(kind, newEntities)).toObject();
+    this.setState({testCase: newTestCase}, function() {
       this.repair();
     });
   },
   handleCreateIndividuInEntity: function(kind, id, role) {
     console.debug('handleCreateIndividuInEntity', arguments);
     var newIndividu = models.TestCase.createIndividu(this.state.testCase);
-    var newIndividus = {};
     var newIndividuId = uuid.v4();
-    newIndividus[newIndividuId] = newIndividu;
-    var spec = {};
-    spec.individus = {$merge: newIndividus};
-    var newTestCase = React.addons.update(this.state.testCase, spec);
+    var newIndividus = Lazy(this.state.testCase.individus).merge(obj(newIndividuId, newIndividu)).toObject();
+    var newTestCase = Lazy(this.state.testCase).assign({individus: newIndividus}).toObject();
     newTestCase = models.TestCase.withIndividuInEntity(newIndividuId, kind, id, role, newTestCase);
-    var newState = React.addons.update(this.state, {testCase: {$set: newTestCase}});
-    this.setState(newState, function() {
+    this.setState({testCase: newTestCase}, function() {
       this.repair();
     });
   },
@@ -126,8 +120,7 @@ var Simulator = React.createClass({
     var message = 'Supprimer ' + entityLabel + ' ?'; // jshint ignore:line
     if (confirm(message)) {
       var newTestCase = models.TestCase.withoutEntity(kind, id, this.state.testCase);
-      var newState = React.addons.update(this.state, {testCase: {$set: newTestCase}});
-      this.setState(newState, function() {
+      this.setState({testCase: newTestCase}, function() {
         this.repair();
       });
     }
@@ -137,8 +130,7 @@ var Simulator = React.createClass({
     var message = 'Supprimer ' + this.state.testCase.individus[id].nom_individu + ' ?'; // jshint ignore:line
     if (confirm(message)) {
       var newTestCase = models.TestCase.withoutIndividu(id, this.state.testCase);
-      var newState = React.addons.update(this.state, {testCase: {$set: newTestCase}});
-      this.setState(newState, function() {
+      this.setState({testCase: newTestCase}, function() {
         this.repair();
       });
     }
@@ -147,50 +139,38 @@ var Simulator = React.createClass({
     console.debug('handleEditEntity', kind, id);
     invariant(this.state.movedIndividu === null, 'movedIndividu exists when requesting edit entity action.');
     if (this.props.columns && this.props.columnsTree) {
-      var editedEntity = {id: id, kind: kind};
-      var newState = React.addons.update(this.state, {editedEntity: {$set: editedEntity}});
-      this.setState(newState);
+      var newEditedEntity = {id: id, kind: kind};
+      this.setState({editedEntity: newEditedEntity});
     } else {
       alert('Impossible de charger les champs du formulaire');
     }
   },
   handleFieldsFormCancel: function() {
     console.debug('handleFieldsFormCancel');
-    var newState = React.addons.update(this.state, {editedEntity: {$set: null}});
-    this.setState(newState);
+    this.setState({editedEntity: null});
   },
   handleFieldsFormChange: function(kind, id, columnName, value) {
     console.debug('handleFieldsFormChange', arguments);
-    // Create values empty object in editedEntity if it doesn't exist.
-    var state = this.state.editedEntity.values ? this.state :
-      React.addons.update(this.state, {editedEntity: {values: {$set: {}}}});
     // Write in this.state.editedEntity.values only values that actually changed. The other stay in this.state.testCase.
-    var spec = {editedEntity: {values: {}}};
-    spec.editedEntity.values[columnName] = {$set: value};
-    var newState = React.addons.update(state, spec);
-    this.setState(newState);
+    var newEditedEntity = Lazy(this.state.editedEntity).assign({values: obj(columnName, value)}).toObject();
+    this.setState({editedEntity: newEditedEntity});
   },
   handleFieldsFormSave: function() {
     console.debug('handleFieldsFormSave');
-    var spec = {
-      editedEntity: {$set: null},
-    };
+    var changeset = {editedEntity: null};
     var id = this.state.editedEntity.id,
       kind = this.state.editedEntity.kind,
       values = this.state.editedEntity.values;
     if (values && Object.keys(values).length) {
-      spec.testCase = {};
-      spec.testCase[kind] = {};
-      spec.testCase[kind][id] = {$merge: values};
+      var newValues = Lazy(this.state.testCase[kind][id]).merge(values).toObject();
+      changeset.testCase = Lazy(this.state.testCase).merge(obj(kind, obj(id, newValues))).toObject();
     }
-    var newState = React.addons.update(this.state, spec);
-    this.setState(newState, function() {
+    this.setState(changeset, function() {
       this.repair();
     });
   },
   handleLegislationChange: function(legislationUrl) {
-    var newState = React.addons.update(this.state, {legislationUrl: {$set: legislationUrl}});
-    this.setState(newState, function() {
+    this.setState({legislationUrl: legislationUrl}, function() {
       this.simulate();
     });
   },
@@ -205,18 +185,16 @@ var Simulator = React.createClass({
         ];
       }.bind(this))).toObject()
     ).toObject();
-    var newState = React.addons.update(this.state, {movedIndividu: {$set: movedIndividu}});
-    this.setState(newState);
+    this.setState({movedIndividu: movedIndividu});
   },
   handleMoveIndividuFormCancel: function() {
     console.debug('handleMoveIndividuFormCancel');
-    var newState = React.addons.update(this.state, {movedIndividu: {$set: null}});
-    this.setState(newState);
+    this.setState({movedIndividu: null});
   },
   handleMoveIndividuFormChange: function(kind, entityId, role) {
     console.debug('handleMoveIndividuFormChange', arguments);
     var newMovedIndividu = Lazy(this.state.movedIndividu).assign(
-      helpers.obj(kind, {id: entityId, role: role})
+      obj(kind, {id: entityId, role: role})
     ).toObject();
     this.setState({movedIndividu: newMovedIndividu});
   },
@@ -253,27 +231,28 @@ var Simulator = React.createClass({
     console.debug('handleWaterfallVariableToggle', variable);
     var status = this.state.waterfallExpandedVariables[variable.code];
     var newwaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
-      .assign(helpers.obj(variable.code, ! status))
+      .assign(obj(variable.code, ! status))
       .toObject();
     this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
   },
   handleVisualizationChange: function(slug) {
-    var newState = React.addons.update(this.state, {visualizationSlug: {$set: slug}});
-    this.setState(newState, function() {
+     // simulationResult is set to null when changing visualization, not when simulating, to avoid the flickering
+     // effet when simulating and staying on the same visualization.
+    var changeset = {
+      simulationResult: null,
+      visualizationSlug: slug,
+    };
+    this.setState(changeset, function() {
       this.simulate();
     });
   },
   handleVisualizationStateChange: function(visualizationState) {
     console.debug('handleVisualizationStateChange', visualizationState);
-    var spec = {};
-    spec[this.state.visualizationSlug] = {$set: visualizationState};
-    var newState = React.addons.update(this.state, spec);
-    this.setState(newState);
+    this.setState(obj(this.state.visualizationSlug, visualizationState));
   },
   handleYearChange: function(year) {
     console.debug('handleYearChange', year);
-    var newState = React.addons.update(this.state, {year: {$set: year}});
-    this.setState(newState, function() {
+    this.setState({year: year}, function() {
       this.simulate();
     });
   },
@@ -283,10 +262,8 @@ var Simulator = React.createClass({
       if (data.error) {
         console.error(data.error);
       } else if (data.length) {
-        var newProps = React.addons.update(this.props, {legislations: {$set: data}});
-        this.setProps(newProps);
-        var newState = React.addons.update(this.state, {legislationSlug: {$set: data[0].slug}});
-        this.setState(newState);
+        this.setProps({legislations: data});
+        this.setState({legislationSlug: data[0].slug});
       }
     }
   },
@@ -385,7 +362,7 @@ var Simulator = React.createClass({
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var values = this.state.testCase[kind][id];
     if (this.state.editedEntity.values) {
-      values = React.addons.update(values, {$merge: this.state.editedEntity.values});
+      values = Lazy(values).merge(this.state.editedEntity.values).toObject();
     }
     return (
       <FormWithHeader
@@ -418,8 +395,6 @@ var Simulator = React.createClass({
       if (this.state.visualizationSlug === 'json') {
         return <JsonVisualization data={this.state.simulationResult} />;
       } else if (this.state.visualizationSlug === 'rattachement-enfant') {
-        var simulationResult = this.state.simulationResult && ! this.state.simulationResult.errors &&
-          this.state.simulationResult;
         return (
           <RattachementEnfantVisualization
             legislationUrl={this.state.legislationUrl}
@@ -445,6 +420,14 @@ var Simulator = React.createClass({
             width={rightPanelWidth}
             xSnapIntervalValue={5}
             yMaxValue={Math.max(100000, value)}
+          />
+        );
+      } else if (this.state.visualizationSlug === 'bareme') {
+        return (
+          <BaremeVisualization
+            height={visualizationHeight}
+            variablesTree={this.state.simulationResult}
+            width={rightPanelWidth}
           />
         );
       } else if (this.state.visualizationSlug === 'cascade') {
@@ -494,69 +477,56 @@ var Simulator = React.createClass({
       originalTestCase = data.originalTestCase,
       suggestions = data.suggestions,
       testCase = data.testCase;
-    var spec = {
-      errors: {$set: errors},
-      suggestions: {$set: suggestions},
+    var changeset = {
+      errors: errors,
+      suggestions: suggestions,
     };
     if (errors) {
-      spec.simulationResult = {$set: null};
+      changeset.simulationResult = null;
       if (originalTestCase) {
         webservices.saveCurrentTestCase(originalTestCase, this.currentTestCaseSaved);
       }
     } else if (testCase) {
       var newTestCase = models.TestCase.withEntitiesNamesFilled(testCase);
-      spec.testCase = {$set: newTestCase};
+      changeset.testCase = newTestCase;
       webservices.saveCurrentTestCase(newTestCase, this.currentTestCaseSaved);
     }
-    var newState = React.addons.update(this.state, spec);
-    this.setState(newState, function() {
+    this.setState(changeset, function() {
       if ( ! this.state.errors) {
         this.simulate();
       }
     });
   },
-  simulate: function(legislationUrl, testCase, year) {
-    console.debug('simulate', legislationUrl, testCase, year);
+  simulate: function() {
+    console.debug('simulate');
     if ( ! this.state.isSimulationInProgress && ! this.state.errors) {
-      var newState = React.addons.update(this.state, {isSimulationInProgress: {$set: true}});
-      this.setState(newState, function() {
-        webservices.simulate(legislationUrl || this.state.legislationUrl, testCase || this.state.testCase,
-          year || this.state.year, null, this.simulationCompleted);
-      });
+      this.setState({isSimulationInProgress: true}, function() {
+        var axes = this.state.visualizationSlug === 'bareme' ? [
+          {
+            count: 20,
+            max: 40000,
+            min: 2000,
+            name: 'sali',
+          },
+        ] : null;
+        webservices.simulate(axes, this.state.legislationUrl, this.state.testCase, this.state.year, null,
+          this.simulationCompleted);
+      }.bind(this));
     }
   },
   simulationCompleted: function(data) {
     console.debug('simulationCompleted', data);
-    var spec = {
-      isSimulationInProgress: {$set: false},
-    };
+    var changeset = {isSimulationInProgress: false};
     if (data) {
       if (data.error) {
         console.error(data.error);
-        spec.simulationResult = {$set: {error: data.error}};
+        changeset.simulationResult = {error: data.error};
       } else {
-        spec.errors = {$set: data.errors ? data.errors : null};
-        spec.simulationResult = {$set: data};
+        changeset.errors = data.errors ? data.errors : null;
+        changeset.simulationResult = data;
       }
     }
-    var newState = React.addons.update(this.state, spec);
-    this.setState(newState);
-  },
-  visualizationsFetched: function(data) {
-    console.debug('visualizationsFetched', data);
-    if (data) {
-      if (data.error) {
-        console.error(data.error);
-      } else {
-        if (data.length) {
-          var newProps = React.addons.update(this.props, {visualizations: {$set: data}});
-          this.setProps(newProps);
-        }
-        var spec = {visualizationSlug: {$set: data.length ? data[0].slug : 'json'}};
-        var newState = React.addons.update(this.state, spec);
-        this.setState(newState);
-      }
-    }
+    this.setState(changeset);
   },
 });
 

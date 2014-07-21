@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var Lazy = require('lazy.js'),
+  React = require('react/addons');
 
 
 var Point = React.createClass({
@@ -25,7 +26,7 @@ var Point = React.createClass({
   render: function() {
     var point = this.props.pointToPixel({x: this.props.x, y: this.props.y});
     var style = this.props.style ?
-      React.addons.update(this.props.defaultStyle, {$merge: this.props.style}) :
+      Lazy(this.props.style).defaults(this.props.defaultStyle).toObject() :
       this.props.defaultStyle;
     return (
       <circle

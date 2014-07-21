@@ -1,10 +1,10 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react/addons'),
   request = require('superagent');
 
-var models = require('./models');
+var helpers = require('./helpers'),
+  models = require('./models');
 
 var appconfig = global.appconfig;
 
@@ -69,37 +69,37 @@ function fetchLegislations(onComplete) {
 function patchColumns(columns) {
   // Patch columns definitions to match UI specificities.
   var birth = columns.birth;
-  var spec = {
+  var newColumns = {
     birth: {
-      '@type': {$set: 'Integer'},
-      default: {$set: parseInt(birth.default.slice(0, 4))},
-      label: {$set: 'Année de naissance'},
-      max: {$set: new Date().getFullYear()},
-      min: {$set: appconfig.constants.minYear},
-      val_type: {$set: 'year'}, // jshint ignore:line
+      '@type': 'Integer',
+      default: parseInt(birth.default.slice(0, 4)),
+      label: 'Année de naissance',
+      max: new Date().getFullYear(),
+      min: appconfig.constants.minYear,
+      val_type: 'year', // jshint ignore:line
     },
   };
   var entitiesNameKeys = Lazy(models.entitiesMetadata).pluck('nameKey').toArray();
   var requiredColumnNames = ['nom_individu'].concat(entitiesNameKeys);
-  var requiredColumnNamesSpec = {};
-  requiredColumnNames.map(function(requiredColumnName) {
-    requiredColumnNamesSpec[requiredColumnName] = {required: {$set: true}};
-  });
-  spec = React.addons.update(spec, {$merge: requiredColumnNamesSpec});
-  var newColumns = React.addons.update(columns, spec);
+  var requiredColumns = Lazy(requiredColumnNames).map(function(requiredColumnName) {
+    return [requiredColumnName, {required: true}];
+  }).toObject();
+  newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
   return newColumns;
 }
 
 function patchValuesForColumns(data) {
   // Change values according to UI-specific columns.
   if (data.individus) {
-    var spec = {individus: {}};
-    Lazy(data.individus).each(function(individu, id) {
-      if (individu.birth) {
-        spec.individus[id] = {birth: {$set: parseInt(individu.birth.slice(0, 4))}};
-      }
-    });
-    var newData = React.addons.update(data, spec);
+    var newIndividus = Lazy(data.individus).map(function(individu, id) {
+      return [
+        id,
+        individu.birth ?
+          Lazy(individu).assign({birth: parseInt(individu.birth.slice(0, 4))}).toObject() :
+          individu
+      ];
+    }).toObject();
+    var newData = Lazy(data).assign({individus: newIndividus}).toObject();
     return newData;
   } else {
     return data;
@@ -133,8 +133,10 @@ function repair(testCase, year, onComplete) {
         onComplete(res);
       } else {
         var testCase = res.body.repaired_scenarios[0].test_case, // jshint ignore:line
-          suggestions = res.body.suggestions.scenarios['0'].test_case; // jshint ignore:line
-        suggestions = patchValuesForColumns(suggestions);
+          suggestions = helpers.getObjectPath(res.body, 'suggestions', 'scenarios', '0', 'test_case');
+        if (suggestions) {
+          suggestions = patchValuesForColumns(suggestions);
+        }
         testCase = patchValuesForColumns(testCase);
         onComplete({
           errors: null,
@@ -163,10 +165,11 @@ function saveCurrentTestCase(testCase, onComplete) {
     });
 }
 
-function simulate(legislationUrl, testCase, year, variables, onComplete) {
+function simulate(axes, legislationUrl, testCase, year, variables, onComplete) {
   var data = {
     scenarios: [
       {
+        axes : axes,
         legislation_url: legislationUrl, // jshint ignore:line
         test_case: testCase, // jshint ignore:line
         year: year,

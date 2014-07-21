@@ -19,8 +19,7 @@ var WaterfallVisualization = React.createClass({
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
     onVariableToggle: React.PropTypes.func,
-    // OpenFisca API simulation results.
-    variablesTree: React.PropTypes.object.isRequired,
+    variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     // variablesTree.values key is a list. This tells which index to use.
     variablesTreeValueIndex: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
