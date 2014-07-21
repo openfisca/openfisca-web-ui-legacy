@@ -16,8 +16,8 @@ var WaterfallVisualization = React.createClass({
   propTypes: {
     expandedVariables: React.PropTypes.object,
     height: React.PropTypes.number.isRequired,
-    legendHeight: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
+    marginTop: React.PropTypes.number.isRequired,
     onVariableToggle: React.PropTypes.func,
     // OpenFisca API simulation results.
     variablesTree: React.PropTypes.object.isRequired,
@@ -30,8 +30,8 @@ var WaterfallVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      legendHeight: 30,
       marginRight: 10,
+      marginTop: 10,
       variablesTreeValueIndex: 0,
       xAxisHeight: 100,
       yAxisWidth: 80,
@@ -97,7 +97,7 @@ var WaterfallVisualization = React.createClass({
       }
       return {name: name, style: style};
     }, this);
-    var gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight,
+    var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
       gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var tickWidth = gridWidth / xSteps;
     var variablesSequence = Lazy(variables);
@@ -121,7 +121,7 @@ var WaterfallVisualization = React.createClass({
               width={gridWidth}
             />
           </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
+          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             <YAxis
               height={gridHeight}
               label='revenu en milliers €'
