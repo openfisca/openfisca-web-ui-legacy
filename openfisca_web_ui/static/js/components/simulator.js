@@ -88,7 +88,7 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
-      visualizationSlug: 'cascade',
+      visualizationSlug: 'bareme',
       waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
@@ -434,7 +434,9 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'bareme') {
         return (
           <BaremeVisualization
+            expandedVariables={this.state.waterfallExpandedVariables}
             height={visualizationHeight}
+            onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
           />
