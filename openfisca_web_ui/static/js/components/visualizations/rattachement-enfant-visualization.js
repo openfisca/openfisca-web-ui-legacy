@@ -125,7 +125,7 @@ var RattachementEnfantVisualization = React.createClass({
         }
       }
     }).toArray();
-    this.simulate(this.props.legislationUrl, newTestCase, this.props.year, ['revdisp', 'irpp']);
+    this.simulate(['revdisp', 'irpp'], this.props.legislationUrl, newTestCase, this.props.year);
   },
   render: function() {
     var simulationResult = this.props.localState.simulationResult;
@@ -177,14 +177,14 @@ var RattachementEnfantVisualization = React.createClass({
       </div>
     );
   },
-  simulate: function (legislationUrl, testCase, year, variables) {
-    console.debug('simulate', legislationUrl, testCase, year, variables);
+  simulate: function (decomposition, legislationUrl, testCase, year) {
+    console.debug('simulate', arguments);
     if ( ! this.props.localState.isSimulationInProgress) {
       var newLocalState = _.clone(this.props.localState);
       newLocalState.isSimulationInProgress = true;  
       this.props.onChange(newLocalState);
-      webservices.simulate(null, legislationUrl || this.props.legislationUrl, testCase || this.props.testCase,
-          year || this.props.year, variables, this.simulationCompleted);
+      webservices.simulate(null, decomposition, legislationUrl || this.props.legislationUrl,
+        testCase || this.props.testCase, year || this.props.year, this.simulationCompleted);
     }
   },
   simulationCompleted: function (data) {

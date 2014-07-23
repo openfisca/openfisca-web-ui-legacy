@@ -4,7 +4,8 @@
 var last = require('lodash.last'),
   range = require('lodash.range'),
   React = require('react/addons'),
-  sortedIndex = require('lodash.sortedindex');
+  sortedIndex = require('lodash.sortedindex'),
+  strformat = require('strformat');
 
 var Curve = require('./svg/curve'),
   HGrid = require('./svg/h-grid'),
@@ -18,9 +19,12 @@ var Curve = require('./svg/curve'),
 
 var SituateurVisualization = React.createClass({
   propTypes: {
+    curveLabel: React.PropTypes.string.isRequired,
     height: React.PropTypes.number.isRequired,
+    hintFormat: React.PropTypes.string.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
+    pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
     value: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
@@ -78,10 +82,10 @@ var SituateurVisualization = React.createClass({
     return y;
   },
   formatHint: function(point) {
-    return this.formatNumber(point.x) +
-      ' % des français ont un revenu disponible inférieur à ' + // jshint ignore:line
-      this.formatNumber(point.y) +
-      ' €.'; // jshint ignore:line
+    return strformat(this.props.hintFormat, {
+      amount: this.formatNumber(point.y),
+      percent: this.formatNumber(point.x),
+    });
   },
   formatNumber: function(number) {
     return Math.floor(number) === number ? number : number.toFixed(2);
@@ -122,7 +126,6 @@ var SituateurVisualization = React.createClass({
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var lastPoints = last(this.props.points, 2);
     this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
-    var revdispLabel = 'Revenu disponible';
     var xValue = this.findXFromY(this.props.value);
     var numericSort = function(a, b) { return a - b; };
     var xSnapValues = range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort(numericSort);
@@ -151,7 +154,7 @@ var SituateurVisualization = React.createClass({
             <VGrid height={this.gridHeight} stepsPositions={xStepsPositions} />
             <YAxis
               height={this.gridHeight}
-              label='revenu en milliers €'
+              label='milliers €'
               maxValue={this.props.yMaxValue}
               nbSteps={this.props.ySteps}
               width={this.props.yAxisWidth}
@@ -189,9 +192,9 @@ var SituateurVisualization = React.createClass({
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
-            <Legend color='rgb(31, 119, 180)'>{revdispLabel}</Legend>
-            <g transform={'translate(' + 12 * 0.7 * revdispLabel.length + ', 0)'}>
-              <Legend color='rgb(166, 50, 50)'>Votre revenu disponible</Legend>
+            <Legend color='rgb(31, 119, 180)'>{this.props.curveLabel}</Legend>
+            <g transform={'translate(' + 12 * 0.7 * this.props.curveLabel.length + ', 0)'}>
+              <Legend color='rgb(166, 50, 50)'>{this.props.pointLabel}</Legend>
             </g>
           </g>
         </svg>

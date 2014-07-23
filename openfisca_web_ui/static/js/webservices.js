@@ -165,18 +165,19 @@ function saveCurrentTestCase(testCase, onComplete) {
     });
 }
 
-function simulate(axes, legislationUrl, testCase, year, variables, onComplete) {
-  var data = {
-    scenarios: [
-      {
-        axes : axes,
-        legislation_url: legislationUrl, // jshint ignore:line
-        test_case: testCase, // jshint ignore:line
-        year: year,
-      },
-    ],
-    decomposition: variables || null,
+function simulate(axes, decomposition, legislationUrl, testCase, year, onComplete) {
+  var scenario = {
+    legislation_url: legislationUrl, // jshint ignore:line
+    test_case: testCase, // jshint ignore:line
+    year: year,
   };
+  if (axes) {
+    scenario.axes = axes;
+  }
+  var data = {scenarios: [scenario]};
+  if (decomposition) {
+    data.decomposition = decomposition;
+  }
   request
     .post(appconfig.api.urls.simulate)
     .send(data)

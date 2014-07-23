@@ -2,6 +2,7 @@
 'use strict';
 
 var invariant = require('react/lib/invariant'),
+  isEqual = require('lodash.isequal'),
   Lazy = require('lazy.js'),
   React = require('react/addons'),
   uuid = require('uuid');
@@ -236,15 +237,17 @@ var Simulator = React.createClass({
     this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
   },
   handleVisualizationChange: function(slug) {
-     // simulationResult is set to null when changing visualization, not when simulating, to avoid the flickering
-     // effet when simulating and staying on the same visualization.
-    var changeset = {
-      simulationResult: null,
-      visualizationSlug: slug,
-    };
-    this.setState(changeset, function() {
-      this.simulate();
-    });
+    var changeset = {visualizationSlug: slug};
+    var newSimulationParams = this.simulationParams(slug),
+      oldSimulationParams = this.simulationParams(this.state.visualizationSlug);
+    if (isEqual(newSimulationParams, oldSimulationParams)) {
+      this.setState(changeset);
+    } else {
+      changeset.simulationResult = null;
+      this.setState(changeset, function() {
+        this.simulate();
+      });
+    }
   },
   handleVisualizationStateChange: function(visualizationState) {
     console.debug('handleVisualizationStateChange', visualizationState);
@@ -405,16 +408,25 @@ var Simulator = React.createClass({
           />
         );
       } else if (Lazy(this.state.visualizationSlug).startsWith('situateur-')) {
-        var value = this.state.simulationResult.values[0];
-        var points;
+        var value = this.state.simulationResult[0].values[0];
+        var curveLabel, hintFormat, pointLabel, points;
         if (this.state.visualizationSlug === 'situateur-revdisp') {
+          curveLabel = 'Revenu disponible';
+          hintFormat = '{percent} % des français ont un revenu disponible inférieur à {amount} €'; // jshint ignore:line
+          pointLabel = 'Votre revenu disponible';
           points = revdispDistribution;
         } else if (this.state.visualizationSlug === 'situateur-sal') {
+          curveLabel = 'Salaires imposables';
+          hintFormat = '{percent} % des français ont des salaires imposables inférieurs à {amount} €'; // jshint ignore:line
+          pointLabel = 'Vos salaires imposables';
           points = salDistribution;
         }
         return (
           <SituateurVisualization
+            curveLabel={curveLabel}
             height={visualizationHeight}
+            hintFormat={hintFormat}
+            pointLabel={pointLabel}
             points={points}
             value={value}
             width={rightPanelWidth}
@@ -501,16 +513,9 @@ var Simulator = React.createClass({
     console.debug('simulate');
     if ( ! this.state.isSimulationInProgress && ! this.state.errors) {
       this.setState({isSimulationInProgress: true}, function() {
-        var axes = this.state.visualizationSlug === 'bareme' ? [
-          {
-            count: 20,
-            max: 40000,
-            min: 2000,
-            name: 'sali',
-          },
-        ] : null;
-        webservices.simulate(axes, this.state.legislationUrl, this.state.testCase, this.state.year, null,
-          this.simulationCompleted);
+        var params = this.simulationParams(this.state.visualizationSlug);
+        webservices.simulate(params.axes, params.decomposition, this.state.legislationUrl, this.state.testCase,
+          this.state.year, this.simulationCompleted);
       }.bind(this));
     }
   },
@@ -527,6 +532,25 @@ var Simulator = React.createClass({
       }
     }
     this.setState(changeset);
+  },
+  simulationParams: function(visualizationSlug) {
+    var params = {
+      axes: visualizationSlug === 'bareme' ? [
+        {
+          count: 20,
+          max: 40000,
+          min: 2000,
+          name: 'sali',
+        },
+      ] : null,
+      decomposition: null,
+    };
+    if (visualizationSlug === 'situateur-revdisp') {
+      params.decomposition = ['revdisp'];
+    } else if (visualizationSlug === 'situateur-sal') {
+      params.decomposition = ['sal'];
+    }
+    return params;
   },
 });
 
