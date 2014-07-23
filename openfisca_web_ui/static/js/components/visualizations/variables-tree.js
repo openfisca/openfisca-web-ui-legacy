@@ -23,15 +23,17 @@ var VariablesTree = React.createClass({
   },
   render: function() {
     return (
-      <table className='table'>
-        <tbody>
-          {
-            this.props.variables.map(function(variable) {
-              return this.renderVariable(variable);
-            }.bind(this))
-          }
-        </tbody>
-      </table>
+      <div className='table-responsive'>
+        <table className='table table-condensed'>
+          <tbody>
+            {
+              this.props.variables.map(function(variable) {
+                return this.renderVariable(variable);
+              }.bind(this))
+            }
+          </tbody>
+        </table>
+      </div>
     );
   },
   renderVariable: function(variable) {
@@ -46,9 +48,7 @@ var VariablesTree = React.createClass({
         key={variable.code}
         onMouseOut={this.props.onHover.bind(null, null)}
         onMouseOver={this.props.onHover.bind(null, variable)}>
-        <td style={{
-          padding: 10,
-        }}>
+        <td style={{width: 20}}>
           {
             (! isSubtotal || variable.collapsed) && variable.type === 'var' && (
               <div style={{
@@ -67,6 +67,7 @@ var VariablesTree = React.createClass({
             style={{
               cursor: isSubtotal ? 'pointer' : 'auto',
               marginLeft: variable.depth > 0 ? (variable.depth - 1) * 20 : 0,
+              fontWeight: variable.depth === 0 ? 'bold' : 'normal',
             }}>
             {variableName}
           </span>
@@ -88,6 +89,7 @@ var VariablesTree = React.createClass({
           style={{
             color: isSubtotal && ! variable.collapsed && this.props.expandedSubtotalColor,
             fontStyle: isSubtotal && 'italic',
+            fontWeight: variable.depth === 0 ? 'bold' : 'normal',
           }}>
           {Math.round(variable.value) + ' €' /* jshint ignore:line */}
         </td>

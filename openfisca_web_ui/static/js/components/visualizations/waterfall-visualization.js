@@ -42,33 +42,36 @@ var WaterfallVisualization = React.createClass({
       hoveredBarCode: null,
     };
   },
+  getVariables: function() {
+    var processNode = function(variables, node, baseValue, depth, hidden) {
+      var children = node.children;
+      node.collapsed = node.code in this.props.expandedVariables && this.props.expandedVariables[node.code];
+      if (children) {
+        var childBaseValue = baseValue;
+        for (var childIndex = 0; childIndex < children.length; childIndex++) {
+          var child = children[childIndex];
+          processNode(variables, child, childBaseValue, depth + 1, hidden || node.collapsed);
+          childBaseValue += child.values[this.props.variablesTreeValueIndex];
+        }
+      }
+      var value = node.values[this.props.variablesTreeValueIndex];
+      node.baseValue = baseValue;
+      node.depth = depth;
+      node.value = value;
+      if (! hidden && value !== 0) {
+        variables.push(node);
+        node.type = ! node.collapsed && children ? 'bar' : 'var';
+      }
+    }.bind(this);
+    var variables = [];
+    processNode(variables, this.props.variablesTree, 0, 0, false);
+    return variables;
+  },
   handleVariableHover: function(variable) {
     this.setState({hoveredBarCode: variable && variable.code});
   },
-  rebuildVariablesTree: function(variablesByCode, node, baseValue, depth, hidden) {
-    var children = node.children;
-    node.collapsed = node.code in this.props.expandedVariables && this.props.expandedVariables[node.code];
-    if (children) {
-      var childBaseValue = baseValue;
-      for (var childIndex = 0; childIndex < children.length; childIndex++) {
-        var child = children[childIndex];
-        this.rebuildVariablesTree(variablesByCode, child, childBaseValue, depth + 1, hidden || node.collapsed);
-        childBaseValue += child.values[this.props.variablesTreeValueIndex];
-      }
-    }
-    var value = node.values[this.props.variablesTreeValueIndex];
-    node.baseValue = baseValue;
-    node.depth = depth;
-    node.value = value;
-    if (! hidden && value !== 0) {
-      variablesByCode[node.code] = node;
-      node.type = ! node.collapsed && children ? 'bar' : 'var';
-    }
-  },
   render: function() {
-    var variablesByCode = {};
-    this.rebuildVariablesTree(variablesByCode, this.props.variablesTree, 0, 0, false);
-    var variables = Lazy(variablesByCode).values().toArray();
+    var variables = this.getVariables();
     var xSteps = variables.length;
     var valueMax = 0;
     var valueMin = 0;

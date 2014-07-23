@@ -88,7 +88,7 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
-      visualizationSlug: 'bareme',
+      visualizationSlug: 'cascade',
       waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
