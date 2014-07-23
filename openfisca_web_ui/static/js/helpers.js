@@ -3,6 +3,29 @@
 var Lazy = require('lazy.js');
 
 
+var assignObjectPath = function(object, crumbs, value) {
+  /*
+  Example:
+    assignObjectPath(null, ['person', 'name'], 'Bob')
+      => {person: {name: 'Bob'}}
+    var bob = {person: {name: 'Bob'}};
+    assignObjectPath(bob, ['person', 'age'], 32)
+      => {person: {age: 32, name: 'Bob'}}
+  */
+  var assignCrumb = function(node, crumbIndex) {
+    if (crumbIndex < crumbs.length) {
+      var crumb = crumbs[crumbIndex];
+      return Lazy(node).assign(
+        obj(crumb, assignCrumb(node[crumb], crumbIndex + 1))
+      ).toObject();
+    } else {
+      return value;
+    }
+  };
+  return assignCrumb(object, 0);
+};
+
+
 var getObjectPath = function(context) {
   /*
   Based on get-object-path npm module which unfortunately only accepts path as string.
@@ -44,6 +67,7 @@ var obj = function() {
 
 
 module.exports = {
+  assignObjectPath: assignObjectPath,
   getObjectPath: getObjectPath,
   obj: obj,
 };

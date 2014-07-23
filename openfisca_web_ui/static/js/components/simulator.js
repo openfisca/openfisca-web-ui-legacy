@@ -96,9 +96,8 @@ var Simulator = React.createClass({
   handleCreateEntity: function(kind) {
     console.debug('handleCreateEntity', kind);
     var newEntity = models.TestCase.createEntity(kind, this.state.testCase);
-    var newEntities = {};
-    newEntities[uuid.v4()] = newEntity;
-    var newTestCase = Lazy(this.state.testCase).merge(obj(kind, newEntities)).toObject();
+    var newEntityId = uuid.v4();
+    var newTestCase = helpers.assignObjectPath(this.state.testCase, [kind, newEntityId], newEntity);
     this.setState({testCase: newTestCase}, function() {
       this.repair();
     });
@@ -107,7 +106,7 @@ var Simulator = React.createClass({
     console.debug('handleCreateIndividuInEntity', arguments);
     var newIndividu = models.TestCase.createIndividu(this.state.testCase);
     var newIndividuId = uuid.v4();
-    var newIndividus = Lazy(this.state.testCase.individus).merge(obj(newIndividuId, newIndividu)).toObject();
+    var newIndividus = Lazy(this.state.testCase.individus).assign(obj(newIndividuId, newIndividu)).toObject();
     var newTestCase = Lazy(this.state.testCase).assign({individus: newIndividus}).toObject();
     newTestCase = models.TestCase.withIndividuInEntity(newIndividuId, kind, id, role, newTestCase);
     this.setState({testCase: newTestCase}, function() {
@@ -165,7 +164,7 @@ var Simulator = React.createClass({
       values = this.state.editedEntity.values;
     if (values && Object.keys(values).length) {
       var newValues = Lazy(this.state.testCase[kind][id]).merge(values).toObject();
-      changeset.testCase = Lazy(this.state.testCase).merge(obj(kind, obj(id, newValues))).toObject();
+      changeset.testCase = helpers.assignObjectPath(this.state.testCase, [kind, id], newValues);
     }
     this.setState(changeset, function() {
       this.repair();
