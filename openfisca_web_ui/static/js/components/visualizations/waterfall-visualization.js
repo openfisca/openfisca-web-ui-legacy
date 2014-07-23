@@ -14,7 +14,7 @@ var axes = require('../../axes'),
 
 var WaterfallVisualization = React.createClass({
   propTypes: {
-    expandedVariables: React.PropTypes.object,
+    expandedVariables: React.PropTypes.object.isRequired,
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
