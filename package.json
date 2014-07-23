@@ -33,7 +33,7 @@
     "underscore": "^1.6.0",
     "backbone": "^1.1.2",
     "X-editable": "git+https://github.com/vitalets/x-editable.git",
-    "react": "^0.10.0",
+    "react": "^0.11.0",
     "reactify": "^0.13.1",
     "superagent": "^0.18.0",
     "uuid": "^1.4.1",
