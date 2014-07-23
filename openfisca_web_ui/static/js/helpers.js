@@ -26,7 +26,7 @@ var assignObjectPath = function(object, crumbs, value) {
 };
 
 
-var getObjectPath = function(context) {
+var getObjectPath = function(object /*, keys... */) {
   /*
   Based on get-object-path npm module which unfortunately only accepts path as string.
   Example:
@@ -36,14 +36,14 @@ var getObjectPath = function(context) {
     getObjectPath(errors, 'person', 'name')
       => 'invalid value'
   */
-  if (typeof context === 'undefined' || context === null) {
+  if (typeof object === 'undefined' || object === null) {
     return undefined;
   }
   var crumbs = Array.prototype.slice.call(arguments, 1);
   var i = -1;
   var result;
   while (++i < crumbs.length) {
-    if (i === 0) result = context;
+    if (i === 0) result = object;
     if (!crumbs[i]) continue;
     if (result === undefined) break;
     result = result[crumbs[i]];

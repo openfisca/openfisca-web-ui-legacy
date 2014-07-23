@@ -209,14 +209,10 @@ var Simulator = React.createClass({
           newTestCase);
       }
     }.bind(this));
-    var changes = {movedIndividu: null, testCase: newTestCase};
-    this.setState(changes, function() {
+    var changeset = {movedIndividu: null, testCase: newTestCase};
+    this.setState(changeset, function() {
       this.repair();
     });
-  },
-  handleRepair: function() {
-    console.debug('handleRepair');
-    this.repair();
   },
   handleReset: function() {
     console.debug('handleReset');
@@ -316,7 +312,7 @@ var Simulator = React.createClass({
             isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
-            onRepair={this.handleRepair}
+            onRepair={this.repair.bind(null, null)}
             onSimulate={this.simulate}
           />
           <hr/>
