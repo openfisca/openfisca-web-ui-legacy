@@ -153,7 +153,8 @@ var Simulator = React.createClass({
   handleFieldsFormChange: function(kind, id, columnName, value) {
     console.debug('handleFieldsFormChange', arguments);
     // Write in this.state.editedEntity.values only values that actually changed. The other stay in this.state.testCase.
-    var newEditedEntity = Lazy(this.state.editedEntity).assign({values: obj(columnName, value)}).toObject();
+    var newValues = Lazy(this.state.editedEntity.values).assign(obj(columnName, value)).toObject();
+    var newEditedEntity = Lazy(this.state.editedEntity).assign({values: newValues}).toObject();
     this.setState({editedEntity: newEditedEntity});
   },
   handleFieldsFormSave: function() {
