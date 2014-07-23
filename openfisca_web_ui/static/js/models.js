@@ -180,7 +180,7 @@ var TestCase = {
           return [id, entity];
         } else {
           var newName = TestCase.guessEntityName(kind, testCase);
-          var newEntity = Lazy(entity).assign({name: newName}).toObject();
+          var newEntity = Lazy(entity).assign(obj(nameKey, newName)).toObject();
           return [id, newEntity];
         }
       }).toObject();
