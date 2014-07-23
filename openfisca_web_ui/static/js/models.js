@@ -2,11 +2,11 @@
 
 var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
-  React = require('react/addons'),
   uuid = require('uuid');
 
 var helpers = require('./helpers');
 
+var obj = helpers.obj;
 
 var entitiesMetadata = {
   familles: {
@@ -173,41 +173,41 @@ var TestCase = {
     return newTestCase;
   },
   withEntitiesNamesFilled: function(testCase) {
-    var spec = {};
-    kinds.forEach(function(kind) {
-      Lazy(testCase[kind]).map(function(entity, id) {
+    var newEntities = Lazy(kinds).map(function(kind) {
+      var newEntitiesOfKind = Lazy(testCase[kind]).map(function(entity, id) {
         var nameKey = entitiesMetadata[kind].nameKey;
-        if ( ! entity[nameKey]) {
+        if (entity[nameKey]) {
+          return [id, entity];
+        } else {
           var newName = TestCase.guessEntityName(kind, testCase);
-          spec[kind] = {};
-          spec[kind][id] = {};
-          spec[kind][id][nameKey] = {$set: newName};
+          var newEntity = Lazy(entity).assign({name: newName}).toObject();
+          return [id, newEntity];
         }
-      }).toArray();
-    });
-    var newTestCase = React.addons.update(testCase, spec);
+      }).toObject();
+      return [kind, newEntitiesOfKind];
+    }).toObject();
+    var newTestCase = Lazy(testCase).assign(newEntities).toObject();
     return newTestCase;
   },
   withIndividuInEntity: function(newIndividuId, kind, id, role, testCase) {
-    var spec = {};
-    spec[kind] = {};
-    spec[kind][id] = {};
+    var newEntitySequence = Lazy(testCase[kind][id]);
+    var newEntity;
     if (TestCase.isSingleton(kind, role)) {
-      spec[kind][id][role] = {$set: newIndividuId};
+      newEntity = newEntitySequence.assign(obj(role, newIndividuId)).toObject();
     } else {
-      spec[kind][id][role] = testCase[kind][id][role] ? {$push: [newIndividuId]} : {$set: [newIndividuId]};
+      var newIndividuIds = Lazy(newEntitySequence.get(role)).concat(newIndividuId).toArray();
+      newEntity = newEntitySequence.assign(obj(role, newIndividuIds)).toObject();
     }
-    var newTestCase = React.addons.update(testCase, spec);
+    var newEntitiesOfKind = Lazy(testCase[kind]).assign(obj(id, newEntity)).toObject();
+    var newTestCase = Lazy(testCase).assign(obj(kind, newEntitiesOfKind)).toObject();
     return newTestCase;
   },
   withoutEntity: function (kind, id, testCase) {
-    var newEntity = Lazy(testCase[kind]).omit([id]).toObject();
-    if (Object.keys(newEntity).length === 0) {
-      newEntity = null;
+    var newEntitiesOfKind = Lazy(testCase[kind]).omit([id]).toObject();
+    if (Object.keys(newEntitiesOfKind).length === 0) {
+      newEntitiesOfKind = null;
     }
-    var spec = {};
-    spec[kind] = {$set: newEntity};
-    var newTestCase = React.addons.update(testCase, spec);
+    var newTestCase = Lazy(testCase).assign(obj(kind, newEntitiesOfKind)).toObject();
     return newTestCase;
   },
   withoutIndividu: function(id, testCase) {
@@ -230,9 +230,9 @@ var TestCase = {
     } else {
       newValue = Lazy(testCase[kind][id][role]).without(individuId).toArray();
     }
-    var newEntity = Lazy(testCase[kind][id]).assign(helpers.obj(role, newValue)).toObject();
-    var newEntities = Lazy(testCase[kind]).assign(helpers.obj(id, newEntity)).toObject();
-    var newTestCase = Lazy(testCase).assign(helpers.obj(kind, newEntities)).toObject();
+    var newEntity = Lazy(testCase[kind][id]).assign(obj(role, newValue)).toObject();
+    var newEntities = Lazy(testCase[kind]).assign(obj(id, newEntity)).toObject();
+    var newTestCase = Lazy(testCase).assign(obj(kind, newEntities)).toObject();
     return newTestCase;
   },
 };
