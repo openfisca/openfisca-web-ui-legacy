@@ -26,6 +26,10 @@ var TestCase = React.createClass({
     suggestions: React.PropTypes.object,
     testCase: React.PropTypes.object.isRequired,
   },
+  preventDefaultThen: function(callback, event) {
+    event.preventDefault();
+    callback();
+  },
   render: function() {
     var entitiesMetadata = this.props.entitiesMetadata;
     var kinds = Object.keys(entitiesMetadata);
@@ -102,7 +106,19 @@ var TestCase = React.createClass({
                       }
                     </Entity>
                   );
-                }.bind(this)).toArray();
+                }.bind(this))
+                .concat(
+                  <p style={{marginBottom: 20}}>
+                    <a
+                      href='#'
+                      onClick={
+                        this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, kind))
+                      }>
+                      {entitiesMetadata[kind].createMessage}
+                    </a>
+                  </p>
+                )
+                .toArray();
             }
           }, this)
         }

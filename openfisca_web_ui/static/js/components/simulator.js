@@ -323,6 +323,7 @@ var Simulator = React.createClass({
               errors={this.state.errors}
               frozenEntity={this.state.editedEntity || this.state.movedIndividu}
               getEntityLabel={models.TestCase.getEntityLabel}
+              onCreateEntity={this.handleCreateEntity}
               onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
               onDeleteEntity={this.handleDeleteEntity}
               onDeleteIndividu={this.handleDeleteIndividu}
