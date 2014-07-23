@@ -4,7 +4,7 @@
 var React = require('react');
 
 
-var FormWithHeader = React.createClass({
+var EditForm = React.createClass({
   propTypes: {
     onCancel: React.PropTypes.func.isRequired,
     onSave: React.PropTypes.func.isRequired,
@@ -17,22 +17,20 @@ var FormWithHeader = React.createClass({
   render: function() {
     return (
       <form onSubmit={this.preventDefaultThen.bind(null, this.props.onSave)} role="form">
+        <h2 style={{margin: 0, textAlign: 'center'}}>{this.props.title}</h2>
+        <hr/>
+        {this.props.children}
         <div className="row">
-          <div className="col-sm-3">
+          <div className="col-sm-1">
             <button className="btn btn-default" onClick={this.props.onCancel} type="button">Annuler</button>
           </div>
-          <div className="col-sm-6">
-            <h2 style={{margin: 0, textAlign: 'center'}}>{this.props.title}</h2>
-          </div>
-          <div className="col-sm-3">
+          <div className="col-sm-1 col-sm-push-10">
             <button className="btn btn-primary pull-right" type="submit">Enregistrer</button>
           </div>
         </div>
-        <hr/>
-        {this.props.children}
       </form>
     );
   }
 });
 
-module.exports = FormWithHeader;
+module.exports = EditForm;

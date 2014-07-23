@@ -8,8 +8,8 @@ var invariant = require('react/lib/invariant'),
   uuid = require('uuid');
 
 var BaremeVisualization = require('./visualizations/bareme-visualization'),
+  EditForm = require('./edit-form'),
   FieldsForm = require('./test-case/form/fields-form'),
-  FormWithHeader = require('./form-with-header'),
   helpers = require('../helpers'),
   JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
@@ -288,7 +288,7 @@ var Simulator = React.createClass({
         }
       }.bind(this))).compact().toObject();
       rightPanel = (
-        <FormWithHeader
+        <EditForm
           onCancel={this.handleMoveIndividuFormCancel}
           onSave={this.handleMoveIndividuFormSave}
           title={
@@ -303,7 +303,7 @@ var Simulator = React.createClass({
             selectedByKind={selectedByKind}
             testCase={this.state.testCase}
           />
-        </FormWithHeader>
+        </EditForm>
       );
     } else {
       rightPanel = this.renderVisualizationPanel();
@@ -369,7 +369,7 @@ var Simulator = React.createClass({
       values = Lazy(values).merge(this.state.editedEntity.values).toObject();
     }
     return (
-      <FormWithHeader
+      <EditForm
         onCancel={this.handleFieldsFormCancel}
         onSave={this.handleFieldsFormSave}
         title={'Éditer ' + title}>
@@ -380,7 +380,7 @@ var Simulator = React.createClass({
           suggestions={suggestions}
           values={values}
         />
-      </FormWithHeader>
+      </EditForm>
     );
   },
   renderVisualization: function() {
