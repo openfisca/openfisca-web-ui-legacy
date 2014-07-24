@@ -2,6 +2,7 @@
 'use strict';
 
 var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react/addons');
 
 
@@ -31,51 +32,44 @@ var WaterfallBars = React.createClass({
   render: function() {
     var unitHeight = this.props.height / (this.props.valueMax - this.props.valueMin);
     var y0 = this.props.valueMax > 0 ? this.props.valueMax * unitHeight : 0;
-    var bars = this.props.variables.map(function(variable) {
-      return {
-        baseValue: variable.baseValue,
-        code: variable.code,
-        color: variable.color,
-        hasChildren: !! variable.children,
+    var variables = this.props.variables.map(function(variable) {
+      return Lazy(variable).assign({
         height: Math.abs(variable.value) * unitHeight,
-        name: variable.name,
-        type: variable.type,
-        value: variable.value,
         y: y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * unitHeight,
-      };
-    }, this);
-    var tickWidth = this.props.width / bars.length;
+      }).toObject();
+    }.bind(this));
+    var tickWidth = this.props.width / variables.length;
     return (
       <g>
         {
-          bars.map(function(bar, barIndex) {
-            invariant(bar.type === 'bar' || bar.type === 'var', 'bar.type is neither "bar" nor "var": %s', bar.type);
+          variables.map(function(variable, variableIndex) {
+            var isSubtotal = ! variable.collapsed && variable.hasChildren;
             var style = {
-              fill: bar.color ? 'rgb(' + bar.color.join(',') + ')' : this.props.noColorFill,
-              opacity: bar.code === this.props.highlightedVariableCode ? 1 : this.props.rectOpacity,
+              fill: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
+              opacity: variable.code === this.props.highlightedVariableCode ? 1 : this.props.rectOpacity,
               shapeRendering: 'crispedges',
-              stroke: bar.code === this.props.highlightedVariableCode ?
+              stroke: variable.code === this.props.highlightedVariableCode ?
                 this.props.strokeActive : this.props.strokeInactive,
-              strokeWidth: bar.type === 'bar' && 3,
+              strokeWidth: isSubtotal && 3,
             };
             return (
-              bar.type === 'var' ? (
-                <rect
-                  height={bar.height}
-                  key={bar.code}
+              isSubtotal ? (
+                <line
+                  key={variable.code}
                   style={style}
-                  width={tickWidth * 0.8}
-                  x={(barIndex + 0.1) * tickWidth}
-                  y={bar.y}
+                  x1={(variableIndex + 0.5) * tickWidth}
+                  y1={variable.y}
+                  x2={(variableIndex + 0.5) * tickWidth}
+                  y2={variable.height + variable.y}
                 />
               ) : (
-                <line
-                  key={bar.code}
+                <rect
+                  height={variable.height}
+                  key={variable.code}
                   style={style}
-                  x1={(barIndex + 0.5) * tickWidth}
-                  y1={bar.y}
-                  x2={(barIndex + 0.5) * tickWidth}
-                  y2={bar.height + bar.y}
+                  width={tickWidth * 0.8}
+                  x={(variableIndex + 0.1) * tickWidth}
+                  y={variable.y}
                 />
               )
             );

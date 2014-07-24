@@ -1,7 +1,9 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
+var
+//  curry = require('lodash.curry'),
+  Lazy = require('lazy.js'),
   React = require('react');
 
 var axes = require('../../axes'),
@@ -10,6 +12,10 @@ var axes = require('../../axes'),
   VariablesTree = require('./variables-tree'),
   XAxisLabelled = require('./svg/x-axis-labelled'),
   YAxis = require('./svg/y-axis');
+
+
+//var isDifferentThan = function(x, y) { return x, y; };
+//var isDifferentThanC = curry(isDifferentThan);
 
 
 var BaremeVisualization = React.createClass({
@@ -41,23 +47,32 @@ var BaremeVisualization = React.createClass({
     };
   },
   getVariables: function() {
-    var processNode = function(variables, node, depth, hidden) {
-      var children = node.children;
-      node.collapsed = node.code in this.props.expandedVariables && this.props.expandedVariables[node.code];
-      if (children) {
-        for (var childIndex = 0; childIndex < children.length; childIndex++) {
-          var child = children[childIndex];
-          processNode(variables, child, depth + 1, hidden || node.collapsed);
-        }
+    var processNode = function(variable, depth, hidden) {
+      var newVariables = [];
+      var collapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
+      if (variable.children) {
+        var childrenVariables = [];
+        Lazy(variable.children).each(function(child) {
+          // TODO use map
+          var childVariables = processNode(child, depth + 1, hidden || collapsed);
+          childrenVariables = childrenVariables.concat(childVariables);
+        }.bind(this));
+        newVariables = newVariables.concat(childrenVariables);
       }
-      node.depth = depth;
-      if (! hidden) {
-        variables.push(node);
-        node.type = ! node.collapsed && children ? 'bar' : 'var';
+      var hasValue = Lazy(variable.values).any(function(value) { return value !== 0; });
+      if (! hidden && hasValue) {
+        var newVariableSequence = Lazy(variable).omit(['children']);
+        newVariableSequence = newVariableSequence.assign({
+          collapsed: collapsed,
+          depth: depth,
+          hasChildren: !! variable.children,
+        });
+        var newVariable = newVariableSequence.toObject();
+        newVariables.push(newVariable);
       }
+      return newVariables;
     }.bind(this);
-    var variables = [];
-    processNode(variables, this.props.variablesTree, 0, 0, false);
+    var variables = processNode(this.props.variablesTree, 0, false);
     return variables;
   },
   gridPointToPixel: function(point) {
@@ -136,8 +151,7 @@ var BaremeVisualization = React.createClass({
           <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
             {
               variables.map(function(variable, idx) {
-                var isSubtotal = variable.children && variable.depth > 0;
-                debugger;
+                var isSubtotal = variable.hasChildren && variable.depth > 0;
                 return (
                   <Curve
                     points={variable.values}

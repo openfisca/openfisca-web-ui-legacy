@@ -43,28 +43,35 @@ var WaterfallVisualization = React.createClass({
     };
   },
   getVariables: function() {
-    var processNode = function(variables, node, baseValue, depth, hidden) {
-      var children = node.children;
-      node.collapsed = node.code in this.props.expandedVariables && this.props.expandedVariables[node.code];
-      if (children) {
+    var processNode = function(variable, baseValue, depth, hidden) {
+      var newVariables = [];
+      var collapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
+      if (variable.children) {
+        var childrenVariables = [];
         var childBaseValue = baseValue;
-        for (var childIndex = 0; childIndex < children.length; childIndex++) {
-          var child = children[childIndex];
-          processNode(variables, child, childBaseValue, depth + 1, hidden || node.collapsed);
+        Lazy(variable.children).each(function(child) {
+          var childVariables = processNode(child, childBaseValue, depth + 1, hidden || collapsed);
+          childrenVariables = childrenVariables.concat(childVariables);
           childBaseValue += child.values[this.props.variablesTreeValueIndex];
-        }
+        }.bind(this));
+        newVariables = newVariables.concat(childrenVariables);
       }
-      var value = node.values[this.props.variablesTreeValueIndex];
-      node.baseValue = baseValue;
-      node.depth = depth;
-      node.value = value;
+      var value = variable.values[this.props.variablesTreeValueIndex];
       if (! hidden && value !== 0) {
-        variables.push(node);
-        node.type = ! node.collapsed && children ? 'bar' : 'var';
+        var newVariableSequence = Lazy(variable).omit(['children', 'values']);
+        newVariableSequence = newVariableSequence.assign({
+          baseValue: baseValue,
+          collapsed: collapsed,
+          depth: depth,
+          hasChildren: !! variable.children,
+          value: value,
+        });
+        var newVariable = newVariableSequence.toObject();
+        newVariables.push(newVariable);
       }
+      return newVariables;
     }.bind(this);
-    var variables = [];
-    processNode(variables, this.props.variablesTree, 0, 0, false);
+    var variables = processNode(this.props.variablesTree, 0, 0, false);
     return variables;
   },
   handleVariableHover: function(variable) {
@@ -93,7 +100,7 @@ var WaterfallVisualization = React.createClass({
         style.fontWeight = 'bold';
       }
       var name = variable.short_name; // jshint ignore:line
-      var isSubtotal = variable.children && variable.depth > 0;
+      var isSubtotal = variable.hasChildren && variable.depth > 0;
       if (isSubtotal) {
         name = (variable.collapsed ? '▶' : '▼') + ' ' + name;
       }
@@ -143,7 +150,7 @@ var WaterfallVisualization = React.createClass({
           <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
             {
               variables.map(function(variable, idx) {
-                var isSubtotal = variable.children && variable.depth > 0;
+                var isSubtotal = variable.hasChildren && variable.depth > 0;
                 return (
                   <rect
                     height={this.props.height}

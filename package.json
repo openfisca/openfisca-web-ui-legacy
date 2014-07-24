@@ -44,9 +44,10 @@
     "lodash.range": "^2.4.1",
     "lodash.sortedindex": "^2.4.1",
     "lodash.last": "^2.4.1",
-    "lazy.js": "^0.3.2",
+    "lazy.js": "git+https://github.com/dtao/lazy.js.git",
     "lodash.isequal": "^2.4.1",
-    "strformat": "0.0.3"
+    "strformat": "0.0.3",
+    "lodash.curry": "^2.4.1"
   },
   "private": true,
   "browserify": {

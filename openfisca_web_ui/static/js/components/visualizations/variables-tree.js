@@ -37,11 +37,12 @@ var VariablesTree = React.createClass({
     );
   },
   renderVariable: function(variable) {
-    var isSubtotal = variable.children && variable.depth > 0;
+    var isSubtotal = variable.hasChildren && variable.depth > 0;
     var variableName = variable.name;
     if (isSubtotal) {
       variableName = (variable.collapsed ? '▶' : '▼') + ' ' + variableName;
     }
+    var displayColor = ! isSubtotal || variable.collapsed;
     return (
       <tr
         className={cx({active: variable.code === this.props.highlightedVariableCode})}
@@ -50,7 +51,7 @@ var VariablesTree = React.createClass({
         onMouseOver={this.props.onHover.bind(null, variable)}>
         <td style={{width: 20}}>
           {
-            (! isSubtotal || variable.collapsed) && variable.type === 'var' && (
+            displayColor && (
               <div style={{
                 backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
                 border: '1px solid gray',
