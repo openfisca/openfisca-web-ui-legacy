@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var range = require('lodash.range'),
+var Lazy = require('lazy.js'),
   React = require('react');
 
 
@@ -29,7 +29,7 @@ var YAxis = React.createClass({
   render: function() {
     var stepSize = this.props.maxValue / this.props.nbSteps;
     var stepSizePx = this.valueToPixel(stepSize);
-    var steps = range(0, this.props.maxValue + stepSize, stepSize);
+    var steps = Lazy.range(0, this.props.maxValue + stepSize, stepSize).toArray();
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};
     return (
       <g className="axis y-axis">

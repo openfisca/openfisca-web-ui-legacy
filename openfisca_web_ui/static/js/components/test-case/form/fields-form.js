@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var intersection = require('lodash.intersection'),
-  invariant = require('react/lib/invariant'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react/addons');
 
 var BooleanControl = require('./boolean-control'),
@@ -36,11 +36,11 @@ var FieldsForm = React.createClass({
             var categoryColumnNames = category.columns.map(function(column) { return column.name; });
             var hasErrors = !! (
               this.props.errors &&
-              intersection(categoryColumnNames, Object.keys(this.props.errors)).length
+              Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
             );
             var hasSuggestions = !! (
               this.props.suggestions &&
-              intersection(categoryColumnNames, Object.keys(this.props.suggestions)).length
+              Lazy(categoryColumnNames).intersection(Object.keys(this.props.suggestions)).size()
             );
             return category.columns && (
               <Category
@@ -70,6 +70,7 @@ var FieldsForm = React.createClass({
       case 'Boolean':
         control = (
           <BooleanControl
+            cerfaField={column.cerfa_field /* jshint ignore:line */}
             default={column.default}
             error={error}
             label={label}
@@ -113,7 +114,7 @@ var FieldsForm = React.createClass({
       case 'Integer':
         control = (
           <IntegerControl
-            cerfaField={this.props.cerfaField}
+            cerfaField={column.cerfa_field /* jshint ignore:line */}
             default={column.default}
             error={error}
             label={label}
@@ -131,7 +132,7 @@ var FieldsForm = React.createClass({
       case 'String':
         control = (
           <StringControl
-            cerfaField={this.props.cerfaField}
+            cerfaField={column.cerfa_field /* jshint ignore:line */}
             default={column.default}
             error={error}
             label={label}

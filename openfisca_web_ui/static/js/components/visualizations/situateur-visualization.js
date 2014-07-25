@@ -1,10 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var last = require('lodash.last'),
-  range = require('lodash.range'),
+var Lazy = require('lazy.js'),
   React = require('react/addons'),
-  sortedIndex = require('lodash.sortedindex'),
   strformat = require('strformat');
 
 var Curve = require('./svg/curve'),
@@ -44,7 +42,7 @@ var SituateurVisualization = React.createClass({
   findXFromY: function(y) {
     // Works with values, not pixels.
     var points = this.props.points.concat(this.extrapolatedLastPoint);
-    var yIndex = sortedIndex(points, {y: y}, 'y');
+    var yIndex = Lazy(points).pluck('y').sortedIndex(y);
     var high = points[yIndex];
     var x;
     if (yIndex === 0) {
@@ -64,7 +62,7 @@ var SituateurVisualization = React.createClass({
   findYFromX: function(x) {
     // Works with values, not pixels.
     var points = this.props.points.concat(this.extrapolatedLastPoint);
-    var xIndex = sortedIndex(points, {x: x}, 'x');
+    var xIndex = Lazy(points).pluck('x').sortedIndex(x);
     var high = points[xIndex];
     var y;
     if (xIndex === 0) {
@@ -124,13 +122,14 @@ var SituateurVisualization = React.createClass({
   render: function() {
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var lastPoints = last(this.props.points, 2);
+    var lastPoints = Lazy(this.props.points).last(2);
     this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
     var xValue = this.findXFromY(this.props.value);
-    var numericSort = function(a, b) { return a - b; };
-    var xSnapValues = range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort(numericSort);
+    var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
     var xStepWidth = this.gridWidth / this.props.xSteps;
-    var xStepsPositions = range(1, this.props.xSteps + 1).map(function(value) { return value * xStepWidth; });
+    var xStepsPositions = Lazy.range(1, this.props.xSteps + 1)
+      .map(function(value) { return value * xStepWidth; })
+      .toArray();
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -165,7 +164,7 @@ var SituateurVisualization = React.createClass({
               style={{stroke: 'rgb(31, 119, 180)'}}
             />
             <Curve
-              points={[last(this.props.points), this.extrapolatedLastPoint]}
+              points={[Lazy(this.props.points).last(), this.extrapolatedLastPoint]}
               pointToPixel={this.gridPointToPixel}
               style={{
                 stroke: 'rgb(31, 119, 180)',

@@ -3,17 +3,17 @@
 var models = require('../models');
 
 
-describe('models.TestCase.isSingleton', function () {
-  it('should return false for kind=familles and role=parents', function () {
+describe('models.TestCase.isSingleton', function() {
+  it('should return false for kind=familles and role=parents', function() {
     expect(models.TestCase.isSingleton('familles', 'parents')).toEqual(false);
   });
-  it('should return true for kind=menages and role=conjoint', function () {
+  it('should return true for kind=menages and role=conjoint', function() {
     expect(models.TestCase.isSingleton('menages', 'conjoint')).toEqual(true);
   });
 });
 
-describe('models.TestCase.withoutIndividu', function () {
-  it('should return a new test case without the individu in individus and entities', function () {
+describe('models.TestCase.withoutIndividu', function() {
+  it('should return a new test case without the individu in individus and entities', function() {
     var testCase = {
       familles: {
         famille1: {
@@ -51,7 +51,7 @@ describe('models.TestCase.withoutIndividu', function () {
     var newTestCase = models.TestCase.withoutIndividu('individu1', testCase);
     expect(newTestCase).toEqual(expectedTestCase);
   });
-  it('should return a new test case without the individu in individus and entities', function () {
+  it('should return a new test case without the individu in individus and entities', function() {
     var testCase = {
       "familles": {
           "9318ec58-3e3e-46d3-bd28-6dbf0cb2808e": {

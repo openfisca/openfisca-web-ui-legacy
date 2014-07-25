@@ -39,97 +39,6 @@ from openfisca_web_ui.templates import helpers
 %>
 
 
-<%def name="accept_cnil_conditions_modal(user)" filter="trim">
-    <div class="modal fade" id="accept-cnil-conditions-modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="post" action="${user.get_user_url(ctx, 'accept-cnil-conditions')}">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Enregistrement de votre simulation</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>
-                            Vous pouvez consulter <a target="_blank" href="/terms">les conditions
-                            générales d'utilisation ici</a>.
-                        </p>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des conditions générales d'utilisation
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="accept-stats-checkbox">
-                                J'accepte que mes données soient utilisées à des fins statistiques, après anonymisation.
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success" disabled="disabled" name="accept" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> Accepter
-                        </button>
-                        <button class="btn btn-danger" name="reject" type="button">
-                            <span class="glyphicon glyphicon-remove"></span> Refuser
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</%def>
-
-
-<%def name="accept_cookies_modal()" filter="trim">
-    <div class="modal fade" id="accept-cookies-modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="post" action="/accept-cookies">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Conditions générales d'utilisation <small>(CGU)</small></h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>
-                            OpenFisca est un logiciel libre de simulation du système socio-fiscal français. Il permet de
-                            visualiser simplement un grand nombre de prestations sociales et d'impôts payés par les
-                            ménages, et de simuler l'impact de réformes sur le budget des ménages. Il s'agit d'un outil
-                            à vocation pédagogique pour aider les citoyens à mieux comprendre le système socio-fiscal
-                            français.
-                        </p>
-                        <p>
-                            La simulation est effectuée à partir des textes juridiques applicables et des éléments
-                            saisis en ligne. Elle ne constitue en aucune façon une déclaration de revenus.
-                        </p>
-                        <p>
-                            Les montants, obtenus à partir des <strong>informations inscrites sous votre seule
-                            responsabilité, n'ont qu'une valeur indicative</strong>. Ainsi, les montants de vos impôts
-                            calculés lors de votre déclaration de revenus peuvent être différents.
-                        </p>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="accept-checkbox">
-                                J'ai pris connaissance des informations ci-dessus.
-                            </label>
-                        </div>
-                        <p class="cookie-text">
-                            Pour fonctionner, ce site a besoin d'utiliser des cookies.
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success" disabled="disabled" name="accept" type="submit">
-                            <span class="glyphicon glyphicon-ok"></span> Accepter
-                        </button>
-                        <a class="btn btn-danger" href="${conf['www.url']}">
-                            <span class="glyphicon glyphicon-remove"></span> Refuser
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</%def>
-
-
 <%def name="appconfig_script()" filter="trim">
 window.appconfig = ${helpers.base_appconfig(ctx) | n, js};
 </%def>
@@ -137,7 +46,9 @@ window.appconfig = ${helpers.base_appconfig(ctx) | n, js};
 
 <%def name="body_content()" filter="trim">
     <div class="container">
-    % if not conf['debug'] and (ctx.session is None or not ctx.session.disclaimer_closed):
+        <%self:modals/>
+        <div id="js-modal"></div>
+    % if conf['enabled.disclaimer'] and (ctx.session is None or not ctx.session.disclaimer_closed):
         <%self:disclaimer/>
     % endif
         <%self:breadcrumb/>
@@ -263,14 +174,6 @@ ${conf['app_name']}
 
 
 <%def name="modals()" filter="trim">
-<%
-    user = model.get_user(ctx)
-%>
-    % if conf['cookie'] not in req.cookies:
-    <%self:accept_cookies_modal/>
-    % elif user is not None and not user.cnil_conditions_accepted:
-    <%self:accept_cnil_conditions_modal user="${user}"/>
-    % endif
 </%def>
 
 
@@ -423,7 +326,6 @@ ${conf['app_name']}
     <%self:ie_scripts/>
 </head>
 <body>
-    <%self:modals/>
     <%self:topbar/>
     <%self:body_content/>
     <%self:scripts/>

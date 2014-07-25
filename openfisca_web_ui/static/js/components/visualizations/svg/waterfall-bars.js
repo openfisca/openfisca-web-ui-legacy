@@ -1,12 +1,9 @@
 /** @jsx React.DOM */
 'use strict';
 
-var invariant = require('react/lib/invariant'),
-  Lazy = require('lazy.js'),
-  React = require('react/addons');
+var Lazy = require('lazy.js'),
+  React = require('react');
 
-
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var WaterfallBars = React.createClass({
   propTypes: {

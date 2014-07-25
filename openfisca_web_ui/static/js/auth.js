@@ -1,16 +1,14 @@
 'use strict';
 
 var $ = require('jquery'),
-  _ = require('underscore');
+  invariant = require('react/lib/invariant');
 
 
-function init (authconfig) {
-  if (_.isUndefined(navigator.id)) {
-    return;
-  }
+function init(options) {
+  invariant(navigator.id, 'navigator.id is not defined');
   navigator.id.watch({
-    loggedInUser: authconfig.currentUser,
-    onlogin: function (assertion) {
+    loggedInUser: options.currentUser,
+    onlogin: function(assertion) {
       $.ajax({
         type: 'POST',
         url: '/login',
@@ -27,7 +25,7 @@ function init (authconfig) {
         alert('Erreur d\'authentification');
       });
     },
-    onlogout: function () {
+    onlogout: function() {
       // TODO use urls.get_url.
       if (window.location.pathname == '/logout') {
         window.location.href = '/';
@@ -37,10 +35,10 @@ function init (authconfig) {
           url: '/logout'
         })
         .done(function() {
-          if (_.isUndefined(authconfig.redirectLocation)) {
+          if (typeof options.redirectLocation === 'undefined') {
             window.location.reload();
           } else {
-            window.location.href = authconfig.redirectLocation;
+            window.location.href = options.redirectLocation;
           }
         })
         .fail(function(/*jqXHR, textStatus, errorThrown*/) {
@@ -50,13 +48,15 @@ function init (authconfig) {
       }
     }
   });
-  if (authconfig.logout) {
+  if (options.logout) {
     navigator.id.logout();
   } else {
-    $(document).on('click', '.sign-in', function () {
+    $(document).on('click', '.sign-in', function(event) {
+      event.preventDefault();
       navigator.id.request();
     });
-    $(document).on('click', '.sign-out', function() {
+    $(document).on('click', '.sign-out', function(event) {
+      event.preventDefault();
       navigator.id.logout();
     });
   }

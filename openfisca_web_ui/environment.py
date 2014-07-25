@@ -78,6 +78,7 @@ def load_environment(global_conf, app_conf):
             'debug': conv.pipe(conv.guess_bool, conv.default(False)),
             'enabled.auth': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.charts.locating': conv.pipe(conv.guess_bool, conv.default(True)),
+            'enabled.disclaimer': conv.pipe(conv.guess_bool, conv.default(True)),
             'global_conf': conv.set_value(global_conf),
 #            'host_urls': conv.pipe(
 #                conv.function(lambda host_urls: host_urls.split()),

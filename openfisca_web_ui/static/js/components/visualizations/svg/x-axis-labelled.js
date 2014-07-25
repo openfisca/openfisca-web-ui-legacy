@@ -26,7 +26,7 @@ var XAxisLabelled = React.createClass({
     };
   },
   render: function() {
-    var toRadians = function (angle) { return angle * (Math.PI / 180); };
+    var toRadians = function(angle) { return angle * (Math.PI / 180); };
     var lineStyle = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     var stepWidth = this.props.width / this.props.nbSteps;
     return (

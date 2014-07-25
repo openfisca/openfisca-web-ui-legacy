@@ -2,7 +2,7 @@
 
 var $ = require('jquery');
 
-function init (config) {
+function init(config) {
   // X-editable is loaded in the DOM.
 
   //turn to inline mode

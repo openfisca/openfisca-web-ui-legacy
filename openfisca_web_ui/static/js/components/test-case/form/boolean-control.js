@@ -4,9 +4,12 @@
 var React = require('react'),
   invariant = require('react/lib/invariant');
 
+var CerfaField = require('./cerfa-field');
+
 
 var BooleanControl = React.createClass({
   propTypes: {
+    cerfaField: React.PropTypes.any,
     default: React.PropTypes.bool,
     error: React.PropTypes.string,
     label: React.PropTypes.component.isRequired,
@@ -83,6 +86,13 @@ var BooleanControl = React.createClass({
             }
           </div>
         </div>
+        {
+          this.props.cerfaField && (
+            <div className="col-md-8">
+              <CerfaField value={this.props.cerfaField} />
+            </div>
+          )
+        }
       </div>
     );
   }

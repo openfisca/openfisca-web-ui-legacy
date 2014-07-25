@@ -3,7 +3,6 @@
 
 var Lazy = require('lazy.js'),
   React = require('react/addons'),
-  _ = require('underscore'),
   uuid = require('uuid');
 
 var models = require('../../models'),
@@ -29,18 +28,18 @@ var RattachementEnfantVisualization = React.createClass({
     testCase: React.PropTypes.object.isRequired,
     year: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function () {
+  getDefaultProps: function() {
     return {
       localState: {},
     };
   },
-  getValidChildren: function () {
+  getValidChildren: function() {
     var children = Lazy(this.props.testCase.individus).filter(function(individu, individuId) {
       return models.TestCase.hasRole(individuId, 'familles', 'enfants', this.props.testCase);
     }.bind(this)).toArray();
     return children;
   },
-  handleChange: function (childId, fieldName, event) {
+  handleChange: function(childId, fieldName, event) {
     console.debug('RattachementEnfantVisualization.handleChange', arguments);
     var value;
     if (fieldName === 'alr') {
@@ -97,7 +96,7 @@ var RattachementEnfantVisualization = React.createClass({
           testCaseSpec = {};
           var famille = familleData.entity;
           var familleId = familleData.id;
-          var familleSpec = {enfants: {$set: _.without(famille.enfants, childId)}};
+          var familleSpec = {enfants: {$set: Lazy(famille.enfants).without(childId).toArray()}};
           var newFamille = React.addons.update(famille, familleSpec);
           if ( ! ('familles' in testCaseSpec)) {
             testCaseSpec.familles = {};
@@ -177,28 +176,27 @@ var RattachementEnfantVisualization = React.createClass({
       </div>
     );
   },
-  simulate: function (decomposition, legislationUrl, testCase, year) {
+  simulate: function(decomposition, legislationUrl, testCase, year) {
     console.debug('simulate', arguments);
     if ( ! this.props.localState.isSimulationInProgress) {
-      var newLocalState = _.clone(this.props.localState);
-      newLocalState.isSimulationInProgress = true;  
+      var newLocalState = Lazy(this.props.localState).assign({isSimulationInProgress: true}).toObject();
       this.props.onChange(newLocalState);
       webservices.simulate(null, decomposition, legislationUrl || this.props.legislationUrl,
         testCase || this.props.testCase, year || this.props.year, this.simulationCompleted);
     }
   },
-  simulationCompleted: function (data) {
+  simulationCompleted: function(data) {
     console.debug('simulationCompleted', data);
-    var newLocalState = _.clone(this.props.localState);
-    newLocalState.isSimulationInProgress = false;  
+    var changeset = {isSimulationInProgress: false};
     if (data) {
       if (data.error) {
         console.error(data.error);
-        newLocalState.simulationResult = {error: data.error};
+        changeset.simulationResult = {error: data.error};
       } else {
-        newLocalState.simulationResult = data;
+        changeset.simulationResult = data;
       }
     }
+    var newLocalState = Lazy(this.props.localState).assign(changeset).toObject();
     this.props.onChange(newLocalState);
   }
 });

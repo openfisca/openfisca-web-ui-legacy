@@ -66,7 +66,7 @@ setup(
     install_requires = [
         'Babel >= 0.9.4',
         'Biryani1 >= 0.9dev',
-        #'bleach >= 1.2',
+#        'bleach >= 1.2',
         'Mako >= 0.7',
 #        'pymongo >= 2.2',
         'requests >= 1.0',

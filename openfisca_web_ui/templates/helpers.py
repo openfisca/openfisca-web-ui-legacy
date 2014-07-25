@@ -44,14 +44,19 @@ def base_appconfig(ctx):
     user = model.get_user(ctx)
     enabled_modules = {}
     if conf['cookie'] not in req.cookies:
-        enabled_modules['acceptCookiesModal'] = True
+        enabled_modules['acceptCookiesModal'] = {
+            'actionUrlPath': urls.get_url(ctx, 'accept-cookies'),
+            }
     elif user is not None and user.email is not None and not user.cnil_conditions_accepted:
-        enabled_modules['acceptCnilConditionsModal'] = True
+        enabled_modules['acceptCnilConditionsModal'] = {
+            'actionUrlPath': user.get_user_url(ctx, 'accept-cnil-conditions'),
+            'termsUrlPath': urls.get_url(ctx, 'terms'),
+            }
     if conf['enabled.auth']:
         enabled_modules['auth'] = {
             'currentUser': user.email if user is not None else None,
             }
-    if session is not None and not session.disclaimer_closed:
+    if conf['enabled.disclaimer'] and session is not None and not session.disclaimer_closed:
         enabled_modules['disclaimer'] = {
             'disclaimerClosedUrlPath': urls.get_url(ctx, 'api/1/disclaimer_closed'),
             }

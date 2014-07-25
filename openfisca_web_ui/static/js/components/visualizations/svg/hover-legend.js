@@ -2,8 +2,8 @@
 'use strict';
 
 var invariant = require('react/lib/invariant'),
-  React = require('react'),
-  sortedIndex = require('lodash.sortedindex');
+  Lazy = require('lazy.js'),
+  React = require('react');
 
 
 var HoverLegend = React.createClass({
@@ -133,7 +133,7 @@ var HoverLegend = React.createClass({
   snapXValue: function(xValue) {
     invariant(xValue <= this.props.xMaxValue, 'xValue is greater than xMaxValue (%s > %s)',
       xValue, this.props.xMaxValue);
-    var index = sortedIndex(this.props.xSnapValues, xValue);
+    var index = Lazy(this.props.xSnapValues).sortedIndex(xValue);
     var low = this.props.xSnapValues[index - 1],
       high = this.props.xSnapValues[index];
     return low + Math.round((xValue - low) / (high - low)) * (high - low);

@@ -1,8 +1,9 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react'),
-  values = require('lodash.values');
+var Lazy = require('lazy.js'),
+  React = require('react'),
+  strformat = require('strformat');
 
 
 var CerfaField = React.createClass({
@@ -13,8 +14,11 @@ var CerfaField = React.createClass({
     var areMultipleValues = typeof this.props === 'object';
     return (
       <span className="help-block">
-        {areMultipleValues ? 'Cases' : 'Case'} CERFA
-        {areMultipleValues ? values(this.props.value).join(', ') : this.props.value}}
+        {
+          areMultipleValues ?
+            strformat('Cases CERFA {0}', Lazy(this.props.value).join(', ')) :
+            strformat('Case CERFA {0}', this.props.value)
+        }
       </span>
     );
   }

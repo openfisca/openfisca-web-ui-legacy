@@ -44,7 +44,7 @@ dirs = None  # Sequence of templates directories, inited by function load_enviro
 js = lambda x: json.dumps(
     x,
     default = lambda obj: obj.isoformat()
-        if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date) else None,
+    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date) else None,
     encoding = 'utf-8',
     ensure_ascii = False,
     indent = 2,

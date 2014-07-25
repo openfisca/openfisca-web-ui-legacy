@@ -47,7 +47,7 @@ var StringControl = React.createClass({
         {
           this.props.cerfaField && (
             <div className="col-md-8">
-              <CerfaField value={this.props.cerfaFields} />
+              <CerfaField value={this.props.cerfaField} />
             </div>
           )
         }

@@ -205,7 +205,7 @@ var TestCase = {
     var newTestCase = Lazy(testCase).assign(obj(kind, newEntitiesOfKind)).toObject();
     return newTestCase;
   },
-  withoutEntity: function (kind, id, testCase) {
+  withoutEntity: function(kind, id, testCase) {
     var newEntitiesOfKind = Lazy(testCase[kind]).omit([id]).toObject();
     if (Object.keys(newEntitiesOfKind).length === 0) {
       newEntitiesOfKind = null;
