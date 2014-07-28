@@ -31,7 +31,7 @@
     "bootstrap": "^3.1.1",
     "jquery": "^2.1.1",
     "X-editable": "git+https://github.com/vitalets/x-editable.git",
-    "react": "^0.11.0",
+    "react": "^0.11.1",
     "reactify": "^0.13.1",
     "superagent": "^0.18.0",
     "uuid": "^1.4.1",
@@ -39,8 +39,7 @@
     "node-qs-serialization": "0.0.2",
     "lazy.js": "git+https://github.com/dtao/lazy.js.git",
     "lodash.isequal": "^2.4.1",
-    "strformat": "0.0.3",
-    "lodash.curry": "^2.4.1"
+    "strformat": "0.0.3"
   },
   "private": true,
   "browserify": {

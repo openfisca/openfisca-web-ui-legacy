@@ -122,14 +122,10 @@ var SituateurVisualization = React.createClass({
   render: function() {
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var lastPoints = Lazy(this.props.points).last(2);
+    var lastPoints = Lazy(this.props.points).last(2).toArray();
     this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
     var xValue = this.findXFromY(this.props.value);
     var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
-    var xStepWidth = this.gridWidth / this.props.xSteps;
-    var xStepsPositions = Lazy.range(1, this.props.xSteps + 1)
-      .map(function(value) { return value * xStepWidth; })
-      .toArray();
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -150,7 +146,12 @@ var SituateurVisualization = React.createClass({
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
-            <VGrid height={this.gridHeight} stepsPositions={xStepsPositions} />
+            <VGrid
+              height={this.gridHeight}
+              nbSteps={this.props.xSteps}
+              startStep={1}
+              width={this.gridWidth}
+            />
             <YAxis
               height={this.gridHeight}
               label='milliers €'

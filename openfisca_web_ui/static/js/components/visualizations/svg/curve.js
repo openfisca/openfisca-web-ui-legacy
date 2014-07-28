@@ -29,14 +29,13 @@ var Curve = React.createClass({
     return points.map(function(point) {
       var pixel = this.props.pointToPixel(point);
       return pixel.x.toString() + ',' + pixel.y.toString();
-    }, this).join(' ');
+    }.bind(this)).join(' ');
   },
   render: function() {
-    var style = this.props.style ?
-      Lazy(this.props.style).defaults(this.props.defaultStyle).toObject() :
-      this.props.defaultStyle;
+    var style = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
+    var pixelsStr = this.pointsToPixelsStr(this.props.points);
     return (
-      <polyline points={this.pointsToPixelsStr(this.props.points)} style={style} />
+      <polyline points={pixelsStr} style={style} />
     );
   }
 });

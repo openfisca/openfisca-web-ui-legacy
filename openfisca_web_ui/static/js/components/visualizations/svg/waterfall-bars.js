@@ -13,8 +13,8 @@ var WaterfallBars = React.createClass({
     rectOpacity: React.PropTypes.number.isRequired,
     strokeActive: React.PropTypes.string.isRequired,
     strokeInactive: React.PropTypes.string.isRequired,
-    valueMax: React.PropTypes.number.isRequired,
-    valueMin: React.PropTypes.number.isRequired,
+    maxValue: React.PropTypes.number.isRequired,
+    minValue: React.PropTypes.number.isRequired,
     variables: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
   },
@@ -27,8 +27,8 @@ var WaterfallBars = React.createClass({
     };
   },
   render: function() {
-    var unitHeight = this.props.height / (this.props.valueMax - this.props.valueMin);
-    var y0 = this.props.valueMax > 0 ? this.props.valueMax * unitHeight : 0;
+    var unitHeight = this.props.height / (this.props.maxValue - this.props.minValue);
+    var y0 = this.props.maxValue > 0 ? this.props.maxValue * unitHeight : 0;
     var variables = this.props.variables.map(function(variable) {
       return Lazy(variable).assign({
         height: Math.abs(variable.value) * unitHeight,

@@ -10,11 +10,12 @@ var YAxis = React.createClass({
     height: React.PropTypes.number.isRequired,
     label: React.PropTypes.string,
     labelFontSize: React.PropTypes.number.isRequired,
-    maxValue: React.PropTypes.number.isRequired,
     nbSteps: React.PropTypes.number.isRequired,
     strokeColor: React.PropTypes.string.isRequired,
     tickFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,
+    maxValue: React.PropTypes.number.isRequired,
+    minValue: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
   },
   getDefaultProps: function() {
@@ -24,12 +25,13 @@ var YAxis = React.createClass({
       strokeColor: 'black',
       tickFontSize: 12,
       tickSize: 6,
+      minValue: 0,
     };
   },
   render: function() {
-    var stepSize = this.props.maxValue / this.props.nbSteps;
+    var stepSize = (this.props.maxValue - this.props.minValue) / this.props.nbSteps;
     var stepSizePx = this.valueToPixel(stepSize);
-    var steps = Lazy.range(0, this.props.maxValue + stepSize, stepSize).toArray();
+    var steps = Lazy.range(this.props.minValue, this.props.maxValue + stepSize, stepSize).toArray();
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};
     return (
       <g className="axis y-axis">

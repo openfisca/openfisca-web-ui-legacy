@@ -80,20 +80,20 @@ var WaterfallVisualization = React.createClass({
   render: function() {
     var variables = this.getVariables();
     var xSteps = variables.length;
-    var valueMax = 0;
-    var valueMin = 0;
+    var maxValue = 0;
+    var minValue = 0;
     variables.forEach(function(variable) {
       var value = variable.baseValue + variable.value;
-      if (value > valueMax) {
-        valueMax = value;
-      } else if (value < valueMin) {
-        valueMin = value;
+      if (value > maxValue) {
+        maxValue = value;
+      } else if (value < minValue) {
+        minValue = value;
       }
     });
-    var valuesRange = valueMax - valueMin;
+    var valuesRange = maxValue - minValue;
     var tickValue = axes.calculateStepSize(valuesRange, this.props.ySteps);
-    var smartValueMax = Math.round(valueMax / tickValue + 0.5) * tickValue;
-    var smartValueMin = Math.round(valueMin / tickValue - 0.5) * tickValue;
+    var smartMaxValue = Math.round(maxValue / tickValue + 0.5) * tickValue;
+    var smartMinValue = Math.round(minValue / tickValue - 0.5) * tickValue;
     var xLabels = variables.map(function(variable) {
       var style = {};
       if (variable.code === this.state.hoveredBarCode) {
@@ -134,15 +134,15 @@ var WaterfallVisualization = React.createClass({
             <YAxis
               height={gridHeight}
               label='revenu en milliers €'
-              maxValue={smartValueMax}
+              maxValue={smartMaxValue}
               nbSteps={this.props.ySteps}
               width={this.props.yAxisWidth}
             />
             <WaterfallBars
               height={gridHeight}
               highlightedVariableCode={this.state.hoveredBarCode}
-              valueMax={smartValueMax}
-              valueMin={smartValueMin}
+              maxValue={smartMaxValue}
+              minValue={smartMinValue}
               variables={variables}
               width={gridWidth}
             />

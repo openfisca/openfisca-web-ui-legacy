@@ -40,7 +40,10 @@ var XAxis = React.createClass({
             return (
               <g key={'tick-' + idx} transform={'translate(' + translateX + ', 0)'}>
                 <text
-                  style={{textAnchor: 'middle', fontSize: this.props.tickFontSize}}
+                  style={{
+                    fontSize: this.props.tickFontSize,
+                    textAnchor: idx === steps.length - 1 ? 'end' : 'middle',
+                  }}
                   x={0}
                   y={this.props.tickSize + this.props.tickFontSize * 1.4}>
                   {value}
@@ -54,7 +57,7 @@ var XAxis = React.createClass({
           this.props.label && (
             <text
               className='axis-label'
-              style={{textAnchor: 'middle', fontSize: this.props.labelFontSize}}
+              style={{fontSize: this.props.labelFontSize, textAnchor: 'middle'}}
               x={this.props.width / 2}
               y={this.props.height - this.props.labelFontSize}>
               {this.props.label}

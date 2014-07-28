@@ -25,9 +25,7 @@ var Point = React.createClass({
   },
   render: function() {
     var point = this.props.pointToPixel({x: this.props.x, y: this.props.y});
-    var style = this.props.style ?
-      Lazy(this.props.style).defaults(this.props.defaultStyle).toObject() :
-      this.props.defaultStyle;
+    var style = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     return (
       <circle
         className="point"

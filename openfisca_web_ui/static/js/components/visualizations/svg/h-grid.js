@@ -25,17 +25,18 @@ var HGrid = React.createClass({
   render: function() {
     var style = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     var stepHeight = this.props.height / this.props.nbSteps;
+    var steps = Lazy.range(this.props.startStep, this.props.nbSteps + this.props.startStep).toArray();
     return (
       <g className="grid h-grid">
         {
-          Lazy.range(this.props.startStep, this.props.nbSteps + this.props.startStep).toArray().map(function(stepIdx) {
-            var translateY = - stepIdx * stepHeight;
+          steps.map(function(stepNum, idx) {
+            var stepPosition = - stepNum * stepHeight;
             return (
-              <g key={'line-' + stepIdx} transform={'translate(0, ' + translateY + ')'}>
+              <g key={'line-' + idx} transform={'translate(0, ' + stepPosition + ')'}>
                 <line style={style} x2={this.props.width} />
               </g>
             );
-          }, this)
+          }.bind(this))
         }
       </g>
     );

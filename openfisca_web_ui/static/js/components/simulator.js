@@ -30,6 +30,10 @@ var appconfig = global.appconfig,
 
 var Simulator = React.createClass({
   propTypes: {
+    baremeStepsX: React.PropTypes.number.isRequired,
+    baremeMaxValue: React.PropTypes.number.isRequired,
+    baremeMinValue: React.PropTypes.number.isRequired,
+    baremeVariableCode: React.PropTypes.string.isRequired,
     columns: React.PropTypes.object,
     columnsTree: React.PropTypes.object,
     legislations: React.PropTypes.array,
@@ -75,6 +79,14 @@ var Simulator = React.createClass({
         });
       }
     }
+  },
+  getDefaultProps: function() {
+    return {
+      baremeStepsX: 20,
+      baremeMaxValue: 40000,
+      baremeMinValue: 2000,
+      baremeVariableCode: 'sali',
+    };
   },
   getInitialState: function() {
     return {
@@ -439,6 +451,8 @@ var Simulator = React.createClass({
             onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
+            xMaxValue={this.props.baremeMaxValue}
+            xMinValue={this.props.baremeMinValue}
           />
         );
       } else if (this.state.visualizationSlug === 'cascade') {
@@ -536,10 +550,10 @@ var Simulator = React.createClass({
     var params = {
       axes: visualizationSlug === 'bareme' ? [
         {
-          count: 20,
-          max: 40000,
-          min: 2000,
-          name: 'sali',
+          count: this.props.baremeStepsX,
+          max: this.props.baremeMaxValue,
+          min: this.props.baremeMinValue,
+          name: this.props.baremeVariableCode,
         },
       ] : null,
       decomposition: null,
