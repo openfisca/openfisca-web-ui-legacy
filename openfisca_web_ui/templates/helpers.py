@@ -53,8 +53,10 @@ def base_appconfig(ctx):
             'termsUrlPath': urls.get_url(ctx, 'terms'),
             }
     if conf['enabled.auth']:
+        dummy_emails = (conf['auth.dummy_admin_email'], conf['auth.dummy_user_email'])
         enabled_modules['auth'] = {
             'currentUser': user.email if user is not None else None,
+            'isDummy': user is not None and user.email in dummy_emails,
             }
     if conf['enabled.disclaimer'] and session is not None and not session.disclaimer_closed:
         enabled_modules['disclaimer'] = {

@@ -69,6 +69,8 @@ def load_environment(global_conf, app_conf):
             'app_conf': conv.set_value(app_conf),
             'app_dir': conv.set_value(app_dir),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('OpenFisca')),
+            'auth.dummy_admin_email': conv.pipe(conv.cleanup_line, conv.default(u'admin@domain.tld')),
+            'auth.dummy_user_email': conv.pipe(conv.cleanup_line, conv.default(u'user@domain.tld')),
             'cache_dir': conv.default(os.path.join(os.path.dirname(app_dir), 'cache')),
             'cookie': conv.default('openfisca-web-ui'),
             'customs_dir': conv.default(None),

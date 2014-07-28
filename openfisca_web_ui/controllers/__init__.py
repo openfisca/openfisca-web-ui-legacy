@@ -114,8 +114,8 @@ def make_router():
             ])
         if conf['debug']:
             routings.extend([
-                ('GET', '^/login/admin?$', auth.become_admin),
-                ('GET', '^/login/user?$', auth.become_user),
+                ('GET', '^/login/dummy-admin?$', auth.dummy_admin),
+                ('GET', '^/login/dummy-user?$', auth.dummy_user),
                 ])
     router = urls.make_router(*routings)
     return router

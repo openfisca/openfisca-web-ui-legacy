@@ -37,8 +37,8 @@ from .. import conf, contexts, conv, model, templates, urls, uuidhelpers, wsgihe
 
 
 @wsgihelpers.wsgify
-def become_admin(req):
-    """Fake admin login, used only in debug environment."""
+def dummy_admin(req):
+    """Dummy admin login, used only in debug environment."""
     assert conf['debug']
     ctx = contexts.Ctx(req)
     admin_account = model.Account.find_one({'admin': True})
@@ -46,7 +46,7 @@ def become_admin(req):
         admin_account = model.Account(
             admin = True,
             cnil_conditions_accepted = True,
-            email = u'admin@domain.tld',
+            email = conf['auth.dummy_admin_email'],
             )
         admin_account.save(safe = True)
     session = ctx.session
@@ -63,8 +63,8 @@ def become_admin(req):
 
 
 @wsgihelpers.wsgify
-def become_user(req):
-    """Fake user login, used only in debug environment."""
+def dummy_user(req):
+    """Dummy user login, used only in debug environment."""
     assert conf['debug']
     ctx = contexts.Ctx(req)
     user_accounts = [account for account in model.Account.find({'email': {'$exists': True}}) if not account.admin]
@@ -73,7 +73,7 @@ def become_user(req):
     else:
         user_account = model.Account(
             cnil_conditions_accepted = True,
-            email = u'user@domain.tld',
+            email = conf['auth.dummy_user_email'],
             )
         user_account.save(safe = True)
     session = ctx.session
