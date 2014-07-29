@@ -226,16 +226,16 @@ var TestCase = {
     return newTestCase;
   },
   withoutIndividuInEntity: function(individuId, kind, id, role, testCase) {
-    var newValue;
+    var newTestCase;
     if (TestCase.isSingleton(kind, role)) {
       invariant(testCase[kind][id][role] === individuId, 'individuId is not referenced by entity role in testCase');
-      newValue = null;
+      newTestCase = helpers.assignIn(testCase, [kind, id], Lazy(testCase[kind][id]).omit([role]).toObject());
     } else {
-      newValue = Lazy(testCase[kind][id][role]).without(individuId).toArray();
+      var newIndividuIds = Lazy(testCase[kind][id][role]).without(individuId).toArray();
+      newTestCase = newIndividuIds.length ?
+        helpers.assignIn(testCase, [kind, id, role], newIndividuIds) :
+        helpers.assignIn(testCase, [kind, id], Lazy(testCase[kind][id]).omit([role]).toObject());
     }
-    var newEntity = Lazy(testCase[kind][id]).assign(obj(role, newValue)).toObject();
-    var newEntities = Lazy(testCase[kind]).assign(obj(id, newEntity)).toObject();
-    var newTestCase = Lazy(testCase).assign(obj(kind, newEntities)).toObject();
     return newTestCase;
   },
 };
