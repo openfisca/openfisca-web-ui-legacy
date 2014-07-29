@@ -25,7 +25,20 @@ var WaterfallVisualization = React.createClass({
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
-    ySteps: React.PropTypes.number.isRequired,
+    yNbSteps: React.PropTypes.number.isRequired,
+  },
+  computeValuesBounds: function(variables) {
+    var maxValue = 0;
+    var minValue = 0;
+    variables.forEach(function(variable) {
+      var value = variable.baseValue + variable.value;
+      if (value > maxValue) {
+        maxValue = value;
+      } else if (value < minValue) {
+        minValue = value;
+      }
+    });
+    return {maxValue: maxValue, minValue: minValue};
   },
   getDefaultProps: function() {
     return {
@@ -34,7 +47,7 @@ var WaterfallVisualization = React.createClass({
       variablesTreeValueIndex: 0,
       xAxisHeight: 100,
       yAxisWidth: 80,
-      ySteps: 8,
+      yNbSteps: 8,
     };
   },
   getInitialState: function() {
@@ -79,21 +92,8 @@ var WaterfallVisualization = React.createClass({
   },
   render: function() {
     var variables = this.getVariables();
-    var xSteps = variables.length;
-    var maxValue = 0;
-    var minValue = 0;
-    variables.forEach(function(variable) {
-      var value = variable.baseValue + variable.value;
-      if (value > maxValue) {
-        maxValue = value;
-      } else if (value < minValue) {
-        minValue = value;
-      }
-    });
-    var valuesRange = maxValue - minValue;
-    var tickValue = axes.calculateStepSize(valuesRange, this.props.ySteps);
-    var smartMaxValue = Math.round(maxValue / tickValue + 0.5) * tickValue;
-    var smartMinValue = Math.round(minValue / tickValue - 0.5) * tickValue;
+    var yBounds = this.computeValuesBounds(variables);
+    var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
     var xLabels = variables.map(function(variable) {
       var style = {};
       if (variable.code === this.state.hoveredBarCode) {
@@ -108,7 +108,8 @@ var WaterfallVisualization = React.createClass({
     }, this);
     var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
       gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var tickWidth = gridWidth / xSteps;
+    var xSteps = variables.length;
+    var stepWidth = gridWidth / xSteps;
     var variablesSequence = Lazy(variables);
     var variablesTreeVariables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
     return (
@@ -119,7 +120,7 @@ var WaterfallVisualization = React.createClass({
           }>
             <HGrid
               height={gridHeight}
-              nbSteps={this.props.ySteps}
+              nbSteps={this.props.yNbSteps}
               startStep={1}
               width={gridWidth}
             />
@@ -133,16 +134,16 @@ var WaterfallVisualization = React.createClass({
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             <YAxis
               height={gridHeight}
-              label='revenu en milliers €'
-              maxValue={smartMaxValue}
-              nbSteps={this.props.ySteps}
+              label='revenu en €'
+              maxValue={ySmartValues.maxValue}
+              nbSteps={this.props.yNbSteps}
               width={this.props.yAxisWidth}
             />
             <WaterfallBars
               height={gridHeight}
               highlightedVariableCode={this.state.hoveredBarCode}
-              maxValue={smartMaxValue}
-              minValue={smartMinValue}
+              maxValue={ySmartValues.maxValue}
+              minValue={ySmartValues.minValue}
               variables={variables}
               width={gridWidth}
             />
@@ -161,8 +162,8 @@ var WaterfallVisualization = React.createClass({
                     onMouseOut={this.handleVariableHover.bind(null, null)}
                     onMouseOver={this.handleVariableHover.bind(null, variable)}
                     style={{opacity: 0}}
-                    width={tickWidth}
-                    x={tickWidth * idx}
+                    width={stepWidth}
+                    x={stepWidth * idx}
                     y={0}
                   />
                 );

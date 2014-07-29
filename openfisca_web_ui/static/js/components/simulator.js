@@ -4,7 +4,7 @@
 var invariant = require('react/lib/invariant'),
   isEqual = require('lodash.isequal'),
   Lazy = require('lazy.js'),
-  React = require('react/addons'),
+  React = require('react'),
   uuid = require('uuid');
 
 var BaremeVisualization = require('./visualizations/bareme-visualization'),
@@ -109,7 +109,7 @@ var Simulator = React.createClass({
     console.debug('handleCreateEntity', kind);
     var newEntity = models.TestCase.createEntity(kind, this.state.testCase);
     var newEntityId = uuid.v4();
-    var newTestCase = helpers.assignObjectPath(this.state.testCase, [kind, newEntityId], newEntity);
+    var newTestCase = helpers.assignIn(this.state.testCase, [kind, newEntityId], newEntity);
     this.setState({testCase: newTestCase}, function() {
       this.repair();
     });
@@ -176,7 +176,7 @@ var Simulator = React.createClass({
       values = this.state.editedEntity.values;
     if (values && Object.keys(values).length) {
       var newValues = Lazy(this.state.testCase[kind][id]).merge(values).toObject();
-      changeset.testCase = helpers.assignObjectPath(this.state.testCase, [kind, id], newValues);
+      changeset.testCase = helpers.assignIn(this.state.testCase, [kind, id], newValues);
     }
     this.setState(changeset, function() {
       this.repair();
@@ -451,6 +451,7 @@ var Simulator = React.createClass({
             onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
+            xLabel="Revenus d'activité imposables (en €)"
             xMaxValue={this.props.baremeMaxValue}
             xMinValue={this.props.baremeMinValue}
           />

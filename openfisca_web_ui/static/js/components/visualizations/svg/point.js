@@ -2,7 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react/addons');
+  React = require('react');
 
 
 var Point = React.createClass({

@@ -21,24 +21,24 @@ var YAxis = React.createClass({
   getDefaultProps: function() {
     return {
       labelFontSize: 14,
+      minValue: 0,
       nbSteps: 10,
       strokeColor: 'black',
       tickFontSize: 12,
       tickSize: 6,
-      minValue: 0,
     };
   },
   render: function() {
-    var stepSize = (this.props.maxValue - this.props.minValue) / this.props.nbSteps;
-    var stepSizePx = this.valueToPixel(stepSize);
-    var steps = Lazy.range(this.props.minValue, this.props.maxValue + stepSize, stepSize).toArray();
+    var stepRange = (this.props.maxValue - this.props.minValue) / this.props.nbSteps;
+    var stepHeight = this.valueToPixel(stepRange);
+    var steps = Lazy.range(this.props.minValue, this.props.maxValue + stepRange, stepRange).toArray();
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};
     return (
       <g className="axis y-axis">
         <line style={lineStyle} x2={0} y2={this.props.height} />
         {
           steps.map(function(value, idx) {
-            var translateY = this.props.height - idx * stepSizePx;
+            var translateY = this.props.height - idx * stepHeight;
             return (
               <g key={'tick-' + idx} transform={'translate(0, ' + translateY + ')'}>
                 <text
@@ -68,7 +68,7 @@ var YAxis = React.createClass({
     );
   },
   valueToPixel: function(value) {
-    return (value / this.props.maxValue) * this.props.height;
+    return (value / (this.props.maxValue - this.props.minValue)) * this.props.height;
   },
 });
 

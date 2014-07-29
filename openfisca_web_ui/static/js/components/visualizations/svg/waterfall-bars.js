@@ -35,7 +35,7 @@ var WaterfallBars = React.createClass({
         y: y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * unitHeight,
       }).toObject();
     }.bind(this));
-    var tickWidth = this.props.width / variables.length;
+    var stepWidth = this.props.width / variables.length;
     return (
       <g>
         {
@@ -54,9 +54,9 @@ var WaterfallBars = React.createClass({
                 <line
                   key={variable.code}
                   style={style}
-                  x1={(variableIndex + 0.5) * tickWidth}
+                  x1={(variableIndex + 0.5) * stepWidth}
                   y1={variable.y}
-                  x2={(variableIndex + 0.5) * tickWidth}
+                  x2={(variableIndex + 0.5) * stepWidth}
                   y2={variable.height + variable.y}
                 />
               ) : (
@@ -64,8 +64,8 @@ var WaterfallBars = React.createClass({
                   height={variable.height}
                   key={variable.code}
                   style={style}
-                  width={tickWidth * 0.8}
-                  x={(variableIndex + 0.1) * tickWidth}
+                  width={stepWidth * 0.8}
+                  x={(variableIndex + 0.1) * stepWidth}
                   y={variable.y}
                 />
               )

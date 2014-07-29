@@ -2,7 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react/addons'),
+  React = require('react'),
   strformat = require('strformat');
 
 var Curve = require('./svg/curve'),
@@ -21,7 +21,6 @@ var SituateurVisualization = React.createClass({
     height: React.PropTypes.number.isRequired,
     hintFormat: React.PropTypes.string.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
-    marginRight: React.PropTypes.number.isRequired,
     pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
     value: React.PropTypes.number.isRequired,
@@ -32,7 +31,7 @@ var SituateurVisualization = React.createClass({
     xSteps: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
     yMaxValue: React.PropTypes.number.isRequired,
-    ySteps: React.PropTypes.number.isRequired,
+    yNbSteps: React.PropTypes.number.isRequired,
   },
   extrapolatePoint: function(low, high) {
     var slope = (high.y - low.y) / (high.x - low.x);
@@ -91,12 +90,12 @@ var SituateurVisualization = React.createClass({
   getDefaultProps: function() {
     return {
       legendHeight: 30,
-      marginRight: 10,
+      marginRight: 5,
       xAxisHeight: 60,
       xMaxValue: 100,
       xSteps: 10,
       yAxisWidth: 80,
-      ySteps: 10,
+      yNbSteps: 10,
     };
   },
   getInitialState: function() {
@@ -134,7 +133,7 @@ var SituateurVisualization = React.createClass({
           }>
             <HGrid
               height={this.gridHeight}
-              nbSteps={this.props.ySteps}
+              nbSteps={this.props.yNbSteps}
               startStep={1}
               width={this.gridWidth}
             />
@@ -156,7 +155,7 @@ var SituateurVisualization = React.createClass({
               height={this.gridHeight}
               label='milliers €'
               maxValue={this.props.yMaxValue}
-              nbSteps={this.props.ySteps}
+              nbSteps={this.props.yNbSteps}
               width={this.props.yAxisWidth}
             />
             <Curve

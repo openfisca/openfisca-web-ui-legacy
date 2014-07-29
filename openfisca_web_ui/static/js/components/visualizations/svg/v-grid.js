@@ -30,9 +30,9 @@ var VGrid = React.createClass({
       <g className="grid v-grid">
         {
           steps.map(function(stepNum, idx) {
-            var stepPosition = stepNum * stepWidth;
+            var translateX = stepNum * stepWidth;
             return (
-              <g key={'line-' + idx} transform={'translate(' + stepPosition + ', 0)'}>
+              <g key={'line-' + idx} transform={'translate(' + translateX + ', 0)'}>
                 <line style={style} y2={this.props.height} />
               </g>
             );

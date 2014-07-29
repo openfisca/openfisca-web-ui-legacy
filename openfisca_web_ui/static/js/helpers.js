@@ -3,13 +3,13 @@
 var Lazy = require('lazy.js');
 
 
-var assignObjectPath = function(object, crumbs, value) {
+var assignIn = function(object, crumbs, value) {
   /*
   Example:
-    assignObjectPath(null, ['person', 'name'], 'Bob')
+    assignIn(null, ['person', 'name'], 'Bob')
       => {person: {name: 'Bob'}}
     var bob = {person: {name: 'Bob'}};
-    assignObjectPath(bob, ['person', 'age'], 32)
+    assignIn(bob, ['person', 'age'], 32)
       => {person: {age: 32, name: 'Bob'}}
   */
   var assignCrumb = function(node, crumbIndex) {
@@ -67,7 +67,7 @@ var obj = function() {
 
 
 module.exports = {
-  assignObjectPath: assignObjectPath,
+  assignIn: assignIn,
   getObjectPath: getObjectPath,
   obj: obj,
 };

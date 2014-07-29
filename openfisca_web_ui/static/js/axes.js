@@ -1,11 +1,11 @@
 'use strict';
 
 
-var calculateStepSize = function(range, stepsCount) {
+function smartStepSize(range, nbSteps) {
   // cf http://stackoverflow.com/questions/361681/algorithm-for-nice-grid-line-intervals-on-a-graph
   // Calculate an initial guess at step size.
   var ln10 = Math.log(10);
-  var tempStepSize = range / stepsCount;
+  var tempStepSize = range / nbSteps;
   // Get the magnitude of the step size.
   var mag = Math.floor(Math.log(tempStepSize) / ln10);
   var magPow = Math.pow(10, mag);
@@ -20,8 +20,26 @@ var calculateStepSize = function(range, stepsCount) {
     magMsd = 2.0;
   }
   return magMsd * magPow;
-};
+}
+
+
+function smartValues(minValue, maxValue, nbSteps) {
+  var valuesRange = maxValue - minValue;
+  var tickValue = smartStepSize(valuesRange, nbSteps);
+  var smartMaxValue = Math.round(maxValue / tickValue + 0.5) * tickValue;
+  var smartMinValue = Math.round(minValue / tickValue - 0.5) * tickValue;
+  return {maxValue: smartMaxValue, minValue: smartMinValue};
+}
+
+
+function convertLinearRange(options, value) {
+  return ((value - options.oldMin) / (options.oldMax - options.oldMin)) *
+    (options.newMax - options.newMin) + options.newMin;
+}
+
 
 module.exports = {
-  calculateStepSize: calculateStepSize,
+  convertLinearRange: convertLinearRange,
+  smartStepSize: smartStepSize,
+  smartValues: smartValues,
 };

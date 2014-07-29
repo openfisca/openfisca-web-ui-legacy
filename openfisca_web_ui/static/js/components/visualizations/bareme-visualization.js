@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  strformat = require('strformat');
 
 var axes = require('../../axes'),
   Curve = require('./svg/curve'),
@@ -24,18 +25,36 @@ var BaremeVisualization = React.createClass({
     // variablesTree.values key is a list. This tells which index to use.
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
+    xLabel: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
-    ySteps: React.PropTypes.number.isRequired,
+    xNbSteps: React.PropTypes.number.isRequired,
+    yNbSteps: React.PropTypes.number.isRequired,
+  },
+  computeValuesBounds: function(variables) {
+    var maxValue = 0;
+    var minValue = 0;
+    variables.forEach(function(variable) {
+      var variableMaxValue = Math.max.apply(null, variable.values);
+      if (variableMaxValue > maxValue) {
+        maxValue = variableMaxValue;
+      }
+      var variableMinValue = Math.min.apply(null, variable.values);
+      if (variableMinValue < minValue) {
+        minValue = variableMinValue;
+      }
+    });
+    return {maxValue: maxValue, minValue: minValue};
   },
   getDefaultProps: function() {
     return {
       marginRight: 10,
       marginTop: 10,
-      xAxisHeight: 100,
+      xAxisHeight: 60,
       yAxisWidth: 80,
-      ySteps: 8,
+      xNbSteps: 10,
+      yNbSteps: 8,
     };
   },
   getInitialState: function() {
@@ -48,12 +67,10 @@ var BaremeVisualization = React.createClass({
       var newVariables = [];
       var collapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
       if (variable.children) {
-        var childrenVariables = [];
-        Lazy(variable.children).each(function(child) {
-          // TODO use map
-          var childVariables = processNode(child, depth + 1, hidden || collapsed);
-          childrenVariables = childrenVariables.concat(childVariables);
-        }.bind(this));
+        var childrenVariables = Lazy(variable.children)
+          .map(function(child) { return processNode(child, depth + 1, hidden || collapsed); })
+          .flatten()
+          .toArray();
         newVariables = newVariables.concat(childrenVariables);
       }
       var hasValue = Lazy(variable.values).any(function(value) { return value !== 0; });
@@ -73,37 +90,31 @@ var BaremeVisualization = React.createClass({
     return variables;
   },
   gridPointToPixel: function(point) {
-    return {
-      x: (point.x / this.props.xMaxValue) * this.gridWidth,
-      y: (1 - point.y / this.yMaxValue) * this.gridHeight,
+    var pixel = {
+      x: axes.convertLinearRange({
+        newMax: this.gridWidth,
+        newMin: 0,
+        oldMax: this.props.xMaxValue,
+        oldMin: this.props.xMinValue,
+      }, point.x),
+      y: axes.convertLinearRange({
+        newMax: 0,
+        newMin: this.gridHeight,
+        oldMax: this.ySmartValues.maxValue,
+        oldMin: this.ySmartValues.minValue,
+      }, point.y),
     };
+    return pixel;
   },
   handleVariableHover: function(variable) {
     this.setState({hoveredBarCode: variable && variable.code});
   },
   render: function() {
-    this.yMaxValue = 100000;
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var variables = this.getVariables();
-    var maxValue = 0;
-    var minValue = 0;
-    variables.forEach(function(variable) {
-      var valuesMaxValue = Lazy(variable.values).max();
-      if (valuesMaxValue > maxValue) {
-        maxValue = valuesMaxValue;
-      }
-      var valuesMinValue = Lazy(variable.values).min();
-      if (valuesMinValue < minValue) {
-        minValue = valuesMinValue;
-      }
-    });
-    var valuesRange = maxValue - minValue;
-    var tickValue = axes.calculateStepSize(valuesRange, this.props.ySteps);
-    var smartMaxValue = Math.round(maxValue / tickValue + 0.5) * tickValue;
-    var smartMinValue = Math.round(minValue / tickValue - 0.5) * tickValue;
-    var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
-      gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    var yBounds = this.computeValuesBounds(variables);
+    this.ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
     var variablesSequence = Lazy(variables);
     var variablesTreeVariables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
     return (
@@ -113,60 +124,85 @@ var BaremeVisualization = React.createClass({
             'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
           }>
             <HGrid
-              height={gridHeight}
-              nbSteps={this.props.ySteps}
+              height={this.gridHeight}
+              nbSteps={this.props.yNbSteps}
               startStep={1}
-              width={gridWidth}
-            />
-            <XAxis
-              height={this.props.xAxisHeight}
-              label='% de la population'
-              maxValue={this.props.xMaxValue}
               width={this.gridWidth}
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             <VGrid
               height={this.gridHeight}
-              nbSteps={variables.length}
+              nbSteps={this.props.xNbSteps}
               startStep={1}
               width={this.gridWidth}
             />
-            <YAxis
-              height={gridHeight}
-              label='revenu en milliers €'
-              maxValue={smartMaxValue}
-              minValue={smartMinValue}
-              nbSteps={this.props.ySteps}
-              width={this.props.yAxisWidth}
-            />
           </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
+          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             {
               variables.map(function(variable) {
-//                var isSubtotal = variable.hasChildren && variable.depth > 0;
-                var values = Lazy.range(2000, 40000, (40000 - 2000) / 20)
+                var toDomainValue = axes.convertLinearRange.bind(
+                  null,
+                  {
+                    newMax: this.props.xMaxValue,
+                    newMin: this.props.xMinValue,
+                    oldMax: variable.values.length - 1,
+                    oldMin: 0,
+                  }
+                );
+                var points = Lazy.range(0, variable.values.length)
+                  .map(toDomainValue)
                   .zip(variable.values)
                   .map(function(pair) { return {x: pair[0], y: pair[1]}; })
                   .toArray();
-                return variable.code === 'revdisp' && (
+                var isFilled = ! variable.collapsed && variable.depth > 0;
+                return (
                   <Curve
+                    fill={isFilled}
                     key={variable.code}
-                    points={values}
+                    points={points}
                     pointToPixel={this.gridPointToPixel}
-                    style={{stroke: 'rgb(31, 119, 180)'}}
+                    style={{
+                      fill: isFilled ? strformat('rgb({0}, {1}, {2})', variable.color) : 'none',
+                      stroke: isFilled ? null : strformat('rgb({0}, {1}, {2})', variable.color),
+                    }}
+                    xMaxValue={this.props.xMaxValue}
+                    xMinValue={this.props.xMinValue}
+                    yMinValue={this.ySmartValues.minValue}
                   />
                 );
               }, this)
             }
+            <YAxis
+              height={this.gridHeight}
+              label='en €'
+              maxValue={this.ySmartValues.maxValue}
+              minValue={this.ySmartValues.minValue}
+              nbSteps={this.props.yNbSteps}
+              width={this.props.yAxisWidth}
+            />
+          </g>
+          <g transform={
+            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
+          }>
+            <XAxis
+              height={this.props.xAxisHeight}
+              label={this.props.xLabel}
+              maxValue={this.props.xMaxValue}
+              minValue={this.props.xMinValue}
+              nbSteps={this.props.xNbSteps}
+              width={this.gridWidth}
+            />
           </g>
         </svg>
-        <VariablesTree
-          highlightedVariableCode={this.state.hoveredBarCode}
-          onToggle={this.props.onVariableToggle}
-          onHover={this.handleVariableHover}
-          variables={variablesTreeVariables}
-        />
+        <div style={{marginTop: 30}}>
+          <VariablesTree
+            highlightedVariableCode={this.state.hoveredBarCode}
+            onToggle={this.props.onVariableToggle}
+            onHover={this.handleVariableHover}
+            variables={variablesTreeVariables}
+          />
+        </div>
       </div>
     );
   },

@@ -11,7 +11,8 @@ var XAxis = React.createClass({
     label: React.PropTypes.string,
     labelFontSize: React.PropTypes.number.isRequired,
     maxValue: React.PropTypes.number.isRequired,
-    steps: React.PropTypes.number.isRequired,
+    minValue: React.PropTypes.number.isRequired,
+    nbSteps: React.PropTypes.number.isRequired,
     strokeColor: React.PropTypes.string.isRequired,
     tickFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,
@@ -20,23 +21,24 @@ var XAxis = React.createClass({
   getDefaultProps: function() {
     return {
       labelFontSize: 14,
-      steps: 10,
+      minValue: 0,
+      nbSteps: 10,
       strokeColor: 'black',
       tickFontSize: 12,
       tickSize: 6,
     };
   },
   render: function() {
-    var stepSize = this.props.maxValue / this.props.steps;
-    var stepSizePx = this.valueToPixel(stepSize);
-    var steps = Lazy.range(0, this.props.maxValue + stepSize, stepSize).toArray();
+    var stepRange = (this.props.maxValue - this.props.minValue) / this.props.nbSteps;
+    var stepWidth = this.valueToPixel(stepRange);
+    var steps = Lazy.range(this.props.minValue, this.props.maxValue + stepRange, stepRange).toArray();
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};
     return (
       <g className="axis x-axis">
         <line style={lineStyle} x2={this.props.width} y2={0} />
         {
           steps.map(function(value, idx) {
-            var translateX = idx * stepSizePx;
+            var translateX = idx * stepWidth;
             return (
               <g key={'tick-' + idx} transform={'translate(' + translateX + ', 0)'}>
                 <text
@@ -68,7 +70,7 @@ var XAxis = React.createClass({
     );
   },
   valueToPixel: function(value) {
-    return (value / this.props.maxValue) * this.props.width;
+    return (value / (this.props.maxValue - this.props.minValue)) * this.props.width;
   },
 });
 
