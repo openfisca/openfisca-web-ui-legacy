@@ -38,9 +38,6 @@ from biryani1.jsonconv import *  # NOQA
 from biryani1.states import default_state
 
 
-# FIXME Parametrize year.
-DEFAULT_YEAR = 2013
-
 N_ = lambda message: message
 email_log = logging.getLogger('email')
 uuid_re = re.compile(ur'[\da-f]{32}$')

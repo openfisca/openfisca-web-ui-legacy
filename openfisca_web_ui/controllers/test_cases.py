@@ -42,7 +42,6 @@ def api1_current(req):
     ctx = contexts.Ctx(req)
     if req.method == 'POST':
         user = model.get_user(ctx, check = True)
-        # TODO use biryani
         data = json.loads(req.body)
         test_case = data.get('test_case')
         user.ensure_test_case()
@@ -244,7 +243,6 @@ def route_api1_class(environ, start_response):
 
 def route_class(environ, start_response):
     router = urls.make_router(
-        # TODO remove or_words
         ('POST', '^/new/?$', new),
         (None, '^/(?P<id_or_slug_or_words>[^/]+)(?=/|$)', route),
         )

@@ -47,7 +47,6 @@ N_ = lambda message: message
 inputs_to_legislation_data = conv.pipe(
     conv.struct(
         dict(
-            # TODO replace by babel.dates parser.
             datetime_begin = conv.pipe(
                 conv.cleanup_line,
                 conv.french_formatted_str_to_datetime,
@@ -157,7 +156,6 @@ def admin_extract(req):
         }
     data, errors = conv.struct({
         'date': conv.pipe(
-            # TODO Replace by ISO date.
             conv.french_formatted_str_to_datetime,
             conv.default(datetime.datetime.utcnow()),
             ),
@@ -312,11 +310,9 @@ def admin_view(req):
     model.is_admin(ctx, check = True)
     legislation = ctx.node
     params = req.GET
-    # TODO Replace by ISO date.
     date, error = conv.french_formatted_str_to_datetime(params.get('date'), state = ctx)
     dated_legislation_json = None
     if date is not None and not legislation.is_dated:
-        # TODO Do not slow down controller with external query.
         response = requests.post(
             conf['api.urls.legislations'],
             headers = {
@@ -362,7 +358,6 @@ def api1_edit(req):
             )
 
     inputs = {
-        # TODO Use jquery param to avoid "[]".
         'name': params.getall('name[]'),
         'value': params.get('value'),
         }
@@ -615,7 +610,6 @@ def route_user(environ, start_response):
     legislation, error = conv.pipe(
         conv.input_to_slug,
         conv.not_none,
-        # TODO Remove 'or_words'.
         model.Legislation.make_id_or_slug_or_words_to_instance(),
         )(req.urlvars.get('id_or_slug_or_words'), state = ctx)
     if error is not None:
@@ -731,7 +725,6 @@ def user_extract(req):
         }
     data, errors = conv.struct({
         'date': conv.pipe(
-            # TODO Replace by ISO date.
             conv.french_formatted_str_to_datetime,
             conv.default(datetime.datetime.utcnow()),
             ),
@@ -882,13 +875,11 @@ def user_view(req):
     ctx = contexts.Ctx(req)
     params = req.GET
     legislation = ctx.node
-    # TODO Replace by ISO date.
     date, error = conv.french_formatted_str_to_datetime(params.get('date'), state = ctx)
     if error is not None:
         return wsgihelpers.bad_request(ctx, explanation = error)
     dated_legislation_json = None
     if date is not None and not legislation.is_dated:
-        # TODO Do not slow down controller with external query.
         response = requests.post(
             conf['api.urls.legislations'],
             headers = {

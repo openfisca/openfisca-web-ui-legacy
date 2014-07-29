@@ -57,6 +57,7 @@ def base_appconfig(ctx):
         enabled_modules['auth'] = {
             'currentUser': user.email if user is not None else None,
             'isDummy': user is not None and user.email in dummy_emails,
+            'logoutUrlPath': urls.get_url(ctx, 'logout'),
             }
     if conf['enabled.disclaimer'] and session is not None and not session.disclaimer_closed:
         enabled_modules['disclaimer'] = {
@@ -80,10 +81,9 @@ def index_appconfig(ctx):
             },
         }
     appconfig['constants'] = {
-        # TODO parametrize year values
-        'defaultYear': 2013,
-        'maxYear': 2099,
-        'minYear': 1870,
+        'defaultYear': conf['constants.simulation.default_year'],
+        'maxYear': conf['constants.simulation.max_year'],
+        'minYear': conf['constants.simulation.min_year'],
         }
     appconfig['enabledModules'].update({
         'charts': {

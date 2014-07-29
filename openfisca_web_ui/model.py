@@ -393,7 +393,6 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
         super(TestCase, self).__init__(**attributes)
         if self.title is None:
             self.title = babel.dates.format_datetime(datetime.datetime.utcnow())
-            # TODO slugify automatically?
             self.slug = strings.slugify(self.title)
 
     def before_delete(self, old_bson):

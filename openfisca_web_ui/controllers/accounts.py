@@ -36,9 +36,6 @@ import webob.multidict
 from .. import contexts, conv, model, paginations, templates, urls, uuidhelpers, wsgihelpers
 
 
-# TODO parametrize year
-DEFAULT_YEAR = 2013
-
 inputs_to_account_admin_data = conv.struct(
     dict(
         admin = conv.pipe(

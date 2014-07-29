@@ -6,13 +6,12 @@ var $ = require('jquery'),
 
 function init(options) {
   function handleLogout() {
-    // TODO use urls.get_url.
-    if (window.location.pathname == '/logout') {
+    if (window.location.pathname == options.logoutUrlPath) {
       window.location.href = '/';
     } else {
       $.ajax({
         type: 'POST',
-        url: '/logout'
+        url: options.logoutUrlPath,
       })
       .done(function() {
         if (typeof options.redirectLocation === 'undefined') {
@@ -22,8 +21,7 @@ function init(options) {
         }
       })
       .fail(function(/*jqXHR, textStatus, errorThrown*/) {
-        // TODO translate string
-        alert('Erreur de déconnexion');
+        console.error('logout error');
       });
     }
   }
@@ -47,8 +45,7 @@ function init(options) {
         })
         .fail(function(/*jqXHR, textStatus, errorThrown*/) {
           navigator.id.logout();
-          // TODO translate string
-          alert('Erreur d\'authentification');
+          console.error('authentication error');
         });
       },
       onlogout: handleLogout,
