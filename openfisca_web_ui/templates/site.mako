@@ -187,10 +187,13 @@ ${conf['app_name']}
     ## Because Persona is still in development, you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
+% if conf['debug']:
+    <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
+% endif
     <script>
         <%self:appconfig_script/>
     </script>
-    <script src="${urls.get_url(ctx, u'js/bundle.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/' + 'bundle.js' if conf['debug'] else u'bundle.min.js')}"></script>
     <%self:page_scripts/>
 </%def>
 
