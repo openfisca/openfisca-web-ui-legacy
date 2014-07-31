@@ -2,6 +2,7 @@
 
 var $ = require('jquery');
 
+
 function init(config) {
   // X-editable is loaded in the DOM.
 
