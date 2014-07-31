@@ -1,40 +1,44 @@
 'use strict';
 
 var browserify = require('browserify'),
-  gulp = require('gulp'),
-  gutil = require('gulp-util'),
-  livereload = require('gulp-livereload'),
-  notify = require('gulp-notify'),
-  reactify = require('reactify'),
-  source = require('vinyl-source-stream'),
-  watchify = require('watchify');
+gulp = require('gulp'),
+gutil = require('gulp-util'),
+livereload = require('gulp-livereload'),
+notify = require('gulp-notify'),
+rename = require('gulp-rename'),
+rimraf = require('gulp-rimraf'),
+source = require('vinyl-source-stream'),
+uglify = require('gulp-uglify'),
+watchify = require('watchify');
 
 
-/** Config variables */
-var liveReloadPort = 35731;
-
-
-/** File paths */
 var staticDir = './openfisca_web_ui/static';
 var jsDir = staticDir + '/js';
 var indexJsFile = jsDir + '/index.js';
 var distDir = staticDir + '/dist';
-var vendorFiles = [
-  './node_modules/react/dist/react-with-addons.js',
+var vendorJsFiles = [
+  './node_modules/jquery/dist/jquery.js',
+  './node_modules/lazy.js/lazy.js',
 ];
-var vendorBuildDir = distDir + '/vendor';
+var vendorDir = distDir + '/vendor',
+vendorBootstrapDir = vendorDir + '/bootstrap';
 
 
 function buildScripts(entryFile, options) {
-  var bundlerConstructor = options && options.watch ? watchify : browserify;
+  var debug = options && options.debug,
+    watch = options && options.watch;
+  var bundlerConstructor = options && watch ? watchify : browserify;
   var bundler = bundlerConstructor(entryFile);
-  bundler.transform(reactify, {es6: true});
+//  bundler.transform(reactify, {es6: true});
   function rebundle() {
-    var stream = bundler.bundle({debug: true});
-    return stream
-      .on('error', handleError)
+    var stream = bundler.bundle({debug: debug});
+    if (watch) {
+      stream = stream.on('error', handleError);
+    }
+    stream = stream
       .pipe(source('bundle.js'))
       .pipe(gulp.dest(distDir));
+    return stream;
   }
   bundler.on('update', function() {
     gutil.log('Rebundle...');
@@ -60,32 +64,66 @@ function handleError() {
 }
 
 
+function startLiveReload() {
+  var port = 35731;
+  var liveReloadServer = livereload(port);
+  var reloadPage = function(event) {
+    gutil.log('Reload browser page.')
+    liveReloadServer.changed(event.path);
+  };
+  return gulp.watch([distDir + '/**/*'], reloadPage);
+}
+
+
 gulp.task('bundle', function() {
   return buildScripts(indexJsFile);
+});
+
+
+gulp.task('bundle-dev', function() {
+  return buildScripts(indexJsFile, {debug: true});
+});
+
+
+gulp.task('clean', function() {
+  return gulp.src(distDir, {read: false})
+    .pipe(rimraf());
 });
 
 
 gulp.task('default', ['dev']);
 
 
-gulp.task('dev', ['watch', 'livereload']);
+gulp.task('dev', ['bundle-dev', 'vendor']);
 
 
-gulp.task('livereload', function() {
-  var liveReloadServer = livereload(liveReloadPort);
-  var reloadPage = function(event) { liveReloadServer.changed(event.path); };
-  gulp.watch([distDir + '/**/*'], reloadPage);
+gulp.task('prod', ['bundle', 'uglify', 'vendor']);
+
+
+gulp.task('uglify', ['bundle'], function() {
+  gulp.src(distDir + '/bundle.js')
+    .pipe(uglify())
+    .pipe(rename({suffix: '.min'}))
+    .pipe(gulp.dest(distDir));
 });
 
 
-gulp.task('prod', ['bundle', 'vendor']);
+gulp.task('vendor', ['vendor-bootstrap', 'vendor-js']);
 
 
-gulp.task('vendor', function() {
-  return gulp.src(vendorFiles).pipe(gulp.dest(vendorBuildDir));
+gulp.task('vendor-bootstrap', function() {
+  return gulp.src('./node_modules/bootstrap/dist/**')
+    .pipe(gulp.dest(vendorBootstrapDir));
 });
 
 
-gulp.task('watch', function() {
-  return buildScripts(indexJsFile, {watch: true});
+gulp.task('vendor-js', function() {
+  return gulp.src(vendorJsFiles)
+    .pipe(gulp.dest(vendorDir));
+});
+
+
+gulp.task('watch', ['vendor'], function() {
+  startLiveReload();
+  buildScripts(indexJsFile, {debug: true, watch: true});
 });

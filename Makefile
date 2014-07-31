@@ -15,10 +15,6 @@ clean:
 flake8: clean
 	flake8 --exclude node_modules
 
-install:
-	npm install
-	cd ${STATIC_DIR}; if [ ! -e node_modules ]; then ln -s ../../node_modules .; fi
-
 jshint: clean
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 

@@ -80,7 +80,7 @@ ${conf['app_name']}
 
 
 <%def name="css()" filter="trim">
-    <link href="${urls.get_url(ctx, u'node_modules/bootstrap/dist/css/bootstrap.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'dist/vendor/bootstrap/css/bootstrap.min.css')}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
 </%def>
 
@@ -187,13 +187,16 @@ ${conf['app_name']}
     ## Because Persona is still in development, you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
-% if conf['debug']:
-    <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
-% endif
+    <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js')}"></script>
     <script>
         <%self:appconfig_script/>
     </script>
-    <script src="${urls.get_url(ctx, u'dist/' + 'bundle.js' if conf['debug'] else u'bundle.min.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.js' if conf['debug'] else u'bundle.min.js'))}"></script>
+% if conf['debug']:
+    <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
+% endif
     <%self:page_scripts/>
 </%def>
 
