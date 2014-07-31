@@ -123,7 +123,7 @@ def load_environment(global_conf, app_conf):
 
     errorware = conf.setdefault('errorware', {})
     errorware['debug'] = conf['debug']
-    if not errorware['debug']:
+    if not conf['debug'] and conf.get('email_to'):
         errorware['error_email'] = conf['email_to']
         errorware['error_log'] = conf.get('error_log', None)
         errorware['error_message'] = conf.get('error_message', 'An internal server error occurred')
