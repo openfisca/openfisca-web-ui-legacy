@@ -81,9 +81,9 @@ def index_appconfig(ctx):
             },
         }
     appconfig['constants'] = {
-        'defaultYear': conf['constants.simulation.default_year'],
-        'maxYear': conf['constants.simulation.max_year'],
-        'minYear': conf['constants.simulation.min_year'],
+        'defaultYear': conf['ui.default_year'],
+        'maxYear': conf['ui.max_year'],
+        'minYear': conf['ui.min_year'],
         }
     appconfig['enabledModules'].update({
         'charts': {

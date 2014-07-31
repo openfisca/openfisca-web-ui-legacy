@@ -72,9 +72,6 @@ def load_environment(global_conf, app_conf):
             'auth.dummy_admin_email': conv.pipe(conv.cleanup_line, conv.default(u'admin@domain.tld')),
             'auth.dummy_user_email': conv.pipe(conv.cleanup_line, conv.default(u'user@domain.tld')),
             'cache_dir': conv.default(os.path.join(os.path.dirname(app_dir), 'cache')),
-            'constants.simulation.default_year': conv.pipe(conv.input_to_int, conv.default(2013)),
-            'constants.simulation.max_year': conv.pipe(conv.input_to_int, conv.default(2099)),
-            'constants.simulation.min_year': conv.pipe(conv.input_to_int, conv.default(1870)),
             'cookie': conv.default('openfisca-web-ui'),
             'customs_dir': conv.default(None),
             'database.host': conv.default('localhost'),
@@ -110,6 +107,9 @@ def load_environment(global_conf, app_conf):
             # Whether this application serves its own static files.
             'static_files': conv.pipe(conv.guess_bool, conv.default(True)),
             'static_files_dir': conv.default(os.path.join(app_dir, 'static')),
+            'ui.default_year': conv.pipe(conv.input_to_int, conv.default(2013)),
+            'ui.max_year': conv.pipe(conv.input_to_int, conv.default(2099)),
+            'ui.min_year': conv.pipe(conv.input_to_int, conv.default(1870)),
             'www.url': conv.pipe(
                 conv.make_input_to_url(full = True),
                 conv.default(u'http://www.openfisca.fr/'),
