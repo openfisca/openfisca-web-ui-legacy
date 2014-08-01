@@ -7,6 +7,7 @@ var Lazy = require('lazy.js'),
 
 var YAxis = React.createClass({
   propTypes: {
+    formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     label: React.PropTypes.string,
     labelFontSize: React.PropTypes.number.isRequired,
@@ -45,7 +46,7 @@ var YAxis = React.createClass({
                   style={{textAnchor: 'end', fontSize: this.props.tickFontSize}}
                   x={- this.props.tickSize * 1.66}
                   y={this.props.tickFontSize * 0.4}>
-                  {value}
+                  {this.props.formatNumber(value)}
                 </text>
                 <line style={lineStyle} x2={- this.props.tickSize} y2={0} />
               </g>

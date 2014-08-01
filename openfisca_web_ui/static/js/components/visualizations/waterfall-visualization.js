@@ -15,6 +15,7 @@ var axes = require('../../axes'),
 var WaterfallVisualization = React.createClass({
   propTypes: {
     expandedVariables: React.PropTypes.object.isRequired,
+    formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
@@ -133,6 +134,7 @@ var WaterfallVisualization = React.createClass({
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             <YAxis
+              formatNumber={this.props.formatNumber}
               height={gridHeight}
               label='revenu en €'
               maxValue={ySmartValues.maxValue}

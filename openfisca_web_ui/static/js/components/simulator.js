@@ -433,6 +433,7 @@ var Simulator = React.createClass({
         return (
           <SituateurVisualization
             curveLabel={curveLabel}
+            formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
             hintFormat={hintFormat}
             pointLabel={pointLabel}
@@ -447,6 +448,7 @@ var Simulator = React.createClass({
         return (
           <BaremeVisualization
             expandedVariables={this.state.waterfallExpandedVariables}
+            formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
             onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
@@ -460,6 +462,7 @@ var Simulator = React.createClass({
         return (
           <WaterfallVisualization
             expandedVariables={this.state.waterfallExpandedVariables}
+            formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
             onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}

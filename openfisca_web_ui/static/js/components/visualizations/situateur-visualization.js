@@ -18,6 +18,7 @@ var Curve = require('./svg/curve'),
 var SituateurVisualization = React.createClass({
   propTypes: {
     curveLabel: React.PropTypes.string.isRequired,
+    formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     hintFormat: React.PropTypes.string.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
@@ -78,12 +79,9 @@ var SituateurVisualization = React.createClass({
   },
   formatHint: function(point) {
     return strformat(this.props.hintFormat, {
-      amount: this.formatNumber(point.y),
-      percent: this.formatNumber(point.x),
+      amount: this.props.formatNumber(point.y),
+      percent: this.props.formatNumber(point.x),
     });
-  },
-  formatNumber: function(number) {
-    return Math.round(number);
   },
   getDefaultProps: function() {
     return {
@@ -136,6 +134,7 @@ var SituateurVisualization = React.createClass({
               width={this.gridWidth}
             />
             <XAxis
+              formatNumber={this.props.formatNumber}
               height={this.props.xAxisHeight}
               label='% de la population'
               maxValue={this.props.xMaxValue}
@@ -150,6 +149,7 @@ var SituateurVisualization = React.createClass({
               width={this.gridWidth}
             />
             <YAxis
+              formatNumber={this.props.formatNumber}
               height={this.gridHeight}
               label='en €'
               maxValue={this.props.yMaxValue}
@@ -177,7 +177,7 @@ var SituateurVisualization = React.createClass({
             />
             <HoverLegend
               findYFromX={this.findYFromX}
-              formatNumber={this.formatNumber}
+              formatNumber={this.props.formatNumber}
               height={this.gridHeight}
               onHover={this.handleHoverLegendHover}
               pixelToPoint={this.gridPixelToPoint}

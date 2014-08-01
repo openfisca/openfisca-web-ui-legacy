@@ -3,7 +3,7 @@
 var Lazy = require('lazy.js');
 
 
-var assignIn = function(object, crumbs, value) {
+function assignIn(object, crumbs, value) {
   /*
   Example:
     assignIn(null, ['person', 'name'], 'Bob')
@@ -23,10 +23,16 @@ var assignIn = function(object, crumbs, value) {
     }
   };
   return assignCrumb(object, 0);
-};
+}
 
 
-var getObjectPath = function(object /*, keys... */) {
+function formatFrenchNumber(number, options) {
+  var options = Lazy(options).defaults({round: true}).toObject();
+  return (options.round ? Math.round(number) : number).toLocaleString('fr');
+}
+
+
+function getObjectPath(object /*, keys... */) {
   /*
   Based on get-object-path npm module which unfortunately only accepts path as string.
   Example:
@@ -49,10 +55,10 @@ var getObjectPath = function(object /*, keys... */) {
     result = result[crumbs[i]];
   }
   return result;
-};
+}
 
 
-var obj = function() {
+function obj() {
   /*
   In JavaScript objects cannot be initialized with a key which is a variable.
   Example:
@@ -63,11 +69,12 @@ var obj = function() {
       => {familles: 1}
   */
   return Lazy(Array.prototype.slice.call(arguments)).chunk(2).toObject();
-};
+}
 
 
 module.exports = {
   assignIn: assignIn,
+  formatFrenchNumber: formatFrenchNumber,
   getObjectPath: getObjectPath,
   obj: obj,
 };

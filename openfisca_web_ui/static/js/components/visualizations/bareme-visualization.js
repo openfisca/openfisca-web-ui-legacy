@@ -17,6 +17,7 @@ var axes = require('../../axes'),
 var BaremeVisualization = React.createClass({
   propTypes: {
     expandedVariables: React.PropTypes.object.isRequired,
+    formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
@@ -174,6 +175,7 @@ var BaremeVisualization = React.createClass({
               }, this)
             }
             <YAxis
+              formatNumber={this.props.formatNumber}
               height={this.gridHeight}
               label='en €'
               maxValue={this.ySmartValues.maxValue}
@@ -186,6 +188,7 @@ var BaremeVisualization = React.createClass({
             'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
           }>
             <XAxis
+              formatNumber={this.props.formatNumber}
               height={this.props.xAxisHeight}
               label={this.props.xLabel}
               maxValue={this.props.xMaxValue}

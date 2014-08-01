@@ -7,6 +7,7 @@ var Lazy = require('lazy.js'),
 
 var XAxis = React.createClass({
   propTypes: {
+    formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     label: React.PropTypes.string,
     labelFontSize: React.PropTypes.number.isRequired,
@@ -48,7 +49,7 @@ var XAxis = React.createClass({
                   }}
                   x={0}
                   y={this.props.tickSize + this.props.tickFontSize * 1.4}>
-                  {value}
+                  {this.props.formatNumber(value)}
                 </text>
                 <line style={lineStyle} x2={0} y2={this.props.tickSize} />
               </g>
