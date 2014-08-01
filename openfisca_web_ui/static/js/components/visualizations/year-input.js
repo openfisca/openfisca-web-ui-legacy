@@ -23,7 +23,7 @@ var YearInput = React.createClass({
         onChange={this.handleChange}
         placeholder={appconfig.constants.defaultYear}
         step="1"
-        title="Année"
+        title="Année de la simulation"
         type="number"
         value={this.props.value}
       />
