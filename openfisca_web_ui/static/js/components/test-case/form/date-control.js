@@ -12,7 +12,7 @@ var DateControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
-    suggestionExplanation: React.PropTypes.string,
+    suggestionIcon: React.PropTypes.component,
     value: React.PropTypes.string,
   },
   handleChange: function(event) {
@@ -22,15 +22,7 @@ var DateControl = React.createClass({
     return (
       <div>
         {this.props.label}
-        {
-          this.props.suggestion && ! this.props.error && (
-            <span
-              className='glyphicon glyphicon-info-sign'
-              style={{marginLeft: 10}}
-              title={this.props.suggestionExplanation}
-            />
-          )
-        }
+        {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <input
           className="form-control"
           id={this.props.name}

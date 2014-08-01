@@ -1,7 +1,11 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var $ = require('jquery'),
+  React = require('react/addons'),
+  strformat = require('strformat');
+
+var SuggestionIcon = require('./suggestion-icon');
 
 var cx = React.addons.classSet;
 
@@ -73,11 +77,9 @@ var Individu = React.createClass({
         </div>
         {
           this.props.suggestions && (
-            <span
-              className='glyphicon glyphicon-info-sign'
-              style={{marginLeft: 10}}
-              title='Cet individu contient des valeurs suggérées par le simulateur.'
-            />
+            <SuggestionIcon>
+              {strformat('« {nom_individu} » contient des suggestions.', this.props.value)/* jshint ignore:line */}
+            </SuggestionIcon>
           )
         }
       </div>

@@ -11,7 +11,8 @@ var BooleanControl = require('./boolean-control'),
   EnumerationControl = require('./enumeration-control'),
   IntegerControl = require('./integer-control'),
   Label = require('./label'),
-  StringControl = require('./string-control');
+  StringControl = require('./string-control'),
+  SuggestionIcon = require('../suggestion-icon');
 
 var cx = React.addons.classSet;
 
@@ -65,7 +66,11 @@ var FieldsForm = React.createClass({
     var label = (
       <Label name={column.name} required={column.required}>{column.label}</Label>
     );
-    var suggestionExplanation = 'Valeur suggérée par le simulateur et utilisée dans ses calculs.';
+    var suggestionIcon = (
+      <SuggestionIcon>
+        Valeur suggérée par le simulateur et utilisée dans ses calculs.
+      </SuggestionIcon>
+    );
     switch(column['@type']) {
       case 'Boolean':
         control = (
@@ -77,7 +82,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
-            suggestionExplanation={suggestionExplanation}
+            suggestionIcon={suggestionIcon}
             value={value}
           />
         );
@@ -91,7 +96,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
-            suggestionExplanation={suggestionExplanation}
+            suggestionIcon={suggestionIcon}
             value={value}
           />
         );
@@ -106,7 +111,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
-            suggestionExplanation={suggestionExplanation}
+            suggestionIcon={suggestionIcon}
             value={value}
           />
         );
@@ -123,7 +128,7 @@ var FieldsForm = React.createClass({
             name={column.name}
             onChange={this.props.onChange.bind(null, column.name)}
             suggestion={suggestion}
-            suggestionExplanation={suggestionExplanation}
+            suggestionIcon={suggestionIcon}
             value={value}
             valType={column.val_type} // jshint ignore:line
           />
@@ -140,7 +145,7 @@ var FieldsForm = React.createClass({
             onChange={this.props.onChange.bind(null, column.name)}
             required={column.required}
             suggestion={suggestion}
-            suggestionExplanation={suggestionExplanation}
+            suggestionIcon={suggestionIcon}
             value={value}
           />
         );

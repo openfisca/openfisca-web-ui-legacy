@@ -17,7 +17,7 @@ var IntegerControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.number,
-    suggestionExplanation: React.PropTypes.string,
+    suggestionIcon: React.PropTypes.component,
     value: React.PropTypes.number,
     valType: React.PropTypes.string,
   },
@@ -41,15 +41,7 @@ var IntegerControl = React.createClass({
     return (
       <div>
         {this.props.label}
-        {
-          this.props.suggestion && ! this.props.error && (
-            <span
-              className='glyphicon glyphicon-info-sign'
-              style={{marginLeft: 10}}
-              title={this.props.suggestionExplanation}
-            />
-          )
-        }
+        {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <div className="row">
           <div className="col-md-4">
             {

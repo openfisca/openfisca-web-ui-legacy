@@ -14,7 +14,7 @@ var EnumerationControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
-    suggestionExplanation: React.PropTypes.string,
+    suggestionIcon: React.PropTypes.component,
     value: React.PropTypes.oneOfType([
       React.PropTypes.number,
       React.PropTypes.string,
@@ -27,15 +27,7 @@ var EnumerationControl = React.createClass({
     return (
       <div>
         {this.props.label}
-        {
-          this.props.suggestion && ! this.props.error && (
-            <span
-              className='glyphicon glyphicon-info-sign'
-              style={{marginLeft: 10}}
-              title={this.props.suggestionExplanation}
-            />
-          )
-        }
+        {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <select
           className="form-control"
           id={this.props.name}

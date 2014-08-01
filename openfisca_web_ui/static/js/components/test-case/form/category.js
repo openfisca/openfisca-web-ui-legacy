@@ -1,7 +1,10 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var $ = require('jquery'),
+  React = require('react');
+
+var SuggestionIcon = require('../suggestion-icon');
 
 var cx = React.addons.classSet;
 
@@ -20,10 +23,9 @@ var Category = React.createClass({
         <div className="panel-heading">
           {
             this.props.hasSuggestions && (
-              <span
-                className='glyphicon glyphicon-info-sign pull-right'
-                title='Dans cette catégorie certaines valeurs sont suggérées par le simulateur.'
-              />
+              <SuggestionIcon className="pull-right">
+                Cette catégorie contient des suggestions.
+              </SuggestionIcon>
             )
           }
           <h4 className="panel-title">
