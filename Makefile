@@ -1,7 +1,6 @@
 .PHONY: clean flake8 install jshint
 
 STATIC_DIR=openfisca_web_ui/static
-BUNDLE_JS=${STATIC_DIR}/js/bundle.js
 
 all: check test
 
@@ -10,7 +9,7 @@ check: flake8 jshint
 clean:
 	rm -Rf cache/templates/
 	find -name '*.pyc' -exec rm \{\} \;
-	rm -f $(BUNDLE_JS)
+	./node_modules/.bin/gulp clean
 
 flake8: clean
 	flake8 --exclude node_modules
