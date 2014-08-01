@@ -50,19 +50,6 @@ var VariablesTree = React.createClass({
         key={variable.code}
         onMouseOut={this.props.onHover.bind(null, null)}
         onMouseOver={this.props.onHover.bind(null, variable)}>
-        <td style={{width: 20}}>
-          {
-            displayColor && (
-              <div style={{
-                backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
-                border: '1px solid gray',
-                width: 20,
-              }}>
-                { /* jshint ignore:line */}
-              </div>
-            )
-          }
-        </td>
         <td>
           <span
             onClick={isSubtotal && this.props.onToggle.bind(null, variable)}
@@ -86,14 +73,31 @@ var VariablesTree = React.createClass({
             )
           }
         </td>
-        <td
-          className='text-right'
-          style={{
-            color: isSubtotal && ! variable.collapsed && this.props.expandedSubtotalColor,
-            fontStyle: isSubtotal && 'italic',
-            fontWeight: variable.depth === 0 ? 'bold' : 'normal',
-          }}>
-          {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
+        {
+          variable.value && (
+            <td
+              className='text-right'
+              style={{
+                color: isSubtotal && ! variable.collapsed && this.props.expandedSubtotalColor,
+                fontStyle: isSubtotal && 'italic',
+                fontWeight: variable.depth === 0 ? 'bold' : 'normal',
+              }}>
+              {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
+            </td>
+          )
+        }
+        <td style={{width: 20}}>
+          {
+            displayColor && (
+              <div style={{
+                backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
+                border: '1px solid gray',
+                width: 20,
+              }}>
+                { /* jshint ignore:line */}
+              </div>
+            )
+          }
         </td>
       </tr>
     );
