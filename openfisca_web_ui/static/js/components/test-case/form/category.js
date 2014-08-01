@@ -1,8 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var $ = require('jquery'),
-  React = require('react');
+var React = require('react');
 
 var SuggestionIcon = require('../suggestion-icon');
 
@@ -38,7 +37,7 @@ var Category = React.createClass({
           </h4>
         </div>
         <div
-          className={cx('panel-collapse', 'collapse', this.props.index === 0 ? 'in' : null)}
+          className={cx('panel-collapse', 'collapse', this.props.index === 0 && 'in')}
           id={'category-' + this.props.index}>
          <div className="panel-body">
             {this.props.children}

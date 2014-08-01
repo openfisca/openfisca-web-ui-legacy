@@ -7,6 +7,7 @@ var React = require('react');
 var EntityRoleSelector = React.createClass({
   propTypes: {
     currentEntityId: React.PropTypes.string,
+    currentRole: React.PropTypes.string,
     entities: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         id: React.PropTypes.string.isRequired,
@@ -15,32 +16,22 @@ var EntityRoleSelector = React.createClass({
     ).isRequired,
     kind: React.PropTypes.string.isRequired,
     label: React.PropTypes.string.isRequired,
-    onChange: React.PropTypes.func.isRequired,
+    onEntityChange: React.PropTypes.func.isRequired,
+    onRoleChange: React.PropTypes.func.isRequired,
     roles: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         id: React.PropTypes.string.isRequired,
         label: React.PropTypes.string.isRequired,
       }).isRequired
     ).isRequired,
-    selectedEntityId: React.PropTypes.string,
-    selectedRole: React.PropTypes.string,
-  },
-  formatEntityLabel: function(entity) {
-    var label = entity.label;
-    if (entity.id === this.props.currentEntityId) {
-      label += ' (en cours)';
-    }
-    return label;
   },
   handleEntityChange: function(event) {
     var newEntityId = event.target.value;
-    var selectedRole = this.refs.role.getDOMNode().value;
-    this.props.onChange(this.props.kind, newEntityId, selectedRole);
+    this.props.onEntityChange(this.props.kind, newEntityId);
   },
   handleRoleChange: function(event) {
     var newRole = event.target.value;
-    var selectedEntityId = this.refs.entity.getDOMNode().value;
-    this.props.onChange(this.props.kind, selectedEntityId, newRole);
+    this.props.onRoleChange(this.props.kind, newRole);
   },
   render: function() {
     return (
@@ -52,13 +43,12 @@ var EntityRoleSelector = React.createClass({
               className="form-control"
               id={this.props.kind}
               onChange={this.handleEntityChange}
-              ref='entity'
-              value={this.props.selectedEntityId}>
+              value={this.props.currentEntityId}>
               {this.props.currentEntityId || <option key='none' value='none'>Aucun</option>}
               {
                 this.props.entities.map(function(entity) {
                   return (
-                    <option key={entity.id} value={entity.id}>{this.formatEntityLabel(entity)}</option>
+                    <option key={entity.id} value={entity.id}>{entity.label}</option>
                   );
                 }, this)
               }
@@ -68,8 +58,7 @@ var EntityRoleSelector = React.createClass({
             <select
               className="form-control"
               onChange={this.handleRoleChange}
-              ref='role'
-              value={this.props.selectedRole}>
+              value={this.props.currentRole}>
               {
                 this.props.roles.map(function(role) {
                   return (

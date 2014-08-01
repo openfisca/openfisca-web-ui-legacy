@@ -1,8 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var $ = require('jquery'),
-  React = require('react/addons'),
+var React = require('react/addons'),
   strformat = require('strformat');
 
 var SuggestionIcon = require('./suggestion-icon');
@@ -12,8 +11,7 @@ var cx = React.addons.classSet;
 
 var Individu = React.createClass({
   propTypes: {
-    disabled: React.PropTypes.bool,
-    edited: React.PropTypes.bool,
+    active: React.PropTypes.bool,
     errors: React.PropTypes.object,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
@@ -26,24 +24,18 @@ var Individu = React.createClass({
     callback();
   },
   render: function() {
-    var btnColorClass = 'btn-default';
-    if (this.props.edited) {
-      btnColorClass = 'btn-info';
-    } else if (this.props.errors) {
-      btnColorClass = 'btn-danger';
-    }
+    var btnColorClass = this.props.errors ? 'btn-danger' : 'btn-default';
     return (
       <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
           <button
-            className={cx('btn', btnColorClass, 'btn-sm')}
-            disabled={this.props.disabled}
+            className={cx('btn', btnColorClass, 'btn-sm', this.props.active && 'active')}
             onClick={this.props.onEdit}
             type="button">
             {this.props.value.nom_individu /* jshint ignore:line */}
           </button>
           <button
-            className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle', this.props.disabled && 'disabled')}
+            className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle')}
             data-toggle="dropdown"
             type="button">
             <span className="caret"></span>

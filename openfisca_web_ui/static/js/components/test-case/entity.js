@@ -8,9 +8,8 @@ var cx = React.addons.classSet;
 
 var Entity = React.createClass({
   propTypes: {
-    disabled: React.PropTypes.bool,
+    active: React.PropTypes.bool,
     hasErrors: React.PropTypes.bool,
-    isEdited: React.PropTypes.bool,
     label: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func.isRequired,
@@ -20,21 +19,18 @@ var Entity = React.createClass({
     callback();
   },
   render: function() {
-    var isEdited = this.props.isEdited;
-    var btnColorClass = isEdited ? 'btn-info' : 'btn-default';
     return (
       <div className={cx('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">
           <div className="btn-group">
             <button
-              className={cx('btn', btnColorClass, 'btn-sm')}
-              disabled={this.props.disabled}
+              className={cx('btn', 'btn-default', 'btn-sm', this.props.active && 'active')}
               onClick={this.props.onEdit}
               type="button">
               {this.props.label}
             </button>
             <button
-              className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle', this.props.disabled && 'disabled')}
+              className={cx('btn', 'btn-default', 'btn-sm', 'dropdown-toggle')}
               data-toggle="dropdown"
               type="button">
               <span className="caret"></span>

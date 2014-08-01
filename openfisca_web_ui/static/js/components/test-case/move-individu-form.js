@@ -12,9 +12,9 @@ var MoveIndividuForm = React.createClass({
     currentEntityIdByKind: React.PropTypes.object.isRequired,
     entitiesMetadata: React.PropTypes.object.isRequired,
     getEntityLabel: React.PropTypes.func.isRequired,
-    onChange: React.PropTypes.func.isRequired,
+    onEntityChange: React.PropTypes.func.isRequired,
+    onRoleChange: React.PropTypes.func.isRequired,
     roleLabels: React.PropTypes.object.isRequired,
-    selectedByKind: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
   },
   render: function() {
@@ -41,10 +41,9 @@ var MoveIndividuForm = React.createClass({
                 key={kind}
                 kind={kind}
                 label={entityMetadata.label}
-                onChange={this.props.onChange}
+                onEntityChange={this.props.onEntityChange}
+                onRoleChange={this.props.onRoleChange}
                 roles={roles}
-                selectedEntityId={this.props.selectedByKind[kind].id}
-                selectedRole={this.props.selectedByKind[kind].role}
               />
             );
           }.bind(this)).toArray()

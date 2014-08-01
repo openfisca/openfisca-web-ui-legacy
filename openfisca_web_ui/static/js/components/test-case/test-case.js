@@ -13,9 +13,9 @@ var Entity = require('./entity'),
 
 var TestCase = React.createClass({
   propTypes: {
+    activeEntity: React.PropTypes.object,
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
-    frozenEntity: React.PropTypes.object,
     getEntityLabel: React.PropTypes.func.isRequired,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
@@ -47,12 +47,10 @@ var TestCase = React.createClass({
                 }.bind(this))
                 .sortBy('label')
                 .map(function(entity) {
-                  var disabled =  !! this.props.frozenEntity;
                   return (
                     <Entity
-                      disabled={disabled}
+                      active={this.props.activeEntity && this.props.activeEntity.id === entity.id}
                       hasErrors={ !! helpers.getObjectPath(this.props.errors, kind, entity.id)}
-                      isEdited={ !! (this.props.frozenEntity && this.props.frozenEntity.id === entity.id)}
                       key={entity.id}
                       label={entity.label}
                       onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}
@@ -65,8 +63,7 @@ var TestCase = React.createClass({
                               'individuId is not in testCase.individus');
                             return (
                               <Individu
-                                disabled={disabled}
-                                edited={ !! (this.props.frozenEntity && this.props.frozenEntity.id === individuId)}
+                                active={this.props.activeEntity && this.props.activeEntity.id === individuId}
                                 errors={helpers.getObjectPath(this.props.errors, 'individus', individuId)}
                                 id={individuId}
                                 key={individuId}
@@ -84,7 +81,6 @@ var TestCase = React.createClass({
                           }
                           return (
                             <Role
-                              disabled={disabled}
                               error={error}
                               key={role}
                               label={this.props.roleLabels[role]}

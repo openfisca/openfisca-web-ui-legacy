@@ -27,8 +27,8 @@ function assignIn(object, crumbs, value) {
 
 
 function formatFrenchNumber(number, options) {
-  var options = Lazy(options).defaults({round: true}).toObject();
-  return (options.round ? Math.round(number) : number).toLocaleString('fr');
+  var opts = Lazy(options).defaults({round: true}).toObject();
+  return (opts.round ? Math.round(number) : number).toLocaleString('fr');
 }
 
 

@@ -4,8 +4,7 @@
 var React = require('react');
 
 var VisualizationSelect = require('./visualization-select'),
-  LegislationSelect = require('./legislation-select'),
-//  SituationForm = require('./situation-form'),
+//  LegislationSelect = require('./legislation-select'),
   YearInput = require('./year-input');
 
 

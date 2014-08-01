@@ -6,7 +6,6 @@ var React = require('react');
 
 var Role = React.createClass({
   propTypes: {
-    disabled: React.PropTypes.bool,
     error: React.PropTypes.string,
     label: React.PropTypes.string.isRequired,
     maxCardinality: React.PropTypes.number,
@@ -19,21 +18,20 @@ var Role = React.createClass({
   },
   render: function() {
     var maxCardinality = this.props.maxCardinality;
-    var addLink = (
-      ! this.props.disabled && (
-        typeof maxCardinality === 'undefined' || ! this.props.children || this.props.children.length < maxCardinality
-      )
-    ) && (
-      <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onCreateIndividuInEntity)}>
-        Ajouter
-      </a>
-    );
+    var addLink = typeof maxCardinality === 'undefined' || ! this.props.children ||
+      this.props.children.length < maxCardinality;
     return (
       <div className="list-group-item">
         <p>{this.props.label}</p>
         {this.props.error && <p className="text-danger">{this.props.error}</p>}
         {this.props.children}
-        {addLink}
+        {
+          addLink && (
+            <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onCreateIndividuInEntity)}>
+              Ajouter
+            </a>
+          )
+        }
       </div>
     );
   },

@@ -10,21 +10,21 @@ var obj = helpers.obj;
 
 var entitiesMetadata = {
   familles: {
-    createMessage: 'Nouvelle famille',
+    createMessage: 'Ajouter une famille',
     label: 'Famille',
     maxCardinality: {parents: 2},
     nameKey: 'nom_famille',
     roles: ['parents', 'enfants'],
   },
   foyers_fiscaux: { // jshint ignore:line
-    createMessage: 'Nouvelle déclaration d\'impôt',
+    createMessage: 'Ajouter une déclaration d\'impôt',
     label: 'Déclaration d\'impôt',
     maxCardinality: {declarants: 2},
     nameKey: 'nom_foyer_fiscal',
     roles: ['declarants', 'personnes_a_charge'],
   },
   menages: {
-    createMessage: 'Nouveau logement principal',
+    createMessage: 'Ajouter un logement principal',
     label: 'Logement principal',
     maxCardinality: {conjoint: 1, personne_de_reference: 1}, // jshint ignore:line
     nameKey: 'nom_menage',
