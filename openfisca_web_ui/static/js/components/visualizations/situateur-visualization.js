@@ -39,7 +39,6 @@ var SituateurVisualization = React.createClass({
     return {x: this.props.xMaxValue, y: extrapolatedPointY};
   },
   findXFromY: function(y) {
-    // Works with values, not pixels.
     var points = this.props.points.concat(this.extrapolatedLastPoint);
     var yIndex = Lazy(points).pluck('y').sortedIndex(y);
     var high = points[yIndex];
@@ -59,7 +58,6 @@ var SituateurVisualization = React.createClass({
     return x;
   },
   findYFromX: function(x) {
-    // Works with values, not pixels.
     var points = this.props.points.concat(this.extrapolatedLastPoint);
     var xIndex = Lazy(points).pluck('x').sortedIndex(x);
     var high = points[xIndex];
@@ -85,7 +83,7 @@ var SituateurVisualization = React.createClass({
     });
   },
   formatNumber: function(number) {
-    return Math.floor(number) === number ? number : number.toFixed(2);
+    return Math.round(number);
   },
   getDefaultProps: function() {
     return {
@@ -153,7 +151,7 @@ var SituateurVisualization = React.createClass({
             />
             <YAxis
               height={this.gridHeight}
-              label='milliers €'
+              label='en €'
               maxValue={this.props.yMaxValue}
               nbSteps={this.props.yNbSteps}
               width={this.props.yAxisWidth}

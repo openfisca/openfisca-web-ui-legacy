@@ -92,7 +92,7 @@ var HoverLegend = React.createClass({
             }}
             x={isLastXValue ? snapPixel.x - 5 : snapPixel.x + 5}
             y={this.props.height - this.props.fontSize}>
-            {this.props.formatNumber(this.props.snapPoint.x)}
+            {this.props.formatNumber(this.props.snapPoint.x) + ' %'}
           </text>
         );
       }
@@ -107,7 +107,7 @@ var HoverLegend = React.createClass({
             }}
             x={10}
             y={snapPixel.y - 5}>
-            {this.props.formatNumber(this.props.snapPoint.y)}
+            {this.props.formatNumber(this.props.snapPoint.y) + ' €'}
           </text>
         );
       }
