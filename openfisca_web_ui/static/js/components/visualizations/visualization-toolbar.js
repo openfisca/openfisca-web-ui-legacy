@@ -33,14 +33,18 @@ var VisualizationToolbar = React.createClass({
         <div className="form-group" style={{marginRight: 5}}>
           <YearInput onChange={this.props.onYearChange} value={this.props.year} />
         </div>
-        <div className="form-group" style={{marginRight: 5}}>
-          <LegislationSelect
-            legislations={this.props.legislations}
-            onChange={this.props.onLegislationChange}
-            value={this.props.legislation}
-          />
+        {
+          /*
+          <div className="form-group" style={{marginRight: 5}}>
+            <LegislationSelect
+              legislations={this.props.legislations}
+              onChange={this.props.onLegislationChange}
+              value={this.props.legislation}
+            />
+          </div>
+        */
+        }
         </div>
-      </div>
     );
   }
 });
