@@ -49,6 +49,13 @@ var Individu = React.createClass({
             <li role="presentation">
               <a
                 href="#"
+                onClick={this.preventDefaultThen.bind(null, this.props.onEdit)}
+                role="menuitem"
+                tabIndex="-1">
+                Éditer
+              </a>
+              <a
+                href="#"
                 onClick={this.preventDefaultThen.bind(null, this.props.onMove)}
                 role="menuitem"
                 tabIndex="-1">

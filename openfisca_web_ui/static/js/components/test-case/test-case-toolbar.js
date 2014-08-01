@@ -9,6 +9,7 @@ var cx = React.addons.classSet;
 var TestCaseToolbar = React.createClass({
   propTypes: {
     disabled: React.PropTypes.bool,
+    displayRepairMenuItem: React.PropTypes.bool,
     hasErrors: React.PropTypes.bool,
     isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
@@ -21,61 +22,76 @@ var TestCaseToolbar = React.createClass({
     callback();
   },
   render: function() {
+    var isButtonDisabled = this.props.disabled || this.props.hasErrors || this.props.isSimulationInProgress;
     return (
       <div>
         <div className="btn-group" style={{marginRight: 5}}>
           <button
             accessKey="s"
             className="btn btn-primary"
-            disabled={this.props.disabled || this.props.hasErrors || this.props.isSimulationInProgress}
-            onClick={this.preventDefaultThen.bind(null, this.props.onSimulate)}
+            disabled={isButtonDisabled}
+            onClick={this.props.onSimulate}
             type="button">
             Simuler
           </button>
           <button
-            className={cx('btn', 'btn-primary', 'dropdown-toggle', this.props.disabled && 'disabled')}
+            className={cx('btn', 'btn-primary', 'dropdown-toggle', isButtonDisabled && 'disabled')}
             data-toggle="dropdown"
+            id="simulation-button"
             type="button">
             <span className="caret"></span>
             <span className="sr-only">Toggle Dropdown</span>
           </button>
-          <ul className="dropdown-menu" role="menu">
-            <li>
-              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}>Réparer</a>
-            </li>
-            <li>
-              <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onReset)}>Réinitialiser</a>
-            </li>
-          </ul>
-        </div>
-        <div className="btn-group" style={{marginRight: 5}}>
-          <button
-            className="btn btn-default dropdown-toggle"
-            data-toggle="dropdown"
-            disabled={this.props.disabled}
-            type="button">
-            Ajouter <span className="caret"></span>
-          </button>
-          <ul className="dropdown-menu" role="menu">
-            <li>
+          <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
+            <li role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'familles'))}>
-                une famille
+                onClick={this.preventDefaultThen.bind(null, this.props.onSimulate)}
+                role="menuitem"
+                tabindex="-1">
+                Simuler
+              </a>
+              {
+                this.props.displayRepairMenuItem && (
+                  <a
+                    href="#"
+                    onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}
+                    role="menuitem"
+                    tabindex="-1">
+                    Réparer
+                  </a>
+                )
+              }
+              <a
+                href="#"
+                onClick={this.preventDefaultThen.bind(null, this.props.onReset)}
+                role="menuitem"
+                tabindex="-1">
+                Réinitialiser
               </a>
             </li>
-            <li>
+            <li className="divider" role="presentation"></li>
+            <li role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'foyers_fiscaux'))}>
-                une déclaration d'impôt
+                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'familles'))}
+                role="menuitem"
+                tabindex="-1">
+                Ajouter une famille
               </a>
-            </li>
-            <li>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'menages'))}>
-                un logement principal
+                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'foyers_fiscaux'))}
+                role="menuitem"
+                tabindex="-1">
+                Ajouter une déclaration d'impôt
+              </a>
+              <a
+                href="#"
+                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'menages'))}
+                role="menuitem"
+                tabindex="-1">
+                Ajouter un logement principal
               </a>
             </li>
           </ul>

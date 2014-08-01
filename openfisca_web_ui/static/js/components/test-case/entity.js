@@ -44,6 +44,11 @@ var Entity = React.createClass({
               <li>
                 <a
                   href="#"
+                  onClick={this.preventDefaultThen.bind(null, this.props.onEdit)}>
+                  Éditer
+                </a>
+                <a
+                  href="#"
                   onClick={this.preventDefaultThen.bind(null, this.props.onDelete)}>
                   Supprimer
                 </a>
