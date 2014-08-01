@@ -9,6 +9,7 @@ var cx = React.addons.classSet;
 var VariablesTree = React.createClass({
   propTypes: {
     expandedSubtotalColor: React.PropTypes.string.isRequired,
+    formatNumber: React.PropTypes.func.isRequired,
     highlightedVariableCode: React.PropTypes.string,
     noColorFill: React.PropTypes.string.isRequired,
     onHover: React.PropTypes.func.isRequired,
@@ -92,7 +93,7 @@ var VariablesTree = React.createClass({
             fontStyle: isSubtotal && 'italic',
             fontWeight: variable.depth === 0 ? 'bold' : 'normal',
           }}>
-          {Math.round(variable.value) + ' €' /* jshint ignore:line */}
+          {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
         </td>
       </tr>
     );

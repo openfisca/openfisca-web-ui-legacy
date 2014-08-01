@@ -200,6 +200,7 @@ var BaremeVisualization = React.createClass({
         </svg>
         <div style={{marginTop: 30}}>
           <VariablesTree
+            formatNumber={this.props.formatNumber}
             highlightedVariableCode={this.state.hoveredBarCode}
             onToggle={this.props.onVariableToggle}
             onHover={this.handleVariableHover}

@@ -174,6 +174,7 @@ var WaterfallVisualization = React.createClass({
           </g>
         </svg>
         <VariablesTree
+          formatNumber={this.props.formatNumber}
           highlightedVariableCode={this.state.hoveredBarCode}
           onToggle={this.props.onVariableToggle}
           onHover={this.handleVariableHover}
