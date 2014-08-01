@@ -10,7 +10,10 @@ var JsonVisualization = React.createClass({
   },
   render: function() {
     return (
-      <pre>{JSON.stringify(this.props.data, null, 2)}</pre>
+      <div>
+        <p>Résultats de la simulation :</p>
+        <pre>{JSON.stringify(this.props.data, null, 2)}</pre>
+      </div>
     );
   },
 });
