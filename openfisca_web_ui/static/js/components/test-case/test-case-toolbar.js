@@ -35,7 +35,7 @@ var TestCaseToolbar = React.createClass({
             Simuler
           </button>
           <button
-            className={cx('btn', 'btn-primary', 'dropdown-toggle', isButtonDisabled && 'disabled')}
+            className={cx('btn', 'btn-primary', 'dropdown-toggle')}
             data-toggle="dropdown"
             id="simulation-button"
             type="button">
@@ -43,14 +43,16 @@ var TestCaseToolbar = React.createClass({
             <span className="sr-only">Toggle Dropdown</span>
           </button>
           <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
-            <li role="presentation">
+            <li className={cx({disabled: isButtonDisabled})} role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onSimulate)}
+                onClick={isButtonDisabled ? null : this.preventDefaultThen.bind(null, this.props.onSimulate)}
                 role="menuitem"
                 tabindex="-1">
                 Simuler
               </a>
+            </li>
+            <li>
               {
                 this.props.displayRepairMenuItem && (
                   <a

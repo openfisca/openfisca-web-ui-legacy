@@ -9,17 +9,22 @@ var EditForm = React.createClass({
     onClose: React.PropTypes.func.isRequired,
     title: React.PropTypes.string.isRequired,
   },
+  preventDefaultThen: function(callback, event) {
+    event.preventDefault();
+    callback();
+  },
   render: function() {
     return (
-      <form role="form">
-        <button className="close" onClick={this.props.onClose} type="button">
+      <form onSubmit={this.preventDefaultThen.bind(null, this.props.onClose)} role="form">
+        <button className="close" onClick={this.props.onClose} title='Fermer' type="button">
           <span aria-hidden="true">×</span>
           <span className="sr-only">Fermer</span>
         </button>
         <h2 style={{margin: 0, textAlign: 'center'}}>{this.props.title}</h2>
         <hr/>
         {this.props.children}
-        <button className="btn btn-default" onClick={this.props.onClose} type="button">Fermer</button>
+        <hr/>
+        <button className="btn btn-default" type="submit">Fermer</button>
       </form>
     );
   }

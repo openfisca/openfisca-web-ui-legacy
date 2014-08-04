@@ -41,8 +41,8 @@ var MoveIndividuForm = React.createClass({
                 key={kind}
                 kind={kind}
                 label={entityMetadata.label}
-                onEntityChange={this.props.onEntityChange}
-                onRoleChange={this.props.onRoleChange}
+                onEntityChange={this.props.onEntityChange.bind(null, kind)}
+                onRoleChange={this.props.onRoleChange.bind(null, kind)}
                 roles={roles}
               />
             );

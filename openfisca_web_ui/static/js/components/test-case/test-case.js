@@ -13,7 +13,7 @@ var Entity = require('./entity'),
 
 var TestCase = React.createClass({
   propTypes: {
-    activeEntity: React.PropTypes.object,
+    activeEntityId: React.PropTypes.string,
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
     getEntityLabel: React.PropTypes.func.isRequired,
@@ -49,7 +49,7 @@ var TestCase = React.createClass({
                 .map(function(entity) {
                   return (
                     <Entity
-                      active={this.props.activeEntity && this.props.activeEntity.id === entity.id}
+                      active={this.props.activeEntityId === entity.id}
                       hasErrors={ !! helpers.getObjectPath(this.props.errors, kind, entity.id)}
                       key={entity.id}
                       label={entity.label}
@@ -63,7 +63,7 @@ var TestCase = React.createClass({
                               'individuId is not in testCase.individus');
                             return (
                               <Individu
-                                active={this.props.activeEntity && this.props.activeEntity.id === individuId}
+                                active={this.props.activeEntityId === individuId}
                                 errors={helpers.getObjectPath(this.props.errors, 'individus', individuId)}
                                 id={individuId}
                                 key={individuId}
