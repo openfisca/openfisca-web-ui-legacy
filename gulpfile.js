@@ -52,14 +52,30 @@ function buildScripts(entryFile, options) {
 function handleError() {
   /* jshint validthis: true */
   var args = Array.prototype.slice.call(arguments);
-  var filePathRegex = /Error: Parsing file (.+): Line \d+/;
-  var match = filePathRegex.exec(args[0]);
-  var filePath = match[1];
-  notify.onError({
-    message: '<%= error.message %> <a href="file://<%= options.filePath %>">open</a>',
-    templateOptions: {filePath: filePath},
+  gutil.log(args);
+  var errorData = {
+    message: '<%= error.message %>',
     title: 'Compile Error',
-  }).apply(this, args);
+  };
+  var filePath;
+  if (args[0] && args[0].fileName) {
+    // React JSX source files.
+    filePath = args[0].fileName;
+  } else {
+    // Vanilla JS source files.
+    var filePathRegex = /Error: Parsing file (.+): Line \d+/;
+    var match = filePathRegex.exec(args[0]);
+    if (match) {
+      filePath = match[1];
+    }
+  }
+  if (filePath) {
+    console.log(errorData);
+    errorData.message += ' <a href="file://<%= options.filePath %>">open</a>';
+    console.log(errorData);
+    errorData.templateOptions = {filePath: filePath};
+  }
+  notify.onError(errorData).apply(this, args);
   this.emit('end'); // Keep gulp from hanging on this task
 }
 
