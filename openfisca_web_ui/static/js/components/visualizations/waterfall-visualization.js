@@ -2,12 +2,14 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  strformat = require('strformat');
 
 var axes = require('../../axes'),
   HGrid = require('./svg/h-grid'),
   VariablesTree = require('./variables-tree'),
   WaterfallBars = require('./svg/waterfall-bars'),
+  WaterfallBarHover = require('./svg/waterfall-bar-hover'),
   XAxisLabelled = require('./svg/x-axis-labelled'),
   YAxis = require('./svg/y-axis');
 
@@ -53,7 +55,7 @@ var WaterfallVisualization = React.createClass({
   },
   getInitialState: function() {
     return {
-      hoveredBarCode: null,
+      activeVariableCode: null,
     };
   },
   getVariables: function() {
@@ -89,7 +91,7 @@ var WaterfallVisualization = React.createClass({
     return variables;
   },
   handleVariableHover: function(variable) {
-    this.setState({hoveredBarCode: variable && variable.code});
+    this.setState({activeVariableCode: variable && variable.code});
   },
   render: function() {
     var variables = this.getVariables();
@@ -97,7 +99,7 @@ var WaterfallVisualization = React.createClass({
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
     var xLabels = variables.map(function(variable) {
       var style = {};
-      if (variable.code === this.state.hoveredBarCode) {
+      if (variable.code === this.state.activeVariableCode) {
         style.fontWeight = 'bold';
       }
       var name = variable.short_name; // jshint ignore:line
@@ -142,40 +144,38 @@ var WaterfallVisualization = React.createClass({
               width={this.props.yAxisWidth}
             />
             <WaterfallBars
+              activeVariableCode={this.state.activeVariableCode}
               height={gridHeight}
-              highlightedVariableCode={this.state.hoveredBarCode}
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
               variables={variables}
               width={gridWidth}
             />
-          </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
             {
               variables.map(function(variable, idx) {
                 var isSubtotal = variable.hasChildren && variable.depth > 0;
                 return (
-                  <rect
-                    height={this.props.height}
-                    key={variable.code}
-                    onClick={
-                      this.props.onVariableToggle && isSubtotal && this.props.onVariableToggle.bind(null, variable)
-                    }
-                    onMouseOut={this.handleVariableHover.bind(null, null)}
-                    onMouseOver={this.handleVariableHover.bind(null, variable)}
-                    style={{opacity: 0}}
-                    width={stepWidth}
-                    x={stepWidth * idx}
-                    y={0}
-                  />
+                  <g key={variable.code} transform={strformat('translate({0}, 0)', stepWidth * idx)}>
+                    <WaterfallBarHover
+                      barHeight={gridHeight}
+                      barWidth={stepWidth}
+                      labelHeight={this.props.xAxisHeight}
+                      onClick={
+                        this.props.onVariableToggle && isSubtotal ?
+                          this.props.onVariableToggle.bind(null, variable) : null
+                      }
+                      onHover={this.handleVariableHover}
+                      variable={variable}
+                    />
+                  </g>
                 );
               }, this)
             }
           </g>
         </svg>
         <VariablesTree
+          activeVariableCode={this.state.activeVariableCode}
           formatNumber={this.props.formatNumber}
-          highlightedVariableCode={this.state.hoveredBarCode}
           onToggle={this.props.onVariableToggle}
           onHover={this.handleVariableHover}
           variables={variablesTreeVariables}

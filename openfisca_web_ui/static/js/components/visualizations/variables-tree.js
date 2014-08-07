@@ -8,9 +8,9 @@ var cx = React.addons.classSet;
 
 var VariablesTree = React.createClass({
   propTypes: {
+    activeVariableCode: React.PropTypes.string,
     expandedSubtotalColor: React.PropTypes.string.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
-    highlightedVariableCode: React.PropTypes.string,
     noColorFill: React.PropTypes.string.isRequired,
     onHover: React.PropTypes.func.isRequired,
     onToggle: React.PropTypes.func,
@@ -46,7 +46,7 @@ var VariablesTree = React.createClass({
     var displayColor = ! isSubtotal || variable.collapsed;
     return (
       <tr
-        className={cx({active: variable.code === this.props.highlightedVariableCode})}
+        className={cx({active: variable.code === this.props.activeVariableCode})}
         key={variable.code}
         onMouseOut={this.props.onHover.bind(null, null)}
         onMouseOver={this.props.onHover.bind(null, variable)}>
@@ -55,8 +55,8 @@ var VariablesTree = React.createClass({
             onClick={isSubtotal && this.props.onToggle.bind(null, variable)}
             style={{
               cursor: isSubtotal ? 'pointer' : 'auto',
-              marginLeft: variable.depth > 0 ? (variable.depth - 1) * 20 : 0,
               fontWeight: variable.depth === 0 ? 'bold' : 'normal',
+              marginLeft: variable.depth > 0 ? (variable.depth - 1) * 20 : 0,
             }}>
             {variableName}
           </span>
