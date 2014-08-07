@@ -48,7 +48,7 @@ var TestCaseToolbar = React.createClass({
                 href="#"
                 onClick={isButtonDisabled ? null : this.preventDefaultThen.bind(null, this.props.onSimulate)}
                 role="menuitem"
-                tabindex="-1">
+                tabIndex="-1">
                 Simuler
               </a>
             </li>
@@ -59,7 +59,7 @@ var TestCaseToolbar = React.createClass({
                     href="#"
                     onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}
                     role="menuitem"
-                    tabindex="-1">
+                    tabIndex="-1">
                     Réparer
                   </a>
                 )
@@ -68,7 +68,7 @@ var TestCaseToolbar = React.createClass({
                 href="#"
                 onClick={this.preventDefaultThen.bind(null, this.props.onReset)}
                 role="menuitem"
-                tabindex="-1">
+                tabIndex="-1">
                 Réinitialiser
               </a>
             </li>
@@ -78,21 +78,21 @@ var TestCaseToolbar = React.createClass({
                 href="#"
                 onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'familles'))}
                 role="menuitem"
-                tabindex="-1">
+                tabIndex="-1">
                 Ajouter une famille
               </a>
               <a
                 href="#"
                 onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'foyers_fiscaux'))}
                 role="menuitem"
-                tabindex="-1">
+                tabIndex="-1">
                 Ajouter une déclaration d'impôt
               </a>
               <a
                 href="#"
                 onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'menages'))}
                 role="menuitem"
-                tabindex="-1">
+                tabIndex="-1">
                 Ajouter un logement principal
               </a>
             </li>
