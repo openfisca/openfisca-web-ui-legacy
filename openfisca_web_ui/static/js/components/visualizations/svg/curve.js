@@ -1,15 +1,16 @@
 /** @jsx React.DOM */
 'use strict';
 
-var invariant = require('react/lib/invariant'),
-  Lazy = require('lazy.js'),
+var Lazy = require('lazy.js'),
   React = require('react'),
   strformat = require('strformat');
 
 
 var Curve = React.createClass({
   propTypes: {
+    active: React.PropTypes.bool.isRequired,
     fill: React.PropTypes.bool.isRequired,
+    onHover: React.PropTypes.func,
     points: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         x: React.PropTypes.number.isRequired,
@@ -18,9 +19,6 @@ var Curve = React.createClass({
     ).isRequired,
     pointToPixel: React.PropTypes.func.isRequired,
     style: React.PropTypes.object,
-    xMaxValue: React.PropTypes.number,
-    xMinValue: React.PropTypes.number,
-    yMinValue: React.PropTypes.number,
   },
   defaultStyle: function() {
     return this.props.fill ? {
@@ -32,11 +30,6 @@ var Curve = React.createClass({
       strokeWidth: 1.5,
     };
   },
-  getDefaultProps: function() {
-    return {
-      fill: false,
-    };
-  },
   pointsToPixelsStr: function(points) {
     return points.map(function(point) {
       var pixel = this.props.pointToPixel(point);
@@ -45,19 +38,17 @@ var Curve = React.createClass({
   },
   render: function() {
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();
-    invariant(
-      ! this.props.fill || this.props.xMaxValue && this.props.xMinValue && this.props.yMinValue,
-      'xMaxValue, xMinValue and yMinValue props must be given when fill prop is true.'
-    );
-    this.points = this.props.fill ?
-      Lazy([{x: this.props.xMinValue, y: this.props.yMinValue}])
-        .concat(this.props.points)
-        .concat({x: this.props.xMaxValue, y: this.props.yMinValue})
-        .toArray() :
-      this.props.points;
-    var pixelsStr = this.pointsToPixelsStr(this.points);
+    if (this.props.active) {
+      var changeset = this.props.fill ? {fill: 'gray', opacity: 1} : {strokeWidth: 3};
+      style = Lazy(style).assign(changeset).toObject();
+    }
     return (
-      <polyline points={pixelsStr} style={style} />
+      <polyline
+        onMouseOut={this.props.onHover}
+        onMouseOver={this.props.onHover}
+        points={this.pointsToPixelsStr(this.props.points)}
+        style={style}
+      />
     );
   }
 });

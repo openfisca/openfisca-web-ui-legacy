@@ -37,15 +37,15 @@ var BaremeVisualization = React.createClass({
     var maxValue = 0;
     var minValue = 0;
     variables.forEach(function(variable) {
-      var variableMaxValue = Math.max.apply(null, variable.values);
+      var variableMaxValue = Math.max.apply(null, this.highValues(variable));
       if (variableMaxValue > maxValue) {
         maxValue = variableMaxValue;
       }
-      var variableMinValue = Math.min.apply(null, variable.values);
+      var variableMinValue = Math.min.apply(null, variable.baseValues);
       if (variableMinValue < minValue) {
         minValue = variableMinValue;
       }
-    });
+    }.bind(this));
     return {maxValue: maxValue, minValue: minValue};
   },
   getDefaultProps: function() {
@@ -60,24 +60,30 @@ var BaremeVisualization = React.createClass({
   },
   getInitialState: function() {
     return {
-      hoveredBarCode: null,
+      activeVariableCode: null,
     };
   },
   getVariables: function() {
-    var processNode = function(variable, depth, hidden) {
+    var processNode = function(variable, baseValues, depth, hidden) {
       var newVariables = [];
       var collapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
       if (variable.children) {
-        var childrenVariables = Lazy(variable.children)
-          .map(function(child) { return processNode(child, depth + 1, hidden || collapsed); })
-          .flatten()
-          .toArray();
+        var childrenVariables = [];
+        var childBaseValues = baseValues;
+        Lazy(variable.children).each(function(child) {
+          var childVariables = processNode(child, childBaseValues, depth + 1, hidden || collapsed);
+          childrenVariables = childrenVariables.concat(childVariables);
+          childBaseValues = Lazy(childBaseValues).zip(child.values).map(function(pair) {
+            return Lazy(pair).sum();
+          }).toArray();
+        });
         newVariables = newVariables.concat(childrenVariables);
       }
       var hasValue = Lazy(variable.values).any(function(value) { return value !== 0; });
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
         newVariableSequence = newVariableSequence.assign({
+          baseValues: baseValues,
           collapsed: collapsed,
           depth: depth,
           hasChildren: !! variable.children,
@@ -87,7 +93,8 @@ var BaremeVisualization = React.createClass({
       }
       return newVariables;
     }.bind(this);
-    var variables = processNode(this.props.variablesTree, 0, false);
+    var initBaseValues = Lazy.repeat(0, this.props.variablesTree.values.length).toArray();
+    var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
   gridPointToPixel: function(point) {
@@ -107,8 +114,14 @@ var BaremeVisualization = React.createClass({
     };
     return pixel;
   },
-  handleVariableHover: function(variable) {
-    this.setState({hoveredBarCode: variable && variable.code});
+  handleVariableHover: function(variable, event) {
+    this.setState({activeVariableCode: event.type === 'mouseover' && variable ? variable.code : null});
+  },
+  highValues: function(variable) {
+    return Lazy(variable.baseValues)
+      .zip(variable.values)
+      .map(function(pair) { return Lazy(pair).sum(); })
+      .toArray();
   },
   render: function() {
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop;
@@ -141,35 +154,41 @@ var BaremeVisualization = React.createClass({
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             {
-              variables.map(function(variable) {
-                var toDomainValue = axes.convertLinearRange.bind(
-                  null,
-                  {
-                    newMax: this.props.xMaxValue,
-                    newMin: this.props.xMinValue,
-                    oldMax: variable.values.length - 1,
-                    oldMin: 0,
-                  }
-                );
-                var points = Lazy.range(0, variable.values.length)
+              variablesTreeVariables.map(function(variable) {
+                var toDomainValue = axes.convertLinearRange.bind(null, {
+                  newMax: this.props.xMaxValue,
+                  newMin: this.props.xMinValue,
+                  oldMax: variable.values.length - 1,
+                  oldMin: 0,
+                });
+                var lowPoints = Lazy.range(0, variable.values.length)
                   .map(toDomainValue)
-                  .zip(variable.values)
-                  .map(function(pair) { return {x: pair[0], y: pair[1]}; })
+                  .zip(variable.baseValues)
                   .toArray();
                 var isFilled = ! variable.collapsed && variable.depth > 0;
+                var pointsSequence;
+                var highPoints = Lazy.range(0, variable.values.length)
+                  .map(toDomainValue)
+                  .zip(this.highValues(variable))
+                  .toArray();
+                if (isFilled) {
+                  pointsSequence = Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray());
+                } else {
+                  pointsSequence = Lazy(highPoints);
+                }
+                var points = pointsSequence.map(function(pair) { return {x: pair[0], y: pair[1]}; }).toArray();
                 return (
                   <Curve
+                    active={this.state.activeVariableCode === variable.code}
                     fill={isFilled}
                     key={variable.code}
+                    onHover={this.handleVariableHover.bind(null, variable)}
                     points={points}
                     pointToPixel={this.gridPointToPixel}
                     style={{
                       fill: isFilled ? strformat('rgb({0}, {1}, {2})', variable.color) : 'none',
                       stroke: isFilled ? null : strformat('rgb({0}, {1}, {2})', variable.color),
                     }}
-                    xMaxValue={this.props.xMaxValue}
-                    xMinValue={this.props.xMinValue}
-                    yMinValue={this.ySmartValues.minValue}
                   />
                 );
               }, this)
@@ -200,8 +219,8 @@ var BaremeVisualization = React.createClass({
         </svg>
         <div style={{marginTop: 30}}>
           <VariablesTree
+            activeVariableCode={this.state.activeVariableCode}
             formatNumber={this.props.formatNumber}
-            highlightedVariableCode={this.state.hoveredBarCode}
             onToggle={this.props.onVariableToggle}
             onHover={this.handleVariableHover}
             variables={variablesTreeVariables}
