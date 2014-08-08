@@ -1,12 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var Lazy = require('lazy.js'),
+  React = require('react');
 
 
 var WaterfallBars = React.createClass({
   propTypes: {
     activeVariableCode: React.PropTypes.string,
+    displayExpandedSubtotals: React.PropTypes.bool.isRequired,
     height: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     rectOpacity: React.PropTypes.number.isRequired,
@@ -28,24 +30,27 @@ var WaterfallBars = React.createClass({
   render: function() {
     var unitHeight = this.props.height / (this.props.maxValue - this.props.minValue);
     var y0 = this.props.maxValue > 0 ? this.props.maxValue * unitHeight : 0;
-    var stepWidth = this.props.width / this.props.variables.length;
+    var variables = Lazy(this.props.variables).filter(function(variable) {
+      var isThinBar = variable.depth > 0 && ! variable.isCollapsed && variable.hasChildren;
+      return ! isThinBar || this.props.displayExpandedSubtotals;
+    }.bind(this)).toArray();
+    var stepWidth = this.props.width / variables.length;
     return (
       <g>
         {
-          this.props.variables.map(function(variable, variableIndex) {
-            var isSubtotal = ! variable.collapsed && variable.hasChildren;
+          variables.map(function(variable, variableIndex) {
             var style = {
               fill: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
               opacity: variable.code === this.props.activeVariableCode ? 1 : this.props.rectOpacity,
               shapeRendering: 'crispedges',
               stroke: variable.code === this.props.activeVariableCode ?
                 this.props.strokeActive : this.props.strokeInactive,
-              strokeWidth: isSubtotal && 3,
+              strokeWidth: variable.isThinBar && 3,
             };
             var height = Math.abs(variable.value) * unitHeight;
             var y = y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * unitHeight;
             return (
-              isSubtotal ? (
+              variable.isThinBar ? (
                 <line
                   key={variable.code}
                   style={style}

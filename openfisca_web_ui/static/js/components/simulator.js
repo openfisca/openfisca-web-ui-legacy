@@ -84,8 +84,8 @@ var Simulator = React.createClass({
   getDefaultProps: function() {
     return {
       baremeStepsX: 20,
-      baremeMaxValue: 40000,
-      baremeMinValue: 2000,
+      baremeMaxValue: 70000,
+      baremeMinValue: 0,
       baremeVariableCode: 'sali',
     };
   },
@@ -100,7 +100,7 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
-      visualizationSlug: 'bareme',
+      visualizationSlug: 'cascade',
       waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
@@ -422,7 +422,7 @@ var Simulator = React.createClass({
             onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
-            xLabel="Revenus d'activité imposables (en €)"
+            xLabel="Revenus d'activité imposables"
             xMaxValue={this.props.baremeMaxValue}
             xMinValue={this.props.baremeMinValue}
           />
@@ -430,6 +430,7 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'cascade') {
         return (
           <WaterfallVisualization
+            displayExpandedSubtotals={false}
             expandedVariables={this.state.waterfallExpandedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}

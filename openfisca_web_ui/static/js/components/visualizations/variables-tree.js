@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var Lazy = require('lazy.js'),
+  React = require('react/addons');
 
 var cx = React.addons.classSet;
 
@@ -23,14 +24,14 @@ var VariablesTree = React.createClass({
     };
   },
   render: function() {
+    var variablesSequence = Lazy(this.props.variables);
+    var variables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
     return (
       <div className='table-responsive'>
         <table className='table table-condensed'>
           <tbody>
             {
-              this.props.variables.map(function(variable) {
-                return this.renderVariable(variable);
-              }.bind(this))
+              variables.map(variable => this.renderVariable(variable))
             }
           </tbody>
         </table>
@@ -38,12 +39,11 @@ var VariablesTree = React.createClass({
     );
   },
   renderVariable: function(variable) {
-    var isSubtotal = variable.hasChildren && variable.depth > 0;
     var variableName = variable.name;
-    if (isSubtotal) {
-      variableName = (variable.collapsed ? '▶' : '▼') + ' ' + variableName;
+    if (variable.isSubtotal) {
+      variableName = (variable.isCollapsed ? '▶' : '▼') + ' ' + variableName;
     }
-    var displayColor = ! isSubtotal || variable.collapsed;
+    var displayColor = ! variable.isSubtotal || variable.isCollapsed;
     return (
       <tr
         className={cx({active: variable.code === this.props.activeVariableCode})}
@@ -52,9 +52,9 @@ var VariablesTree = React.createClass({
         onMouseOver={this.props.onHover.bind(null, variable)}>
         <td>
           <span
-            onClick={isSubtotal && this.props.onToggle.bind(null, variable)}
+            onClick={variable.isSubtotal && this.props.onToggle.bind(null, variable)}
             style={{
-              cursor: isSubtotal ? 'pointer' : 'auto',
+              cursor: variable.isSubtotal ? 'pointer' : 'auto',
               fontWeight: variable.depth === 0 ? 'bold' : 'normal',
               marginLeft: variable.depth > 0 ? (variable.depth - 1) * 20 : 0,
             }}>
@@ -78,8 +78,8 @@ var VariablesTree = React.createClass({
             <td
               className='text-right'
               style={{
-                color: isSubtotal && ! variable.collapsed && this.props.expandedSubtotalColor,
-                fontStyle: isSubtotal && 'italic',
+                color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
+                fontStyle: variable.isSubtotal && 'italic',
                 fontWeight: variable.depth === 0 ? 'bold' : 'normal',
               }}>
               {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}

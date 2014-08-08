@@ -21,14 +21,15 @@ var Curve = React.createClass({
     style: React.PropTypes.object,
   },
   defaultStyle: function() {
-    return this.props.fill ? {
+    var style = this.props.fill ? {
       fill: 'rgb(31, 119, 180)',
-      opacity: 0.6,
     } : {
       fill: 'none',
-      stroke: 'rgb(31, 119, 180)',
       strokeWidth: 1.5,
     };
+    return Lazy(style).assign({
+      stroke: 'rgb(31, 119, 180)',
+    }).toObject();
   },
   pointsToPixelsStr: function(points) {
     return points.map(function(point) {
@@ -39,8 +40,7 @@ var Curve = React.createClass({
   render: function() {
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();
     if (this.props.active) {
-      var changeset = this.props.fill ? {fill: 'gray', opacity: 1} : {strokeWidth: 3};
-      style = Lazy(style).assign(changeset).toObject();
+      style = Lazy(style).assign({stroke: 'black', strokeWidth: 2}).toObject();
     }
     return (
       <polyline

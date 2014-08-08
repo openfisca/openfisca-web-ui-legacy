@@ -52,7 +52,7 @@ var BaremeVisualization = React.createClass({
     return {
       marginRight: 10,
       marginTop: 10,
-      xAxisHeight: 60,
+      xAxisHeight: 90,
       yAxisWidth: 80,
       xNbSteps: 10,
       yNbSteps: 8,
@@ -129,8 +129,6 @@ var BaremeVisualization = React.createClass({
     var variables = this.getVariables();
     var yBounds = this.computeValuesBounds(variables);
     this.ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
-    var variablesSequence = Lazy(variables);
-    var variablesTreeVariables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -154,7 +152,7 @@ var BaremeVisualization = React.createClass({
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             {
-              variablesTreeVariables.map(function(variable) {
+              variables.map(function(variable) {
                 var toDomainValue = axes.convertLinearRange.bind(null, {
                   newMax: this.props.xMaxValue,
                   newMin: this.props.xMinValue,
@@ -165,7 +163,7 @@ var BaremeVisualization = React.createClass({
                   .map(toDomainValue)
                   .zip(variable.baseValues)
                   .toArray();
-                var isFilled = ! variable.collapsed && variable.depth > 0;
+                var isFilled = ! variable.isCollapsed && variable.depth > 0;
                 var pointsSequence;
                 var highPoints = Lazy.range(0, variable.values.length)
                   .map(toDomainValue)
@@ -177,7 +175,7 @@ var BaremeVisualization = React.createClass({
                   pointsSequence = Lazy(highPoints);
                 }
                 var points = pointsSequence.map(function(pair) { return {x: pair[0], y: pair[1]}; }).toArray();
-                return (
+                return (! variable.hasChildren || variable.depth === 0) && (
                   <Curve
                     active={this.state.activeVariableCode === variable.code}
                     fill={isFilled}
@@ -187,19 +185,19 @@ var BaremeVisualization = React.createClass({
                     pointToPixel={this.gridPointToPixel}
                     style={{
                       fill: isFilled ? strformat('rgb({0}, {1}, {2})', variable.color) : 'none',
-                      stroke: isFilled ? null : strformat('rgb({0}, {1}, {2})', variable.color),
+                      stroke: strformat('rgb({0}, {1}, {2})', variable.color),
                     }}
                   />
                 );
-              }, this)
+              }.bind(this))
             }
             <YAxis
               formatNumber={this.props.formatNumber}
               height={this.gridHeight}
-              label='en €'
               maxValue={this.ySmartValues.maxValue}
               minValue={this.ySmartValues.minValue}
               nbSteps={this.props.yNbSteps}
+              unit='€'
               width={this.props.yAxisWidth}
             />
           </g>
@@ -213,6 +211,8 @@ var BaremeVisualization = React.createClass({
               maxValue={this.props.xMaxValue}
               minValue={this.props.xMinValue}
               nbSteps={this.props.xNbSteps}
+              rotateLabels={true}
+              unit='€'
               width={this.gridWidth}
             />
           </g>
@@ -223,7 +223,7 @@ var BaremeVisualization = React.createClass({
             formatNumber={this.props.formatNumber}
             onToggle={this.props.onVariableToggle}
             onHover={this.handleVariableHover}
-            variables={variablesTreeVariables}
+            variables={variables}
           />
         </div>
       </div>

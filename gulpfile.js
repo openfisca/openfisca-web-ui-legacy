@@ -1,15 +1,15 @@
 'use strict';
 
 var browserify = require('browserify'),
-gulp = require('gulp'),
-gutil = require('gulp-util'),
-livereload = require('gulp-livereload'),
-notify = require('gulp-notify'),
-rename = require('gulp-rename'),
-rimraf = require('gulp-rimraf'),
-source = require('vinyl-source-stream'),
-uglify = require('gulp-uglify'),
-watchify = require('watchify');
+  gulp = require('gulp'),
+  gutil = require('gulp-util'),
+  livereload = require('gulp-livereload'),
+  notify = require('gulp-notify'),
+  rename = require('gulp-rename'),
+  rimraf = require('gulp-rimraf'),
+  source = require('vinyl-source-stream'),
+  uglify = require('gulp-uglify'),
+  watchify = require('watchify');
 
 
 var staticDir = './openfisca_web_ui/static';
@@ -21,7 +21,7 @@ var vendorJsFiles = [
   './node_modules/lazy.js/lazy.js',
 ];
 var vendorDir = distDir + '/vendor',
-vendorBootstrapDir = vendorDir + '/bootstrap';
+  vendorBootstrapDir = vendorDir + '/bootstrap';
 
 
 function buildScripts(entryFile, options) {
@@ -29,7 +29,6 @@ function buildScripts(entryFile, options) {
     watch = options && options.watch;
   var bundlerConstructor = options && watch ? watchify : browserify;
   var bundler = bundlerConstructor(entryFile);
-//  bundler.transform(reactify, {es6: true});
   function rebundle() {
     var stream = bundler.bundle({debug: debug});
     if (watch) {

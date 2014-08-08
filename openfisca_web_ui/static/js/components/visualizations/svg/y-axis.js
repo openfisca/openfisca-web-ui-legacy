@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  strformat = require('strformat');
 
 
 var YAxis = React.createClass({
@@ -11,12 +12,13 @@ var YAxis = React.createClass({
     height: React.PropTypes.number.isRequired,
     label: React.PropTypes.string,
     labelFontSize: React.PropTypes.number.isRequired,
+    maxValue: React.PropTypes.number.isRequired,
+    minValue: React.PropTypes.number.isRequired,
     nbSteps: React.PropTypes.number.isRequired,
     strokeColor: React.PropTypes.string.isRequired,
     tickFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,
-    maxValue: React.PropTypes.number.isRequired,
-    minValue: React.PropTypes.number.isRequired,
+    unit: React.PropTypes.string,
     width: React.PropTypes.number.isRequired,
   },
   getDefaultProps: function() {
@@ -46,7 +48,12 @@ var YAxis = React.createClass({
                   style={{textAnchor: 'end', fontSize: this.props.tickFontSize}}
                   x={- this.props.tickSize * 1.66}
                   y={this.props.tickFontSize * 0.4}>
-                  {this.props.formatNumber(value)}
+                  {
+                    strformat(this.props.unit && value > 0 ? '{value} {unit}' : '{value}', {
+                      unit: this.props.unit,
+                      value: this.props.formatNumber(value),
+                    })
+                  }
                 </text>
                 <line style={lineStyle} x2={- this.props.tickSize} y2={0} />
               </g>

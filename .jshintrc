@@ -1,6 +1,7 @@
 {
   "browser": true,
   "camelcase": true,
+  "esnext": true,
   "globals": {
     "alert": false,
     "confirm": false,

@@ -195,11 +195,9 @@ var SituateurVisualization = React.createClass({
             </g>
           </g>
         </svg>
-        {
-          <p className='well' style={{textAlign: 'center'}}>
-            {this.formatHint(this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value})}
-          </p>
-        }
+        <p className='well' style={{textAlign: 'center'}}>
+          {this.formatHint(this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value})}
+        </p>
       </div>
     );
   },

@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  strformat = require('strformat');
 
 
 var XAxis = React.createClass({
@@ -14,6 +15,7 @@ var XAxis = React.createClass({
     maxValue: React.PropTypes.number.isRequired,
     minValue: React.PropTypes.number.isRequired,
     nbSteps: React.PropTypes.number.isRequired,
+    rotateLabels: React.PropTypes.bool.isRequired,
     strokeColor: React.PropTypes.string.isRequired,
     tickFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,
@@ -42,15 +44,23 @@ var XAxis = React.createClass({
             var translateX = idx * stepWidth;
             return (
               <g key={'tick-' + idx} transform={'translate(' + translateX + ', 0)'}>
-                <text
-                  style={{
-                    fontSize: this.props.tickFontSize,
-                    textAnchor: idx === steps.length - 1 ? 'end' : 'middle',
-                  }}
-                  x={0}
-                  y={this.props.tickSize + this.props.tickFontSize * 1.4}>
-                  {this.props.formatNumber(value)}
-                </text>
+                <g transform={strformat('translate(0, {y}) {r}', {
+                  r: this.props.rotateLabels ? 'rotate(-45)' : '',
+                  y: this.props.tickSize + this.props.tickFontSize * (this.props.rotateLabels ? 1 : 1.5),
+                })}>
+                  <text
+                    style={{
+                      fontSize: this.props.tickFontSize,
+                      textAnchor: idx === steps.length - 1 || this.props.rotateLabels ? 'end' : 'middle',
+                    }}>
+                    {
+                      strformat(this.props.unit && value > 0 ? '{value} {unit}' : '{value}', {
+                        unit: this.props.unit,
+                        value: this.props.formatNumber(value),
+                      })
+                    }
+                  </text>
+                </g>
                 <line style={lineStyle} x2={0} y2={this.props.tickSize} />
               </g>
             );
