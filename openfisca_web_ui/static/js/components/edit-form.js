@@ -23,8 +23,7 @@ var EditForm = React.createClass({
         <h2 style={{margin: 0, textAlign: 'center'}}>{this.props.title}</h2>
         <hr/>
         {this.props.children}
-        <hr/>
-        <button className="btn btn-default" type="submit">Fermer</button>
+        <button className="btn btn-primary" type="submit">Fermer</button>
       </form>
     );
   }
