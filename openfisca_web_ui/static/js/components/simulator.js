@@ -32,11 +32,12 @@ var appconfig = global.appconfig,
 var Simulator = React.createClass({
   propTypes: {
     baremeStepsX: React.PropTypes.number.isRequired,
-    baremeMaxValue: React.PropTypes.number.isRequired,
-    baremeMinValue: React.PropTypes.number.isRequired,
     baremeVariableCode: React.PropTypes.string.isRequired,
     columns: React.PropTypes.object,
     columnsTree: React.PropTypes.object,
+    defaultBaremeMaxValue: React.PropTypes.number.isRequired,
+    defaultBaremeMinValue: React.PropTypes.number.isRequired,
+    defaultVisualizationSlug: React.PropTypes.string.isRequired,
     legislations: React.PropTypes.array,
     visualizations: React.PropTypes.array,
   },
@@ -84,13 +85,16 @@ var Simulator = React.createClass({
   getDefaultProps: function() {
     return {
       baremeStepsX: 20,
-      baremeMaxValue: 70000,
-      baremeMinValue: 0,
       baremeVariableCode: 'sali',
+      defaultBaremeMaxValue: 70000,
+      defaultBaremeMinValue: 0,
+      defaultVisualizationSlug: 'bareme',
     };
   },
   getInitialState: function() {
     return {
+      baremeMaxValue: this.props.defaultBaremeMaxValue,
+      baremeMinValue: this.props.defaultBaremeMinValue,
       calculationResult: null,
       editedEntity: null,
       errors: null,
@@ -100,10 +104,18 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
-      visualizationSlug: 'cascade',
+      visualizationSlug: this.props.defaultVisualizationSlug,
       waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
+  },
+  handleBaremeXValuesChange: function(minValue, maxValue) {
+    this.setState({
+      baremeMaxValue: maxValue,
+      baremeMinValue: minValue,
+    }, function() {
+      this.simulate();
+    });
   },
   handleCreateEntity: function(kind) {
     console.debug('handleCreateEntity', kind);
@@ -209,14 +221,6 @@ var Simulator = React.createClass({
   handleResize: function() {
     this.forceUpdate();
   },
-  handleWaterfallVariableToggle: function(variable) {
-    console.debug('handleWaterfallVariableToggle', variable);
-    var status = this.state.waterfallExpandedVariables[variable.code];
-    var newwaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
-      .assign(obj(variable.code, ! status))
-      .toObject();
-    this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
-  },
   handleVisualizationChange: function(slug) {
     var changeset = {visualizationSlug: slug};
     var newSimulationParams = this.simulationParams(slug),
@@ -233,6 +237,14 @@ var Simulator = React.createClass({
   handleVisualizationStateChange: function(visualizationState) {
     console.debug('handleVisualizationStateChange', visualizationState);
     this.setState(obj(this.state.visualizationSlug, visualizationState));
+  },
+  handleWaterfallVariableToggle: function(variable) {
+    console.debug('handleWaterfallVariableToggle', variable);
+    var status = this.state.waterfallExpandedVariables[variable.code];
+    var newwaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
+      .assign(obj(variable.code, ! status))
+      .toObject();
+    this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
   },
   handleYearChange: function(year) {
     console.debug('handleYearChange', year);
@@ -419,12 +431,13 @@ var Simulator = React.createClass({
             expandedVariables={this.state.waterfallExpandedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
+            onXValuesChange={this.handleBaremeXValuesChange}
             onVariableToggle={this.handleWaterfallVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
             xLabel="Revenus d'activité imposables"
-            xMaxValue={this.props.baremeMaxValue}
-            xMinValue={this.props.baremeMinValue}
+            xMaxValue={this.state.baremeMaxValue}
+            xMinValue={this.state.baremeMinValue}
           />
         );
       } else if (this.state.visualizationSlug === 'cascade') {
@@ -527,8 +540,8 @@ var Simulator = React.createClass({
       axes: visualizationSlug === 'bareme' ? [
         {
           count: this.props.baremeStepsX,
-          max: this.props.baremeMaxValue,
-          min: this.props.baremeMinValue,
+          max: this.state.baremeMaxValue,
+          min: this.state.baremeMinValue,
           name: this.props.baremeVariableCode,
         },
       ] : null,

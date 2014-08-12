@@ -74,9 +74,7 @@ var WaterfallVisualization = React.createClass({
     };
   },
   getInitialState: function() {
-    return {
-      activeVariableCode: this.props.defaultActiveVariableCode,
-    };
+    return {activeVariableCode: this.props.defaultActiveVariableCode};
   },
   getVariables: function() {
     var processNode = function(variable, baseValue, depth, hidden) {

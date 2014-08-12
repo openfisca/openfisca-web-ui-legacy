@@ -8,6 +8,7 @@ var Lazy = require('lazy.js'),
 var axes = require('../../axes'),
   Curve = require('./svg/curve'),
   HGrid = require('./svg/h-grid'),
+  Link = require('./svg/link'),
   VariablesTree = require('./variables-tree'),
   VGrid = require('./svg/v-grid'),
   XAxis = require('./svg/x-axis'),
@@ -21,6 +22,7 @@ var BaremeVisualization = React.createClass({
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
+    onXValuesChange: React.PropTypes.func.isRequired,
     onVariableToggle: React.PropTypes.func,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     // variablesTree.values key is a list. This tells which index to use.
@@ -48,30 +50,39 @@ var BaremeVisualization = React.createClass({
     }.bind(this));
     return {maxValue: maxValue, minValue: minValue};
   },
+  formatHint: function(variables) {
+    var variableName;
+    if (this.state.activeVariableCode) {
+      var variable = Lazy(variables).find({code: this.state.activeVariableCode});
+      variableName = variable.name;
+    } else {
+      variableName = 'Survolez le graphique';
+    }
+    return variableName;
+  },
   getDefaultProps: function() {
     return {
       marginRight: 10,
       marginTop: 10,
       xAxisHeight: 90,
+      xAxisLabelFontSize: 14,
       yAxisWidth: 80,
       xNbSteps: 10,
       yNbSteps: 8,
     };
   },
   getInitialState: function() {
-    return {
-      activeVariableCode: null,
-    };
+    return {activeVariableCode: null};
   },
   getVariables: function() {
     var processNode = function(variable, baseValues, depth, hidden) {
       var newVariables = [];
-      var collapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
+      var isCollapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
       if (variable.children) {
         var childrenVariables = [];
         var childBaseValues = baseValues;
         Lazy(variable.children).each(function(child) {
-          var childVariables = processNode(child, childBaseValues, depth + 1, hidden || collapsed);
+          var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
           childBaseValues = Lazy(childBaseValues).zip(child.values).map(function(pair) {
             return Lazy(pair).sum();
@@ -82,11 +93,13 @@ var BaremeVisualization = React.createClass({
       var hasValue = Lazy(variable.values).any(function(value) { return value !== 0; });
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
+        var hasChildren = !! variable.children;
         newVariableSequence = newVariableSequence.assign({
           baseValues: baseValues,
-          collapsed: collapsed,
           depth: depth,
-          hasChildren: !! variable.children,
+          hasChildren: hasChildren,
+          isCollapsed: isCollapsed,
+          isSubtotal: hasChildren && depth > 0,
         });
         var newVariable = newVariableSequence.toObject();
         newVariables.push(newVariable);
@@ -114,14 +127,35 @@ var BaremeVisualization = React.createClass({
     };
     return pixel;
   },
+  handleModifyLinkClick: function() {
+    function promptValue(message, defaultValue) {
+      var newValue = prompt(message, defaultValue);
+      if (newValue === null) {
+        newValue = defaultValue;
+      } else {
+        newValue = Number(newValue);
+        if (isNaN(newValue)) {
+          alert('Valeur invalide');
+          newValue = null;
+        }
+      }
+      return newValue;
+    }
+    var newXMinValue = promptValue('Valeur minimum', this.props.xMinValue);
+    var newXMaxValue = promptValue('Valeur maximum', this.props.xMaxValue);
+    if (newXMinValue !== null && newXMaxValue !== null) {
+      if (newXMinValue < newXMaxValue) {
+        this.props.onXValuesChange(newXMinValue, newXMaxValue);
+      } else {
+        alert('La valeur minimum doit être inférieure à la valeur maximum.');
+      }
+    }
+  },
   handleVariableHover: function(variable, event) {
     this.setState({activeVariableCode: event.type === 'mouseover' && variable ? variable.code : null});
   },
   highValues: function(variable) {
-    return Lazy(variable.baseValues)
-      .zip(variable.values)
-      .map(function(pair) { return Lazy(pair).sum(); })
-      .toArray();
+    return Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum()).toArray();
   },
   render: function() {
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop;
@@ -163,7 +197,7 @@ var BaremeVisualization = React.createClass({
                   .map(toDomainValue)
                   .zip(variable.baseValues)
                   .toArray();
-                var isFilled = ! variable.isCollapsed && variable.depth > 0;
+                var isFilled = ! variable.hasChildren && variable.depth > 0;
                 var pointsSequence;
                 var highPoints = Lazy.range(0, variable.values.length)
                   .map(toDomainValue)
@@ -175,7 +209,7 @@ var BaremeVisualization = React.createClass({
                   pointsSequence = Lazy(highPoints);
                 }
                 var points = pointsSequence.map(function(pair) { return {x: pair[0], y: pair[1]}; }).toArray();
-                return (! variable.hasChildren || variable.depth === 0) && (
+                return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
                   <Curve
                     active={this.state.activeVariableCode === variable.code}
                     fill={isFilled}
@@ -208,6 +242,7 @@ var BaremeVisualization = React.createClass({
               formatNumber={this.props.formatNumber}
               height={this.props.xAxisHeight}
               label={this.props.xLabel}
+              labelFontSize={this.props.xAxisLabelFontSize}
               maxValue={this.props.xMaxValue}
               minValue={this.props.xMinValue}
               nbSteps={this.props.xNbSteps}
@@ -215,17 +250,25 @@ var BaremeVisualization = React.createClass({
               unit='€'
               width={this.gridWidth}
             />
+            <Link
+              onClick={this.handleModifyLinkClick}
+              style={{textAnchor: 'end'}}
+              x={this.gridWidth}
+              y={this.props.xAxisHeight - this.props.xAxisLabelFontSize}>
+              Modifier
+            </Link>
           </g>
         </svg>
-        <div style={{marginTop: 30}}>
-          <VariablesTree
-            activeVariableCode={this.state.activeVariableCode}
-            formatNumber={this.props.formatNumber}
-            onToggle={this.props.onVariableToggle}
-            onHover={this.handleVariableHover}
-            variables={variables}
-          />
-        </div>
+        <p className='well' style={{textAlign: 'center'}}>
+          {this.formatHint(variables)}
+        </p>
+        <VariablesTree
+          activeVariableCode={this.state.activeVariableCode}
+          formatNumber={this.props.formatNumber}
+          onToggle={this.props.onVariableToggle}
+          onHover={this.handleVariableHover}
+          variables={variables}
+        />
       </div>
     );
   },

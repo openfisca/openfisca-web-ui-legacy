@@ -10,6 +10,7 @@
     "expect": false,
     "it": false,
     "module": false,
+    "prompt": false,
     "require": false
   },
   "indent": 2,
