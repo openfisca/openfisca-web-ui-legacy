@@ -60,7 +60,7 @@ var TestCase = {
     if (testCase) {
       var values = Lazy(testCase.individus).map(function(individu) {
         var name = individu.nom_individu; // jshint ignore:line
-         if (name) {
+        if (name) {
           return parseInt(name.slice(namePrefix.length, name.length));
         }
       }).compact().toArray();
