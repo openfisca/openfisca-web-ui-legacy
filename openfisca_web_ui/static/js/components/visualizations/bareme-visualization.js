@@ -35,21 +35,6 @@ var BaremeVisualization = React.createClass({
     xNbSteps: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
-  computeValuesBounds: function(variables) {
-    var maxValue = 0;
-    var minValue = 0;
-    variables.forEach(function(variable) {
-      var variableMaxValue = Math.max.apply(null, this.highValues(variable));
-      if (variableMaxValue > maxValue) {
-        maxValue = variableMaxValue;
-      }
-      var variableMinValue = Math.min.apply(null, variable.baseValues);
-      if (variableMinValue < minValue) {
-        minValue = variableMinValue;
-      }
-    }.bind(this));
-    return {maxValue: maxValue, minValue: minValue};
-  },
   formatHint: function(variables) {
     var variableName;
     if (this.state.activeVariableCode) {
@@ -64,7 +49,7 @@ var BaremeVisualization = React.createClass({
     return {
       marginRight: 10,
       marginTop: 10,
-      xAxisHeight: 90,
+      xAxisHeight: 100,
       xAxisLabelFontSize: 14,
       yAxisWidth: 80,
       xNbSteps: 10,
@@ -84,9 +69,8 @@ var BaremeVisualization = React.createClass({
         Lazy(variable.children).each(function(child) {
           var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
-          childBaseValues = Lazy(childBaseValues).zip(child.values).map(function(pair) {
-            return Lazy(pair).sum();
-          }).toArray();
+          childBaseValues = Lazy(childBaseValues).zip(child.values)
+            .map(pair => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
@@ -161,8 +145,11 @@ var BaremeVisualization = React.createClass({
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var variables = this.getVariables();
-    var yBounds = this.computeValuesBounds(variables);
-    this.ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
+    var revdisp = Lazy(variables).find({code: 'revdisp'});
+    var yMaxValue = Math.max.apply(null, revdisp.values),
+      yMinValue = Math.min.apply(null, revdisp.values);
+    this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
+    var clipValues = value => Math.max(value, this.ySmartValues.minValue);
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -186,29 +173,21 @@ var BaremeVisualization = React.createClass({
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
             {
-              variables.map(function(variable) {
+              variables.map(variable => {
                 var toDomainValue = axes.convertLinearRange.bind(null, {
                   newMax: this.props.xMaxValue,
                   newMin: this.props.xMinValue,
                   oldMax: variable.values.length - 1,
                   oldMin: 0,
                 });
-                var lowPoints = Lazy.range(0, variable.values.length)
-                  .map(toDomainValue)
-                  .zip(variable.baseValues)
-                  .toArray();
+                var lowPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
+                  .zip(variable.baseValues.map(clipValues)).toArray();
                 var isFilled = ! variable.hasChildren && variable.depth > 0;
-                var pointsSequence;
-                var highPoints = Lazy.range(0, variable.values.length)
-                  .map(toDomainValue)
-                  .zip(this.highValues(variable))
-                  .toArray();
-                if (isFilled) {
-                  pointsSequence = Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray());
-                } else {
-                  pointsSequence = Lazy(highPoints);
-                }
-                var points = pointsSequence.map(function(pair) { return {x: pair[0], y: pair[1]}; }).toArray();
+                var highPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
+                  .zip(this.highValues(variable).map(clipValues)).toArray();
+                var pointsSequence = isFilled ? Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray()) :
+                  Lazy(highPoints);
+                var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
                 return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
                   <Curve
                     active={this.state.activeVariableCode === variable.code}
@@ -223,7 +202,7 @@ var BaremeVisualization = React.createClass({
                     }}
                   />
                 );
-              }.bind(this))
+              })
             }
             <YAxis
               formatNumber={this.props.formatNumber}
