@@ -77,17 +77,17 @@ var WaterfallVisualization = React.createClass({
     return {activeVariableCode: this.props.defaultActiveVariableCode};
   },
   getVariables: function() {
-    var processNode = function(variable, baseValue, depth, hidden) {
+    var processNode = (variable, baseValue, depth, hidden) => {
       var newVariables = [];
       var isCollapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
       if (variable.children) {
         var childrenVariables = [];
         var childBaseValue = baseValue;
-        Lazy(variable.children).each(function(child) {
+        Lazy(variable.children).each(child => {
           var childVariables = processNode(child, childBaseValue, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
           childBaseValue += child.values[this.props.variablesTreeValueIndex];
-        }.bind(this));
+        });
         newVariables = newVariables.concat(childrenVariables);
       }
       var value = variable.values[this.props.variablesTreeValueIndex];
@@ -106,7 +106,7 @@ var WaterfallVisualization = React.createClass({
         newVariables.push(newVariable);
       }
       return newVariables;
-    }.bind(this);
+    };
     var variables = processNode(this.props.variablesTree, 0, 0, false);
     return variables;
   },
@@ -116,12 +116,10 @@ var WaterfallVisualization = React.createClass({
   render: function() {
     var variables = this.getVariables();
     var displayedVariables = this.props.displayExpandedSubtotals ? variables :
-      Lazy(variables).filter(function(variable) {
-        return ! variable.isSubtotal || variable.isCollapsed;
-      }.bind(this)).toArray();
+      Lazy(variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
     var yBounds = this.computeValuesBounds(variables);
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
-    var xLabels = displayedVariables.map(function(variable) {
+    var xLabels = displayedVariables.map(variable => {
       var style = {cursor: 'default'};
       if (variable.code === this.state.activeVariableCode) {
         style.textDecoration = 'underline';
@@ -139,7 +137,7 @@ var WaterfallVisualization = React.createClass({
         props.onClick = this.props.onVariableToggle.bind(null, variable);
       }
       return {name: name, props: props, style: style};
-    }.bind(this));
+    });
     var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
       gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var xSteps = xLabels.length;
@@ -183,25 +181,23 @@ var WaterfallVisualization = React.createClass({
               width={gridWidth}
             />
             {
-              displayedVariables.map(function(variable, idx) {
-                return (
-                  <g key={variable.code} transform={strformat('translate({0}, 0)', stepWidth * idx)}>
-                    <WaterfallBarHover
-                      barHeight={gridHeight}
-                      barWidth={stepWidth}
-                      enableLabelsHover={false}
-                      labelHeight={this.props.labelsFontSize * 1.5}
-                      labelWidth={this.props.xAxisHeight}
-                      onClick={
-                        this.props.onVariableToggle && variable.isSubtotal ?
-                          this.props.onVariableToggle.bind(null, variable) : null
-                      }
-                      onHover={this.handleVariableHover}
-                      variable={variable}
-                    />
-                  </g>
-                );
-              }, this)
+              displayedVariables.map((variable, idx) =>
+                <g key={variable.code} transform={strformat('translate({0}, 0)', stepWidth * idx)}>
+                  <WaterfallBarHover
+                    barHeight={gridHeight}
+                    barWidth={stepWidth}
+                    enableLabelsHover={false}
+                    labelHeight={this.props.labelsFontSize * 1.5}
+                    labelWidth={this.props.xAxisHeight}
+                    onClick={
+                      this.props.onVariableToggle && variable.isSubtotal ?
+                        this.props.onVariableToggle.bind(null, variable) : null
+                    }
+                    onHover={this.handleVariableHover}
+                    variable={variable}
+                  />
+                </g>
+              )
             }
           </g>
         </svg>

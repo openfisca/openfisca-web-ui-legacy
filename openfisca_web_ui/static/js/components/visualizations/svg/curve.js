@@ -32,10 +32,10 @@ var Curve = React.createClass({
     }).toObject();
   },
   pointsToPixelsStr: function(points) {
-    return points.map(function(point) {
+    return points.map(point => {
       var pixel = this.props.pointToPixel(point);
       return strformat('{x},{y}', pixel);
-    }.bind(this)).join(' ');
+    }).join(' ');
   },
   render: function() {
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();

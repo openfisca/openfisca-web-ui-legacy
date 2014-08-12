@@ -34,9 +34,9 @@ var RattachementEnfantVisualization = React.createClass({
     };
   },
   getValidChildren: function() {
-    var children = Lazy(this.props.testCase.individus).filter(function(individu, individuId) {
-      return models.TestCase.hasRole(individuId, 'familles', 'enfants', this.props.testCase);
-    }.bind(this)).toArray();
+    var children = Lazy(this.props.testCase.individus).filter((individu, individuId) =>
+      models.TestCase.hasRole(individuId, 'familles', 'enfants', this.props.testCase)
+    ).toArray();
     return children;
   },
   handleChange: function(childId, fieldName, event) {
@@ -133,35 +133,33 @@ var RattachementEnfantVisualization = React.createClass({
         <form onSubmit={this.handleSubmit} role="form">
           <h1>Enfants</h1>
           {
-            Lazy(this.getValidChildren()).map(function(child, childId) {
-              return (
-                <div key={childId}>
-                  <h2>{child.nom_individu /* jshint ignore:line */}</h2>
-                  <div className='form-group'>
-                    <div className="input-group">
-                      <span className="input-group-addon">
-                        <label>
-                          <input
-                            id={childId + '-detached'}
-                            onChange={this.handleChange.bind(null, childId, 'detached')}
-                            type='checkbox'
-                            checked={(this.props.localState[childId] || {}).detached}
-                          /> Détaché
-                        </label>
-                      </span>
-                      <input
-                        className='form-control'
-                        disabled={! (this.props.localState[childId] || {}).detached}
-                        onChange={this.handleChange.bind(null, childId, 'alr')}
-                        placeholder='Montant de la pension'
-                        type="number"
-                        value={(this.props.localState[childId] || {}).alr}
-                      />
-                    </div>
+            Lazy(this.getValidChildren()).map((child, childId) =>
+              <div key={childId}>
+                <h2>{child.nom_individu /* jshint ignore:line */}</h2>
+                <div className='form-group'>
+                  <div className="input-group">
+                    <span className="input-group-addon">
+                      <label>
+                        <input
+                          id={childId + '-detached'}
+                          onChange={this.handleChange.bind(null, childId, 'detached')}
+                          type='checkbox'
+                          checked={(this.props.localState[childId] || {}).detached}
+                        /> Détaché
+                      </label>
+                    </span>
+                    <input
+                      className='form-control'
+                      disabled={! (this.props.localState[childId] || {}).detached}
+                      onChange={this.handleChange.bind(null, childId, 'alr')}
+                      placeholder='Montant de la pension'
+                      type="number"
+                      value={(this.props.localState[childId] || {}).alr}
+                    />
                   </div>
                 </div>
-              );
-            }.bind(this)).toArray()
+              </div>
+            ).toArray()
           }
           <button className="btn btn-primary" type="submit">Simuler</button>
         </form>

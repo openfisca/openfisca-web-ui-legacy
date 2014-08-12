@@ -29,14 +29,14 @@ var VGrid = React.createClass({
     return (
       <g className="grid v-grid">
         {
-          steps.map(function(stepNum, idx) {
+          steps.map((stepNum, idx) => {
             var translateX = stepNum * stepWidth;
             return (
               <g key={'line-' + idx} transform={'translate(' + translateX + ', 0)'}>
                 <line style={style} y2={this.props.height} />
               </g>
             );
-          }.bind(this))
+          })
         }
       </g>
     );

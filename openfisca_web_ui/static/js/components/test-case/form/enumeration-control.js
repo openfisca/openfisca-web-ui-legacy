@@ -39,9 +39,9 @@ var EnumerationControl = React.createClass({
               'valeur par défaut : ' + this.props.labels[this.props.default] // jshint ignore:line
           })</option>
           {
-            Lazy(this.props.labels).map(function(label, labelId) {
-              return <option key={'label-' + labelId} value={labelId}>{label}</option>;
-            }).toArray()
+            Lazy(this.props.labels).map((label, labelId) =>
+              <option key={'label-' + labelId} value={labelId}>{label}</option>
+            ).toArray()
           }
         </select>
       </div>

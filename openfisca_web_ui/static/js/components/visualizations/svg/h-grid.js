@@ -29,14 +29,14 @@ var HGrid = React.createClass({
     return (
       <g className="grid h-grid">
         {
-          steps.map(function(stepNum, idx) {
+          steps.map((stepNum, idx) => {
             var translateY = - stepNum * stepHeight;
             return (
               <g key={'line-' + idx} transform={'translate(0, ' + translateY + ')'}>
                 <line style={style} x2={this.props.width} />
               </g>
             );
-          }.bind(this))
+          })
         }
       </g>
     );

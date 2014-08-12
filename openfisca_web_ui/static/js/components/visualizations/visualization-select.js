@@ -14,9 +14,9 @@ var VisualizationSelect = React.createClass({
     this.props.onChange(event.target.value);
   },
   render: function() {
-    var options = this.props.visualizations && this.props.visualizations.map(function(visualization) {
-      return <option key={visualization.slug} value={visualization.slug}>{visualization.title}</option>;
-    });
+    var options = this.props.visualizations && this.props.visualizations.map(visualization =>
+      <option key={visualization.slug} value={visualization.slug}>{visualization.title}</option>
+    );
     return (
       <select className="form-control" onChange={this.handleChange} value={this.props.value}>
         {options}

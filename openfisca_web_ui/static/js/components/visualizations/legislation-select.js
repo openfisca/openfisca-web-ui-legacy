@@ -16,9 +16,9 @@ var LegislationSelect = React.createClass({
   render: function() {
     var options = [<option key="default-legislation" value="">Législation par défaut</option>];
     if (this.props.legislations && this.props.legislations.length) {
-      options = options.concat(this.props.legislations.map(function(legislation) {
-        return <option key={legislation.url} value={legislation.url}>{legislation.title}</option>;
-      }));
+      options = options.concat(this.props.legislations.map(legislation =>
+        <option key={legislation.url} value={legislation.url}>{legislation.title}</option>
+      ));
     }
     return (
       <select className="form-control" onChange={this.handleChange} value={this.props.value}>

@@ -40,7 +40,7 @@ var YAxis = React.createClass({
       <g className="axis y-axis">
         <line style={lineStyle} x2={0} y2={this.props.height} />
         {
-          steps.map(function(value, idx) {
+          steps.map((value, idx) => {
             var translateY = this.props.height - idx * stepHeight;
             return (
               <g key={'tick-' + idx} transform={'translate(0, ' + translateY + ')'}>
@@ -58,7 +58,7 @@ var YAxis = React.createClass({
                 <line style={lineStyle} x2={- this.props.tickSize} y2={0} />
               </g>
             );
-          }, this)
+          })
         }
         {
           this.props.label && (

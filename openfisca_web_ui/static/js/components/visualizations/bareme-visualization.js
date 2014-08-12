@@ -60,7 +60,7 @@ var BaremeVisualization = React.createClass({
     return {activeVariableCode: null};
   },
   getVariables: function() {
-    var processNode = function(variable, baseValues, depth, hidden) {
+    var processNode = (variable, baseValues, depth, hidden) => {
       var newVariables = [];
       var isCollapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
       if (variable.children) {
@@ -89,7 +89,7 @@ var BaremeVisualization = React.createClass({
         newVariables.push(newVariable);
       }
       return newVariables;
-    }.bind(this);
+    };
     var initBaseValues = Lazy.repeat(0, this.props.variablesTree.values.length).toArray();
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;

@@ -21,19 +21,17 @@ var MoveIndividuForm = React.createClass({
     return (
       <div>
         {
-          Lazy(this.props.entitiesMetadata).map(function(entityMetadata, kind) {
-            var entities = Lazy(this.props.testCase[kind]).map(function(entity, entityId) {
+          Lazy(this.props.entitiesMetadata).map((entityMetadata, kind) => {
+            var entities = Lazy(this.props.testCase[kind]).map((entity, entityId) => {
               return {
                 id: entityId,
                 label: this.props.getEntityLabel(kind, entity),
               };
-            }.bind(this)).sortBy('label').toArray();
-            var roles = entityMetadata.roles.map(function(role) {
-              return {
-                id: role,
-                label: this.props.roleLabels[role],
-              };
-            }, this);
+            }).sortBy('label').toArray();
+            var roles = entityMetadata.roles.map(role => ({
+              id: role,
+              label: this.props.roleLabels[role],
+            })); // jshint ignore:line
             return (
               <EntityRoleSelector
                 currentEntityId={this.props.currentEntityIdByKind[kind]}
@@ -46,7 +44,7 @@ var MoveIndividuForm = React.createClass({
                 roles={roles}
               />
             );
-          }.bind(this)).toArray()
+          }).toArray()
         }
       </div>
     );

@@ -33,8 +33,8 @@ var FieldsForm = React.createClass({
     return (
       <div className="panel-group" id="accordion">
         {
-          this.props.categories.map(function(category, index) {
-            var categoryColumnNames = category.columns.map(function(column) { return column.name; });
+          this.props.categories.map((category, index) => {
+            var categoryColumnNames = category.columns.map(column => column.name);
             var hasErrors = !! (
               this.props.errors &&
               Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
@@ -53,7 +53,7 @@ var FieldsForm = React.createClass({
                 {category.columns.map(this.renderControl)}
               </Category>
             );
-          }, this)
+          })
         }
       </div>
     );

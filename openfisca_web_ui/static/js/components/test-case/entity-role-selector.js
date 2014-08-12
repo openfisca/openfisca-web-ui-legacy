@@ -46,11 +46,9 @@ var EntityRoleSelector = React.createClass({
               value={this.props.currentEntityId}>
               {this.props.currentEntityId ? null : <option key='none' value='none'>Aucun</option>}
               {
-                this.props.entities.map(function(entity) {
-                  return (
-                    <option key={entity.id} value={entity.id}>{entity.label}</option>
-                  );
-                }, this)
+                this.props.entities.map(entity =>
+                  <option key={entity.id} value={entity.id}>{entity.label}</option>
+                )
               }
             </select>
           </div>
@@ -60,11 +58,9 @@ var EntityRoleSelector = React.createClass({
               onChange={this.handleRoleChange}
               value={this.props.currentRole}>
               {
-                this.props.roles.map(function(role) {
-                  return (
-                    <option key={role.id} value={role.id}>{role.label}</option>
-                  );
-                }, this)
+                this.props.roles.map(role =>
+                  <option key={role.id} value={role.id}>{role.label}</option>
+                )
               }
             </select>
           </div>

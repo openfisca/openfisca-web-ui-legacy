@@ -33,16 +33,16 @@ var XAxisLabelled = React.createClass({
       <g className='axis x-axis x-axis-labelled'>
         <line style={lineStyle} x2={this.props.width} y2={0} />
         {
-          this.props.labels.map(function(label, stepIdx) {
-            return (
-              <g key={'tick-' + stepIdx} transform={strformat('translate({0}, 0)', stepIdx * stepWidth)}>
-                <line style={lineStyle} x2={0} y2={this.props.tickSize} />
-              </g>
-            );
-          }.bind(this))
+          this.props.labels.map((label, stepIdx) =>
+            <g
+              key={'tick-' + stepIdx}
+              transform={strformat('translate({0}, 0)', stepIdx * stepWidth)}>
+              <line style={lineStyle} x2={0} y2={this.props.tickSize} />
+            </g>
+          )
         }
         {
-          this.props.labels.map(function(label, stepIdx) {
+          this.props.labels.map((label, stepIdx) => {
             var defaultStyle = {
               fontSize: this.props.labelsFontSize,
               textAnchor: 'end',
@@ -67,7 +67,7 @@ var XAxisLabelled = React.createClass({
                 }
               </g>
             );
-          }.bind(this))
+          })
         }
       </g>
     );

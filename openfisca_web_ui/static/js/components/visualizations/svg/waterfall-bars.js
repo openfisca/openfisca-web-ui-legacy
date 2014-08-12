@@ -30,15 +30,15 @@ var WaterfallBars = React.createClass({
   render: function() {
     var unitHeight = this.props.height / (this.props.maxValue - this.props.minValue);
     var y0 = this.props.maxValue > 0 ? this.props.maxValue * unitHeight : 0;
-    var variables = Lazy(this.props.variables).filter(function(variable) {
+    var variables = Lazy(this.props.variables).filter(variable => {
       var isThinBar = variable.depth > 0 && ! variable.isCollapsed && variable.hasChildren;
       return ! isThinBar || this.props.displayExpandedSubtotals;
-    }.bind(this)).toArray();
+    }).toArray();
     var stepWidth = this.props.width / variables.length;
     return (
       <g>
         {
-          variables.map(function(variable, variableIndex) {
+          variables.map((variable, variableIndex) => {
             var style = {
               fill: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
               opacity: variable.code === this.props.activeVariableCode ? 1 : this.props.rectOpacity,
@@ -70,7 +70,7 @@ var WaterfallBars = React.createClass({
                 />
               )
             );
-          }, this)
+          })
         }
       </g>
     );

@@ -270,15 +270,12 @@ var Simulator = React.createClass({
         rightPanel = this.renderFieldsFormPanel();
       } else {
         invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
-        var currentEntityIdByKind = Lazy(models.kinds.map(function(kind) {
+        var currentEntityIdByKind = Lazy(models.kinds.map(kind => {
           var entityData = models.TestCase.findEntityAndRole(this.state.editedEntity.id, kind, this.state.testCase);
           if (entityData) {
-            return [
-              kind,
-              Lazy(entityData).get('id'),
-            ];
+            return [kind, Lazy(entityData).get('id')];
           }
-        }.bind(this))).compact().toObject();
+        })).compact().toObject();
         rightPanel = (
           <EditForm
             onClose={this.handleEditFormClose}
@@ -346,15 +343,13 @@ var Simulator = React.createClass({
       entity.nom_individu : // jshint ignore:line
       models.TestCase.getEntityLabel(kind, entity);
     invariant('children' in this.props.columnsTree[kind], 'columnsTree.' + kind + ' has no children');
-    var categories = Lazy(this.props.columnsTree[kind].children).map(function(category) {
-      return {
-        columns: category.children ? category.children.map(function(columnName) {
-          invariant(columnName in this.props.columns, 'column "' + columnName + '" is not in columns prop');
-          return this.props.columns[columnName];
-        }, this) : null,
-        label: category.label,
-      };
-    }.bind(this)).toArray();
+    var categories = Lazy(this.props.columnsTree[kind].children).map(category => ({
+      columns: category.children ? category.children.map(columnName => {
+        invariant(columnName in this.props.columns, 'column "' + columnName + '" is not in columns prop');
+        return this.props.columns[columnName];
+      }) : null,
+      label: category.label,
+    })).toArray(); // jshint ignore:line
     var errors = helpers.getObjectPath(this.state.errors, kind, id);
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var values = this.state.testCase[kind][id];
@@ -514,11 +509,11 @@ var Simulator = React.createClass({
   simulate: function() {
     console.debug('simulate');
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
-      this.setState({isSimulationInProgress: true}, function() {
+      this.setState({isSimulationInProgress: true}, () => {
         var params = this.simulationParams(this.state.visualizationSlug);
         webservices.simulate(params.axes, params.decomposition, this.state.legislationUrl, this.state.testCase,
           this.state.year, this.simulationCompleted);
-      }.bind(this));
+      });
     }
   },
   simulationCompleted: function(data) {
