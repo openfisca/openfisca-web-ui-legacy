@@ -376,7 +376,7 @@ var Simulator = React.createClass({
     invariant(this.state.simulationResult, 'this.state.simulationResult is empty');
     var rightPanelNode = this.refs.rightPanel.getDOMNode();
     var rightPanelWidth = rightPanelNode.clientWidth;
-    var visualizationHeight = rightPanelWidth * 0.66;
+    var visualizationHeight = rightPanelWidth * 0.8;
     if (this.state.simulationResult.error) {
       return (
         <p className="text-danger">
