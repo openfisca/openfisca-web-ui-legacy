@@ -31,7 +31,7 @@ function formatFrenchNumber(number, options) {
   var roundedNumber = Math.round(number);
   var formattedNumber = opts.fixed ?
     number.toFixed(opts.fixed) :
-    (opts.round && Math.abs(number) > 10 ? roundedNumber : number.toFixed(2));
+    (opts.round && (Math.abs(number) === 0 || Math.abs(number) > 10) ? roundedNumber : number.toFixed(2));
   return formattedNumber.toLocaleString('fr');
 }
 
