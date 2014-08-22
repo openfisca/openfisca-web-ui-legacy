@@ -18,7 +18,6 @@ var Point = React.createClass({
     return {
       defaultStyle: {
         fill: 'rgb(166, 50, 50)',
-        fillOpacity: 1,
       },
       radius: 5,
     };

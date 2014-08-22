@@ -34,13 +34,8 @@ var SituateurVisualization = React.createClass({
     yMaxValue: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
-  extrapolatePoint: function(low, high) {
-    var slope = (high.y - low.y) / (high.x - low.x);
-    var extrapolatedPointY = high.y + slope * (this.props.xMaxValue - high.x);
-    return {x: this.props.xMaxValue, y: extrapolatedPointY};
-  },
   findXFromY: function(y) {
-    var points = this.props.points.concat(this.extrapolatedLastPoint);
+    var points = this.allPoints;
     var yIndex = Lazy(points).pluck('y').sortedIndex(y);
     var high = points[yIndex];
     var x;
@@ -59,14 +54,14 @@ var SituateurVisualization = React.createClass({
     return x;
   },
   findYFromX: function(x) {
-    var points = this.props.points.concat(this.extrapolatedLastPoint);
+    var points = this.allPoints;
     var xIndex = Lazy(points).pluck('x').sortedIndex(x);
     var high = points[xIndex];
     var y;
     if (xIndex === 0) {
       y = high.y;
     } else if (xIndex === points.length) {
-      y = this.extrapolatedLastPoint.y;
+      y = this.lastPoint.y;
     } else {
       var low = points[xIndex - 1];
       var dX = high.x - low.x;
@@ -79,10 +74,12 @@ var SituateurVisualization = React.createClass({
   },
   formatHint: function() {
     var point = this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value};
-    return this.props.formatHint({
-      amount: this.props.yFormatNumber(point.y),
-      percent: this.props.xFormatNumber(point.x),
-    });
+    return point.x > this.pointsXMaxValue ?
+      `Valeurs inconnues au delà de ${this.props.xFormatNumber(this.pointsXMaxValue)} %` : // jshint ignore:line
+      this.props.formatHint({
+        amount: this.props.yFormatNumber(point.y),
+        percent: this.props.xFormatNumber(point.x),
+      });
   },
   getDefaultProps: function() {
     return {
@@ -112,14 +109,22 @@ var SituateurVisualization = React.createClass({
       y: (1 - point.y / this.props.yMaxValue) * this.gridHeight,
     };
   },
-  handleHoverLegendHover: function(point) {
-    this.setState({snapPoint: point});
+  handleHoverLegendHover: function(snapX) {
+    var snapPoint;
+    if (snapX === null) {
+      snapPoint = null;
+    } else {
+      var snapY = this.findYFromX(snapX);
+      snapPoint = {x: snapX, y: snapY};
+    }
+    this.setState({snapPoint: snapPoint});
   },
   render: function() {
+    this.pointsXMaxValue = Math.max(...this.props.points.map(point => point.x));
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var lastPoints = Lazy(this.props.points).last(2).toArray();
-    this.extrapolatedLastPoint = this.extrapolatePoint(lastPoints[0], lastPoints[1]);
+    this.lastPoint = {x: this.props.xMaxValue * 0.99, y: this.props.yMaxValue};
+    this.allPoints = this.props.points.concat(this.lastPoint);
     var xValue = this.findXFromY(this.props.value);
     var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
     return (
@@ -164,7 +169,7 @@ var SituateurVisualization = React.createClass({
               style={{stroke: 'rgb(31, 119, 180)'}}
             />
             <Curve
-              points={[Lazy(this.props.points).last(), this.extrapolatedLastPoint]}
+              points={[this.props.points.last(), this.lastPoint]}
               pointToPixel={this.gridPointToPixel}
               style={{
                 stroke: 'rgb(31, 119, 180)',
@@ -172,13 +177,15 @@ var SituateurVisualization = React.createClass({
               }}
             />
             <Point
-              color='rgb(166, 50, 50)'
               pointToPixel={this.gridPointToPixel}
+              style={{
+                fill: xValue > this.pointsXMaxValue ? 'none' : 'rgb(166, 50, 50)',
+                stroke: 'rgb(166, 50, 50)',
+              }}
               x={xValue}
               y={this.props.value}
             />
             <HoverLegend
-              findYFromX={this.findYFromX}
               height={this.gridHeight}
               onHover={this.handleHoverLegendHover}
               pixelToPoint={this.gridPixelToPoint}

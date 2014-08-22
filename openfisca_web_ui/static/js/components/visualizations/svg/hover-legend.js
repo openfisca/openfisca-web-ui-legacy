@@ -8,7 +8,6 @@ var invariant = require('react/lib/invariant'),
 
 var HoverLegend = React.createClass({
   propTypes: {
-    findYFromX: React.PropTypes.func.isRequired,
     fontSize: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     lineColor: React.PropTypes.string.isRequired,
@@ -46,9 +45,7 @@ var HoverLegend = React.createClass({
     var localPixel = this.clientPixelToLocalPixel(clientPixel);
     var point = this.props.pixelToPoint(localPixel);
     var snapX = this.snapXValue(point.x);
-    var snapY = this.props.findYFromX(snapX);
-    var snapPoint = {x: snapX, y: snapY};
-    this.props.onHover(snapPoint);
+    this.props.onHover(snapX);
   },
   handleMouseOut: function() {
     this.props.onHover(null);
