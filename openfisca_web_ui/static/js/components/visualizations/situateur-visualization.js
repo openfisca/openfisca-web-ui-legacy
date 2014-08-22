@@ -158,9 +158,9 @@ var SituateurVisualization = React.createClass({
             <YAxis
               formatNumber={this.props.yFormatNumber}
               height={this.gridHeight}
-              label='en €'
               maxValue={this.props.yMaxValue}
               nbSteps={this.props.yNbSteps}
+              unit='€'
               width={this.props.yAxisWidth}
             />
             <Curve
