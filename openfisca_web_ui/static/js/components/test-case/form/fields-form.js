@@ -33,27 +33,29 @@ var FieldsForm = React.createClass({
     return (
       <div className="panel-group" id="accordion">
         {
-          this.props.categories.map((category, index) => {
-            var categoryColumnNames = category.columns.map(column => column.name);
-            var hasErrors = !! (
-              this.props.errors &&
-              Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
-            );
-            var hasSuggestions = !! (
-              this.props.suggestions &&
-              Lazy(categoryColumnNames).intersection(Object.keys(this.props.suggestions)).size()
-            );
-            return category.columns && (
-              <Category
-                hasErrors={hasErrors}
-                hasSuggestions={hasSuggestions}
-                index={index}
-                key={'category-' + index}
-                label={category.label}>
-                {category.columns.map(this.renderControl)}
-              </Category>
-            );
-          })
+          this.props.categories.length === 1 ?
+            this.props.categories[0].columns.map(this.renderControl) :
+            this.props.categories.map((category, index) => {
+              var categoryColumnNames = category.columns.map(column => column.name);
+              var hasErrors = !! (
+                this.props.errors &&
+                Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
+              );
+              var hasSuggestions = !! (
+                this.props.suggestions &&
+                Lazy(categoryColumnNames).intersection(Object.keys(this.props.suggestions)).size()
+              );
+              return category.columns && (
+                <Category
+                  hasErrors={hasErrors}
+                  hasSuggestions={hasSuggestions}
+                  index={index}
+                  key={'category-' + index}
+                  label={category.label}>
+                  {category.columns.map(this.renderControl)}
+                </Category>
+              );
+            })
         }
       </div>
     );
