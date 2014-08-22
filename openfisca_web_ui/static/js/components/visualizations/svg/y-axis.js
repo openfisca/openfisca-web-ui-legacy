@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 
 var YAxis = React.createClass({
@@ -41,19 +40,16 @@ var YAxis = React.createClass({
         <line style={lineStyle} x2={0} y2={this.props.height} />
         {
           steps.map((value, idx) => {
-            var translateY = this.props.height - idx * stepHeight;
+            var formattedValue = this.props.formatNumber(value),
+              unit = this.props.unit;
+            var label = unit && value > 0 ? `${formattedValue} ${unit}` : formattedValue;
             return (
-              <g key={'tick-' + idx} transform={'translate(0, ' + translateY + ')'}>
+              <g key={'tick-' + idx} transform={`translate(0, ${this.props.height - idx * stepHeight})`}>
                 <text
                   style={{textAnchor: 'end', fontSize: this.props.tickFontSize}}
                   x={- this.props.tickSize * 1.66}
                   y={this.props.tickFontSize * 0.4}>
-                  {
-                    strformat(this.props.unit && value > 0 ? '{value} {unit}' : '{value}', {
-                      unit: this.props.unit,
-                      value: this.props.formatNumber(value),
-                    })
-                  }
+                  {label}
                 </text>
                 <line style={lineStyle} x2={- this.props.tickSize} y2={0} />
               </g>

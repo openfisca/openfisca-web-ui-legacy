@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react/addons'),
-  strformat = require('strformat');
+  React = require('react/addons');
 
 
 var XAxisLabelled = React.createClass({
@@ -36,7 +35,7 @@ var XAxisLabelled = React.createClass({
           this.props.labels.map((label, stepIdx) =>
             <g
               key={'tick-' + stepIdx}
-              transform={strformat('translate({0}, 0)', stepIdx * stepWidth)}>
+              transform={`translate(${stepIdx * stepWidth}, 0)`}>
               <line style={lineStyle} x2={0} y2={this.props.tickSize} />
             </g>
           )
@@ -52,7 +51,7 @@ var XAxisLabelled = React.createClass({
             return (
               <g
                 key={'label-' + stepIdx}
-                transform={strformat('translate({0}, 0)', (stepIdx + 0.5) * stepWidth)}>
+                transform={`translate(${(stepIdx + 0.5) * stepWidth}, 0)`}>
                 {
                   React.addons.cloneWithProps((
                     <text

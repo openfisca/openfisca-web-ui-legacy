@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 var axes = require('../../axes'),
   HGrid = require('./svg/h-grid'),
@@ -51,15 +50,15 @@ var WaterfallVisualization = React.createClass({
     if (variable.value < 0) {
       [endValue, startValue] = [startValue, endValue];
     }
-    var hintFormat = startValue && endValue ? '{variableName} : {startValue} {operator} {absoluteValue} = {endValue} €' : // jshint ignore:line
-      '{variableName} : {absoluteValue} €'; // jshint ignore:line
-    return strformat(hintFormat, {
-      absoluteValue: this.props.formatNumber(Math.abs(variable.value)),
-      endValue: this.props.formatNumber(endValue, {fixed: 2}),
-      operator: variable.value > 0 ? '+' : '−',
-      startValue: this.props.formatNumber(startValue),
-      variableName: variable.name,
-    });
+    var absoluteValue = this.props.formatNumber(Math.abs(variable.value)),
+      formattedEndValue = this.props.formatNumber(endValue, {fixed: 2}),
+      formattedStartValue = this.props.formatNumber(startValue),
+      operator = variable.value > 0 ? '+' : '−',
+      variableName = variable.name;
+    var hint = startValue && endValue ?
+      `${variableName} : ${formattedStartValue} ${operator} ${absoluteValue} = ${formattedEndValue} €` : // jshint ignore:line
+      `${variableName} : ${absoluteValue} €`; // jshint ignore:line
+    return hint;
   },
   getDefaultProps: function() {
     return {
@@ -182,11 +181,10 @@ var WaterfallVisualization = React.createClass({
             />
             {
               displayedVariables.map((variable, idx) =>
-                <g key={variable.code} transform={strformat('translate({0}, 0)', stepWidth * idx)}>
+                <g key={variable.code} transform={`translate(${stepWidth * idx}, 0)`}>
                   <WaterfallBarHover
                     barHeight={gridHeight}
                     barWidth={stepWidth}
-                    enableLabelsHover={false}
                     labelHeight={this.props.labelsFontSize * 1.5}
                     labelWidth={this.props.xAxisHeight}
                     onClick={

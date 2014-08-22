@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 
 var XAxis = React.createClass({
@@ -41,24 +40,23 @@ var XAxis = React.createClass({
         <line style={lineStyle} x2={this.props.width} y2={0} />
         {
           steps.map((value, idx) => {
-            var translateX = idx * stepWidth;
+            var translateY = this.props.tickSize + this.props.tickFontSize * (this.props.rotateLabels ? 1 : 1.5);
+            var labelTransform = `translate(0, ${translateY})`;
+            if (this.props.rotateLabels) {
+              labelTransform += ' rotate(-45)';
+            }
+            var formattedValue = this.props.formatNumber(value),
+              unit = this.props.unit;
+            var label = unit && value > 0 ? `${formattedValue} ${unit}` : formattedValue;
             return (
-              <g key={'tick-' + idx} transform={'translate(' + translateX + ', 0)'}>
-                <g transform={strformat('translate(0, {y}) {r}', {
-                  r: this.props.rotateLabels ? 'rotate(-45)' : '',
-                  y: this.props.tickSize + this.props.tickFontSize * (this.props.rotateLabels ? 1 : 1.5),
-                })}>
+              <g key={'tick-' + idx} transform={`translate(${idx * stepWidth}, 0)`}>
+                <g transform={labelTransform}>
                   <text
                     style={{
                       fontSize: this.props.tickFontSize,
                       textAnchor: idx === steps.length - 1 || this.props.rotateLabels ? 'end' : 'middle',
                     }}>
-                    {
-                      strformat(this.props.unit && value > 0 ? '{value} {unit}' : '{value}', {
-                        unit: this.props.unit,
-                        value: this.props.formatNumber(value),
-                      })
-                    }
+                    {label}
                   </text>
                 </g>
                 <line style={lineStyle} x2={0} y2={this.props.tickSize} />

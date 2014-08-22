@@ -26,13 +26,12 @@ function assignIn(object, crumbs, value) {
 }
 
 
-function formatFrenchNumber(number, options) {
-  var opts = Lazy(options).defaults({round: true}).toObject();
-  var roundedNumber = Math.round(number);
-  var formattedNumber = opts.fixed ?
-    number.toFixed(opts.fixed) :
-    (opts.round && (Math.abs(number) === 0 || Math.abs(number) > 10) ? roundedNumber : number.toFixed(2));
-  return formattedNumber.toLocaleString('fr');
+function formatFrenchNumber(value, {fixed = false, round = true} = {}) {
+  var roundedNumber = Math.round(value);
+  var formattedValue = fixed !== false ?
+    value.toFixed(fixed) :
+    (round && (Math.abs(value) === 0 || Math.abs(value) > 10) ? roundedNumber : value.toFixed(2));
+  return formattedValue.toLocaleString('fr');
 }
 
 
@@ -77,8 +76,8 @@ function obj() {
 
 
 module.exports = {
-  assignIn: assignIn,
-  formatFrenchNumber: formatFrenchNumber,
-  getObjectPath: getObjectPath,
-  obj: obj,
+  assignIn,
+  formatFrenchNumber,
+  getObjectPath,
+  obj,
 };

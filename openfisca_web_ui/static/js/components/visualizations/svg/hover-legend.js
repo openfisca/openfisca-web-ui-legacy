@@ -10,7 +10,6 @@ var HoverLegend = React.createClass({
   propTypes: {
     findYFromX: React.PropTypes.func.isRequired,
     fontSize: React.PropTypes.number.isRequired,
-    formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     lineColor: React.PropTypes.string.isRequired,
     lineStrokeWidth: React.PropTypes.number.isRequired,
@@ -22,8 +21,10 @@ var HoverLegend = React.createClass({
       y: React.PropTypes.number.isRequired,
     }),
     width: React.PropTypes.number.isRequired,
+    xFormatNumber: React.PropTypes.func.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xSnapValues: React.PropTypes.array.isRequired,
+    yFormatNumber: React.PropTypes.func.isRequired,
   },
   clientPixelToLocalPixel: function(clientPixel) {
     var boundingClientRect = this.getDOMNode().getBoundingClientRect();
@@ -92,7 +93,7 @@ var HoverLegend = React.createClass({
             }}
             x={isLastXValue ? snapPixel.x - 5 : snapPixel.x + 5}
             y={this.props.height - this.props.fontSize}>
-            {this.props.formatNumber(this.props.snapPoint.x) + ' %'}
+            {this.props.xFormatNumber(this.props.snapPoint.x) + ' %'}
           </text>
         );
       }
@@ -107,7 +108,7 @@ var HoverLegend = React.createClass({
             }}
             x={10}
             y={snapPixel.y - 5}>
-            {this.props.formatNumber(this.props.snapPoint.y) + ' €'}
+            {this.props.yFormatNumber(this.props.snapPoint.y) + ' €'}
           </text>
         );
       }

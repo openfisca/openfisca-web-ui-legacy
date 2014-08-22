@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 var axes = require('../../axes'),
   Curve = require('./svg/curve'),
@@ -188,6 +187,7 @@ var BaremeVisualization = React.createClass({
                 var pointsSequence = isFilled ? Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray()) :
                   Lazy(highPoints);
                 var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
+                var cssColor = `rgb(${variable.color})`;
                 return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
                   <Curve
                     active={this.state.activeVariableCode === variable.code}
@@ -197,8 +197,8 @@ var BaremeVisualization = React.createClass({
                     points={points}
                     pointToPixel={this.gridPointToPixel}
                     style={{
-                      fill: isFilled ? strformat('rgb({0}, {1}, {2})', variable.color) : 'none',
-                      stroke: strformat('rgb({0}, {1}, {2})', variable.color),
+                      fill: isFilled ? cssColor : 'none',
+                      stroke: cssColor,
                     }}
                   />
                 );

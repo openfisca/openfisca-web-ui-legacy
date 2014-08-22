@@ -24,10 +24,10 @@
     "X-editable": "git+https://github.com/vitalets/x-editable.git",
     "bootstrap": "^3.1.1",
     "deep-equal": "^0.2.1",
+    "es6ify": "^1.3.0",
     "jquery": "^2.1.1",
     "lazy.js": "git+https://github.com/dtao/lazy.js.git",
     "react": "^0.11.1",
-    "strformat": "0.0.3",
     "superagent": "^0.18.0",
     "uuid": "^1.4.1"
   },
@@ -49,12 +49,8 @@
   },
   "browserify": {
     "transform": [
-      [
-        "reactify",
-        {
-          "es6": true
-        }
-      ],
+      "reactify",
+      "es6ify",
       "browserify-shim"
     ]
   },

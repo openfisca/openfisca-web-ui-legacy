@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 
 var Curve = React.createClass({
@@ -34,7 +33,7 @@ var Curve = React.createClass({
   pointsToPixelsStr: function(points) {
     return points.map(point => {
       var pixel = this.props.pointToPixel(point);
-      return strformat('{x},{y}', pixel);
+      return `${pixel.x},${pixel.y}`;
     }).join(' ');
   },
   render: function() {

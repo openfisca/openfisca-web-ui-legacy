@@ -394,29 +394,30 @@ var Simulator = React.createClass({
         );
       } else if (Lazy(this.state.visualizationSlug).startsWith('situateur-')) {
         var value = this.state.simulationResult[0].values[0];
-        var curveLabel, hintFormat, pointLabel, points;
+        var curveLabel, formatHint, pointLabel, points;
         if (this.state.visualizationSlug === 'situateur-revdisp') {
           curveLabel = 'Revenu disponible';
-          hintFormat = '{percent} % des français ont un revenu disponible inférieur à {amount} €'; // jshint ignore:line
+          formatHint = ({amount, percent}) => `${percent} % des français ont un revenu disponible inférieur à ${amount} €`; // jshint ignore:line
           pointLabel = 'Votre revenu disponible';
           points = revdispDistribution;
         } else if (this.state.visualizationSlug === 'situateur-sal') {
           curveLabel = 'Salaires imposables';
-          hintFormat = '{percent} % des français ont des salaires imposables inférieurs à {amount} €'; // jshint ignore:line
+          formatHint = ({amount, percent}) => `${percent} % des français ont des salaires imposables inférieurs à ${amount} €`; // jshint ignore:line
           pointLabel = 'Vos salaires imposables';
           points = salDistribution;
         }
         return (
           <SituateurVisualization
             curveLabel={curveLabel}
-            formatNumber={helpers.formatFrenchNumber}
+            formatHint={formatHint}
             height={visualizationHeight}
-            hintFormat={hintFormat}
             pointLabel={pointLabel}
             points={points}
             value={value}
             width={rightPanelWidth}
+            xFormatNumber={value => helpers.formatFrenchNumber(value, {fixed: 0})}
             xSnapIntervalValue={5}
+            yFormatNumber={helpers.formatFrenchNumber}
             yMaxValue={Math.max(100000, value)}
           />
         );

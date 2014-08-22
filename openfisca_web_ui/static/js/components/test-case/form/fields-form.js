@@ -71,11 +71,12 @@ var FieldsForm = React.createClass({
         Valeur suggérée par le simulateur et utilisée dans ses calculs.
       </SuggestionIcon>
     );
+    var cerfaField = column.cerfa_field; // jshint ignore:line
     switch(column['@type']) {
       case 'Boolean':
         control = (
           <BooleanControl
-            cerfaField={column.cerfa_field /* jshint ignore:line */}
+            cerfaField={cerfaField}
             default={column.default}
             error={error}
             label={label}
@@ -119,7 +120,7 @@ var FieldsForm = React.createClass({
       case 'Integer':
         control = (
           <IntegerControl
-            cerfaField={column.cerfa_field /* jshint ignore:line */}
+            cerfaField={cerfaField}
             default={column.default}
             error={error}
             label={label}
@@ -137,7 +138,7 @@ var FieldsForm = React.createClass({
       case 'String':
         control = (
           <StringControl
-            cerfaField={column.cerfa_field /* jshint ignore:line */}
+            cerfaField={cerfaField}
             default={column.default}
             error={error}
             label={label}

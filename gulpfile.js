@@ -29,6 +29,7 @@ function buildScripts(entryFile, options) {
     watch = options && options.watch;
   var bundlerConstructor = options && watch ? watchify : browserify;
   var bundler = bundlerConstructor(entryFile);
+  bundler.add(require('es6ify').runtime); // Needed by some traceur es6 transformations.
   function rebundle() {
     var stream = bundler.bundle({debug: debug});
     if (watch) {

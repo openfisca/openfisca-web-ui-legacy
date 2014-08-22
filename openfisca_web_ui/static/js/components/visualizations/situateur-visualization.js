@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 var Curve = require('./svg/curve'),
   HGrid = require('./svg/h-grid'),
@@ -18,19 +17,20 @@ var Curve = require('./svg/curve'),
 var SituateurVisualization = React.createClass({
   propTypes: {
     curveLabel: React.PropTypes.string.isRequired,
-    formatNumber: React.PropTypes.func.isRequired,
+    formatHint: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
-    hintFormat: React.PropTypes.string.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
     pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
     value: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
+    xFormatNumber: React.PropTypes.func.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xSnapIntervalValue: React.PropTypes.number.isRequired,
     xSteps: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
+    yFormatNumber: React.PropTypes.func.isRequired,
     yMaxValue: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
@@ -77,10 +77,11 @@ var SituateurVisualization = React.createClass({
     }
     return y;
   },
-  formatHint: function(point) {
-    return strformat(this.props.hintFormat, {
-      amount: this.props.formatNumber(point.y),
-      percent: this.props.formatNumber(point.x),
+  formatHint: function() {
+    var point = this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value};
+    return this.props.formatHint({
+      amount: this.props.yFormatNumber(point.y),
+      percent: this.props.xFormatNumber(point.x),
     });
   },
   getDefaultProps: function() {
@@ -134,10 +135,11 @@ var SituateurVisualization = React.createClass({
               width={this.gridWidth}
             />
             <XAxis
-              formatNumber={this.props.formatNumber}
+              formatNumber={this.props.xFormatNumber}
               height={this.props.xAxisHeight}
               label='% de la population'
               maxValue={this.props.xMaxValue}
+              unit='%'
               width={this.gridWidth}
             />
           </g>
@@ -149,7 +151,7 @@ var SituateurVisualization = React.createClass({
               width={this.gridWidth}
             />
             <YAxis
-              formatNumber={this.props.formatNumber}
+              formatNumber={this.props.yFormatNumber}
               height={this.gridHeight}
               label='en €'
               maxValue={this.props.yMaxValue}
@@ -177,15 +179,16 @@ var SituateurVisualization = React.createClass({
             />
             <HoverLegend
               findYFromX={this.findYFromX}
-              formatNumber={this.props.formatNumber}
               height={this.gridHeight}
               onHover={this.handleHoverLegendHover}
               pixelToPoint={this.gridPixelToPoint}
               pointToPixel={this.gridPointToPixel}
               snapPoint={this.state.snapPoint}
               width={this.gridWidth}
+              xFormatNumber={this.props.xFormatNumber}
               xMaxValue={this.props.xMaxValue}
               xSnapValues={xSnapValues}
+              yFormatNumber={this.props.yFormatNumber}
             />
           </g>
           <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
@@ -196,7 +199,7 @@ var SituateurVisualization = React.createClass({
           </g>
         </svg>
         <p className='well' style={{textAlign: 'center'}}>
-          {this.formatHint(this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value})}
+          {this.formatHint()}
         </p>
       </div>
     );

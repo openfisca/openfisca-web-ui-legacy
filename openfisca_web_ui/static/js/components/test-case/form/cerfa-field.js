@@ -2,8 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react'),
-  strformat = require('strformat');
+  React = require('react');
 
 
 var CerfaField = React.createClass({
@@ -11,16 +10,11 @@ var CerfaField = React.createClass({
     value: React.PropTypes.any.isRequired,
   },
   render: function() {
-    var areMultipleValues = typeof this.props === 'object';
-    return (
-      <span className="help-block">
-        {
-          areMultipleValues ?
-            strformat('Cases CERFA {0}', Lazy(this.props.value).join(', ')) :
-            strformat('Case CERFA {0}', this.props.value)
-        }
-      </span>
-    );
+    var areMultipleValues = typeof this.props.value === 'object';
+    var helpMessage = areMultipleValues ?
+      `Cases CERFA ${Lazy(this.props.value).join(', ')}` :
+      `Case CERFA ${this.props.value}`;
+    return <span className="help-block">{helpMessage}</span>;
   }
 });
 

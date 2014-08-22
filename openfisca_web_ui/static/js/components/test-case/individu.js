@@ -1,8 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons'),
-  strformat = require('strformat');
+var React = require('react/addons');
 
 var SuggestionIcon = require('./suggestion-icon');
 
@@ -70,7 +69,7 @@ var Individu = React.createClass({
         {
           this.props.suggestions && (
             <SuggestionIcon>
-              {strformat('« {nom_individu} » contient des suggestions.', this.props.value)/* jshint ignore:line */}
+              {`« ${this.props.value.nom_individu} » contient des suggestions.` /* jshint ignore:line */}
             </SuggestionIcon>
           )
         }
