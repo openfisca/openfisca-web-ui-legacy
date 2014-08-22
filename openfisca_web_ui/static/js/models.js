@@ -32,6 +32,8 @@ var entitiesMetadata = {
   },
 };
 
+var getNameKey = kind => kind === 'individus' ? 'nom_individu' : entitiesMetadata[kind].nameKey; // jshint ignore:line
+
 var kinds = Object.keys(entitiesMetadata);
 
 var roleLabels = {
@@ -50,7 +52,7 @@ var TestCase = {
     entitiesMetadata[kind].roles.forEach(function(role) {
       entity[role] = TestCase.isSingleton(kind, role) ? null : [];
     });
-    var nameKey = entitiesMetadata[kind].nameKey;
+    var nameKey = getNameKey(kind);
     entity[nameKey] = TestCase.guessEntityName(kind, testCase);
     return entity;
   },
@@ -102,9 +104,14 @@ var TestCase = {
     return null;
   },
   getEntityLabel: function(kind, entity) {
-    var label = entitiesMetadata[kind].label;
-    var name = entity[entitiesMetadata[kind].nameKey];
-    return label + ' ' + name;
+    if (kind === 'individus') {
+      return entity.nom_individu; // jshint ignore:line
+    } else {
+      var label = entitiesMetadata[kind].label;
+      var nameKey = getNameKey(kind);
+      var name = entity[nameKey];
+      return `${label} ${name}`;
+    }
   },
   getInitialTestCase: function() {
     var individu = TestCase.createIndividu();
@@ -138,7 +145,7 @@ var TestCase = {
     return testCase;
   },
   guessEntityName: function(kind, testCase) {
-    var nameKey = entitiesMetadata[kind].nameKey;
+    var nameKey = getNameKey(kind);
     var value;
     if (testCase && testCase[kind]) {
       var values = Lazy(testCase[kind]).map(function(entity) {
@@ -178,7 +185,7 @@ var TestCase = {
   withEntitiesNamesFilled: function(testCase) {
     var newEntities = Lazy(kinds).map(function(kind) {
       var newEntitiesOfKind = Lazy(testCase[kind]).map(function(entity, id) {
-        var nameKey = entitiesMetadata[kind].nameKey;
+        var nameKey = getNameKey(kind);
         if (entity[nameKey]) {
           return [id, entity];
         } else {
@@ -240,9 +247,4 @@ var TestCase = {
   },
 };
 
-module.exports = {
-  entitiesMetadata: entitiesMetadata,
-  kinds: kinds,
-  roleLabels: roleLabels,
-  TestCase: TestCase,
-};
+module.exports = {entitiesMetadata, getNameKey, kinds, roleLabels, TestCase};

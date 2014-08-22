@@ -151,7 +151,7 @@ var Simulator = React.createClass({
   },
   handleDeleteIndividu: function(id) {
     console.debug('handleDeleteIndividu', id);
-    var message = 'Supprimer ' + this.state.testCase.individus[id].nom_individu + ' ?'; // jshint ignore:line
+    var message = `Supprimer ${this.state.testCase.individus[id].nom_individu} ?`; // jshint ignore:line
     if (confirm(message)) {
       var newTestCase = models.TestCase.withoutIndividu(id, this.state.testCase);
       this.setState({testCase: newTestCase}, function() {
@@ -163,27 +163,39 @@ var Simulator = React.createClass({
     console.debug('handleEditEntity', kind, id);
     if (this.props.columns && this.props.columnsTree) {
       var newEditedEntity = {action: 'edit', id: id, kind: kind};
-      this.setState({
-        editedEntity: this.state.editedEntity && shallowEqual(this.state.editedEntity, newEditedEntity) ? null :
-          newEditedEntity,
-      });
+      var nameKey = models.getNameKey(kind);
+      newEditedEntity[nameKey] = this.state.testCase[kind][id][nameKey];
+      this.setState({editedEntity: newEditedEntity});
     } else {
       alert('Impossible de charger les champs du formulaire');
     }
   },
   handleEditFormClose: function() {
     console.debug('handleEditFormClose');
-    this.setState({editedEntity: null}, function() {
+    var {id, kind} = this.state.editedEntity;
+    var nameKey = models.getNameKey(kind);
+    var newTestCase = helpers.assignIn(this.state.testCase, [kind, id, nameKey], this.state.editedEntity[nameKey]);
+    var changeset = {
+      editedEntity: null,
+      testCase: newTestCase,
+    };
+    this.setState(changeset, function() {
       this.simulate();
     });
   },
   handleFieldsFormChange: function(kind, id, columnName, value) {
     console.debug('handleFieldsFormChange', arguments);
-    var newValues = Lazy(this.state.testCase[kind][id]).assign(obj(columnName, value)).toObject();
-    var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newValues);
-    this.setState({testCase: newTestCase}, function() {
-      this.repair();
-    });
+    var nameKey = models.getNameKey(kind);
+    if (columnName === nameKey) {
+      var newEditedEntity = Lazy(this.state.editedEntity).assign(obj(columnName, value)).toObject();
+      this.setState({editedEntity: newEditedEntity});
+    } else {
+      var newValues = Lazy(this.state.testCase[kind][id]).assign(obj(columnName, value)).toObject();
+      var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newValues);
+      this.setState({testCase: newTestCase}, function() {
+        this.repair();
+      });
+    }
   },
   handleLegislationChange: function(legislationUrl) {
     this.setState({legislationUrl: legislationUrl}, function() {
@@ -194,8 +206,8 @@ var Simulator = React.createClass({
     console.debug('handleMoveIndividu', id);
     var newEditedEntity = {action: 'move', id: id, kind: 'individus'};
     this.setState({
-      editedEntity: this.state.editedEntity && shallowEqual(this.state.editedEntity, newEditedEntity) ? null :
-        newEditedEntity,
+      editedEntity: this.state.editedEntity && shallowEqual(this.state.editedEntity, newEditedEntity) ?
+        null : newEditedEntity,
     });
   },
   handleMoveIndividuFormChange: function(whatChanged, kind, value) {
@@ -321,7 +333,7 @@ var Simulator = React.createClass({
               onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
               onDeleteEntity={this.handleDeleteEntity}
               onDeleteIndividu={this.handleDeleteIndividu}
-              onEditEntity={this.handleEditEntity}
+              onEditEntity={this.state.editedEntity === null ? this.handleEditEntity : this.handleEditFormClose}
               onMoveIndividu={this.handleMoveIndividu}
               roleLabels={models.roleLabels}
               suggestions={this.state.suggestions}
@@ -336,12 +348,9 @@ var Simulator = React.createClass({
     );
   },
   renderFieldsFormPanel: function() {
-    var id = this.state.editedEntity.id,
-      kind = this.state.editedEntity.kind;
-    var entity = this.state.testCase[kind][id];
-    var title = kind === 'individus' ?
-      entity.nom_individu : // jshint ignore:line
-      models.TestCase.getEntityLabel(kind, entity);
+    var {id, kind} = this.state.editedEntity,
+      entity = this.state.testCase[kind][id];
+    var entityLabel = models.TestCase.getEntityLabel(kind, entity);
     invariant('children' in this.props.columnsTree[kind], 'columnsTree.' + kind + ' has no children');
     var categories = Lazy(this.props.columnsTree[kind].children).map(category => ({
       columns: category.children ? category.children.map(columnName => {
@@ -352,11 +361,13 @@ var Simulator = React.createClass({
     })).toArray(); // jshint ignore:line
     var errors = helpers.getObjectPath(this.state.errors, kind, id);
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
-    var values = this.state.testCase[kind][id];
+    var nameKey = models.getNameKey(kind);
+    var editedValues = obj(nameKey, this.state.editedEntity[nameKey]);
+    var values = Lazy(entity).assign(editedValues).toObject();
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={'Éditer ' + title}>
+        title={'Éditer ' + entityLabel}>
         <FieldsForm
           categories={categories}
           errors={errors}
