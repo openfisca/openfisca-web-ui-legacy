@@ -14,7 +14,7 @@ var XAxis = React.createClass({
     maxValue: React.PropTypes.number.isRequired,
     minValue: React.PropTypes.number.isRequired,
     nbSteps: React.PropTypes.number.isRequired,
-    rotateLabels: React.PropTypes.bool.isRequired,
+    rotateLabels: React.PropTypes.bool,
     strokeColor: React.PropTypes.string.isRequired,
     tickFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,

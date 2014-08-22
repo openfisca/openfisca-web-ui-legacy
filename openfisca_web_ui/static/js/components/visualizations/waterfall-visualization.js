@@ -16,7 +16,7 @@ var axes = require('../../axes'),
 var WaterfallVisualization = React.createClass({
   propTypes: {
     defaultActiveVariableCode: React.PropTypes.string.isRequired,
-    displayExpandedSubtotals: React.PropTypes.bool.isRequired,
+    displayExpandedSubtotals: React.PropTypes.bool,
     expandedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,

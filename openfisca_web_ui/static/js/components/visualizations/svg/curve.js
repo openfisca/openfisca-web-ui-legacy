@@ -7,8 +7,8 @@ var Lazy = require('lazy.js'),
 
 var Curve = React.createClass({
   propTypes: {
-    active: React.PropTypes.bool.isRequired,
-    fill: React.PropTypes.bool.isRequired,
+    active: React.PropTypes.bool,
+    fill: React.PropTypes.bool,
     onHover: React.PropTypes.func,
     points: React.PropTypes.arrayOf(
       React.PropTypes.shape({
