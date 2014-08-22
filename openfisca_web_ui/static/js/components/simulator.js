@@ -392,7 +392,7 @@ var Simulator = React.createClass({
             year={this.state.year}
           />
         );
-      } else if (Lazy(this.state.visualizationSlug).startsWith('situateur-')) {
+      } else if (this.state.visualizationSlug.startsWith('situateur-')) {
         var value = this.state.simulationResult[0].values[0];
         var curveLabel, formatHint, pointLabel, points;
         if (this.state.visualizationSlug === 'situateur-revdisp') {
