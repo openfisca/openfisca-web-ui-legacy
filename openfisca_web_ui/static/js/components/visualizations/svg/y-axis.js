@@ -42,7 +42,7 @@ var YAxis = React.createClass({
           steps.map((value, idx) => {
             var formattedValue = this.props.formatNumber(value),
               unit = this.props.unit;
-            var label = unit && value > 0 ? `${formattedValue} ${unit}` : formattedValue;
+            var label = unit && value !== 0 ? `${formattedValue} ${unit}` : formattedValue;
             return (
               <g key={'tick-' + idx} transform={`translate(0, ${this.props.height - idx * stepHeight})`}>
                 <text
