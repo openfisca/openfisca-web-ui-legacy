@@ -1,4 +1,4 @@
-.PHONY: clean flake8 install jshint
+.PHONY: clean flake8 jshint
 
 STATIC_DIR=openfisca_web_ui/static
 
