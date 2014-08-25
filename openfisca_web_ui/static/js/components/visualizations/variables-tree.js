@@ -4,6 +4,8 @@
 var Lazy = require('lazy.js'),
   React = require('react/addons');
 
+var Tooltip = require('../tooltip');
+
 var cx = React.addons.classSet;
 
 
@@ -16,6 +18,12 @@ var VariablesTree = React.createClass({
     onHover: React.PropTypes.func.isRequired,
     onToggle: React.PropTypes.func,
     variables: React.PropTypes.array.isRequired,
+  },
+  componentDidMount: function() {
+    $(this.refs.externalLink.getDOMNode()).tooltip();
+  },
+  componentDidUpdate: function() {
+    $(this.refs.externalLink.getDOMNode()).tooltip('fixTitle');
   },
   getDefaultProps: function() {
     return {
@@ -37,18 +45,20 @@ var VariablesTree = React.createClass({
     );
   },
   renderVariable: function(variable) {
+    var onVariableClick = variable.isSubtotal && this.props.onToggle.bind(null, variable);
     return (
       <tr
         className={cx({active: variable.code === this.props.activeVariableCode})}
         key={variable.code}
-        onClick={variable.isSubtotal && this.props.onToggle.bind(null, variable)}
         onMouseOut={this.props.onHover.bind(null, null)}
         onMouseOver={this.props.onHover.bind(null, variable)}
         style={{cursor: variable.isSubtotal ? 'pointer' : null}}>
         <td
+          onClick={onVariableClick}
           style={{
             fontWeight: variable.depth === 0 ? 'bold' : null,
             paddingLeft: variable.depth > 1 ? (variable.depth - 1) * 20 : null,
+            textDecoration: variable.code === this.props.activeVariableCode && variable.isSubtotal ? 'underline' : null,
           }}>
           {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}
         </td>
@@ -56,6 +66,7 @@ var VariablesTree = React.createClass({
           variable.value && (
             <td
               className='text-right'
+              onClick={onVariableClick}
               style={{
                 color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
                 fontStyle: variable.isSubtotal && 'italic',
@@ -65,7 +76,7 @@ var VariablesTree = React.createClass({
             </td>
           )
         }
-        <td style={{width: 20}}>
+        <td onClick={onVariableClick}>
           {
             ! variable.isSubtotal || variable.isCollapsed && (
               <div style={{
@@ -78,17 +89,18 @@ var VariablesTree = React.createClass({
             )
           }
         </td>
-        <td style={{width: 20}}>
+        <td>
           {
             variable.url && (
-              <a
-                className='btn btn-default btn-xs'
-                href={variable.url}
-                style={{marginLeft: '1em'}}
-                target='_blank'
-                title={'Explication sur ' + variable.name}>
-                ?
-              </a>
+              <Tooltip placement='left'>
+                <a
+                  href={variable.url}
+                  ref='externalLink'
+                  target='_blank'
+                  title={`Explication sur ${variable.name}`}>
+                  <span className='glyphicon glyphicon-question-sign'></span>
+                </a>
+              </Tooltip>
             )
           }
         </td>
