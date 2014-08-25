@@ -19,12 +19,6 @@ var VariablesTree = React.createClass({
     onToggle: React.PropTypes.func,
     variables: React.PropTypes.array.isRequired,
   },
-  componentDidMount: function() {
-    $(this.refs.externalLink.getDOMNode()).tooltip();
-  },
-  componentDidUpdate: function() {
-    $(this.refs.externalLink.getDOMNode()).tooltip('fixTitle');
-  },
   getDefaultProps: function() {
     return {
       expandedSubtotalColor: 'lightGray',
@@ -103,7 +97,6 @@ var VariablesTree = React.createClass({
               <Tooltip placement='left'>
                 <a
                   href={variable.url}
-                  ref='externalLink'
                   target='_blank'
                   title={`Explication sur ${variable.name}`}>
                   <span className='glyphicon glyphicon-question-sign'></span>
