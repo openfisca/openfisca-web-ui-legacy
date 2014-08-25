@@ -31,6 +31,13 @@ var VariablesTree = React.createClass({
       noColorFill: 'gray',
     };
   },
+  getInitialState: function() {
+    return {hoveredVariableCode: null};
+  },
+  handleHover: function(variable) {
+    this.setState({hoveredVariableCode: variable ? variable.code : null});
+    this.props.onHover(variable);
+  },
   render: function() {
     var variablesSequence = Lazy(this.props.variables);
     var variables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
@@ -50,15 +57,16 @@ var VariablesTree = React.createClass({
       <tr
         className={cx({active: variable.code === this.props.activeVariableCode})}
         key={variable.code}
-        onMouseOut={this.props.onHover.bind(null, null)}
-        onMouseOver={this.props.onHover.bind(null, variable)}
+        onMouseOut={this.handleHover.bind(null, null)}
+        onMouseOver={this.handleHover.bind(null, variable)}
         style={{cursor: variable.isSubtotal ? 'pointer' : null}}>
         <td
           onClick={onVariableClick}
           style={{
             fontWeight: variable.depth === 0 ? 'bold' : null,
             paddingLeft: variable.depth > 1 ? (variable.depth - 1) * 20 : null,
-            textDecoration: variable.code === this.props.activeVariableCode && variable.isSubtotal ? 'underline' : null,
+            textDecoration: variable.code === this.state.hoveredVariableCode &&
+              variable.isSubtotal ? 'underline' : null,
           }}>
           {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}
         </td>

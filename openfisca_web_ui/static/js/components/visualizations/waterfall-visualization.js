@@ -15,8 +15,8 @@ var axes = require('../../axes'),
 
 var WaterfallVisualization = React.createClass({
   propTypes: {
-    defaultActiveVariableCode: React.PropTypes.string.isRequired,
-    displayExpandedSubtotals: React.PropTypes.bool,
+    defaultActiveVariableCode: React.PropTypes.string,
+    displaySubtotalThinBars: React.PropTypes.bool,
     expandedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
@@ -62,7 +62,7 @@ var WaterfallVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      defaultActiveVariableCode: 'revdisp',
+      defaultActiveVariableCode: null,
       labelsFontSize: 14,
       marginRight: 10,
       marginTop: 10,
@@ -73,7 +73,10 @@ var WaterfallVisualization = React.createClass({
     };
   },
   getInitialState: function() {
-    return {activeVariableCode: this.props.defaultActiveVariableCode};
+    return {
+      activeVariableCode: this.props.defaultActiveVariableCode,
+      xAxisHoveredVariableCode: this.props.defaultActiveVariableCode,
+    };
   },
   getVariables: function() {
     var processNode = (variable, baseValue, depth, hidden) => {
@@ -112,52 +115,48 @@ var WaterfallVisualization = React.createClass({
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : this.props.defaultActiveVariableCode});
   },
+  handleXAxisLabelledVariableHover: function(variable) {
+    this.setState({xAxisHoveredVariableCode: variable ? variable.code : this.props.defaultActiveVariableCode});
+    this.handleVariableHover(variable);
+  },
   render: function() {
     var variables = this.getVariables();
-    var displayedVariables = this.props.displayExpandedSubtotals ? variables :
+    var waterfallBarsVariables = this.props.displaySubtotalThinBars ? variables :
       Lazy(variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
     var yBounds = this.computeValuesBounds(variables);
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
-    var xLabels = displayedVariables.map(variable => {
-      var style = {cursor: 'default'};
-      if (variable.code === this.state.activeVariableCode) {
-        style.textDecoration = 'underline';
-      }
+    var xLabels = waterfallBarsVariables.map(variable => {
+      var style = {cursor: null};
       var name = variable.short_name; // jshint ignore:line
       if (variable.isSubtotal) {
         name = (variable.isCollapsed ? '▶' : '▼') + ' ' + name;
+        if (variable.code === this.state.xAxisHoveredVariableCode) {
+          style.textDecoration = 'underline';
+        }
       }
       var props = {
-        onMouseOut: this.handleVariableHover.bind(null, null),
-        onMouseOver: this.handleVariableHover.bind(null, variable),
+        onMouseOut: this.handleXAxisLabelledVariableHover.bind(null, null),
+        onMouseOver: this.handleXAxisLabelledVariableHover.bind(null, variable),
       };
       if (this.props.onVariableToggle && variable.isSubtotal) {
         style.cursor = 'pointer';
         props.onClick = this.props.onVariableToggle.bind(null, variable);
       }
-      return {name: name, props: props, style: style};
+      return {name, props, style};
     });
     var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
       gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var xSteps = xLabels.length;
     var stepWidth = gridWidth / xSteps;
+    var xAxisTransform = `translate(${this.props.yAxisWidth}, ${this.props.height - this.props.xAxisHeight})`;
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
-          <g transform={
-            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
-          }>
+          <g transform={xAxisTransform}>
             <HGrid
               height={gridHeight}
               nbSteps={this.props.yNbSteps}
               startStep={1}
-              width={gridWidth}
-            />
-            <XAxisLabelled
-              height={this.props.xAxisHeight}
-              labels={xLabels}
-              labelsFontSize={this.props.labelsFontSize}
-              nbSteps={xSteps}
               width={gridWidth}
             />
           </g>
@@ -172,25 +171,21 @@ var WaterfallVisualization = React.createClass({
             />
             <WaterfallBars
               activeVariableCode={this.state.activeVariableCode}
-              displayExpandedSubtotals={this.props.displayExpandedSubtotals}
               height={gridHeight}
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
-              variables={displayedVariables}
+              variables={waterfallBarsVariables}
               width={gridWidth}
             />
             {
-              displayedVariables.map((variable, idx) =>
+              waterfallBarsVariables.map((variable, idx) =>
                 <g key={variable.code} transform={`translate(${stepWidth * idx}, 0)`}>
                   <WaterfallBarHover
+                    activeVariableCode={this.state.activeVariableCode}
                     barHeight={gridHeight}
                     barWidth={stepWidth}
                     labelHeight={this.props.labelsFontSize * 1.5}
                     labelWidth={this.props.xAxisHeight}
-                    onClick={
-                      this.props.onVariableToggle && variable.isSubtotal ?
-                        this.props.onVariableToggle.bind(null, variable) : null
-                    }
                     onHover={this.handleVariableHover}
                     variable={variable}
                   />
@@ -198,9 +193,18 @@ var WaterfallVisualization = React.createClass({
               )
             }
           </g>
+          <g transform={xAxisTransform}>
+            <XAxisLabelled
+              height={this.props.xAxisHeight}
+              labels={xLabels}
+              labelsFontSize={this.props.labelsFontSize}
+              nbSteps={xSteps}
+              width={gridWidth}
+            />
+          </g>
         </svg>
         <p className='well' style={{textAlign: 'center'}}>
-          {this.formatHint(variables)}
+          {this.state.activeVariableCode ? this.formatHint(variables) : 'Survolez le graphique'}
         </p>
         <VariablesTree
           activeVariableCode={this.state.activeVariableCode}
