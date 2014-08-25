@@ -13,4 +13,4 @@
 /node_modules
 /npm-debug.log
 /openfisca_web_ui/static/dist
-/openfisca_web_ui/static/node_modules
+/src
