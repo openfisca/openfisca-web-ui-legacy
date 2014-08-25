@@ -30,36 +30,55 @@ var VariablesTree = React.createClass({
       <div className='table-responsive'>
         <table className='table table-condensed'>
           <tbody>
-            {
-              variables.map(variable => this.renderVariable(variable))
-            }
+            {variables.map(variable => this.renderVariable(variable))}
           </tbody>
         </table>
       </div>
     );
   },
   renderVariable: function(variable) {
-    var variableName = variable.name;
-    if (variable.isSubtotal) {
-      variableName = (variable.isCollapsed ? '▶' : '▼') + ' ' + variableName;
-    }
-    var displayColor = ! variable.isSubtotal || variable.isCollapsed;
     return (
       <tr
         className={cx({active: variable.code === this.props.activeVariableCode})}
         key={variable.code}
+        onClick={variable.isSubtotal && this.props.onToggle.bind(null, variable)}
         onMouseOut={this.props.onHover.bind(null, null)}
-        onMouseOver={this.props.onHover.bind(null, variable)}>
-        <td>
-          <span
-            onClick={variable.isSubtotal && this.props.onToggle.bind(null, variable)}
-            style={{
-              cursor: variable.isSubtotal ? 'pointer' : 'auto',
-              fontWeight: variable.depth === 0 ? 'bold' : 'normal',
-              marginLeft: variable.depth > 0 ? (variable.depth - 1) * 20 : 0,
-            }}>
-            {variableName}
-          </span>
+        onMouseOver={this.props.onHover.bind(null, variable)}
+        style={{cursor: variable.isSubtotal ? 'pointer' : null}}>
+        <td
+          style={{
+            fontWeight: variable.depth === 0 ? 'bold' : null,
+            paddingLeft: variable.depth > 1 ? (variable.depth - 1) * 20 : null,
+          }}>
+          {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}
+        </td>
+        {
+          variable.value && (
+            <td
+              className='text-right'
+              style={{
+                color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
+                fontStyle: variable.isSubtotal && 'italic',
+                fontWeight: variable.depth === 0 ? 'bold' : null,
+              }}>
+              {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
+            </td>
+          )
+        }
+        <td style={{width: 20}}>
+          {
+            ! variable.isSubtotal || variable.isCollapsed && (
+              <div style={{
+                backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
+                border: '1px solid gray',
+                width: 20,
+              }}>
+                { /* jshint ignore:line */}
+              </div>
+            )
+          }
+        </td>
+        <td style={{width: 20}}>
           {
             variable.url && (
               <a
@@ -70,32 +89,6 @@ var VariablesTree = React.createClass({
                 title={'Explication sur ' + variable.name}>
                 ?
               </a>
-            )
-          }
-        </td>
-        {
-          variable.value && (
-            <td
-              className='text-right'
-              style={{
-                color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
-                fontStyle: variable.isSubtotal && 'italic',
-                fontWeight: variable.depth === 0 ? 'bold' : 'normal',
-              }}>
-              {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
-            </td>
-          )
-        }
-        <td style={{width: 20}}>
-          {
-            displayColor && (
-              <div style={{
-                backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
-                border: '1px solid gray',
-                width: 20,
-              }}>
-                { /* jshint ignore:line */}
-              </div>
             )
           }
         </td>
