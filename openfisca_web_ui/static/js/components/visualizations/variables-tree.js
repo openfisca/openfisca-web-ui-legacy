@@ -78,7 +78,7 @@ var VariablesTree = React.createClass({
         }
         <td onClick={onVariableClick}>
           {
-            ! variable.isSubtotal || variable.isCollapsed && (
+            (! variable.isSubtotal || variable.isCollapsed) && (
               <div style={{
                 backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
                 border: '1px solid gray',
