@@ -253,10 +253,10 @@ var Simulator = React.createClass({
   handleWaterfallVariableToggle: function(variable) {
     console.debug('handleWaterfallVariableToggle', variable);
     var status = this.state.waterfallExpandedVariables[variable.code];
-    var newwaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
+    var newWaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
       .assign(obj(variable.code, ! status))
       .toObject();
-    this.setState({waterfallExpandedVariables: newwaterfallExpandedVariables});
+    this.setState({waterfallExpandedVariables: newWaterfallExpandedVariables});
   },
   handleYearChange: function(year) {
     console.debug('handleYearChange', year);
