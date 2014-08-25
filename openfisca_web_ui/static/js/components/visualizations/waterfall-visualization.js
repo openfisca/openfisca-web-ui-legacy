@@ -2,7 +2,7 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react/addons');
 
 var axes = require('../../axes'),
   HGrid = require('./svg/h-grid'),
@@ -14,9 +14,10 @@ var axes = require('../../axes'),
 
 
 var WaterfallVisualization = React.createClass({
+  mixins: [React.addons.LinkedStateMixin],
   propTypes: {
     defaultActiveVariableCode: React.PropTypes.string,
-    displaySubtotalThinBars: React.PropTypes.bool,
+    defaultDisplaySubtotalThinBars: React.PropTypes.bool,
     expandedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
@@ -63,6 +64,7 @@ var WaterfallVisualization = React.createClass({
   getDefaultProps: function() {
     return {
       defaultActiveVariableCode: null,
+      defaultDisplaySubtotalThinBars: false,
       labelsFontSize: 14,
       marginRight: 10,
       marginTop: 10,
@@ -75,6 +77,7 @@ var WaterfallVisualization = React.createClass({
   getInitialState: function() {
     return {
       activeVariableCode: this.props.defaultActiveVariableCode,
+      displaySubtotalThinBars: this.props.defaultDisplaySubtotalThinBars,
       xAxisHoveredVariableCode: this.props.defaultActiveVariableCode,
     };
   },
@@ -121,7 +124,7 @@ var WaterfallVisualization = React.createClass({
   },
   render: function() {
     var variables = this.getVariables();
-    var waterfallBarsVariables = this.props.displaySubtotalThinBars ? variables :
+    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? variables :
       Lazy(variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
     var yBounds = this.computeValuesBounds(variables);
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
@@ -213,6 +216,19 @@ var WaterfallVisualization = React.createClass({
           onHover={this.handleVariableHover}
           variables={variables}
         />
+        <div className='panel panel-default'>
+          <div className='panel-heading'>
+            Paramètres
+          </div>
+          <div className='panel-body'>
+            <div className='checkbox'>
+              <label>
+                <input checkedLink={this.linkState('displaySubtotalThinBars')} type='checkbox' />
+                Afficher les sous-totaux
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
     );
   },

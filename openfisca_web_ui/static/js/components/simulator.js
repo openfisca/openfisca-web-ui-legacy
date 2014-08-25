@@ -450,7 +450,6 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'cascade') {
         return (
           <WaterfallVisualization
-            displaySubtotalThinBars={false}
             expandedVariables={this.state.waterfallExpandedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
