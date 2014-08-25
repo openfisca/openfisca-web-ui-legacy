@@ -194,7 +194,7 @@ ${conf['app_name']}
         <%self:appconfig_script/>
     </script>
     <script src="${urls.get_url(ctx, u'dist/' + ('bundle.js' if conf['debug'] else u'bundle.min.js'))}"></script>
-% if conf['debug']:
+% if conf['enabled.livereload']:
     <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
 % endif
     <%self:page_scripts/>
