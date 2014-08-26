@@ -433,7 +433,17 @@ var Simulator = React.createClass({
     }
   },
   renderVisualizationPanel: function() {
-    return (
+    return this.state.errors ? (
+      <div className="alert alert-danger" role="alert">
+        <h4>Situation incorrecte</h4>
+        <p>Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.</p>
+        <p>
+          Vous pouvez également {
+            <button className='btn btn-danger btn-xs' onClick={this.handleReset}>réinitialiser</button>
+          } la situation.
+        </p>
+      </div>
+    ) : (
       <div>
         <VisualizationToolbar
           onVisualizationChange={this.handleVisualizationChange}
@@ -442,13 +452,7 @@ var Simulator = React.createClass({
           year={this.state.year}
         />
         <hr/>
-        {
-          this.state.simulationResult ? this.renderVisualization() : (
-            this.state.errors && (
-              <p>Les entités comportent des erreurs. Veuillez les corriger.</p>
-            )
-          )
-        }
+        {this.state.simulationResult && this.renderVisualization()}
       </div>
     );
   },
