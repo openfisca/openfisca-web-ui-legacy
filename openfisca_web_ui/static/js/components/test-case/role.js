@@ -12,10 +12,6 @@ var Role = React.createClass({
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     role: React.PropTypes.string.isRequired,
   },
-  preventDefaultThen: function(callback, event) {
-    event.preventDefault();
-    callback();
-  },
   render: function() {
     var maxCardinality = this.props.maxCardinality;
     var addLink = typeof maxCardinality === 'undefined' || ! this.props.children ||
@@ -27,7 +23,7 @@ var Role = React.createClass({
         {this.props.children}
         {
           addLink && (
-            <a href="#" onClick={this.preventDefaultThen.bind(null, this.props.onCreateIndividuInEntity)}>
+            <a href="#" onClick={event => { event.preventDefault(); this.props.onCreateIndividuInEntity(); }}>
               Ajouter
             </a>
           )

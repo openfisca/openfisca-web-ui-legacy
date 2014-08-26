@@ -20,15 +20,11 @@ var TestCase = React.createClass({
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
     onDeleteIndividu: React.PropTypes.func.isRequired,
-    onEditEntity: React.PropTypes.func.isRequired,
+    onEditEntity: React.PropTypes.func,
     onMoveIndividu: React.PropTypes.func.isRequired,
     roleLabels: React.PropTypes.object.isRequired,
     suggestions: React.PropTypes.object,
     testCase: React.PropTypes.object.isRequired,
-  },
-  preventDefaultThen: function(callback, event) {
-    event.preventDefault();
-    callback();
   },
   render: function() {
     var entitiesMetadata = this.props.entitiesMetadata;
@@ -51,7 +47,7 @@ var TestCase = React.createClass({
                     key={entity.id}
                     label={entity.label}
                     onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}
-                    onEdit={this.props.onEditEntity.bind(null, kind, entity.id)}>
+                    onEdit={this.props.onEditEntity && this.props.onEditEntity.bind(null, kind, entity.id)}>
                     {
                       entitiesMetadata[kind].roles.map(role => {
                         var maxCardinality = entitiesMetadata[kind].maxCardinality[role];
@@ -65,7 +61,9 @@ var TestCase = React.createClass({
                               id={individuId}
                               key={individuId}
                               onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
-                              onEdit={this.props.onEditEntity.bind(null, 'individus', individuId)}
+                              onEdit={
+                                this.props.onEditEntity && this.props.onEditEntity.bind(null, 'individus', individuId)
+                              }
                               onMove={this.props.onMoveIndividu.bind(null, individuId)}
                               suggestions={helpers.getObjectPath(this.props.suggestions, 'individus', individuId)}
                               value={this.props.testCase.individus[individuId]}
@@ -99,11 +97,7 @@ var TestCase = React.createClass({
                 )
                 .concat(
                   <p style={{marginBottom: 20}}>
-                    <a
-                      href='#'
-                      onClick={
-                        this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, kind))
-                      }>
+                    <a href='#' onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}>
                       {entitiesMetadata[kind].createMessage}
                     </a>
                   </p>

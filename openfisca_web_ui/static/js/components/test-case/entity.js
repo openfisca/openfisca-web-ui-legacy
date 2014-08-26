@@ -12,11 +12,7 @@ var Entity = React.createClass({
     hasErrors: React.PropTypes.bool,
     label: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
-    onEdit: React.PropTypes.func.isRequired,
-  },
-  preventDefaultThen: function(callback, event) {
-    event.preventDefault();
-    callback();
+    onEdit: React.PropTypes.func,
   },
   render: function() {
     return (
@@ -38,16 +34,10 @@ var Entity = React.createClass({
             </button>
             <ul className="dropdown-menu" role="menu">
               <li>
-                <a
-                  href="#"
-                  onClick={this.preventDefaultThen.bind(null, this.props.onEdit)}>
+                <a href="#" onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}>
                   Éditer
                 </a>
-                <a
-                  href="#"
-                  onClick={this.preventDefaultThen.bind(null, this.props.onDelete)}>
-                  Supprimer
-                </a>
+                <a href="#" onClick={event => { event.preventDefault(); this.props.onDelete(); }}>Supprimer</a>
               </li>
             </ul>
           </div>

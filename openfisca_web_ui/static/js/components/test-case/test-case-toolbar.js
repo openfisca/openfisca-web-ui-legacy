@@ -17,10 +17,6 @@ var TestCaseToolbar = React.createClass({
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
   },
-  preventDefaultThen: function(callback, event) {
-    event.preventDefault();
-    callback();
-  },
   render: function() {
     var isButtonDisabled = this.props.disabled || this.props.hasErrors || this.props.isSimulationInProgress;
     return (
@@ -46,7 +42,7 @@ var TestCaseToolbar = React.createClass({
             <li className={cx({disabled: isButtonDisabled})} role="presentation">
               <a
                 href="#"
-                onClick={isButtonDisabled ? null : this.preventDefaultThen.bind(null, this.props.onSimulate)}
+                onClick={event => { event.preventDefault(); isButtonDisabled && this.props.onSimulate(); }}
                 role="menuitem"
                 tabIndex="-1">
                 Simuler
@@ -57,7 +53,7 @@ var TestCaseToolbar = React.createClass({
                 this.props.displayRepairMenuItem && (
                   <a
                     href="#"
-                    onClick={this.preventDefaultThen.bind(null, this.props.onRepair)}
+                    onClick={event => { event.preventDefault(); this.props.onRepair(); }}
                     role="menuitem"
                     tabIndex="-1">
                     Réparer
@@ -66,7 +62,7 @@ var TestCaseToolbar = React.createClass({
               }
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onReset)}
+                onClick={event => { event.preventDefault(); this.props.onReset(); }}
                 role="menuitem"
                 tabIndex="-1">
                 Réinitialiser
@@ -76,21 +72,21 @@ var TestCaseToolbar = React.createClass({
             <li role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'familles'))}
+                onClick={event => { event.preventDefault(); this.props.onCreateEntity('familles'); }}
                 role="menuitem"
                 tabIndex="-1">
                 Ajouter une famille
               </a>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'foyers_fiscaux'))}
+                onClick={event => { event.preventDefault(); this.props.onCreateEntity('foyers_fiscaux'); }}
                 role="menuitem"
                 tabIndex="-1">
                 Ajouter une déclaration d'impôt
               </a>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onCreateEntity.bind(null, 'menages'))}
+                onClick={event => { event.preventDefault(); this.props.onCreateEntity('menages'); }}
                 role="menuitem"
                 tabIndex="-1">
                 Ajouter un logement principal

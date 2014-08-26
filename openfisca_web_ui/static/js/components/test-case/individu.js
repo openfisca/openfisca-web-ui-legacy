@@ -13,14 +13,10 @@ var Individu = React.createClass({
     active: React.PropTypes.bool,
     errors: React.PropTypes.object,
     onDelete: React.PropTypes.func.isRequired,
-    onEdit: React.PropTypes.func.isRequired,
+    onEdit: React.PropTypes.func,
     onMove: React.PropTypes.func.isRequired,
     suggestions: React.PropTypes.object,
     value: React.PropTypes.object.isRequired,
-  },
-  preventDefaultThen: function(callback, event) {
-    event.preventDefault();
-    callback();
   },
   render: function() {
     var btnColorClass = this.props.errors ? 'btn-danger' : 'btn-default';
@@ -44,21 +40,21 @@ var Individu = React.createClass({
             <li role="presentation">
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onEdit)}
+                onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}
                 role="menuitem"
                 tabIndex="-1">
                 Éditer
               </a>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onMove)}
+                onClick={event => { event.preventDefault(); this.props.onMove(); }}
                 role="menuitem"
                 tabIndex="-1">
                 Déplacer
               </a>
               <a
                 href="#"
-                onClick={this.preventDefaultThen.bind(null, this.props.onDelete)}
+                onClick={event => { event.preventDefault(); this.props.onDelete(); }}
                 role="menuitem"
                 tabIndex="-1">
                 Supprimer

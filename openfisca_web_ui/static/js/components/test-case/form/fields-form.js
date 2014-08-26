@@ -25,10 +25,6 @@ var FieldsForm = React.createClass({
     suggestions: React.PropTypes.object,
     values: React.PropTypes.object,
   },
-  preventDefaultThen: function(callback, event) {
-    event.preventDefault();
-    callback();
-  },
   render: function() {
     return (
       <div className="panel-group" id="accordion">
