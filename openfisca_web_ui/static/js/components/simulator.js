@@ -38,7 +38,6 @@ var Simulator = React.createClass({
     defaultBaremeMaxValue: React.PropTypes.number.isRequired,
     defaultBaremeMinValue: React.PropTypes.number.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
-    legislations: React.PropTypes.array,
     visualizations: React.PropTypes.array,
   },
   componentDidMount: function() {
@@ -47,7 +46,6 @@ var Simulator = React.createClass({
   componentWillMount: function() {
     webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
     webservices.fetchFields(this.fieldsFetched);
-    webservices.fetchLegislations(this.legislationsFetched);
   },
   componentWillUnmount: function() {
     window.onresize = null;
@@ -197,11 +195,6 @@ var Simulator = React.createClass({
       });
     }
   },
-  handleLegislationChange: function(legislationUrl) {
-    this.setState({legislationUrl: legislationUrl}, function() {
-      this.simulate();
-    });
-  },
   handleMoveIndividu: function(id) {
     console.debug('handleMoveIndividu', id);
     var newEditedEntity = {action: 'move', id: id, kind: 'individus'};
@@ -263,17 +256,6 @@ var Simulator = React.createClass({
     this.setState({year: year}, function() {
       this.simulate();
     });
-  },
-  legislationsFetched: function(data) {
-    console.debug('legislationsFetched', data);
-    if (data) {
-      if (data.error) {
-        console.error(data.error);
-      } else if (data.length) {
-        this.setProps({legislations: data});
-        this.setState({legislationSlug: data[0].slug});
-      }
-    }
   },
   render: function() {
     var rightPanel;
@@ -467,9 +449,6 @@ var Simulator = React.createClass({
     return (
       <div>
         <VisualizationToolbar
-          legislation={this.state.legislationUrl}
-          legislations={this.props.legislations}
-          onLegislationChange={this.handleLegislationChange}
           onVisualizationChange={this.handleVisualizationChange}
           onYearChange={this.handleYearChange}
           visualizations={this.props.visualizations}

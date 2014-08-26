@@ -49,23 +49,6 @@ function fetchFields(onComplete) {
     });
 }
 
-function fetchLegislations(onComplete) {
-  request
-    .get(appconfig.enabledModules.charts.urlPaths.legislationsSearch)
-    .on('error', function(error) {
-      onComplete({error: error.message});
-    })
-    .end(function(res) {
-      if (res.body && res.body.error) {
-        onComplete(res.body);
-      } else if (res.error) {
-        onComplete(res);
-      } else {
-        onComplete(res.body);
-      }
-    });
-}
-
 function patchColumns(columns) {
   // Patch columns definitions to match UI specificities.
   var birth = columns.birth;
@@ -197,11 +180,4 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     });
 }
 
-module.exports = {
-  fetchCurrentTestCase: fetchCurrentTestCase,
-  fetchFields: fetchFields,
-  fetchLegislations: fetchLegislations,
-  repair: repair,
-  saveCurrentTestCase: saveCurrentTestCase,
-  simulate: simulate,
-};
+module.exports = {fetchCurrentTestCase, fetchFields, repair, saveCurrentTestCase, simulate};
