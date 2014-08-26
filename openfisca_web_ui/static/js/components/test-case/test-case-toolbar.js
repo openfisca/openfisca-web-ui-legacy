@@ -8,24 +8,27 @@ var cx = React.addons.classSet;
 
 var TestCaseToolbar = React.createClass({
   propTypes: {
-    disabled: React.PropTypes.bool,
+    disableSimulate: React.PropTypes.bool,
     displayRepairMenuItem: React.PropTypes.bool,
-    hasErrors: React.PropTypes.bool,
     isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
     onReset: React.PropTypes.func.isRequired,
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
   },
+  getDefaultProps: function() {
+    return {
+      displayRepairMenuItem: false,
+    };
+  },
   render: function() {
-    var isButtonDisabled = this.props.disabled || this.props.hasErrors || this.props.isSimulationInProgress;
     return (
       <div>
         <div className="btn-group" style={{marginRight: 5}}>
           <button
             accessKey="s"
             className="btn btn-primary"
-            disabled={isButtonDisabled}
+            disabled={this.props.disableSimulate}
             onClick={this.props.onSimulate}
             type="button">
             Simuler
@@ -39,18 +42,21 @@ var TestCaseToolbar = React.createClass({
             <span className="sr-only">Toggle Dropdown</span>
           </button>
           <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
-            <li className={cx({disabled: isButtonDisabled})} role="presentation">
+            <li className={cx({disabled: this.props.disableSimulate})} role="presentation">
               <a
                 href="#"
-                onClick={event => { event.preventDefault(); isButtonDisabled && this.props.onSimulate(); }}
+                onClick={event => {
+                  event.preventDefault();
+                  ! this.props.disableSimulate && this.props.onSimulate();
+                }}
                 role="menuitem"
                 tabIndex="-1">
                 Simuler
               </a>
             </li>
-            <li>
-              {
-                this.props.displayRepairMenuItem && (
+            {
+              this.props.displayRepairMenuItem && (
+                <li role="presentation">
                   <a
                     href="#"
                     onClick={event => { event.preventDefault(); this.props.onRepair(); }}
@@ -58,8 +64,10 @@ var TestCaseToolbar = React.createClass({
                     tabIndex="-1">
                     Réparer
                   </a>
-                )
-              }
+                </li>
+              )
+            }
+            <li role="presentation">
               <a
                 href="#"
                 onClick={event => { event.preventDefault(); this.props.onReset(); }}

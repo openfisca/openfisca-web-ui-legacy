@@ -165,9 +165,7 @@ var Simulator = React.createClass({
       editedEntity: null,
       testCase: newTestCase,
     };
-    this.setState(changeset, function() {
-      this.simulate();
-    });
+    this.setState(changeset, this.repair);
   },
   handleFieldsFormChange: function(kind, id, columnName, value) {
     console.debug('handleFieldsFormChange', arguments);
@@ -178,9 +176,7 @@ var Simulator = React.createClass({
     } else {
       var newValues = Lazy(this.state.testCase[kind][id]).assign(obj(columnName, value)).toObject();
       var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newValues);
-      this.setState({testCase: newTestCase}, function() {
-        this.repair();
-      });
+      this.setState({testCase: newTestCase}, ! this.state.editedEntity && this.repair);
     }
   },
   handleMoveIndividu: function(id) {
@@ -201,13 +197,20 @@ var Simulator = React.createClass({
     var newTestCase = models.TestCase.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
       this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
+  },
+  handleRepair: function() {
+    if ( ! this.state.editedEntity) {
       this.repair();
     }
   },
   handleReset: function() {
     console.debug('handleReset');
-    if (confirm('Réinitialiser la situation ?')) { // jshint ignore:line
+    var message = 'Réinitialiser la situation ? Ceci effacera définitivement les entités et les individus renseignés.'; // jshint ignore:line
+    if (confirm(message)) {
       var initialTestCase = models.TestCase.getInitialTestCase();
+      if (this.state.editedEntity) {
+        this.setState({editedEntity: null});
+      }
       this.repair(initialTestCase);
     }
   },
@@ -281,12 +284,11 @@ var Simulator = React.createClass({
       <div className="row">
         <div className="col-sm-4">
           <TestCaseToolbar
-            disabled={Boolean(this.state.editedEntity)}
-            hasErrors={ !! this.state.errors}
+            disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
             isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
-            onRepair={this.repair.bind(null, null)}
+            onRepair={this.handleRepair}
             onSimulate={this.simulate}
           />
           <hr/>
