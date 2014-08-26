@@ -84,7 +84,7 @@ var Simulator = React.createClass({
       baremeVariableCode: 'sali',
       defaultBaremeMaxValue: 20000,
       defaultBaremeMinValue: 0,
-      defaultVisualizationSlug: 'bareme',
+      defaultVisualizationSlug: 'cascade',
     };
   },
   getInitialState: function() {
@@ -94,6 +94,7 @@ var Simulator = React.createClass({
       calculationResult: null,
       editedEntity: null,
       errors: null,
+      expandedVariables: {},
       isCalculationInProgress: false,
       isSimulationInProgress: false,
       legislationUrl: null,
@@ -101,7 +102,6 @@ var Simulator = React.createClass({
       suggestions: null,
       testCase: null,
       visualizationSlug: this.props.defaultVisualizationSlug,
-      waterfallExpandedVariables: {},
       year: appconfig.constants.defaultYear,
     };
   },
@@ -217,6 +217,14 @@ var Simulator = React.createClass({
   handleResize: function() {
     this.forceUpdate();
   },
+  handleVariableToggle: function(variable) {
+    console.debug('handleVariableToggle', variable);
+    var status = this.state.expandedVariables[variable.code];
+    var newExpandedVariables = Lazy(this.state.expandedVariables)
+      .assign(obj(variable.code, ! status))
+      .toObject();
+    this.setState({expandedVariables: newExpandedVariables});
+  },
   handleVisualizationChange: function(slug) {
     var changeset = {visualizationSlug: slug};
     var newSimulationParams = this.simulationParams(slug),
@@ -233,14 +241,6 @@ var Simulator = React.createClass({
   handleVisualizationStateChange: function(visualizationState) {
     console.debug('handleVisualizationStateChange', visualizationState);
     this.setState(obj(this.state.visualizationSlug, visualizationState));
-  },
-  handleWaterfallVariableToggle: function(variable) {
-    console.debug('handleWaterfallVariableToggle', variable);
-    var status = this.state.waterfallExpandedVariables[variable.code];
-    var newWaterfallExpandedVariables = Lazy(this.state.waterfallExpandedVariables)
-      .assign(obj(variable.code, ! status))
-      .toObject();
-    this.setState({waterfallExpandedVariables: newWaterfallExpandedVariables});
   },
   handleYearChange: function(year) {
     console.debug('handleYearChange', year);
@@ -406,11 +406,11 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'bareme') {
         return (
           <BaremeVisualization
-            expandedVariables={this.state.waterfallExpandedVariables}
+            expandedVariables={this.state.expandedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
             onXValuesChange={this.handleBaremeXValuesChange}
-            onVariableToggle={this.handleWaterfallVariableToggle}
+            onVariableToggle={this.handleVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
             xLabel="Revenus d'activité imposables"
@@ -421,10 +421,10 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'cascade') {
         return (
           <WaterfallVisualization
-            expandedVariables={this.state.waterfallExpandedVariables}
+            expandedVariables={this.state.expandedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
-            onVariableToggle={this.handleWaterfallVariableToggle}
+            onVariableToggle={this.handleVariableToggle}
             variablesTree={this.state.simulationResult}
             width={rightPanelWidth}
           />

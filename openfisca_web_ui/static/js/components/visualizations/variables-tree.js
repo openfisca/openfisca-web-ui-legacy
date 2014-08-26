@@ -11,9 +11,10 @@ var cx = React.addons.classSet;
 
 var VariablesTree = React.createClass({
   propTypes: {
-    activeVariableCode: React.PropTypes.string,
+    activeVariablesCodes: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     expandedSubtotalColor: React.PropTypes.string.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
+    hoveredVariableCode: React.PropTypes.string,
     noColorFill: React.PropTypes.string.isRequired,
     onHover: React.PropTypes.func.isRequired,
     onToggle: React.PropTypes.func,
@@ -21,16 +22,10 @@ var VariablesTree = React.createClass({
   },
   getDefaultProps: function() {
     return {
+      activeVariablesCodes: [],
       expandedSubtotalColor: 'lightGray',
       noColorFill: 'gray',
     };
-  },
-  getInitialState: function() {
-    return {hoveredVariableCode: null};
-  },
-  handleHover: function(variable) {
-    this.setState({hoveredVariableCode: variable ? variable.code : null});
-    this.props.onHover(variable);
   },
   render: function() {
     var variablesSequence = Lazy(this.props.variables);
@@ -49,17 +44,17 @@ var VariablesTree = React.createClass({
     var onVariableClick = variable.isSubtotal && this.props.onToggle.bind(null, variable);
     return (
       <tr
-        className={cx({active: variable.code === this.props.activeVariableCode})}
+        className={cx({active: this.props.activeVariablesCodes.contains(variable.code)})}
         key={variable.code}
-        onMouseOut={this.handleHover.bind(null, null)}
-        onMouseOver={this.handleHover.bind(null, variable)}
+        onMouseOut={this.props.onHover.bind(null, null)}
+        onMouseOver={this.props.onHover.bind(null, variable)}
         style={{cursor: variable.isSubtotal ? 'pointer' : null}}>
         <td
           onClick={onVariableClick}
           style={{
             fontWeight: variable.depth === 0 ? 'bold' : null,
             paddingLeft: variable.depth > 1 ? (variable.depth - 1) * 20 : null,
-            textDecoration: variable.code === this.state.hoveredVariableCode &&
+            textDecoration: variable.code === this.props.hoveredVariableCode &&
               variable.isSubtotal ? 'underline' : null,
           }}>
           {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}

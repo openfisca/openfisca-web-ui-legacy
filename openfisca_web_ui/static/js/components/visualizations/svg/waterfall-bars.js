@@ -7,7 +7,7 @@ var Lazy = require('lazy.js'),
 
 var WaterfallBars = React.createClass({
   propTypes: {
-    activeVariableCode: React.PropTypes.string,
+    activeVariablesCodes: React.PropTypes.arrayOf(React.PropTypes.string.isRequired),
     height: React.PropTypes.number.isRequired,
     highlightColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
@@ -37,13 +37,13 @@ var WaterfallBars = React.createClass({
       <g>
         {
           variables.map((variable, variableIndex) => {
-            var isThinBar = variable.isSubtotal && ! variable.isCollapsed;
+            var isActive = this.props.activeVariablesCodes.contains(variable.code),
+              isThinBar = variable.isSubtotal && ! variable.isCollapsed;
             var style = {
               fill: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
-              opacity: variable.code === this.props.activeVariableCode ? 1 : this.props.rectOpacity,
+              opacity: isActive ? 1 : this.props.rectOpacity,
               shapeRendering: 'crispedges',
-              stroke: variable.code === this.props.activeVariableCode ?
-                this.props.strokeActive : this.props.strokeInactive,
+              stroke: isActive ? this.props.strokeActive : this.props.strokeInactive,
               strokeWidth: isThinBar && 3,
             };
             var height = Math.abs(variable.value) * unitHeight;
@@ -51,17 +51,17 @@ var WaterfallBars = React.createClass({
             return (
               <g key={variable.code}>
                 {
-                  variable.code === this.props.activeVariableCode && (
+                  isActive && (
                     <rect
                       className='highlight'
                       height={this.props.height}
                       style={{
                         fill: this.props.highlightColor,
-                        opacity: 0.6,
+                        opacity: 0.8,
                         stroke: this.props.highlightColor,
                       }}
-                      width={stepWidth * 0.8}
-                      x={(variableIndex + 0.1) * stepWidth}
+                      width={stepWidth  }
+                      x={variableIndex * stepWidth}
                       y={0}
                     />
                   )

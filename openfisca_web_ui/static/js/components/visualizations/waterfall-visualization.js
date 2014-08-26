@@ -1,8 +1,10 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
-  React = require('react/addons');
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
+  React = require('react/addons'),
+  recursiveFind = require('recursive-find');
 
 var axes = require('../../axes'),
   HGrid = require('./svg/h-grid'),
@@ -16,7 +18,6 @@ var axes = require('../../axes'),
 var WaterfallVisualization = React.createClass({
   mixins: [React.addons.LinkedStateMixin],
   propTypes: {
-    defaultActiveVariableCode: React.PropTypes.string,
     defaultDisplaySubtotalThinBars: React.PropTypes.bool,
     expandedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
@@ -63,7 +64,6 @@ var WaterfallVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      defaultActiveVariableCode: null,
       defaultDisplaySubtotalThinBars: false,
       labelsFontSize: 14,
       marginRight: 10,
@@ -76,9 +76,11 @@ var WaterfallVisualization = React.createClass({
   },
   getInitialState: function() {
     return {
-      activeVariableCode: this.props.defaultActiveVariableCode,
+      activeVariableCode: null,
+      activeVariablesCodes: null,
       displaySubtotalThinBars: this.props.defaultDisplaySubtotalThinBars,
-      xAxisHoveredVariableCode: this.props.defaultActiveVariableCode,
+      variablesTreeHoveredVariableCode: null,
+      xAxisHoveredVariableCode: null,
     };
   },
   getVariables: function() {
@@ -97,14 +99,15 @@ var WaterfallVisualization = React.createClass({
       }
       var value = variable.values[this.props.variablesTreeValueIndex];
       if (! hidden && value !== 0) {
-        var newVariableSequence = Lazy(variable).omit(['children', 'values']);
-        var hasChildren = !! variable.children;
+        var newVariableSequence = Lazy(variable).omit(['values']);
         newVariableSequence = newVariableSequence.assign({
           baseValue: baseValue,
           depth: depth,
-          hasChildren: hasChildren,
           isCollapsed: isCollapsed,
-          isSubtotal: hasChildren && depth > 0,
+          isSubtotal: !! variable.children && depth > 0,
+          nbChildren: Lazy(variable.children)
+            .filter(child => child.values[this.props.variablesTreeValueIndex] && child.code)
+            .size(),
           value: value,
         });
         var newVariable = newVariableSequence.toObject();
@@ -116,17 +119,51 @@ var WaterfallVisualization = React.createClass({
     return variables;
   },
   handleVariableHover: function(variable) {
-    this.setState({activeVariableCode: variable ? variable.code : this.props.defaultActiveVariableCode});
+    function walk(node) {
+      return node.children ? node.children.map(child => {
+        var walkResult = walk(child);
+        return walkResult ? [child.code, ...walkResult] : child.code;
+      }).flatten() : null;
+    }
+    var changeset = {
+      activeVariableCode: variable ? variable.code : null,
+      activeVariableChildrenCodes: null,
+    };
+    if (variable && variable.code !== 'revdisp') {
+      var variablesInTree = recursiveFind(this.props.variablesTree,
+        treeVariable => treeVariable.code === variable.code);
+      invariant(variablesInTree.length === 1, 'recursiveFind should return only one node');
+      var childrenCodes = walk(variablesInTree[0]);
+      if (childrenCodes && childrenCodes.length) {
+        changeset.activeVariableChildrenCodes = childrenCodes;
+      }
+    }
+    this.setState(changeset);
+  },
+  handleVariablesTreeVariableHover: function(variable) {
+    this.setState({variablesTreeHoveredVariableCode: variable ? variable.code : null});
+    this.handleVariableHover(variable);
+  },
+  handleVariableToggle: function(variable) {
+    this.props.onVariableToggle(variable);
+    this.setState({
+      activeVariableCode: null,
+      activeVariableChildrenCodes: null,
+      variablesTreeHoveredVariableCode: null,
+      xAxisHoveredVariableCode: null,
+    });
   },
   handleXAxisLabelledVariableHover: function(variable) {
-    this.setState({xAxisHoveredVariableCode: variable ? variable.code : this.props.defaultActiveVariableCode});
+    this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
     this.handleVariableHover(variable);
   },
   render: function() {
-    var variables = this.getVariables();
-    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? variables :
-      Lazy(variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
-    var yBounds = this.computeValuesBounds(variables);
+    this.variables = this.getVariables();
+//    var variablesTreeVariables = Lazy(variables).filter(variable => variable.nbChildren !== 1).toArray();
+    var variablesTreeVariables = this.variables;
+    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? this.variables :
+      Lazy(this.variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
+    var yBounds = this.computeValuesBounds(this.variables);
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
     var xLabels = waterfallBarsVariables.map(variable => {
       var style = {cursor: null};
@@ -143,15 +180,16 @@ var WaterfallVisualization = React.createClass({
       };
       if (this.props.onVariableToggle && variable.isSubtotal) {
         style.cursor = 'pointer';
-        props.onClick = this.props.onVariableToggle.bind(null, variable);
+        props.onClick = this.handleVariableToggle.bind(null, variable);
       }
       return {name, props, style};
     });
     var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
       gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var xSteps = xLabels.length;
-    var stepWidth = gridWidth / xSteps;
+    var stepWidth = gridWidth / xLabels.length;
     var xAxisTransform = `translate(${this.props.yAxisWidth}, ${this.props.height - this.props.xAxisHeight})`;
+    var activeVariablesCodes = Lazy([this.state.activeVariableCode]).concat(this.state.activeVariableChildrenCodes)
+      .compact().toArray();
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -173,7 +211,7 @@ var WaterfallVisualization = React.createClass({
               width={this.props.yAxisWidth}
             />
             <WaterfallBars
-              activeVariableCode={this.state.activeVariableCode}
+              activeVariablesCodes={activeVariablesCodes}
               height={gridHeight}
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
@@ -184,7 +222,6 @@ var WaterfallVisualization = React.createClass({
               waterfallBarsVariables.map((variable, idx) =>
                 <g key={variable.code} transform={`translate(${stepWidth * idx}, 0)`}>
                   <WaterfallBarHover
-                    activeVariableCode={this.state.activeVariableCode}
                     barHeight={gridHeight}
                     barWidth={stepWidth}
                     labelHeight={this.props.labelsFontSize * 1.5}
@@ -201,20 +238,21 @@ var WaterfallVisualization = React.createClass({
               height={this.props.xAxisHeight}
               labels={xLabels}
               labelsFontSize={this.props.labelsFontSize}
-              nbSteps={xSteps}
+              nbSteps={xLabels.length}
               width={gridWidth}
             />
           </g>
         </svg>
         <p className='text-center well'>
-          {this.state.activeVariableCode ? this.formatHint(variables) : 'Survolez le graphique'}
+          {this.state.activeVariableCode ? this.formatHint(this.variables) : 'Survolez le graphique'}
         </p>
         <VariablesTree
-          activeVariableCode={this.state.activeVariableCode}
+          activeVariablesCodes={activeVariablesCodes}
           formatNumber={this.props.formatNumber}
-          onToggle={this.props.onVariableToggle}
-          onHover={this.handleVariableHover}
-          variables={variables}
+          hoveredVariableCode={this.state.variablesTreeHoveredVariableCode}
+          onToggle={this.handleVariableToggle}
+          onHover={this.handleVariablesTreeVariableHover}
+          variables={variablesTreeVariables}
         />
         <div className='panel panel-default'>
           <div className='panel-heading'>

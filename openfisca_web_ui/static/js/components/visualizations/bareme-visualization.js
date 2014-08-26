@@ -242,8 +242,9 @@ var BaremeVisualization = React.createClass({
           {this.formatHint(variables)}
         </p>
         <VariablesTree
-          activeVariableCode={this.state.activeVariableCode}
+          activeVariablesCodes={[this.state.activeVariableCode]}
           formatNumber={this.props.formatNumber}
+          hoveredVariableCode={this.state.activeVariableCode}
           onToggle={this.props.onVariableToggle}
           onHover={this.handleVariableHover}
           variables={variables}
