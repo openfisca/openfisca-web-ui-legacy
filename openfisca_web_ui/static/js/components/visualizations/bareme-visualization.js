@@ -238,7 +238,7 @@ var BaremeVisualization = React.createClass({
             </Link>
           </g>
         </svg>
-        <p className='well' style={{textAlign: 'center'}}>
+        <p className='text-center well'>
           {this.formatHint(variables)}
         </p>
         <VariablesTree

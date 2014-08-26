@@ -51,11 +51,8 @@ var AcceptCookiesModal = React.createClass({
                   saisis en ligne. Elle ne constitue en aucune façon une déclaration de revenus.
                 </p>
                 <p>
-                  Les montants, obtenus à partir des
-                  <strong>
-                    informations inscrites sous votre seule
-                    responsabilité, n'ont qu'une valeur indicative
-                  </strong>.
+                  Les montants, obtenus à partir des <strong>informations inscrites sous votre seule
+                  responsabilité, n'ont qu'une valeur indicative</strong>.
                   Ainsi, les montants de vos impôts calculés lors de votre déclaration de revenus
                   peuvent être différents.
                 </p>
@@ -70,7 +67,7 @@ var AcceptCookiesModal = React.createClass({
                     J'ai pris connaissance des informations ci-dessus.
                   </label>
                 </div>
-                <p className="cookie-text">Pour fonctionner, ce site a besoin d'utiliser des cookies.</p>
+                <p>Pour fonctionner, ce site a besoin d'utiliser des cookies.</p>
               </div>
               <div className="modal-footer">
                 <button

@@ -206,7 +206,7 @@ var WaterfallVisualization = React.createClass({
             />
           </g>
         </svg>
-        <p className='well' style={{textAlign: 'center'}}>
+        <p className='text-center well'>
           {this.state.activeVariableCode ? this.formatHint(variables) : 'Survolez le graphique'}
         </p>
         <VariablesTree

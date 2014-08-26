@@ -32,7 +32,7 @@
 
 <%def name="container_content()" filter="trim">
 <article class="cgu">
-    <h1>Politique de confidentialité</h1>
+    <h1 class="text-center">Politique de confidentialité</h1>
 
     <p>
         La présente politique de confidentialité décrit les termes et conditions dans lesquels la mission Etalab

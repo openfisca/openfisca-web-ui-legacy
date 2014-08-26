@@ -16,7 +16,7 @@ var EditForm = React.createClass({
           <span aria-hidden="true">×</span>
           <span className="sr-only">Fermer</span>
         </button>
-        <h2 style={{margin: 0, textAlign: 'center'}}>{this.props.title}</h2>
+        <h2 className='text-center' style={{margin: 0}}>{this.props.title}</h2>
         <hr/>
         {this.props.children}
         <button className="btn btn-primary" type="submit">Fermer</button>
