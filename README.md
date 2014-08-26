@@ -21,9 +21,12 @@ Install Python package with dependencies
 	pip install --user --requirement requirements.txt
 	pip install --user --editable .
 
-Compile gettext catalog
+Compile gettext catalogs
 
 	python setup.py compile_catalog
+	cd src/biryani1
+	python setup.py compile_catalog
+	cd ../..
 
 Install npm dependencies for JavaScript
 
