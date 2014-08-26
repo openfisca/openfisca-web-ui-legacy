@@ -440,8 +440,6 @@ var Simulator = React.createClass({
             width={rightPanelWidth}
           />
         );
-      } else if ( ! this.props.visualizations) {
-        return <p className="text-danger">Aucune visualisation disponible.</p>;
       }
     }
   },
@@ -451,7 +449,6 @@ var Simulator = React.createClass({
         <VisualizationToolbar
           onVisualizationChange={this.handleVisualizationChange}
           onYearChange={this.handleYearChange}
-          visualizations={this.props.visualizations}
           visualizationSlug={this.state.visualizationSlug}
           year={this.state.year}
         />
