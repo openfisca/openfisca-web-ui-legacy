@@ -11,13 +11,17 @@ var SuggestionIcon = React.createClass({
     children: React.PropTypes.string.isRequired,
   },
   render: function() {
-    return this.transferPropsTo(
+    return (
       <Tooltip>
-        <span
-          className='glyphicon glyphicon-info-sign'
-          style={{marginLeft: 10}}
-          title={this.props.children}
-        />
+        {
+          this.transferPropsTo(
+            <span
+              className='glyphicon glyphicon-info-sign'
+              style={{marginLeft: 10}}
+              title={this.props.children}
+            />
+          )
+        }
       </Tooltip>
     );
   }
