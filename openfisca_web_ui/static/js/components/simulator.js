@@ -111,18 +111,14 @@ var Simulator = React.createClass({
     this.setState({
       baremeMaxValue: maxValue,
       baremeMinValue: minValue,
-    }, function() {
-      this.simulate();
-    });
+    }, this.simulate);
   },
   handleCreateEntity: function(kind) {
     console.debug('handleCreateEntity', kind);
     var newEntity = models.TestCase.createEntity(kind, this.state.testCase);
     var newEntityId = uuid.v4();
     var newTestCase = helpers.assignIn(this.state.testCase, [kind, newEntityId], newEntity);
-    this.setState({testCase: newTestCase}, function() {
-      this.repair();
-    });
+    this.setState({testCase: newTestCase}, this.repair);
   },
   handleCreateIndividuInEntity: function(kind, id, role) {
     console.debug('handleCreateIndividuInEntity', arguments);
@@ -131,9 +127,7 @@ var Simulator = React.createClass({
     var newIndividus = Lazy(this.state.testCase.individus).assign(obj(newIndividuId, newIndividu)).toObject();
     var newTestCase = Lazy(this.state.testCase).assign({individus: newIndividus}).toObject();
     newTestCase = models.TestCase.withIndividuInEntity(newIndividuId, kind, id, role, newTestCase);
-    this.setState({testCase: newTestCase}, function() {
-      this.repair();
-    });
+    this.setState({testCase: newTestCase}, this.repair);
   },
   handleDeleteEntity: function(kind, id) {
     console.debug('handleDeleteEntity', arguments);
@@ -212,9 +206,9 @@ var Simulator = React.createClass({
     var newRole = whatChanged === 'role' ? value : oldEntityData.role;
     var newTestCase = models.TestCase.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
       this.state.testCase);
-    this.setState({testCase: newTestCase}, function() {
+    this.setState({testCase: newTestCase}, this.repair);
       this.repair();
-    });
+    }
   },
   handleReset: function() {
     console.debug('handleReset');
@@ -253,9 +247,7 @@ var Simulator = React.createClass({
   },
   handleYearChange: function(year) {
     console.debug('handleYearChange', year);
-    this.setState({year: year}, function() {
-      this.simulate();
-    });
+    this.setState({year: year}, this.simulate);
   },
   render: function() {
     var rightPanel;
