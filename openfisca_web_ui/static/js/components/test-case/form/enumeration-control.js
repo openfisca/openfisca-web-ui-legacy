@@ -24,6 +24,11 @@ var EnumerationControl = React.createClass({
     this.props.onChange(event.target.value);
   },
   render: function() {
+    var firstOptionLabel = `Non renseigné (${
+      this.props.suggestion ?
+        'valeur suggérée : ' + this.props.labels[this.props.suggestion] :
+        'valeur par défaut : ' + this.props.labels[this.props.default]
+    })`;
     return (
       <div>
         {this.props.label}
@@ -33,11 +38,7 @@ var EnumerationControl = React.createClass({
           id={this.props.name}
           onChange={this.handleChange}
           value={this.props.value}>
-          <option value="">Non renseigné ({
-            this.props.suggestion ?
-              'valeur suggérée : ' + this.props.labels[this.props.suggestion] : // jshint ignore:line
-              'valeur par défaut : ' + this.props.labels[this.props.default] // jshint ignore:line
-          })</option>
+          <option value="">{firstOptionLabel}</option>
           {
             Lazy(this.props.labels).map((label, labelId) =>
               <option key={'label-' + labelId} value={labelId}>{label}</option>
