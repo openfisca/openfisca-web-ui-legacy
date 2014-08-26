@@ -17,6 +17,7 @@ var TestCase = React.createClass({
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
     getEntityLabel: React.PropTypes.func.isRequired,
+    onCloseEntity: React.PropTypes.func.isRequired,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
     onDeleteIndividu: React.PropTypes.func.isRequired,
@@ -25,6 +26,13 @@ var TestCase = React.createClass({
     roleLabels: React.PropTypes.object.isRequired,
     suggestions: React.PropTypes.object,
     testCase: React.PropTypes.object.isRequired,
+  },
+  handleEdit: function(kind, id) {
+    if (id === this.props.activeEntityId) {
+      this.props.onCloseEntity();
+    } else {
+      this.props.onEditEntity && this.props.onEditEntity(kind, id);
+    }
   },
   render: function() {
     var entitiesMetadata = this.props.entitiesMetadata;
@@ -47,7 +55,7 @@ var TestCase = React.createClass({
                     key={entity.id}
                     label={entity.label}
                     onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}
-                    onEdit={this.props.onEditEntity && this.props.onEditEntity.bind(null, kind, entity.id)}>
+                    onEdit={this.handleEdit.bind(null, kind, entity.id)}>
                     {
                       entitiesMetadata[kind].roles.map(role => {
                         var maxCardinality = entitiesMetadata[kind].maxCardinality[role];
@@ -61,9 +69,7 @@ var TestCase = React.createClass({
                               id={individuId}
                               key={individuId}
                               onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
-                              onEdit={
-                                this.props.onEditEntity && this.props.onEditEntity.bind(null, 'individus', individuId)
-                              }
+                              onEdit={this.handleEdit.bind(null, 'individus', individuId)}
                               onMove={this.props.onMoveIndividu.bind(null, individuId)}
                               suggestions={helpers.getObjectPath(this.props.suggestions, 'individus', individuId)}
                               value={this.props.testCase.individus[individuId]}

@@ -33,8 +33,6 @@ var Simulator = React.createClass({
   propTypes: {
     baremeStepsX: React.PropTypes.number.isRequired,
     baremeVariableCode: React.PropTypes.string.isRequired,
-    columns: React.PropTypes.object,
-    columnsTree: React.PropTypes.object,
     defaultBaremeMaxValue: React.PropTypes.number.isRequired,
     defaultBaremeMinValue: React.PropTypes.number.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
@@ -73,7 +71,7 @@ var Simulator = React.createClass({
       if (data.error) {
         console.error(data.error);
       } else {
-        this.setProps({
+        this.setState({
           columns: data.columns,
           columnsTree: data.columnsTree,
         });
@@ -153,14 +151,10 @@ var Simulator = React.createClass({
   },
   handleEditEntity: function(kind, id) {
     console.debug('handleEditEntity', kind, id);
-    if (this.props.columns && this.props.columnsTree) {
-      var newEditedEntity = {action: 'edit', id: id, kind: kind};
-      var nameKey = models.getNameKey(kind);
-      newEditedEntity[nameKey] = this.state.testCase[kind][id][nameKey];
-      this.setState({editedEntity: newEditedEntity});
-    } else {
-      alert('Impossible de charger les champs du formulaire');
-    }
+    var newEditedEntity = {action: 'edit', id: id, kind: kind};
+    var nameKey = models.getNameKey(kind);
+    newEditedEntity[nameKey] = this.state.testCase[kind][id][nameKey];
+    this.setState({editedEntity: newEditedEntity});
   },
   handleEditFormClose: function() {
     console.debug('handleEditFormClose');
@@ -303,11 +297,12 @@ var Simulator = React.createClass({
               entitiesMetadata={models.entitiesMetadata}
               errors={this.state.errors}
               getEntityLabel={models.TestCase.getEntityLabel}
+              onCloseEntity={this.handleEditFormClose}
               onCreateEntity={this.handleCreateEntity}
               onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
               onDeleteEntity={this.handleDeleteEntity}
               onDeleteIndividu={this.handleDeleteIndividu}
-              onEditEntity={this.state.editedEntity === null ? this.handleEditEntity : this.handleEditFormClose}
+              onEditEntity={this.state.columns && this.state.columnsTree && this.handleEditEntity}
               onMoveIndividu={this.handleMoveIndividu}
               roleLabels={models.roleLabels}
               suggestions={this.state.suggestions}
@@ -325,11 +320,11 @@ var Simulator = React.createClass({
     var {id, kind} = this.state.editedEntity,
       entity = this.state.testCase[kind][id];
     var entityLabel = models.TestCase.getEntityLabel(kind, entity);
-    invariant('children' in this.props.columnsTree[kind], 'columnsTree.' + kind + ' has no children');
-    var categories = Lazy(this.props.columnsTree[kind].children).map(category => ({
+    invariant('children' in this.state.columnsTree[kind], `columnsTree.${kind} has no children`);
+    var categories = Lazy(this.state.columnsTree[kind].children).map(category => ({
       columns: category.children ? category.children.map(columnName => {
-        invariant(columnName in this.props.columns, 'column "' + columnName + '" is not in columns prop');
-        return this.props.columns[columnName];
+        invariant(columnName in this.state.columns, `column "${columnName}" is not in columns prop`);
+        return this.state.columns[columnName];
       }) : null,
       label: category.label,
     })).toArray(); // jshint ignore:line
