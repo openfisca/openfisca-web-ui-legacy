@@ -146,12 +146,7 @@ var WaterfallVisualization = React.createClass({
   },
   handleVariableToggle: function(variable) {
     this.props.onVariableToggle(variable);
-    this.setState({
-      activeVariableCode: null,
-      activeVariableChildrenCodes: null,
-      variablesTreeHoveredVariableCode: null,
-      xAxisHoveredVariableCode: null,
-    });
+    this.setState({xAxisHoveredVariableCode: null});
   },
   handleXAxisLabelledVariableHover: function(variable) {
     this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
