@@ -153,12 +153,10 @@ var WaterfallVisualization = React.createClass({
     this.handleVariableHover(variable);
   },
   render: function() {
-    this.variables = this.getVariables();
-//    var variablesTreeVariables = Lazy(variables).filter(variable => variable.nbChildren !== 1).toArray();
-    var variablesTreeVariables = this.variables;
-    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? this.variables :
-      Lazy(this.variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
-    var yBounds = this.computeValuesBounds(this.variables);
+    var variables = this.getVariables();
+    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? variables :
+      Lazy(variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
+    var yBounds = this.computeValuesBounds(variables);
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
     var xLabels = waterfallBarsVariables.map(variable => {
       var style = {cursor: null};
@@ -239,7 +237,7 @@ var WaterfallVisualization = React.createClass({
           </g>
         </svg>
         <p className='text-center well'>
-          {this.state.activeVariableCode ? this.formatHint(this.variables) : 'Survolez le graphique'}
+          {this.state.activeVariableCode ? this.formatHint(variables) : 'Survolez le graphique'}
         </p>
         <VariablesTree
           activeVariablesCodes={activeVariablesCodes}
@@ -247,7 +245,7 @@ var WaterfallVisualization = React.createClass({
           hoveredVariableCode={this.state.variablesTreeHoveredVariableCode}
           onToggle={this.handleVariableToggle}
           onHover={this.handleVariablesTreeVariableHover}
-          variables={variablesTreeVariables}
+          variables={variables}
         />
         <div className='panel panel-default'>
           <div className='panel-heading'>
