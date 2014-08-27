@@ -7,7 +7,7 @@ var Lazy = require('lazy.js'),
 
 var WaterfallBars = React.createClass({
   propTypes: {
-    activeVariablesCodes: React.PropTypes.arrayOf(React.PropTypes.string.isRequired),
+    activeVariablesCodes: React.PropTypes.arrayOf(React.PropTypes.string),
     height: React.PropTypes.number.isRequired,
     highlightColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,

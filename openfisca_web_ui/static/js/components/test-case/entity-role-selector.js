@@ -12,7 +12,7 @@ var EntityRoleSelector = React.createClass({
       React.PropTypes.shape({
         id: React.PropTypes.string.isRequired,
         label: React.PropTypes.string.isRequired,
-      }).isRequired
+      })
     ).isRequired,
     kind: React.PropTypes.string.isRequired,
     label: React.PropTypes.string.isRequired,
@@ -22,7 +22,7 @@ var EntityRoleSelector = React.createClass({
       React.PropTypes.shape({
         id: React.PropTypes.string.isRequired,
         label: React.PropTypes.string.isRequired,
-      }).isRequired
+      })
     ).isRequired,
   },
   handleEntityChange: function(event) {

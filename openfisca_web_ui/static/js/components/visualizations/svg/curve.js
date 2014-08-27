@@ -14,7 +14,7 @@ var Curve = React.createClass({
       React.PropTypes.shape({
         x: React.PropTypes.number.isRequired,
         y: React.PropTypes.number.isRequired,
-      }).isRequired
+      })
     ).isRequired,
     pointToPixel: React.PropTypes.func.isRequired,
     style: React.PropTypes.object,
