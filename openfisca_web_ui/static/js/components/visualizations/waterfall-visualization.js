@@ -159,7 +159,7 @@ var WaterfallVisualization = React.createClass({
     var yBounds = this.computeValuesBounds(variables);
     var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
     var xLabels = waterfallBarsVariables.map(variable => {
-      var style = {cursor: null};
+      var style = {};
       var name = variable.short_name; // jshint ignore:line
       if (variable.isSubtotal) {
         name = (variable.isCollapsed ? '▶' : '▼') + ' ' + name;
