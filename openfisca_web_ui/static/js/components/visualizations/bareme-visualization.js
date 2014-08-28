@@ -186,7 +186,7 @@ var BaremeVisualization = React.createClass({
                 });
                 var lowPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
                   .zip(variable.baseValues.map(clipValues)).toArray();
-                var isFilled = ! variable.hasChildren && variable.depth > 0;
+                var isFilled = variable.depth > 0;
                 var highPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
                   .zip(this.highValues(variable).map(clipValues)).toArray();
                 var pointsSequence = isFilled ? Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray()) :
