@@ -21,6 +21,7 @@ var BaremeVisualization = React.createClass({
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
+    noColorFill: React.PropTypes.string.isRequired,
     onXValuesChange: React.PropTypes.func.isRequired,
     onVariableToggle: React.PropTypes.func,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
@@ -48,6 +49,7 @@ var BaremeVisualization = React.createClass({
     return {
       marginRight: 10,
       marginTop: 10,
+      noColorFill: 'gray',
       xAxisHeight: 100,
       xAxisLabelFontSize: 14,
       yAxisWidth: 80,
@@ -190,7 +192,7 @@ var BaremeVisualization = React.createClass({
                 var pointsSequence = isFilled ? Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray()) :
                   Lazy(highPoints);
                 var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
-                var cssColor = `rgb(${variable.color})`;
+                var cssColor = variable.color ? `rgb(${variable.color})` : this.props.noColorFill;
                 return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
                   <Curve
                     active={this.state.activeVariableCode === variable.code}
@@ -248,6 +250,7 @@ var BaremeVisualization = React.createClass({
           activeVariablesCodes={[this.state.activeVariableCode]}
           formatNumber={this.props.formatNumber}
           hoveredVariableCode={this.state.activeVariableCode}
+          noColorFill={this.props.noColorFill}
           onToggle={this.props.onVariableToggle}
           onHover={this.handleVariableHover}
           variables={variables}

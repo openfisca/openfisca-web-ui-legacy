@@ -24,6 +24,7 @@ var WaterfallVisualization = React.createClass({
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
+    noColorFill: React.PropTypes.string.isRequired,
     onVariableToggle: React.PropTypes.func,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     // variablesTree.values key is a list. This tells which index to use.
@@ -68,6 +69,7 @@ var WaterfallVisualization = React.createClass({
       labelsFontSize: 14,
       marginRight: 10,
       marginTop: 10,
+      noColorFill: 'gray',
       variablesTreeValueIndex: 0,
       xAxisHeight: 100,
       yAxisWidth: 80,
@@ -211,6 +213,7 @@ var WaterfallVisualization = React.createClass({
               height={gridHeight}
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
+              noColorFill={this.props.noColorFill}
               variables={waterfallBarsVariables}
               width={gridWidth}
             />
@@ -246,6 +249,7 @@ var WaterfallVisualization = React.createClass({
           activeVariablesCodes={activeVariablesCodes}
           formatNumber={this.props.formatNumber}
           hoveredVariableCode={this.state.variablesTreeHoveredVariableCode}
+          noColorFill={this.props.noColorFill}
           onToggle={this.handleVariableToggle}
           onHover={this.handleVariablesTreeVariableHover}
           variables={variables}
