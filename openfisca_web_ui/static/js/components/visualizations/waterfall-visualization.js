@@ -4,7 +4,8 @@
 var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   React = require('react/addons'),
-  recursiveFind = require('recursive-find');
+  recursiveFind = require('recursive-find'),
+  TweenState = require('react-tween-state');
 
 var axes = require('../../axes'),
   HGrid = require('./svg/h-grid'),
@@ -16,7 +17,7 @@ var axes = require('../../axes'),
 
 
 var WaterfallVisualization = React.createClass({
-  mixins: [React.addons.LinkedStateMixin],
+  mixins: [React.addons.LinkedStateMixin, TweenState.Mixin],
   propTypes: {
     collapsedVariables: React.PropTypes.object.isRequired,
     defaultDisplaySubtotalThinBars: React.PropTypes.bool,
@@ -81,6 +82,7 @@ var WaterfallVisualization = React.createClass({
       activeVariableCode: null,
       activeVariablesCodes: null,
       displaySubtotalThinBars: this.props.defaultDisplaySubtotalThinBars,
+      tweenVariablesPercentage: null,
       variablesTreeHoveredVariableCode: null,
       xAxisHoveredVariableCode: null,
     };
@@ -147,8 +149,19 @@ var WaterfallVisualization = React.createClass({
     this.handleVariableHover(variable);
   },
   handleVariableToggle: function(variable) {
-    this.props.onVariableToggle(variable);
     this.setState({xAxisHoveredVariableCode: null});
+    if (this.isCollapsed(variable)) {
+      this.props.onVariableToggle(variable);
+    } else {
+      this.tweenState('tweenVariablesPercentage', {
+        beginValue: 100,
+        duration: 500,
+        endValue: 0,
+        onEnd: () => {
+          this.props.onVariableToggle(variable);
+        }
+      });
+    }
   },
   handleXAxisLabelledVariableHover: function(variable) {
     this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
@@ -214,6 +227,8 @@ var WaterfallVisualization = React.createClass({
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
               noColorFill={this.props.noColorFill}
+              tweenVariables={this.state.activeVariableChildrenCodes}
+              tweenVariablesPercentage={this.getTweeningValue('tweenVariablesPercentage')}
               variables={waterfallBarsVariables}
               width={gridWidth}
             />

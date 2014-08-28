@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react');
 
 
@@ -16,6 +17,8 @@ var WaterfallBars = React.createClass({
     strokeInactive: React.PropTypes.string.isRequired,
     maxValue: React.PropTypes.number.isRequired,
     minValue: React.PropTypes.number.isRequired,
+    tweenVariables: React.PropTypes.array,
+    tweenVariablesPercentage: React.PropTypes.number,
     variables: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
   },
@@ -26,6 +29,7 @@ var WaterfallBars = React.createClass({
       rectOpacity: 0.8,
       strokeActive: 'black',
       strokeInactive: 'gray',
+      tweenVariables: null,
     };
   },
   render: function() {
@@ -34,7 +38,7 @@ var WaterfallBars = React.createClass({
     var variables = this.props.variables;
     var stepWidth = this.props.width / variables.length;
     return (
-      <g>
+      <g className='bars'>
         {
           variables.map((variable, variableIndex) => {
             var isActive = this.props.activeVariablesCodes.contains(variable.code),
@@ -48,8 +52,10 @@ var WaterfallBars = React.createClass({
             };
             var height = Math.abs(variable.value) * unitHeight;
             var y = y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * unitHeight;
+            var transform = this.props.tweenVariables && this.props.tweenVariables.contains(variable.code) &&
+              this.props.tweenVariablesPercentage ? `scale(${this.props.tweenVariablesPercentage / 100}, 1)` : null;
             return (
-              <g key={variable.code}>
+              <g key={variable.code} transform={transform}>
                 {
                   isActive && (
                     <rect
