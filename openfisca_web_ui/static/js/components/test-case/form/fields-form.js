@@ -46,7 +46,7 @@ var FieldsForm = React.createClass({
                   hasErrors={hasErrors}
                   hasSuggestions={hasSuggestions}
                   index={index}
-                  key={'category-' + index}
+                  key={index}
                   label={category.label}>
                   {category.columns.map(this.renderControl)}
                 </Category>

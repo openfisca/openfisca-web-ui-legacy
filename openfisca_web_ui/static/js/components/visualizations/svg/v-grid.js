@@ -32,7 +32,7 @@ var VGrid = React.createClass({
           steps.map((stepNum, idx) => {
             var translateX = stepNum * stepWidth;
             return (
-              <g key={'line-' + idx} transform={'translate(' + translateX + ', 0)'}>
+              <g key={idx} transform={'translate(' + translateX + ', 0)'}>
                 <line style={style} y2={this.props.height} />
               </g>
             );

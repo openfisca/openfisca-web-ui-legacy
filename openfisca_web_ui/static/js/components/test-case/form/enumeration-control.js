@@ -41,7 +41,7 @@ var EnumerationControl = React.createClass({
           <option value="">{firstOptionLabel}</option>
           {
             Lazy(this.props.labels).map((label, labelId) =>
-              <option key={'label-' + labelId} value={labelId}>{label}</option>
+              <option key={labelId} value={labelId}>{label}</option>
             ).toArray()
           }
         </select>

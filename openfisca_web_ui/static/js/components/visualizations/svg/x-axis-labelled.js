@@ -34,7 +34,7 @@ var XAxisLabelled = React.createClass({
         {
           this.props.labels.map((label, stepIdx) =>
             <g
-              key={'tick-' + stepIdx}
+              key={stepIdx}
               transform={`translate(${stepIdx * stepWidth}, 0)`}>
               <line style={lineStyle} x2={0} y2={this.props.tickSize} />
             </g>
@@ -50,7 +50,7 @@ var XAxisLabelled = React.createClass({
             var style = Lazy(label.style).defaults(defaultStyle).toObject();
             return (
               <g
-                key={'label-' + stepIdx}
+                key={stepIdx}
                 transform={`translate(${(stepIdx + 0.5) * stepWidth}, 0)`}>
                 {
                   React.addons.cloneWithProps((

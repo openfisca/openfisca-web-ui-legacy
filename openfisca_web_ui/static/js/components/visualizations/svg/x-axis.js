@@ -49,7 +49,7 @@ var XAxis = React.createClass({
               unit = this.props.unit;
             var label = unit && value !== 0 ? `${formattedValue} ${unit}` : formattedValue;
             return (
-              <g key={'tick-' + idx} transform={`translate(${idx * stepWidth}, 0)`}>
+              <g key={idx} transform={`translate(${idx * stepWidth}, 0)`}>
                 <g transform={labelTransform}>
                   <text
                     style={{

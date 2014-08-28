@@ -44,7 +44,7 @@ var YAxis = React.createClass({
               unit = this.props.unit;
             var label = unit && value !== 0 ? `${formattedValue} ${unit}` : formattedValue;
             return (
-              <g key={'tick-' + idx} transform={`translate(0, ${this.props.height - idx * stepHeight})`}>
+              <g key={idx} transform={`translate(0, ${this.props.height - idx * stepHeight})`}>
                 <text
                   style={{textAnchor: 'end', fontSize: this.props.tickFontSize}}
                   x={- this.props.tickSize * 1.66}

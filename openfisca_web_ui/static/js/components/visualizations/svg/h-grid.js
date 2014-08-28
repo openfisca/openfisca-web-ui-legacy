@@ -32,7 +32,7 @@ var HGrid = React.createClass({
           steps.map((stepNum, idx) => {
             var translateY = - stepNum * stepHeight;
             return (
-              <g key={'line-' + idx} transform={'translate(0, ' + translateY + ')'}>
+              <g key={idx} transform={'translate(0, ' + translateY + ')'}>
                 <line style={style} x2={this.props.width} />
               </g>
             );
