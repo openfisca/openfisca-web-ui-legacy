@@ -70,9 +70,9 @@ function handleError() {
     }
   }
   if (filePath) {
-    console.log(errorData);
+    gutil.log(errorData);
     errorData.message += ' <a href="file://<%= options.filePath %>">open</a>';
-    console.log(errorData);
+    gutil.log(errorData);
     errorData.templateOptions = {filePath: filePath};
   }
   notify.onError(errorData).apply(this, args);
