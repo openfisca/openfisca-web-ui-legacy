@@ -60,7 +60,7 @@ var WaterfallBars = React.createClass({
                         opacity: 0.8,
                         stroke: this.props.highlightColor,
                       }}
-                      width={stepWidth  }
+                      width={stepWidth}
                       x={variableIndex * stepWidth}
                       y={0}
                     />
