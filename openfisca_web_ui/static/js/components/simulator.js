@@ -92,9 +92,9 @@ var Simulator = React.createClass({
       baremeMaxValue: this.props.defaultBaremeMaxValue,
       baremeMinValue: this.props.defaultBaremeMinValue,
       calculationResult: null,
+      collapsedVariables: {},
       editedEntity: null,
       errors: null,
-      expandedVariables: {},
       isCalculationInProgress: false,
       isSimulationInProgress: false,
       legislationUrl: null,
@@ -219,11 +219,9 @@ var Simulator = React.createClass({
   },
   handleVariableToggle: function(variable) {
     console.debug('handleVariableToggle', variable);
-    var status = this.state.expandedVariables[variable.code];
-    var newExpandedVariables = Lazy(this.state.expandedVariables)
-      .assign(obj(variable.code, ! status))
-      .toObject();
-    this.setState({expandedVariables: newExpandedVariables});
+    var status = this.state.collapsedVariables[variable.code];
+    var newCollapsedVariables = Lazy(this.state.collapsedVariables).assign(obj(variable.code, ! status)).toObject();
+    this.setState({collapsedVariables: newCollapsedVariables});
   },
   handleVisualizationChange: function(slug) {
     var changeset = {visualizationSlug: slug};
@@ -406,7 +404,7 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'bareme') {
         return (
           <BaremeVisualization
-            expandedVariables={this.state.expandedVariables}
+            collapsedVariables={this.state.collapsedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
             onXValuesChange={this.handleBaremeXValuesChange}
@@ -421,7 +419,7 @@ var Simulator = React.createClass({
       } else if (this.state.visualizationSlug === 'cascade') {
         return (
           <WaterfallVisualization
-            expandedVariables={this.state.expandedVariables}
+            collapsedVariables={this.state.collapsedVariables}
             formatNumber={helpers.formatFrenchNumber}
             height={visualizationHeight}
             onVariableToggle={this.handleVariableToggle}

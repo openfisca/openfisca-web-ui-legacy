@@ -18,8 +18,8 @@ var axes = require('../../axes'),
 var WaterfallVisualization = React.createClass({
   mixins: [React.addons.LinkedStateMixin],
   propTypes: {
+    collapsedVariables: React.PropTypes.object.isRequired,
     defaultDisplaySubtotalThinBars: React.PropTypes.bool,
-    expandedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
@@ -86,7 +86,7 @@ var WaterfallVisualization = React.createClass({
   getVariables: function() {
     var processNode = (variable, baseValue, depth, hidden) => {
       var newVariables = [];
-      var isCollapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
+      var isCollapsed = this.isCollapsed(variable);
       if (variable.children) {
         var childrenVariables = [];
         var childBaseValue = baseValue;
@@ -151,6 +151,9 @@ var WaterfallVisualization = React.createClass({
   handleXAxisLabelledVariableHover: function(variable) {
     this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
     this.handleVariableHover(variable);
+  },
+  isCollapsed: function(variable) {
+    return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
   },
   render: function() {
     var variables = this.getVariables();

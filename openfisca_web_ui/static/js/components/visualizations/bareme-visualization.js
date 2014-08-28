@@ -16,7 +16,7 @@ var axes = require('../../axes'),
 
 var BaremeVisualization = React.createClass({
   propTypes: {
-    expandedVariables: React.PropTypes.object.isRequired,
+    collapsedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
@@ -61,7 +61,7 @@ var BaremeVisualization = React.createClass({
   getVariables: function() {
     var processNode = (variable, baseValues, depth, hidden) => {
       var newVariables = [];
-      var isCollapsed = variable.code in this.props.expandedVariables && this.props.expandedVariables[variable.code];
+      var isCollapsed = this.isCollapsed(variable);
       if (variable.children) {
         var childrenVariables = [];
         var childBaseValues = baseValues;
@@ -139,6 +139,9 @@ var BaremeVisualization = React.createClass({
   },
   highValues: function(variable) {
     return Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum()).toArray();
+  },
+  isCollapsed: function(variable) {
+    return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
   },
   render: function() {
     this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop;
