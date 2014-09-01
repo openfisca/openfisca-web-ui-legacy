@@ -1,10 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var invariant = require('react/lib/invariant'),
-  Lazy = require('lazy.js'),
+var Lazy = require('lazy.js'),
   React = require('react/addons'),
-  recursiveFind = require('recursive-find'),
   TweenState = require('react-tween-state');
 
 var axes = require('../../axes'),
@@ -35,7 +33,7 @@ var WaterfallVisualization = React.createClass({
     yAxisWidth: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
-  computeValuesBounds: function(variables) {
+  determineYAxisRange: function(variables) {
     var maxValue = 0;
     var minValue = 0;
     variables.forEach(function(variable) {
@@ -46,7 +44,7 @@ var WaterfallVisualization = React.createClass({
         minValue = value;
       }
     });
-    return {maxValue: maxValue, minValue: minValue};
+    return [minValue, maxValue];
   },
   formatHint: function(variables) {
     var variable = Lazy(variables).find({code: this.state.activeVariableCode});
@@ -80,105 +78,110 @@ var WaterfallVisualization = React.createClass({
   getInitialState: function() {
     return {
       activeVariableCode: null,
-      activeVariablesCodes: null,
       displaySubtotalThinBars: this.props.defaultDisplaySubtotalThinBars,
-      tweenVariablesPercentage: null,
+      tweenProgress: null,
       variablesTreeHoveredVariableCode: null,
       xAxisHoveredVariableCode: null,
     };
   },
-  getVariables: function() {
-    var processNode = (variable, baseValue, depth, hidden) => {
-      var newVariables = [];
-      var isCollapsed = this.isCollapsed(variable);
-      if (variable.children) {
-        var childrenVariables = [];
-        var childBaseValue = baseValue;
-        Lazy(variable.children).each(child => {
-          var childVariables = processNode(child, childBaseValue, depth + 1, hidden || isCollapsed);
-          childrenVariables = childrenVariables.concat(childVariables);
-          childBaseValue += child.values[this.props.variablesTreeValueIndex];
-        });
-        newVariables = newVariables.concat(childrenVariables);
-      }
-      var value = variable.values[this.props.variablesTreeValueIndex];
-      if (! hidden && value !== 0) {
-        var newVariableSequence = Lazy(variable).omit(['values']);
-        newVariableSequence = newVariableSequence.assign({
-          baseValue: baseValue,
-          depth: depth,
-          isCollapsed: isCollapsed,
-          isSubtotal: !! variable.children && depth > 0,
-          nbChildren: Lazy(variable.children)
-            .filter(child => child.values[this.props.variablesTreeValueIndex] && child.code)
-            .size(),
-          value: value,
-        });
-        var newVariable = newVariableSequence.toObject();
-        newVariables.push(newVariable);
-      }
-      return newVariables;
-    };
-    var variables = processNode(this.props.variablesTree, 0, 0, false);
-    return variables;
-  },
   handleVariableHover: function(variable) {
-    function walk(node) {
-      return node.children ? node.children.map(child => {
-        var walkResult = walk(child);
-        return walkResult ? [child.code, ...walkResult] : child.code;
-      }).flatten() : null;
-    }
-    var changeset = {
-      activeVariableCode: variable ? variable.code : null,
-      activeVariableChildrenCodes: null,
-    };
-    if (variable && variable.code !== 'revdisp') {
-      var variablesInTree = recursiveFind(this.props.variablesTree,
-        treeVariable => treeVariable.code === variable.code);
-      invariant(variablesInTree.length === 1, 'recursiveFind should return only one node');
-      var childrenCodes = walk(variablesInTree[0]);
-      if (childrenCodes && childrenCodes.length) {
-        changeset.activeVariableChildrenCodes = childrenCodes;
-      }
-    }
-    this.setState(changeset);
+    this.setState({activeVariableCode: variable ? variable.code : null});
   },
   handleVariablesTreeVariableHover: function(variable) {
     this.setState({variablesTreeHoveredVariableCode: variable ? variable.code : null});
     this.handleVariableHover(variable);
   },
   handleVariableToggle: function(variable) {
-    this.setState({xAxisHoveredVariableCode: null});
-    if (this.isCollapsed(variable)) {
+    if (variable.isCollapsed) {
       this.props.onVariableToggle(variable);
     } else {
-      this.tweenState('tweenVariablesPercentage', {
-        beginValue: 100,
+      this.tweenState('tweenProgress', {
+        beginValue: variable.isCollapsed ? 1 : 0,
         duration: 500,
-        endValue: 0,
+        endValue: variable.isCollapsed ? 0 : 1,
         onEnd: () => {
+          this.setState({tweenProgress: null});
           this.props.onVariableToggle(variable);
-        }
+        },
       });
     }
+    this.setState({xAxisHoveredVariableCode: null});
   },
   handleXAxisLabelledVariableHover: function(variable) {
     this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
     this.handleVariableHover(variable);
   },
-  isCollapsed: function(variable) {
-    return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
+  linearizeVariables: function() {
+    // Transform this.props.variablesTree into a list and compute base values for waterfall.
+    // Also rename snake case keys to camel case.
+    var valueIndex = this.props.variablesTreeValueIndex;
+    function extractChildrenCodes(node) {
+      return node.children ? node.children.map(child => {
+        var childrenCodes = extractChildrenCodes(child);
+        return childrenCodes ? [child.code, ...childrenCodes] : child.code;
+      }).flatten() : null;
+    }
+    var walk = (variable, baseValue = 0, depth = 0) => {
+      var newVariables = [];
+      if (variable.children) {
+        var childrenVariables = [];
+        var childBaseValue = baseValue;
+        variable.children.forEach(child => {
+          var childVariables = walk(child, childBaseValue, depth + 1);
+          childrenVariables = childrenVariables.concat(childVariables);
+          childBaseValue += child.values[valueIndex];
+        });
+        newVariables = newVariables.concat(childrenVariables);
+      }
+      var value = variable.values[valueIndex];
+      var childrenCodes = extractChildrenCodes(variable);
+      var newVariable = Lazy(variable)
+        .omit(['@context', '@type', 'children', 'short_name', 'values'])
+        .assign({
+          baseValue: baseValue,
+          childrenCodes: childrenCodes,
+          depth: depth,
+          isCollapsed: variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code],
+          isSubtotal: Boolean(variable.children) && depth > 0,
+          shortName: variable.short_name, // jshint ignore:line
+          value: value,
+        })
+        .toObject();
+      newVariables.push(newVariable);
+      return newVariables;
+    };
+    var variables = walk(this.props.variablesTree);
+    return variables;
+  },
+  removeVariables: function(variables, isRemoved, removeChildren = false) {
+    // Filter variables by isRemoved function and rewrite their childrenCodes properties
+    // according to the remaining variables.
+    var variablesCodes = removeChildren ?
+      variables.filter(isRemoved).map(variable => variable.childrenCodes).flatten().uniq() :
+      variables.filter(isRemoved).map(variable => variable.code);
+    return variables
+      .filter(variable => ! variablesCodes.contains(variable.code))
+      .map(variable => variable.childrenCodes ? Lazy(variable).assign({
+        childrenCodes: variable.childrenCodes.diff(variablesCodes)
+      }).toObject() : variable);
   },
   render: function() {
-    var variables = this.getVariables();
-    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? variables :
-      Lazy(variables).filter(variable => ! variable.isSubtotal || variable.isCollapsed).toArray();
-    var yBounds = this.computeValuesBounds(variables);
-    var ySmartValues = axes.smartValues(yBounds.minValue, yBounds.maxValue, this.props.yNbSteps);
+    var linearizedVariables = this.linearizeVariables();
+    var isZeroValue = variable => variable.value === 0;
+    var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
+    var isCollapsed = variable => variable.isCollapsed;
+    var variablesWithSubtotals = this.removeVariables(linearizedVariables, isZeroValue);
+    var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
+    var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
+    var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
+    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? displayedVariablesWithSubtotals :
+      displayedVariablesWithoutSubtotals;
+    var variablesTreeVariables = displayedVariablesWithSubtotals;
+    var [yAxisMinValue, yAxisMaxValue] = this.determineYAxisRange(variablesWithoutSubtotals);
+    var ySmartValues = axes.smartValues(yAxisMinValue, yAxisMaxValue, this.props.yNbSteps);
     var xLabels = waterfallBarsVariables.map(variable => {
       var style = {};
-      var name = variable.short_name; // jshint ignore:line
+      var name = variable.shortName;
       if (variable.isSubtotal) {
         name = (variable.isCollapsed ? '▶' : '▼') + ' ' + name;
         if (variable.code === this.state.xAxisHoveredVariableCode) {
@@ -199,8 +202,15 @@ var WaterfallVisualization = React.createClass({
       gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var stepWidth = gridWidth / xLabels.length;
     var xAxisTransform = `translate(${this.props.yAxisWidth}, ${this.props.height - this.props.xAxisHeight})`;
-    var activeVariablesCodes = Lazy([this.state.activeVariableCode]).concat(this.state.activeVariableChildrenCodes)
-      .compact().toArray();
+    var activeVariablesCodes = null;
+    if (this.state.activeVariableCode) {
+      activeVariablesCodes = [this.state.activeVariableCode];
+      if (this.state.activeVariableCode !== 'revdisp') {
+        var activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
+        activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
+      }
+      activeVariablesCodes = activeVariablesCodes.intersection(waterfallBarsVariables.map(_ => _.code));
+    }
     return (
       <div>
         <svg height={this.props.height} width={this.props.width}>
@@ -227,8 +237,7 @@ var WaterfallVisualization = React.createClass({
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
               noColorFill={this.props.noColorFill}
-              tweenVariables={this.state.activeVariableChildrenCodes}
-              tweenVariablesPercentage={this.getTweeningValue('tweenVariablesPercentage')}
+              tweenProgress={this.getTweeningValue('tweenProgress')}
               variables={waterfallBarsVariables}
               width={gridWidth}
             />
@@ -258,16 +267,16 @@ var WaterfallVisualization = React.createClass({
           </g>
         </svg>
         <p className='text-center well'>
-          {this.state.activeVariableCode ? this.formatHint(variables) : 'Survolez le graphique'}
+          {this.state.activeVariableCode ? this.formatHint(variablesWithSubtotals) : 'Survolez le graphique'}
         </p>
         <VariablesTree
-          activeVariablesCodes={activeVariablesCodes}
+          activeVariableCode={this.state.activeVariableCode}
           formatNumber={this.props.formatNumber}
           hoveredVariableCode={this.state.variablesTreeHoveredVariableCode}
           noColorFill={this.props.noColorFill}
           onToggle={this.handleVariableToggle}
           onHover={this.handleVariablesTreeVariableHover}
-          variables={variables}
+          variables={variablesTreeVariables}
         />
         <div className='panel panel-default'>
           <div className='panel-heading'>

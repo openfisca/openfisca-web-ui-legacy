@@ -2,7 +2,6 @@
 'use strict';
 
 var invariant = require('react/lib/invariant'),
-  Lazy = require('lazy.js'),
   React = require('react');
 
 
@@ -17,8 +16,7 @@ var WaterfallBars = React.createClass({
     strokeInactive: React.PropTypes.string.isRequired,
     maxValue: React.PropTypes.number.isRequired,
     minValue: React.PropTypes.number.isRequired,
-    tweenVariables: React.PropTypes.array,
-    tweenVariablesPercentage: React.PropTypes.number,
+    tweenProgress: React.PropTypes.number,
     variables: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
   },
@@ -29,19 +27,31 @@ var WaterfallBars = React.createClass({
       rectOpacity: 0.8,
       strokeActive: 'black',
       strokeInactive: 'gray',
-      tweenVariables: null,
+      tweenProgress: null,
     };
   },
   render: function() {
     var unitHeight = this.props.height / (this.props.maxValue - this.props.minValue);
     var y0 = this.props.maxValue > 0 ? this.props.maxValue * unitHeight : 0;
-    var variables = this.props.variables;
-    var stepWidth = this.props.width / variables.length;
+    var stepWidth = this.props.width / this.props.variables.length;
+    var widthAtStart = stepWidth;
+    if (this.props.tweenProgress !== null) {
+      invariant(this.props.activeVariablesCodes && this.props.activeVariablesCodes.length,
+        'this.props.tweenProgress is not null and no this.props.activeVariablesCodes given');
+      var nbTweeningVariables = this.props.activeVariablesCodes.length;
+      var nbNonTweeningVariables = this.props.variables.length - nbTweeningVariables;
+      var widthAtEnd = this.props.width / (nbNonTweeningVariables + 1);
+      var tweeningVariablesWidth = (widthAtEnd - widthAtStart * nbTweeningVariables) * this.props.tweenProgress +
+        widthAtStart * nbTweeningVariables;
+      var tweenWidth = tweeningVariablesWidth / nbTweeningVariables;
+      var nonTweenWidth = (this.props.width - tweeningVariablesWidth) / nbNonTweeningVariables;
+    }
+    var nextBarX = 0;
     return (
       <g className='bars'>
         {
-          variables.map((variable, variableIndex) => {
-            var isActive = this.props.activeVariablesCodes.contains(variable.code),
+          this.props.variables.map((variable, variableIndex) => {
+            var isActive = this.props.activeVariablesCodes && this.props.activeVariablesCodes.contains(variable.code),
               isThinBar = variable.isSubtotal && ! variable.isCollapsed;
             var style = {
               fill: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
@@ -51,11 +61,14 @@ var WaterfallBars = React.createClass({
               strokeWidth: isThinBar && 3,
             };
             var height = Math.abs(variable.value) * unitHeight;
+            var width = this.props.tweenProgress === null ? widthAtStart : (isActive ? tweenWidth : nonTweenWidth);
+            var rectWidth = width * 0.8;
+            var x = nextBarX + width * 0.1;
             var y = y0 - Math.max(variable.baseValue, variable.baseValue + variable.value) * unitHeight;
-            var transform = this.props.tweenVariables && this.props.tweenVariables.contains(variable.code) &&
-              this.props.tweenVariablesPercentage ? `scale(${this.props.tweenVariablesPercentage / 100}, 1)` : null;
+            var highlightRectX = nextBarX;
+            nextBarX += width;
             return (
-              <g key={variable.code} transform={transform}>
+              <g key={variable.code}>
                 {
                   isActive && (
                     <rect
@@ -66,8 +79,8 @@ var WaterfallBars = React.createClass({
                         opacity: 0.8,
                         stroke: this.props.highlightColor,
                       }}
-                      width={stepWidth}
-                      x={variableIndex * stepWidth}
+                      width={width}
+                      x={highlightRectX}
                       y={0}
                     />
                   )
@@ -87,8 +100,8 @@ var WaterfallBars = React.createClass({
                       className='bar'
                       height={height}
                       style={style}
-                      width={stepWidth * 0.8}
-                      x={(variableIndex + 0.1) * stepWidth}
+                      width={rectWidth}
+                      x={x}
                       y={y}
                     />
                   )
