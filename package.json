@@ -25,6 +25,7 @@
     "bootstrap": "^3.1.1",
     "deep-equal": "^0.2.1",
     "es5-ext": "^0.10.4",
+    "es5-extend": "^0.1.1",
     "jquery": "^2.1.1",
     "lazy.js": "git+https://github.com/dtao/lazy.js.git",
     "react": "^0.11.1",
