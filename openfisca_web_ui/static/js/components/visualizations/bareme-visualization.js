@@ -248,6 +248,7 @@ var BaremeVisualization = React.createClass({
         </p>
         <VariablesTree
           activeVariablesCodes={[this.state.activeVariableCode]}
+          displayVariablesColors={true}
           formatNumber={this.props.formatNumber}
           hoveredVariableCode={this.state.activeVariableCode}
           noColorFill={this.props.noColorFill}
