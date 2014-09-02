@@ -12,18 +12,23 @@ var cx = React.addons.classSet;
 var VariablesTree = React.createClass({
   propTypes: {
     activeVariableCode: React.PropTypes.string,
+    displayVariablesColors: React.PropTypes.bool,
     expandedSubtotalColor: React.PropTypes.string.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     hoveredVariableCode: React.PropTypes.string,
+    negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onHover: React.PropTypes.func.isRequired,
     onToggle: React.PropTypes.func,
+    positiveColor: React.PropTypes.string.isRequired,
     variables: React.PropTypes.array.isRequired,
   },
   getDefaultProps: function() {
     return {
       expandedSubtotalColor: 'lightGray',
+      negativeColor: 'red',
       noColorFill: 'gray',
+      positiveColor: 'green',
     };
   },
   render: function() {
@@ -77,8 +82,9 @@ var VariablesTree = React.createClass({
                       {
                         (! variable.isSubtotal || variable.isCollapsed) && (
                           <div style={{
-                            backgroundColor: variable.color ? 'rgb(' + variable.color.join(',') + ')' :
-                              this.props.noColorFill,
+                            backgroundColor: this.props.displayVariablesColors ?
+                              (variable.color ? `rgb(${variable.color.join(',')})` : this.props.noColorFill) :
+                              (variable.value > 0 ? this.props.positiveColor : this.props.negativeColor),
                             border: '1px solid gray',
                             width: 20,
                           }}>

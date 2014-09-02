@@ -8,12 +8,12 @@ var invariant = require('react/lib/invariant'),
 var WaterfallBars = React.createClass({
   propTypes: {
     activeVariablesCodes: React.PropTypes.arrayOf(React.PropTypes.string),
+    displayVariablesColors: React.PropTypes.bool,
     height: React.PropTypes.number.isRequired,
     highlightColor: React.PropTypes.string.isRequired,
+    negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
-    rectOpacity: React.PropTypes.number.isRequired,
-    strokeActive: React.PropTypes.string.isRequired,
-    strokeInactive: React.PropTypes.string.isRequired,
+    positiveColor: React.PropTypes.string.isRequired,
     maxValue: React.PropTypes.number.isRequired,
     minValue: React.PropTypes.number.isRequired,
     tweenProgress: React.PropTypes.number,
@@ -23,10 +23,9 @@ var WaterfallBars = React.createClass({
   getDefaultProps: function() {
     return {
       highlightColor: '#eee',
+      negativeColor: 'red',
       noColorFill: 'gray',
-      rectOpacity: 0.8,
-      strokeActive: 'black',
-      strokeInactive: 'gray',
+      positiveColor: 'green',
       tweenProgress: null,
     };
   },
@@ -54,10 +53,11 @@ var WaterfallBars = React.createClass({
             var isActive = this.props.activeVariablesCodes && this.props.activeVariablesCodes.contains(variable.code),
               isThinBar = variable.isSubtotal && ! variable.isCollapsed;
             var style = {
-              fill: variable.color ? 'rgb(' + variable.color.join(',') + ')' : this.props.noColorFill,
-              opacity: isActive ? 1 : this.props.rectOpacity,
+              fill: this.props.displayVariablesColors ?
+                (variable.color ? `rgb(${variable.color.join(',')})` : this.props.noColorFill) :
+                (variable.value > 0 ? this.props.positiveColor : this.props.negativeColor),
               shapeRendering: 'crispedges',
-              stroke: isActive ? this.props.strokeActive : this.props.strokeInactive,
+              stroke: 'black',
               strokeWidth: isThinBar && 3,
             };
             var height = Math.abs(variable.value) * unitHeight;

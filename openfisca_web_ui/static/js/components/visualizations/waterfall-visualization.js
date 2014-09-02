@@ -18,13 +18,14 @@ var WaterfallVisualization = React.createClass({
   mixins: [React.addons.LinkedStateMixin, TweenState.Mixin],
   propTypes: {
     collapsedVariables: React.PropTypes.object.isRequired,
-    defaultDisplaySubtotalThinBars: React.PropTypes.bool,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
+    negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onVariableToggle: React.PropTypes.func,
+    positiveColor: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     // variablesTree.values key is a list. This tells which index to use.
     variablesTreeValueIndex: React.PropTypes.number.isRequired,
@@ -64,11 +65,12 @@ var WaterfallVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      defaultDisplaySubtotalThinBars: false,
       labelsFontSize: 14,
       marginRight: 10,
       marginTop: 10,
+      negativeColor: '#d9534f', // Bootstrap danger color
       noColorFill: 'gray',
+      positiveColor: '#5cb85c', // Bootstrap success color
       variablesTreeValueIndex: 0,
       xAxisHeight: 100,
       yAxisWidth: 80,
@@ -78,7 +80,8 @@ var WaterfallVisualization = React.createClass({
   getInitialState: function() {
     return {
       activeVariableCode: null,
-      displaySubtotalThinBars: this.props.defaultDisplaySubtotalThinBars,
+      displaySubtotalThinBars: null,
+      displayVariablesColors: null,
       tweenProgress: null,
       variablesTreeHoveredVariableCode: null,
       xAxisHoveredVariableCode: null,
@@ -221,11 +224,13 @@ var WaterfallVisualization = React.createClass({
             />
             <WaterfallBars
               activeVariablesCodes={activeVariablesCodes}
+              displayVariablesColors={this.state.displayVariablesColors}
               height={gridHeight}
               maxValue={ySmartValues.maxValue}
               minValue={ySmartValues.minValue}
+              negativeColor={this.props.negativeColor}
               noColorFill={this.props.noColorFill}
-              tweenProgress={this.getTweeningValue('tweenProgress')}
+              positiveColor={this.props.positiveColor}
               variables={waterfallBarsVariables}
               width={gridWidth}
             />
@@ -259,9 +264,12 @@ var WaterfallVisualization = React.createClass({
         </p>
         <VariablesTree
           activeVariableCode={this.state.activeVariableCode}
+          displayVariablesColors={this.state.displayVariablesColors}
           formatNumber={this.props.formatNumber}
           hoveredVariableCode={this.state.variablesTreeHoveredVariableCode}
+          negativeColor={this.props.negativeColor}
           noColorFill={this.props.noColorFill}
+          positiveColor={this.props.positiveColor}
           onToggle={this.handleVariableToggle}
           onHover={this.handleVariablesTreeVariableHover}
           variables={variablesTreeVariables}
@@ -275,6 +283,12 @@ var WaterfallVisualization = React.createClass({
               <label>
                 <input checkedLink={this.linkState('displaySubtotalThinBars')} type='checkbox' />
                 Afficher les sous-totaux
+              </label>
+            </div>
+            <div className='checkbox'>
+              <label>
+                <input checkedLink={this.linkState('displayVariablesColors')} type='checkbox' />
+                Afficher les couleurs des variables
               </label>
             </div>
           </div>
