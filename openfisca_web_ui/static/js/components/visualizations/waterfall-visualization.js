@@ -95,8 +95,20 @@ var WaterfallVisualization = React.createClass({
     this.handleVariableHover(variable);
   },
   handleVariableToggle: function(variable) {
+    if (variable.isCollapsed) {
+      this.props.onVariableToggle(variable);
+    } else {
+      this.tweenState('tweenProgress', {
+        beginValue: variable.isCollapsed ? 1 : 0,
+        duration: 500,
+        endValue: variable.isCollapsed ? 0 : 1,
+        onEnd: () => {
+          this.setState({tweenProgress: null});
+          this.props.onVariableToggle(variable);
+        },
+      });
+    }
     this.setState({xAxisHoveredVariableCode: null});
-    this.props.onVariableToggle(variable);
   },
   handleXAxisLabelledVariableHover: function(variable) {
     this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
