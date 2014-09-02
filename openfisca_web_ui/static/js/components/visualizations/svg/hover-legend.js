@@ -15,6 +15,7 @@ var HoverLegend = React.createClass({
     onHover: React.PropTypes.func.isRequired,
     pixelToPoint: React.PropTypes.func.isRequired,
     pointToPixel: React.PropTypes.func.isRequired,
+    pointsXMaxValue: React.PropTypes.number.isRequired,
     snapPoint: React.PropTypes.shape({
       x: React.PropTypes.number.isRequired,
       y: React.PropTypes.number.isRequired,
@@ -90,7 +91,11 @@ var HoverLegend = React.createClass({
             }}
             x={isLastXValue ? snapPixel.x - 5 : snapPixel.x + 5}
             y={this.props.height - this.props.fontSize}>
-            {this.props.xFormatNumber(this.props.snapPoint.x) + ' %'}
+            {
+              this.props.snapPoint.x === this.props.xMaxValue || this.props.snapPoint.x <= this.props.pointsXMaxValue ?
+                this.props.xFormatNumber(this.props.snapPoint.x) + ' %' :
+                '?'
+            }
           </text>
         );
       }
@@ -105,7 +110,11 @@ var HoverLegend = React.createClass({
             }}
             x={10}
             y={snapPixel.y - 5}>
-            {this.props.yFormatNumber(this.props.snapPoint.y) + ' €'}
+            {
+              this.props.snapPoint.x < this.props.xMaxValue ?
+                this.props.yFormatNumber(this.props.snapPoint.y) + ' €' :
+                '?'
+            }
           </text>
         );
       }

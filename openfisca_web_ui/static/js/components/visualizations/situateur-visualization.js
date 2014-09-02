@@ -190,6 +190,7 @@ var SituateurVisualization = React.createClass({
               onHover={this.handleHoverLegendHover}
               pixelToPoint={this.gridPixelToPoint}
               pointToPixel={this.gridPointToPixel}
+              pointsXMaxValue={this.pointsXMaxValue}
               snapPoint={this.state.snapPoint}
               width={this.gridWidth}
               xFormatNumber={this.props.xFormatNumber}
