@@ -10,6 +10,7 @@ var EntityRoleSelector = require('./entity-role-selector');
 var MoveIndividuForm = React.createClass({
   propTypes: {
     currentEntityIdByKind: React.PropTypes.object.isRequired,
+    currentRoleByKind: React.PropTypes.object.isRequired,
     entitiesMetadata: React.PropTypes.object.isRequired,
     getEntityLabel: React.PropTypes.func.isRequired,
     onEntityChange: React.PropTypes.func.isRequired,
@@ -35,6 +36,7 @@ var MoveIndividuForm = React.createClass({
             return (
               <EntityRoleSelector
                 currentEntityId={this.props.currentEntityIdByKind[kind]}
+                currentRole={this.props.currentRoleByKind[kind]}
                 entities={entities}
                 key={kind}
                 kind={kind}

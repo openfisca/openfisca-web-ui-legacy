@@ -158,13 +158,13 @@ var Simulator = React.createClass({
   },
   handleEditFormClose: function() {
     console.debug('handleEditFormClose');
-    var {id, kind} = this.state.editedEntity;
-    var nameKey = models.getNameKey(kind);
-    var newTestCase = helpers.assignIn(this.state.testCase, [kind, id, nameKey], this.state.editedEntity[nameKey]);
-    var changeset = {
-      editedEntity: null,
-      testCase: newTestCase,
-    };
+    var {action, id, kind} = this.state.editedEntity;
+    var changeset = {editedEntity: null};
+    if (action === 'edit') {
+      var nameKey = models.getNameKey(kind);
+      var newTestCase = helpers.assignIn(this.state.testCase, [kind, id, nameKey], this.state.editedEntity[nameKey]);
+      changeset.testCase = newTestCase;
+    }
     this.setState(changeset, this.repair);
   },
   handleFieldsFormChange: function(kind, id, columnName, value) {
@@ -251,12 +251,15 @@ var Simulator = React.createClass({
         rightPanel = this.renderFieldsFormPanel();
       } else {
         invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
-        var currentEntityIdByKind = Lazy(models.kinds.map(kind => {
+        var currentEntityIdByKind = {},
+          currentRoleByKind = {};
+        models.kinds.forEach(kind => {
           var entityData = models.TestCase.findEntityAndRole(this.state.editedEntity.id, kind, this.state.testCase);
           if (entityData) {
-            return [kind, Lazy(entityData).get('id')];
+            currentEntityIdByKind[kind] = entityData.id;
+            currentRoleByKind[kind] = entityData.role;
           }
-        })).compact().toObject();
+        });
         rightPanel = (
           <EditForm
             onClose={this.handleEditFormClose}
@@ -265,6 +268,7 @@ var Simulator = React.createClass({
             }>
             <MoveIndividuForm
               currentEntityIdByKind={currentEntityIdByKind}
+              currentRoleByKind={currentRoleByKind}
               entitiesMetadata={models.entitiesMetadata}
               getEntityLabel={models.TestCase.getEntityLabel}
               onEntityChange={this.handleMoveIndividuFormChange.bind(null, 'entity')}
