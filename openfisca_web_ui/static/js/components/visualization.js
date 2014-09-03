@@ -30,7 +30,6 @@ var Visualization = React.createClass({
     };
   },
   handleVariableToggle: function(variable) {
-    console.debug('handleVariableToggle', variable);
     var status = this.state.collapsedVariables[variable.code];
     var newCollapsedVariables = Lazy(this.state.collapsedVariables).assign(obj(variable.code, ! status)).toObject();
     this.setState({collapsedVariables: newCollapsedVariables});

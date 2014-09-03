@@ -43,7 +43,6 @@ var Simulator = React.createClass({
     window.onresize = null;
   },
   currentTestCaseFetched: function(data) {
-    console.debug('currentTestCaseFetched', data);
     var newState;
     if (data && data.error) {
       console.error(data.error);
@@ -56,11 +55,7 @@ var Simulator = React.createClass({
       });
     }
   },
-  currentTestCaseSaved: function(data) {
-    console.debug('currentTestCaseSaved', data);
-  },
   fieldsFetched: function(data) {
-    console.debug('fieldsFetched', data);
     if (data) {
       if (data.error) {
         console.error(data.error);
@@ -105,14 +100,12 @@ var Simulator = React.createClass({
     }, this.simulate);
   },
   handleCreateEntity: function(kind) {
-    console.debug('handleCreateEntity', kind);
     var newEntity = models.TestCase.createEntity(kind, this.state.testCase);
     var newEntityId = uuid.v4();
     var newTestCase = helpers.assignIn(this.state.testCase, [kind, newEntityId], newEntity);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleCreateIndividuInEntity: function(kind, id, role) {
-    console.debug('handleCreateIndividuInEntity', arguments);
     var newIndividu = models.TestCase.createIndividu(this.state.testCase);
     var newIndividuId = uuid.v4();
     var newIndividus = Lazy(this.state.testCase.individus).assign(obj(newIndividuId, newIndividu)).toObject();
@@ -121,7 +114,6 @@ var Simulator = React.createClass({
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleDeleteEntity: function(kind, id) {
-    console.debug('handleDeleteEntity', arguments);
     var entity = this.state.testCase[kind][id];
     var entityLabel = models.TestCase.getEntityLabel(kind, entity);
     var message = 'Supprimer ' + entityLabel + ' ?'; // jshint ignore:line
@@ -133,7 +125,6 @@ var Simulator = React.createClass({
     }
   },
   handleDeleteIndividu: function(id) {
-    console.debug('handleDeleteIndividu', id);
     var message = `Supprimer ${this.state.testCase.individus[id].nom_individu} ?`; // jshint ignore:line
     if (confirm(message)) {
       var newTestCase = models.TestCase.withoutIndividu(id, this.state.testCase);
@@ -143,14 +134,12 @@ var Simulator = React.createClass({
     }
   },
   handleEditEntity: function(kind, id) {
-    console.debug('handleEditEntity', kind, id);
     var newEditedEntity = {action: 'edit', id: id, kind: kind};
     var nameKey = models.getNameKey(kind);
     newEditedEntity[nameKey] = this.state.testCase[kind][id][nameKey];
     this.setState({editedEntity: newEditedEntity});
   },
   handleEditFormClose: function() {
-    console.debug('handleEditFormClose');
     var {action, id, kind} = this.state.editedEntity;
     var changeset = {editedEntity: null};
     if (action === 'edit') {
@@ -161,7 +150,6 @@ var Simulator = React.createClass({
     this.setState(changeset, this.repair);
   },
   handleFieldsFormChange: function(kind, id, columnName, value) {
-    console.debug('handleFieldsFormChange', arguments);
     var nameKey = models.getNameKey(kind);
     if (columnName === nameKey) {
       var newEditedEntity = Lazy(this.state.editedEntity).assign(obj(columnName, value)).toObject();
@@ -173,7 +161,6 @@ var Simulator = React.createClass({
     }
   },
   handleMoveIndividu: function(id) {
-    console.debug('handleMoveIndividu', id);
     var newEditedEntity = {action: 'move', id: id, kind: 'individus'};
     this.setState({
       editedEntity: this.state.editedEntity && shallowEqual(this.state.editedEntity, newEditedEntity) ?
@@ -181,7 +168,6 @@ var Simulator = React.createClass({
     });
   },
   handleMoveIndividuFormChange: function(whatChanged, kind, value) {
-    console.debug('handleMoveIndividuFormChange', arguments);
     invariant(this.state.editedEntity, 'handler called without editedEntity in state.');
     var movedIndividuId = this.state.editedEntity.id;
     var oldEntityData = models.TestCase.findEntityAndRole(movedIndividuId, kind, this.state.testCase);
@@ -197,7 +183,6 @@ var Simulator = React.createClass({
     }
   },
   handleReset: function() {
-    console.debug('handleReset');
     var message = 'Réinitialiser la situation ? Ceci effacera définitivement les entités et les individus renseignés.'; // jshint ignore:line
     if (confirm(message)) {
       var initialTestCase = models.TestCase.getInitialTestCase();
@@ -224,11 +209,9 @@ var Simulator = React.createClass({
     }
   },
   handleVisualizationStateChange: function(visualizationState) {
-    console.debug('handleVisualizationStateChange', visualizationState);
     this.setState(obj(this.state.visualizationSlug, visualizationState));
   },
   handleYearChange: function(year) {
-    console.debug('handleYearChange', year);
     this.setState({year: year}, this.simulate);
   },
   render: function() {
@@ -374,11 +357,9 @@ var Simulator = React.createClass({
     );
   },
   repair: function(testCase) {
-    console.debug('repair', testCase);
     webservices.repair(testCase || this.state.testCase, this.state.year, this.repairCompleted);
   },
   repairCompleted: function(data) {
-    console.debug('repairCompleted', data);
     var errors = data.errors,
       originalTestCase = data.originalTestCase,
       suggestions = data.suggestions,
@@ -390,12 +371,12 @@ var Simulator = React.createClass({
     if (errors) {
       changeset.simulationResult = null;
       if (originalTestCase) {
-        webservices.saveCurrentTestCase(originalTestCase, this.currentTestCaseSaved);
+        webservices.saveCurrentTestCase(originalTestCase);
       }
     } else if (testCase) {
       var newTestCase = models.TestCase.withEntitiesNamesFilled(testCase);
       changeset.testCase = newTestCase;
-      webservices.saveCurrentTestCase(newTestCase, this.currentTestCaseSaved);
+      webservices.saveCurrentTestCase(newTestCase);
     }
     this.setState(changeset, function() {
       if ( ! this.state.errors) {
@@ -404,7 +385,6 @@ var Simulator = React.createClass({
     });
   },
   simulate: function() {
-    console.debug('simulate');
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
       this.setState({isSimulationInProgress: true}, () => {
         var params = this.simulationParams(this.state.visualizationSlug);
@@ -414,7 +394,6 @@ var Simulator = React.createClass({
     }
   },
   simulationCompleted: function(data) {
-    console.debug('simulationCompleted', data);
     var changeset = {isSimulationInProgress: false};
     if (data) {
       if (data.error) {
