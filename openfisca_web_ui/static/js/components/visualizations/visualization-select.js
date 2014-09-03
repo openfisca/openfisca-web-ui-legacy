@@ -19,7 +19,6 @@ var VisualizationSelect = React.createClass({
         <option value="bareme">Barême</option>
         <option value="situateur-revdisp">Situateur de revenu disponible du ménage</option>
         <option value="situateur-sal">Situateur de salaires imposables</option>
-        {/* <option value="rattachement-enfant">Rattachement enfants</option> */}
         <option value="json">Export données JSON</option>
       </select>
     );
