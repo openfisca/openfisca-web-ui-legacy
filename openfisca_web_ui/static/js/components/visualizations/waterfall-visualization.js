@@ -97,17 +97,18 @@ var WaterfallVisualization = React.createClass({
   handleVariableToggle: function(variable) {
     if (variable.isCollapsed) {
       this.props.onVariableToggle(variable);
-    } else {
-      this.tweenState('tweenProgress', {
-        beginValue: variable.isCollapsed ? 1 : 0,
-        duration: 500,
-        endValue: variable.isCollapsed ? 0 : 1,
-        onEnd: () => {
-          this.setState({tweenProgress: null});
-          this.props.onVariableToggle(variable);
-        },
-      });
     }
+    this.tweenState('tweenProgress', {
+      beginValue: variable.isCollapsed ? 1 : 0,
+      duration: 500,
+      endValue: variable.isCollapsed ? 0 : 1,
+      onEnd: () => {
+        this.setState({tweenProgress: null});
+        if ( ! variable.isCollapsed) {
+          this.props.onVariableToggle(variable);
+        }
+      },
+    });
     this.setState({xAxisHoveredVariableCode: null});
   },
   handleXAxisLabelledVariableHover: function(variable) {
@@ -192,8 +193,9 @@ var WaterfallVisualization = React.createClass({
         }
       }
       var props = {
-        onMouseOut: this.handleXAxisLabelledVariableHover.bind(null, null),
-        onMouseOver: this.handleXAxisLabelledVariableHover.bind(null, variable),
+        onMouseOut: this.state.tweenProgress === null ? this.handleXAxisLabelledVariableHover.bind(null, null) : null,
+        onMouseOver: this.state.tweenProgress === null ? this.handleXAxisLabelledVariableHover.bind(null, variable) :
+          null,
       };
       if (this.props.onVariableToggle && variable.isSubtotal) {
         style.cursor = 'pointer';
@@ -243,11 +245,12 @@ var WaterfallVisualization = React.createClass({
               negativeColor={this.props.negativeColor}
               noColorFill={this.props.noColorFill}
               positiveColor={this.props.positiveColor}
+              tweenProgress={this.getTweeningValue('tweenProgress')}
               variables={waterfallBarsVariables}
               width={gridWidth}
             />
             {
-              waterfallBarsVariables.map((variable, idx) =>
+              this.state.tweenProgress === null && waterfallBarsVariables.map((variable, idx) =>
                 <g key={variable.code} transform={`translate(${stepWidth * idx}, 0)`}>
                   <WaterfallBarHover
                     barHeight={gridHeight}
@@ -282,8 +285,8 @@ var WaterfallVisualization = React.createClass({
           negativeColor={this.props.negativeColor}
           noColorFill={this.props.noColorFill}
           positiveColor={this.props.positiveColor}
-          onToggle={this.handleVariableToggle}
-          onHover={this.handleVariablesTreeVariableHover}
+          onToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
+          onHover={this.state.tweenProgress === null ? this.handleVariablesTreeVariableHover : null}
           variables={variablesTreeVariables}
         />
         <div className='panel panel-default'>

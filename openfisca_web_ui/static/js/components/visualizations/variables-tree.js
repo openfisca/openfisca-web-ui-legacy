@@ -19,7 +19,7 @@ var VariablesTree = React.createClass({
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onHover: React.PropTypes.func,
-    onToggle: React.PropTypes.func.isRequired,
+    onToggle: React.PropTypes.func,
     positiveColor: React.PropTypes.string.isRequired,
     variables: React.PropTypes.array.isRequired,
   },
@@ -42,7 +42,8 @@ var VariablesTree = React.createClass({
           <tbody>
             {
               variables.map(variable => {
-                var onVariableClick = variable.isSubtotal && this.props.onToggle.bind(null, variable);
+                var onVariableClick = this.props.onToggle ?
+                  variable.isSubtotal && this.props.onToggle.bind(null, variable) : null;
                 var isActive = this.props.activeVariableCode ? (
                   this.props.activeVariableCode === variable.code ||
                     activeVariable.childrenCodes && activeVariable.childrenCodes.contains(variable.code)
