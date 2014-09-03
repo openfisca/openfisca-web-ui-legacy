@@ -4,8 +4,11 @@ STATIC_DIR=openfisca_web_ui/static
 
 all: check test
 
-build:
+build-dev:
 	./node_modules/.bin/gulp dev
+
+build-prod:
+	./node_modules/.bin/gulp prod
 
 check: flake8 jshint
 
