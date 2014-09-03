@@ -18,8 +18,8 @@ var VariablesTree = React.createClass({
     hoveredVariableCode: React.PropTypes.string,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
-    onHover: React.PropTypes.func.isRequired,
-    onToggle: React.PropTypes.func,
+    onHover: React.PropTypes.func,
+    onToggle: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     variables: React.PropTypes.array.isRequired,
   },
@@ -51,8 +51,8 @@ var VariablesTree = React.createClass({
                   <tr
                     className={cx({active: isActive})}
                     key={variable.code}
-                    onMouseOut={this.props.onHover.bind(null, null)}
-                    onMouseOver={this.props.onHover.bind(null, variable)}
+                    onMouseOut={this.props.onHover ? this.props.onHover.bind(null, null) : null}
+                    onMouseOver={this.props.onHover ? this.props.onHover.bind(null, variable) : null}
                     style={{cursor: variable.isSubtotal ? 'pointer' : null}}>
                     <td
                       onClick={onVariableClick}

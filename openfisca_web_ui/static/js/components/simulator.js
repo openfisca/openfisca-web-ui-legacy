@@ -8,20 +8,15 @@ var deepEqual = require('deep-equal'),
   shallowEqual = require('react/lib/shallowEqual'),
   uuid = require('uuid');
 
-var BaremeVisualization = require('./visualizations/bareme-visualization'),
-  EditForm = require('./edit-form'),
+var EditForm = require('./edit-form'),
   FieldsForm = require('./test-case/form/fields-form'),
   helpers = require('../helpers'),
-  JsonVisualization = require('./visualizations/json-visualization'),
   models = require('../models'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
-  revdispDistribution = require('../../data/revdisp-distribution.json'),
-  salDistribution = require('../../data/sal-distribution.json'),
-  SituateurVisualization = require('./visualizations/situateur-visualization'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
+  Visualization = require('./visualization'),
   VisualizationToolbar = require('./visualizations/visualization-toolbar'),
-  WaterfallVisualization = require('./visualizations/waterfall-visualization'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig,
@@ -32,8 +27,8 @@ var Simulator = React.createClass({
   propTypes: {
     baremeStepsX: React.PropTypes.number.isRequired,
     baremeVariableCode: React.PropTypes.string.isRequired,
-    defaultBaremeMaxValue: React.PropTypes.number.isRequired,
-    defaultBaremeMinValue: React.PropTypes.number.isRequired,
+    defaultBaremeXMaxValue: React.PropTypes.number.isRequired,
+    defaultBaremeXMinValue: React.PropTypes.number.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
     visualizations: React.PropTypes.array,
   },
@@ -81,17 +76,16 @@ var Simulator = React.createClass({
     return {
       baremeStepsX: 20,
       baremeVariableCode: 'sali',
-      defaultBaremeMaxValue: 20000,
-      defaultBaremeMinValue: 0,
+      defaultBaremeXMaxValue: 20000,
+      defaultBaremeXMinValue: 0,
       defaultVisualizationSlug: 'cascade',
     };
   },
   getInitialState: function() {
     return {
-      baremeMaxValue: this.props.defaultBaremeMaxValue,
-      baremeMinValue: this.props.defaultBaremeMinValue,
+      baremeXMaxValue: this.props.defaultBaremeXMaxValue,
+      baremeXMinValue: this.props.defaultBaremeXMinValue,
       calculationResult: null,
-      collapsedVariables: {},
       editedEntity: null,
       errors: null,
       isCalculationInProgress: false,
@@ -106,8 +100,8 @@ var Simulator = React.createClass({
   },
   handleBaremeXValuesChange: function(minValue, maxValue) {
     this.setState({
-      baremeMaxValue: maxValue,
-      baremeMinValue: minValue,
+      baremeXMaxValue: maxValue,
+      baremeXMinValue: minValue,
     }, this.simulate);
   },
   handleCreateEntity: function(kind) {
@@ -215,12 +209,6 @@ var Simulator = React.createClass({
   },
   handleResize: function() {
     this.forceUpdate();
-  },
-  handleVariableToggle: function(variable) {
-    console.debug('handleVariableToggle', variable);
-    var status = this.state.collapsedVariables[variable.code];
-    var newCollapsedVariables = Lazy(this.state.collapsedVariables).assign(obj(variable.code, ! status)).toObject();
-    this.setState({collapsedVariables: newCollapsedVariables});
   },
   handleVisualizationChange: function(slug) {
     var changeset = {visualizationSlug: slug};
@@ -350,89 +338,6 @@ var Simulator = React.createClass({
       </EditForm>
     );
   },
-  renderVisualization: function() {
-    invariant(this.state.simulationResult, 'this.state.simulationResult is empty');
-    var rightPanelNode = this.refs.rightPanel.getDOMNode();
-    var rightPanelWidth = rightPanelNode.clientWidth;
-    var visualizationHeight = rightPanelWidth * 0.8;
-    if (this.state.simulationResult.error) {
-      return (
-        <p className="text-danger">
-          Erreur de simulation sur le serveur, veuillez nous excuser.
-          L'équipe technique vient d'être prévenue par un email automatique.
-        </p>
-      );
-    } else {
-      if (this.state.visualizationSlug === 'json') {
-        return <JsonVisualization data={this.state.simulationResult} />;
-      } else if (this.state.visualizationSlug === 'rattachement-enfant') {
-        return (
-          <RattachementEnfantVisualization
-            legislationUrl={this.state.legislationUrl}
-            localState={this.state[this.state.visualizationSlug]}
-            onChange={this.handleVisualizationStateChange}
-            testCase={this.state.testCase}
-            year={this.state.year}
-          />
-        );
-      } else if (this.state.visualizationSlug.startsWith('situateur-')) {
-        var value = this.state.simulationResult[0].values[0];
-        var curveLabel, formatHint, pointLabel, points;
-        if (this.state.visualizationSlug === 'situateur-revdisp') {
-          curveLabel = 'Revenu disponible';
-          formatHint = ({amount, percent}) => `${percent} % des français ont un revenu disponible inférieur à ${amount} €`; // jshint ignore:line
-          pointLabel = 'Votre revenu disponible';
-          points = revdispDistribution;
-        } else if (this.state.visualizationSlug === 'situateur-sal') {
-          curveLabel = 'Salaires imposables';
-          formatHint = ({amount, percent}) => `${percent} % des français ont des salaires imposables inférieurs à ${amount} €`; // jshint ignore:line
-          pointLabel = 'Vos salaires imposables';
-          points = salDistribution;
-        }
-        return (
-          <SituateurVisualization
-            curveLabel={curveLabel}
-            formatHint={formatHint}
-            height={visualizationHeight}
-            pointLabel={pointLabel}
-            points={points}
-            value={value}
-            width={rightPanelWidth}
-            xFormatNumber={value => helpers.formatFrenchNumber(value, {fixed: 0})}
-            xSnapIntervalValue={5}
-            yFormatNumber={helpers.formatFrenchNumber}
-            yMaxValue={Math.max(100000, value)}
-          />
-        );
-      } else if (this.state.visualizationSlug === 'bareme') {
-        return (
-          <BaremeVisualization
-            collapsedVariables={this.state.collapsedVariables}
-            formatNumber={helpers.formatFrenchNumber}
-            height={visualizationHeight}
-            onXValuesChange={this.handleBaremeXValuesChange}
-            onVariableToggle={this.handleVariableToggle}
-            variablesTree={this.state.simulationResult}
-            width={rightPanelWidth}
-            xLabel="Revenus d'activité imposables"
-            xMaxValue={this.state.baremeMaxValue}
-            xMinValue={this.state.baremeMinValue}
-          />
-        );
-      } else if (this.state.visualizationSlug === 'cascade') {
-        return (
-          <WaterfallVisualization
-            collapsedVariables={this.state.collapsedVariables}
-            formatNumber={helpers.formatFrenchNumber}
-            height={visualizationHeight}
-            onVariableToggle={this.handleVariableToggle}
-            variablesTree={this.state.simulationResult}
-            width={rightPanelWidth}
-          />
-        );
-      }
-    }
-  },
   renderVisualizationPanel: function() {
     return this.state.errors ? (
       <div className="alert alert-danger" role="alert">
@@ -453,7 +358,18 @@ var Simulator = React.createClass({
           year={this.state.year}
         />
         <hr/>
-        {this.state.simulationResult && this.renderVisualization()}
+        {
+          this.state.simulationResult && (
+            <Visualization
+              baremeXMaxValue={this.state.baremeXMaxValue}
+              baremeXMinValue={this.state.baremeXMinValue}
+              onBaremeXValuesChange={this.handleBaremeXValuesChange}
+              simulationResult={this.state.simulationResult}
+              visualizationPanelWidth={this.refs.rightPanel.getDOMNode().clientWidth}
+              visualizationSlug={this.state.visualizationSlug}
+            />
+          )
+        }
       </div>
     );
   },
@@ -516,8 +432,8 @@ var Simulator = React.createClass({
       axes: visualizationSlug === 'bareme' ? [
         {
           count: this.props.baremeStepsX,
-          max: this.state.baremeMaxValue,
-          min: this.state.baremeMinValue,
+          max: this.state.baremeXMaxValue,
+          min: this.state.baremeXMinValue,
           name: this.props.baremeVariableCode,
         },
       ] : null,
