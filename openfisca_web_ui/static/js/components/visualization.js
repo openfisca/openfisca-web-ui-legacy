@@ -20,7 +20,7 @@ var Visualization = React.createClass({
     baremeXMaxValue: React.PropTypes.number.isRequired,
     baremeXMinValue: React.PropTypes.number.isRequired,
     onBaremeXValuesChange: React.PropTypes.func.isRequired,
-    simulationResult: React.PropTypes.object.isRequired,
+    simulationResult: React.PropTypes.any.isRequired,
     visualizationPanelWidth: React.PropTypes.number.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
