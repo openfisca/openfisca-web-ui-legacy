@@ -45,7 +45,7 @@ var Simulator = React.createClass({
   currentTestCaseFetched: function(data) {
     var newState;
     if (data && data.error) {
-      console.error(data.error);
+//      console.error(data.error); // TODO handle error
       newState = Lazy(this.state).assign({testCase: null}).toObject();
       this.setState(newState);
     } else {
@@ -58,7 +58,7 @@ var Simulator = React.createClass({
   fieldsFetched: function(data) {
     if (data) {
       if (data.error) {
-        console.error(data.error);
+//        console.error(data.error); // TODO handle error
       } else {
         this.setState({
           columns: data.columns,
@@ -397,7 +397,6 @@ var Simulator = React.createClass({
     var changeset = {isSimulationInProgress: false};
     if (data) {
       if (data.error) {
-        console.error(data.error);
         changeset.simulationResult = {error: data.error};
       } else {
         changeset.errors = data.errors ? data.errors : null;

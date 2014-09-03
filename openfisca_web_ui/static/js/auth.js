@@ -21,7 +21,7 @@ function init(options) {
         }
       })
       .fail(function(/*jqXHR, textStatus, errorThrown*/) {
-        console.error('logout error');
+        alert('Erreur de déconnexion');
       });
     }
   }
@@ -45,7 +45,7 @@ function init(options) {
         })
         .fail(function(/*jqXHR, textStatus, errorThrown*/) {
           navigator.id.logout();
-          console.error('authentication error');
+          alert("Erreur d'authentifiation");
         });
       },
       onlogout: handleLogout,
