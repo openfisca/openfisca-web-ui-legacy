@@ -137,13 +137,13 @@ function saveCurrentTestCase(testCase, onComplete) {
     .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
     .send(data)
     .on('error', function(error) {
-      onComplete({error: error.message});
+      if (onComplete) {
+        onComplete({error: error.message});
+      }
     })
     .end(function(res) {
-      if (res.error) {
-        onComplete(res);
-      } else {
-        onComplete(res.body);
+      if (onComplete) {
+        onComplete(res.error ? res : res.body);
       }
     });
 }
