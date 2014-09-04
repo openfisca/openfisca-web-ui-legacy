@@ -34,6 +34,7 @@ var Simulator = React.createClass({
   },
   componentDidMount: function() {
     window.onresize = this.handleResize;
+    this.handleResize();
   },
   componentWillMount: function() {
     webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
@@ -193,7 +194,7 @@ var Simulator = React.createClass({
     }
   },
   handleResize: function() {
-    this.forceUpdate();
+    this.setState({rightPanelWidth: this.refs.rightPanel.getDOMNode().clientWidth});
   },
   handleVisualizationChange: function(slug) {
     var changeset = {visualizationSlug: slug};
@@ -342,13 +343,13 @@ var Simulator = React.createClass({
         />
         <hr/>
         {
-          this.state.simulationResult && (
+          this.state.rightPanelWidth && this.state.simulationResult && (
             <Visualization
               baremeXMaxValue={this.state.baremeXMaxValue}
               baremeXMinValue={this.state.baremeXMinValue}
               onBaremeXValuesChange={this.handleBaremeXValuesChange}
               simulationResult={this.state.simulationResult}
-              visualizationPanelWidth={this.refs.rightPanel.getDOMNode().clientWidth}
+              visualizationPanelWidth={this.state.rightPanelWidth}
               visualizationSlug={this.state.visualizationSlug}
             />
           )
