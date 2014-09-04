@@ -84,7 +84,7 @@ function startLiveReload() {
   var port = 35731;
   var liveReloadServer = livereload(port);
   var reloadPage = function(event) {
-    gutil.log('Reload browser page.')
+    gutil.log('Reload browser page.');
     liveReloadServer.changed(event.path);
   };
   return gulp.watch([distDir + '/**/*'], reloadPage);
