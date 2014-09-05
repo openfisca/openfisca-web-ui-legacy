@@ -19,10 +19,15 @@ var Visualization = React.createClass({
   propTypes: {
     baremeXMaxValue: React.PropTypes.number.isRequired,
     baremeXMinValue: React.PropTypes.number.isRequired,
+    labelsFontSize: React.PropTypes.number.isRequired,
     onBaremeXValuesChange: React.PropTypes.func.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
-    visualizationPanelWidth: React.PropTypes.number.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
+  },
+  getDefaultProps: function() {
+    return {
+      labelsFontSize: 14,
+    };
   },
   getInitialState: function() {
     return {
@@ -35,13 +40,13 @@ var Visualization = React.createClass({
     this.setState({collapsedVariables: newCollapsedVariables});
   },
   render: function() {
-    var visualizationHeight = this.props.visualizationPanelWidth * 0.8;
     if (this.props.simulationResult.error) {
       return (
-        <p className="text-danger">
-          Erreur de simulation sur le serveur, veuillez nous excuser.
-          L'équipe technique vient d'être prévenue par un email automatique.
-        </p>
+        <div className="alert alert-danger" role="alert">
+          <h4>Erreur</h4>
+          <p>La simulation a échoué car une erreur s'est produite sur le serveur.</p>
+        </div>
+
       );
     } else {
       if (this.props.visualizationSlug === 'json') {
@@ -64,11 +69,10 @@ var Visualization = React.createClass({
           <SituateurVisualization
             curveLabel={curveLabel}
             formatHint={formatHint}
-            height={visualizationHeight}
+            labelsFontSize={this.props.labelsFontSize}
             pointLabel={pointLabel}
             points={points}
             value={value}
-            width={this.props.visualizationPanelWidth}
             xFormatNumber={value => helpers.formatFrenchNumber(value, {fixed: 0})}
             xSnapIntervalValue={5}
             yFormatNumber={helpers.formatFrenchNumber}
@@ -80,12 +84,10 @@ var Visualization = React.createClass({
           <BaremeVisualization
             collapsedVariables={this.state.collapsedVariables}
             formatNumber={helpers.formatFrenchNumber}
-            height={visualizationHeight}
-            onXValuesChange={this.props.onBaremeXValuesChange}
+            labelsFontSize={this.props.labelsFontSize}
             onVariableToggle={this.handleVariableToggle}
+            onXValuesChange={this.props.onBaremeXValuesChange}
             variablesTree={this.props.simulationResult}
-            width={this.props.visualizationPanelWidth}
-            xLabel="Revenus d'activité imposables"
             xMaxValue={this.props.baremeXMaxValue}
             xMinValue={this.props.baremeXMinValue}
           />
@@ -95,10 +97,9 @@ var Visualization = React.createClass({
           <WaterfallVisualization
             collapsedVariables={this.state.collapsedVariables}
             formatNumber={helpers.formatFrenchNumber}
-            height={visualizationHeight}
+            labelsFontSize={this.props.labelsFontSize}
             onVariableToggle={this.handleVariableToggle}
             variablesTree={this.props.simulationResult}
-            width={this.props.visualizationPanelWidth}
           />
         );
       }

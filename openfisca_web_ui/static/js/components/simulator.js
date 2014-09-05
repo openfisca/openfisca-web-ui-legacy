@@ -32,16 +32,9 @@ var Simulator = React.createClass({
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
     visualizations: React.PropTypes.array,
   },
-  componentDidMount: function() {
-    window.onresize = this.handleResize;
-    this.handleResize();
-  },
   componentWillMount: function() {
     webservices.fetchCurrentTestCase(this.currentTestCaseFetched);
     webservices.fetchFields(this.fieldsFetched);
-  },
-  componentWillUnmount: function() {
-    window.onresize = null;
   },
   currentTestCaseFetched: function(data) {
     var newState;
@@ -193,9 +186,6 @@ var Simulator = React.createClass({
       this.repair(initialTestCase);
     }
   },
-  handleResize: function() {
-    this.setState({rightPanelWidth: this.refs.rightPanel.getDOMNode().clientWidth});
-  },
   handleVisualizationChange: function(slug) {
     var changeset = {visualizationSlug: slug};
     var newSimulationParams = this.simulationParams(slug),
@@ -258,7 +248,6 @@ var Simulator = React.createClass({
         <div className="col-sm-4">
           <TestCaseToolbar
             disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
-            isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
             onRepair={this.handleRepair}
@@ -285,7 +274,7 @@ var Simulator = React.createClass({
             />
           }
         </div>
-        <div className="col-sm-8" ref='rightPanel'>
+        <div className="col-sm-8">
           {rightPanel}
         </div>
       </div>
@@ -323,39 +312,43 @@ var Simulator = React.createClass({
     );
   },
   renderVisualizationPanel: function() {
-    return this.state.errors ? (
-      <div className="alert alert-danger" role="alert">
-        <h4>Situation incorrecte</h4>
-        <p>Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.</p>
-        <p>
-          Vous pouvez également {
-            <button className='btn btn-danger btn-xs' onClick={this.handleReset}>réinitialiser</button>
-          } la situation.
-        </p>
-      </div>
-    ) : (
-      <div>
-        <VisualizationToolbar
-          onVisualizationChange={this.handleVisualizationChange}
-          onYearChange={this.handleYearChange}
-          visualizationSlug={this.state.visualizationSlug}
-          year={this.state.year}
-        />
-        <hr/>
-        {
-          this.state.rightPanelWidth && this.state.simulationResult && (
-            <Visualization
-              baremeXMaxValue={this.state.baremeXMaxValue}
-              baremeXMinValue={this.state.baremeXMinValue}
-              onBaremeXValuesChange={this.handleBaremeXValuesChange}
-              simulationResult={this.state.simulationResult}
-              visualizationPanelWidth={this.state.rightPanelWidth}
-              visualizationSlug={this.state.visualizationSlug}
-            />
-          )
-        }
-      </div>
-    );
+    if (this.state.errors) {
+      return (
+        <div className="alert alert-danger" role="alert">
+          <h4>Situation incorrecte</h4>
+          <p>Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.</p>
+          <p>
+            Vous pouvez également {
+              <button className='btn btn-danger btn-xs' onClick={this.handleReset}>réinitialiser</button>
+            } la situation.
+          </p>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <VisualizationToolbar
+            isSimulationInProgress={this.state.isSimulationInProgress}
+            onVisualizationChange={this.handleVisualizationChange}
+            onYearChange={this.handleYearChange}
+            visualizationSlug={this.state.visualizationSlug}
+            year={this.state.year}
+          />
+          <hr/>
+          {
+            this.state.simulationResult && (
+              <Visualization
+                baremeXMaxValue={this.state.baremeXMaxValue}
+                baremeXMinValue={this.state.baremeXMinValue}
+                onBaremeXValuesChange={this.handleBaremeXValuesChange}
+                simulationResult={this.state.simulationResult}
+                visualizationSlug={this.state.visualizationSlug}
+              />
+            )
+          }
+        </div>
+      );
+    }
   },
   repair: function(testCase) {
     webservices.repair(testCase || this.state.testCase, this.state.year, this.repairCompleted);

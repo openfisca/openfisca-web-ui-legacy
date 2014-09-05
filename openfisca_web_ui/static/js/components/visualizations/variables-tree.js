@@ -15,11 +15,10 @@ var VariablesTree = React.createClass({
     displayVariablesColors: React.PropTypes.bool,
     expandedSubtotalColor: React.PropTypes.string.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
-    hoveredVariableCode: React.PropTypes.string,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
-    onHover: React.PropTypes.func,
-    onToggle: React.PropTypes.func,
+    onVariableHover: React.PropTypes.func,
+    onVariableToggle: React.PropTypes.func,
     positiveColor: React.PropTypes.string.isRequired,
     variables: React.PropTypes.array.isRequired,
   },
@@ -30,6 +29,15 @@ var VariablesTree = React.createClass({
       noColorFill: 'gray',
       positiveColor: 'green',
     };
+  },
+  getInitialState: function() {
+    return {
+      hoveredVariableCode: null,
+    };
+  },
+  handleVariableHover: function(variable) {
+    this.setState({hoveredVariableCode: variable ? variable.code : null});
+    this.props.onVariableHover && this.props.onVariableHover(variable);
   },
   render: function() {
     var variablesSequence = Lazy(this.props.variables);
@@ -42,8 +50,8 @@ var VariablesTree = React.createClass({
           <tbody>
             {
               variables.map(variable => {
-                var onVariableClick = this.props.onToggle ?
-                  variable.isSubtotal && this.props.onToggle.bind(null, variable) : null;
+                var onVariableClick = this.props.onVariableToggle ?
+                  variable.isSubtotal && this.props.onVariableToggle.bind(null, variable) : null;
                 var isActive = this.props.activeVariableCode ? (
                   this.props.activeVariableCode === variable.code ||
                     activeVariable.childrenCodes && activeVariable.childrenCodes.contains(variable.code)
@@ -52,15 +60,15 @@ var VariablesTree = React.createClass({
                   <tr
                     className={cx({active: isActive})}
                     key={variable.code}
-                    onMouseOut={this.props.onHover ? this.props.onHover.bind(null, null) : null}
-                    onMouseOver={this.props.onHover ? this.props.onHover.bind(null, variable) : null}
+                    onMouseOut={this.handleVariableHover.bind(null, null)}
+                    onMouseOver={this.handleVariableHover.bind(null, variable)}
                     style={{cursor: variable.isSubtotal ? 'pointer' : null}}>
                     <td
                       onClick={onVariableClick}
                       style={{
                         fontWeight: variable.depth === 0 ? 'bold' : null,
                         paddingLeft: variable.depth > 1 ? (variable.depth - 1) * 20 : null,
-                        textDecoration: variable.code === this.props.hoveredVariableCode &&
+                        textDecoration: variable.code === this.state.hoveredVariableCode &&
                           variable.isSubtotal ? 'underline' : null,
                       }}>
                       {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}

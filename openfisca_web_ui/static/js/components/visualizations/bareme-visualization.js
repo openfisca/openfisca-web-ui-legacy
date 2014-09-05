@@ -2,38 +2,34 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react/addons');
 
-var axes = require('../../axes'),
-  Curve = require('./svg/curve'),
-  HGrid = require('./svg/h-grid'),
-  Link = require('./svg/link'),
-  VariablesTree = require('./variables-tree'),
-  VGrid = require('./svg/v-grid'),
-  XAxis = require('./svg/x-axis'),
-  YAxis = require('./svg/y-axis');
+var BaremeChart = require('./svg/bareme-chart'),
+  TwoColumnsLayout = require('./two-columns-layout'),
+  VariablesTree = require('./variables-tree');
+
+var cx = React.addons.classSet;
 
 
 var BaremeVisualization = React.createClass({
+  mixins: [React.addons.LinkedStateMixin],
   propTypes: {
     collapsedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
-    height: React.PropTypes.number.isRequired,
-    marginRight: React.PropTypes.number.isRequired,
-    marginTop: React.PropTypes.number.isRequired,
+    labelsFontSize: React.PropTypes.number,
     noColorFill: React.PropTypes.string.isRequired,
+    onVariableToggle: React.PropTypes.func.isRequired,
     onXValuesChange: React.PropTypes.func.isRequired,
-    onVariableToggle: React.PropTypes.func,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
-    // variablesTree.values key is a list. This tells which index to use.
-    width: React.PropTypes.number.isRequired,
-    xAxisHeight: React.PropTypes.number.isRequired,
-    xLabel: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
-    yAxisWidth: React.PropTypes.number.isRequired,
-    xNbSteps: React.PropTypes.number.isRequired,
-    yNbSteps: React.PropTypes.number.isRequired,
+  },
+  componentDidMount: function() {
+    window.onresize = this.handleLayoutChange;
+    this.handleLayoutChange();
+  },
+  componentWillUnmount: function() {
+    window.onresize = null;
   },
   formatHint: function(variables) {
     var variableName;
@@ -47,18 +43,14 @@ var BaremeVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      marginRight: 10,
-      marginTop: 10,
       noColorFill: 'gray',
-      xAxisHeight: 100,
-      xAxisLabelFontSize: 14,
-      yAxisWidth: 80,
-      xNbSteps: 10,
-      yNbSteps: 8,
     };
   },
   getInitialState: function() {
-    return {activeVariableCode: null};
+    return {
+      activeVariableCode: null,
+      displayParametersColumn: false,
+    };
   },
   getVariables: function() {
     var processNode = (variable, baseValues, depth, hidden) => {
@@ -95,168 +87,81 @@ var BaremeVisualization = React.createClass({
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
-  gridPointToPixel: function(point) {
-    var pixel = {
-      x: axes.convertLinearRange({
-        newMax: this.gridWidth,
-        newMin: 0,
-        oldMax: this.props.xMaxValue,
-        oldMin: this.props.xMinValue,
-      }, point.x),
-      y: axes.convertLinearRange({
-        newMax: 0,
-        newMin: this.gridHeight,
-        oldMax: this.ySmartValues.maxValue,
-        oldMin: this.ySmartValues.minValue,
-      }, point.y),
-    };
-    return pixel;
+  handleDisplayParametersColumnClick: function() {
+    this.setState({displayParametersColumn: ! this.state.displayParametersColumn}, this.handleLayoutChange);
   },
-  handleModifyLinkClick: function() {
-    function promptValue(message, defaultValue) {
-      var newValue = prompt(message, defaultValue);
-      if (newValue === null) {
-        newValue = defaultValue;
-      } else {
-        newValue = Number(newValue);
-        if (isNaN(newValue)) {
-          alert('Valeur invalide');
-          newValue = null;
-        }
-      }
-      return newValue;
-    }
-    var newXMinValue = promptValue('Valeur minimum', this.props.xMinValue);
-    var newXMaxValue = promptValue('Valeur maximum', this.props.xMaxValue);
-    if (newXMinValue !== null && newXMaxValue !== null) {
-      if (newXMinValue < newXMaxValue) {
-        this.props.onXValuesChange(newXMinValue, newXMaxValue);
-      } else {
-        alert('La valeur minimum doit être inférieure à la valeur maximum.');
-      }
-    }
+  handleLayoutChange: function() {
+    var chartColumnNode = this.refs.chartColumn.getDOMNode();
+    this.setState({chartColumnWidth: chartColumnNode.offsetWidth});
   },
-  handleVariableHover: function(variable, event) {
-    this.setState({activeVariableCode: event.type === 'mouseover' && variable ? variable.code : null});
-  },
-  highValues: function(variable) {
-    return Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum()).toArray();
+  handleVariableHover: function(variable) {
+    this.setState({activeVariableCode: variable ? variable.code : null});
   },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
   },
   render: function() {
-    this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop;
-    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     var variables = this.getVariables();
-    var revdisp = Lazy(variables).find({code: 'revdisp'});
-    var yMaxValue = Math.max.apply(null, revdisp.values),
-      yMinValue = Math.min.apply(null, revdisp.values);
-    this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
-    var clipValues = value => Math.max(value, this.ySmartValues.minValue);
     return (
-      <div>
-        <svg height={this.props.height} width={this.props.width}>
-          <g transform={
-            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
-          }>
-            <HGrid
-              height={this.gridHeight}
-              nbSteps={this.props.yNbSteps}
-              startStep={1}
-              width={this.gridWidth}
-            />
-          </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
-            <VGrid
-              height={this.gridHeight}
-              nbSteps={this.props.xNbSteps}
-              startStep={1}
-              width={this.gridWidth}
-            />
-          </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
-            {
-              variables.map(variable => {
-                var toDomainValue = axes.convertLinearRange.bind(null, {
-                  newMax: this.props.xMaxValue,
-                  newMin: this.props.xMinValue,
-                  oldMax: variable.values.length - 1,
-                  oldMin: 0,
-                });
-                var lowPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
-                  .zip(variable.baseValues.map(clipValues)).toArray();
-                var isFilled = variable.depth > 0;
-                var highPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
-                  .zip(this.highValues(variable).map(clipValues)).toArray();
-                var pointsSequence = isFilled ? Lazy(lowPoints).concat(Lazy(highPoints).reverse().toArray()) :
-                  Lazy(highPoints);
-                var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
-                var cssColor = variable.color ? `rgb(${variable.color})` : this.props.noColorFill;
-                return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
-                  <Curve
-                    active={this.state.activeVariableCode === variable.code}
-                    fill={isFilled}
-                    key={variable.code}
-                    onHover={this.handleVariableHover.bind(null, variable)}
-                    points={points}
-                    pointToPixel={this.gridPointToPixel}
-                    style={{
-                      fill: isFilled ? cssColor : 'none',
-                      stroke: cssColor,
-                    }}
-                  />
-                );
-              })
-            }
-            <YAxis
-              formatNumber={this.props.formatNumber}
-              height={this.gridHeight}
-              maxValue={this.ySmartValues.maxValue}
-              minValue={this.ySmartValues.minValue}
-              nbSteps={this.props.yNbSteps}
-              unit='€'
-              width={this.props.yAxisWidth}
-            />
-          </g>
-          <g transform={
-            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
-          }>
-            <XAxis
-              formatNumber={this.props.formatNumber}
-              height={this.props.xAxisHeight}
-              label={this.props.xLabel}
-              labelFontSize={this.props.xAxisLabelFontSize}
-              maxValue={this.props.xMaxValue}
-              minValue={this.props.xMinValue}
-              nbSteps={this.props.xNbSteps}
-              rotateLabels={true}
-              unit='€'
-              width={this.gridWidth}
-            />
-            <Link
-              onClick={this.handleModifyLinkClick}
-              style={{textAnchor: 'end'}}
-              x={this.gridWidth}
-              y={this.props.xAxisHeight - this.props.xAxisLabelFontSize}>
-              Modifier
-            </Link>
-          </g>
-        </svg>
-        <p className='text-center well'>
-          {this.formatHint(variables)}
-        </p>
-        <VariablesTree
-          activeVariablesCodes={[this.state.activeVariableCode]}
-          displayVariablesColors={true}
-          formatNumber={this.props.formatNumber}
-          hoveredVariableCode={this.state.activeVariableCode}
-          noColorFill={this.props.noColorFill}
-          onToggle={this.props.onVariableToggle}
-          onHover={this.handleVariableHover}
-          variables={variables}
-        />
-      </div>
+      <TwoColumnsLayout
+        leftComponentRef={'chartColumn'}
+        rightComponentRef={this.state.displayParametersColumn ? 'parametersColumn' : null}>
+        <div ref='chartColumn'>
+          {
+            this.state.chartColumnWidth && (
+              <div>
+                <p className='clearfix'>
+                  <button
+                    className={cx({
+                      active: this.state.displayParametersColumn,
+                      btn: true,
+                      'btn-default': true,
+                      'pull-right': true,
+                    })}
+                    onClick={this.handleDisplayParametersColumnClick}>
+                    Paramètres
+                  </button>
+                </p>
+                <BaremeChart
+                  activeVariableCode={this.state.activeVariableCode}
+                  formatNumber={this.props.formatNumber}
+                  onVariableHover={this.handleVariableHover}
+                  onVariableToggle={this.props.onVariableToggle}
+                  onXValuesChange={this.props.onXValuesChange}
+                  variables={variables}
+                  width={this.state.chartColumnWidth}
+                  xMaxValue={this.props.xMaxValue}
+                  xMinValue={this.props.xMinValue}
+                />
+                <p className='text-center well'>
+                  {this.formatHint(variables)}
+                </p>
+              </div>
+            )
+          }
+        </div>
+        <div ref='parametersColumn'>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              Décomposition des variables
+            </div>
+            <div className='panel-body'>
+              <VariablesTree
+                activeVariableCode={this.state.activeVariableCode}
+                displayVariablesColors={true}
+                formatNumber={this.props.formatNumber}
+                hoveredVariableCode={this.state.hoveredVariableCode}
+                negativeColor={this.props.negativeColor}
+                noColorFill={this.props.noColorFill}
+                onVariableHover={this.handleVariableHover}
+                onVariableToggle={this.props.onVariableToggle}
+                positiveColor={this.props.positiveColor}
+                variables={variables}
+              />
+            </div>
+          </div>
+        </div>
+      </TwoColumnsLayout>
     );
   },
 });

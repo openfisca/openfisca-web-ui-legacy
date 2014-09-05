@@ -16,14 +16,16 @@ var Curve = require('./svg/curve'),
 
 var SituateurVisualization = React.createClass({
   propTypes: {
+    aspectRatio: React.PropTypes.number.isRequired,
     curveLabel: React.PropTypes.string.isRequired,
     formatHint: React.PropTypes.func.isRequired,
-    height: React.PropTypes.number.isRequired,
+    height: React.PropTypes.number,
+    labelsFontSize: React.PropTypes.number.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
+    pointColor: React.PropTypes.string.isRequired,
     pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
     value: React.PropTypes.number.isRequired,
-    width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
     xFormatNumber: React.PropTypes.func.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
@@ -33,6 +35,13 @@ var SituateurVisualization = React.createClass({
     yFormatNumber: React.PropTypes.func.isRequired,
     yMaxValue: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
+  },
+  componentDidMount: function() {
+    window.onresize = this.handleLayoutChange;
+    this.handleLayoutChange();
+  },
+  componentWillUnmount: function() {
+    window.onresize = null;
   },
   findXFromY: function(y) {
     var points = this.allPoints;
@@ -83,8 +92,11 @@ var SituateurVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
+      aspectRatio: 4/3,
+      labelsFontSize: 14,
       legendHeight: 30,
       marginRight: 5,
+      pointColor: 'rgb(166, 50, 50)',
       xAxisHeight: 60,
       xMaxValue: 100,
       xSteps: 10,
@@ -95,6 +107,7 @@ var SituateurVisualization = React.createClass({
   getInitialState: function() {
     return {
       snapPoint: null,
+      width: null,
     };
   },
   gridPixelToPoint: function(pixel) {
@@ -119,97 +132,106 @@ var SituateurVisualization = React.createClass({
     }
     this.setState({snapPoint: snapPoint});
   },
+  handleLayoutChange: function() {
+    this.setState({width: this.getDOMNode().offsetWidth});
+  },
   render: function() {
     this.pointsXMaxValue = Math.max(...this.props.points.map(point => point.x));
-    this.gridHeight = this.props.height - this.props.xAxisHeight - this.props.legendHeight;
-    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
     this.lastPoint = {x: this.props.xMaxValue * 0.99, y: this.props.yMaxValue};
     this.allPoints = this.props.points.concat(this.lastPoint);
-    var xValue = this.findXFromY(this.props.value);
-    var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
     return (
       <div>
-        <svg height={this.props.height} width={this.props.width}>
-          <g transform={
-            'translate(' + this.props.yAxisWidth + ', ' + (this.props.height - this.props.xAxisHeight) + ')'
-          }>
-            <HGrid
-              height={this.gridHeight}
-              nbSteps={this.props.yNbSteps}
-              startStep={1}
-              width={this.gridWidth}
-            />
-            <XAxis
-              formatNumber={this.props.xFormatNumber}
-              height={this.props.xAxisHeight}
-              label='% de la population'
-              maxValue={this.props.xMaxValue}
-              unit='%'
-              width={this.gridWidth}
-            />
-          </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.legendHeight + ')'}>
-            <VGrid
-              height={this.gridHeight}
-              nbSteps={this.props.xSteps}
-              startStep={1}
-              width={this.gridWidth}
-            />
-            <YAxis
-              formatNumber={this.props.yFormatNumber}
-              height={this.gridHeight}
-              maxValue={this.props.yMaxValue}
-              nbSteps={this.props.yNbSteps}
-              unit='€'
-              width={this.props.yAxisWidth}
-            />
-            <Curve
-              points={this.props.points}
-              pointToPixel={this.gridPointToPixel}
-              style={{stroke: 'rgb(31, 119, 180)'}}
-            />
-            <Curve
-              points={[this.props.points.last(), this.lastPoint]}
-              pointToPixel={this.gridPointToPixel}
-              style={{
-                stroke: 'rgb(31, 119, 180)',
-                strokeDasharray: '5 5',
-              }}
-            />
-            <Point
-              pointToPixel={this.gridPointToPixel}
-              style={{
-                fill: xValue > this.pointsXMaxValue ? 'none' : 'rgb(166, 50, 50)',
-                stroke: 'rgb(166, 50, 50)',
-              }}
-              x={xValue}
-              y={this.props.value}
-            />
-            <HoverLegend
-              height={this.gridHeight}
-              onHover={this.handleHoverLegendHover}
-              pixelToPoint={this.gridPixelToPoint}
-              pointToPixel={this.gridPointToPixel}
-              pointsXMaxValue={this.pointsXMaxValue}
-              snapPoint={this.state.snapPoint}
-              width={this.gridWidth}
-              xFormatNumber={this.props.xFormatNumber}
-              xMaxValue={this.props.xMaxValue}
-              xSnapValues={xSnapValues}
-              yFormatNumber={this.props.yFormatNumber}
-            />
-          </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', 0)'}>
-            <Legend color='rgb(31, 119, 180)'>{this.props.curveLabel}</Legend>
-            <g transform={'translate(' + 12 * 0.7 * this.props.curveLabel.length + ', 0)'}>
-              <Legend color='rgb(166, 50, 50)'>{this.props.pointLabel}</Legend>
-            </g>
-          </g>
-        </svg>
+        {this.state.width && this.renderSvg()}
         <p className='text-center well'>
           {this.formatHint()}
         </p>
       </div>
+    );
+  },
+  renderSvg: function() {
+    var height = this.props.height || this.state.width / this.props.aspectRatio;
+    this.gridHeight = height - this.props.xAxisHeight - this.props.legendHeight;
+    this.gridWidth = this.state.width - this.props.yAxisWidth - this.props.marginRight;
+    var xValue = this.findXFromY(this.props.value);
+    var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
+    return (
+      <svg height={height} width={this.state.width}>
+        <g transform={`translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`}>
+          <HGrid
+            height={this.gridHeight}
+            nbSteps={this.props.yNbSteps}
+            startStep={1}
+            width={this.gridWidth}
+          />
+          <XAxis
+            formatNumber={this.props.xFormatNumber}
+            height={this.props.xAxisHeight}
+            label='% de la population'
+            labelFontSize={this.props.labelsFontSize}
+            maxValue={this.props.xMaxValue}
+            unit='%'
+            width={this.gridWidth}
+          />
+        </g>
+        <g transform={`translate(${this.props.yAxisWidth}, ${this.props.legendHeight})`}>
+          <VGrid
+            height={this.gridHeight}
+            nbSteps={this.props.xSteps}
+            startStep={1}
+            width={this.gridWidth}
+          />
+          <YAxis
+            formatNumber={this.props.yFormatNumber}
+            height={this.gridHeight}
+            labelFontSize={this.props.labelsFontSize}
+            maxValue={this.props.yMaxValue}
+            nbSteps={this.props.yNbSteps}
+            unit='€'
+            width={this.props.yAxisWidth}
+          />
+          <Curve
+            points={this.props.points}
+            pointToPixel={this.gridPointToPixel}
+            style={{stroke: 'rgb(31, 119, 180)'}}
+          />
+          <Curve
+            points={[this.props.points.last(), this.lastPoint]}
+            pointToPixel={this.gridPointToPixel}
+            style={{
+              stroke: 'rgb(31, 119, 180)',
+              strokeDasharray: '5 5',
+            }}
+          />
+          <Point
+            pointToPixel={this.gridPointToPixel}
+            style={{
+              fill: xValue > this.pointsXMaxValue ? 'none' : this.props.pointColor,
+              stroke: this.props.pointColor,
+            }}
+            x={xValue}
+            y={this.props.value}
+          />
+          <HoverLegend
+            height={this.gridHeight}
+            onHover={this.handleHoverLegendHover}
+            pixelToPoint={this.gridPixelToPoint}
+            pointToPixel={this.gridPointToPixel}
+            pointsXMaxValue={this.pointsXMaxValue}
+            snapPoint={this.state.snapPoint}
+            width={this.gridWidth}
+            xFormatNumber={this.props.xFormatNumber}
+            xMaxValue={this.props.xMaxValue}
+            xSnapValues={xSnapValues}
+            yFormatNumber={this.props.yFormatNumber}
+          />
+        </g>
+        <g transform={`translate(${this.props.yAxisWidth}, 0)`}>
+          <Legend color='rgb(31, 119, 180)'>{this.props.curveLabel}</Legend>
+          <g transform={`translate(${12 * 0.7 * this.props.curveLabel.length}, 0)`}>
+            <Legend color={this.props.pointColor}>{this.props.pointLabel}</Legend>
+          </g>
+        </g>
+      </svg>
     );
   },
 });

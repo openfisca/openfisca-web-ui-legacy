@@ -45,7 +45,7 @@ window.appconfig = ${helpers.base_appconfig(ctx) | n, js};
 
 
 <%def name="body_content()" filter="trim">
-    <div class="container">
+    <div class="container-fluid">
         <%self:modals/>
         <div id="js-modal"></div>
     % if conf['enabled.disclaimer'] and (ctx.session is None or not ctx.session.disclaimer_closed):

@@ -5,13 +5,11 @@ var Lazy = require('lazy.js'),
   React = require('react/addons'),
   TweenState = require('react-tween-state');
 
-var axes = require('../../axes'),
-  HGrid = require('./svg/h-grid'),
+var TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree'),
-  WaterfallBars = require('./svg/waterfall-bars'),
-  WaterfallBarHover = require('./svg/waterfall-bar-hover'),
-  XAxisLabelled = require('./svg/x-axis-labelled'),
-  YAxis = require('./svg/y-axis');
+  WaterfallChart = require('./svg/waterfall-chart');
+
+var cx = React.addons.classSet;
 
 
 var WaterfallVisualization = React.createClass({
@@ -19,33 +17,21 @@ var WaterfallVisualization = React.createClass({
   propTypes: {
     collapsedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
-    height: React.PropTypes.number.isRequired,
-    marginRight: React.PropTypes.number.isRequired,
-    marginTop: React.PropTypes.number.isRequired,
+    labelsFontSize: React.PropTypes.number,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
-    onVariableToggle: React.PropTypes.func,
+    onVariableToggle: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     // variablesTree.values key is a list. This tells which index to use.
     variablesTreeValueIndex: React.PropTypes.number.isRequired,
-    width: React.PropTypes.number.isRequired,
-    xAxisHeight: React.PropTypes.number.isRequired,
-    yAxisWidth: React.PropTypes.number.isRequired,
-    yNbSteps: React.PropTypes.number.isRequired,
   },
-  determineYAxisRange: function(variables) {
-    var maxValue = 0;
-    var minValue = 0;
-    variables.forEach(function(variable) {
-      var value = variable.baseValue + variable.value;
-      if (value > maxValue) {
-        maxValue = value;
-      } else if (value < minValue) {
-        minValue = value;
-      }
-    });
-    return [minValue, maxValue];
+  componentDidMount: function() {
+    window.onresize = this.handleLayoutChange;
+    this.handleLayoutChange();
+  },
+  componentWillUnmount: function() {
+    window.onresize = null;
   },
   formatHint: function(variables) {
     var variable = Lazy(variables).find({code: this.state.activeVariableCode});
@@ -65,34 +51,31 @@ var WaterfallVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      labelsFontSize: 14,
-      marginRight: 10,
-      marginTop: 10,
       negativeColor: '#d9534f', // Bootstrap danger color
       noColorFill: 'gray',
       positiveColor: '#5cb85c', // Bootstrap success color
       variablesTreeValueIndex: 0,
-      xAxisHeight: 100,
-      yAxisWidth: 80,
-      yNbSteps: 8,
     };
   },
   getInitialState: function() {
     return {
       activeVariableCode: null,
-      displaySubtotalThinBars: null,
-      displayVariablesColors: null,
+      chartColumnWidth: null,
+      displayParametersColumn: false,
+      displaySubtotalThinBars: false,
+      displayVariablesColors: false,
       tweenProgress: null,
-      variablesTreeHoveredVariableCode: null,
-      xAxisHoveredVariableCode: null,
     };
+  },
+  handleDisplayParametersColumnClick: function() {
+    this.setState({displayParametersColumn: ! this.state.displayParametersColumn}, this.handleLayoutChange);
+  },
+  handleLayoutChange: function() {
+    var chartColumnNode = this.refs.chartColumn.getDOMNode();
+    this.setState({chartColumnWidth: chartColumnNode.offsetWidth});
   },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
-  },
-  handleVariablesTreeVariableHover: function(variable) {
-    this.setState({variablesTreeHoveredVariableCode: variable ? variable.code : null});
-    this.handleVariableHover(variable);
   },
   handleVariableToggle: function(variable) {
     if (variable.isCollapsed) {
@@ -109,11 +92,6 @@ var WaterfallVisualization = React.createClass({
         }
       },
     });
-    this.setState({xAxisHoveredVariableCode: null});
-  },
-  handleXAxisLabelledVariableHover: function(variable) {
-    this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
-    this.handleVariableHover(variable);
   },
   linearizeVariables: function() {
     // Transform this.props.variablesTree into a list and compute base values for waterfall.
@@ -178,35 +156,9 @@ var WaterfallVisualization = React.createClass({
     var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
     var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
     var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
-    var waterfallBarsVariables = this.state.displaySubtotalThinBars ? displayedVariablesWithSubtotals :
+    var waterfallChartVariables = this.state.displaySubtotalThinBars ? displayedVariablesWithSubtotals :
       displayedVariablesWithoutSubtotals;
     var variablesTreeVariables = displayedVariablesWithSubtotals;
-    var [yAxisMinValue, yAxisMaxValue] = this.determineYAxisRange(variablesWithoutSubtotals);
-    var ySmartValues = axes.smartValues(yAxisMinValue, yAxisMaxValue, this.props.yNbSteps);
-    var xLabels = waterfallBarsVariables.map(variable => {
-      var style = {};
-      var name = variable.shortName;
-      if (variable.isSubtotal) {
-        name = (variable.isCollapsed ? '▶' : '▼') + ' ' + name;
-        if (variable.code === this.state.xAxisHoveredVariableCode) {
-          style.textDecoration = 'underline';
-        }
-      }
-      var props = {
-        onMouseOut: this.state.tweenProgress === null ? this.handleXAxisLabelledVariableHover.bind(null, null) : null,
-        onMouseOver: this.state.tweenProgress === null ? this.handleXAxisLabelledVariableHover.bind(null, variable) :
-          null,
-      };
-      if (this.props.onVariableToggle && variable.isSubtotal) {
-        style.cursor = 'pointer';
-        props.onClick = this.handleVariableToggle.bind(null, variable);
-      }
-      return {name, props, style};
-    });
-    var gridHeight = this.props.height - this.props.xAxisHeight - this.props.marginTop,
-      gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var stepWidth = gridWidth / xLabels.length;
-    var xAxisTransform = `translate(${this.props.yAxisWidth}, ${this.props.height - this.props.xAxisHeight})`;
     var activeVariablesCodes = null;
     if (this.state.activeVariableCode) {
       activeVariablesCodes = [this.state.activeVariableCode];
@@ -214,101 +166,90 @@ var WaterfallVisualization = React.createClass({
         var activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
         activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
       }
-      activeVariablesCodes = activeVariablesCodes.intersection(waterfallBarsVariables.map(_ => _.code));
+      activeVariablesCodes = activeVariablesCodes.intersection(waterfallChartVariables.map(_ => _.code));
     }
     return (
-      <div>
-        <svg height={this.props.height} width={this.props.width}>
-          <g transform={xAxisTransform}>
-            <HGrid
-              height={gridHeight}
-              nbSteps={this.props.yNbSteps}
-              startStep={1}
-              width={gridWidth}
-            />
-          </g>
-          <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
-            <YAxis
-              formatNumber={this.props.formatNumber}
-              height={gridHeight}
-              maxValue={ySmartValues.maxValue}
-              nbSteps={this.props.yNbSteps}
-              unit='€'
-              width={this.props.yAxisWidth}
-            />
-            <WaterfallBars
-              activeVariablesCodes={activeVariablesCodes}
-              displayVariablesColors={this.state.displayVariablesColors}
-              height={gridHeight}
-              maxValue={ySmartValues.maxValue}
-              minValue={ySmartValues.minValue}
-              negativeColor={this.props.negativeColor}
-              noColorFill={this.props.noColorFill}
-              positiveColor={this.props.positiveColor}
-              tweenProgress={this.getTweeningValue('tweenProgress')}
-              variables={waterfallBarsVariables}
-              width={gridWidth}
-            />
-            {
-              this.state.tweenProgress === null && waterfallBarsVariables.map((variable, idx) =>
-                <g key={variable.code} transform={`translate(${stepWidth * idx}, 0)`}>
-                  <WaterfallBarHover
-                    barHeight={gridHeight}
-                    barWidth={stepWidth}
-                    labelHeight={this.props.labelsFontSize * 1.5}
-                    labelWidth={this.props.xAxisHeight}
-                    onHover={this.handleVariableHover}
-                    variable={variable}
-                  />
-                </g>
-              )
-            }
-          </g>
-          <g transform={xAxisTransform}>
-            <XAxisLabelled
-              height={this.props.xAxisHeight}
-              labels={xLabels}
-              labelsFontSize={this.props.labelsFontSize}
-              nbSteps={xLabels.length}
-              width={gridWidth}
-            />
-          </g>
-        </svg>
-        <p className='text-center well'>
-          {this.state.activeVariableCode ? this.formatHint(variablesWithSubtotals) : 'Survolez le graphique'}
-        </p>
-        <VariablesTree
-          activeVariableCode={this.state.activeVariableCode}
-          displayVariablesColors={this.state.displayVariablesColors}
-          formatNumber={this.props.formatNumber}
-          hoveredVariableCode={this.state.variablesTreeHoveredVariableCode}
-          negativeColor={this.props.negativeColor}
-          noColorFill={this.props.noColorFill}
-          positiveColor={this.props.positiveColor}
-          onToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
-          onHover={this.state.tweenProgress === null ? this.handleVariablesTreeVariableHover : null}
-          variables={variablesTreeVariables}
-        />
-        <div className='panel panel-default'>
-          <div className='panel-heading'>
-            Paramètres
-          </div>
-          <div className='panel-body'>
-            <div className='checkbox'>
-              <label>
-                <input checkedLink={this.linkState('displaySubtotalThinBars')} type='checkbox' />
-                Afficher les sous-totaux
-              </label>
+      <TwoColumnsLayout
+        leftComponentRef={'chartColumn'}
+        rightComponentRef={this.state.displayParametersColumn ? 'parametersColumn' : null}>
+        <div ref='chartColumn'>
+          {
+            this.state.chartColumnWidth && (
+              <div>
+                <p className='clearfix'>
+                  <button
+                    className={cx({
+                      active: this.state.displayParametersColumn,
+                      btn: true,
+                      'btn-default': true,
+                      'pull-right': true,
+                    })}
+                    onClick={this.handleDisplayParametersColumnClick}>
+                    Paramètres
+                  </button>
+                </p>
+                <WaterfallChart
+                  activeVariablesCodes={activeVariablesCodes}
+                  displayVariablesColors={this.state.displayVariablesColors}
+                  formatNumber={this.props.formatNumber}
+                  labelsFontSize={this.props.labelsFontSize}
+                  negativeColor={this.props.negativeColor}
+                  noColorFill={this.props.noColorFill}
+                  onVariableHover={this.handleVariableHover}
+                  onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
+                  positiveColor={this.props.positiveColor}
+                  tweenProgress={this.getTweeningValue('tweenProgress')}
+                  variables={waterfallChartVariables}
+                  width={this.state.chartColumnWidth}
+                />
+                <p className='text-center well'>
+                  {this.state.activeVariableCode ? this.formatHint(variablesWithSubtotals) : 'Survolez le graphique'}
+                </p>
+              </div>
+            )
+          }
+        </div>
+        <div ref='parametersColumn'>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              Décomposition des variables
             </div>
-            <div className='checkbox'>
-              <label>
-                <input checkedLink={this.linkState('displayVariablesColors')} type='checkbox' />
-                Afficher les couleurs des variables
-              </label>
+            <div className='panel-body'>
+              <VariablesTree
+                activeVariableCode={this.state.activeVariableCode}
+                displayVariablesColors={this.state.displayVariablesColors}
+                formatNumber={this.props.formatNumber}
+                hoveredVariableCode={this.state.hoveredVariableCode}
+                negativeColor={this.props.negativeColor}
+                noColorFill={this.props.noColorFill}
+                onVariableHover={this.state.tweenProgress === null ? this.handleVariableHover : null}
+                onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
+                positiveColor={this.props.positiveColor}
+                variables={variablesTreeVariables}
+              />
+            </div>
+          </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              Paramètres avancés
+            </div>
+            <div className='panel-body'>
+              <div className='checkbox'>
+                <label>
+                  <input checkedLink={this.linkState('displaySubtotalThinBars')} type='checkbox' />
+                  Afficher les sous-totaux
+                </label>
+              </div>
+              <div className='checkbox'>
+                <label>
+                  <input checkedLink={this.linkState('displayVariablesColors')} type='checkbox' />
+                  Afficher les couleurs des variables
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </TwoColumnsLayout>
     );
   },
 });

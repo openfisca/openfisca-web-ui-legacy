@@ -9,6 +9,7 @@ var VisualizationSelect = require('./visualization-select'),
 
 var VisualizationToolbar = React.createClass({
   propTypes: {
+    isSimulationInProgress: React.PropTypes.bool,
     onVisualizationChange: React.PropTypes.func.isRequired,
     onYearChange: React.PropTypes.func.isRequired,
     visualizationSlug: React.PropTypes.string,
@@ -23,6 +24,11 @@ var VisualizationToolbar = React.createClass({
         <div className="form-group" style={{marginRight: 5}}>
           <YearInput onChange={this.props.onYearChange} value={this.props.year} />
         </div>
+        {
+          this.props.isSimulationInProgress && (
+            <span className="label label-default">Simulation en cours</span>
+          )
+        }
       </div>
     );
   }
