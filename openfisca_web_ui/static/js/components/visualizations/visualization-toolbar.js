@@ -26,7 +26,7 @@ var VisualizationToolbar = React.createClass({
         </div>
         {
           this.props.isSimulationInProgress && (
-            <span className="label label-default">Simulation en cours</span>
+            <span className="label label-default visible-xs-inline">Simulation en cours</span>
           )
         }
       </div>

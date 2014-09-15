@@ -20,6 +20,7 @@ var EditForm = require('./edit-form'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig,
+  cx = React.addons.classSet,
   obj = helpers.obj;
 
 
@@ -244,10 +245,14 @@ var Simulator = React.createClass({
       rightPanel = this.renderVisualizationPanel();
     }
     return (
-      <div className="row">
-        <div className="col-sm-4">
+      <div className='row'>
+        <div className={cx({
+          'col-sm-4': true,
+          'hidden-xs': this.state.editedEntity,
+        })}>
           <TestCaseToolbar
             disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
+            isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
             onRepair={this.handleRepair}
@@ -255,23 +260,24 @@ var Simulator = React.createClass({
           />
           <hr/>
           {
-            this.state.testCase &&
-            <TestCase
-              activeEntityId={this.state.editedEntity && this.state.editedEntity.id}
-              entitiesMetadata={models.entitiesMetadata}
-              errors={this.state.errors}
-              getEntityLabel={models.TestCase.getEntityLabel}
-              onCloseEntity={this.handleEditFormClose}
-              onCreateEntity={this.handleCreateEntity}
-              onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
-              onDeleteEntity={this.handleDeleteEntity}
-              onDeleteIndividu={this.handleDeleteIndividu}
-              onEditEntity={this.state.columns && this.state.columnsTree && this.handleEditEntity}
-              onMoveIndividu={this.handleMoveIndividu}
-              roleLabels={models.roleLabels}
-              suggestions={this.state.suggestions}
-              testCase={this.state.testCase}
-            />
+            this.state.testCase && (
+              <TestCase
+                activeEntityId={this.state.editedEntity && this.state.editedEntity.id}
+                entitiesMetadata={models.entitiesMetadata}
+                errors={this.state.errors}
+                getEntityLabel={models.TestCase.getEntityLabel}
+                onCloseEntity={this.handleEditFormClose}
+                onCreateEntity={this.handleCreateEntity}
+                onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
+                onDeleteEntity={this.handleDeleteEntity}
+                onDeleteIndividu={this.handleDeleteIndividu}
+                onEditEntity={this.state.columns && this.state.columnsTree && this.handleEditEntity}
+                onMoveIndividu={this.handleMoveIndividu}
+                roleLabels={models.roleLabels}
+                suggestions={this.state.suggestions}
+                testCase={this.state.testCase}
+              />
+            )
           }
         </div>
         <div className="col-sm-8">
