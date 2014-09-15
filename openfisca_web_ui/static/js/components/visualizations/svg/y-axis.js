@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react');
 
 
@@ -31,7 +32,9 @@ var YAxis = React.createClass({
     };
   },
   render: function() {
-    var stepRange = (this.props.maxValue - this.props.minValue) / this.props.nbSteps;
+    var range = this.props.maxValue - this.props.minValue;
+    invariant(range > 0, 'range must be positive');
+    var stepRange = range / this.props.nbSteps;
     var stepHeight = this.valueToPixel(stepRange);
     var steps = Lazy.range(this.props.minValue, this.props.maxValue + stepRange, stepRange).toArray();
     var lineStyle = {stroke: this.props.strokeColor, shapeRendering: 'crispedges'};

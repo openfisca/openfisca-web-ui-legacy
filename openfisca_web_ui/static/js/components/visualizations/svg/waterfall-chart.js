@@ -75,6 +75,9 @@ var WaterfallChart = React.createClass({
   },
   render: function() {
     var [yAxisMinValue, yAxisMaxValue] = this.determineYAxisRange(this.props.variables);
+    if (yAxisMaxValue === yAxisMinValue) {
+      yAxisMaxValue = yAxisMinValue + 1;
+    }
     var ySmartValues = axes.smartValues(yAxisMinValue, yAxisMaxValue, this.props.yNbSteps);
     var xLabels = this.props.variables.map(variable => {
       var style = {};
