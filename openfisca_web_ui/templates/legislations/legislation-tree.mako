@@ -203,8 +203,8 @@ html_node_path = strings.slugify("-".join(path))
 dates_set = set()
 for slice in scale.get('slices', []):
     for param in chain(slice.get('threshold', []), slice.get('rate', []), slice.get('base', [])):
-        dates_set.add(param.get('from'))
-        dates_set.add(param.get('to'))
+        dates_set.add(param.get('start'))
+        dates_set.add(param.get('stop'))
 
 dates = sorted(filter(None, [datetime.datetime.strptime(date, '%Y-%m-%d') for date in dates_set]))
 periods = []
@@ -255,8 +255,8 @@ id="${html_node_path}-${period[0].strftime('%Y-%m-%d')}-${period[1].strftime('%Y
                         <td>
                 % for item in slice.get(item_name, []):
 <%
-                    from_date = datetime.datetime.strptime(item.get('from'), '%Y-%m-%d')
-                    to_date = datetime.datetime.strptime(item.get('to'), '%Y-%m-%d')
+                    from_date = datetime.datetime.strptime(item.get('start'), '%Y-%m-%d')
+                    to_date = datetime.datetime.strptime(item.get('stop'), '%Y-%m-%d')
                     from_bool = from_date >= period[0] and from_date <= period[1]
                     to_bool = to_date >= period[1]
 %>\
@@ -296,8 +296,8 @@ id="${html_node_path}-${period[0].strftime('%Y-%m-%d')}-${period[1].strftime('%Y
         % for param in parameter:
             <tr>
                 <td>${param.get('value')}</td>
-                <td>${param.get('from')}</td>
-                <td>${param.get('to')}</td>
+                <td>${param.get('start')}</td>
+                <td>${param.get('stop')}</td>
             </tr>
         % endfor
         </tbody>
