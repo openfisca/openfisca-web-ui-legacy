@@ -31,6 +31,7 @@
     "react": "^0.11.1",
     "react-tween-state": "0.0.2",
     "superagent": "^0.18.0",
+    "typeahead.js": "^0.10.5",
     "uuid": "^1.4.1"
   },
   "devDependencies": {

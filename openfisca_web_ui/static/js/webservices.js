@@ -1,6 +1,7 @@
 'use strict';
 
-var Lazy = require('lazy.js'),
+var $ = require('jquery'),
+  Lazy = require('lazy.js'),
   request = require('superagent');
 
 var helpers = require('./helpers'),
@@ -8,6 +9,27 @@ var helpers = require('./helpers'),
 
 var appconfig = global.appconfig;
 
+
+function fetchCommunes(term, onComplete, onError) {
+  var url = 'http://ou.comarquage.fr/api/v1/autocomplete-territory',
+  data = {
+    kind: ['CommuneOfFrance', 'ArrondissementOfCommuneOfFrance', 'AssociatedCommuneOfFrance'],
+    term: term,
+  };
+  $.ajax({
+    data: data,
+    dataType: 'jsonp',
+    jsonp: 'jsonp',
+    traditional: true,
+    url: url,
+  })
+  .done(function(data) {
+    onComplete(data);
+  })
+  .fail(function(error) {
+    onError(error);
+  });
+}
 
 function fetchCurrentTestCase(onComplete) {
   request
@@ -68,6 +90,7 @@ function patchColumns(columns) {
     return [requiredColumnName, {required: true}];
   }).toObject();
   newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
+  newColumns.depcom.autocomplete = fetchCommunes;
   return newColumns;
 }
 

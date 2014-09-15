@@ -1,13 +1,16 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var $ = require('jquery'),
+  React = require('react'),
+  typeahead = require('typeahead.js');
 
 var CerfaField = require('./cerfa-field');
 
 
 var StringControl = React.createClass({
   propTypes: {
+    autocomplete: React.PropTypes.func,
     cerfaField: React.PropTypes.any,
     default: React.PropTypes.string,
     error: React.PropTypes.string,
@@ -18,6 +21,34 @@ var StringControl = React.createClass({
     suggestion: React.PropTypes.string,
     suggestionIcon: React.PropTypes.component,
     value: React.PropTypes.string,
+  },
+  componentDidMount: function() {
+    if (this.props.autocomplete) {
+      var input = this.refs.input.getDOMNode();
+      $(input)
+      .typeahead({
+        highlight: true,
+        minLength: 1,
+      }, {
+        displayKey: 'main_postal_distribution',
+        source: (query, cb) => {
+          var onComplete = res => cb(res.data.items),
+            onError = error => console.error(error);
+          if (input.value) {
+            this.props.autocomplete(input.value, onComplete, onError);
+          }
+        },
+      })
+      .on(
+        'typeahead:autocompleted typeahead:selected',
+        (event, suggestion, datasetName) =>  this.props.onChange(suggestion.code)
+      );
+    }
+  },
+  componentWillUnmount: function() {
+    if (this.props.autocomplete) {
+      $(this.refs.input.getDOMNode()).typeahead('destroy');
+    }
   },
   handleChange: function(event) {
     this.props.onChange(event.target.value);
@@ -32,6 +63,7 @@ var StringControl = React.createClass({
           id={this.props.name}
           onChange={this.handleChange}
           placeholder={this.props.suggestion || this.props.default}
+          ref='input'
           required={this.props.required}
           type="text"
           value={this.props.value}

@@ -81,6 +81,7 @@ ${conf['app_name']}
 
 <%def name="css()" filter="trim">
     <link href="${urls.get_url(ctx, u'dist/vendor/bootstrap/css/bootstrap.min.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'css/typeahead.css')}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
 </%def>
 

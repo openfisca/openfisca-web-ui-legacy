@@ -61,3 +61,10 @@ automatically:
 
 Bonus: if you set `enabled.livereload = true` in `development.ini`, the "watcher" will reload the page in the browser
 automatically on each JavaScript rebuild.
+
+Dependencies
+------------
+
+* JavaScript dependencies are npm modules declared in `package.json`.
+* CSS dependencies
+	* https://github.com/hyspace/typeahead.js-bootstrap3.less

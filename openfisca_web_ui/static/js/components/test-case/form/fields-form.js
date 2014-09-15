@@ -136,6 +136,7 @@ var FieldsForm = React.createClass({
       case 'String':
         control = (
           <StringControl
+            autocomplete={column.autocomplete}
             cerfaField={cerfaField}
             default={column.default}
             error={error}
