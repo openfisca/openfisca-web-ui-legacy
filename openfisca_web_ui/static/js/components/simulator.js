@@ -307,13 +307,13 @@ var Simulator = React.createClass({
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var nameKey = models.getNameKey(kind);
     var editedValues = obj(nameKey, this.state.editedEntity[nameKey]);
-    var additionalDataValues = {
+    var additionalDataValues = 'depcom' in entity ? {
       depcom: {
         displayedValue: this.state.testCaseAdditionalData.depcom,
         value: entity.depcom,
       },
-    };
-    var values = Lazy(entity).assign(editedValues).assign(additionalDataValues).toObject();
+    } : {};
+    var values = Lazy(entity).assign(editedValues).assign({}).toObject();
     return (
       <EditForm
         onClose={this.handleEditFormClose}
