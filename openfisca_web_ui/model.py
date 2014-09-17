@@ -28,7 +28,6 @@
 
 import collections
 import datetime
-import logging
 import re
 import requests
 import urllib
@@ -37,10 +36,6 @@ import babel.dates
 from biryani1 import strings
 
 from . import conf, conv, objects, urls, wsgihelpers
-
-
-_fields_api_data = None
-email_log = logging.getLogger('email')
 
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
@@ -485,32 +480,6 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
 
 def configure(ctx):
     pass
-
-
-def fetch_fields_api_data():
-    global _fields_api_data
-    try:
-        response = requests.get(conf['api.urls.fields'])
-    except requests.exceptions.ConnectionError as exc:
-        email_log.exception(exc)
-        return
-    if response.ok:
-        _fields_api_data = response.json()
-
-
-def fields_api_data():
-    if _fields_api_data is None:
-        fetch_fields_api_data()
-    return _fields_api_data
-
-
-def find_category_name(column_name, entity_name):
-    """For a given column, find its category name."""
-    entity_categories = fields_api_data()['columns_tree'][entity_name]['children']
-    for entity_category in entity_categories:
-        if column_name in entity_category['children']:
-            return strings.slugify(entity_category['label'], separator = '_')
-    return None
 
 
 def get_user(ctx, check = False):
