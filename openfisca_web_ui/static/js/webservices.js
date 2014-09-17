@@ -117,8 +117,10 @@ function patchColumns(columns) {
     return [requiredColumnName, {required: true}];
   }).toObject();
   newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
-  newColumns.depcom.autocomplete = fetchCommunes;
-  newColumns.depcom.label = 'Lieu de résidence';
+  if ('depcom' in newColumns) {
+    newColumns.depcom.autocomplete = fetchCommunes;
+    newColumns.depcom.label = 'Lieu de résidence';
+  }
   return newColumns;
 }
 
