@@ -7,6 +7,7 @@ var $ = require('jquery'),
 var helpers = require('./helpers'),
   models = require('./models');
 
+
 var appconfig = global.appconfig;
 
 
@@ -31,6 +32,21 @@ function fetchCommunes(term, onComplete, onError) {
   });
 }
 
+function fetchCurrentLocaleMessages(onComplete) {
+  var onError = () => alert('Unable to load language files');
+  request
+    .get(`${appconfig.i18n.baseUrlPath}/${appconfig.i18n.lang}.json`)
+    .on('error', function(error) {
+      onError();
+    })
+    .end(function (res) {
+      if (res.error) {
+        onError();
+      }
+      onComplete(res.body);
+    });
+}
+
 function fetchCurrentTestCase(onComplete) {
   request
     .get(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
@@ -53,7 +69,7 @@ function fetchCurrentTestCase(onComplete) {
 
 function fetchFields(onComplete) {
   request
-    .get(appconfig.api.urls.fields)
+    .get(makeUrl(appconfig.api.urlPaths.fields))
     .on('error', function(error) {
       onComplete({error: error.message});
     })
@@ -72,6 +88,14 @@ function fetchFields(onComplete) {
         onComplete({error: 'invalid fields data: no columns or no columns_tree'});
       }
     });
+}
+
+function makeUrl(path) {
+  var baseUrl = appconfig.api.baseUrlOfCountry;
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+  return baseUrl + path;
 }
 
 function patchColumns(columns) {
@@ -127,7 +151,7 @@ function repair(testCase, year, onComplete) {
     validate: true,
   };
   request
-    .post(appconfig.api.urls.simulate)
+    .post(makeUrl(appconfig.api.urlPaths.simulate))
     .send(data)
     .on('error', function(error) {
       onComplete({error: error.message});
@@ -185,7 +209,7 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     data.decomposition = decomposition;
   }
   request
-    .post(appconfig.api.urls.simulate)
+    .post(makeUrl(appconfig.api.urlPaths.simulate))
     .send(data)
     .on('error', function(error) {
       onComplete({error: error.message});
@@ -203,4 +227,4 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     });
 }
 
-module.exports = {fetchCurrentTestCase, fetchFields, repair, saveCurrentTestCase, simulate};
+module.exports = {fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchFields, repair, saveCurrentTestCase, simulate};

@@ -5,6 +5,7 @@ var deepEqual = require('deep-equal'),
   invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   React = require('react'),
+  ReactIntlMixin = require('react-intl'),
   shallowEqual = require('react/lib/shallowEqual'),
   uuid = require('uuid');
 
@@ -25,6 +26,7 @@ var appconfig = global.appconfig,
 
 
 var Simulator = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     baremeStepsX: React.PropTypes.number.isRequired,
     baremeVariableCode: React.PropTypes.string.isRequired,
@@ -315,7 +317,7 @@ var Simulator = React.createClass({
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={'Éditer ' + entityLabel}>
+        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {label: entityLabel})}>
         <FieldsForm
           categories={categories}
           errors={errors}

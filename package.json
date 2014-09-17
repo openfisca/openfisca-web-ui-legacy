@@ -29,6 +29,7 @@
     "jquery": "^2.1.1",
     "lazy.js": "git+https://github.com/dtao/lazy.js.git",
     "react": "^0.11.1",
+    "react-intl": "^1.0.0-rc-1",
     "react-tween-state": "0.0.2",
     "superagent": "^0.18.0",
     "typeahead.js": "^0.10.5",

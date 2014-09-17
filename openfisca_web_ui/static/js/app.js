@@ -4,6 +4,8 @@
 
 var React = require('react');
 
+var webservices = require('./webservices');
+
 
 var appconfig = global.appconfig;
 
@@ -44,9 +46,11 @@ function init() {
     legislation.init(enabledModules.legislation);
   }
   if (enabledModules.situationForm) {
-    var Simulator = require('./components/simulator');
-    var mountNode = document.getElementById('simulator-container');
-    React.renderComponent(<Simulator />, mountNode);
+    webservices.fetchCurrentLocaleMessages(messages => {
+      var Simulator = require('./components/simulator'),
+        mountNode = document.getElementById('simulator-container');
+      React.renderComponent(<Simulator messages={messages} />, mountNode);
+    });
   }
 }
 

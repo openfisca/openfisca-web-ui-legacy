@@ -1,12 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var React = require('react/addons'),
+  ReactIntlMixin = require('react-intl');
 
 var cx = React.addons.classSet;
 
 
 var TestCaseToolbar = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     disableSimulate: React.PropTypes.bool,
     displayRepairMenuItem: React.PropTypes.bool,
@@ -31,7 +33,7 @@ var TestCaseToolbar = React.createClass({
             disabled={this.props.disableSimulate}
             onClick={this.props.onSimulate}
             type="button">
-            Simuler
+            {this.getIntlMessage('simulate')}
           </button>
           <button
             className={cx('btn', 'btn-primary', 'dropdown-toggle')}

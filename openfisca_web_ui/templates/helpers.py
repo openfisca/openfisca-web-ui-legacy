@@ -68,6 +68,10 @@ def base_appconfig(ctx):
     appconfig = {
         'debug': conf['debug'],
         'enabledModules': enabled_modules,
+        'i18n': {
+            'baseUrlPath': urls.get_url(ctx, 'i18n'),
+            'lang': ctx.lang[0],
+            },
         }
     return appconfig
 
@@ -75,9 +79,11 @@ def base_appconfig(ctx):
 def index_appconfig(ctx):
     appconfig = base_appconfig(ctx)
     appconfig['api'] = {
-        'urls': {
-            'fields': conf['api.urls.fields'],
-            'simulate': conf['api.urls.simulate'],
+        'baseUrlOfCountry': conf['api.baseUrls.{}'.format(ctx.country)],
+        'urlPaths': {
+            'calculate': conf['api.urlPaths.calculate'],
+            'fields': conf['api.urlPaths.fields'],
+            'simulate': conf['api.urlPaths.simulate'],
             },
         }
     appconfig['constants'] = {
@@ -101,13 +107,6 @@ def index_appconfig(ctx):
             },
         })
     appconfig['www.url'] = conf['www.url']
-    appconfig['api'] = {
-        'urls': {
-            'calculate': conf['api.urls.calculate'],
-            'fields': conf['api.urls.fields'],
-            'simulate': conf['api.urls.simulate'],
-            },
-        }
     return appconfig
 
 

@@ -50,22 +50,18 @@ def load_environment(global_conf, app_conf):
     conf.update(strings.deep_decode(app_conf))
     conf.update(conv.check(conv.struct(
         {
-            'api.urls.calculate': conv.pipe(
+            'api.baseUrls.france': conv.pipe(
                 conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
                 conv.not_none,
                 ),
-            'api.urls.fields': conv.pipe(
+            'api.baseUrls.tunisia': conv.pipe(
                 conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
                 conv.not_none,
                 ),
-            'api.urls.legislations': conv.pipe(
-                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
-                conv.not_none,
-                ),
-            'api.urls.simulate': conv.pipe(
-                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
-                conv.not_none,
-                ),
+            'api.urlPaths.calculate': conv.pipe(conv.cleanup_line, conv.not_none),
+            'api.urlPaths.fields': conv.pipe(conv.cleanup_line, conv.not_none),
+            'api.urlPaths.legislations': conv.pipe(conv.cleanup_line, conv.not_none),
+            'api.urlPaths.simulate': conv.pipe(conv.cleanup_line, conv.not_none),
             'app_conf': conv.set_value(app_conf),
             'app_dir': conv.set_value(app_dir),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('OpenFisca')),
@@ -78,6 +74,24 @@ def load_environment(global_conf, app_conf):
             'database.name': conv.default('openfisca_web_ui'),
             'database.port': conv.pipe(conv.input_to_int, conv.default(27017)),
             'debug': conv.pipe(conv.guess_bool, conv.default(False)),
+            'default_country': conv.pipe(
+                conv.input_to_slug,
+                conv.test_in([
+                    u'france',
+                    u'tunisia',
+                    ]),
+                conv.default(u'france'),
+                ),
+            'default_language': conv.pipe(
+                conv.input_to_slug,
+                conv.test_in([
+                    u'ar',
+                    u'en',
+                    u'fr',
+                    ]),
+                conv.default(u'fr'),
+                ),
+
             'enabled.auth': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.charts.locating': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.disclaimer': conv.pipe(conv.guess_bool, conv.default(True)),
