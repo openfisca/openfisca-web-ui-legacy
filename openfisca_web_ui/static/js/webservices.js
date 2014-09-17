@@ -154,20 +154,18 @@ function repair(testCase, year, onComplete) {
     });
 }
 
-function saveCurrentTestCase(testCase, onComplete) {
-  var data = {test_case: testCase}; // jshint ignore:line
+function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
   request
     .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
-    .send(data)
+    .send({
+      test_case: testCase, // jshint ignore:line
+      test_case_additional_data: testCaseAdditionalData, // jshint ignore:line
+    })
     .on('error', function(error) {
-      if (onComplete) {
-        onComplete({error: error.message});
-      }
+      onComplete({error: error});
     })
     .end(function(res) {
-      if (onComplete) {
-        onComplete(res.error ? res : res.body);
-      }
+      onComplete(res.error ? res : res.body);
     });
 }
 

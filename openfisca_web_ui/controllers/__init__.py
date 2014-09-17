@@ -104,14 +104,12 @@ def make_router():
         (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/test_cases(?=/|$)', test_cases.route_api1_class),
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
+        (('GET', 'POST'), '^/logout/?$', auth.logout),
         (None, '^/test_cases(?=/|$)', test_cases.route_class),
         ('GET', '^/terms/?$', terms),
         ]
     if conf['enabled.auth']:
-        routings.extend([
-            ('POST', '^/login/?$', auth.login),
-            (('GET', 'POST'), '^/logout/?$', auth.logout),
-            ])
+        routings.append(('POST', '^/login/?$', auth.login))
         if conf['debug']:
             routings.extend([
                 ('GET', '^/login/dummy-admin?$', auth.dummy_admin),

@@ -175,4 +175,6 @@ def logout(req):
                 httponly = True,
                 secure = req.scheme == 'https',
                 )
-    return wsgihelpers.no_content(ctx) if req.is_xhr else templates.render(ctx, '/logout.mako')
+    return wsgihelpers.no_content(ctx) \
+        if req.is_xhr or not conf['enabled.auth'] \
+        else templates.render(ctx, '/logout.mako')

@@ -356,31 +356,39 @@ var Simulator = React.createClass({
       );
     }
   },
-  repair: function(testCase) {
-    webservices.repair(testCase || this.state.testCase, this.state.year, this.repairCompleted);
-  },
-  repairCompleted: function(data) {
-    var errors = data.errors,
-      originalTestCase = data.originalTestCase,
-      suggestions = data.suggestions,
-      testCase = data.testCase;
-    var changeset = {
-      errors: errors,
-      suggestions: suggestions,
-    };
-    if (errors) {
-      changeset.simulationResult = null;
-      if (originalTestCase) {
-        webservices.saveCurrentTestCase(originalTestCase);
-      }
-    } else if (testCase) {
-      var newTestCase = models.TestCase.withEntitiesNamesFilled(testCase);
-      changeset.testCase = newTestCase;
-      webservices.saveCurrentTestCase(newTestCase);
+  repair: function(testCase, testCaseAdditionalData) {
+    var originalTestCase = testCase || this.state.testCase;
+    if ( ! testCaseAdditionalData) {
+      testCaseAdditionalData = this.state.testCaseAdditionalData;
     }
-    this.setState(changeset, function() {
-      if ( ! this.state.errors) {
-        this.simulate();
+    webservices.repair(originalTestCase, this.state.year, data => {
+      var {errors, suggestions} = data,
+        repairedTestCase = data.testCase;
+      var changeset = {errors, suggestions};
+      var saveComplete = () => {
+        this.setState(changeset, () => {
+          if ( ! errors) {
+            this.simulate();
+          }
+        });
+      };
+      if (errors) {
+        changeset.simulationResult = null;
+        this.save(originalTestCase, testCaseAdditionalData, saveComplete);
+      } else if (repairedTestCase) {
+        var newTestCase = models.TestCase.withEntitiesNamesFilled(repairedTestCase);
+        changeset.testCase = newTestCase;
+        this.save(newTestCase, testCaseAdditionalData, saveComplete);
+      }
+    });
+  },
+  save: function (testCase, testCaseAdditionalData, onComplete) {
+    webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
+      if (data && data.unauthorized) {
+        alert('Votre session a expiré. La page va être rechargée avec une situation vierge.');
+        window.location.reload();
+      } else {
+        onComplete();
       }
     });
   },
