@@ -116,18 +116,14 @@ var Simulator = React.createClass({
     var message = 'Supprimer ' + entityLabel + ' ?'; // jshint ignore:line
     if (confirm(message)) {
       var newTestCase = models.TestCase.withoutEntity(kind, id, this.state.testCase);
-      this.setState({testCase: newTestCase}, function() {
-        this.repair();
-      });
+      this.setState({testCase: newTestCase}, this.repair);
     }
   },
   handleDeleteIndividu: function(id) {
     var message = `Supprimer ${this.state.testCase.individus[id].nom_individu} ?`; // jshint ignore:line
     if (confirm(message)) {
       var newTestCase = models.TestCase.withoutIndividu(id, this.state.testCase);
-      this.setState({testCase: newTestCase}, function() {
-        this.repair();
-      });
+      this.setState({testCase: newTestCase}, this.repair);
     }
   },
   handleEditEntity: function(kind, id) {
@@ -193,7 +189,7 @@ var Simulator = React.createClass({
       if (this.state.editedEntity) {
         this.setState({editedEntity: null});
       }
-      this.repair(initialTestCase);
+      this.repair(initialTestCase, null);
     }
   },
   handleVisualizationChange: function(slug) {
@@ -204,9 +200,7 @@ var Simulator = React.createClass({
       this.setState(changeset);
     } else {
       changeset.simulationResult = null;
-      this.setState(changeset, function() {
-        this.simulate();
-      });
+      this.setState(changeset, this.simulate);
     }
   },
   handleVisualizationStateChange: function(visualizationState) {
