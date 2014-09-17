@@ -43,7 +43,10 @@ function fetchCurrentTestCase(onComplete) {
       } else if (res.error) {
         onComplete(res);
       } else {
-        onComplete(res.body);
+        onComplete({
+          testCase: res.body.test_case, // jshint ignore:line
+          testCaseAdditionalData: res.body.test_case_additional_data, // jshint ignore:line
+        });
       }
     });
 }
@@ -91,6 +94,7 @@ function patchColumns(columns) {
   }).toObject();
   newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
   newColumns.depcom.autocomplete = fetchCommunes;
+  newColumns.depcom.label = 'Lieu de résidence';
   return newColumns;
 }
 
@@ -132,7 +136,6 @@ function repair(testCase, year, onComplete) {
       if (res.body && res.body.error) {
         onComplete({
           errors: res.body.error.errors[0].scenarios['0'].test_case, // jshint ignore:line
-          originalTestCase: res.body.params.scenarios[0].test_case, // jshint ignore:line
           suggestions: null,
         });
       } else if (res.error) {
@@ -146,7 +149,6 @@ function repair(testCase, year, onComplete) {
         testCase = patchValuesForColumns(testCase);
         onComplete({
           errors: null,
-          originalTestCase: res.body.params.scenarios[0].test_case, // jshint ignore:line
           suggestions: suggestions,
           testCase: testCase,
         });

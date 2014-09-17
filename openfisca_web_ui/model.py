@@ -382,6 +382,7 @@ class Status(objects.Mapper, objects.Wrapper):
 
 
 class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):
+    additional_api_data = None
     api_data = None
     author_id = None
     collection_name = 'test_cases'

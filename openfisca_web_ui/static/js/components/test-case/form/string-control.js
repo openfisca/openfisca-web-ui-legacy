@@ -20,7 +20,13 @@ var StringControl = React.createClass({
     required: React.PropTypes.bool,
     suggestion: React.PropTypes.string,
     suggestionIcon: React.PropTypes.component,
-    value: React.PropTypes.string,
+    value: React.PropTypes.oneOfType([
+      React.PropTypes.string,
+      React.PropTypes.shape({
+        displayedValue: React.PropTypes.string,
+        value: React.PropTypes.string,
+      }),
+    ]),
   },
   componentDidMount: function() {
     if (this.props.autocomplete) {
@@ -41,7 +47,10 @@ var StringControl = React.createClass({
       })
       .on(
         'typeahead:autocompleted typeahead:selected',
-        (event, suggestion, datasetName) =>  this.props.onChange(suggestion.code)
+        (event, suggestion, datasetName) =>  this.props.onChange({
+          displayedValue: suggestion.main_postal_distribution,
+          value: suggestion.code,
+        })
       );
     }
   },
@@ -51,7 +60,8 @@ var StringControl = React.createClass({
     }
   },
   handleChange: function(event) {
-    this.props.onChange(event.target.value);
+    var value = event.target.value;
+    this.props.onChange(this.props.autocomplete ? {value} : value);
   },
   render: function() {
     return (
@@ -66,7 +76,7 @@ var StringControl = React.createClass({
           ref='input'
           required={this.props.required}
           type="text"
-          value={this.props.value}
+          value={this.props.autocomplete ? this.props.value && this.props.value.displayedValue : this.props.value}
         />
         {
           this.props.cerfaField && (

@@ -44,9 +44,10 @@ var Simulator = React.createClass({
       newState = Lazy(this.state).assign({testCase: null}).toObject();
       this.setState(newState);
     } else {
-      newState = Lazy(this.state).assign({testCase: data}).toObject();
+      var {testCase, testCaseAdditionalData} = data;
+      newState = Lazy(this.state).assign({testCase, testCaseAdditionalData}).toObject();
       this.setState(newState, function() {
-        this.repair(data || models.TestCase.getInitialTestCase());
+        this.repair(testCase || models.TestCase.getInitialTestCase(), testCaseAdditionalData);
       });
     }
   },
@@ -84,6 +85,7 @@ var Simulator = React.createClass({
       simulationResult: null,
       suggestions: null,
       testCase: null,
+      testCaseAdditionalData: null,
       visualizationSlug: this.props.defaultVisualizationSlug,
       year: appconfig.constants.defaultYear,
     };
@@ -144,15 +146,22 @@ var Simulator = React.createClass({
     }
     this.setState(changeset, this.repair);
   },
-  handleFieldsFormChange: function(kind, id, columnName, value) {
+  handleFieldsFormChange: function(kind, id, column, value) {
     var nameKey = models.getNameKey(kind);
-    if (columnName === nameKey) {
-      var newEditedEntity = Lazy(this.state.editedEntity).assign(obj(columnName, value)).toObject();
+    if (column.name === nameKey) {
+      var newEditedEntity = Lazy(this.state.editedEntity).assign(obj(column.name, value)).toObject();
       this.setState({editedEntity: newEditedEntity});
     } else {
-      var newValues = Lazy(this.state.testCase[kind][id]).assign(obj(columnName, value)).toObject();
+      var newValue = column.autocomplete ? value.value : value;
+      var newValues = Lazy(this.state.testCase[kind][id]).assign(obj(column.name, newValue)).toObject();
       var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newValues);
-      this.setState({testCase: newTestCase}, ! this.state.editedEntity && this.repair);
+      var changeset = {testCase: newTestCase};
+      if (column.autocomplete) {
+        var newTestCaseAdditionalData = Lazy(this.state.testCaseAdditionalData)
+          .assign(obj(column.name, value.displayedValue)).toObject();
+        changeset.testCaseAdditionalData = newTestCaseAdditionalData;
+      }
+      this.setState(changeset);
     }
   },
   handleMoveIndividu: function(id) {
@@ -302,7 +311,13 @@ var Simulator = React.createClass({
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var nameKey = models.getNameKey(kind);
     var editedValues = obj(nameKey, this.state.editedEntity[nameKey]);
-    var values = Lazy(entity).assign(editedValues).toObject();
+    var additionalDataValues = {
+      depcom: {
+        displayedValue: this.state.testCaseAdditionalData.depcom,
+        value: entity.depcom,
+      },
+    };
+    var values = Lazy(entity).assign(editedValues).assign(additionalDataValues).toObject();
     return (
       <EditForm
         onClose={this.handleEditFormClose}
