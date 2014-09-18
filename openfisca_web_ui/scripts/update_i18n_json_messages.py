@@ -33,6 +33,7 @@ Since there is no gettext equivalent this script is useful.
 
 
 import argparse
+from collections import OrderedDict
 import json
 import logging
 import os
@@ -77,8 +78,9 @@ def main():
     for key, reference_message in reference_messages.iteritems():
         if key not in messages:
             messages[key] = u'{} {}'.format(fuzzy_tag, reference_message)
+    messages = OrderedDict(sorted(messages.iteritems()))  # Sort keys alphabetically.
     output = json.dumps(messages, encoding = 'utf-8', ensure_ascii = False, indent = 2,
-        sort_keys = True).encode('utf-8')
+        separators = (',', ': ')).encode('utf-8')
     if args.inplace:
         with open(language_file_path, 'w') as language_file:
             language_file.write(output)
