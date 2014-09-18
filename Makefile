@@ -27,5 +27,9 @@ test:
 	python setup.py test
 	./node_modules/.bin/jasmine-node openfisca_web_ui/static/js/spec/
 
+update-i18n:
+	./openfisca_web_ui/scripts/update_i18n_json_messages.py --inplace ar fr
+	./openfisca_web_ui/scripts/update_i18n_json_messages.py --inplace en fr
+
 watch:
 	./node_modules/.bin/gulp watch
