@@ -219,7 +219,7 @@ ${conf['app_name']}
                 </button>
                 <a class="navbar-brand" href="/">
                     <%self:brand/>
-                    <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'pre-alpha')}</span>
+                    <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'beta')}</span>
                 </a>
             </div>
             <div class="collapse navbar-collapse" id="topbar-collapse">

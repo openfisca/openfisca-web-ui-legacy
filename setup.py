@@ -31,7 +31,7 @@ from setuptools import setup, find_packages
 
 
 classifiers = """\
-Development Status :: 2 - Pre-Alpha
+Development Status :: 4 - Beta
 Environment :: Web Environment
 License :: OSI Approved :: GNU Affero General Public License v3
 Operating System :: POSIX

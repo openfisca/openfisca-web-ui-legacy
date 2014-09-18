@@ -231,8 +231,8 @@ msgid "debug"
 msgstr "debug"
 
 #: openfisca_web_ui/templates/site.mako:215
-msgid "pre-alpha"
-msgstr "pre-alpha"
+msgid "beta"
+msgstr "beta"
 
 #: openfisca_web_ui/templates/site.mako:234
 msgid "Administration"
