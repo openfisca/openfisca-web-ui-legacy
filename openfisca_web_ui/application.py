@@ -41,7 +41,7 @@ from . import conf, contexts, controllers, environment, model, urls
 country_re = re.compile('^/(?P<country>france|tunisia)(?=/|$)')
 lang_re_by_country = dict(
     france = re.compile('^/(?P<lang>en|fr)(?=/|$)'),
-    tunisia = re.compile('^/(?P<lang>ar|fr)(?=/|$)'),
+    tunisia = re.compile('^/(?P<lang>ar|en|fr)(?=/|$)'),
     )
 log = logging.getLogger(__name__)
 percent_encoding_re = re.compile('%[\dA-Fa-f]{2}')
