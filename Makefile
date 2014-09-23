@@ -17,6 +17,9 @@ clean:
 	find -name '*.pyc' -exec rm \{\} \;
 	./node_modules/.bin/gulp clean
 
+ctags:
+	ctags --recurse=yes --exclude=node_modules --exclude=openfisca_web_ui/static/dist .
+
 flake8: clean
 	flake8 --exclude node_modules
 
