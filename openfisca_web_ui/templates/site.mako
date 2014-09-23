@@ -190,6 +190,7 @@ ${conf['app_name']}
 % endif
     <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js')}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js')}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js')}"></script>
     <script>
         <%self:appconfig_script/>

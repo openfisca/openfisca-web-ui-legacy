@@ -19,6 +19,7 @@ var distDir = staticDir + '/dist';
 var vendorJsFiles = [
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
+  './node_modules/es6ify/node_modules/traceur/bin/traceur-runtime.js',
 ];
 var vendorDir = distDir + '/vendor',
   vendorBootstrapDir = vendorDir + '/bootstrap';
@@ -29,13 +30,9 @@ function buildScripts(entryFile, options) {
     watch = options && options.watch;
   var bundlerConstructor = options && watch ? watchify : browserify;
   var bundler = bundlerConstructor(entryFile);
-  bundler.add(require('es6ify').runtime); // Needed by some traceur es6 transformations.
   function rebundle() {
-    var stream = bundler.bundle({debug: debug});
-    if (watch) {
-      stream = stream.on('error', handleError);
-    }
-    stream = stream
+    var stream = bundler.bundle({debug: debug})
+      .on('error', handleError)
       .pipe(source('bundle.js'))
       .pipe(gulp.dest(distDir));
     return stream;
