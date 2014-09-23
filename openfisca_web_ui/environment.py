@@ -59,6 +59,7 @@ def load_environment(global_conf, app_conf):
                 conv.not_none,
                 ),
             'api.urlPaths.calculate': conv.pipe(conv.cleanup_line, conv.not_none),
+            'api.urlPaths.entities': conv.pipe(conv.cleanup_line, conv.not_none),
             'api.urlPaths.fields': conv.pipe(conv.cleanup_line, conv.not_none),
             'api.urlPaths.legislations': conv.pipe(conv.cleanup_line, conv.not_none),
             'api.urlPaths.simulate': conv.pipe(conv.cleanup_line, conv.not_none),

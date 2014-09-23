@@ -25,9 +25,13 @@ jshint: clean
 
 test:
 	python setup.py test
-	./node_modules/.bin/jasmine-node openfisca_web_ui/static/js/spec/
 
-update-i18n:
+update-i18n: update-i18n-js update-i18n-python
+
+update-i18n-python:
+	python setup.py extract_messages update_catalog
+
+update-i18n-js:
 	./openfisca_web_ui/scripts/update_i18n_json_messages.py --inplace ar fr
 	./openfisca_web_ui/scripts/update_i18n_json_messages.py --inplace en fr
 

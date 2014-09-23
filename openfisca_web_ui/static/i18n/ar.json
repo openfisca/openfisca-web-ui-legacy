@@ -1,4 +1,7 @@
 {
+  "addEntity:familles": "@nonTranslated Ajouter une famille",
+  "addEntity:foyers_fiscaux": "@nonTranslated Ajouter une déclaration d'impôt",
+  "addEntity:menages": "@nonTranslated Ajouter un logement principal",
   "editFormTitle": "{label} حرر",
   "simulate": "حسب"
 }

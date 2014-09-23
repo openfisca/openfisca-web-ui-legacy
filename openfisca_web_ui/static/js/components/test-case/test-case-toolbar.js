@@ -12,6 +12,8 @@ var TestCaseToolbar = React.createClass({
   propTypes: {
     disableSimulate: React.PropTypes.bool,
     displayRepairMenuItem: React.PropTypes.bool,
+    entitiesMetadata: React.PropTypes.object.isRequired,
+    getEntitiesKinds: React.PropTypes.func.isRequired,
     isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
     onReset: React.PropTypes.func.isRequired,
@@ -80,27 +82,18 @@ var TestCaseToolbar = React.createClass({
             </li>
             <li className="divider" role="presentation"></li>
             <li role="presentation">
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onCreateEntity('familles'); }}
-                role="menuitem"
-                tabIndex="-1">
-                Ajouter une famille
-              </a>
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onCreateEntity('foyers_fiscaux'); }}
-                role="menuitem"
-                tabIndex="-1">
-                Ajouter une déclaration d'impôt
-              </a>
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onCreateEntity('menages'); }}
-                role="menuitem"
-                tabIndex="-1">
-                Ajouter un logement principal
-              </a>
+              {
+                this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => (
+                  <a
+                    href="#"
+                    key={kind}
+                    onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}
+                    role="menuitem"
+                    tabIndex="-1">
+                    {this.getIntlMessage(`addEntity:${kind}`)}
+                  </a>
+                ))
+              }
             </li>
           </ul>
         </div>

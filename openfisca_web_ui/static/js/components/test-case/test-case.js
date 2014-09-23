@@ -3,7 +3,8 @@
 
 var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var Entity = require('./entity'),
   helpers = require('../../helpers'),
@@ -12,10 +13,12 @@ var Entity = require('./entity'),
 
 
 var TestCase = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     activeEntityId: React.PropTypes.string,
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
+    getEntitiesKinds: React.PropTypes.func.isRequired,
     getEntityLabel: React.PropTypes.func.isRequired,
     onCloseEntity: React.PropTypes.func.isRequired,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
@@ -23,7 +26,6 @@ var TestCase = React.createClass({
     onDeleteIndividu: React.PropTypes.func.isRequired,
     onEditEntity: React.PropTypes.func,
     onMoveIndividu: React.PropTypes.func.isRequired,
-    roleLabels: React.PropTypes.object.isRequired,
     suggestions: React.PropTypes.object,
     testCase: React.PropTypes.object.isRequired,
   },
@@ -35,8 +37,7 @@ var TestCase = React.createClass({
     }
   },
   render: function() {
-    var entitiesMetadata = this.props.entitiesMetadata;
-    var kinds = Object.keys(entitiesMetadata);
+    var kinds = this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
     return (
       <div>
         {
@@ -45,7 +46,7 @@ var TestCase = React.createClass({
               return Lazy(this.props.testCase[kind])
                 .map((entity, entityId) => Lazy(entity).assign({
                   id: entityId,
-                  label: this.props.getEntityLabel(kind, entity),
+                  label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
                 }).toObject())
                 .sortBy('label')
                 .map(entity =>
@@ -57,8 +58,8 @@ var TestCase = React.createClass({
                     onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}
                     onEdit={this.handleEdit.bind(null, kind, entity.id)}>
                     {
-                      entitiesMetadata[kind].roles.map(role => {
-                        var maxCardinality = entitiesMetadata[kind].maxCardinality[role];
+                      this.props.entitiesMetadata[kind].roles.map(role => {
+                        var maxCardinality = this.props.entitiesMetadata[kind].maxCardinalityByRoleKey[role];
                         var renderIndividu = individuId => {
                           invariant(individuId in this.props.testCase.individus,
                             'individuId is not in testCase.individus');
@@ -84,7 +85,7 @@ var TestCase = React.createClass({
                           <Role
                             error={error}
                             key={role}
-                            label={this.props.roleLabels[role]}
+                            label={this.props.entitiesMetadata[kind].labelByRoleKey[role]}
                             maxCardinality={maxCardinality}
                             onCreateIndividuInEntity={
                               this.props.onCreateIndividuInEntity.bind(null, kind, entity.id, role)
@@ -104,7 +105,7 @@ var TestCase = React.createClass({
                 .concat(
                   <p style={{marginBottom: 20}}>
                     <a href='#' onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}>
-                      {entitiesMetadata[kind].createMessage}
+                      {this.getIntlMessage(`addEntity:${kind}`)}
                     </a>
                   </p>
                 )

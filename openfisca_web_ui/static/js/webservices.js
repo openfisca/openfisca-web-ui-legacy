@@ -33,7 +33,8 @@ function fetchCommunes(term, onComplete, onError) {
 }
 
 function fetchCurrentLocaleMessages(onComplete) {
-  var onError = () => alert('Unable to load language files');
+  // TODO Throw exception, caught by window.onerror.
+  var onError = () => alert('Error: unable to load language files.');
   request
     .get(`${appconfig.i18n.baseUrlPath}/${appconfig.i18n.lang}.json`)
     .on('error', function(error) {
@@ -67,7 +68,23 @@ function fetchCurrentTestCase(onComplete) {
     });
 }
 
-function fetchFields(onComplete) {
+function fetchEntitiesMetadata(onComplete) {
+  // TODO Throw exception, caught by window.onerror.
+  var onError = () => alert('Error: unable to entities metadata.');
+  request
+    .get(makeUrl(appconfig.api.urlPaths.entities))
+    .on('error', function(error) {
+      onError();
+    })
+    .end(function (res) {
+      if (res.error) {
+        onError();
+      }
+      onComplete(res.body);
+    });
+}
+
+function fetchFields(entitiesMetadata, onComplete) {
   request
     .get(makeUrl(appconfig.api.urlPaths.fields))
     .on('error', function(error) {
@@ -79,11 +96,10 @@ function fetchFields(onComplete) {
       } else if (res.error) {
         onComplete(res);
       } else if (res.body && 'columns' in res.body && 'columns_tree' in res.body) {
-        var data = {
-          columns: patchColumns(res.body.columns),
+        onComplete({
+          columns: patchColumns(res.body.columns, entitiesMetadata),
           columnsTree: res.body.columns_tree, // jshint ignore:line
-        };
-        onComplete(data);
+        });
       } else {
         onComplete({error: 'invalid fields data: no columns or no columns_tree'});
       }
@@ -98,7 +114,7 @@ function makeUrl(path) {
   return baseUrl + path;
 }
 
-function patchColumns(columns) {
+function patchColumns(columns, entitiesMetadata) {
   // Patch columns definitions to match UI specificities.
   var birth = columns.birth;
   var newColumns = {
@@ -111,11 +127,9 @@ function patchColumns(columns) {
       val_type: 'year', // jshint ignore:line
     },
   };
-  var entitiesNameKeys = Lazy(models.entitiesMetadata).pluck('nameKey').toArray();
-  var requiredColumnNames = ['nom_individu'].concat(entitiesNameKeys);
-  var requiredColumns = Lazy(requiredColumnNames).map(function(requiredColumnName) {
-    return [requiredColumnName, {required: true}];
-  }).toObject();
+  var entitiesNameKeys = Lazy(entitiesMetadata).pluck('nameKey').toArray();
+  var requiredColumns = Lazy(entitiesNameKeys).map(requiredColumnName => [requiredColumnName, {required: true}])
+    .toObject();
   newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
   if ('depcom' in newColumns) {
     newColumns.depcom.autocomplete = fetchCommunes;
@@ -229,4 +243,7 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     });
 }
 
-module.exports = {fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchFields, repair, saveCurrentTestCase, simulate};
+module.exports = {
+  fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchEntitiesMetadata, fetchFields, repair, saveCurrentTestCase,
+  simulate,
+};

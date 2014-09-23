@@ -1,4 +1,7 @@
 {
+  "addEntity:familles": "Ajouter une famille",
+  "addEntity:foyers_fiscaux": "Ajouter une déclaration d'impôt",
+  "addEntity:menages": "Ajouter un logement principal",
   "editFormTitle": "Éditer {label}",
   "simulate": "Simuler"
 }

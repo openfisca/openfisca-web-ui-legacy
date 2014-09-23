@@ -26,7 +26,7 @@
 
 """
 Update an i18n JSON file, merging the "reference" language file to it.
-Add @FUZZY tag to non-translated messages, copied from reference language file.
+Add @nonTranslated tag to non-translated messages, copied from reference language file.
 
 Since there is no gettext equivalent this script is useful.
 """
@@ -57,7 +57,7 @@ def main():
 
     language_file_path = os.path.join(i18n_dir, '{}.json'.format(args.language))
     reference_language_file_path = os.path.join(i18n_dir, '{}.json'.format(args.reference_language))
-    fuzzy_tag = '@fuzzy'
+    fuzzy_tag = '@nonTranslated'
     with open(reference_language_file_path) as reference_language_file:
         try:
             reference_messages = json.load(reference_language_file)

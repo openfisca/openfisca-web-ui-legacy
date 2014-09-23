@@ -4,7 +4,8 @@
 
 var React = require('react');
 
-var webservices = require('./webservices');
+var models = require('./models'),
+  webservices = require('./webservices');
 
 
 var appconfig = global.appconfig;
@@ -53,10 +54,30 @@ function init() {
     legislation.init(enabledModules.legislation);
   }
   if (enabledModules.situationForm) {
-    webservices.fetchCurrentLocaleMessages(messages => {
-      var Simulator = require('./components/simulator'),
-        mountNode = document.getElementById('simulator-container');
-      React.renderComponent(<Simulator messages={messages} />, mountNode);
+    // TODO use promise.all()
+    webservices.fetchEntitiesMetadata(entitiesMetadata => {
+      webservices.fetchCurrentLocaleMessages(messages => {
+        webservices.fetchFields(entitiesMetadata, fields => {
+          if (fields) {
+            if (fields.error) {
+               throw new Error(fields.error);
+            } else {
+              var {columns, columnsTree} = fields;
+            }
+          }
+          var Simulator = require('./components/simulator'),
+            mountNode = document.getElementById('simulator-container');
+          React.renderComponent(
+            <Simulator
+              columns={columns}
+              columnsTree={columnsTree}
+              entitiesMetadata={entitiesMetadata}
+              messages={messages}
+            />,
+            mountNode
+          );
+        });
+      });
     });
   }
 }

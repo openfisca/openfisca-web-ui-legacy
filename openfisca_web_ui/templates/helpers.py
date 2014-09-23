@@ -83,6 +83,7 @@ def index_appconfig(ctx):
         'baseUrlOfCountry': conf['api.baseUrls.{}'.format(ctx.country)],
         'urlPaths': {
             'calculate': conf['api.urlPaths.calculate'],
+            'entities': conf['api.urlPaths.entities'],
             'fields': conf['api.urlPaths.fields'],
             'simulate': conf['api.urlPaths.simulate'],
             },
