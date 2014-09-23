@@ -15,9 +15,7 @@ function assignIn(object, crumbs, value) {
   var assignCrumb = function(node, crumbIndex) {
     if (crumbIndex < crumbs.length) {
       var crumb = crumbs[crumbIndex];
-      return Lazy(node).assign(
-        obj(crumb, assignCrumb(node[crumb], crumbIndex + 1))
-      ).toObject();
+      return Lazy(node).assign({[crumb]: assignCrumb(node[crumb], crumbIndex + 1)}).toObject();
     } else {
       return value;
     }
@@ -62,6 +60,7 @@ function getObjectPath(object /*, keys... */) {
 
 
 function obj() {
+  // TODO Use es6 computed properties, remove this function.
   /*
   In JavaScript objects cannot be initialized with a key which is a variable.
   Example:
