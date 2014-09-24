@@ -37,6 +37,7 @@ from collections import OrderedDict
 import json
 import logging
 import os
+import subprocess
 import sys
 
 
@@ -44,56 +45,42 @@ app_name = os.path.splitext(os.path.basename(__file__))[0]
 log = logging.getLogger(app_name)
 script_dir = os.path.realpath(os.path.dirname(__file__))
 i18n_dir = os.path.realpath(os.path.join(script_dir, '../static/i18n'))
+js_dir = os.path.realpath(os.path.join(script_dir, '../static/js'))
 
 
 def main():
     parser = argparse.ArgumentParser(description = __doc__)
-    parser.add_argument('language', help = u"JSON language file")
-    parser.add_argument('reference_language', help = u"Reference JSON language file")
-    parser.add_argument('--inplace', action = 'store_true', default = False, help = u"Save language input file inplace")
+    parser.add_argument('language', help = u"JSON language file to update")
     parser.add_argument('-v', '--verbose', action = 'store_true', default = False, help = u"increase output verbosity")
     args = parser.parse_args()
     logging.basicConfig(level = logging.DEBUG if args.verbose else logging.WARNING)
 
-    language_file_path = os.path.join(i18n_dir, '{}.json'.format(args.language))
-    reference_language_file_path = os.path.join(i18n_dir, '{}.json'.format(args.reference_language))
     fuzzy_tag = '@nonTranslated'
-    with open(reference_language_file_path) as reference_language_file:
+
+    extract_keys_command = u"""
+grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').+?(?=\'\))" {js_dir} | sort | uniq
+""".strip().format(js_dir = js_dir)
+    extract_keys_command_output = subprocess.check_output(extract_keys_command, shell = True)
+    message_keys = extract_keys_command_output.strip().split('\n')
+
+    language_file_path = os.path.join(i18n_dir, '{}.json'.format(args.language))
+    with open(language_file_path) as language_file:
         try:
-            reference_messages = json.load(reference_language_file)
+            messages = json.load(language_file)
         except ValueError:
-            log.error(u'Error reading {}'.format(reference_language_file_path))
+            log.error(u'Error reading {}'.format(language_file_path))
             return 1
-    reference_messages = {
-        key: reference_message[len(fuzzy_tag) + 1:] if fuzzy_tag in reference_message else reference_message
-        for key, reference_message in reference_messages.iteritems()
-        }
-    if os.path.isfile(language_file_path):
-        with open(language_file_path) as language_file:
-            try:
-                messages = json.load(language_file)
-            except ValueError:
-                log.error(u'Error reading {}'.format(language_file_path))
-                return 1
-        messages = {
-            key: message
-            for key, message in messages.iteritems()
-            if fuzzy_tag not in message
-            }
-    else:
-        messages = {}
-    for key, reference_message in reference_messages.iteritems():
-        if key not in messages:
-            messages[key] = u'{} {}'.format(fuzzy_tag, reference_message) if reference_message else fuzzy_tag
+    messages.update({
+        key: fuzzy_tag
+        for key in message_keys
+        if key not in messages
+        })
     messages = OrderedDict(sorted(messages.iteritems()))  # Sort keys alphabetically.
     output = json.dumps(messages, encoding = 'utf-8', ensure_ascii = False, indent = 2,
-        separators = (',', ': ')).encode('utf-8')
-    if args.inplace:
-        with open(language_file_path, 'w') as language_file:
-            language_file.write(output)
-            language_file.write('\n')
-    else:
-        print(output)
+    separators = (',', ': ')).encode('utf-8')
+    with open(language_file_path, 'w') as language_file:
+        language_file.write(output)
+        language_file.write('\n')
 
     return 0
 

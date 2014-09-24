@@ -35,6 +35,7 @@ update-i18n-python:
 	python setup.py extract_messages update_catalog
 
 update-i18n-js:
+	./openfisca_web_ui/scripts/extract_i18n_json_messages.py fr
 	./openfisca_web_ui/scripts/update_i18n_json_messages.py --inplace ar fr
 	./openfisca_web_ui/scripts/update_i18n_json_messages.py --inplace en fr
 
