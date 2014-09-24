@@ -180,7 +180,7 @@ var Simulator = React.createClass({
     }
   },
   handleReset: function() {
-    var message = 'Réinitialiser la situation ? Ceci effacera définitivement les entités et les individus renseignés.'; // jshint ignore:line
+    var message = this.getIntlMessage('resetSituationConfirmMessage');
     if (confirm(message)) {
       var initialTestCase = models.getInitialTestCase(this.props.entitiesMetadata);
       if (this.state.editedEntity) {
@@ -227,7 +227,9 @@ var Simulator = React.createClass({
         var nameKey = this.props.entitiesMetadata.individus.nameKey;
         var name = this.state.testCase.individus[this.state.editedEntity.id][nameKey];
         rightPanel = (
-          <EditForm onClose={this.handleEditFormClose} title={`Déplacer ${name}`}>
+          <EditForm
+            onClose={this.handleEditFormClose}
+            title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: name})}>
             <MoveIndividuForm
               currentEntityIdByKind={currentEntityIdByKind}
               currentRoleByKind={currentRoleByKind}
@@ -314,7 +316,7 @@ var Simulator = React.createClass({
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {label: entityLabel})}>
+        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {name: entityLabel})}>
         <FieldsForm
           categories={categories}
           errors={errors}
@@ -329,8 +331,8 @@ var Simulator = React.createClass({
     if (this.state.errors) {
       return (
         <div className="alert alert-danger" role="alert">
-          <h4>Situation incorrecte</h4>
-          <p>Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.</p>
+          <h4>{this.getIntlMessage('incorrectSituation')}</h4>
+          <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
           <p>
             Vous pouvez également {
               <button className='btn btn-danger btn-xs' onClick={this.handleReset}>réinitialiser</button>

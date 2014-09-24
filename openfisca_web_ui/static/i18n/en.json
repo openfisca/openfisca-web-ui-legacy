@@ -2,6 +2,10 @@
   "addEntity:familles": "@nonTranslated Ajouter une famille",
   "addEntity:foyers_fiscaux": "@nonTranslated Ajouter une déclaration d'impôt",
   "addEntity:menages": "@nonTranslated Ajouter un logement principal",
-  "editFormTitle": "Edit {label}",
-  "simulate": "Simulate"
+  "editFormTitle": "@nonTranslated Éditer {name}",
+  "incorrectSituation": "@nonTranslated Situation incorrecte",
+  "incorrectSituationExplanation": "@nonTranslated Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.",
+  "moveFormTitle": "@nonTranslated Déplacer {name}",
+  "resetSituationConfirmMessage": "@nonTranslated Réinitialiser la situation ? Ceci effacera définitivement les entités et les individus renseignés.",
+  "simulate": "@nonTranslated Simuler"
 }
