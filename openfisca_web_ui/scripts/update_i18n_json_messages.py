@@ -64,17 +64,20 @@ def main():
         except ValueError:
             log.error(u'Error reading {}'.format(reference_language_file_path))
             return 1
-    with open(language_file_path) as language_file:
-        try:
-            messages = json.load(language_file)
-        except ValueError:
-            log.error(u'Error reading {}'.format(language_file_path))
-            return 1
-    messages = {
-        key: message
-        for key, message in messages.iteritems()
-        if fuzzy_tag not in message
-        }
+    if os.path.isfile(language_file_path):
+        with open(language_file_path) as language_file:
+            try:
+                messages = json.load(language_file)
+            except ValueError:
+                log.error(u'Error reading {}'.format(language_file_path))
+                return 1
+        messages = {
+            key: message
+            for key, message in messages.iteritems()
+            if fuzzy_tag not in message
+            }
+    else:
+        messages = {}
     for key, reference_message in reference_messages.iteritems():
         if key not in messages:
             messages[key] = u'{} {}'.format(fuzzy_tag, reference_message)
