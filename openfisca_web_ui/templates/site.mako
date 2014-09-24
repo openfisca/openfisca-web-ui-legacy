@@ -71,7 +71,6 @@ OpenFisca
 
 <%def name="css()" filter="trim">
     <link href="${urls.get_url(ctx, u'dist/vendor/bootstrap/css/bootstrap.min.css', static = True)}" media="screen" rel="stylesheet">
-    <link href="${urls.get_url(ctx, u'css/typeahead.css', static = True)}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css', static = True)}" media="screen" rel="stylesheet">
 </%def>
 

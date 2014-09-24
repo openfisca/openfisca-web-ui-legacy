@@ -10,10 +10,12 @@ var BooleanControl = require('./boolean-control'),
   Category = require('./category'),
   DateControl = require('./date-control'),
   EnumerationControl = require('./enumeration-control'),
+  FixedStringControl = require('./fixed-string-control'),
   IntegerControl = require('./integer-control'),
   Label = require('./label'),
   StringControl = require('./string-control'),
-  SuggestionIcon = require('../suggestion-icon');
+  SuggestionIcon = require('../suggestion-icon'),
+  TypeaheadControl = require('./typeahead-control');
 
 var cx = React.addons.classSet;
 
@@ -132,9 +134,36 @@ var FieldsForm = React.createClass({
         );
         break;
       case 'String':
-        control = (
+        control = column.autocomplete ? (
+          value && value.value ? (
+            <FixedStringControl
+              cerfaField={cerfaField}
+              error={error}
+              label={label}
+              name={column.name}
+              onModifyClick={this.props.onChange.bind(null, column)}
+              suggestion={suggestion}
+              suggestionIcon={suggestionIcon}
+              value={value.displayedValue}
+            />
+          ) : (
+            <TypeaheadControl
+              autocomplete={column.autocomplete}
+              cerfaField={cerfaField}
+              default={column.default}
+              displayedValue={value && value.displayedValue}
+              error={error}
+              label={label}
+              name={column.name}
+              onChange={this.props.onChange.bind(null, column)}
+              required={column.required}
+              suggestion={suggestion}
+              suggestionIcon={suggestionIcon}
+              value={value && value.value}
+            />
+          )
+        ) : (
           <StringControl
-            autocomplete={column.autocomplete}
             cerfaField={cerfaField}
             default={column.default}
             error={error}
