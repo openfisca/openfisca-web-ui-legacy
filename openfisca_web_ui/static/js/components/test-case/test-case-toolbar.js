@@ -51,11 +51,13 @@ var TestCaseToolbar = React.createClass({
                 href="#"
                 onClick={event => {
                   event.preventDefault();
-                  ! this.props.disableSimulate && this.props.onSimulate();
+                  if (! this.props.disableSimulate) {
+                    this.props.onSimulate();
+                  }
                 }}
                 role="menuitem"
                 tabIndex="-1">
-                Simuler
+                {this.getIntlMessage('simulate')}
               </a>
             </li>
             {
@@ -66,7 +68,7 @@ var TestCaseToolbar = React.createClass({
                     onClick={event => { event.preventDefault(); this.props.onRepair(); }}
                     role="menuitem"
                     tabIndex="-1">
-                    Réparer
+                    {this.getIntlMessage('repair')}
                   </a>
                 </li>
               )
@@ -77,7 +79,7 @@ var TestCaseToolbar = React.createClass({
                 onClick={event => { event.preventDefault(); this.props.onReset(); }}
                 role="menuitem"
                 tabIndex="-1">
-                Réinitialiser
+                {this.getIntlMessage('reset')}
               </a>
             </li>
             <li className="divider" role="presentation"></li>

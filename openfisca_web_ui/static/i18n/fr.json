@@ -6,6 +6,8 @@
   "incorrectSituation": "Situation incorrecte",
   "incorrectSituationExplanation": "Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.",
   "moveFormTitle": "Déplacer {name}",
+  "repair": "Réparer",
+  "reset": "Réinitialiser",
   "resetSituationConfirmMessage": "Réinitialiser la situation ? Ceci effacera définitivement les entités et les individus renseignés.",
   "simulate": "Simuler"
 }

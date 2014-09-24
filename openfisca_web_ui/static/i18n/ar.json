@@ -6,6 +6,8 @@
   "incorrectSituation": "@fuzzy Situation incorrecte",
   "incorrectSituationExplanation": "@fuzzy Certaines entités comportent des erreurs. Veuillez les corriger pour rétablir la simulation.",
   "moveFormTitle": "@fuzzy Déplacer {name}",
+  "repair": "@nonTranslated Réparer",
+  "reset": "@nonTranslated Réinitialiser",
   "resetSituationConfirmMessage": "@fuzzy Réinitialiser la situation ? Ceci effacera définitivement les entités et les individus renseignés.",
   "simulate": "حسب"
 }
