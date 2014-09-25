@@ -1,12 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var React = require('react/addons'),
+  ReactIntlMixin = require('react-intl');
 
 var cx = React.addons.classSet;
 
 
 var Entity = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     active: React.PropTypes.bool,
     hasErrors: React.PropTypes.bool,
@@ -35,9 +37,11 @@ var Entity = React.createClass({
             <ul className="dropdown-menu" role="menu">
               <li>
                 <a href="#" onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}>
-                  Éditer
+                  {this.getIntlMessage('edit')}
                 </a>
-                <a href="#" onClick={event => { event.preventDefault(); this.props.onDelete(); }}>Supprimer</a>
+                <a href="#" onClick={event => { event.preventDefault(); this.props.onDelete(); }}>
+                  {this.getIntlMessage('delete')}
+                </a>
               </li>
             </ul>
           </div>

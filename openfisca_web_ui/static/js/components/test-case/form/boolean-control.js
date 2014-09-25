@@ -1,13 +1,15 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react'),
-  invariant = require('react/lib/invariant');
+var invariant = require('react/lib/invariant'),
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var CerfaField = require('./cerfa-field');
 
 
 var BooleanControl = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     cerfaField: React.PropTypes.any,
     default: React.PropTypes.bool,
@@ -47,7 +49,7 @@ var BooleanControl = React.createClass({
                 type="radio"
                 value=""
               />
-              Non renseigné
+              {this.getIntlMessage('notIndicated')}
             </label>
             <label className="radio-inline">
               <input
@@ -57,7 +59,7 @@ var BooleanControl = React.createClass({
                 type="radio"
                 value="1"
               />
-              Oui
+              {this.getIntlMessage('yes')}
             </label>
             <label className="radio-inline">
               <input
@@ -67,14 +69,18 @@ var BooleanControl = React.createClass({
                 type="radio"
                 value="0"
               />
-              Non
+              {this.getIntlMessage('no')}
             </label>
           </div>
           <div className="col-sm-6">
             {
               this.props.suggestion ?
-                'valeur suggérée : ' + booleanToString(this.props.suggestion) : // jshint ignore:line
-                'valeur par défaut : ' + booleanToString(this.props.default) // jshint ignore:line
+                this.formatMessage(this.getIntlMessage('suggestedValue'), {
+                  value: booleanToString(this.props.suggestion),
+                }) :
+                this.formatMessage(this.getIntlMessage('defaultValue'), {
+                  value: booleanToString(this.props.default),
+                })
             }
           </div>
         </div>

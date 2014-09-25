@@ -1,13 +1,15 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var VisualizationSelect = require('./visualization-select'),
   YearInput = require('./year-input');
 
 
 var VisualizationToolbar = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     isSimulationInProgress: React.PropTypes.bool,
     onVisualizationChange: React.PropTypes.func.isRequired,
@@ -26,7 +28,9 @@ var VisualizationToolbar = React.createClass({
         </div>
         {
           this.props.isSimulationInProgress && (
-            <span className="label label-default visible-xs-inline">Simulation en cours</span>
+            <span className="label label-default visible-xs-inline">
+              {this.getIntlMessage('simulationInProgress')}
+            </span>
           )
         }
       </div>

@@ -69,11 +69,15 @@ var TestCase = React.createClass({
                               errors={helpers.getObjectPath(this.props.errors, 'individus', individuId)}
                               id={individuId}
                               key={individuId}
+                              name={
+                                this.props.testCase.individus[individuId][
+                                  this.props.entitiesMetadata.individus.nameKey
+                                ]
+                              }
                               onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
                               onEdit={this.handleEdit.bind(null, 'individus', individuId)}
                               onMove={this.props.onMoveIndividu.bind(null, individuId)}
                               suggestions={helpers.getObjectPath(this.props.suggestions, 'individus', individuId)}
-                              value={this.props.testCase.individus[individuId]}
                             />
                           );
                         };

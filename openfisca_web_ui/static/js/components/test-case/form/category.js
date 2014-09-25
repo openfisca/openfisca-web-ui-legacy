@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var SuggestionIcon = require('../suggestion-icon');
 
@@ -9,6 +10,7 @@ var cx = React.addons.classSet;
 
 
 var Category = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     children: React.PropTypes.arrayOf(React.PropTypes.component).isRequired,
     hasErrors: React.PropTypes.bool,
@@ -23,7 +25,7 @@ var Category = React.createClass({
           {
             this.props.hasSuggestions && (
               <SuggestionIcon className="pull-right">
-                Cette catégorie contient des suggestions.
+                {this.getIntlMessage('categoryContainsSuggestions')}
               </SuggestionIcon>
             )
           }

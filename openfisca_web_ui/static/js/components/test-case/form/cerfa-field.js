@@ -2,18 +2,21 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 
 var CerfaField = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     value: React.PropTypes.any.isRequired,
   },
   render: function() {
-    var areMultipleValues = typeof this.props.value === 'object';
-    var helpMessage = areMultipleValues ?
-      `Cases CERFA ${Lazy(this.props.value).join(', ')}` :
-      `Case CERFA ${this.props.value}`;
+    var count = typeof this.props.value === 'object' ? Object.keys(this.props.value).length : 1;
+    var helpMessage = this.formatMessage(this.getIntlMessage('cerfaHint'), {
+      count: count,
+      value: count > 1 ? Lazy(this.props.value).join(', ') : this.props.value,
+    });
     return <span className="help-block">{helpMessage}</span>;
   }
 });

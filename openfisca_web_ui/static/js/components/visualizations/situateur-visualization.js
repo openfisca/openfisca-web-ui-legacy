@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var Curve = require('./svg/curve'),
   HGrid = require('./svg/h-grid'),
@@ -15,6 +16,7 @@ var Curve = require('./svg/curve'),
 
 
 var SituateurVisualization = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     aspectRatio: React.PropTypes.number.isRequired,
     curveLabel: React.PropTypes.string.isRequired,
@@ -84,7 +86,7 @@ var SituateurVisualization = React.createClass({
   formatHint: function() {
     var point = this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value};
     return point.x > this.pointsXMaxValue ?
-      `Valeurs inconnues au delà de ${this.props.xFormatNumber(this.pointsXMaxValue)} %` : // jshint ignore:line
+      this.formatMessage(this.getIntlMessage('unknownValuesAbove'), {value: this.pointsXMaxValue / 100}) :
       this.props.formatHint({
         amount: this.props.yFormatNumber(point.y),
         percent: this.props.xFormatNumber(point.x),

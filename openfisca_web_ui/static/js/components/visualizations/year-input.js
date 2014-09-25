@@ -1,12 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var appconfig = global.appconfig;
 
 
 var YearInput = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.number.isRequired,
@@ -23,7 +25,7 @@ var YearInput = React.createClass({
         onChange={this.handleChange}
         placeholder={appconfig.constants.defaultYear}
         step="1"
-        title="Année de la simulation"
+        title={this.getIntlMessage('simulationYear')}
         type="number"
         value={this.props.value}
       />

@@ -1,12 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var appconfig = global.appconfig;
 
 
 var Label = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     children: React.PropTypes.string.isRequired,
     name: React.PropTypes.string.isRequired,
@@ -25,8 +27,10 @@ var Label = React.createClass({
           href={appconfig['www.url'] + 'outils/variables/' + this.props.name}
           style={{marginLeft: 10}}
           target="_blank"
-          title={'Explication sur ' + this.props.name}>
-          ?
+          title={
+            this.formatMessage(this.getIntlMessage('columnExplanationLinkTitle'), {columnName: this.props.name})
+          }>
+          {this.getIntlMessage('columnExplanationLink')}
         </a>
       </label>
     );

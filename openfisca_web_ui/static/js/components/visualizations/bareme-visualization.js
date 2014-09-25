@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react/addons');
+  React = require('react/addons'),
+  ReactIntlMixin = require('react-intl');
 
 var BaremeChart = require('./svg/bareme-chart'),
   TwoColumnsLayout = require('./two-columns-layout'),
@@ -12,7 +13,7 @@ var cx = React.addons.classSet;
 
 
 var BaremeVisualization = React.createClass({
-  mixins: [React.addons.LinkedStateMixin],
+  mixins: [React.addons.LinkedStateMixin, ReactIntlMixin],
   propTypes: {
     collapsedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
@@ -119,7 +120,7 @@ var BaremeVisualization = React.createClass({
                       'pull-right': true,
                     })}
                     onClick={this.handleDisplayParametersColumnClick}>
-                    Paramètres
+                    {this.getIntlMessage('settings')}
                   </button>
                 </p>
                 <BaremeChart
@@ -143,7 +144,7 @@ var BaremeVisualization = React.createClass({
         <div ref='parametersColumn'>
           <div className='panel panel-default'>
             <div className='panel-heading'>
-              Décomposition des variables
+              {this.getIntlMessage('variablesDecomposition')}
             </div>
             <div className='panel-body'>
               <VariablesTree

@@ -3,6 +3,7 @@
 
 var Lazy = require('lazy.js'),
   React = require('react/addons'),
+  ReactIntlMixin = require('react-intl'),
   TweenState = require('react-tween-state');
 
 var TwoColumnsLayout = require('./two-columns-layout'),
@@ -13,7 +14,7 @@ var cx = React.addons.classSet;
 
 
 var WaterfallVisualization = React.createClass({
-  mixins: [React.addons.LinkedStateMixin, TweenState.Mixin],
+  mixins: [React.addons.LinkedStateMixin, TweenState.Mixin, ReactIntlMixin],
   propTypes: {
     collapsedVariables: React.PropTypes.object.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
@@ -185,7 +186,7 @@ var WaterfallVisualization = React.createClass({
                       'pull-right': true,
                     })}
                     onClick={this.handleDisplayParametersColumnClick}>
-                    Paramètres
+                    {this.getIntlMessage('settings')}
                   </button>
                 </p>
                 <WaterfallChart
@@ -203,7 +204,11 @@ var WaterfallVisualization = React.createClass({
                   width={this.state.chartColumnWidth}
                 />
                 <p className='text-center well'>
-                  {this.state.activeVariableCode ? this.formatHint(variablesWithSubtotals) : 'Survolez le graphique'}
+                  {
+                    this.state.activeVariableCode ?
+                      this.formatHint(variablesWithSubtotals) :
+                      this.getIntlMessage('hoverTheChart')
+                  }
                 </p>
               </div>
             )
@@ -212,7 +217,7 @@ var WaterfallVisualization = React.createClass({
         <div ref='parametersColumn'>
           <div className='panel panel-default'>
             <div className='panel-heading'>
-              Décomposition des variables
+              {this.getIntlMessage('variablesDecomposition')}
             </div>
             <div className='panel-body'>
               <VariablesTree
@@ -231,19 +236,19 @@ var WaterfallVisualization = React.createClass({
           </div>
           <div className='panel panel-default'>
             <div className='panel-heading'>
-              Paramètres avancés
+              {this.getIntlMessage('advancedSettings')}
             </div>
             <div className='panel-body'>
               <div className='checkbox'>
                 <label>
                   <input checkedLink={this.linkState('displaySubtotalThinBars')} type='checkbox' />
-                  Afficher les sous-totaux
+                  {this.getIntlMessage('displaySubtotals')}
                 </label>
               </div>
               <div className='checkbox'>
                 <label>
                   <input checkedLink={this.linkState('displayVariablesColors')} type='checkbox' />
-                  Afficher les couleurs des variables
+                  {this.getIntlMessage('displayVariablesColors')}
                 </label>
               </div>
             </div>

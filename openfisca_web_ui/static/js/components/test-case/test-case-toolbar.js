@@ -101,7 +101,7 @@ var TestCaseToolbar = React.createClass({
         </div>
         {
           this.props.isSimulationInProgress && (
-            <span className="label label-default">Simulation en cours</span>
+            <span className="label label-default">{this.getIntlMessage('simulationInProgress')}</span>
           )
         }
       </div>

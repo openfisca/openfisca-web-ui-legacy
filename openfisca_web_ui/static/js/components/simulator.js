@@ -35,6 +35,7 @@ var Simulator = React.createClass({
     defaultBaremeXMaxValue: React.PropTypes.number.isRequired,
     defaultBaremeXMinValue: React.PropTypes.number.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
+    disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
     visualizations: React.PropTypes.array,
   },
@@ -170,8 +171,8 @@ var Simulator = React.createClass({
       this.state.testCase);
     var newEntityId = whatChanged === 'entity' ? value : oldEntityData.id;
     var newRole = whatChanged === 'role' ? value : oldEntityData.role;
-    var newTestCase = models.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole, entitiesMetadata,
-      this.state.testCase);
+    var newTestCase = models.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
+      this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleRepair: function() {
@@ -333,11 +334,14 @@ var Simulator = React.createClass({
         <div className="alert alert-danger" role="alert">
           <h4>{this.getIntlMessage('incorrectSituation')}</h4>
           <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
-          <p>
-            Vous pouvez également {
-              <button className='btn btn-danger btn-xs' onClick={this.handleReset}>réinitialiser</button>
-            } la situation.
-          </p>
+          <ul>
+            <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
+            <li>
+              <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
+                {this.getIntlMessage('resetSituation')}
+              </button>
+            </li>
+          </ul>
         </div>
       );
     } else {
@@ -393,14 +397,16 @@ var Simulator = React.createClass({
     });
   },
   save: function (testCase, testCaseAdditionalData, onComplete) {
-    webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
-      if (data && data.unauthorized) {
-        alert('Votre session a expiré. La page va être rechargée avec une situation vierge.');
-        window.location.reload();
-      } else {
-        onComplete();
-      }
-    });
+    if ( ! this.props.disableSave) {
+      webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
+        if (data && data.unauthorized) {
+          alert('Votre session a expiré. La page va être rechargée avec une situation vierge.');
+          window.location.reload();
+        } else {
+          onComplete();
+        }
+      });
+    }
   },
   simulate: function() {
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {

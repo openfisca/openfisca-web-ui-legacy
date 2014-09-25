@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var axes = require('../../../axes'),
   Curve = require('./curve'),
@@ -14,6 +15,7 @@ var axes = require('../../../axes'),
 
 
 var BaremeChart = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     activeVariableCode: React.PropTypes.string,
     aspectRatio: React.PropTypes.number.isRequired,
@@ -85,7 +87,7 @@ var BaremeChart = React.createClass({
       if (newXMinValue < newXMaxValue) {
         this.props.onXValuesChange(newXMinValue, newXMaxValue);
       } else {
-        alert('La valeur minimum doit être inférieure à la valeur maximum.');
+        alert(this.getIntlMessage('minimumValueLessThanMaximumValueExplanation'));
       }
     }
   },
@@ -186,7 +188,7 @@ var BaremeChart = React.createClass({
             style={{textAnchor: 'end'}}
             x={this.gridWidth}
             y={this.props.xAxisHeight - this.props.labelsFontSize}>
-            Modifier
+            {this.getIntlMessage('modify')}
           </Link>
         </g>
       </svg>

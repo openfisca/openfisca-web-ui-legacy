@@ -2,10 +2,12 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 
 var EnumerationControl = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     default: React.PropTypes.string,
     error: React.PropTypes.string,
@@ -24,11 +26,11 @@ var EnumerationControl = React.createClass({
     this.props.onChange(event.target.value);
   },
   render: function() {
-    var firstOptionLabel = `Non renseigné (${
+    var firstOptionLabel = `${this.getIntlMessage('notIndicated')} (${
       this.props.suggestion ?
-        'valeur suggérée : ' + this.props.labels[this.props.suggestion] :
-        'valeur par défaut : ' + this.props.labels[this.props.default]
-    })`;
+        this.formatMessage(this.getIntlMessage('suggestedValue'), {value: this.props.labels[this.props.suggestion]}) :
+        this.formatMessage(this.getIntlMessage('defaultValue'), {value: this.props.labels[this.props.default]})
+      })`;
     return (
       <div>
         {this.props.label}

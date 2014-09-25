@@ -2,13 +2,15 @@
 'use strict';
 
 var $ = require('jquery'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 
 var appconfig = global.appconfig;
 
 
 var AcceptCookiesModal = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     actionUrlPath: React.PropTypes.string.isRequired,
   },
@@ -35,27 +37,14 @@ var AcceptCookiesModal = React.createClass({
             <form method="post" action={this.props.actionUrlPath}>
               <div className="modal-header">
                 <h4 className="modal-title">
-                  Conditions générales d'utilisation <small>(CGU)</small>
+                  {this.getIntlMessage('acceptCookiesModalTitle') + ' '}
+                  <small>{this.getIntlMessage('acceptCookiesModalTitleSmall')}</small>
                 </h4>
               </div>
               <div className="modal-body">
-                <p>
-                  OpenFisca est un logiciel libre de simulation du système socio-fiscal français. Il permet de
-                  visualiser simplement un grand nombre de prestations sociales et d'impôts payés par les
-                  ménages, et de simuler l'impact de réformes sur le budget des ménages. Il s'agit d'un outil
-                  à vocation pédagogique pour aider les citoyens à mieux comprendre le système socio-fiscal
-                  français.
-                </p>
-                <p>
-                  La simulation est effectuée à partir des textes juridiques applicables et des éléments
-                  saisis en ligne. Elle ne constitue en aucune façon une déclaration de revenus.
-                </p>
-                <p>
-                  Les montants, obtenus à partir des <strong>informations inscrites sous votre seule
-                  responsabilité, n'ont qu'une valeur indicative</strong>.
-                  Ainsi, les montants de vos impôts calculés lors de votre déclaration de revenus
-                  peuvent être différents.
-                </p>
+                <p>{this.getIntlMessage('acceptCookiesModalParagraph1')}</p>
+                <p>{this.getIntlMessage('acceptCookiesModalParagraph2')}</p>
+                <p>{this.getIntlMessage('acceptCookiesModalParagraph3')}</p>
                 <div className="checkbox">
                   <label>
                     <input
@@ -64,10 +53,10 @@ var AcceptCookiesModal = React.createClass({
                       onChange={this.handleAcceptCheckboxChange}
                       type="checkbox"
                     />
-                    J'ai pris connaissance des informations ci-dessus.
+                    {this.getIntlMessage('acceptCookiesModalCheckboxLabel')}
                   </label>
                 </div>
-                <p>Pour fonctionner, ce site a besoin d'utiliser des cookies.</p>
+                <p>{this.getIntlMessage('acceptCookiesModalParagraph4')}</p>
               </div>
               <div className="modal-footer">
                 <button
@@ -75,10 +64,12 @@ var AcceptCookiesModal = React.createClass({
                   disabled={! this.state.acceptCheckboxChecked}
                   name="accept"
                   type="submit">
-                  <span className="glyphicon glyphicon-ok"></span> Accepter
+                  <span className="glyphicon glyphicon-ok"></span>
+                  {' ' + this.getIntlMessage('accept')}
                 </button>
                 <a className="btn btn-danger" href={appconfig['www.url']}>
-                  <span className="glyphicon glyphicon-remove"></span> Refuser
+                  <span className="glyphicon glyphicon-remove"></span>
+                  {' ' + this.getIntlMessage('deny')}
                 </a>
               </div>
             </form>

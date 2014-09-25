@@ -3,7 +3,8 @@
 
 var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
-  React = require('react/addons');
+  React = require('react/addons'),
+  ReactIntlMixin = require('react-intl');
 
 var BooleanControl = require('./boolean-control'),
   Category = require('./category'),
@@ -18,6 +19,7 @@ var cx = React.addons.classSet;
 
 
 var FieldsForm = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     categories: React.PropTypes.array.isRequired,
     errors: React.PropTypes.object,
@@ -64,11 +66,7 @@ var FieldsForm = React.createClass({
     var label = (
       <Label name={column.name} required={column.required}>{column.label}</Label>
     );
-    var suggestionIcon = (
-      <SuggestionIcon>
-        Valeur suggérée par le simulateur et utilisée dans ses calculs.
-      </SuggestionIcon>
-    );
+    var suggestionIcon = <SuggestionIcon>{this.getIntlMessage('suggestedValueExplanation')}</SuggestionIcon>;
     var cerfaField = column.cerfa_field; // jshint ignore:line
     switch(column['@type']) {
       case 'Boolean':

@@ -1,10 +1,12 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react');
+var React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 
 var Role = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     error: React.PropTypes.string,
     label: React.PropTypes.string.isRequired,
@@ -24,7 +26,7 @@ var Role = React.createClass({
         {
           addLink && (
             <a href="#" onClick={event => { event.preventDefault(); this.props.onCreateIndividuInEntity(); }}>
-              Ajouter
+              {this.getIntlMessage('add')}
             </a>
           )
         }

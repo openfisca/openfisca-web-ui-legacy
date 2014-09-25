@@ -83,7 +83,7 @@ var VariablesTree = React.createClass({
                             fontStyle: variable.isSubtotal && 'italic',
                             fontWeight: variable.depth === 0 ? 'bold' : null,
                           }}>
-                          {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
+                          {this.props.formatNumber(variable.value) + ' €' /* TODO i18n jshint ignore:line */}
                         </td>
                       )
                     }

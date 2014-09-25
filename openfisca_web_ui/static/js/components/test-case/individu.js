@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons');
+var React = require('react/addons'),
+  ReactIntlMixin = require('react-intl');
 
 var SuggestionIcon = require('./suggestion-icon');
 
@@ -9,14 +10,15 @@ var cx = React.addons.classSet;
 
 
 var Individu = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     active: React.PropTypes.bool,
     errors: React.PropTypes.object,
+    name: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func,
     onMove: React.PropTypes.func.isRequired,
     suggestions: React.PropTypes.object,
-    value: React.PropTypes.object.isRequired,
   },
   render: function() {
     var btnColorClass = this.props.errors ? 'btn-danger' : 'btn-default';
@@ -27,7 +29,7 @@ var Individu = React.createClass({
             className={cx('btn', btnColorClass, 'btn-sm', this.props.active && 'active')}
             onClick={this.props.onEdit}
             type="button">
-            {this.props.value.nom_individu /* jshint ignore:line */}
+            {this.props.name}
           </button>
           <button
             className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle')}
@@ -43,21 +45,21 @@ var Individu = React.createClass({
                 onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}
                 role="menuitem"
                 tabIndex="-1">
-                Éditer
+                {this.getIntlMessage('edit')}
               </a>
               <a
                 href="#"
                 onClick={event => { event.preventDefault(); this.props.onMove(); }}
                 role="menuitem"
                 tabIndex="-1">
-                Déplacer
+                {this.getIntlMessage('move')}
               </a>
               <a
                 href="#"
                 onClick={event => { event.preventDefault(); this.props.onDelete(); }}
                 role="menuitem"
                 tabIndex="-1">
-                Supprimer
+                {this.getIntlMessage('delete')}
               </a>
             </li>
           </ul>
@@ -65,7 +67,7 @@ var Individu = React.createClass({
         {
           this.props.suggestions && (
             <SuggestionIcon>
-              {`« ${this.props.value.nom_individu} » contient des suggestions.` /* jshint ignore:line */}
+              {this.formatMessage(this.getIntlMessage('individuContainsSuggestions'), {name: this.props.name})}
             </SuggestionIcon>
           )
         }

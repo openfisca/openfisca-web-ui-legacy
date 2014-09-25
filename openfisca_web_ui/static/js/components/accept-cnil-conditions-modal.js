@@ -2,10 +2,12 @@
 'use strict';
 
 var $ = require('jquery'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 
 var AcceptCnilConditionsModal = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     actionUrlPath: React.PropTypes.string.isRequired,
     termsUrlPath: React.PropTypes.string.isRequired,
@@ -35,13 +37,11 @@ var AcceptCnilConditionsModal = React.createClass({
           <div className="modal-content">
             <form method="post" action={this.props.actionUrlPath}>
               <div className="modal-header">
-                <h4 className="modal-title">Enregistrement de votre simulation</h4>
+                <h4 className="modal-title">{this.getIntlMessage('acceptCnilConditionsModalTitle')}</h4>
               </div>
               <div className="modal-body">
                 <p>
-                  <a target="_blank" href={this.props.termsUrlPath}>
-                    Vous pouvez consulter les conditions générales d'utilisation ici.
-                  </a>
+                  <a target="_blank" href={this.props.termsUrlPath}>{this.getIntlMessage('acceptCnilConditionsModalTermsLink')}</a>
                 </p>
                 <div className="checkbox">
                   <label>
@@ -50,7 +50,7 @@ var AcceptCnilConditionsModal = React.createClass({
                       onChange={this.handleAcceptCheckboxChange}
                       type="checkbox"
                     />
-                    J'ai pris connaissance des conditions générales d'utilisation
+                    {this.getIntlMessage('acceptCnilConditionsModalAcceptCheckboxLabel')}
                   </label>
                 </div>
                 <div className="checkbox">
@@ -60,8 +60,7 @@ var AcceptCnilConditionsModal = React.createClass({
                       name="accept-stats-checkbox"
                       type="checkbox"
                     />
-                    J'accepte que mes données soient utilisées à des fins statistiques,
-                    après anonymisation.
+                    {this.getIntlMessage('acceptCnilConditionsModalAcceptStatsCheckboxLabel')}
                   </label>
                 </div>
               </div>
@@ -71,10 +70,12 @@ var AcceptCnilConditionsModal = React.createClass({
                   disabled={! this.state.acceptCheckboxChecked}
                   name="accept"
                   type="submit">
-                  <span className="glyphicon glyphicon-ok"></span> Accepter
+                  <span className="glyphicon glyphicon-ok"></span>
+                  {' ' + this.getIntlMessage('accept')}
                 </button>
                 <button className="btn btn-danger" onClick={this.logout} type="button">
-                  <span className="glyphicon glyphicon-remove"></span> Refuser
+                  <span className="glyphicon glyphicon-remove"></span>
+                  {' ' + this.getIntlMessage('deny')}
                 </button>
               </div>
             </form>

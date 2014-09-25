@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react');
+  React = require('react'),
+  ReactIntlMixin = require('react-intl');
 
 var BaremeVisualization = require('./visualizations/bareme-visualization'),
   helpers = require('../helpers'),
@@ -16,6 +17,7 @@ var obj = helpers.obj;
 
 
 var Visualization = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     baremeXMaxValue: React.PropTypes.number.isRequired,
     baremeXMinValue: React.PropTypes.number.isRequired,
@@ -43,8 +45,8 @@ var Visualization = React.createClass({
     if (this.props.simulationResult.error) {
       return (
         <div className="alert alert-danger" role="alert">
-          <h4>Erreur</h4>
-          <p>La simulation a échoué car une erreur s'est produite sur le serveur.</p>
+          <h4>{this.getIntlMessage('error')}</h4>
+          <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
         </div>
 
       );
@@ -54,6 +56,7 @@ var Visualization = React.createClass({
       } else if (this.props.visualizationSlug.startsWith('situateur-')) {
         var value = this.props.simulationResult[0].values[0];
         var curveLabel, formatHint, pointLabel, points;
+        // TODO translate labels and hints.
         if (this.props.visualizationSlug === 'situateur-revdisp') {
           curveLabel = 'Revenu disponible';
           formatHint = ({amount, percent}) => `${percent} % des français ont un revenu disponible inférieur à ${amount} €`; // jshint ignore:line

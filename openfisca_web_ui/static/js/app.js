@@ -29,21 +29,25 @@ function init() {
   var jsModal = document.getElementById('js-modal');
   if (enabledModules.acceptCookiesModal) {
     var AcceptCookiesModal = require('./components/accept-cookies-modal');
-    React.renderComponent(
-      <AcceptCookiesModal actionUrlPath={enabledModules.acceptCookiesModal.actionUrlPath} />,
-      jsModal
-    );
+    webservices.fetchCurrentLocaleMessages(messages => {
+      React.renderComponent(
+        <AcceptCookiesModal actionUrlPath={enabledModules.acceptCookiesModal.actionUrlPath} messages={messages} />,
+        jsModal
+      );
+    });
   }
   else if (enabledModules.acceptCnilConditionsModal) {
     var AcceptCnilConditionsModal = require('./components/accept-cnil-conditions-modal');
-    React.renderComponent(
-      <AcceptCnilConditionsModal
-        actionUrlPath={enabledModules.acceptCnilConditionsModal.actionUrlPath}
-        termsUrlPath={enabledModules.acceptCnilConditionsModal.termsUrlPath}
-      />,
-      jsModal
-    );
-
+    webservices.fetchCurrentLocaleMessages(messages => {
+      React.renderComponent(
+        <AcceptCnilConditionsModal
+          actionUrlPath={enabledModules.acceptCnilConditionsModal.actionUrlPath}
+          messages={messages}
+          termsUrlPath={enabledModules.acceptCnilConditionsModal.termsUrlPath}
+        />,
+        jsModal
+      );
+    });
   }
   if ( ! enabledModules.acceptCookiesModal && ! enabledModules.acceptCnilConditionsModal) {
     if (enabledModules.disclaimer) {
@@ -63,21 +67,24 @@ function init() {
           if (fields) {
             if (fields.error) {
                throw new Error(fields.error);
-            } else {
-              var {columns, columnsTree} = fields;
             }
+            var {columns, columnsTree} = fields;
+            var Simulator = require('./components/simulator'),
+              mountNode = document.getElementById('simulator-container');
+            React.renderComponent(
+              <Simulator
+                columns={columns}
+                columnsTree={columnsTree}
+                disableSave={ !! enabledModules.acceptCookiesModal}
+                entitiesMetadata={entitiesMetadata}
+                locales={appconfig.i18n.lang}
+                messages={messages}
+              />,
+              mountNode
+            );
+          } else {
+            throw new Error('Unable to fetch fields');
           }
-          var Simulator = require('./components/simulator'),
-            mountNode = document.getElementById('simulator-container');
-          React.renderComponent(
-            <Simulator
-              columns={columns}
-              columnsTree={columnsTree}
-              entitiesMetadata={entitiesMetadata}
-              messages={messages}
-            />,
-            mountNode
-          );
         });
       });
     });
