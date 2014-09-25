@@ -41,7 +41,7 @@ var Category = React.createClass({
         <div
           className={cx('panel-collapse', 'collapse', this.props.index === 0 && 'in')}
           id={'category-' + this.props.index}>
-         <div className="panel-body">
+          <div className="panel-body">
             {this.props.children}
           </div>
         </div>
