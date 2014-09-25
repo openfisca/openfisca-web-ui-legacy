@@ -50,10 +50,25 @@ js_dir = os.path.realpath(os.path.join(script_dir, '../static/js'))
 
 def main():
     parser = argparse.ArgumentParser(description = __doc__)
-    parser.add_argument('language', help = u"JSON language file to update")
+    parser.add_argument('languages', help = u"JSON language files to update (without extension ex: en, fr)",
+        nargs = '*')
+    parser.add_argument('--all', action = 'store_true', help = u'Process all language files found')
     parser.add_argument('-v', '--verbose', action = 'store_true', default = False, help = u"increase output verbosity")
     args = parser.parse_args()
     logging.basicConfig(level = logging.DEBUG if args.verbose else logging.WARNING)
+
+    if args.all:
+        languages = [
+            file_name[: - len('.json')]
+            for file_name in os.listdir(i18n_dir)
+            if file_name.endswith('.json')
+            ]
+    else:
+        if args.languages:
+            languages = args.languages
+        else:
+            parser.error(u'languages arguments or --all option must be given')
+            return 1
 
     fuzzy_tag = '@nonTranslated'
 
@@ -63,24 +78,32 @@ grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').
     extract_keys_command_output = subprocess.check_output(extract_keys_command, shell = True)
     message_keys = extract_keys_command_output.strip().split('\n')
 
-    language_file_path = os.path.join(i18n_dir, '{}.json'.format(args.language))
-    with open(language_file_path) as language_file:
-        try:
-            messages = json.load(language_file)
-        except ValueError:
-            log.error(u'Error reading {}'.format(language_file_path))
-            return 1
-    messages.update({
-        key: fuzzy_tag
-        for key in message_keys
-        if key not in messages
-        })
-    messages = OrderedDict(sorted(messages.iteritems()))  # Sort keys alphabetically.
-    output = json.dumps(messages, encoding = 'utf-8', ensure_ascii = False, indent = 2,
-    separators = (',', ': ')).encode('utf-8')
-    with open(language_file_path, 'w') as language_file:
-        language_file.write(output)
-        language_file.write('\n')
+    for language in languages:
+        language_file_path = os.path.join(i18n_dir, '{}.json'.format(language))
+        if os.path.isfile(language_file_path):
+            with open(language_file_path) as language_file:
+                try:
+                    messages = json.load(language_file)
+                except ValueError:
+                    log.error(u'Error reading {}'.format(language_file_path))
+                    return 1
+            if '' in messages:
+                print u'Error: {} contains an empty key.'.format(language_file_path).encode('utf-8')
+            new_messages = {
+                key: fuzzy_tag
+                for key in message_keys
+                if key not in messages
+                }
+            messages.update(new_messages)
+            messages = OrderedDict(sorted(messages.iteritems()))  # Sort keys alphabetically.
+            output = json.dumps(messages, encoding = 'utf-8', ensure_ascii = False, indent = 2,
+            separators = (',', ': ')).encode('utf-8')
+            with open(language_file_path, 'w') as language_file:
+                language_file.write(output)
+                language_file.write('\n')
+            print u'{} messages added to {}.'.format(len(new_messages), language_file_path).encode('utf-8')
+        else:
+            print u'Language file {} does not exist: touch it first.'.format(language_file_path).encode('utf-8')
 
     return 0
 
