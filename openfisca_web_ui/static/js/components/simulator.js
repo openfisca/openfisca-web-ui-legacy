@@ -205,7 +205,7 @@ var Simulator = React.createClass({
     this.setState(obj(this.state.visualizationSlug, visualizationState));
   },
   handleYearChange: function(year) {
-    this.setState({year: year}, this.simulate);
+    this.setState({errors: null, year: year}, this.simulate);
   },
   render: function() {
     var rightPanel;
@@ -269,7 +269,7 @@ var Simulator = React.createClass({
               <TestCase
                 activeEntityId={this.state.editedEntity && this.state.editedEntity.id}
                 entitiesMetadata={this.props.entitiesMetadata}
-                errors={this.state.errors}
+                errors={this.state.errors && this.state.errors.test_case /* jshint ignore:line */}
                 getEntitiesKinds={models.getEntitiesKinds}
                 getEntityLabel={models.getEntityLabel}
                 onCloseEntity={this.handleEditFormClose}
@@ -303,7 +303,7 @@ var Simulator = React.createClass({
       }) : null,
       label: category.label,
     })).toArray(); // jshint ignore:line
-    var errors = helpers.getObjectPath(this.state.errors, kind, id);
+    var errors = helpers.getObjectPath(this.state.errors, 'test_case', kind, id);
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var nameKey = this.props.entitiesMetadata[kind].nameKey;
     var editedValues = obj(nameKey, this.state.editedEntity[nameKey]);
@@ -329,33 +329,32 @@ var Simulator = React.createClass({
     );
   },
   renderVisualizationPanel: function() {
-    if (this.state.errors) {
-      return (
-        <div className="alert alert-danger" role="alert">
-          <h4>{this.getIntlMessage('incorrectSituation')}</h4>
-          <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
-          <ul>
-            <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
-            <li>
-              <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
-                {this.getIntlMessage('resetSituation')}
-              </button>
-            </li>
-          </ul>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <VisualizationToolbar
-            isSimulationInProgress={this.state.isSimulationInProgress}
-            onVisualizationChange={this.handleVisualizationChange}
-            onYearChange={this.handleYearChange}
-            visualizationSlug={this.state.visualizationSlug}
-            year={this.state.year}
-          />
-          <hr/>
-          {
+    return (
+      <div>
+        <VisualizationToolbar
+          errors={this.state.errors}
+          isSimulationInProgress={this.state.isSimulationInProgress}
+          onVisualizationChange={this.handleVisualizationChange}
+          onYearChange={this.handleYearChange}
+          visualizationSlug={this.state.visualizationSlug}
+          year={this.state.year}
+        />
+        <hr/>
+        {
+          this.state.errors ? (
+            <div className="alert alert-danger" role="alert">
+              <h4>{this.getIntlMessage('incorrectSituation')}</h4>
+              <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
+              <ul>
+                <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
+                <li>
+                  <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
+                    {this.getIntlMessage('resetSituation')}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          ) : (
             this.state.simulationResult && ! this.state.isSimulationInProgress && (
               <Visualization
                 baremeXMaxValue={this.state.baremeXMaxValue}
@@ -366,10 +365,10 @@ var Simulator = React.createClass({
                 visualizationSlug={this.state.visualizationSlug}
               />
             )
-          }
-        </div>
-      );
-    }
+          )
+        }
+      </div>
+    );
   },
   repair: function(testCase, testCaseAdditionalData) {
     var originalTestCase = testCase || this.state.testCase;
@@ -414,21 +413,25 @@ var Simulator = React.createClass({
       this.setState({isSimulationInProgress: true}, () => {
         var params = this.simulationParams(this.state.visualizationSlug);
         webservices.simulate(params.axes, params.decomposition, this.state.legislationUrl, this.state.testCase,
-          this.state.year, this.simulationCompleted);
+          this.state.year, data => {
+            var changeset = {isSimulationInProgress: false};
+            if (data) {
+              if (data.error) {
+                changeset.simulationResult = {error: data.error};
+              } else {
+                if (data.errors) {
+                  changeset.errors = data.errors;
+                  changeset.simulationResult = null;
+                } else {
+                  changeset.errors = null;
+                  changeset.simulationResult = data;
+                }
+              }
+            }
+            this.setState(changeset);
+          });
       });
     }
-  },
-  simulationCompleted: function(data) {
-    var changeset = {isSimulationInProgress: false};
-    if (data) {
-      if (data.error) {
-        changeset.simulationResult = {error: data.error};
-      } else {
-        changeset.errors = data.errors ? data.errors : null;
-        changeset.simulationResult = data;
-      }
-    }
-    this.setState(changeset);
   },
   simulationParams: function(visualizationSlug) {
     var params = {

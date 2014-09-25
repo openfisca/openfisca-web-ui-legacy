@@ -11,6 +11,7 @@ var VisualizationSelect = require('./visualization-select'),
 var VisualizationToolbar = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    errors: React.PropTypes.object,
     isSimulationInProgress: React.PropTypes.bool,
     onVisualizationChange: React.PropTypes.func.isRequired,
     onYearChange: React.PropTypes.func.isRequired,
@@ -24,7 +25,11 @@ var VisualizationToolbar = React.createClass({
           <VisualizationSelect onChange={this.props.onVisualizationChange} value={this.props.visualizationSlug} />
         </div>
         <div className="form-group" style={{marginRight: 5}}>
-          <YearInput onChange={this.props.onYearChange} value={this.props.year} />
+          <YearInput
+            error={this.props.errors && this.props.errors.date}
+            onChange={this.props.onYearChange}
+            value={this.props.year}
+          />
         </div>
         {
           this.props.isSimulationInProgress && (

@@ -10,6 +10,7 @@ var appconfig = global.appconfig;
 var YearInput = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    error: React.PropTypes.string,
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.number.isRequired,
   },
@@ -17,7 +18,7 @@ var YearInput = React.createClass({
     this.props.onChange(event.target.valueAsNumber);
   },
   render: function() {
-    return (
+    var input = (
       <input
         className="form-control"
         max={appconfig.constants.maxYear}
@@ -25,11 +26,16 @@ var YearInput = React.createClass({
         onChange={this.handleChange}
         placeholder={appconfig.constants.defaultYear}
         step="1"
-        title={this.getIntlMessage('simulationYear')}
+        title={this.props.error || this.getIntlMessage('simulationYear')}
         type="number"
         value={this.props.value}
       />
     );
+    return this.props.error ? (
+      <div className='has-error'>
+        {input}
+      </div>
+    ) : input;
   }
 });
 

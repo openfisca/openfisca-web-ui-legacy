@@ -233,7 +233,7 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     .end(function(res) {
       if (res.body && res.body.error) {
         onComplete({
-          errors: res.body.error.errors[0].scenarios['0'].test_case, // jshint ignore:line
+          errors: res.body.error.errors[0].scenarios['0'],
         });
       } else if (res.error) {
         onComplete(res);
