@@ -36,7 +36,7 @@
   "incorrectSituationFixErrors": "Corrigez-les afin de rétablir la simulation.",
   "individuContainsSuggestions": "« {name} » contient des suggestions.",
   "jsonExport": "Export données JSON",
-  "jsonSimulationResult": "Résultat brut de la simulation au format JSON :",
+  "jsonVisualizationExplanation": "Données brutes à l'usage des informaticiens.",
   "minimumValueLessThanMaximumValueExplanation": "La valeur minimum doit être inférieure à la valeur maximum.",
   "modify": "Modifier",
   "move": "Déplacer",
@@ -51,6 +51,7 @@
   "simulate": "Simuler",
   "simulationErrorExplanation": "La simulation a échoué car une erreur s'est produite sur le serveur.",
   "simulationInProgress": "Simulation en cours",
+  "simulationResult": "Résultat de la simulation au format JSON :",
   "simulationYear": "Année de la simulation",
   "situatorOfRevdisp": "Situateur de revenu disponible du ménage",
   "situatorOfSal": "Situateur de salaires imposables",
@@ -59,5 +60,6 @@
   "unknownValuesAbove": "Valeurs inconnues au delà de {value, number, percent}",
   "variablesDecomposition": "Décomposition des variables",
   "waterfall": "Cascade",
-  "yes": "Oui"
+  "yes": "Oui",
+  "yourTestCase": "Votre situation :"
 }

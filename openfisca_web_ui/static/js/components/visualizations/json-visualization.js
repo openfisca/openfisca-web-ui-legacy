@@ -8,13 +8,48 @@ var React = require('react'),
 var JsonVisualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
-    data: React.PropTypes.object.isRequired,
+    simulationResult: React.PropTypes.object.isRequired,
+    testCase: React.PropTypes.object,
   },
   render: function() {
+    var preStyle = {
+      background: 'none',
+      border: 'none',
+      wordWrap: 'normal',
+    };
     return (
       <div>
-        <p>{this.getIntlMessage('jsonSimulationResult')}</p>
-        <pre>{JSON.stringify(this.props.data, null, 2)}</pre>
+        <div className="alert alert-info" role="alert">
+          <p>{this.getIntlMessage('jsonVisualizationExplanation')}</p>
+        </div>
+        <div className='panel panel-default'>
+          <div className="panel-heading">
+            <h4 className="panel-title">
+              <a data-parent="#accordion" data-toggle="collapse" href='#test-case'>
+                {this.getIntlMessage('yourTestCase')}
+              </a>
+            </h4>
+          </div>
+          <div className='collapse in panel-collapse' id='test-case'>
+            <div className="panel-body">
+              <pre style={preStyle}>{JSON.stringify(this.props.testCase, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+        <div className='panel panel-default'>
+          <div className="panel-heading">
+            <h4 className="panel-title">
+              <a data-parent="#accordion" data-toggle="collapse" href='#simulation-result'>
+                {this.getIntlMessage('simulationResult')}
+              </a>
+            </h4>
+          </div>
+          <div className='collapse in panel-collapse' id='simulation-result'>
+            <div className="panel-body">
+              <pre style={preStyle}>{JSON.stringify(this.props.simulationResult, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
       </div>
     );
   },

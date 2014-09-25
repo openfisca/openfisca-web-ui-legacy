@@ -362,6 +362,7 @@ var Simulator = React.createClass({
                 baremeXMinValue={this.state.baremeXMinValue}
                 onBaremeXValuesChange={this.handleBaremeXValuesChange}
                 simulationResult={this.state.simulationResult}
+                testCase={this.state.testCase}
                 visualizationSlug={this.state.visualizationSlug}
               />
             )

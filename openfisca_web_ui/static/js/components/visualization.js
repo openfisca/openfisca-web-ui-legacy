@@ -24,6 +24,7 @@ var Visualization = React.createClass({
     labelsFontSize: React.PropTypes.number.isRequired,
     onBaremeXValuesChange: React.PropTypes.func.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
+    testCase: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   getDefaultProps: function() {
@@ -52,7 +53,7 @@ var Visualization = React.createClass({
       );
     } else {
       if (this.props.visualizationSlug === 'json') {
-        return <JsonVisualization data={this.props.simulationResult} />;
+        return <JsonVisualization simulationResult={this.props.simulationResult} testCase={this.props.testCase} />;
       } else if (this.props.visualizationSlug.startsWith('situateur-')) {
         var value = this.props.simulationResult[0].values[0];
         var curveLabel, formatHint, pointLabel, points;

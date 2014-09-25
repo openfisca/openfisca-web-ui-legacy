@@ -38,6 +38,7 @@
   "individuContainsSuggestions": "@nonTranslated",
   "jsonExport": "@nonTranslated",
   "jsonSimulationResult": "@nonTranslated",
+  "jsonVisualizationExplanation": "@nonTranslated",
   "minimumValueLessThanMaximumValueExplanation": "@nonTranslated",
   "modify": "@nonTranslated",
   "move": "@nonTranslated",
@@ -52,6 +53,7 @@
   "simulate": "حسب",
   "simulationErrorExplanation": "@nonTranslated",
   "simulationInProgress": "@nonTranslated",
+  "simulationResult": "@nonTranslated",
   "simulationYear": "@nonTranslated",
   "situatorOfRevdisp": "@nonTranslated",
   "situatorOfSal": "@nonTranslated",
@@ -60,5 +62,6 @@
   "unknownValuesAbove": "@nonTranslated",
   "variablesDecomposition": "@nonTranslated",
   "waterfall": "@nonTranslated",
-  "yes": "@nonTranslated"
+  "yes": "@nonTranslated",
+  "yourTestCase": "@nonTranslated"
 }
