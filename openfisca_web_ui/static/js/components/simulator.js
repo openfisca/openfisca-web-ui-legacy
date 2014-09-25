@@ -356,7 +356,7 @@ var Simulator = React.createClass({
           />
           <hr/>
           {
-            this.state.simulationResult && (
+            this.state.simulationResult && ! this.state.isSimulationInProgress && (
               <Visualization
                 baremeXMaxValue={this.state.baremeXMaxValue}
                 baremeXMinValue={this.state.baremeXMinValue}
