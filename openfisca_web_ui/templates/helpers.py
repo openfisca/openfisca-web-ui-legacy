@@ -80,7 +80,7 @@ def base_appconfig(ctx):
 def index_appconfig(ctx):
     appconfig = base_appconfig(ctx)
     appconfig['api'] = {
-        'baseUrlOfCountry': conf['api.baseUrls.{}'.format(ctx.country)],
+        'baseUrl': conf['api.baseUrl'],
         'urlPaths': {
             'calculate': conf['api.urlPaths.calculate'],
             'entities': conf['api.urlPaths.entities'],

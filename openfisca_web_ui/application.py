@@ -38,30 +38,18 @@ import webob
 from . import conf, contexts, controllers, environment, model, urls
 
 
-country_re = re.compile('^/(?P<country>france|tunisia)(?=/|$)')
-lang_re_by_country = dict(
-    france = re.compile('^/(?P<lang>en|fr)(?=/|$)'),
-    tunisia = re.compile('^/(?P<lang>ar|en|fr)(?=/|$)'),
-    )
+lang_re = re.compile('^/(?P<lang>ar|en|fr)(?=/|$)')
 log = logging.getLogger(__name__)
 percent_encoding_re = re.compile('%[\dA-Fa-f]{2}')
 
 
-def country_and_language_detector(app):
-    """WSGI middleware that detects the country and the language in requested URL"""
-    def detect_country_and_language(environ, start_response):
+def language_detector(app):
+    """WSGI middleware that detects the language in requested URL"""
+    def detect_language(environ, start_response):
         req = webob.Request(environ)
         ctx = contexts.Ctx(req)
 
-        country_match = country_re.match(req.path_info)
-        if country_match is None:
-            ctx.country = country = conf['default_country']
-        else:
-            ctx.country = country = country_match.group('country')
-            req.script_name += req.path_info[:country_match.end()]
-            req.path_info = req.path_info[country_match.end():]
-
-        lang_match = lang_re_by_country[country].match(req.path_info)
+        lang_match = lang_re.match(req.path_info)
         if lang_match is None:
             ctx.lang = [conf['default_language']]
         else:
@@ -71,7 +59,7 @@ def country_and_language_detector(app):
 
         return app(req.environ, start_response)
 
-    return detect_country_and_language
+    return detect_language
 
 
 def environment_setter(app):
@@ -110,7 +98,7 @@ def make_app(global_conf, **app_conf):
     app = controllers.make_router()
 
     # Init request-dependant environment
-    app = country_and_language_detector(app)
+    app = language_detector(app)
     app = environment_setter(app)
 
     # Repair badly encoded query in request URL.

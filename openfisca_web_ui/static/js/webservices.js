@@ -107,7 +107,7 @@ function fetchFields(entitiesMetadata, onComplete) {
 }
 
 function makeUrl(path) {
-  var baseUrl = appconfig.api.baseUrlOfCountry;
+  var baseUrl = appconfig.api.baseUrl;
   if (baseUrl.endsWith('/')) {
     baseUrl = baseUrl.slice(0, -1);
   }
