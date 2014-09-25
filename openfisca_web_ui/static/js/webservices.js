@@ -61,8 +61,8 @@ function fetchCurrentTestCase(onComplete) {
         onComplete(res);
       } else {
         onComplete({
-          testCase: res.body.test_case, // jshint ignore:line
-          testCaseAdditionalData: res.body.test_case_additional_data, // jshint ignore:line
+          testCase: res.body ? res.body.test_case : null, // jshint ignore:line
+          testCaseAdditionalData: res.body ? res.body.test_case_additional_data : null, // jshint ignore:line
         });
       }
     });
