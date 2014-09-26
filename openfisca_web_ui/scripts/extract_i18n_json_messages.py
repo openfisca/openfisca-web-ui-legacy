@@ -37,6 +37,7 @@ from collections import OrderedDict
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 
@@ -53,6 +54,7 @@ def main():
     parser.add_argument('languages', help = u"JSON language files to update (without extension ex: en, fr)",
         nargs = '*')
     parser.add_argument('--all', action = 'store_true', help = u'Process all language files found')
+    parser.add_argument('--no-delete-regex', help = u'Regex for keys to keep even if not extracted from source files')
     parser.add_argument('-v', '--verbose', action = 'store_true', default = False, help = u"increase output verbosity")
     args = parser.parse_args()
     logging.basicConfig(level = logging.DEBUG if args.verbose else logging.WARNING)
@@ -70,7 +72,14 @@ def main():
             parser.error(u'languages arguments or --all option must be given')
             return 1
 
-    fuzzy_tag = '@nonTranslated'
+    if args.no_delete_regex:
+        no_delete_re = re.compile(args.no_delete_regex)
+
+    tags = {
+        'deleted': '@deleted',
+        'non_translated': u'@nonTranslated',
+        }
+    with_tag = lambda string, tag: string if string.startswith(tag) else u'{} {}'.format(tag, string)
 
     extract_keys_command = u"""
 grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').+?(?=\'\))" {js_dir} | sort | uniq
@@ -79,7 +88,7 @@ grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').
     message_keys = extract_keys_command_output.strip().split('\n')
 
     for language in languages:
-        language_file_path = os.path.join(i18n_dir, '{}.json'.format(language))
+        language_file_path = os.path.join(i18n_dir, u'{}.json'.format(language))
         if os.path.isfile(language_file_path):
             with open(language_file_path) as language_file:
                 try:
@@ -89,8 +98,19 @@ grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').
                     return 1
             if '' in messages:
                 print u'Error: {} contains an empty key.'.format(language_file_path).encode('utf-8')
+            deleted_keys = [
+                key
+                for key, message in messages.iteritems()
+                if key not in message_keys and not key.startswith(tags['deleted']) and (
+                    not args.no_delete_regex or no_delete_re.match(key) is None
+                    )
+                ]
+            messages = {
+                with_tag(key, tags['deleted']) if key in deleted_keys else key: message
+                for key, message in messages.iteritems()
+                }
             new_messages = {
-                key: fuzzy_tag
+                key: tags['non_translated']
                 for key in message_keys
                 if key not in messages
                 }
@@ -101,7 +121,8 @@ grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').
             with open(language_file_path, 'w') as language_file:
                 language_file.write(output)
                 language_file.write('\n')
-            print u'{} messages added to {}.'.format(len(new_messages), language_file_path).encode('utf-8')
+            print u'{}: {} messages added, {} messages marked as deleted.'.format(
+                language_file_path, len(new_messages), len(deleted_keys)).encode('utf-8')
         else:
             print u'Language file {} does not exist: touch it first.'.format(language_file_path).encode('utf-8')
 

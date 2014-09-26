@@ -35,7 +35,7 @@ update-i18n-python:
 	python setup.py extract_messages update_catalog
 
 update-i18n-js:
-	./openfisca_web_ui/scripts/extract_i18n_json_messages.py --all
+	./openfisca_web_ui/scripts/extract_i18n_json_messages.py --all --no-delete-regex='.+:.+'
 
 watch:
 	./node_modules/.bin/gulp watch
