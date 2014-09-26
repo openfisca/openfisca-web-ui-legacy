@@ -175,7 +175,7 @@ function repair(testCase, year, onComplete) {
     .end(function(res) {
       if (res.body && res.body.error) {
         onComplete({
-          errors: res.body.error.errors[0].scenarios['0'].test_case, // jshint ignore:line
+          errors: res.body.error.errors[0].scenarios['0'], // jshint ignore:line
           suggestions: null,
         });
       } else if (res.error) {
