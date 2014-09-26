@@ -14,7 +14,7 @@ var EditForm = React.createClass({
   render: function() {
     return (
       <form onSubmit={event => { event.preventDefault(); this.props.onClose(); }} role="form">
-        <button className="close" title='Fermer' type="submit">
+        <button className="close" title={this.getIntlMessage('close')} type="submit">
           <span aria-hidden="true">×</span>
           <span className="sr-only">{this.getIntlMessage('close')}</span>
         </button>

@@ -38,7 +38,7 @@ var BaremeVisualization = React.createClass({
       var variable = Lazy(variables).find({code: this.state.activeVariableCode});
       variableName = variable.name;
     } else {
-      variableName = 'Survolez le graphique';
+        variableName = this.getIntlMessage('hoverOverChart');
     }
     return variableName;
   },

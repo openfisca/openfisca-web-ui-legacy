@@ -207,7 +207,7 @@ var WaterfallVisualization = React.createClass({
                   {
                     this.state.activeVariableCode ?
                       this.formatHint(variablesWithSubtotals) :
-                      this.getIntlMessage('hoverTheChart')
+                      this.getIntlMessage('hoverOverChart')
                   }
                 </p>
               </div>

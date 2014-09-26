@@ -108,7 +108,7 @@ var Simulator = React.createClass({
   handleDeleteEntity: function(kind, id) {
     var entity = this.state.testCase[kind][id];
     var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
-    var message = `Supprimer ${entityLabel} ?`;
+    var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: entityLabel});
     if (confirm(message)) {
       var newTestCase = models.withoutEntity(kind, id, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
@@ -117,7 +117,7 @@ var Simulator = React.createClass({
   handleDeleteIndividu: function(id) {
     var nameKey = this.props.entitiesMetadata.individus.nameKey;
     var name = this.state.testCase.individus[id][nameKey];
-    var message = `Supprimer ${name} ?`;
+    var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: name});
     if (confirm(message)) {
       var newTestCase = models.withoutIndividu(id, this.props.entitiesMetadata, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
