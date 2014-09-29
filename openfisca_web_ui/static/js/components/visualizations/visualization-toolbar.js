@@ -7,6 +7,8 @@ var React = require('react'),
 var VisualizationSelect = require('./visualization-select'),
   YearInput = require('./year-input');
 
+var cx = React.addons.classSet;
+
 
 var VisualizationToolbar = React.createClass({
   mixins: [ReactIntlMixin],
@@ -24,7 +26,10 @@ var VisualizationToolbar = React.createClass({
         <div className="form-group" style={{marginRight: 5}}>
           <VisualizationSelect onChange={this.props.onVisualizationChange} value={this.props.visualizationSlug} />
         </div>
-        <div className="form-group" style={{marginRight: 5}}>
+        <div className={cx({
+          'form-group': true,
+          'has-error': this.props.errors && this.props.errors.date,
+        })} style={{marginRight: 5}}>
           <YearInput
             error={this.props.errors && this.props.errors.date}
             onChange={this.props.onYearChange}

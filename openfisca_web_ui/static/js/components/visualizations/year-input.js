@@ -18,7 +18,7 @@ var YearInput = React.createClass({
     this.props.onChange(event.target.valueAsNumber);
   },
   render: function() {
-    var input = (
+    return (
       <input
         className="form-control"
         max={appconfig.constants.maxYear}
@@ -31,12 +31,7 @@ var YearInput = React.createClass({
         value={this.props.value}
       />
     );
-    return this.props.error ? (
-      <div className='has-error'>
-        {input}
-      </div>
-    ) : input;
-  }
+  },
 });
 
 module.exports = YearInput;
