@@ -22,7 +22,14 @@ var IntegerControl = React.createClass({
     valType: React.PropTypes.string,
   },
   handleChange: function(event) {
-    this.props.onChange(event.target.valueAsNumber);
+    var value = event.target.valueAsNumber;
+    if (isNaN(value)) {
+      value = parseInt(event.target.value);
+      if (isNaN(value)) {
+        value = null;
+      }
+    }
+    this.props.onChange(value);
   },
   render: function() {
     var input = (
