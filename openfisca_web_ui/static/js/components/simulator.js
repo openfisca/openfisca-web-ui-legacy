@@ -62,13 +62,11 @@ var Simulator = React.createClass({
       baremeVariableCode: 'sali',
       defaultBaremeXMaxValue: 20000,
       defaultBaremeXMinValue: 0,
-      defaultVisualizationSlug: 'cascade',
+      defaultVisualizationSlug: 'waterfall',
     };
   },
   getInitialState: function() {
     return {
-      baremeXMaxValue: this.props.defaultBaremeXMaxValue,
-      baremeXMinValue: this.props.defaultBaremeXMinValue,
       calculationResult: null,
       editedEntity: null,
       errors: null,
@@ -79,15 +77,26 @@ var Simulator = React.createClass({
       suggestions: null,
       testCase: null,
       testCaseAdditionalData: null,
+      visualizationsSettings: {
+        bareme: {
+          collapsedVariables: {},
+          displayParametersColumn: false,
+          xMaxValue: this.props.defaultBaremeXMaxValue,
+          xMinValue: this.props.defaultBaremeXMinValue,
+        },
+        waterfall: {
+          collapsedVariables: {},
+          displayParametersColumn: false,
+        },
+      },
       visualizationSlug: this.props.defaultVisualizationSlug,
       year: appconfig.constants.defaultYear,
     };
   },
-  handleBaremeXValuesChange: function(minValue, maxValue) {
-    this.setState({
-      baremeXMaxValue: maxValue,
-      baremeXMinValue: minValue,
-    }, this.simulate);
+  handleCollapsedVariablesChange: function(variableCode, newStatus) {
+    var newVisualizationsSettings = helpers.assignIn(this.state.visualizationsSettings,
+      ['shared', 'collapsedVariables', variableCode], newStatus);
+    this.setState({visualizationsSettings: newVisualizationsSettings});
   },
   handleCreateEntity: function(kind) {
     // FIXME use withEntity
@@ -200,6 +209,11 @@ var Simulator = React.createClass({
       changeset.simulationResult = null;
       this.setState(changeset, this.simulate);
     }
+  },
+  handleVisualizationSettingsChange: function(visualizationName, settings, simulate = false) {
+    var newVisualizationsSettings = Lazy(this.state.visualizationsSettings).merge(obj(visualizationName, settings))
+      .toObject();
+    this.setState({visualizationsSettings: newVisualizationsSettings}, simulate ? this.simulate : null);
   },
   handleVisualizationStateChange: function(visualizationState) {
     this.setState(obj(this.state.visualizationSlug, visualizationState));
@@ -355,11 +369,10 @@ var Simulator = React.createClass({
               </ul>
             </div>
           ) : (
-            this.state.simulationResult && ! this.state.isSimulationInProgress && (
+            this.state.simulationResult && (
               <Visualization
-                baremeXMaxValue={this.state.baremeXMaxValue}
-                baremeXMinValue={this.state.baremeXMinValue}
-                onBaremeXValuesChange={this.handleBaremeXValuesChange}
+                onSettingsChange={this.handleVisualizationSettingsChange}
+                settings={this.state.visualizationsSettings}
                 simulationResult={this.state.simulationResult}
                 testCase={this.state.testCase}
                 visualizationSlug={this.state.visualizationSlug}
@@ -438,8 +451,8 @@ var Simulator = React.createClass({
       axes: visualizationSlug === 'bareme' ? [
         {
           count: this.props.baremeStepsX,
-          max: this.state.baremeXMaxValue,
-          min: this.state.baremeXMinValue,
+          max: this.state.visualizationsSettings.bareme.xMaxValue,
+          min: this.state.visualizationsSettings.bareme.xMinValue,
           name: this.props.baremeVariableCode,
         },
       ] : null,

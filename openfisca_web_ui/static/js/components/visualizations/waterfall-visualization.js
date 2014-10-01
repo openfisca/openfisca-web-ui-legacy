@@ -6,22 +6,27 @@ var Lazy = require('lazy.js'),
   ReactIntlMixin = require('react-intl'),
   TweenState = require('react-tween-state');
 
-var TwoColumnsLayout = require('./two-columns-layout'),
+var helpers = require('../../helpers'),
+  TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree'),
   WaterfallChart = require('./svg/waterfall-chart');
 
-var cx = React.addons.classSet;
+var cx = React.addons.classSet,
+  obj = helpers.obj;
 
 
 var WaterfallVisualization = React.createClass({
-  mixins: [React.addons.LinkedStateMixin, TweenState.Mixin, ReactIntlMixin],
+  mixins: [TweenState.Mixin, ReactIntlMixin],
   propTypes: {
-    collapsedVariables: React.PropTypes.object.isRequired,
+    collapsedVariables: React.PropTypes.object,
+    displayParametersColumn: React.PropTypes.bool,
+    displaySubtotals: React.PropTypes.bool,
+    displayVariablesColors: React.PropTypes.bool,
     formatNumber: React.PropTypes.func.isRequired,
     labelsFontSize: React.PropTypes.number,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
-    onVariableToggle: React.PropTypes.func.isRequired,
+    onSettingsChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     // variablesTree.values key is a list. This tells which index to use.
@@ -33,6 +38,11 @@ var WaterfallVisualization = React.createClass({
   },
   componentWillUnmount: function() {
     window.onresize = null;
+  },
+  componentDidUpdate: function(prevProps) {
+    if (prevProps.displayParametersColumn !== this.props.displayParametersColumn) {
+      this.handleLayoutChange();
+    }
   },
   formatHint: function(variables) {
     var variable = Lazy(variables).find({code: this.state.activeVariableCode});
@@ -58,6 +68,7 @@ var WaterfallVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
+      collapsedVariables: {},
       negativeColor: '#d9534f', // Bootstrap danger color
       noColorFill: 'gray',
       positiveColor: '#5cb85c', // Bootstrap success color
@@ -68,14 +79,11 @@ var WaterfallVisualization = React.createClass({
     return {
       activeVariableCode: null,
       chartColumnWidth: null,
-      displayParametersColumn: false,
-      displaySubtotalThinBars: false,
-      displayVariablesColors: false,
       tweenProgress: null,
     };
   },
   handleDisplayParametersColumnClick: function() {
-    this.setState({displayParametersColumn: ! this.state.displayParametersColumn}, this.handleLayoutChange);
+    this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
   },
   handleLayoutChange: function() {
     var chartColumnNode = this.refs.chartColumn.getDOMNode();
@@ -86,7 +94,10 @@ var WaterfallVisualization = React.createClass({
   },
   handleVariableToggle: function(variable) {
     if (variable.isCollapsed) {
-      this.props.onVariableToggle(variable);
+      var newSettings = {
+        collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
+      };
+      this.props.onSettingsChange(newSettings);
     }
     this.tweenState('tweenProgress', {
       beginValue: variable.isCollapsed ? 1 : 0,
@@ -95,7 +106,10 @@ var WaterfallVisualization = React.createClass({
       onEnd: () => {
         this.setState({tweenProgress: null});
         if ( ! variable.isCollapsed) {
-          this.props.onVariableToggle(variable);
+          var newSettings = {
+            collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
+          };
+          this.props.onSettingsChange(newSettings);
         }
       },
     });
@@ -163,22 +177,25 @@ var WaterfallVisualization = React.createClass({
     var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
     var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
     var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
-    var waterfallChartVariables = this.state.displaySubtotalThinBars ? displayedVariablesWithSubtotals :
+    var waterfallChartVariables = this.props.displaySubtotals ? displayedVariablesWithSubtotals :
       displayedVariablesWithoutSubtotals;
     var variablesTreeVariables = displayedVariablesWithSubtotals;
     var activeVariablesCodes = null;
+    var activeVariable;
     if (this.state.activeVariableCode) {
-      activeVariablesCodes = [this.state.activeVariableCode];
-      if (this.state.activeVariableCode !== 'revdisp') {
-        var activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
-        activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
+      activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
+      if (activeVariable) {
+        activeVariablesCodes = [this.state.activeVariableCode];
+        if (this.state.activeVariableCode !== 'revdisp') {
+          activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
+        }
+        activeVariablesCodes = activeVariablesCodes.intersection(waterfallChartVariables.map(_ => _.code));
       }
-      activeVariablesCodes = activeVariablesCodes.intersection(waterfallChartVariables.map(_ => _.code));
     }
     return (
       <TwoColumnsLayout
         leftComponentRef={'chartColumn'}
-        rightComponentRef={this.state.displayParametersColumn ? 'parametersColumn' : null}>
+        rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
         <div ref='chartColumn'>
           {
             this.state.chartColumnWidth && (
@@ -186,7 +203,7 @@ var WaterfallVisualization = React.createClass({
                 <p className='clearfix'>
                   <button
                     className={cx({
-                      active: this.state.displayParametersColumn,
+                      active: this.props.displayParametersColumn,
                       btn: true,
                       'btn-default': true,
                       'pull-right': true,
@@ -197,7 +214,7 @@ var WaterfallVisualization = React.createClass({
                 </p>
                 <WaterfallChart
                   activeVariablesCodes={activeVariablesCodes}
-                  displayVariablesColors={this.state.displayVariablesColors}
+                  displayVariablesColors={this.props.displayVariablesColors}
                   formatNumber={this.props.formatNumber}
                   labelsFontSize={this.props.labelsFontSize}
                   negativeColor={this.props.negativeColor}
@@ -211,7 +228,7 @@ var WaterfallVisualization = React.createClass({
                 />
                 <p className='text-center well'>
                   {
-                    this.state.activeVariableCode ?
+                    activeVariable ?
                       this.formatHint(variablesWithSubtotals) :
                       this.getIntlMessage('hoverOverChart')
                   }
@@ -228,9 +245,8 @@ var WaterfallVisualization = React.createClass({
             <div className='panel-body'>
               <VariablesTree
                 activeVariableCode={this.state.activeVariableCode}
-                displayVariablesColors={this.state.displayVariablesColors}
+                displayVariablesColors={this.props.displayVariablesColors}
                 formatNumber={this.props.formatNumber}
-                hoveredVariableCode={this.state.hoveredVariableCode}
                 negativeColor={this.props.negativeColor}
                 noColorFill={this.props.noColorFill}
                 onVariableHover={this.state.tweenProgress === null ? this.handleVariableHover : null}
@@ -247,13 +263,21 @@ var WaterfallVisualization = React.createClass({
             <div className='panel-body'>
               <div className='checkbox'>
                 <label>
-                  <input checkedLink={this.linkState('displaySubtotalThinBars')} type='checkbox' />
+                  <input
+                    checked={this.props.displaySubtotals}
+                    onChange={event => this.props.onSettingsChange({displaySubtotals: event.target.checked})}
+                    type='checkbox'
+                  />
                   {this.getIntlMessage('displaySubtotals')}
                 </label>
               </div>
               <div className='checkbox'>
                 <label>
-                  <input checkedLink={this.linkState('displayVariablesColors')} type='checkbox' />
+                  <input
+                    checked={this.props.displayVariablesColors}
+                    onChange={event => this.props.onSettingsChange({displayVariablesColors: event.target.checked})}
+                    type='checkbox'
+                  />
                   {this.getIntlMessage('displayVariablesColors')}
                 </label>
               </div>

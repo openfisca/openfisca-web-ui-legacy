@@ -6,21 +6,25 @@ var Lazy = require('lazy.js'),
   ReactIntlMixin = require('react-intl');
 
 var BaremeChart = require('./svg/bareme-chart'),
+  helpers = require('../../helpers'),
   TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree');
 
-var cx = React.addons.classSet;
+var cx = React.addons.classSet,
+  obj = helpers.obj;
 
 
 var BaremeVisualization = React.createClass({
-  mixins: [React.addons.LinkedStateMixin, ReactIntlMixin],
+  mixins: [ReactIntlMixin],
   propTypes: {
-    collapsedVariables: React.PropTypes.object.isRequired,
+    collapsedVariables: React.PropTypes.object,
+    displayParametersColumn: React.PropTypes.bool,
+    displaySubtotals: React.PropTypes.bool,
+    displayVariablesColors: React.PropTypes.bool,
     formatNumber: React.PropTypes.func.isRequired,
     labelsFontSize: React.PropTypes.number,
     noColorFill: React.PropTypes.string.isRequired,
-    onVariableToggle: React.PropTypes.func.isRequired,
-    onXValuesChange: React.PropTypes.func.isRequired,
+    onSettingsChange: React.PropTypes.func.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
@@ -28,6 +32,11 @@ var BaremeVisualization = React.createClass({
   componentDidMount: function() {
     window.onresize = this.handleLayoutChange;
     this.handleLayoutChange();
+  },
+  componentDidUpdate: function(prevProps) {
+    if (prevProps.displayParametersColumn !== this.props.displayParametersColumn) {
+      this.handleLayoutChange();
+    }
   },
   componentWillUnmount: function() {
     window.onresize = null;
@@ -38,19 +47,20 @@ var BaremeVisualization = React.createClass({
       var variable = Lazy(variables).find({code: this.state.activeVariableCode});
       variableName = variable.name;
     } else {
-        variableName = this.getIntlMessage('hoverOverChart');
+      variableName = this.getIntlMessage('hoverOverChart');
     }
     return variableName;
   },
   getDefaultProps: function() {
     return {
+      collapsedVariables: {},
       noColorFill: 'gray',
     };
   },
   getInitialState: function() {
     return {
       activeVariableCode: null,
-      displayParametersColumn: false,
+      chartColumnWidth: null,
     };
   },
   getVariables: function() {
@@ -89,7 +99,7 @@ var BaremeVisualization = React.createClass({
     return variables;
   },
   handleDisplayParametersColumnClick: function() {
-    this.setState({displayParametersColumn: ! this.state.displayParametersColumn}, this.handleLayoutChange);
+    this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
   },
   handleLayoutChange: function() {
     var chartColumnNode = this.refs.chartColumn.getDOMNode();
@@ -97,6 +107,14 @@ var BaremeVisualization = React.createClass({
   },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
+  },
+  handleVariableToggle: function (variable) {
+    this.props.onSettingsChange({
+      collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
+    });
+  },
+  handleXValuesChange: function (xMinValue, xMaxValue) {
+    this.props.onSettingsChange({xMinValue, xMaxValue}, true);
   },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
@@ -106,7 +124,7 @@ var BaremeVisualization = React.createClass({
     return (
       <TwoColumnsLayout
         leftComponentRef={'chartColumn'}
-        rightComponentRef={this.state.displayParametersColumn ? 'parametersColumn' : null}>
+        rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
         <div ref='chartColumn'>
           {
             this.state.chartColumnWidth && (
@@ -114,7 +132,7 @@ var BaremeVisualization = React.createClass({
                 <p className='clearfix'>
                   <button
                     className={cx({
-                      active: this.state.displayParametersColumn,
+                      active: this.props.displayParametersColumn,
                       btn: true,
                       'btn-default': true,
                       'pull-right': true,
@@ -127,8 +145,8 @@ var BaremeVisualization = React.createClass({
                   activeVariableCode={this.state.activeVariableCode}
                   formatNumber={this.props.formatNumber}
                   onVariableHover={this.handleVariableHover}
-                  onVariableToggle={this.props.onVariableToggle}
-                  onXValuesChange={this.props.onXValuesChange}
+                  onVariableToggle={this.handleVariableToggle}
+                  onXValuesChange={this.handleXValuesChange}
                   variables={variables}
                   width={this.state.chartColumnWidth}
                   xMaxValue={this.props.xMaxValue}
@@ -151,11 +169,10 @@ var BaremeVisualization = React.createClass({
                 activeVariableCode={this.state.activeVariableCode}
                 displayVariablesColors={true}
                 formatNumber={this.props.formatNumber}
-                hoveredVariableCode={this.state.hoveredVariableCode}
                 negativeColor={this.props.negativeColor}
                 noColorFill={this.props.noColorFill}
                 onVariableHover={this.handleVariableHover}
-                onVariableToggle={this.props.onVariableToggle}
+                onVariableToggle={this.handleVariableToggle}
                 positiveColor={this.props.positiveColor}
                 variables={variables}
               />
