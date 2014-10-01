@@ -40,15 +40,21 @@ var WaterfallVisualization = React.createClass({
     if (variable.value < 0) {
       [endValue, startValue] = [startValue, endValue];
     }
-    var absoluteValue = this.props.formatNumber(Math.abs(variable.value)),
-      formattedEndValue = this.props.formatNumber(endValue, {fixed: 2}),
-      formattedStartValue = this.props.formatNumber(startValue),
-      operator = variable.value > 0 ? '+' : '−',
-      variableName = variable.name;
-    var hint = startValue && endValue ?
-      `${variableName} : ${formattedStartValue} ${operator} ${absoluteValue} = ${formattedEndValue} €` : // jshint ignore:line
-      `${variableName} : ${absoluteValue} €`; // jshint ignore:line
-    return hint;
+    var absoluteValue = this.props.formatNumber(Math.abs(variable.value));
+    if (startValue && endValue) {
+      return this.formatMessage(this.getIntlMessage('waterfallHintEquation'), {
+        absoluteValue: absoluteValue,
+        formattedEndValue: this.props.formatNumber(endValue, {fixed: 2}),
+        formattedStartValue: this.props.formatNumber(startValue),
+        operator: variable.value > 0 ? '+' : '−',
+        variableName: variable.name,
+      });
+    } else {
+      return this.formatMessage(this.getIntlMessage('waterfallHintValue'), {
+        absoluteValue: absoluteValue,
+        variableName: variable.name,
+      });
+    }
   },
   getDefaultProps: function() {
     return {

@@ -61,6 +61,8 @@
   "unknownValuesAbove": "@nonTranslated",
   "variablesDecomposition": "@nonTranslated",
   "waterfall": "@nonTranslated",
+  "waterfallHintEquation": "@nonTranslated",
+  "waterfallHintValue": "@nonTranslated",
   "yes": "@nonTranslated",
   "yourTestCase": "@nonTranslated"
 }

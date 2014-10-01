@@ -61,6 +61,8 @@
   "unknownValuesAbove": "Values are unknown above {value, number, percent}",
   "variablesDecomposition": "Variables decomposition",
   "waterfall": "Waterfall",
+  "waterfallHintEquation": "{variableName} : {formattedStartValue} {operator} {absoluteValue} = {formattedEndValue} €",
+  "waterfallHintValue": "{variableName} : {absoluteValue} €",
   "yes": "Yes",
   "yourTestCase": "Your test case"
 }
