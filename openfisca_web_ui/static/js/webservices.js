@@ -70,7 +70,7 @@ function fetchCurrentTestCase(onComplete) {
 
 function fetchEntitiesMetadata(onComplete) {
   // TODO Throw exception, caught by window.onerror.
-  var onError = () => alert('Error: unable to entities metadata.');
+  var onError = () => alert('Error: unable to fetch entities metadata.');
   request
     .get(makeUrl(appconfig.api.urlPaths.entities))
     .on('error', function(error) {
