@@ -38,22 +38,24 @@ import webob
 from . import conf, contexts, controllers, environment, model, urls
 
 
-lang_re = re.compile('^/(?P<lang>ar|en|fr)(?=/|$)')
-log = logging.getLogger(__name__)
 percent_encoding_re = re.compile('%[\dA-Fa-f]{2}')
 
 
 def language_detector(app):
     """WSGI middleware that detects the language in requested URL"""
+    lang_re = re.compile('^/(?P<lang>{languages})(?=/|$)'.format(languages = u'|'.join(conf['languages'])))
+
     def detect_language(environ, start_response):
         req = webob.Request(environ)
         ctx = contexts.Ctx(req)
 
         lang_match = lang_re.match(req.path_info)
         if lang_match is None:
-            ctx.lang = [conf['default_language']]
+            default_language = conf['languages'][0]
+            ctx.lang = [default_language]
         else:
-            ctx.lang = [lang_match.group('lang')]
+            language = lang_match.group('lang')
+            ctx.lang = [language]
             req.script_name += req.path_info[:lang_match.end()]
             req.path_info = req.path_info[lang_match.end():]
 

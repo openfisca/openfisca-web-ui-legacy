@@ -29,6 +29,7 @@
 
 
 <%!
+import collections
 import datetime
 import urlparse
 
@@ -209,6 +210,13 @@ ${conf['app_name']}
 
 
 <%def name="topbar()" filter="trim">
+<%
+language_name_by_code = collections.OrderedDict([
+    ('en', u'English'),
+    ('fr', u'Français'),
+    ('ar', u'العربية'),
+    ])
+%>
     <nav class="navbar navbar-inverse" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -230,6 +238,18 @@ ${conf['app_name']}
     % if conf['enabled.auth']:
                 <%self:topbar_user/>
     % endif
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            ${language_name_by_code[ctx.lang[0]]} <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+    % for language_code, language_name in language_name_by_code.iteritems():
+                            <li><a href="${urls.get_url(ctx, language_code)}">${language_name}</a></li>
+    % endfor
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>

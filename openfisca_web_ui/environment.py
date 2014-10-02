@@ -71,24 +71,6 @@ def load_environment(global_conf, app_conf):
             'database.name': conv.default('openfisca_web_ui'),
             'database.port': conv.pipe(conv.input_to_int, conv.default(27017)),
             'debug': conv.pipe(conv.guess_bool, conv.default(False)),
-            'default_country': conv.pipe(
-                conv.input_to_slug,
-                conv.test_in([
-                    u'france',
-                    u'tunisia',
-                    ]),
-                conv.default(u'france'),
-                ),
-            'default_language': conv.pipe(
-                conv.input_to_slug,
-                conv.test_in([
-                    u'ar',
-                    u'en',
-                    u'fr',
-                    ]),
-                conv.default(u'fr'),
-                ),
-
             'enabled.auth': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.charts.locating': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.disclaimer': conv.pipe(conv.guess_bool, conv.default(True)),
@@ -103,6 +85,11 @@ def load_environment(global_conf, app_conf):
 #                    ),
 #                ),
             'i18n_dir': conv.default(os.path.join(app_dir, 'i18n')),
+            'languages': conv.pipe(
+                conv.cleanup_line,
+                conv.function(lambda value: value.split(',')),
+                conv.uniform_sequence(conv.input_to_slug),
+                ),
             'log_level': conv.pipe(
                 conv.default('WARNING'),
                 conv.function(lambda log_level: getattr(logging, log_level.upper())),
