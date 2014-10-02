@@ -24,6 +24,7 @@ var BaremeChart = React.createClass({
     labelsFontSize: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
+    maxHeightRatio: React.PropTypes.number,
     noColorFill: React.PropTypes.string.isRequired,
     onVariableHover: React.PropTypes.func,
     onVariableToggle: React.PropTypes.func,
@@ -37,12 +38,23 @@ var BaremeChart = React.createClass({
     yAxisWidth: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
+  computeChartDimensions: function () {
+    var width = this.props.width;
+    var height = this.props.height || width / this.props.aspectRatio,
+      maxHeight = window.innerHeight * this.props.maxHeightRatio;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * this.props.aspectRatio;
+    }
+    return [width, height];
+  },
   getDefaultProps: function() {
     return {
       aspectRatio: 4/3,
       labelsFontSize: 14,
       marginRight: 10,
       marginTop: 10,
+      maxHeightRatio: 2/3,
       noColorFill: 'gray',
       xAxisHeight: 100,
       yAxisWidth: 80,
@@ -95,18 +107,18 @@ var BaremeChart = React.createClass({
     this.props.onVariableHover(event.type === 'mouseover' ? variable : null);
   },
   render: function() {
-    var height = this.props.height || this.props.width / this.props.aspectRatio;
+    var [width, height] = this.computeChartDimensions();
     var revdisp = this.props.variables.find(_ => _.code === 'revdisp');
     var yMaxValue = Math.max.apply(null, revdisp.values),
       yMinValue = Math.min.apply(null, revdisp.values);
     this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
     var clipValues = value => Math.max(value, this.ySmartValues.minValue);
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
-    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    this.gridWidth = width - this.props.yAxisWidth - this.props.marginRight;
     var targetValues = variable => Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum())
       .toArray();
     return (
-      <svg height={height} width={this.props.width}>
+      <svg height={height} width={width}>
         <g transform={`translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`}>
           <HGrid
             height={this.gridHeight}

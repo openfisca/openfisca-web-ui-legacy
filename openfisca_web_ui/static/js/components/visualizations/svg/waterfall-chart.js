@@ -21,6 +21,7 @@ var WaterfallChart = React.createClass({
     labelsFontSize: React.PropTypes.number.isRequired,
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
+    maxHeightRatio: React.PropTypes.number,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onVariableHover: React.PropTypes.func,
@@ -32,6 +33,16 @@ var WaterfallChart = React.createClass({
     xAxisHeight: React.PropTypes.number.isRequired,
     yAxisWidth: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
+  },
+  computeChartDimensions: function () {
+    var width = this.props.width;
+    var height = this.props.height || width / this.props.aspectRatio,
+      maxHeight = window.innerHeight * this.props.maxHeightRatio;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * this.props.aspectRatio;
+    }
+    return [width, height];
   },
   determineYAxisRange: function(variables) {
     var maxValue = 0;
@@ -51,6 +62,7 @@ var WaterfallChart = React.createClass({
       aspectRatio: 4/3,
       marginRight: 10,
       marginTop: 10,
+      maxHeightRatio: 2/3,
       negativeColor: 'red',
       noColorFill: 'gray',
       positiveColor: 'green',
@@ -98,13 +110,13 @@ var WaterfallChart = React.createClass({
       }
       return {name, props, style};
     });
-    var height = this.props.height || this.props.width / this.props.aspectRatio;
+    var [width, height] = this.computeChartDimensions();
     var gridHeight = height - this.props.xAxisHeight - this.props.marginTop,
-      gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+      gridWidth = width - this.props.yAxisWidth - this.props.marginRight;
     var stepWidth = gridWidth / xLabels.length;
     var xAxisTransform = `translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`;
     return (
-      <svg height={height} width={this.props.width}>
+      <svg height={height} width={width}>
         <g transform={xAxisTransform}>
           <HGrid
             height={gridHeight}
