@@ -370,13 +370,20 @@ var Simulator = React.createClass({
             </div>
           ) : (
             this.state.simulationResult && (
-              <Visualization
-                onSettingsChange={this.handleVisualizationSettingsChange}
-                settings={this.state.visualizationsSettings}
-                simulationResult={this.state.simulationResult}
-                testCase={this.state.testCase}
-                visualizationSlug={this.state.visualizationSlug}
-              />
+              this.state.simulationResult.error ? (
+                <div className="alert alert-danger" role="alert">
+                  <h4>{this.getIntlMessage('error')}</h4>
+                  <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+                </div>
+              ) : (
+                <Visualization
+                  onSettingsChange={this.handleVisualizationSettingsChange}
+                  settings={this.state.visualizationsSettings}
+                  simulationResult={this.state.simulationResult}
+                  testCase={this.state.testCase}
+                  visualizationSlug={this.state.visualizationSlug}
+                />
+              )
             )
           )
         }
