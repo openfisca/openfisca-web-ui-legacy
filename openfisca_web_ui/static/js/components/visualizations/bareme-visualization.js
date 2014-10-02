@@ -17,12 +17,14 @@ var cx = React.addons.classSet,
 var BaremeVisualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
     displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
     formatNumber: React.PropTypes.func.isRequired,
     labelsFontSize: React.PropTypes.number,
+    maxHeightRatio: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
@@ -30,12 +32,12 @@ var BaremeVisualization = React.createClass({
     xMinValue: React.PropTypes.number.isRequired,
   },
   componentDidMount: function() {
-    window.onresize = this.handleLayoutChange;
-    this.handleLayoutChange();
+    window.onresize = this.handleWidthChange;
+    this.handleWidthChange();
   },
   componentDidUpdate: function(prevProps) {
     if (prevProps.displayParametersColumn !== this.props.displayParametersColumn) {
-      this.handleLayoutChange();
+      this.handleWidthChange();
     }
   },
   componentWillUnmount: function() {
@@ -53,7 +55,9 @@ var BaremeVisualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
+      chartAspectRatio: 4/3,
       collapsedVariables: {},
+      maxHeightRatio: 2/3,
       noColorFill: 'gray',
     };
   },
@@ -101,10 +105,6 @@ var BaremeVisualization = React.createClass({
   handleDisplayParametersColumnClick: function() {
     this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
   },
-  handleLayoutChange: function() {
-    var chartColumnNode = this.refs.chartColumn.getDOMNode();
-    this.setState({chartColumnWidth: chartColumnNode.offsetWidth});
-  },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
   },
@@ -112,6 +112,16 @@ var BaremeVisualization = React.createClass({
     this.props.onSettingsChange({
       collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
     });
+  },
+  handleWidthChange: function() {
+    var width = this.refs.chartColumn.getDOMNode().offsetWidth;
+    var height = this.props.height || width / this.props.chartAspectRatio,
+      maxHeight = window.innerHeight * this.props.maxHeightRatio;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * this.props.chartAspectRatio;
+    }
+    this.setState({chartColumnWidth: width});
   },
   handleXValuesChange: function (xMinValue, xMaxValue) {
     this.props.onSettingsChange({xMinValue, xMaxValue}, true);

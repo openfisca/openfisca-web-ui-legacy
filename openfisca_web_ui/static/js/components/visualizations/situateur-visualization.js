@@ -24,6 +24,7 @@ var SituateurVisualization = React.createClass({
     height: React.PropTypes.number,
     labelsFontSize: React.PropTypes.number.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
+    maxHeightRatio: React.PropTypes.number.isRequired,
     pointColor: React.PropTypes.string.isRequired,
     pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
@@ -39,8 +40,8 @@ var SituateurVisualization = React.createClass({
     yNbSteps: React.PropTypes.number.isRequired,
   },
   componentDidMount: function() {
-    window.onresize = this.handleLayoutChange;
-    this.handleLayoutChange();
+    window.onresize = this.handleWidthChange;
+    this.handleWidthChange();
   },
   componentWillUnmount: function() {
     window.onresize = null;
@@ -98,6 +99,7 @@ var SituateurVisualization = React.createClass({
       labelsFontSize: 14,
       legendHeight: 30,
       marginRight: 5,
+      maxHeightRatio: 2/3,
       pointColor: 'rgb(166, 50, 50)',
       xAxisHeight: 60,
       xMaxValue: 100,
@@ -134,8 +136,15 @@ var SituateurVisualization = React.createClass({
     }
     this.setState({snapPoint: snapPoint});
   },
-  handleLayoutChange: function() {
-    this.setState({width: this.getDOMNode().offsetWidth});
+  handleWidthChange: function() {
+    var width = this.getDOMNode().offsetWidth;
+    var height = this.props.height || width / this.props.aspectRatio,
+      maxHeight = window.innerHeight * this.props.maxHeightRatio;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * this.props.aspectRatio;
+    }
+    this.setState({width: width});
   },
   render: function() {
     this.pointsXMaxValue = Math.max(...this.props.points.map(point => point.x));
