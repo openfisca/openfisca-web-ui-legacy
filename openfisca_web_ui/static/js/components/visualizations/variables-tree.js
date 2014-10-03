@@ -50,12 +50,13 @@ var VariablesTree = React.createClass({
           <tbody>
             {
               variables.map(variable => {
-                var onVariableClick = this.props.onVariableToggle ?
-                  variable.isSubtotal && this.props.onVariableToggle.bind(null, variable) : null;
-                var isActive = this.props.activeVariableCode ? (
+                var onVariableClick = this.props.onVariableToggle && variable.isSubtotal ?
+                  this.props.onVariableToggle.bind(null, variable) :
+                  null;
+                var isActive = this.props.activeVariableCode && (
                   this.props.activeVariableCode === variable.code ||
                     activeVariable.childrenCodes && activeVariable.childrenCodes.contains(variable.code)
-                ) : false;
+                );
                 return (
                   <tr
                     className={cx({active: isActive})}
