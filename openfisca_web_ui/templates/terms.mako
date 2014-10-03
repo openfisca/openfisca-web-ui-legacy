@@ -95,7 +95,3 @@
     </p>
 </article>
 </%def>
-
-
-<%def name="scripts()" filter="trim">
-</%def>
