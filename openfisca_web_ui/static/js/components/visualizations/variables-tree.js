@@ -74,20 +74,16 @@ var VariablesTree = React.createClass({
                       }}>
                       {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}
                     </td>
-                    {
-                      variable.value && (
-                        <td
-                          className='text-right'
-                          onClick={onVariableClick}
-                          style={{
-                            color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
-                            fontStyle: variable.isSubtotal && 'italic',
-                            fontWeight: variable.depth === 0 ? 'bold' : null,
-                          }}>
-                          {this.props.formatNumber(variable.value) + ' €' /* TODO i18n jshint ignore:line */}
-                        </td>
-                      )
-                    }
+                    <td
+                      className='text-right'
+                      onClick={onVariableClick}
+                      style={{
+                        color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
+                        fontStyle: variable.isSubtotal && 'italic',
+                        fontWeight: variable.depth === 0 ? 'bold' : null,
+                      }}>
+                      {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
+                    </td>
                     <td onClick={onVariableClick}>
                       {
                         (! variable.isSubtotal || variable.isCollapsed) && (
