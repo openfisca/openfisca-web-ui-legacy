@@ -26,6 +26,7 @@
 """Helpers for URLs"""
 
 
+import itertools
 import re
 import urllib
 import urlparse
@@ -49,9 +50,14 @@ def get_base_url(ctx, full = False):
 
 
 def get_full_url(ctx, *path, **query):
+    lang = query.pop('lang', None) or ctx.lang[0]
+    static = query.pop('static', None)
     path = [
         urllib.quote(unicode(sub_fragment).encode('utf-8'), safe = ',/:').decode('utf-8')
-        for fragment in path
+        for fragment in itertools.chain(
+            [lang if not static and lang != conf['languages'][0] else None],
+            path,
+            )
         if fragment
         for sub_fragment in unicode(fragment).split(u'/')
         if sub_fragment
@@ -66,9 +72,14 @@ def get_full_url(ctx, *path, **query):
 
 
 def get_url(ctx, *path, **query):
+    lang = query.pop('lang', None) or ctx.lang[0]
+    static = query.pop('static', None)
     path = [
         urllib.quote(unicode(sub_fragment).encode('utf-8'), safe = ',/:').decode('utf-8')
-        for fragment in path
+        for fragment in itertools.chain(
+            [lang if not static and lang != conf['languages'][0] else None],
+            path,
+            )
         if fragment
         for sub_fragment in unicode(fragment).split(u'/')
         if sub_fragment
@@ -165,7 +176,7 @@ def make_router(*routings, **kwargs):
                 headers = headers,
                 )(environ, start_response)
         return wsgihelpers.not_found(ctx, explanation = ctx._(u"Page not found: {0}").format(
-            req.path_info))(environ, start_response)
+            ctx.application_path_info))(environ, start_response)
 
     return router
 

@@ -42,7 +42,7 @@ __all__ = ['Ctx']
 class Ctx(State):
     _parent = None
     default_values = dict(
-        _country = None,
+        _application_path_info = None,
         _lang = None,
         _node = UnboundLocalError,
         _session = UnboundLocalError,
@@ -50,7 +50,7 @@ class Ctx(State):
         _user = UnboundLocalError,
         req = None,
         )
-    env_keys = ('_country', '_lang', '_node', '_session', '_translator', '_user')
+    env_keys = ('_application_path_info', '_lang', '_node', '_session', '_translator', '_user')
 
     def __init__(self, req = None):
         if req is not None:
@@ -77,6 +77,24 @@ class Ctx(State):
     def _(self):
         return self.translator.ugettext
 
+    def application_path_info_del(self):
+        del self._application_path_info
+        if self.req is not None and self.req.environ.get('openfisca-web-ui') is not None \
+                and '_application_path_info' in self.req.environ['openfisca-web-ui']:
+            del self.req.environ['openfisca-web-ui']['_application_path_info']
+
+    def application_path_info_get(self):
+        application_path_info = self._application_path_info
+        assert application_path_info is not None
+        return application_path_info
+
+    def application_path_info_set(self, application_path_info):
+        self._application_path_info = application_path_info
+        if self.req is not None:
+            self.req.environ.setdefault('openfisca-web-ui', {})['_application_path_info'] = self._application_path_info
+
+    application_path_info = property(application_path_info_get, application_path_info_set, application_path_info_del)
+
     def blank_req(self, path, environ = None, base_url = None, headers = None, POST = None, **kw):  # NOQA
         env = environ.copy() if environ else {}
         openfisca_web_ui_env = env.setdefault('openfisca-web-ui', {})
@@ -85,24 +103,6 @@ class Ctx(State):
             if value is not None:
                 openfisca_web_ui_env[key] = value
         return webob.Request.blank(path, environ = env, base_url = base_url, headers = headers, POST = POST, **kw)
-
-    def country_del(self):
-        del self._country
-        if self.req is not None and self.req.environ.get('openfisca-web-ui') is not None \
-                and '_country' in self.req.environ['openfisca-web-ui']:
-            del self.req.environ['openfisca-web-ui']['_country']
-
-    def country_get(self):
-        country = self._country
-        assert country is not None
-        return country
-
-    def country_set(self, country):
-        self._country = country
-        if self.req is not None:
-            self.req.environ.setdefault('openfisca-web-ui', {})['_country'] = self._country
-
-    country = property(country_get, country_set, country_del)
 
     def get_containing(self, name, depth = 0):
         """Return the n-th (n = ``depth``) context containing attribute named ``name``."""

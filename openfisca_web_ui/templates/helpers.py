@@ -69,7 +69,7 @@ def base_appconfig(ctx):
         'debug': conf['debug'],
         'enabledModules': enabled_modules,
         'i18n': {
-            'baseUrlPath': urls.get_url(ctx, 'i18n'),
+            'baseUrlPath': urls.get_url(ctx, 'i18n', static = True),
             'onerrorMessage': ctx._(u'An error has occured in the simulator UI. The page will reload.'),
             'lang': ctx.lang[0],
             },

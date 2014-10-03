@@ -81,9 +81,9 @@ ${conf['app_name']}
 
 
 <%def name="css()" filter="trim">
-    <link href="${urls.get_url(ctx, u'dist/vendor/bootstrap/css/bootstrap.min.css')}" media="screen" rel="stylesheet">
-    <link href="${urls.get_url(ctx, u'css/typeahead.css')}" media="screen" rel="stylesheet">
-    <link href="${urls.get_url(ctx, u'css/site.css')}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'dist/vendor/bootstrap/css/bootstrap.min.css', static = True)}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'css/typeahead.css', static = True)}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'css/site.css', static = True)}" media="screen" rel="stylesheet">
 </%def>
 
 
@@ -161,8 +161,8 @@ ${conf['app_name']}
 
 <%def name="ie_scripts()" filter="trim">
     <!--[if lt IE 9]>
-    <script src="${urls.get_url(ctx, u'node_modules/html5shiv/src/html5shiv.js')}"></script>
-    <script src="${urls.get_url(ctx, u'node_modules/respond/respond.src.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/html5shiv.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/respond.src.js', static = True)}"></script>
     <![endif]-->
 </%def>
 
@@ -189,14 +189,14 @@ ${conf['app_name']}
     ## Because Persona is still in development, you should not self-host the include.js file.
     <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
 % endif
-    <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js')}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js')}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js')}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js')}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js', static = True)}"></script>
     <script>
         <%self:appconfig_script/>
     </script>
-    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.js' if conf['debug'] else u'bundle.min.js'))}"></script>
+    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.js' if conf['debug'] else u'bundle.min.js'), static = True)}"></script>
 % if conf['enabled.livereload']:
     <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
 % endif
@@ -245,7 +245,11 @@ language_name_by_code = collections.OrderedDict([
                         </a>
                         <ul class="dropdown-menu" role="menu">
     % for language_code, language_name in language_name_by_code.iteritems():
-                            <li><a href="${urls.get_url(ctx, language_code)}">${language_name}</a></li>
+                            <li>
+                                <a href="${urls.get_url(ctx, ctx.application_path_info, lang = language_code, **req.GET)}">
+                                    ${language_name}
+                                </a>
+                            </li>
     % endfor
                         </ul>
                     </li>
