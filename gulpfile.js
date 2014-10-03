@@ -17,8 +17,10 @@ var jsDir = staticDir + '/js';
 var indexJsFile = jsDir + '/index.js';
 var distDir = staticDir + '/dist';
 var vendorJsFiles = [
+  './node_modules/html5shiv/src/html5shiv.js',
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
+  './node_modules/respond/respond.src.js',
   './node_modules/es6ify/node_modules/traceur/bin/traceur-runtime.js',
 ];
 var vendorDir = distDir + '/vendor',
