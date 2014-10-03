@@ -183,7 +183,9 @@ var WaterfallVisualization = React.createClass({
     var isZeroValue = variable => variable.value === 0;
     var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
     var isCollapsed = variable => variable.isCollapsed;
-    var variablesWithSubtotals = this.removeVariables(linearizedVariables, isZeroValue);
+    var variablesWithSubtotals = linearizedVariables.every(isZeroValue) ?
+      linearizedVariables :
+      this.removeVariables(linearizedVariables, isZeroValue);
     var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
     var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
     var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
