@@ -276,9 +276,9 @@ language_name_by_code = collections.OrderedDict([
 <%
     user = model.get_user(ctx)
 %>
-        <li${u' class="active"' if req.script_name.startswith('/legislations') else '' | n}>
-            <a href="${model.Legislation.get_class_url(ctx)}">${_(u'Legislations')}</a>
-        </li>
+        ## <li${u' class="active"' if req.script_name.startswith('/legislations') else '' | n}>
+        ##     <a href="${model.Legislation.get_class_url(ctx)}">${_(u'Legislations')}</a>
+        ## </li>
         <li><a href="http://www.openfisca.fr/a-propos">${_(u'About')}</a></li>
         <li><a href="http://www.openfisca.fr/api">${_(u'API')}</a></li>
         <li><a href="/terms" title="${_(u'Terms of use')}">${_(u'EULA')}</a></li>
