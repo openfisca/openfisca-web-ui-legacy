@@ -226,7 +226,7 @@ language_name_by_code = collections.OrderedDict([
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">
+                <a class="navbar-brand" href="${urls.get_url(ctx)}">
                     <%self:brand/>
                     <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'beta')}</span>
                 </a>
@@ -281,7 +281,7 @@ language_name_by_code = collections.OrderedDict([
         ## </li>
         <li><a href="http://www.openfisca.fr/a-propos">${_(u'About')}</a></li>
         <li><a href="http://www.openfisca.fr/api">${_(u'API')}</a></li>
-        <li><a href="/terms" title="${_(u'Terms of use')}">${_(u'EULA')}</a></li>
+        <li><a href="${urls.get_url(ctx, 'terms')}" title="${_(u'Terms of use')}">${_(u'EULA')}</a></li>
 </%def>
 
 
