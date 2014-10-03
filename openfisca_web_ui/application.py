@@ -26,7 +26,6 @@
 """Middleware initialization"""
 
 
-import logging
 import re
 import urllib
 
