@@ -9,18 +9,10 @@ var TwoColumnsLayout = React.createClass({
   propTypes: {
     children: React.PropTypes.arrayOf(React.PropTypes.component).isRequired,
     leftComponentRef: React.PropTypes.string,
-    leftWidth: React.PropTypes.number.isRequired,
     rightComponentRef: React.PropTypes.string,
-    rightWidth: React.PropTypes.number.isRequired,
   },
   findChildComponent: function(ref) {
     return this.props.children.find(child => child.props.ref === ref);
-  },
-  getDefaultProps: function() {
-    return {
-      leftWidth: 7,
-      rightWidth: 5,
-    };
   },
   render: function() {
     return ! this.props.leftComponentRef || ! this.props.rightComponentRef ?
@@ -35,10 +27,10 @@ var TwoColumnsLayout = React.createClass({
       rightComponent = this.findChildComponent(this.props.rightComponentRef);
     return (
       <div className='row'>
-        <div className={`col-sm-${this.props.leftWidth}`}>
+        <div className='col-md-7'>
           {leftComponent}
         </div>
-        <div className={`col-sm-${this.props.rightWidth}`}>
+        <div className='col-md-5'>
           {rightComponent}
         </div>
       </div>

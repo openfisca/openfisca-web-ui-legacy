@@ -139,18 +139,6 @@ var BaremeVisualization = React.createClass({
           {
             this.state.chartColumnWidth && (
               <div>
-                <p className='clearfix'>
-                  <button
-                    className={cx({
-                      active: this.props.displayParametersColumn,
-                      btn: true,
-                      'btn-default': true,
-                      'pull-right': true,
-                    })}
-                    onClick={this.handleDisplayParametersColumnClick}>
-                    {this.getIntlMessage('settings')}
-                  </button>
-                </p>
                 <BaremeChart
                   activeVariableCode={this.state.activeVariableCode}
                   formatNumber={this.props.formatNumber}
@@ -164,6 +152,18 @@ var BaremeVisualization = React.createClass({
                 />
                 <p className='text-center well'>
                   {this.formatHint(variables)}
+                </p>
+                <p className='clearfix'>
+                  <button
+                    className={cx({
+                      active: this.props.displayParametersColumn,
+                      btn: true,
+                      'btn-default': true,
+                      'pull-right': true,
+                    })}
+                    onClick={this.handleDisplayParametersColumnClick}>
+                    {this.getIntlMessage('settings')}
+                  </button>
                 </p>
               </div>
             )

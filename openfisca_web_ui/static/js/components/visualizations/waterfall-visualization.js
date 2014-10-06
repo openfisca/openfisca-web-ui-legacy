@@ -212,18 +212,6 @@ var WaterfallVisualization = React.createClass({
           {
             this.state.chartColumnWidth && (
               <div>
-                <p className='clearfix'>
-                  <button
-                    className={cx({
-                      active: this.props.displayParametersColumn,
-                      btn: true,
-                      'btn-default': true,
-                      'pull-right': true,
-                    })}
-                    onClick={this.handleDisplayParametersColumnClick}>
-                    {this.getIntlMessage('settings')}
-                  </button>
-                </p>
                 <WaterfallChart
                   activeVariablesCodes={activeVariablesCodes}
                   displayVariablesColors={this.props.displayVariablesColors}
@@ -244,6 +232,18 @@ var WaterfallVisualization = React.createClass({
                       this.formatHint(variablesWithSubtotals) :
                       this.getIntlMessage('hoverOverChart')
                   }
+                </p>
+                <p className='clearfix'>
+                  <button
+                    className={cx({
+                      active: this.props.displayParametersColumn,
+                      btn: true,
+                      'btn-default': true,
+                      'pull-right': true,
+                    })}
+                    onClick={this.handleDisplayParametersColumnClick}>
+                    {this.getIntlMessage('settings')}
+                  </button>
                 </p>
               </div>
             )
