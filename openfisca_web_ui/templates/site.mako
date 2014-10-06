@@ -29,7 +29,6 @@
 
 
 <%!
-import collections
 import datetime
 import urlparse
 
@@ -45,22 +44,8 @@ window.appconfig = ${helpers.base_appconfig(ctx) | n, js};
 </%def>
 
 
-<%def name="body_content()" filter="trim">
-    <div class="container-fluid">
-        <%self:modals/>
-        <div id="js-modal"></div>
-    % if conf['enabled.disclaimer'] and (ctx.session is None or not ctx.session.disclaimer_closed):
-        <%self:disclaimer/>
-    % endif
-        <%self:breadcrumb/>
-        <%self:container_content/>
-        <%self:footer/>
-    </div>
-</%def>
-
-
 <%def name="brand()" filter="trim">
-${conf['app_name']}
+OpenFisca
 </%def>
 
 
@@ -72,7 +57,11 @@ ${conf['app_name']}
 
 
 <%def name="breadcrumb_content()" filter="trim">
-            <li><a href="${urls.get_url(ctx)}">${_(u'Home')}</a></li>
+            <li><a href="${conf['urls.www']}">${_(u'Home')}</a></li>
+            <li>
+                <a href="${urls.get_url(ctx)}">${_(u'Demonstrator')}</a>
+                <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'beta')}</span>
+            </li>
 </%def>
 
 
@@ -109,6 +98,7 @@ ${conf['app_name']}
 
 
 <%def name="disclaimer()" filter="trim">
+## TODO translate
         <div class="alert alert-warning disclaimer">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
             <p>
@@ -131,27 +121,15 @@ ${conf['app_name']}
 
 
 <%def name="footer()" filter="trim">
-        <hr>
-        <footer class="footer">
-            <%self:footer_service/>
-            <p>
-                ${_(u'{}:').format(_(u'Software'))}
-                <a href="http://www.openfisca.fr" rel="external" target="_blank">OpenFisca</a>
-                &mdash;
-                <span>${_(u'Copyright © {} OpenFisca Team').format(u', '.join(
-                    unicode(year)
-                    for year in range(2011, datetime.date.today().year + 1)
-                    ))}</span>
-                &mdash;
-                <a href="http://www.gnu.org/licenses/agpl.html" rel="external" target="_blank">
-                    ${_(u'GNU Affero General Public License')}
-                </a>
-            </p>
-        </footer>
-</%def>
-
-
-<%def name="footer_service()" filter="trim">
+<footer class="footer navbar-inverse">
+    <div class="container">
+        <ul class="nav navbar-nav">
+            <li><a href="http://stats.data.gouv.fr/index.php?idSite=4">Statistiques du site</a></li>
+            <li><a href="${urlparse.urljoin(conf['urls.www'], 'mentions-legales')}">${_('Legal terms')}</a></li>
+            <li><a href="${urls.get_url(ctx, 'privacy-policy')}">${_('Privacy policy')}</a></li>
+        </ul>
+    </div>
+</footer>
 </%def>
 
 
@@ -187,7 +165,7 @@ ${conf['app_name']}
 % if conf['enabled.auth']:
     ## Quote from persona: You must include this on every page which uses navigator.id functions.
     ## Because Persona is still in development, you should not self-host the include.js file.
-    <script src="${urlparse.urljoin(conf['persona.url'], 'include.js')}"></script>
+    <script src="${urlparse.urljoin(conf['urls.persona'], 'include.js')}"></script>
 % endif
     <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js', static = True)}"></script>
@@ -210,15 +188,8 @@ ${conf['app_name']}
 
 
 <%def name="topbar()" filter="trim">
-<%
-language_name_by_code = collections.OrderedDict([
-    ('en', u'English'),
-    ('fr', u'Français'),
-    ('ar', u'العربية'),
-    ])
-%>
-    <nav class="navbar navbar-inverse" role="navigation">
-        <div class="container-fluid">
+    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+        <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topbar-collapse">
                     <span class="sr-only">${_(u'Toggle navigation')}</span>
@@ -226,33 +197,22 @@ language_name_by_code = collections.OrderedDict([
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="${urls.get_url(ctx)}">
+                <a class="navbar-brand" href="${conf['urls.www']}">
                     <%self:brand/>
-                    <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'beta')}</span>
                 </a>
             </div>
             <div class="collapse navbar-collapse" id="topbar-collapse">
                 <ul class="nav navbar-nav">
-                    <%self:topbar_links/>
-                </ul>
     % if conf['enabled.auth']:
-                <%self:topbar_user/>
+                    <%self:topbar_ui_menu/>
     % endif
+                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'presentation')}">${_(u'Presentation')}</a></li>
+                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'documentation')}">${_(u'Documentation')}</a></li>
+                </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            ${language_name_by_code[ctx.lang[0]]} <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu" role="menu">
-    % for language_code, language_name in language_name_by_code.iteritems():
-                            <li>
-                                <a href="${urls.get_url(ctx, ctx.application_path_info, lang = language_code, **req.GET)}">
-                                    ${language_name}
-                                </a>
-                            </li>
-    % endfor
-                        </ul>
-                    </li>
+                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'a-propos')}">${_(u'About')}</a></li>
+                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'contact')}">${_(u'Contact')}</a></li>
+                    <%self:topbar_lang/>
                 </ul>
             </div>
         </div>
@@ -260,87 +220,109 @@ language_name_by_code = collections.OrderedDict([
 </%def>
 
 
-<%def name="topbar_links()" filter="trim">
-    % if model.is_admin(ctx):
-        <li class="${u'active ' if req.script_name.startswith('/admin') else ''}dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">${_(u'Administration')} <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li${u' class="active"' if req.script_name.startswith('/admin/accounts') else '' | n}>
-                    <a href="${model.Account.get_admin_class_url(ctx)}">${_(u'Accounts')}</a>
-                </li>
-                <li${u' class="active"' if req.script_name.startswith('/admin/legislations') else '' | n}>
-                    <a href="${model.Legislation.get_admin_class_url(ctx)}">${_(u'Legislations')}</a>
-                </li>
-                <li${u' class="active"' if req.script_name.startswith('/admin/sessions') else '' | n}>
-                    <a href="${model.Session.get_admin_class_url(ctx)}">${_(u'Sessions')}</a>
-                </li>
-            </ul>
-        </li>
-    % endif
+<%def name="topbar_lang()" filter="trim">
 <%
-    user = model.get_user(ctx)
-%>
-        ## <li${u' class="active"' if req.script_name.startswith('/legislations') else '' | n}>
-        ##     <a href="${model.Legislation.get_class_url(ctx)}">${_(u'Legislations')}</a>
-        ## </li>
-        <li><a href="http://www.openfisca.fr/a-propos">${_(u'About')}</a></li>
-        <li><a href="http://www.openfisca.fr/api">${_(u'API')}</a></li>
-        <li><a href="${urls.get_url(ctx, 'terms')}" title="${_(u'Terms of use')}">${_(u'EULA')}</a></li>
+country_name_by_code = {
+    'france': _(u'France'),
+    'tunisia': _(u'Tunisia'),
+    }
+language_name_by_code = {
+    'en': u'English',
+    'fr': u'Français',
+    'ar': u'العربية',
+    }
+%>\
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            ${language_name_by_code[ctx.lang[0]]} <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+            <li role="presentation" class="dropdown-header">
+                ${country_name_by_code[conf['country']]}
+            </li>
+    % for language_code in conf['languages']:
+            <li>
+                <a href="${urls.get_url(ctx, ctx.application_path_info, lang = language_code, **req.GET)}">
+                    ${language_name_by_code[language_code]}
+                </a>
+            </li>
+    % endfor
+            <li role="presentation" class="divider"></li>
+            <li role="presentation" class="dropdown-header">${_('Other countries')}</li>
+    % for country_code, country_url in conf['urls.other_ui_by_country'].iteritems():
+            <li>
+                <a href="${country_url}">
+                    ${country_name_by_code[country_code]}
+                </a>
+            </li>
+    % endfor
+        </ul>
+    </li>
 </%def>
 
 
-<%def name="topbar_user()" filter="trim">
+<%def name="topbar_ui_menu()" filter="trim">
 <%
     user = model.get_user(ctx)
 %>\
-            <ul class="nav navbar-nav navbar-right">
-    % if user is not None and user.email is not None:
-                <li${u' class="active"' if req.script_name == '/account' else '' | n}>
-                    <a href="${user.get_user_url(ctx)}" title="${_(u'My account')}">
-                        <span class="glyphicon glyphicon-user"></span> ${user.email}
-                    </a>
-                </li>
-    % endif
-    % if conf['debug']:
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        ${_(u'Authentication')} <b class="caret"></b>
+                        ${_(u'Demonstrator')} <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-        % if user is None or user.email is None:
-                        <li>
-                            <a class="sign-in" href="#">${_(u'Sign in')}</a>
+    % if model.is_admin(ctx):
+                        <li role="presentation" class="dropdown-header">${_(u'Administration')}</li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="${model.Account.get_admin_class_url(ctx)}">
+                                ${_(u'Accounts')}
+                            </a>
                         </li>
-        % endif
-                        <li>
-                            <a href="${urls.get_url(ctx, 'login', 'dummy-admin', redirect = req.path)}">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="${model.Legislation.get_admin_class_url(ctx)}">
+                                ${_(u'Legislations')}
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="${model.Session.get_admin_class_url(ctx)}">
+                                ${_(u'Sessions')}
+                            </a>
+                        </li>
+                        <li role="presentation" class="divider"></li>
+    % endif
+    % if user is None or user.email is None:
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" class="sign-in" href="#" title="${_(u'Your account and simulations')}">
+                                ${_(u'Sign in')}
+                            </a>
+                        </li>
+    % elif user is not None and user.email is not None:
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="${user.get_user_url(ctx)}" title="${_(u'My account')}">
+                                <span class="glyphicon glyphicon-user"></span> ${user.email}
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" class="sign-out" href="#">
+                                ${_(u'Sign out')}
+                            </a>
+                        </li>
+    % endif
+    % if conf['debug']:
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation" class="dropdown-header">${_(u'Debug')}</li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="${urls.get_url(ctx, 'login', 'dummy-admin', redirect = req.path)}">
                                 ${_(u'Dummy admin')}
                             </a>
                         </li>
-                        <li>
-                            <a href="${urls.get_url(ctx, 'login', 'dummy-user', redirect = req.path)}">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="${urls.get_url(ctx, 'login', 'dummy-user', redirect = req.path)}">
                                 ${_(u'Dummy user')}
                             </a>
                         </li>
-        % if user is not None and user.email is not None:
-                        <li>
-                            <a class="sign-out" href="#">${_(u'Sign out')}</a>
-                        </li>
-        % endif
+    % endif
                     </ul>
                 </li>
-    % elif user is None or user.email is None:
-                <li>
-                    <a class="sign-in" href="#" title="${_(u'Access to your account and your simulations')}">
-                        ${_(u'Sign in')}
-                    </a>
-                </li>
-    % else:
-                <li>
-                    <a class="sign-out" href="#">${_(u'Sign out')}</a>
-                </li>
-    % endif
-            </ul>
 </%def>
 
 
@@ -358,8 +340,21 @@ language_name_by_code = collections.OrderedDict([
     <%self:ie_scripts/>
 </head>
 <body>
+    <%self:modals/>
+    <div id="js-modal"></div>
     <%self:topbar/>
-    <%self:body_content/>
+    <div class="container">
+        <%self:breadcrumb/>
+    % if conf['enabled.disclaimer'] and (ctx.session is None or not ctx.session.disclaimer_closed):
+        <%self:disclaimer/>
+    % endif
+    </div>
+    <%block name="container">
+    <div class="container">
+        <%self:container_content/>
+    </div>
+    </%block>
+    <%self:footer/>
     <%self:scripts/>
     <%self:trackers/>
 </body>

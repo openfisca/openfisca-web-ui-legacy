@@ -151,9 +151,7 @@ class Ctx(State):
             del self.req.environ['openfisca-web-ui']['_lang']
 
     def lang_get(self):
-        lang = self._lang
-        assert lang is not None
-        return lang
+        return self._lang or conf['languages']
 
     def lang_set(self, lang):
         self._lang = lang

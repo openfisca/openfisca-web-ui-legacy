@@ -66,6 +66,7 @@ def load_environment(global_conf, app_conf):
             'auth.dummy_user_email': conv.pipe(conv.cleanup_line, conv.default(u'user@domain.tld')),
             'cache_dir': conv.default(os.path.join(os.path.dirname(app_dir), 'cache')),
             'cookie': conv.default('openfisca-web-ui'),
+            'country': conv.cleanup_line,
             'customs_dir': conv.default(None),
             'database.host': conv.default('localhost'),
             'database.name': conv.default('openfisca_web_ui'),
@@ -89,17 +90,13 @@ def load_environment(global_conf, app_conf):
                 conv.cleanup_line,
                 conv.function(lambda value: value.split(',')),
                 conv.uniform_sequence(conv.input_to_slug),
+                conv.not_none,
                 ),
             'log_level': conv.pipe(
                 conv.default('WARNING'),
                 conv.function(lambda log_level: getattr(logging, log_level.upper())),
                 ),
             'package_name': conv.default('openfisca-web-ui'),
-            'persona.url': conv.pipe(
-                conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
-                    full = True),
-                conv.default(u'https://login.persona.org/'),
-                ),
             'piwik.site_id': conv.input_to_int,
             'piwik.url': conv.make_input_to_url(full = True, error_if_fragment = True, error_if_path = True,
                 error_if_query = True),
@@ -109,9 +106,34 @@ def load_environment(global_conf, app_conf):
             'ui.default_year': conv.pipe(conv.input_to_int, conv.default(2013)),
             'ui.max_year': conv.pipe(conv.input_to_int, conv.default(2099)),
             'ui.min_year': conv.pipe(conv.input_to_int, conv.default(1870)),
-            'www.url': conv.pipe(
-                conv.make_input_to_url(full = True),
-                conv.default(u'http://www.openfisca.fr/'),
+            'urls.other_ui_by_country': conv.pipe(
+                conv.cleanup_line,
+                conv.function(lambda value: value.split('\n')),
+                conv.uniform_sequence(
+                    conv.pipe(
+                        conv.function(lambda value: value.split('=')),
+                        conv.uniform_sequence(conv.cleanup_line),
+                        )
+                    ),
+                conv.function(lambda value: dict(value)),
+                conv.uniform_mapping(
+                    conv.noop,
+                    conv.pipe(
+                        conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
+                            full = True),
+                        conv.not_none,
+                        )
+                    ),
+                ),
+            'urls.persona': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
+                    full = True),
+                conv.default(u'https://login.persona.org/'),
+                ),
+            'urls.www': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
+                    full = True),
+                conv.not_none,
                 ),
             },
         default = 'drop',

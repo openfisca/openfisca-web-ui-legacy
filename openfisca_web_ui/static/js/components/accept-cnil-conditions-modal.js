@@ -10,7 +10,7 @@ var AcceptCnilConditionsModal = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     actionUrlPath: React.PropTypes.string.isRequired,
-    termsUrlPath: React.PropTypes.string.isRequired,
+    privacyPolicyUrlPath: React.PropTypes.string.isRequired,
   },
   componentDidMount: function() {
     $(this.getDOMNode()).modal({
@@ -41,7 +41,7 @@ var AcceptCnilConditionsModal = React.createClass({
               </div>
               <div className="modal-body">
                 <p>
-                  <a target="_blank" href={this.props.termsUrlPath}>{this.getIntlMessage('acceptCnilConditionsModalTermsLink')}</a>
+                  <a target="_blank" href={this.props.privacyPolicyUrlPath}>{this.getIntlMessage('acceptCnilConditionsModalTermsLink')}</a>
                 </p>
                 <div className="checkbox">
                   <label>

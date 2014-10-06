@@ -50,7 +50,7 @@ def base_appconfig(ctx):
     elif user is not None and user.email is not None and not user.cnil_conditions_accepted:
         enabled_modules['acceptCnilConditionsModal'] = {
             'actionUrlPath': user.get_user_url(ctx, 'accept-cnil-conditions'),
-            'termsUrlPath': urls.get_url(ctx, 'terms'),
+            'privacyPolicyUrlPath': urls.get_url(ctx, 'privacy-policy'),
             }
     if conf['enabled.auth']:
         dummy_emails = (conf['auth.dummy_admin_email'], conf['auth.dummy_user_email'])
@@ -108,7 +108,7 @@ def index_appconfig(ctx):
                 },
             },
         })
-    appconfig['www.url'] = conf['www.url']
+    appconfig['urls.www'] = conf['urls.www']
     return appconfig
 
 

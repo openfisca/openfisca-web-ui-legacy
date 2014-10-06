@@ -67,7 +67,7 @@ var AcceptCookiesModal = React.createClass({
                   <span className="glyphicon glyphicon-ok"></span>
                   {' ' + this.getIntlMessage('accept')}
                 </button>
-                <a className="btn btn-danger" href={appconfig['www.url']}>
+                <a className="btn btn-danger" href={appconfig['urls.www']}>
                   <span className="glyphicon glyphicon-remove"></span>
                   {' ' + this.getIntlMessage('deny')}
                 </a>

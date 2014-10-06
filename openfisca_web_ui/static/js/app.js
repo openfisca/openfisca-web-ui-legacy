@@ -43,7 +43,7 @@ function init() {
         <AcceptCnilConditionsModal
           actionUrlPath={enabledModules.acceptCnilConditionsModal.actionUrlPath}
           messages={messages}
-          termsUrlPath={enabledModules.acceptCnilConditionsModal.termsUrlPath}
+          privacyPolicyUrlPath={enabledModules.acceptCnilConditionsModal.privacyPolicyUrlPath}
         />,
         jsModal
       );

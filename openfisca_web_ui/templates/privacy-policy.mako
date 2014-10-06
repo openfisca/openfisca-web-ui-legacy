@@ -26,7 +26,9 @@
 <%inherit file="site.mako"/>
 
 
-<%def name="breadcrumb()" filter="trim">
+<%def name="breadcrumb_content()" filter="trim">
+            <%parent:breadcrumb_content/>
+            <li class="active">${_('Privacy policy')}</li>
 </%def>
 
 

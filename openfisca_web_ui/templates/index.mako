@@ -37,8 +37,20 @@ window.appconfig = ${helpers.index_appconfig(ctx) | n, js};
 </%def>
 
 
-<%def name="breadcrumb()" filter="trim">
+<%def name="breadcrumb_content()" filter="trim">
+    <li><a href="${conf['urls.www']}">${_(u'Home')}</a></li>
+    <li class="active">
+        ${_(u'Demonstrator')}
+        <span class="label label-warning">${_(u'debug') if conf['debug'] else _(u'beta')}</span>
+    </li>
 </%def>
+
+
+<%block name="container">
+<div class="container-fluid">
+    <%self:container_content/>
+</div>
+</%block>
 
 
 <%def name="container_content()" filter="trim">

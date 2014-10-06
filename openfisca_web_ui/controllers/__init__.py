@@ -44,7 +44,7 @@ def accept_cookies(req):
     ctx = contexts.Ctx(req)
     if not ('accept' in req.params and conv.check(conv.guess_bool(req.params.get('accept-checkbox'))) is True):
         # User doesn't accept the use of cookies => Bye bye.
-        return wsgihelpers.redirect(ctx, location = conf['www.url'])
+        return wsgihelpers.redirect(ctx, location = conf['urls.www'])
     session = ctx.session
     if session is None:
         session = ctx.session = model.Session()
@@ -106,7 +106,7 @@ def make_router():
         (None, '^/legislations(?=/|$)', legislations.route_user_class),
         (('GET', 'POST'), '^/logout/?$', auth.logout),
         (None, '^/test_cases(?=/|$)', test_cases.route_class),
-        ('GET', '^/terms/?$', terms),
+        ('GET', '^/privacy-policy/?$', privacy_policy),
         ]
     if conf['enabled.auth']:
         routings.append(('POST', '^/login/?$', auth.login))
@@ -120,9 +120,9 @@ def make_router():
 
 
 @wsgihelpers.wsgify
-def terms(req):
+def privacy_policy(req):
     ctx = contexts.Ctx(req)
-    return templates.render(ctx, '/terms.mako')
+    return templates.render(ctx, '/privacy-policy.mako')
 
 
 def update_session(ctx):

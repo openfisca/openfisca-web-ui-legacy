@@ -264,7 +264,9 @@ var Simulator = React.createClass({
     return (
       <div className='row'>
         <div className={cx({
-          'col-sm-4': true,
+          'col-lg-3': true,
+          'col-md-3': true,
+          'col-sm-3': true,
           'hidden-xs': this.state.editedEntity,
         })}>
           <TestCaseToolbar
@@ -299,7 +301,7 @@ var Simulator = React.createClass({
             )
           }
         </div>
-        <div className="col-sm-8">
+        <div className="col-lg-9 col-md-9 col-sm-9">
           {rightPanel}
         </div>
       </div>

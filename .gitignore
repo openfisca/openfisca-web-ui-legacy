@@ -7,8 +7,7 @@
 *~
 /build
 /cache
-/config-*.ini
-/development-*.ini
+/development-local*.ini
 /dist
 /node_modules
 /npm-debug.log

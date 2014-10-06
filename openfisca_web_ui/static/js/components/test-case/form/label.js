@@ -24,7 +24,7 @@ var Label = React.createClass({
         {label}
         <a
           className="btn btn-default btn-xs"
-          href={appconfig['www.url'] + 'outils/variables/' + this.props.name}
+          href={appconfig['urls.www'] + 'outils/variables/' + this.props.name}
           style={{marginLeft: 10}}
           target="_blank"
           title={
