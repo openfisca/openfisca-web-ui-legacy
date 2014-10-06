@@ -247,16 +247,18 @@ language_name_by_code = {
                 </a>
             </li>
     % endfor
+    % if conf['urls.other_ui_by_country']:
             <li role="presentation" class="divider"></li>
             <li role="presentation" class="dropdown-header">${_('Other countries')}</li>
-    % for country_code, country_url in conf['urls.other_ui_by_country'].iteritems():
+        % for country_code, country_url in conf['urls.other_ui_by_country'].iteritems():
             <li>
                 <a href="${country_url}">
                     ${country_name_by_code[country_code]}
                 </a>
             </li>
-    % endfor
+        % endfor
         </ul>
+    % endif
     </li>
 </%def>
 
