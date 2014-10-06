@@ -258,6 +258,7 @@ var WaterfallVisualization = React.createClass({
               <VariablesTree
                 activeVariableCode={this.state.activeVariableCode}
                 displayVariablesColors={this.props.displayVariablesColors}
+                displayVariablesValues={true}
                 formatNumber={this.props.formatNumber}
                 negativeColor={this.props.negativeColor}
                 noColorFill={this.props.noColorFill}

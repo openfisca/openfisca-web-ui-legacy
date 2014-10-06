@@ -13,6 +13,7 @@ var VariablesTree = React.createClass({
   propTypes: {
     activeVariableCode: React.PropTypes.string,
     displayVariablesColors: React.PropTypes.bool,
+    displayVariablesValues: React.PropTypes.bool,
     expandedSubtotalColor: React.PropTypes.string.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     negativeColor: React.PropTypes.string.isRequired,
@@ -24,6 +25,8 @@ var VariablesTree = React.createClass({
   },
   getDefaultProps: function() {
     return {
+      displayVariablesColors: false,
+      displayVariablesValues: true,
       expandedSubtotalColor: 'lightGray',
       negativeColor: 'red',
       noColorFill: 'gray',
@@ -74,16 +77,20 @@ var VariablesTree = React.createClass({
                       }}>
                       {variable.isSubtotal ? `${variable.isCollapsed ? '▶' : '▼'} ${variable.name}` : variable.name}
                     </td>
-                    <td
-                      className='text-right'
-                      onClick={onVariableClick}
-                      style={{
-                        color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
-                        fontStyle: variable.isSubtotal && 'italic',
-                        fontWeight: variable.depth === 0 ? 'bold' : null,
-                      }}>
-                      {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
-                    </td>
+                    {
+                      this.props.displayVariablesValues && (
+                        <td
+                          className='text-right'
+                          onClick={onVariableClick}
+                          style={{
+                            color: variable.isSubtotal && ! variable.isCollapsed && this.props.expandedSubtotalColor,
+                            fontStyle: variable.isSubtotal && 'italic',
+                            fontWeight: variable.depth === 0 ? 'bold' : null,
+                          }}>
+                          {this.props.formatNumber(variable.value) + ' €' /* jshint ignore:line */}
+                        </td>
+                      )
+                    }
                     <td onClick={onVariableClick}>
                       {
                         (! variable.isSubtotal || variable.isCollapsed) && (
