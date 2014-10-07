@@ -214,8 +214,11 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
 function simulate(axes, decomposition, legislationUrl, testCase, year, onComplete) {
   var scenario = {
     legislation_url: legislationUrl, // jshint ignore:line
+    period: {
+      start: year,
+      unit: 'year',
+    },
     test_case: testCase, // jshint ignore:line
-    year: year,
   };
   if (axes) {
     scenario.axes = axes;
