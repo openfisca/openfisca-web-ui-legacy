@@ -183,7 +183,7 @@ OpenFisca
 
 
 <%def name="title_content()" filter="trim">
-<%self:brand/>
+${_(u'OpenFisca demonstrator')}
 </%def>
 
 
