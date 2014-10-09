@@ -38,21 +38,21 @@
 
     <p>
         La présente politique de confidentialité décrit les termes et conditions dans lesquels la mission Etalab
-        collecte les informations personnelles des utilisateurs de la plateforme Openfisca. Ce site a pour but
+        collecte les informations personnelles des utilisateurs de la plateforme OpenFisca. Ce site a pour but
         d'offrir un service de simulation de la situation socio-fiscale des ménages.
     </p>
 
     <h2>Collecte et utilisation des informations personnelles</h2>
 
     <p>
-        L'utilisation de la plateforme Openfisca est facultative.<br>
+        L'utilisation de la plateforme OpenFisca est facultative.<br>
         Voici comment vous pouvez être amené à fournir ces données et les types de données que vous pourriez soumettre.
         <dl>
             <dt>Simulation</dt>
             <dd>
-                Lors de l'utilisation de la plateforme Openfisca, nous vous inviterons à communiquer différents
+                Lors de l'utilisation de la plateforme OpenFisca, nous vous inviterons à communiquer différents
                 types d'informations. Vous seul pouvez choisir et décider de fournir des données personnelles à
-                travers notre site. La plateforme Openfisca est itérative, c'est-à-dire que  plus les données
+                travers notre site. La plateforme OpenFisca est itérative, c'est-à-dire que  plus les données
                 fournies sont précises et complètes, meilleure est la simulation. Le défaut de réponse aux questions
                 aura pour seule conséquence de rendre la simulation moins précise.
             </dd>
