@@ -21,7 +21,7 @@ ctags:
 	ctags --recurse=yes --exclude=node_modules --exclude=openfisca_web_ui/static/dist .
 
 flake8: clean
-	flake8 --exclude node_modules
+	flake8 --exclude cache --exclude node_modules
 
 jshint: clean
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
