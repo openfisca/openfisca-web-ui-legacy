@@ -45,13 +45,22 @@ var StringControl = React.createClass({
           }
         },
       })
-      .on(
-        'typeahead:autocompleted typeahead:selected',
-        (event, suggestion, datasetName) =>  this.props.onChange({
+      .on('typeahead:autocompleted typeahead:selected',
+        (event, suggestion, datasetName) => this.props.onChange({
           displayedValue: suggestion.main_postal_distribution,
           value: suggestion.code,
         })
-      );
+      )
+      .on('typeahead:closed', () => {
+        if (this.props.value && this.props.value.displayedValue && ! this.props.value.value) {
+          $(input).typeahead('val', '');
+        }
+      });
+    }
+  },
+  componentDidUpdate: function(prevProps) {
+    if (this.props.autocomplete && this.props.value && ! this.props.value.displayedValue) {
+      $(this.refs.input.getDOMNode()).typeahead('val', '');
     }
   },
   componentWillUnmount: function() {
@@ -61,7 +70,14 @@ var StringControl = React.createClass({
   },
   handleChange: function(event) {
     var value = event.target.value;
-    this.props.onChange(this.props.autocomplete ? {value} : value);
+    if (this.props.autocomplete) {
+      this.props.onChange({
+        displayedValue: this.props.value && this.props.value.value ? '' : value,
+        value: null,
+      });
+    } else {
+      this.props.onChange(value);
+    }
   },
   render: function() {
     return (
@@ -76,7 +92,12 @@ var StringControl = React.createClass({
           ref='input'
           required={this.props.required}
           type="text"
-          value={this.props.autocomplete ? this.props.value && this.props.value.displayedValue : this.props.value}
+          value={
+              this.props.autocomplete ? (
+                this.props.value ? this.props.value.displayedValue : ''
+              ) :
+              this.props.value
+          }
         />
         {
           this.props.cerfaField && (
