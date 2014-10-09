@@ -57,7 +57,7 @@ def get_default_lookup():
         default_lookup = mako.lookup.TemplateLookup(
             default_filters = ['h'],
             directories = dirs,
-#            error_handler = handle_mako_error,
+            # error_handler = handle_mako_error,
             input_encoding = 'utf-8',
             module_directory = os.path.join(conf['cache_dir'], 'templates'),
             strict_undefined = False,
@@ -74,7 +74,7 @@ def get_lookup(custom_name):
             custom_lookups[custom_name] = mako.lookup.TemplateLookup(
                 default_filters = ['h'],
                 directories = [custom_templates_dir] + dirs,
-#                error_handler = handle_mako_error,
+                # error_handler = handle_mako_error,
                 input_encoding = 'utf-8',
                 module_directory = os.path.join(conf['cache_dir'], 'templates-{}'.format(custom_name)),
                 strict_undefined = False,

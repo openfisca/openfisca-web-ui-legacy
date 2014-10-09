@@ -29,13 +29,12 @@
 import collections
 import datetime
 import re
-import requests
 import urllib
 
 import babel.dates
 from biryani1 import strings
 
-from . import conf, conv, objects, urls, wsgihelpers
+from . import conv, objects, urls, wsgihelpers
 
 
 class Account(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, objects.ActivityStreamWrapper):

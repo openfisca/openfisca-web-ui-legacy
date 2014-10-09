@@ -77,14 +77,14 @@ def load_environment(global_conf, app_conf):
             'enabled.disclaimer': conv.pipe(conv.guess_bool, conv.default(True)),
             'enabled.livereload': conv.pipe(conv.guess_bool, conv.default(False)),
             'global_conf': conv.set_value(global_conf),
-#            'host_urls': conv.pipe(
-#                conv.function(lambda host_urls: host_urls.split()),
-#                conv.uniform_sequence(
-#                    conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
-#                        full = True, schemes = (u'ws', u'wss')),
-#                    constructor = lambda host_urls: sorted(set(host_urls)),
-#                    ),
-#                ),
+            # 'host_urls': conv.pipe(
+            #    conv.function(lambda host_urls: host_urls.split()),
+            #    conv.uniform_sequence(
+            #        conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
+            #            full = True, schemes = (u'ws', u'wss')),
+            #        constructor = lambda host_urls: sorted(set(host_urls)),
+            #        ),
+            #    ),
             'i18n_dir': conv.default(os.path.join(app_dir, 'i18n')),
             'languages': conv.pipe(
                 conv.cleanup_line,
