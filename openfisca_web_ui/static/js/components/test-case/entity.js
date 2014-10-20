@@ -22,7 +22,7 @@ var Entity = React.createClass({
         <div className="panel-heading">
           <div className="btn-group">
             <button
-              className={cx('btn', 'btn-default', 'btn-sm', this.props.active && 'active')}
+              className={cx('btn', 'btn-default', 'btn-sm', this.props.active ? 'active' : null)}
               onClick={this.props.onEdit}
               type="button">
               {this.props.label}

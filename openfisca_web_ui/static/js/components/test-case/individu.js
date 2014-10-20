@@ -26,7 +26,7 @@ var Individu = React.createClass({
       <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
           <button
-            className={cx('btn', btnColorClass, 'btn-sm', this.props.active && 'active')}
+            className={cx('btn', btnColorClass, 'btn-sm', this.props.active ? 'active' : null)}
             onClick={this.props.onEdit}
             type="button">
             {this.props.name}
