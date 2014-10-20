@@ -1,11 +1,13 @@
 /** @jsx React.DOM */
 'use strict';
 
-var deepEqual = require('deep-equal'),
+var toCsv = require('to-csv'),
+  deepEqual = require('deep-equal'),
   invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   React = require('react'),
   ReactIntlMixin = require('react-intl'),
+  saveAs = require('filesaver.js'),
   shallowEqual = require('react/lib/shallowEqual'),
   uuid = require('uuid');
 
@@ -130,6 +132,48 @@ var Simulator = React.createClass({
     if (confirm(message)) {
       var newTestCase = models.withoutIndividu(id, this.props.entitiesMetadata, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
+    }
+  },
+  handleDownload: function(dataKind, format) {
+    function treeToArray(tree) {
+      var array = [];
+      var walk = variable => {
+        if (variable.children) {
+          variable.children.forEach(child => {
+            walk(child);
+          });
+        }
+        array.push(variable);
+      };
+      walk(tree);
+      return array;
+    }
+
+    if (dataKind === 'simulationResult') {
+      if (format === 'csv') {
+        var variables = treeToArray(this.state.simulationResult);
+        var data = variables.map(variable => {
+          return {
+            code: variable.code,
+            name: variable.name,
+            values: variable.values,
+          };
+        });
+        saveAs(
+          new Blob([toCsv(data)], {type: "text/csv"}),
+          this.formatMessage(this.getIntlMessage('simulationResultFilename'), {extension: 'csv'})
+        );
+      } else if (format === 'json') {
+        saveAs(
+          new Blob([JSON.stringify(this.state.simulationResult, null, 2)], {type: "application/json"}),
+          this.formatMessage(this.getIntlMessage('simulationResultFilename'), {extension: 'json'})
+        );
+      }
+    } else if (dataKind === 'testCase') {
+      saveAs(
+        new Blob([JSON.stringify(this.state.testCase, null, 2)], {type: "application/json"}),
+        this.formatMessage(this.getIntlMessage('testCaseFilename'), {extension: 'json'})
+      );
     }
   },
   handleEditEntity: function(kind, id) {
@@ -379,10 +423,10 @@ var Simulator = React.createClass({
                 </div>
               ) : (
                 <Visualization
+                  onDownload={this.handleDownload}
                   onSettingsChange={this.handleVisualizationSettingsChange}
                   settings={this.state.visualizationsSettings}
                   simulationResult={this.state.simulationResult}
-                  testCase={this.state.testCase}
                   visualizationSlug={this.state.visualizationSlug}
                 />
               )

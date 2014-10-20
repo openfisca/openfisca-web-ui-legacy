@@ -1,29 +1,25 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
-  React = require('react'),
+var React = require('react'),
   ReactIntlMixin = require('react-intl');
 
 var BaremeVisualization = require('./visualizations/bareme-visualization'),
   helpers = require('../helpers'),
-  JsonVisualization = require('./visualizations/json-visualization'),
   revdispDistribution = require('../../data/revdisp-distribution.json'),
   salDistribution = require('../../data/sal-distribution.json'),
   SituateurVisualization = require('./visualizations/situateur-visualization'),
   WaterfallVisualization = require('./visualizations/waterfall-visualization');
-
-var obj = helpers.obj;
 
 
 var Visualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     labelsFontSize: React.PropTypes.number.isRequired,
+    onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
-    testCase: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   getDefaultProps: function() {
@@ -43,6 +39,7 @@ var Visualization = React.createClass({
             displayParametersColumn={this.props.settings.bareme.displayParametersColumn}
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
+            onDownload={this.props.onDownload}
             onSettingsChange={this.handleSettingsChange}
             onXValuesChange={(xMinValue, xMaxValue) => this.handleSettingsChange({xMinValue, xMaxValue}, true)}
             variablesTree={this.props.simulationResult}
@@ -54,8 +51,6 @@ var Visualization = React.createClass({
         return this.renderSituateur('revdisp');
       case 'situateur-sal':
         return this.renderSituateur('sal');
-      case 'json':
-        return <JsonVisualization simulationResult={this.props.simulationResult} testCase={this.props.testCase} />;
       case 'waterfall':
         return (
           <WaterfallVisualization
@@ -65,6 +60,7 @@ var Visualization = React.createClass({
             displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
+            onDownload={this.props.onDownload}
             onSettingsChange={this.handleSettingsChange}
             variablesTree={this.props.simulationResult}
           />

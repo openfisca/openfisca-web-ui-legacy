@@ -28,6 +28,7 @@ var WaterfallVisualization = React.createClass({
     maxHeightRatio: React.PropTypes.number.isRequired,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
+    onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
@@ -125,7 +126,7 @@ var WaterfallVisualization = React.createClass({
     this.setState({chartColumnWidth: width});
   },
   linearizeVariables: function() {
-    // Transform this.props.variablesTree into a list and compute base values for waterfall.
+    // Transform this.props.variablesTree into an array and compute base values for waterfall.
     // Also rename snake case keys to camel case.
     var valueIndex = this.props.variablesTreeValueIndex;
     function extractChildrenCodes(node) {
@@ -242,7 +243,7 @@ var WaterfallVisualization = React.createClass({
                       'pull-right': true,
                     })}
                     onClick={this.handleDisplayParametersColumnClick}>
-                    {this.getIntlMessage('settings')}
+                    {this.getIntlMessage('details')}
                   </button>
                 </p>
               </div>
@@ -271,7 +272,7 @@ var WaterfallVisualization = React.createClass({
           </div>
           <div className='panel panel-default'>
             <div className='panel-heading'>
-              {this.getIntlMessage('advancedSettings')}
+              {this.getIntlMessage('displayParameters')}
             </div>
             <div className='panel-body'>
               <div className='checkbox'>
@@ -293,6 +294,40 @@ var WaterfallVisualization = React.createClass({
                   />
                   {this.getIntlMessage('displayVariablesColors')}
                 </label>
+              </div>
+            </div>
+          </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              {this.getIntlMessage('rawData')}
+            </div>
+            <div className='list-group'>
+              <div className='list-group-item'>
+                <p>
+                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={() => this.props.onDownload('testCase', 'json')}>
+                    {this.getIntlMessage('downloadJSON')}
+                  </button>
+                </p>
+              </div>
+              <div className='list-group-item'>
+                <p>
+                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={() => this.props.onDownload('simulationResult', 'json')}
+                    style={{marginRight: '1em'}}>
+                    {this.getIntlMessage('downloadJSON')}
+                  </button>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={() => this.props.onDownload('simulationResult', 'csv')}
+                    >
+                    {this.getIntlMessage('downloadCSV')}
+                  </button>
+                </p>
               </div>
             </div>
           </div>

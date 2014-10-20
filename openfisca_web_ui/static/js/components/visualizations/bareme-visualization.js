@@ -26,6 +26,7 @@ var BaremeVisualization = React.createClass({
     labelsFontSize: React.PropTypes.number,
     maxHeightRatio: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
+    onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     xMaxValue: React.PropTypes.number.isRequired,
@@ -162,7 +163,7 @@ var BaremeVisualization = React.createClass({
                       'pull-right': true,
                     })}
                     onClick={this.handleDisplayParametersColumnClick}>
-                    {this.getIntlMessage('settings')}
+                    {this.getIntlMessage('details')}
                   </button>
                 </p>
               </div>
@@ -187,6 +188,40 @@ var BaremeVisualization = React.createClass({
                 positiveColor={this.props.positiveColor}
                 variables={variables}
               />
+            </div>
+          </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              {this.getIntlMessage('rawData')}
+            </div>
+            <div className='list-group'>
+              <div className='list-group-item'>
+                <p>
+                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={() => this.props.onDownload('testCase', 'json')}>
+                    {this.getIntlMessage('downloadJSON')}
+                  </button>
+                </p>
+              </div>
+              <div className='list-group-item'>
+                <p>
+                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={() => this.props.onDownload('simulationResult', 'json')}
+                    style={{marginRight: '1em'}}>
+                    {this.getIntlMessage('downloadJSON')}
+                  </button>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={() => this.props.onDownload('simulationResult', 'csv')}
+                    >
+                    {this.getIntlMessage('downloadCSV')}
+                  </button>
+                </p>
+              </div>
             </div>
           </div>
         </div>

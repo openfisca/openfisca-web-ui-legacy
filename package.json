@@ -26,6 +26,7 @@
     "deep-equal": "^0.2.1",
     "es5-ext": "^0.10.4",
     "es5-extend": "^0.1.1",
+    "filesaver.js": "^0.1.0",
     "html5shiv": "^3.7.2",
     "jquery": "^2.1.1",
     "lazy.js": "git+https://github.com/dtao/lazy.js.git",
@@ -34,6 +35,7 @@
     "react-tween-state": "0.0.2",
     "respond": "^0.9.0",
     "superagent": "^0.18.0",
+    "to-csv": "0.0.3",
     "typeahead.js": "^0.10.5",
     "uuid": "^1.4.1"
   },

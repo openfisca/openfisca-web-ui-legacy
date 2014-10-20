@@ -21,7 +21,6 @@ var VisualizationSelect = React.createClass({
         <option value="bareme">{this.getIntlMessage('bareme')}</option>
         <option value="situateur-revdisp">{this.getIntlMessage('situatorOfRevdisp')}</option>
         <option value="situateur-sal">{this.getIntlMessage('situatorOfSal')}</option>
-        <option value="json">{this.getIntlMessage('jsonExport')}</option>
       </select>
     );
   }
