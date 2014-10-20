@@ -1,5 +1,3 @@
-.PHONY: clean flake8 jshint
-
 STATIC_DIR=openfisca_web_ui/static
 
 all: check test
@@ -12,22 +10,30 @@ build-prod:
 
 check: flake8 jshint
 
-clean:
+check-syntax-errors: clean-pyc
+	@# This is a hack around flake8 not displaying E910 errors with the select option.
+	test -z "`flake8 --first | grep E901`"
+
+clean: clean-js-build clean-pyc
 	rm -Rf cache/templates/
-	find -name '*.pyc' -exec rm \{\} \;
+
+clean-js-build:
 	./node_modules/.bin/gulp clean
+
+clean-pyc:
+	find -name '*.pyc' -exec rm \{\} \;
 
 ctags:
 	ctags --recurse=yes --exclude=node_modules --exclude=openfisca_web_ui/static/dist .
 
-flake8: clean
-	flake8 --exclude cache --exclude node_modules
+flake8: clean-pyc
+	flake8
 
-jshint: clean
+jshint: clean-js-build
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 
-test:
-	python setup.py test
+test: check-syntax-errors
+	nosetests openfisca_web_ui/tests
 
 update-i18n: update-i18n-js update-i18n-python
 
