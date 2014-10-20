@@ -3,7 +3,8 @@
 
 var Lazy = require('lazy.js'),
   React = require('react/addons'),
-  ReactIntlMixin = require('react-intl');
+  ReactIntlMixin = require('react-intl'),
+  saveAs = require('filesaver.js');
 
 var BaremeChart = require('./svg/bareme-chart'),
   helpers = require('../../helpers'),
@@ -106,6 +107,14 @@ var BaremeVisualization = React.createClass({
   handleDisplayParametersColumnClick: function() {
     this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
   },
+  handleChartDownload: function() {
+    var svg = this.refs.chart.getDOMNode();
+    var serializer = new XMLSerializer();
+    saveAs(
+      new Blob([serializer.serializeToString(svg)], {type: "image/svg+xml"}),
+      this.formatMessage(this.getIntlMessage('baremeFilename'), {extension: 'svg'})
+    );
+  },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
   },
@@ -146,6 +155,7 @@ var BaremeVisualization = React.createClass({
                   onVariableHover={this.handleVariableHover}
                   onVariableToggle={this.handleVariableToggle}
                   onXValuesChange={this.handleXValuesChange}
+                  ref='chart'
                   variables={variables}
                   width={this.state.chartColumnWidth}
                   xMaxValue={this.props.xMaxValue}
@@ -219,6 +229,17 @@ var BaremeVisualization = React.createClass({
                     onClick={() => this.props.onDownload('simulationResult', 'csv')}
                     >
                     {this.getIntlMessage('downloadCSV')}
+                  </button>
+                </p>
+              </div>
+              <div className='list-group-item'>
+                <p>
+                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
+                  <button
+                    className='btn btn-default btn-xs'
+                    onClick={this.handleChartDownload}
+                    >
+                    {this.getIntlMessage('downloadSVG')}
                   </button>
                 </p>
               </div>
