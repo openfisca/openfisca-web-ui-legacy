@@ -6,7 +6,7 @@ var React = require('react');
 var CerfaField = require('./cerfa-field');
 
 
-var IntegerControl = React.createClass({
+var NumberControl = React.createClass({
   propTypes: {
     cerfaField: React.PropTypes.any,
     default: React.PropTypes.number,
@@ -18,29 +18,36 @@ var IntegerControl = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.number,
     suggestionIcon: React.PropTypes.component,
-    value: React.PropTypes.number,
+    type: React.PropTypes.string.isRequired,
+    value: React.PropTypes.string,
     valType: React.PropTypes.string,
   },
-  handleChange: function(event) {
-    var value = event.target.valueAsNumber;
-    if (isNaN(value)) {
-      value = parseInt(event.target.value);
-      if (isNaN(value)) {
-        value = null;
-      }
+  componentDidMount: function() {
+    this.setState({isValid: this.refs.input.getDOMNode().validity.valid});
+  },
+  componentDidUpdate: function() {
+    var isValid = this.refs.input.getDOMNode().validity.valid;
+    if (this.state.isValid !== isValid) {
+      this.setState({isValid: isValid});
     }
-    this.props.onChange(value);
+  },
+  getInitialState: function() {
+    return {
+      isValid: null,
+    };
   },
   render: function() {
+    console.log(this.state.isValid);
     var input = (
       <input
         className="form-control"
         id={this.props.name}
         max={this.props.max}
         min={this.props.min}
-        onChange={this.handleChange}
+        onChange={event => this.props.onChange(event.target.value)}
         placeholder={this.props.suggestion || this.props.default}
-        step="1"
+        ref='input'
+        step={this.props.type === 'Integer' ? 1 : 'any'}
         type="number"
         value={this.props.value}
       />
@@ -51,16 +58,18 @@ var IntegerControl = React.createClass({
         {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <div className="row">
           <div className="col-md-4">
-            {
-              this.props.valType === 'monetary' ? (
-                <div className="input-group">
-                  {input}
-                  <span className="input-group-addon">
-                    {this.props.valType === 'monetary' && <span className="glyphicon glyphicon-euro"></span>}
-                  </span>
-                </div>
-              ) : input
-            }
+            <div className={this.state.isValid === false ? 'has-error' : null}>
+              {
+                this.props.valType === 'monetary' ? (
+                  <div className="input-group">
+                    {input}
+                    <span className="input-group-addon">
+                      {this.props.valType === 'monetary' && <span className="glyphicon glyphicon-euro"></span>}
+                    </span>
+                  </div>
+                ) : input
+              }
+            </div>
           </div>
           {
             this.props.cerfaField && (
@@ -75,4 +84,4 @@ var IntegerControl = React.createClass({
   }
 });
 
-module.exports = IntegerControl;
+module.exports = NumberControl;

@@ -10,8 +10,8 @@ var BooleanControl = require('./boolean-control'),
   Category = require('./category'),
   DateControl = require('./date-control'),
   EnumerationControl = require('./enumeration-control'),
-  IntegerControl = require('./integer-control'),
   Label = require('./label'),
+  NumberControl = require('./number-control'),
   StringControl = require('./string-control'),
   SuggestionIcon = require('../suggestion-icon');
 
@@ -113,9 +113,10 @@ var FieldsForm = React.createClass({
           />
         );
         break;
+      case 'Float':
       case 'Integer':
         control = (
-          <IntegerControl
+          <NumberControl
             cerfaField={cerfaField}
             default={column.default}
             error={error}
@@ -126,7 +127,8 @@ var FieldsForm = React.createClass({
             onChange={this.props.onChange.bind(null, column)}
             suggestion={suggestion}
             suggestionIcon={suggestionIcon}
-            value={value}
+            type={column['@type']}
+            value={value ? value.toString() : null}
             valType={column.val_type} // jshint ignore:line
           />
         );
@@ -149,7 +151,7 @@ var FieldsForm = React.createClass({
         );
         break;
       default:
-        invariant(false, 'column type not expected for column: %s', column);
+        invariant(false, 'column type not expected, column.name: %s, column.type: %s', column.name, column['@type']);
     }
     return (
       <div className={cx('form-group', error && 'has-error')} key={column.name}>

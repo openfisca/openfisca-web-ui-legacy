@@ -177,38 +177,47 @@ var Simulator = React.createClass({
     }
   },
   handleEditEntity: function(kind, id) {
-    var newEditedEntity = {action: 'edit', id: id, kind: kind};
     var nameKey = this.props.entitiesMetadata[kind].nameKey;
-    newEditedEntity[nameKey] = this.state.testCase[kind][id][nameKey];
+    var name = this.state.testCase[kind][id][nameKey];
+    var newEditedEntity = {action: 'edit', changedValues: obj(nameKey, name), id: id, kind: kind};
     this.setState({editedEntity: newEditedEntity});
   },
   handleEditFormClose: function() {
     var {action, id, kind} = this.state.editedEntity;
     var changeset = {editedEntity: null};
     if (action === 'edit') {
-      var nameKey = this.props.entitiesMetadata[kind].nameKey;
-      var newTestCase = helpers.assignIn(this.state.testCase, [kind, id, nameKey], this.state.editedEntity[nameKey]);
+      var sanitizedChangedValues = Lazy(this.state.editedEntity.changedValues).map((value, columnName) => {
+        var columnType = this.props.columns[columnName]['@type'];
+        if (columnType === 'Integer') {
+          value = parseInt(value);
+          if (isNaN(value)) {
+            value = null;
+          }
+        } else if (columnType === 'Float') {
+          value = parseFloat(value);
+          if (isNaN(value)) {
+            value = null;
+          }
+        }
+        return [columnName, value];
+      }).toObject();
+      var newEntity = Lazy(this.state.testCase[kind][id]).assign(sanitizedChangedValues).toObject();
+      var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newEntity);
       changeset.testCase = newTestCase;
     }
     this.setState(changeset, this.repair);
   },
   handleFieldsFormChange: function(kind, id, column, value) {
-    var nameKey = this.props.entitiesMetadata[kind].nameKey;
-    if (column.name === nameKey) {
-      var newEditedEntity = Lazy(this.state.editedEntity).assign(obj(column.name, value)).toObject();
-      this.setState({editedEntity: newEditedEntity});
-    } else {
-      var newValue = column.autocomplete ? value.value : value;
-      var newValues = Lazy(this.state.testCase[kind][id]).assign(obj(column.name, newValue)).toObject();
-      var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newValues);
-      var changeset = {testCase: newTestCase};
-      if (column.autocomplete) {
-        var newTestCaseAdditionalData = Lazy(this.state.testCaseAdditionalData)
-          .assign(obj(column.name, value.displayedValue)).toObject();
-        changeset.testCaseAdditionalData = newTestCaseAdditionalData;
-      }
-      this.setState(changeset);
+    var newValue = column.autocomplete ? value.value : value;
+    var newChangedValues = Lazy(this.state.editedEntity.changedValues).assign(obj(column.name, newValue)).toObject();
+    var newEditedEntity = helpers.assignIn(this.state.editedEntity, ['changedValues'], newChangedValues);
+    if (column.autocomplete) {
+      var newChangedAdditionalData = Lazy(this.state.editedEntity.changedAdditionalData)
+        .assign(obj(column.name, value.displayedValue)).toObject();
+      newEditedEntity = helpers.assignIn(newEditedEntity, ['changedAdditionalData'], newChangedAdditionalData);
     }
+    var changeset = {editedEntity: newEditedEntity};
+    this.setState(changeset);
   },
   handleMoveIndividu: function(id) {
     var newEditedEntity = {action: 'move', id: id, kind: 'individus'};
@@ -365,15 +374,13 @@ var Simulator = React.createClass({
     })).toArray(); // jshint ignore:line
     var errors = helpers.getObjectPath(this.state.errors, 'test_case', kind, id);
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
-    var nameKey = this.props.entitiesMetadata[kind].nameKey;
-    var editedValues = obj(nameKey, this.state.editedEntity[nameKey]);
     var additionalDataValues = 'depcom' in entity ? {
       depcom: {
         displayedValue: this.state.testCaseAdditionalData.depcom,
         value: entity.depcom,
       },
     } : {};
-    var values = Lazy(entity).assign(editedValues).assign(additionalDataValues).toObject();
+    var values = Lazy(entity).assign(this.state.editedEntity.changedValues).assign(additionalDataValues).toObject();
     return (
       <EditForm
         onClose={this.handleEditFormClose}
