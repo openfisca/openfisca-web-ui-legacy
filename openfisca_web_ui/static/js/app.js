@@ -71,12 +71,21 @@ function init() {
             var {columns, columnsTree} = fields;
             var Simulator = require('./components/simulator'),
               mountNode = document.getElementById('simulator-container');
+            var formats = {
+              number: {
+                currencyStyle: {
+                  currency: 'EUR', // TODO parametrize in appconfig
+                  style: 'currency',
+                },
+              },
+            };
             React.renderComponent(
               <Simulator
                 columns={columns}
                 columnsTree={columnsTree}
                 disableSave={ !! enabledModules.acceptCookiesModal}
                 entitiesMetadata={entitiesMetadata}
+                formats={formats}
                 locales={appconfig.i18n.lang}
                 messages={messages}
               />,

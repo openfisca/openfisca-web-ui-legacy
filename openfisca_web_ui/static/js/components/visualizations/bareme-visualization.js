@@ -234,8 +234,8 @@ var BaremeVisualization = React.createClass({
                 <span style={{marginRight: '1em'}}>
                   {
                     this.formatMessage(this.getIntlMessage('fromMinToMax'), {
-                      max: this.props.xMaxValue.toString(),
-                      min: this.props.xMinValue.toString(),
+                      max: this.props.xMaxValue,
+                      min: this.props.xMinValue,
                     })
                   }
                 </span>

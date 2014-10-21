@@ -38,7 +38,7 @@
   "edit": "Éditer",
   "editFormTitle": "Éditer {name}",
   "error": "Erreur",
-  "fromMinToMax": "de {min} à {max}",
+  "fromMinToMax": "de {min, number, currencyStyle} à {max, number, currencyStyle}",
   "hoverOverChart": "Survolez le graphique",
   "incorrectSituation": "Situation incorrecte",
   "incorrectSituationExplanation": "Certaines entités ou certains individus comportent des erreurs. Voici vos options :",
