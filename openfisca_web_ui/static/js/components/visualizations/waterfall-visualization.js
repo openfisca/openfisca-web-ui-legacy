@@ -24,6 +24,7 @@ var WaterfallVisualization = React.createClass({
     displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
+    downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     labelsFontSize: React.PropTypes.number,
     maxHeightRatio: React.PropTypes.number.isRequired,
@@ -89,10 +90,14 @@ var WaterfallVisualization = React.createClass({
     };
   },
   handleChartDownload: function() {
-    var svg = this.refs.chart.getDOMNode();
-    var serializer = new XMLSerializer();
+    var newProps = Lazy(this.refs.chart.props).omit(['ref']).assign({
+      attribution: this.props.downloadAttribution,
+      height: null,
+      width: 800,
+    }).toObject();
+    var svgString = React.renderComponentToStaticMarkup(WaterfallChart(newProps));
     saveAs(
-      new Blob([serializer.serializeToString(svg)], {type: "image/svg+xml"}),
+      new Blob([svgString], {type: "image/svg+xml"}),
       this.formatMessage(this.getIntlMessage('waterfallFilename'), {extension: 'svg'})
     );
   },
@@ -309,7 +314,7 @@ var WaterfallVisualization = React.createClass({
           </div>
           <div className='panel panel-default'>
             <div className='panel-heading'>
-              {this.getIntlMessage('rawData')}
+              {this.getIntlMessage('dataExport')}
             </div>
             <div className='list-group'>
               <div className='list-group-item'>

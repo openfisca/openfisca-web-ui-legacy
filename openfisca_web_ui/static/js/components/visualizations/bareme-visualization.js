@@ -23,6 +23,7 @@ var BaremeVisualization = React.createClass({
     displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
+    downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     labelsFontSize: React.PropTypes.number,
     maxHeightRatio: React.PropTypes.number.isRequired,
@@ -108,10 +109,14 @@ var BaremeVisualization = React.createClass({
     this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
   },
   handleChartDownload: function() {
-    var svg = this.refs.chart.getDOMNode();
-    var serializer = new XMLSerializer();
+    var newProps = Lazy(this.refs.chart.props).omit(['ref']).assign({
+      attribution: this.props.downloadAttribution,
+      height: null,
+      width: 800,
+    }).toObject();
+    var svgString = React.renderComponentToStaticMarkup(BaremeChart(newProps));
     saveAs(
-      new Blob([serializer.serializeToString(svg)], {type: "image/svg+xml"}),
+      new Blob([svgString], {type: "image/svg+xml"}),
       this.formatMessage(this.getIntlMessage('baremeFilename'), {extension: 'svg'})
     );
   },
@@ -133,8 +138,29 @@ var BaremeVisualization = React.createClass({
     }
     this.setState({chartColumnWidth: width});
   },
-  handleXValuesChange: function (xMinValue, xMaxValue) {
-    this.props.onSettingsChange({xMinValue, xMaxValue}, true);
+  handleXAxisBoundsChange: function() {
+    function promptValue(message, defaultValue) {
+      var newValue = prompt(message, defaultValue);
+      if (newValue === null) {
+        newValue = defaultValue;
+      } else {
+        newValue = Number(newValue);
+        if (isNaN(newValue)) {
+          alert('Valeur invalide');
+          newValue = null;
+        }
+      }
+      return newValue;
+    }
+    var newXMinValue = promptValue('Valeur minimum', this.props.xMinValue);
+    var newXMaxValue = promptValue('Valeur maximum', this.props.xMaxValue);
+    if (newXMinValue !== null && newXMaxValue !== null) {
+      if (newXMinValue < newXMaxValue) {
+        this.props.onSettingsChange({xMinValue: newXMinValue, xMaxValue: newXMaxValue}, true);
+      } else {
+        alert(this.getIntlMessage('minimumValueLessThanMaximumValueExplanation'));
+      }
+    }
   },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
@@ -154,7 +180,6 @@ var BaremeVisualization = React.createClass({
                   formatNumber={this.props.formatNumber}
                   onVariableHover={this.handleVariableHover}
                   onVariableToggle={this.handleVariableToggle}
-                  onXValuesChange={this.handleXValuesChange}
                   ref='chart'
                   variables={variables}
                   width={this.state.chartColumnWidth}
@@ -202,7 +227,30 @@ var BaremeVisualization = React.createClass({
           </div>
           <div className='panel panel-default'>
             <div className='panel-heading'>
-              {this.getIntlMessage('rawData')}
+              {this.getIntlMessage('xAxisBounds')}
+            </div>
+            <div className='panel-body'>
+              <p>
+                <span style={{marginRight: '1em'}}>
+                  {
+                    this.formatMessage(this.getIntlMessage('fromMinToMax'), {
+                      max: this.props.xMaxValue.toString(),
+                      min: this.props.xMinValue.toString(),
+                    })
+                  }
+                </span>
+                <button
+                  className='btn btn-default btn-xs'
+                  onClick={this.handleXAxisBoundsChange}
+                  >
+                  {this.getIntlMessage('modify')}
+                </button>
+              </p>
+            </div>
+          </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              {this.getIntlMessage('dataExport')}
             </div>
             <div className='list-group'>
               <div className='list-group-item'>

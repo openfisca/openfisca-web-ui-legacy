@@ -23,6 +23,7 @@
   "close": "Close",
   "columnExplanationLink": "?",
   "columnExplanationLinkTitle": "Explanation on {columnName}",
+  "dataExport": "Data export",
   "defaultValue": "default value: {value}",
   "delete": "Delete",
   "deleteNameQuestion": "Delete {name}?",
@@ -37,6 +38,7 @@
   "edit": "Edit",
   "editFormTitle": "Edit {name}",
   "error": "Error",
+  "fromMinToMax": "from {min} to {max}",
   "hoverOverChart": "Hover over chart",
   "incorrectSituation": "Incorrect situation",
   "incorrectSituationExplanation": "Some entites or individuals contain errors. Here are your options :",
@@ -48,7 +50,6 @@
   "moveFormTitle": "Move {name}",
   "no": "No",
   "notIndicated": "Not indicated",
-  "rawData": "Raw data",
   "repair": "Repair",
   "reset": "Reset",
   "resetSituation": "Reset situation",
@@ -71,5 +72,6 @@
   "waterfallFilename": "waterfall.{extension}",
   "waterfallHintEquation": "{variableName} : {formattedStartValue} {operator} {absoluteValue} = {formattedEndValue} €",
   "waterfallHintValue": "{variableName} : {absoluteValue} €",
+  "xAxisBounds": "X axis bounds",
   "yes": "Yes"
 }

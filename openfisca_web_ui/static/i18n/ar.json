@@ -23,6 +23,7 @@
   "close": "@nonTranslated",
   "columnExplanationLink": "@nonTranslated",
   "columnExplanationLinkTitle": "@nonTranslated",
+  "dataExport": "@nonTranslated",
   "defaultValue": "@nonTranslated",
   "delete": "@nonTranslated",
   "deleteNameQuestion": "@nonTranslated",
@@ -37,6 +38,7 @@
   "edit": "@nonTranslated",
   "editFormTitle": "{name} حرر",
   "error": "@nonTranslated",
+  "fromMinToMax": "@nonTranslated",
   "hoverOverChart": "@nonTranslated",
   "incorrectSituation": "@nonTranslated",
   "incorrectSituationExplanation": "@nonTranslated",
@@ -48,7 +50,6 @@
   "moveFormTitle": "@nonTranslated",
   "no": "@nonTranslated",
   "notIndicated": "@nonTranslated",
-  "rawData": "@nonTranslated",
   "repair": "@nonTranslated",
   "reset": "@nonTranslated",
   "resetSituation": "@nonTranslated",
@@ -71,5 +72,6 @@
   "waterfallFilename": "@nonTranslated",
   "waterfallHintEquation": "@nonTranslated",
   "waterfallHintValue": "@nonTranslated",
+  "xAxisBounds": "@nonTranslated",
   "yes": "@nonTranslated"
 }

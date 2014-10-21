@@ -15,6 +15,7 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
 var Visualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    downloadAttribution: React.PropTypes.string,
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
@@ -24,6 +25,7 @@ var Visualization = React.createClass({
   },
   getDefaultProps: function() {
     return {
+      downloadAttribution: '© openfisca.fr',
       labelsFontSize: 14,
     };
   },
@@ -37,6 +39,7 @@ var Visualization = React.createClass({
           <BaremeVisualization
             collapsedVariables={this.props.settings.bareme.collapsedVariables}
             displayParametersColumn={this.props.settings.bareme.displayParametersColumn}
+            downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
             onDownload={this.props.onDownload}
@@ -58,6 +61,7 @@ var Visualization = React.createClass({
             displaySubtotals={this.props.settings.waterfall.displaySubtotals}
             displayParametersColumn={this.props.settings.waterfall.displayParametersColumn}
             displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
+            downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
             onDownload={this.props.onDownload}

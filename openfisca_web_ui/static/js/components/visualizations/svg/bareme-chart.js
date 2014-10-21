@@ -19,6 +19,7 @@ var BaremeChart = React.createClass({
   propTypes: {
     activeVariableCode: React.PropTypes.string,
     aspectRatio: React.PropTypes.number.isRequired,
+    attribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number,
     labelsFontSize: React.PropTypes.number.isRequired,
@@ -27,7 +28,6 @@ var BaremeChart = React.createClass({
     noColorFill: React.PropTypes.string.isRequired,
     onVariableHover: React.PropTypes.func,
     onVariableToggle: React.PropTypes.func,
-    onXValuesChange: React.PropTypes.func.isRequired,
     variables: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
@@ -66,30 +66,6 @@ var BaremeChart = React.createClass({
       }, point.y),
     };
     return pixel;
-  },
-  handleModifyLinkClick: function() {
-    function promptValue(message, defaultValue) {
-      var newValue = prompt(message, defaultValue);
-      if (newValue === null) {
-        newValue = defaultValue;
-      } else {
-        newValue = Number(newValue);
-        if (isNaN(newValue)) {
-          alert('Valeur invalide');
-          newValue = null;
-        }
-      }
-      return newValue;
-    }
-    var newXMinValue = promptValue('Valeur minimum', this.props.xMinValue);
-    var newXMaxValue = promptValue('Valeur maximum', this.props.xMaxValue);
-    if (newXMinValue !== null && newXMaxValue !== null) {
-      if (newXMinValue < newXMaxValue) {
-        this.props.onXValuesChange(newXMinValue, newXMaxValue);
-      } else {
-        alert(this.getIntlMessage('minimumValueLessThanMaximumValueExplanation'));
-      }
-    }
   },
   handleVariableHover: function(variable, event) {
     this.props.onVariableHover(event.type === 'mouseover' ? variable : null);
@@ -183,13 +159,9 @@ var BaremeChart = React.createClass({
             unit='€'
             width={this.gridWidth}
           />
-          <Link
-            onClick={this.handleModifyLinkClick}
-            style={{textAnchor: 'end'}}
-            x={this.gridWidth}
-            y={this.props.xAxisHeight - this.props.labelsFontSize}>
-            {this.getIntlMessage('modify')}
-          </Link>
+        </g>
+        <g className='attribution' transform={`translate(${this.props.yAxisWidth}, ${height - 10})`}>
+          <text>{this.props.attribution}</text>
         </g>
       </svg>
     );

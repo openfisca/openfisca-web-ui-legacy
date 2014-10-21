@@ -15,6 +15,7 @@ var WaterfallChart = React.createClass({
   propTypes: {
     activeVariablesCodes: React.PropTypes.arrayOf(React.PropTypes.string),
     aspectRatio: React.PropTypes.number.isRequired,
+    attribution: React.PropTypes.string,
     displayVariablesColors: React.PropTypes.bool,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number,
@@ -115,7 +116,7 @@ var WaterfallChart = React.createClass({
             width={gridWidth}
           />
         </g>
-        <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
+        <g transform={`translate(${this.props.yAxisWidth}, ${this.props.marginTop})`}>
           <YAxis
             formatNumber={this.props.formatNumber}
             height={gridHeight}
@@ -160,6 +161,9 @@ var WaterfallChart = React.createClass({
             nbSteps={xLabels.length}
             width={gridWidth}
           />
+        </g>
+        <g className='attribution' transform={`translate(${this.props.yAxisWidth}, ${height - 10})`}>
+          <text>{this.props.attribution}</text>
         </g>
       </svg>
     );
