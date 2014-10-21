@@ -256,10 +256,8 @@ var BaremeVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
-                  <button
-                    className='btn btn-default btn-xs'
-                    onClick={() => this.props.onDownload('testCase', 'json')}>
-                    {this.getIntlMessage('downloadJSON')}
+                  <button className='btn btn-default btn-xs' onClick={() => this.props.onDownload('testCase', 'json')}>
+                    JSON
                   </button>
                 </p>
               </div>
@@ -270,25 +268,19 @@ var BaremeVisualization = React.createClass({
                     className='btn btn-default btn-xs'
                     onClick={() => this.props.onDownload('simulationResult', 'json')}
                     style={{marginRight: '1em'}}>
-                    {this.getIntlMessage('downloadJSON')}
+                    JSON
                   </button>
                   <button
                     className='btn btn-default btn-xs'
-                    onClick={() => this.props.onDownload('simulationResult', 'csv')}
-                    >
-                    {this.getIntlMessage('downloadCSV')}
+                    onClick={() => this.props.onDownload('simulationResult', 'csv')}>
+                    CSV
                   </button>
                 </p>
               </div>
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
-                  <button
-                    className='btn btn-default btn-xs'
-                    onClick={this.handleChartDownload}
-                    >
-                    {this.getIntlMessage('downloadSVG')}
-                  </button>
+                  <button className='btn btn-default btn-xs' onClick={this.handleChartDownload}>SVG</button>
                 </p>
               </div>
             </div>
