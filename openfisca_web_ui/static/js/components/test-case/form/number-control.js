@@ -37,7 +37,6 @@ var NumberControl = React.createClass({
     };
   },
   render: function() {
-    console.log(this.state.isValid);
     var input = (
       <input
         className="form-control"
