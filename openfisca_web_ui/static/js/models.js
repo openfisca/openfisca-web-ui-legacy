@@ -151,7 +151,7 @@ function moveIndividuInEntity(individuId, kind, id, role, entitiesMetadata, test
     newTestCase = withoutIndividuInEntity(individuId, kind, oldEntity.id, oldEntity.role, entitiesMetadata,
       newTestCase);
   }
-  newTestCase = withIndividuInEntity(individuId, kind, id, role, newTestCase);
+  newTestCase = withIndividuInEntity(individuId, kind, id, role, entitiesMetadata, newTestCase);
   return newTestCase;
 }
 
