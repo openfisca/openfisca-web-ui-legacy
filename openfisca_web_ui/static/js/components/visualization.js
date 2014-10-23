@@ -19,6 +19,7 @@ var Visualization = React.createClass({
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
+    reform: React.PropTypes.string,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
@@ -33,6 +34,7 @@ var Visualization = React.createClass({
     this.props.onSettingsChange(this.props.visualizationSlug, settings, simulate);
   },
   render: function() {
+    var isDiff = this.props.reform === 'plfrss2014-diff';
     switch (this.props.visualizationSlug) {
       case 'bareme':
         return (
@@ -45,6 +47,7 @@ var Visualization = React.createClass({
             onDownload={this.props.onDownload}
             onSettingsChange={this.handleSettingsChange}
             onXValuesChange={(xMinValue, xMaxValue) => this.handleSettingsChange({xMinValue, xMaxValue}, true)}
+            reform={this.props.reform}
             variablesTree={this.props.simulationResult}
             xMaxValue={this.props.settings.bareme.xMaxValue}
             xMinValue={this.props.settings.bareme.xMinValue}
@@ -58,6 +61,7 @@ var Visualization = React.createClass({
         return (
           <WaterfallVisualization
             collapsedVariables={this.props.settings.waterfall.collapsedVariables}
+            diff={isDiff}
             displaySubtotals={this.props.settings.waterfall.displaySubtotals}
             displayParametersColumn={this.props.settings.waterfall.displayParametersColumn}
             displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
@@ -66,6 +70,7 @@ var Visualization = React.createClass({
             labelsFontSize={this.props.labelsFontSize}
             onDownload={this.props.onDownload}
             onSettingsChange={this.handleSettingsChange}
+            valuesOffset={isDiff ? null : (this.props.reform ? 1 : 0)}
             variablesTree={this.props.simulationResult}
           />
         );

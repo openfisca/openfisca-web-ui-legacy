@@ -213,17 +213,20 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
 
 function simulate(axes, decomposition, legislationUrl, testCase, year, onComplete) {
   var scenario = {
-    legislation_url: legislationUrl, // jshint ignore:line
+    'legislation_url': legislationUrl,
     period: {
       start: year,
       unit: 'year',
     },
-    test_case: testCase, // jshint ignore:line
+    'test_case': testCase,
   };
   if (axes) {
     scenario.axes = axes;
   }
-  var data = {scenarios: [scenario]};
+  var data = {
+    'reform_names': ['plfrss2014'],
+    scenarios: [scenario],
+  };
   if (decomposition) {
     data.decomposition = decomposition;
   }

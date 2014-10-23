@@ -43,10 +43,13 @@ var VariablesTree = React.createClass({
     this.props.onVariableHover && this.props.onVariableHover(variable);
   },
   render: function() {
-    var variablesSequence = Lazy(this.props.variables);
-    var variables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
-    var activeVariable = this.props.activeVariableCode ?
-      this.props.variables.find(_ => _.code === this.props.activeVariableCode) : null;
+    var activeVariable = null, variables = [];
+    if (this.props.variables.length) {
+      var variablesSequence = Lazy(this.props.variables);
+      variables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
+      activeVariable = this.props.activeVariableCode ?
+        this.props.variables.find(_ => _.code === this.props.activeVariableCode) : null;
+    }
     return (
       <div className='table-responsive'>
         <table className='table table-condensed'>

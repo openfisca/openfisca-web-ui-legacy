@@ -30,7 +30,8 @@ var BaremeVisualization = React.createClass({
     noColorFill: React.PropTypes.string.isRequired,
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
-    variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
+    reform: React.PropTypes.string,
+    variablesTree: React.PropTypes.object.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
   },
@@ -71,21 +72,29 @@ var BaremeVisualization = React.createClass({
     };
   },
   getVariables: function() {
+    var isDiff = this.props.reform === 'plfrss2014-diff';
+    var diffValues = values => {
+      var referenceValues = values.slice(0, values.length / 2),
+        reformValues = values.slice(values.length / 2, values.length);
+      return reformValues.map((value, index) => value - referenceValues[index]);
+    };
     var processNode = (variable, baseValues, depth, hidden) => {
       var newVariables = [];
       var isCollapsed = this.isCollapsed(variable);
       if (variable.children) {
         var childrenVariables = [];
         var childBaseValues = baseValues;
-        Lazy(variable.children).each(function(child) {
+        Lazy(variable.children).each(child => {
           var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
-          childBaseValues = Lazy(childBaseValues).zip(child.values)
+          var values = isDiff ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
+          childBaseValues = Lazy(childBaseValues).zip(values)
             .map(pair => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var hasValue = Lazy(variable.values).any(function(value) { return value !== 0; });
+      var values = isDiff ? diffValues(variable.values) : variable.values.slice(sliceStart, sliceEnd);
+      var hasValue = Lazy(values).any(value => value !== 0);
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
         var hasChildren = !! variable.children;
@@ -95,13 +104,20 @@ var BaremeVisualization = React.createClass({
           hasChildren: hasChildren,
           isCollapsed: isCollapsed,
           isSubtotal: hasChildren && depth > 0,
+          values: values,
         });
         var newVariable = newVariableSequence.toObject();
         newVariables.push(newVariable);
       }
       return newVariables;
     };
-    var initBaseValues = Lazy.repeat(0, this.props.variablesTree.values.length).toArray();
+    var values = this.props.variablesTree.values;
+    var valuesLength = this.props.variablesTree.values.length;
+    if ( ! isDiff) {
+      var sliceStart = this.props.reform ? valuesLength / 2 : 0;
+      var sliceEnd = this.props.reform ? valuesLength : valuesLength / 2;
+    }
+    var initBaseValues = Lazy.repeat(0, values.length).toArray();
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
@@ -186,9 +202,13 @@ var BaremeVisualization = React.createClass({
                   xMaxValue={this.props.xMaxValue}
                   xMinValue={this.props.xMinValue}
                 />
-                <p className='text-center well'>
-                  {this.formatHint(variables)}
-                </p>
+                {
+                  variables && (
+                    <p className='text-center well'>
+                      {this.formatHint(variables)}
+                    </p>
+                  )
+                }
                 <p className='clearfix'>
                   <button
                     className={cx({

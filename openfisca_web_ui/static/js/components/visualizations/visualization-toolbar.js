@@ -4,7 +4,8 @@
 var React = require('react'),
   ReactIntlMixin = require('react-intl');
 
-var VisualizationSelect = require('./visualization-select'),
+var ReformSelector = require('./reform-selector'),
+  VisualizationSelect = require('./visualization-select'),
   YearInput = require('./year-input');
 
 var cx = React.addons.classSet;
@@ -15,8 +16,10 @@ var VisualizationToolbar = React.createClass({
   propTypes: {
     errors: React.PropTypes.object,
     isSimulationInProgress: React.PropTypes.bool,
+    onReformChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     onYearChange: React.PropTypes.func.isRequired,
+    reform: React.PropTypes.string,
     visualizationSlug: React.PropTypes.string,
     year: React.PropTypes.number.isRequired,
   },
@@ -28,13 +31,16 @@ var VisualizationToolbar = React.createClass({
         </div>
         <div className={cx({
           'form-group': true,
-          'has-error': this.props.errors && this.props.errors.date,
+          'has-error': this.props.errors && this.props.errors.period,
         })} style={{marginRight: 5}}>
           <YearInput
-            error={this.props.errors && this.props.errors.date}
+            error={this.props.errors && this.props.errors.period && this.props.errors.period['1']}
             onChange={this.props.onYearChange}
             value={this.props.year}
           />
+        </div>
+        <div className="form-group" style={{marginRight: 5}}>
+          <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
         </div>
         {
           this.props.isSimulationInProgress && (

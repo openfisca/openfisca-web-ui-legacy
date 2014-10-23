@@ -72,15 +72,17 @@ var BaremeChart = React.createClass({
   },
   render: function() {
     var height = this.props.height || this.props.width / this.props.aspectRatio;
-    var revdisp = this.props.variables.find(_ => _.code === 'revdisp');
-    var yMaxValue = Math.max.apply(null, revdisp.values),
-      yMinValue = Math.min.apply(null, revdisp.values);
-    this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
-    var clipValues = value => Math.max(value, this.ySmartValues.minValue);
+    if (this.props.variables.length) {
+      var revdisp = this.props.variables.find(_ => _.code === 'revdisp');
+      var yMaxValue = Math.max.apply(null, revdisp.values),
+        yMinValue = Math.min.apply(null, revdisp.values);
+      this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
+      var clipValues = value => Math.max(value, this.ySmartValues.minValue);
+      var targetValues = variable => Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum())
+        .toArray();
+    }
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
-    var targetValues = variable => Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum())
-      .toArray();
     return (
       <svg height={height} width={this.props.width}>
         <g transform={`translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`}>
@@ -108,12 +110,12 @@ var BaremeChart = React.createClass({
                 oldMax: variable.values.length - 1,
                 oldMin: 0,
               });
-              var lowPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
+              var basePoints = Lazy.range(0, variable.values.length).map(toDomainValue)
                 .zip(variable.baseValues.map(clipValues)).toArray();
               var isFilled = variable.depth > 0;
               var targetPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
                 .zip(targetValues(variable).map(clipValues)).toArray();
-              var pointsSequence = isFilled ? Lazy(lowPoints).concat(Lazy(targetPoints).reverse().toArray()) :
+              var pointsSequence = isFilled ? Lazy(basePoints).concat(Lazy(targetPoints).reverse().toArray()) :
                 Lazy(targetPoints);
               var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
               var cssColor = variable.color ? `rgb(${variable.color})` : this.props.noColorFill;

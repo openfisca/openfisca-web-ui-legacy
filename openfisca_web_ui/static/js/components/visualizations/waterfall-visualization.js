@@ -21,6 +21,7 @@ var WaterfallVisualization = React.createClass({
   propTypes: {
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
+    diff: React.PropTypes.bool,
     displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
@@ -33,9 +34,8 @@ var WaterfallVisualization = React.createClass({
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
+    valuesOffset: React.PropTypes.number,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
-    // variablesTree.values key is a list. This tells which index to use.
-    variablesTreeValueIndex: React.PropTypes.number.isRequired,
   },
   componentDidMount: function() {
     window.onresize = this.handleWidthChange;
@@ -79,7 +79,6 @@ var WaterfallVisualization = React.createClass({
       negativeColor: '#d9534f', // Bootstrap danger color
       noColorFill: 'gray',
       positiveColor: '#5cb85c', // Bootstrap success color
-      variablesTreeValueIndex: 0,
     };
   },
   getInitialState: function() {
@@ -142,7 +141,6 @@ var WaterfallVisualization = React.createClass({
   linearizeVariables: function() {
     // Transform this.props.variablesTree into an array and compute base values for waterfall.
     // Also rename snake case keys to camel case.
-    var valueIndex = this.props.variablesTreeValueIndex;
     function extractChildrenCodes(node) {
       return node.children ? node.children.map(child => {
         var childrenCodes = extractChildrenCodes(child);
@@ -157,11 +155,18 @@ var WaterfallVisualization = React.createClass({
         variable.children.forEach(child => {
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
-          childBaseValue += child.values[valueIndex];
+          if ( ! this.props.diff) {
+            childBaseValue += child.values[this.props.valuesOffset];
+          }
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var value = variable.values[valueIndex];
+      var value;
+      if (this.props.diff) {
+        value = variable.values[1] - variable.values[0];
+      } else {
+        value = variable.values[this.props.valuesOffset];
+      }
       var childrenCodes = extractChildrenCodes(variable);
       var newVariable = Lazy(variable)
         .omit(['@context', '@type', 'children', 'short_name', 'values'])
@@ -173,6 +178,7 @@ var WaterfallVisualization = React.createClass({
           isSubtotal: Boolean(variable.children) && depth > 0,
           shortName: variable.short_name, // jshint ignore:line
           value: value,
+          values: variable.values,
         })
         .toObject();
       newVariables.push(newVariable);
@@ -184,23 +190,21 @@ var WaterfallVisualization = React.createClass({
   removeVariables: function(variables, isRemoved, removeChildren = false) {
     // Filter variables by isRemoved function and rewrite their childrenCodes properties
     // according to the remaining variables.
-    var variablesCodes = removeChildren ?
+    var removedVariablesCodes = removeChildren ?
       variables.filter(isRemoved).map(variable => variable.childrenCodes).flatten().uniq() :
       variables.filter(isRemoved).map(variable => variable.code);
     return variables
-      .filter(variable => ! variablesCodes.contains(variable.code))
+      .filter(variable => ! removedVariablesCodes.contains(variable.code))
       .map(variable => variable.childrenCodes ? Lazy(variable).assign({
-        childrenCodes: variable.childrenCodes.diff(variablesCodes)
+        childrenCodes: variable.childrenCodes.diff(removedVariablesCodes)
       }).toObject() : variable);
   },
   render: function() {
     var linearizedVariables = this.linearizeVariables();
-    var isZeroValue = variable => variable.value === 0;
+    var hasOnlyZeroValues = variable => Math.max.apply(null, variable.values.map(Math.abs)) === 0;
     var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
     var isCollapsed = variable => variable.isCollapsed;
-    var variablesWithSubtotals = linearizedVariables.every(isZeroValue) ?
-      linearizedVariables :
-      this.removeVariables(linearizedVariables, isZeroValue);
+    var variablesWithSubtotals = this.removeVariables(linearizedVariables, hasOnlyZeroValues);
     var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
     var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
     var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);

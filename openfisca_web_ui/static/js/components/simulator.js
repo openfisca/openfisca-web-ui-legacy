@@ -75,6 +75,7 @@ var Simulator = React.createClass({
       isCalculationInProgress: false,
       isSimulationInProgress: false,
       legislationUrl: null,
+      reform: null,
       simulationResult: null,
       suggestions: null,
       testCase: null,
@@ -236,6 +237,9 @@ var Simulator = React.createClass({
     var newTestCase = models.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
       this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
+  },
+  handleReformChange: function(value) {
+    this.setState({reform: value});
   },
   handleRepair: function() {
     if ( ! this.state.editedEntity) {
@@ -401,8 +405,10 @@ var Simulator = React.createClass({
         <VisualizationToolbar
           errors={this.state.errors}
           isSimulationInProgress={this.state.isSimulationInProgress}
+          onReformChange={this.handleReformChange}
           onVisualizationChange={this.handleVisualizationChange}
           onYearChange={this.handleYearChange}
+          reform={this.state.reform}
           visualizationSlug={this.state.visualizationSlug}
           year={this.state.year}
         />
@@ -432,6 +438,7 @@ var Simulator = React.createClass({
                 <Visualization
                   onDownload={this.handleDownload}
                   onSettingsChange={this.handleVisualizationSettingsChange}
+                  reform={this.state.reform}
                   settings={this.state.visualizationsSettings}
                   simulationResult={this.state.simulationResult}
                   visualizationSlug={this.state.visualizationSlug}
