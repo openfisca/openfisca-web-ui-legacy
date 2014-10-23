@@ -16,7 +16,7 @@
   "addEntity:foyers_fiscaux": "Add a \"déclaration d'impôt\"",
   "addEntity:menages": "Add a \"logement principal\"",
   "bareme": "Bareme",
-  "baremeFilename": "@nonTranslated",
+  "baremeFilename": "bareme.{extension}",
   "categoryContainsSuggestions": "This category contains suggestions",
   "cerfaHint": "{count, plural, one {Case CERFA {value}} other {Cases CERFA {value}}}",
   "chart": "Chart",
