@@ -88,8 +88,7 @@ var BaremeVisualization = React.createClass({
           var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
           var values = isDiff ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
-          childBaseValues = Lazy(childBaseValues).zip(values)
-            .map(pair => Lazy(pair).sum()).toArray();
+          childBaseValues = Lazy(childBaseValues).zip(values).map(pair => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
@@ -117,7 +116,7 @@ var BaremeVisualization = React.createClass({
       var sliceStart = this.props.reform ? valuesLength / 2 : 0;
       var sliceEnd = this.props.reform ? valuesLength : valuesLength / 2;
     }
-    var initBaseValues = Lazy.repeat(0, values.length).toArray();
+    var initBaseValues = Lazy.repeat(0, values.length / 2).toArray();
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
