@@ -16,7 +16,7 @@ function init() {
     if ( ! appconfig.debug) {
       alert(appconfig.i18n.onerrorMessage);
       // TODO call send mail webservice.
-      window.location.reload();
+      // window.location.reload();
     }
     return false;
   };
