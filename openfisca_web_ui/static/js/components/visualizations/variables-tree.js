@@ -103,7 +103,9 @@ var VariablesTree = React.createClass({
                             backgroundColor: this.props.displayVariablesColors ?
                               (variable.color ? `rgb(${variable.color.join(',')})` : this.props.noColorFill) :
                               (variable.value > 0 ? this.props.positiveColor : this.props.negativeColor),
-                            border: '1px solid gray',
+                            border: variable.depth > 0 ? '1px solid gray' : null,
+                            height: variable.depth === 0 ? 5 : null,
+                            marginTop: variable.depth === 0 ? 5 : null,
                             width: 20,
                           }}>
                             { /* jshint ignore:line */}
