@@ -32,6 +32,10 @@ flake8: clean-pyc
 jshint: clean-js-build
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 
+poedit: update-i18n-python
+	poedit openfisca_web_ui/i18n/fr/LC_MESSAGES/openfisca-web-ui.po
+
+
 test: check-syntax-errors
 	nosetests openfisca_web_ui/tests
 
