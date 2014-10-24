@@ -36,6 +36,16 @@ var BaremeChart = React.createClass({
     yAxisWidth: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
+  computeMaxValue: function(variables) {
+    var maxValue = 0;
+    variables.forEach(variable => {
+      var variableMaxValue = Math.max.apply(null, this.targetValues(variable));
+      if (variableMaxValue > maxValue) {
+        maxValue = variableMaxValue;
+      }
+    });
+    return maxValue;
+  },
   getDefaultProps: function() {
     return {
       aspectRatio: 4/3,
@@ -72,13 +82,8 @@ var BaremeChart = React.createClass({
   render: function() {
     var height = this.props.height || this.props.width / this.props.aspectRatio;
     if (this.props.variables.length) {
-      var revdisp = this.props.variables.find(_ => _.code === 'revdisp');
-      var yMaxValue = Math.max.apply(null, revdisp.values),
-        yMinValue = Math.min.apply(null, revdisp.values);
-      this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
-      var clipValues = value => Math.max(value, this.ySmartValues.minValue);
-      var targetValues = variable => Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum())
-        .toArray();
+      var yMaxValue = this.computeMaxValue(this.props.variables);
+      this.ySmartValues = axes.smartValues(0, yMaxValue, this.props.yNbSteps);
     }
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
     this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
@@ -109,11 +114,11 @@ var BaremeChart = React.createClass({
                 oldMax: variable.values.length - 1,
                 oldMin: 0,
               });
-              var basePoints = Lazy.range(0, variable.values.length).map(toDomainValue)
-                .zip(variable.baseValues.map(clipValues)).toArray();
+              var basePoints = Lazy.range(0, variable.values.length).map(toDomainValue).zip(variable.baseValues)
+                .toArray();
               var isFilled = variable.depth > 0;
               var targetPoints = Lazy.range(0, variable.values.length).map(toDomainValue)
-                .zip(targetValues(variable).map(clipValues)).toArray();
+                .zip(this.targetValues(variable)).toArray();
               var pointsSequence = isFilled ? Lazy(basePoints).concat(Lazy(targetPoints).reverse().toArray()) :
                 Lazy(targetPoints);
               var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
@@ -166,6 +171,9 @@ var BaremeChart = React.createClass({
         </g>
       </svg>
     );
+  },
+  targetValues: function(variable) {
+    return Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum()).toArray();
   },
 });
 
