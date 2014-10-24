@@ -24,7 +24,7 @@ var Curve = React.createClass({
       fill: 'rgb(31, 119, 180)',
     } : {
       fill: 'none',
-      strokeWidth: 1.5,
+      strokeWidth: 4,
     };
     return Lazy(style).assign({
       stroke: 'rgb(31, 119, 180)',
@@ -39,7 +39,7 @@ var Curve = React.createClass({
   render: function() {
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();
     if (this.props.active) {
-      style = Lazy(style).assign({stroke: 'black', strokeWidth: 2}).toObject();
+      style = Lazy(style).assign({stroke: 'black'}).toObject();
     }
     return (
       <polyline
