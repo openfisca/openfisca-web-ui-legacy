@@ -8,7 +8,6 @@ var Lazy = require('lazy.js'),
 var axes = require('../../../axes'),
   Curve = require('./curve'),
   HGrid = require('./h-grid'),
-  Link = require('./link'),
   VGrid = require('./v-grid'),
   XAxis = require('./x-axis'),
   YAxis = require('./y-axis');
