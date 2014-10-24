@@ -40,7 +40,9 @@ var VariablesTree = React.createClass({
   },
   handleVariableHover: function(variable) {
     this.setState({hoveredVariableCode: variable ? variable.code : null});
-    this.props.onVariableHover && this.props.onVariableHover(variable);
+    if (this.props.onVariableHover) {
+      this.props.onVariableHover(variable);
+    }
   },
   render: function() {
     var activeVariable = null, variables = [];
