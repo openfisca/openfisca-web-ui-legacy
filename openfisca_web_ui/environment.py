@@ -96,6 +96,7 @@ def load_environment(global_conf, app_conf):
                 conv.default('WARNING'),
                 conv.function(lambda log_level: getattr(logging, log_level.upper())),
                 ),
+            'minify_js_bundle': conv.pipe(conv.guess_bool, conv.not_none),
             'package_name': conv.default('openfisca-web-ui'),
             'piwik.site_id': conv.input_to_int,
             'piwik.url': conv.make_input_to_url(full = True, error_if_fragment = True, error_if_path = True,

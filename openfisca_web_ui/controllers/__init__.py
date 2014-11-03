@@ -77,6 +77,16 @@ def disclaimer_closed(req):
 @wsgihelpers.wsgify
 def index(req):
     ctx = contexts.Ctx(req)
+    data, errors = conv.struct(
+        {
+            'minify_js_bundle': conv.pipe(
+                conv.guess_bool,
+                conv.default(conf['minify_js_bundle']),
+                ),
+            },
+        )(req.params, state = ctx)
+    if errors is not None:
+        return wsgihelpers.bad_request(ctx, explanation = errors)
     if conf['cookie'] in req.cookies:
         update_session(ctx)
         session = ctx.session
@@ -87,7 +97,7 @@ def index(req):
                 httponly = True,
                 secure = req.scheme == 'https',
                 )
-    return templates.render(ctx, '/index.mako')
+    return templates.render(ctx, '/index.mako', minify_js_bundle = data['minify_js_bundle'])
 
 
 def make_router():
