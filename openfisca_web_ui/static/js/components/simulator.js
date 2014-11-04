@@ -60,7 +60,7 @@ var Simulator = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      baremeStepsX: 20,
+      baremeStepsX: 200,
       baremeVariableCode: 'sali',
       defaultBaremeXMaxValue: 20000,
       defaultBaremeXMinValue: 0,
