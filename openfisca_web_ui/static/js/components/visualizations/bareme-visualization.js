@@ -275,7 +275,7 @@ var BaremeVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
-                  <button className='btn btn-default btn-xs' onClick={() => this.props.onDownload('testCase', 'json')}>
+                  <button className='btn btn-default btn-sm' onClick={() => this.props.onDownload('testCase', 'json')}>
                     JSON
                   </button>
                 </p>
@@ -284,13 +284,13 @@ var BaremeVisualization = React.createClass({
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
                   <button
-                    className='btn btn-default btn-xs'
+                    className='btn btn-default btn-sm'
                     onClick={() => this.props.onDownload('simulationResult', 'json')}
                     style={{marginRight: '1em'}}>
                     JSON
                   </button>
                   <button
-                    className='btn btn-default btn-xs'
+                    className='btn btn-default btn-sm'
                     onClick={() => this.props.onDownload('simulationResult', 'csv')}>
                     CSV
                   </button>
@@ -299,7 +299,7 @@ var BaremeVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
-                  <button className='btn btn-default btn-xs' onClick={this.handleChartDownload}>SVG</button>
+                  <button className='btn btn-default btn-sm' onClick={this.handleChartDownload}>SVG</button>
                 </p>
               </div>
             </div>
