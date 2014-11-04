@@ -34,8 +34,6 @@ var Simulator = React.createClass({
     baremeVariableCode: React.PropTypes.string.isRequired,
     columns: React.PropTypes.object.isRequired,
     columnsTree: React.PropTypes.object.isRequired,
-    defaultBaremeXMaxValue: React.PropTypes.number.isRequired,
-    defaultBaremeXMinValue: React.PropTypes.number.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
     disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
@@ -62,8 +60,12 @@ var Simulator = React.createClass({
     return {
       baremeStepsX: 200,
       baremeVariableCode: 'sali',
-      defaultBaremeXMaxValue: 20000,
-      defaultBaremeXMinValue: 0,
+      defaultPropsByVisualizationSlug: {
+        bareme: {
+          xMaxValue: 20000,
+          xMinValue: 0,
+        },
+      },
       defaultVisualizationSlug: 'waterfall',
     };
   },
@@ -84,8 +86,8 @@ var Simulator = React.createClass({
         bareme: {
           collapsedVariables: {},
           displayParametersColumn: true,
-          xMaxValue: this.props.defaultBaremeXMaxValue,
-          xMinValue: this.props.defaultBaremeXMinValue,
+          xMaxValue: this.props.defaultPropsByVisualizationSlug.bareme.xMaxValue,
+          xMinValue: this.props.defaultPropsByVisualizationSlug.bareme.xMinValue,
         },
         waterfall: {
           collapsedVariables: {},

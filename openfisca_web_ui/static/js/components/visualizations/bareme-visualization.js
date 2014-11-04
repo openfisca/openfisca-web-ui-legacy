@@ -20,6 +20,8 @@ var BaremeVisualization = React.createClass({
   propTypes: {
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
+    defaultXMaxValue: React.PropTypes.number.isRequired,
+    defaultXMinValue: React.PropTypes.number.isRequired,
     displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
@@ -61,6 +63,8 @@ var BaremeVisualization = React.createClass({
     return {
       chartAspectRatio: 4/3,
       collapsedVariables: {},
+      defaultXMaxValue: 20000,
+      defaultXMinValue: 0,
       maxHeightRatio: 2/3,
       noColorFill: 'gray',
     };
@@ -69,6 +73,8 @@ var BaremeVisualization = React.createClass({
     return {
       activeVariableCode: null,
       chartColumnWidth: null,
+      xMaxValue: this.props.xMaxValue,
+      xMinValue: this.props.xMinValue,
     };
   },
   getVariables: function() {
@@ -153,35 +159,25 @@ var BaremeVisualization = React.createClass({
     }
     this.setState({chartColumnWidth: width});
   },
-  handleXAxisBoundsChange: function() {
-    function promptValue(message, defaultValue) {
-      var newValue = prompt(message, defaultValue);
-      if (newValue === null) {
-        newValue = defaultValue;
-      } else {
-        newValue = Number(newValue);
-        if (isNaN(newValue)) {
-          alert('Valeur invalide');
-          newValue = null;
-        }
-      }
-      return newValue;
-    }
-    var newXMinValue = promptValue('Valeur minimum', this.props.xMinValue);
-    var newXMaxValue = promptValue('Valeur maximum', this.props.xMaxValue);
-    if (newXMinValue !== null && newXMaxValue !== null) {
-      if (newXMinValue < newXMaxValue) {
-        this.props.onSettingsChange({xMinValue: newXMinValue, xMaxValue: newXMaxValue}, true);
-      } else {
-        alert(this.getIntlMessage('minimumValueLessThanMaximumValueExplanation'));
-      }
-    }
+  handleXAxisBoundsSubmit: function(event) {
+    event.preventDefault();
+    var newXMaxValue = this.state.xMaxValue || this.props.defaultXMaxValue;
+    var newXMinValue = this.state.xMinValue || this.props.defaultXMinValue;
+    this.props.onSettingsChange({xMinValue: newXMinValue, xMaxValue: newXMaxValue}, true);
+  },
+  handleXMaxValueChange: function() {
+    this.setState({xMaxValue: this.refs.xMaxValue.getDOMNode().valueAsNumber || null});
+  },
+  handleXMinValueChange: function() {
+    this.setState({xMinValue: this.refs.xMinValue.getDOMNode().valueAsNumber || null});
   },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
   },
   render: function() {
     var variables = this.getVariables();
+    var isMaxValueLessThanMinValue = this.state.xMaxValue !== null && this.state.xMinValue !== null &&
+      this.state.xMaxValue < this.state.xMinValue;
     return (
       <TwoColumnsLayout
         leftComponentRef={'chartColumn'}
@@ -249,22 +245,74 @@ var BaremeVisualization = React.createClass({
               {this.getIntlMessage('xAxisBounds')}
             </div>
             <div className='panel-body'>
-              <p>
-                <span style={{marginRight: '1em'}}>
-                  {
-                    this.formatMessage(this.getIntlMessage('fromMinToMax'), {
-                      max: this.props.xMaxValue,
-                      min: this.props.xMinValue,
-                    })
-                  }
-                </span>
-                <button
-                  className='btn btn-default btn-xs'
-                  onClick={this.handleXAxisBoundsChange}
-                  >
-                  {this.getIntlMessage('modify')}
-                </button>
-              </p>
+              <form className="form-horizontal" onSubmit={this.handleXAxisBoundsSubmit} role="form">
+                <div className={cx({
+                  'form-group': true,
+                  'form-group-sm': true,
+                  'has-error': isMaxValueLessThanMinValue,
+                })}>
+                  <label className="col-xs-6 control-label" htmlFor="x-axis-min-value">
+                    {this.getIntlMessage('minimumLabel')}
+                  </label>
+                  <div className='col-xs-6'>
+                    <input
+                      className='form-control'
+                      min={0}
+                      onChange={this.handleXMinValueChange}
+                      placeholder={this.props.defaultXMinValue}
+                      ref='xMinValue'
+                      type='number'
+                      value={this.state.xMinValue}
+                      />
+                  </div>
+                </div>
+                <div className={cx({
+                  'form-group': true,
+                  'form-group-sm': true,
+                  'has-error': isMaxValueLessThanMinValue,
+                })}>
+                  <label className="col-xs-6 control-label" htmlFor="x-axis-max-value">
+                    {this.getIntlMessage('maximumLabel')}
+                  </label>
+                  <div className='col-xs-6'>
+                    <input
+                      className='form-control'
+                      id='x-axis-max-value'
+                      min={0}
+                      onChange={this.handleXMaxValueChange}
+                      placeholder={this.props.defaultXMaxValue}
+                      ref='xMaxValue'
+                      type='number'
+                      value={this.state.xMaxValue}
+                      />
+                    {
+                      isMaxValueLessThanMinValue && (
+                        <p className='help-block'>
+                          {this.getIntlMessage('minimumValueLessThanMaximumValueExplanation')}
+                        </p>
+                      )
+                    }
+                  </div>
+                </div>
+                <div className="form-group form-group-sm">
+                  <div className="col-xs-offset-6 col-xs-6">
+                    <button
+                      className='btn btn-default btn-sm'
+                      disabled={
+                        (
+                          (this.state.xMaxValue || this.props.defaultXMaxValue) === this.props.xMaxValue &&
+                          (this.state.xMinValue || this.props.defaultXMinValue) === this.props.xMinValue
+                        ) || (
+                          (this.state.xMaxValue || this.props.defaultXMaxValue) <
+                            (this.state.xMinValue || this.props.defaultXMinValue)
+                        )
+                      }
+                      type='submit'>
+                      {this.getIntlMessage('apply')}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
           <div className='panel panel-default'>
