@@ -66,6 +66,7 @@
   "suggestedValueExplanation": "Valeur suggérée par le simulateur et utilisée dans ses calculs.",
   "testCase": "Situation",
   "testCaseFilename": "situation.{extension}",
+  "trace": "Tracer",
   "unknownValuesAbove": "Valeurs inconnues au delà de {value, number, percent}",
   "variablesDecomposition": "Décomposition des variables",
   "waterfall": "Cascade",

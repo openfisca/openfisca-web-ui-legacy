@@ -4,7 +4,8 @@
 var React = require('react/addons'),
   ReactIntlMixin = require('react-intl');
 
-var cx = React.addons.classSet;
+var appconfig = global.appconfig,
+  cx = React.addons.classSet;
 
 
 var TestCaseToolbar = React.createClass({
@@ -19,6 +20,8 @@ var TestCaseToolbar = React.createClass({
     onReset: React.PropTypes.func.isRequired,
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
+    testCase: React.PropTypes.object,
+    year: React.PropTypes.number,
   },
   getDefaultProps: function() {
     return {
@@ -26,6 +29,16 @@ var TestCaseToolbar = React.createClass({
     };
   },
   render: function() {
+    var simulationJsonStr = JSON.stringify({
+      scenarios: [
+        {
+          "test_case": this.props.testCase,
+          year: this.props.year,
+        },
+      ],
+      variables: ["revdisp"],
+    });
+    var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
     return (
       <div>
         <div className="btn-group" style={{marginRight: 5}}>
@@ -58,6 +71,11 @@ var TestCaseToolbar = React.createClass({
                 role="menuitem"
                 tabIndex="-1">
                 {this.getIntlMessage('simulate')}
+              </a>
+            </li>
+            <li role="presentation">
+              <a href={traceUrl} role="menuitem" tabIndex="-1" target='_blank'>
+                {this.getIntlMessage('trace')}
               </a>
             </li>
             {

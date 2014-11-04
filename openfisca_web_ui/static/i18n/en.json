@@ -66,6 +66,7 @@
   "suggestedValueExplanation": "Value suggested by the simulator and used for calculations",
   "testCase": "Test case",
   "testCaseFilename": "test_case.{extension}",
+  "trace": "Trace",
   "unknownValuesAbove": "Values are unknown above {value, number, percent}",
   "variablesDecomposition": "Variables decomposition",
   "waterfall": "Waterfall",

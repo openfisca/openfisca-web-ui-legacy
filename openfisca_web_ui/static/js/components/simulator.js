@@ -337,6 +337,8 @@ var Simulator = React.createClass({
             onReset={this.handleReset}
             onRepair={this.handleRepair}
             onSimulate={this.simulate}
+            testCase={this.state.testCase}
+            year={this.state.year}
           />
           <hr/>
           {
