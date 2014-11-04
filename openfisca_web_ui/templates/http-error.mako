@@ -42,7 +42,11 @@ import pprint
             <h1 class="alert-heading">${title}</h1>
         </div>
         <div class="alert alert-block alert-danger">
+    % if isinstance(explanation, basestring):
             <p>${explanation}</p>
+    % else:
+            <p>${explanation | n, js}</p>
+    % endif
     % if comment:
             <p>${comment}</p>
     % endif
