@@ -4,8 +4,7 @@ var $ = require('jquery'),
   Lazy = require('lazy.js'),
   request = require('superagent');
 
-var helpers = require('./helpers'),
-  models = require('./models');
+var helpers = require('./helpers');
 
 
 var appconfig = global.appconfig;
