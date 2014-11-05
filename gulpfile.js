@@ -1,14 +1,12 @@
 'use strict';
 
 var browserify = require('browserify'),
+  del = require('del'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
   livereload = require('gulp-livereload'),
   notify = require('gulp-notify'),
-  rename = require('gulp-rename'),
-  rimraf = require('gulp-rimraf'),
   source = require('vinyl-source-stream'),
-  uglify = require('gulp-uglify'),
   watchify = require('watchify');
 
 
@@ -18,34 +16,16 @@ var indexJsFile = jsDir + '/index.js';
 var distDir = staticDir + '/dist';
 var vendorJsFiles = [
   './node_modules/html5shiv/src/html5shiv.js',
+  './node_modules/intl/Intl.min.js',
+  './node_modules/react/dist/react-with-addons.min.js',
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
   './node_modules/respond/respond.src.js',
   './node_modules/es6ify/node_modules/traceur/bin/traceur-runtime.js',
 ];
 var vendorDir = distDir + '/vendor',
-  vendorBootstrapDir = vendorDir + '/bootstrap';
-
-
-function buildScripts(entryFile, options) {
-  var debug = options && options.debug,
-    watch = options && options.watch;
-  var bundlerConstructor = options && watch ? watchify : browserify;
-  var bundler = bundlerConstructor(entryFile);
-  function rebundle() {
-    var stream = bundler.bundle({debug: debug})
-      .on('error', handleError)
-      .pipe(source('bundle.js'))
-      .pipe(gulp.dest(distDir));
-    return stream;
-  }
-  bundler.on('update', function() {
-    gutil.log('Rebundle...');
-    rebundle()
-      .on('end', function() { gutil.log('Rebundle done.'); });
-  });
-  return rebundle();
-}
+  vendorBootstrapDir = vendorDir + '/bootstrap',
+  vendorReactIntlDir = vendorDir + '/react-intl';
 
 
 function handleError() {
@@ -90,55 +70,79 @@ function startLiveReload() {
 }
 
 
-gulp.task('bundle', function() {
-  return buildScripts(indexJsFile);
+gulp.task('bundle:dev', function() {
+  var bundler = browserify(indexJsFile);
+  var stream = bundler.bundle({debug: true})
+    .on('error', handleError)
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest(distDir));
+  return stream;
 });
 
 
-gulp.task('bundle-dev', function() {
-  return buildScripts(indexJsFile, {debug: true});
+gulp.task('bundle:prod', function() {
+  var bundler = browserify(indexJsFile);
+  bundler.plugin('minifyify', {
+    map: '/dist/bundle.map.json',
+    output: distDir + '/bundle.map.json',
+  });
+  var stream = bundler.bundle()
+    .on('error', handleError)
+    .pipe(source('bundle.min.js'))
+    .pipe(gulp.dest(distDir));
+  return stream;
 });
 
 
-gulp.task('clean', function() {
-  return gulp.src(distDir, {read: false})
-    .pipe(rimraf());
+gulp.task('clean:dist', function() {
+  del.sync([distDir]);
 });
 
 
 gulp.task('default', ['dev']);
 
 
-gulp.task('dev', ['bundle-dev', 'vendor']);
+gulp.task('dev', ['clean:dist', 'bundle:dev', 'vendor']);
 
 
-gulp.task('prod', ['bundle', 'uglify', 'vendor']);
+gulp.task('prod', ['clean:dist', 'bundle:prod', 'bundle:dev', 'vendor']);
 
 
-gulp.task('uglify', ['bundle'], function() {
-  gulp.src(distDir + '/bundle.js')
-    .pipe(uglify())
-    .pipe(rename({suffix: '.min'}))
-    .pipe(gulp.dest(distDir));
-});
+gulp.task('vendor', ['vendor:bootstrap', 'vendor:react-intl', 'vendor:js']);
 
 
-gulp.task('vendor', ['vendor-bootstrap', 'vendor-js']);
-
-
-gulp.task('vendor-bootstrap', function() {
+gulp.task('vendor:bootstrap', function() {
   return gulp.src('./node_modules/bootstrap/dist/**')
     .pipe(gulp.dest(vendorBootstrapDir));
 });
 
 
-gulp.task('vendor-js', function() {
+gulp.task('vendor:react-intl', function() {
+  return gulp.src('./node_modules/react-intl/dist/**')
+    .pipe(gulp.dest(vendorReactIntlDir));
+});
+
+
+gulp.task('vendor:js', function() {
   return gulp.src(vendorJsFiles)
     .pipe(gulp.dest(vendorDir));
 });
 
 
-gulp.task('watch', ['vendor'], function() {
+gulp.task('watch', ['clean:dist', 'vendor'], function() {
+  function rebundle() {
+    return bundler.bundle({debug: true})
+      .on('error', handleError)
+      .pipe(source('bundle.js'))
+      .pipe(gulp.dest(distDir));
+  }
+
   startLiveReload();
-  buildScripts(indexJsFile, {debug: true, watch: true});
+  var bundler = watchify(indexJsFile, {fullPaths: true});
+  bundler.on('update', function() {
+    gutil.log('Rebundle in progress...');
+    rebundle().on('end', function() { gutil.log('Rebundle done.'); });
+  });
+  gutil.log('Initial bundle in progress...');
+  return rebundle().on('end', function() { gutil.log('Initial bundle done.'); });
 });

@@ -169,12 +169,16 @@ OpenFisca
 % endif
     <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-with-addons.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/Intl.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/react-intl.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/locale-data/fr.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js', static = True)}"></script>
     <script>
         <%self:appconfig_script/>
     </script>
-    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.min.js' if minify_js_bundle else u'bundle.js'), static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.min.js' if minified_js_bundle else u'bundle.js'), static = True)}"></script>
 % if conf['enabled.livereload']:
     <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
 % endif
