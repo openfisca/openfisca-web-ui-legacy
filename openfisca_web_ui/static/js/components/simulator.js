@@ -484,6 +484,7 @@ var Simulator = React.createClass({
     if ( ! this.props.disableSave) {
       webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
         if (data && data.unauthorized) {
+          // TODO i18n
           alert('Votre session a expiré. La page va être rechargée avec une situation vierge.');
           window.location.reload();
         } else {
