@@ -172,7 +172,7 @@ OpenFisca
     <script src="${urls.get_url(ctx, u'dist/vendor/react-with-addons.min.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/Intl.min.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/react-intl.min.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/locale-data/fr.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/locale-data/{}.js'.format(ctx.lang[0]), static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js', static = True)}"></script>
     <script>
