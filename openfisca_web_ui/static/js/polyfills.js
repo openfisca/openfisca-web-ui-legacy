@@ -12,15 +12,68 @@ require('es5-ext/string/#/starts-with/implement');
 // Define only the array methods actually used in the application code.
 // No need to check if they are already implemented since they are non-standard.
 
-for (arrayMethodName in ['contains', 'flatten', 'last']) {
-	Object.defineProperty(
-		Array.prototype,
-		arrayMethodName,
-		{
-			configurable: true,
-			enumerable: false,
-			value: require(`es5-ext/array/#/${arrayMethodName}`),
-			writable: true,
-		}
-	);
-}
+Object.defineProperty(
+	Array.prototype,
+	'contains',
+	{
+		configurable: true,
+		enumerable: false,
+		value: require('es5-ext/array/#/contains'),
+		writable: true,
+	}
+);
+
+Object.defineProperty(
+	Array.prototype,
+	'diff',
+	{
+		configurable: true,
+		enumerable: false,
+		value: require('es5-ext/array/#/diff'),
+		writable: true,
+	}
+);
+
+Object.defineProperty(
+	Array.prototype,
+	'flatten',
+	{
+		configurable: true,
+		enumerable: false,
+		value: require('es5-ext/array/#/flatten'),
+		writable: true,
+	}
+);
+
+Object.defineProperty(
+	Array.prototype,
+	'intersection',
+	{
+		configurable: true,
+		enumerable: false,
+		value: require('es5-ext/array/#/intersection'),
+		writable: true,
+	}
+);
+
+Object.defineProperty(
+	Array.prototype,
+	'last',
+	{
+		configurable: true,
+		enumerable: false,
+		value: require('es5-ext/array/#/last'),
+		writable: true,
+	}
+);
+
+Object.defineProperty(
+	Array.prototype,
+	'uniq',
+	{
+		configurable: true,
+		enumerable: false,
+		value: require('es5-ext/array/#/uniq'),
+		writable: true,
+	}
+);
