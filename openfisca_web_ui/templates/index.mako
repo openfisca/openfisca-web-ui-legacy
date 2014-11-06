@@ -56,3 +56,28 @@ window.appconfig = ${helpers.index_appconfig(ctx, alert_on_js_error = data['aler
 <%def name="container_content()" filter="trim">
 <div id="simulator-container"></div>
 </%def>
+
+
+<%def name="page_css()" filter="trim">
+    <link href="${urls.get_url(ctx, u'css/typeahead.css', static = True)}" media="screen" rel="stylesheet">
+</%def>
+
+
+<%def name="page_scripts()" filter="trim">
+% if conf['enabled.auth']:
+    ## Quote from persona: You must include this on every page which uses navigator.id functions.
+    ## Because Persona is still in development, you should not self-host the include.js file.
+    <script src="${urlparse.urljoin(conf['urls.persona'], 'include.js')}"></script>
+% endif
+    <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-with-addons.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/intl/Intl.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/intl/locale-data/jsonp/{}.js'.format(ctx.lang[0]), static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/react-intl.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/locale-data/{}.js'.format(ctx.lang[0]), static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js', static = True)}"></script>
+    <script>
+        <%self:appconfig_script/>
+    </script>
+    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.min.js' if data['minified_js_bundle'] else u'bundle.js'), static = True)}"></script>
+</%def>

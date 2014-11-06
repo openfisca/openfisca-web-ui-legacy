@@ -39,11 +39,6 @@ from openfisca_web_ui.templates import helpers
 %>
 
 
-<%def name="appconfig_script()" filter="trim">
-window.appconfig = ${helpers.base_appconfig(ctx) | n, js};
-</%def>
-
-
 <%def name="brand()" filter="trim">
 OpenFisca
 </%def>
@@ -71,8 +66,8 @@ OpenFisca
 
 <%def name="css()" filter="trim">
     <link href="${urls.get_url(ctx, u'dist/vendor/bootstrap/css/bootstrap.min.css', static = True)}" media="screen" rel="stylesheet">
-    <link href="${urls.get_url(ctx, u'css/typeahead.css', static = True)}" media="screen" rel="stylesheet">
     <link href="${urls.get_url(ctx, u'css/site.css', static = True)}" media="screen" rel="stylesheet">
+    <%self:page_css/>
 </%def>
 
 
@@ -157,33 +152,21 @@ OpenFisca
 </%def>
 
 
+<%def name="page_css()" filter="trim">
+</%def>
+
+
 <%def name="page_scripts()" filter="trim">
 </%def>
 
 
 <%def name="scripts()" filter="trim">
-% if conf['enabled.auth']:
-    ## Quote from persona: You must include this on every page which uses navigator.id functions.
-    ## Because Persona is still in development, you should not self-host the include.js file.
-    <script src="${urlparse.urljoin(conf['urls.persona'], 'include.js')}"></script>
-% endif
     <script src="${urls.get_url(ctx, u'dist/vendor/jquery.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/react-with-addons.min.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/intl/Intl.min.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/intl/locale-data/jsonp/{}.js'.format(ctx.lang[0]), static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/react-intl.min.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/locale-data/{}.js'.format(ctx.lang[0]), static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/traceur-runtime.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/bootstrap/js/bootstrap.js', static = True)}"></script>
-    <script>
-        <%self:appconfig_script/>
-    </script>
-    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.min.js' if data['minified_js_bundle'] else u'bundle.js'), static = True)}"></script>
+    <%self:page_scripts/>
 % if conf['enabled.livereload']:
     <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
 % endif
-    <%self:page_scripts/>
 </%def>
 
 
