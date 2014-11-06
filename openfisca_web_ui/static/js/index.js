@@ -1,9 +1,8 @@
 'use strict';
 
-// Polyfills
-require('es5-extend').call(global);
-
 var React = require('react');
+
+require('./polyfills');
 
 var app = require('./app');
 

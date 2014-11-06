@@ -24,7 +24,7 @@
     "X-editable": "git+https://github.com/vitalets/x-editable.git",
     "bootstrap": "^3.1.1",
     "deep-equal": "^0.2.1",
-    "es5-extend": "^0.1.1",
+    "es5-ext": "^0.10.4",
     "filesaver.js": "^0.1.0",
     "html5shiv": "^3.7.2",
     "intl": "^0.1.4",
