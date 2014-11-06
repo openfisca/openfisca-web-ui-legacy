@@ -79,6 +79,10 @@ def index(req):
     ctx = contexts.Ctx(req)
     data, errors = conv.struct(
         {
+            'alert_on_js_error': conv.pipe(
+                conv.guess_bool,
+                conv.default(conf['alert_on_js_error']),
+                ),
             'minified_js_bundle': conv.pipe(
                 conv.guess_bool,
                 conv.default(conf['minified_js_bundle']),
@@ -97,7 +101,7 @@ def index(req):
                 httponly = True,
                 secure = req.scheme == 'https',
                 )
-    return templates.render(ctx, '/index.mako', minified_js_bundle = data['minified_js_bundle'])
+    return templates.render(ctx, '/index.mako', data = data)
 
 
 def make_router():

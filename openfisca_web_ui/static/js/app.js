@@ -12,14 +12,13 @@ var appconfig = global.appconfig;
 
 
 function init() {
-  window.onerror = function(errorMsg, url, lineNumber) {
-    if ( ! appconfig.debug) {
+  if (appconfig.alertOnJsError) {
+    window.onerror = function(errorMsg, url, lineNumber) {
       alert(appconfig.i18n.onerrorMessage);
       // TODO call send mail webservice.
-      // window.location.reload();
-    }
-    return false;
-  };
+      return false;
+    };
+  }
 
   var enabledModules = appconfig.enabledModules;
   if (enabledModules.auth) {

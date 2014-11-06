@@ -179,7 +179,7 @@ OpenFisca
     <script>
         <%self:appconfig_script/>
     </script>
-    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.min.js' if minified_js_bundle else u'bundle.js'), static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/' + ('bundle.min.js' if data['minified_js_bundle'] else u'bundle.js'), static = True)}"></script>
 % if conf['enabled.livereload']:
     <script src="${'http://{0}:35731/livereload.js?snipver=1'.format(req.domain)}"></script>
 % endif

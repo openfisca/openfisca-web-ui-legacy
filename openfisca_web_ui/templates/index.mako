@@ -33,7 +33,7 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="appconfig_script()" filter="trim">
-window.appconfig = ${helpers.index_appconfig(ctx) | n, js};
+window.appconfig = ${helpers.index_appconfig(ctx, alert_on_js_error = data['alert_on_js_error']) | n, js};
 </%def>
 
 

@@ -77,8 +77,9 @@ def base_appconfig(ctx):
     return appconfig
 
 
-def index_appconfig(ctx):
+def index_appconfig(ctx, alert_on_js_error):
     appconfig = base_appconfig(ctx)
+    appconfig['alertOnJsError'] = alert_on_js_error
     appconfig['api'] = {
         'baseUrl': conf['api.baseUrl'],
         'urlPaths': {
