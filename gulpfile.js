@@ -16,7 +16,6 @@ var indexJsFile = jsDir + '/index.js';
 var distDir = staticDir + '/dist';
 var vendorJsFiles = [
   './node_modules/html5shiv/src/html5shiv.js',
-  './node_modules/intl/Intl.min.js',
   './node_modules/react/dist/react-with-addons.min.js',
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
@@ -25,6 +24,7 @@ var vendorJsFiles = [
 ];
 var vendorDir = distDir + '/vendor',
   vendorBootstrapDir = vendorDir + '/bootstrap',
+  vendorIntlDir = vendorDir + '/intl',
   vendorReactIntlDir = vendorDir + '/react-intl';
 
 
@@ -108,12 +108,18 @@ gulp.task('dev', ['clean:dist', 'bundle:dev', 'vendor']);
 gulp.task('prod', ['clean:dist', 'bundle:prod', 'bundle:dev', 'vendor']);
 
 
-gulp.task('vendor', ['vendor:bootstrap', 'vendor:react-intl', 'vendor:js']);
+gulp.task('vendor', ['vendor:bootstrap', 'vendor:intl', 'vendor:react-intl', 'vendor:js']);
 
 
 gulp.task('vendor:bootstrap', function() {
   return gulp.src('./node_modules/bootstrap/dist/**')
     .pipe(gulp.dest(vendorBootstrapDir));
+});
+
+
+gulp.task('vendor:intl', function() {
+  return gulp.src('./node_modules/intl/**')
+    .pipe(gulp.dest(vendorIntlDir));
 });
 
 
