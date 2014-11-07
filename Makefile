@@ -23,6 +23,9 @@ clean-js-build:
 clean-pyc:
 	find -name '*.pyc' -exec rm \{\} \;
 
+compile-i18n-python:
+	python setup.py compile_catalog
+
 ctags:
 	ctags --recurse=yes --exclude=node_modules --exclude=openfisca_web_ui/static/dist .
 
@@ -34,7 +37,7 @@ jshint: clean-js-build
 
 poedit: update-i18n-python
 	poedit openfisca_web_ui/i18n/fr/LC_MESSAGES/openfisca-web-ui.po
-
+	make compile-i18n-python
 
 test: check-syntax-errors
 	nosetests openfisca_web_ui/tests
