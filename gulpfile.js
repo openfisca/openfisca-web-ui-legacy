@@ -143,12 +143,13 @@ gulp.task('watch', ['clean:dist', 'vendor'], function() {
       .pipe(gulp.dest(distDir));
   }
 
-  startLiveReload();
   var bundler = watchify(indexJsFile, {fullPaths: true});
   bundler.on('update', function() {
     gutil.log('Rebundle in progress...');
     rebundle().on('end', function() { gutil.log('Rebundle done.'); });
   });
   gutil.log('Initial bundle in progress...');
-  return rebundle().on('end', function() { gutil.log('Initial bundle done.'); });
+  var stream = rebundle().on('end', function() { gutil.log('Initial bundle done.'); });
+  startLiveReload();
+  return stream;
 });
