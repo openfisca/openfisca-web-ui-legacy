@@ -4,6 +4,9 @@
 var React = require('react'),
   ReactIntlMixin = require('react-intl');
 
+var polyfills = require('../../polyfills');
+
+
 var appconfig = global.appconfig;
 
 
@@ -15,7 +18,8 @@ var YearInput = React.createClass({
     value: React.PropTypes.number.isRequired,
   },
   handleChange: function(event) {
-    this.props.onChange(event.target.valueAsNumber);
+    var newValue = polyfills.valueAsNumber(event.target);
+    this.props.onChange(newValue);
   },
   render: function() {
     return (

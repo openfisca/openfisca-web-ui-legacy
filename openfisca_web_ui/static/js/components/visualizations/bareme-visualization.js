@@ -8,6 +8,7 @@ var Lazy = require('lazy.js'),
 
 var BaremeChart = require('./svg/bareme-chart'),
   helpers = require('../../helpers'),
+  polyfills = require('../../polyfills'),
   TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree');
 
@@ -166,10 +167,12 @@ var BaremeVisualization = React.createClass({
     this.props.onSettingsChange({xMinValue: newXMinValue, xMaxValue: newXMaxValue}, true);
   },
   handleXMaxValueChange: function() {
-    this.setState({xMaxValue: this.refs.xMaxValue.getDOMNode().valueAsNumber || null});
+    var newXMaxValue = polyfills.valueAsNumber(this.refs.xMaxValue.getDOMNode());
+    this.setState({xMaxValue: newXMaxValue});
   },
   handleXMinValueChange: function() {
-    this.setState({xMinValue: this.refs.xMinValue.getDOMNode().valueAsNumber || null});
+    var newXMinValue = polyfills.valueAsNumber(this.refs.xMinValue.getDOMNode());
+    this.setState({xMinValue: newXMinValue});
   },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];

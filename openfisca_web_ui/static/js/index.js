@@ -2,12 +2,13 @@
 
 var React = require('react');
 
-require('./polyfills');
-
-var app = require('./app');
+var app = require('./app'),
+  polyfills = require('./polyfills');
 
 
 // Enable React tab in Webkit developer tools.
 global.React = React;
+
+polyfills.install();
 
 app.init();
