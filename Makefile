@@ -14,11 +14,11 @@ check-syntax-errors: clean-pyc
 	@# This is a hack around flake8 not displaying E910 errors with the select option.
 	test -z "`flake8 --first | grep E901`"
 
-clean: clean-js-build clean-pyc
+clean: clean-js_dist clean-pyc
 	rm -Rf cache/templates/
 
-clean-js-build:
-	./node_modules/.bin/gulp clean
+clean-js_dist:
+	./node_modules/.bin/gulp clean:dist
 
 clean-pyc:
 	find -name '*.pyc' -exec rm \{\} \;
@@ -32,7 +32,7 @@ ctags:
 flake8: clean-pyc
 	flake8
 
-jshint: clean-js-build
+jshint: clean-js_dist
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 
 poedit: update-i18n-python
