@@ -63,7 +63,8 @@ var VariablesTree = React.createClass({
                   null;
                 var isActive = this.props.activeVariableCode && (
                   this.props.activeVariableCode === variable.code ||
-                    activeVariable.childrenCodes && activeVariable.childrenCodes.contains(variable.code)
+                    activeVariable && activeVariable.childrenCodes &&
+                      activeVariable.childrenCodes.contains(variable.code)
                 );
                 return (
                   <tr
