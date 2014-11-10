@@ -182,7 +182,9 @@ var BaremeVisualization = React.createClass({
                         onChange={this.props.onVisualizationChange}
                         value={this.props.visualizationSlug}
                       />
-                      <button className='btn btn-default pull-right' onClick={this.handleDisplayParametersColumnClick}>
+                      <button
+                        className='btn btn-default hidden-sm hidden-xs pull-right'
+                        onClick={this.handleDisplayParametersColumnClick}>
                         {
                           this.props.displayParametersColumn ?
                             this.getIntlMessage('enlarge') :
