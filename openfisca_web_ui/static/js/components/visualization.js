@@ -18,7 +18,9 @@ var Visualization = React.createClass({
     downloadAttribution: React.PropTypes.string,
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
+    onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
+    onVisualizationChange: React.PropTypes.func.isRequired,
     reform: React.PropTypes.string,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
@@ -45,10 +47,13 @@ var Visualization = React.createClass({
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
             onDownload={this.props.onDownload}
+            onReformChange={this.props.onReformChange}
             onSettingsChange={this.handleSettingsChange}
+            onVisualizationChange={this.props.onVisualizationChange}
             onXValuesChange={(xMinValue, xMaxValue) => this.handleSettingsChange({xMinValue, xMaxValue}, true)}
             reform={this.props.reform}
             variablesTree={this.props.simulationResult}
+            visualizationSlug={this.props.visualizationSlug}
             xMaxValue={this.props.settings.bareme.xMaxValue}
             xMinValue={this.props.settings.bareme.xMinValue}
           />
@@ -69,9 +74,13 @@ var Visualization = React.createClass({
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
             onDownload={this.props.onDownload}
+            onReformChange={this.props.onReformChange}
             onSettingsChange={this.handleSettingsChange}
+            onVisualizationChange={this.props.onVisualizationChange}
+            reform={this.props.reform}
             valuesOffset={isDiff ? null : (this.props.reform ? 1 : 0)}
             variablesTree={this.props.simulationResult}
+            visualizationSlug={this.props.visualizationSlug}
           />
         );
     }
@@ -96,9 +105,11 @@ var Visualization = React.createClass({
         curveLabel={curveLabel}
         formatHint={formatHint}
         labelsFontSize={this.props.labelsFontSize}
+        onVisualizationChange={this.props.onVisualizationChange}
         pointLabel={pointLabel}
         points={points}
         value={value}
+        visualizationSlug={this.props.visualizationSlug}
         xFormatNumber={value => helpers.formatFrenchNumber(value, {fixed: 0})}
         xSnapIntervalValue={5}
         yFormatNumber={helpers.formatFrenchNumber}

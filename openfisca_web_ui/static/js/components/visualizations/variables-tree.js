@@ -21,6 +21,7 @@ var VariablesTree = React.createClass({
     onVariableHover: React.PropTypes.func,
     onVariableToggle: React.PropTypes.func,
     positiveColor: React.PropTypes.string.isRequired,
+    variableHeightByCode: React.PropTypes.object,
     variables: React.PropTypes.array.isRequired,
   },
   getDefaultProps: function() {
@@ -31,6 +32,7 @@ var VariablesTree = React.createClass({
       negativeColor: 'red',
       noColorFill: 'gray',
       positiveColor: 'green',
+      variableHeightByCode: {},
     };
   },
   getInitialState: function() {
@@ -104,9 +106,9 @@ var VariablesTree = React.createClass({
                             backgroundColor: this.props.displayVariablesColors ?
                               (variable.color ? `rgb(${variable.color.join(',')})` : this.props.noColorFill) :
                               (variable.value > 0 ? this.props.positiveColor : this.props.negativeColor),
-                            border: variable.depth > 0 ? '1px solid gray' : null,
-                            height: variable.depth === 0 ? 5 : null,
-                            marginTop: variable.depth === 0 ? 5 : null,
+                            border: '1px solid gray',
+                            height: this.props.variableHeightByCode[variable.code],
+                            marginTop: this.props.variableHeightByCode[variable.code],
                             width: 20,
                           }}>
                             { /* jshint ignore:line */}

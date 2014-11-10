@@ -7,13 +7,14 @@ var Lazy = require('lazy.js'),
   saveAs = require('filesaver.js');
 
 var BaremeChart = require('./svg/bareme-chart'),
+  BaremeXAxisBoundsSelector = require('./bareme-x-axis-bounds-selector'),
   helpers = require('../../helpers'),
-  polyfills = require('../../polyfills'),
+  ReformSelector = require('./reform-selector'),
   TwoColumnsLayout = require('./two-columns-layout'),
-  VariablesTree = require('./variables-tree');
+  VariablesTree = require('./variables-tree'),
+  VisualizationSelect = require('./visualization-select');
 
-var cx = React.addons.classSet,
-  obj = helpers.obj;
+var obj = helpers.obj;
 
 
 var BaremeVisualization = React.createClass({
@@ -32,9 +33,12 @@ var BaremeVisualization = React.createClass({
     maxHeightRatio: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onDownload: React.PropTypes.func.isRequired,
+    onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
+    onVisualizationChange: React.PropTypes.func.isRequired,
     reform: React.PropTypes.string,
     variablesTree: React.PropTypes.object.isRequired,
+    visualizationSlug: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
   },
@@ -74,8 +78,6 @@ var BaremeVisualization = React.createClass({
     return {
       activeVariableCode: null,
       chartColumnWidth: null,
-      xMaxValue: this.props.xMaxValue,
-      xMinValue: this.props.xMinValue,
     };
   },
   getVariables: function() {
@@ -160,68 +162,72 @@ var BaremeVisualization = React.createClass({
     }
     this.setState({chartColumnWidth: width});
   },
-  handleXAxisBoundsSubmit: function(event) {
-    event.preventDefault();
-    var newXMaxValue = this.state.xMaxValue || this.props.defaultXMaxValue;
-    var newXMinValue = this.state.xMinValue || this.props.defaultXMinValue;
-    this.props.onSettingsChange({xMinValue: newXMinValue, xMaxValue: newXMaxValue}, true);
-  },
-  handleXMaxValueChange: function() {
-    var newXMaxValue = polyfills.valueAsNumber(this.refs.xMaxValue.getDOMNode());
-    this.setState({xMaxValue: newXMaxValue});
-  },
-  handleXMinValueChange: function() {
-    var newXMinValue = polyfills.valueAsNumber(this.refs.xMinValue.getDOMNode());
-    this.setState({xMinValue: newXMinValue});
-  },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
   },
   render: function() {
     var variables = this.getVariables();
-    var isMaxValueLessThanMinValue = this.state.xMaxValue !== null && this.state.xMinValue !== null &&
-      this.state.xMaxValue < this.state.xMinValue;
     return (
       <TwoColumnsLayout
         leftComponentRef={'chartColumn'}
         rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
         <div ref='chartColumn'>
-          {
-            this.state.chartColumnWidth && (
-              <div>
-                <BaremeChart
-                  activeVariableCode={this.state.activeVariableCode}
-                  formatNumber={this.props.formatNumber}
-                  onVariableHover={this.handleVariableHover}
-                  onVariableToggle={this.handleVariableToggle}
-                  ref='chart'
-                  variables={variables}
-                  width={this.state.chartColumnWidth}
-                  xMaxValue={this.props.xMaxValue}
-                  xMinValue={this.props.xMinValue}
-                />
-                {
-                  variables && (
-                    <p className='text-center well'>
-                      {this.formatHint(variables)}
-                    </p>
-                  )
-                }
-                <p className='clearfix'>
-                  <button
-                    className={cx({
-                      active: this.props.displayParametersColumn,
-                      btn: true,
-                      'btn-default': true,
-                      'pull-right': true,
-                    })}
-                    onClick={this.handleDisplayParametersColumnClick}>
-                    {this.getIntlMessage('details')}
-                  </button>
-                </p>
+          <div>
+            {
+              this.state.chartColumnWidth && (
+                <div className='panel panel-default'>
+                  <div className='panel-heading'>
+                    <div className="form-inline">
+                      <VisualizationSelect
+                        onChange={this.props.onVisualizationChange}
+                        value={this.props.visualizationSlug}
+                      />
+                      <button className='btn btn-default pull-right' onClick={this.handleDisplayParametersColumnClick}>
+                        {
+                          this.props.displayParametersColumn ?
+                            this.getIntlMessage('enlarge') :
+                            this.getIntlMessage('reduce')
+                        }
+                      </button>
+                    </div>
+                  </div>
+                  <div className='list-group-item'>
+                    <BaremeChart
+                      activeVariableCode={this.state.activeVariableCode}
+                      formatNumber={this.props.formatNumber}
+                      onVariableHover={this.handleVariableHover}
+                      onVariableToggle={this.handleVariableToggle}
+                      ref='chart'
+                      variables={variables}
+                      width={this.state.chartColumnWidth - 15 * 2 /* bootstrap adds 15px padding to panel-body */}
+                      xMaxValue={this.props.xMaxValue}
+                      xMinValue={this.props.xMinValue}
+                    />
+                  </div>
+                  <div className='list-group-item'>
+                    {variables && <p>{this.formatHint(variables)}</p>}
+                  </div>
+                  <div className='list-group-item'>
+                    <BaremeXAxisBoundsSelector
+                      defaultXMaxValue={this.props.defaultXMaxValue}
+                      defaultXMinValue={this.props.defaultXMinValue}
+                      onSettingsChange={this.props.onSettingsChange}
+                      xMaxValue={this.props.xMaxValue}
+                      xMinValue={this.props.xMinValue}
+                    />
+                  </div>
+                </div>
+              )
+            }
+            <div className='panel panel-default'>
+              <div className='panel-heading'>
+                {this.getIntlMessage('reforms')}
               </div>
-            )
-          }
+              <div className='panel-body'>
+                <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+              </div>
+            </div>
+          </div>
         </div>
         <div ref='parametersColumn'>
           <div className='panel panel-default'>
@@ -239,83 +245,9 @@ var BaremeVisualization = React.createClass({
                 onVariableHover={this.handleVariableHover}
                 onVariableToggle={this.handleVariableToggle}
                 positiveColor={this.props.positiveColor}
+                variableHeightByCode={{revdisp: 5}}
                 variables={variables}
               />
-            </div>
-          </div>
-          <div className='panel panel-default'>
-            <div className='panel-heading'>
-              {this.getIntlMessage('xAxisBounds')}
-            </div>
-            <div className='panel-body'>
-              <form className="form-horizontal" onSubmit={this.handleXAxisBoundsSubmit} role="form">
-                <div className={cx({
-                  'form-group': true,
-                  'form-group-sm': true,
-                  'has-error': isMaxValueLessThanMinValue,
-                })}>
-                  <label className="col-xs-6 control-label" htmlFor="x-axis-min-value">
-                    {this.getIntlMessage('minimumLabel')}
-                  </label>
-                  <div className='col-xs-6'>
-                    <input
-                      className='form-control'
-                      min={0}
-                      onChange={this.handleXMinValueChange}
-                      placeholder={this.props.defaultXMinValue}
-                      ref='xMinValue'
-                      type='number'
-                      value={this.state.xMinValue}
-                      />
-                  </div>
-                </div>
-                <div className={cx({
-                  'form-group': true,
-                  'form-group-sm': true,
-                  'has-error': isMaxValueLessThanMinValue,
-                })}>
-                  <label className="col-xs-6 control-label" htmlFor="x-axis-max-value">
-                    {this.getIntlMessage('maximumLabel')}
-                  </label>
-                  <div className='col-xs-6'>
-                    <input
-                      className='form-control'
-                      id='x-axis-max-value'
-                      min={0}
-                      onChange={this.handleXMaxValueChange}
-                      placeholder={this.props.defaultXMaxValue}
-                      ref='xMaxValue'
-                      type='number'
-                      value={this.state.xMaxValue}
-                      />
-                    {
-                      isMaxValueLessThanMinValue && (
-                        <p className='help-block'>
-                          {this.getIntlMessage('minimumValueLessThanMaximumValueExplanation')}
-                        </p>
-                      )
-                    }
-                  </div>
-                </div>
-                <div className="form-group form-group-sm">
-                  <div className="col-xs-offset-6 col-xs-6">
-                    <button
-                      className='btn btn-default btn-sm'
-                      disabled={
-                        (
-                          (this.state.xMaxValue || this.props.defaultXMaxValue) === this.props.xMaxValue &&
-                          (this.state.xMinValue || this.props.defaultXMinValue) === this.props.xMinValue
-                        ) || (
-                          (this.state.xMaxValue || this.props.defaultXMaxValue) <
-                            (this.state.xMinValue || this.props.defaultXMinValue)
-                        )
-                      }
-                      type='submit'>
-                      {this.getIntlMessage('apply')}
-                    </button>
-                  </div>
-                </div>
-              </form>
             </div>
           </div>
           <div className='panel panel-default'>

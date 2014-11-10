@@ -19,7 +19,6 @@ var EditForm = require('./edit-form'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   Visualization = require('./visualization'),
-  VisualizationToolbar = require('./visualizations/visualization-toolbar'),
   webservices = require('../webservices');
 
 var appconfig = global.appconfig,
@@ -328,19 +327,6 @@ var Simulator = React.createClass({
           'col-sm-3': true,
           'hidden-xs': this.state.editedEntity,
         })}>
-          <TestCaseToolbar
-            disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
-            entitiesMetadata={this.props.entitiesMetadata}
-            getEntitiesKinds={models.getEntitiesKinds}
-            isSimulationInProgress={this.state.isSimulationInProgress}
-            onCreateEntity={this.handleCreateEntity}
-            onReset={this.handleReset}
-            onRepair={this.handleRepair}
-            onSimulate={this.simulate}
-            testCase={this.state.testCase}
-            year={this.state.year}
-          />
-          <hr/>
           {
             this.state.testCase && (
               <TestCase
@@ -361,6 +347,21 @@ var Simulator = React.createClass({
               />
             )
           }
+          <hr/>
+          <TestCaseToolbar
+            disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
+            entitiesMetadata={this.props.entitiesMetadata}
+            errors={this.state.errors}
+            getEntitiesKinds={models.getEntitiesKinds}
+            isSimulationInProgress={this.state.isSimulationInProgress}
+            onCreateEntity={this.handleCreateEntity}
+            onReset={this.handleReset}
+            onRepair={this.handleRepair}
+            onSimulate={this.simulate}
+            onYearChange={this.handleYearChange}
+            testCase={this.state.testCase}
+            year={this.state.year}
+          />
         </div>
         <div className="col-lg-9 col-md-9 col-sm-9">
           {rightPanel}
@@ -406,17 +407,6 @@ var Simulator = React.createClass({
   renderVisualizationPanel: function() {
     return (
       <div>
-        <VisualizationToolbar
-          errors={this.state.errors}
-          isSimulationInProgress={this.state.isSimulationInProgress}
-          onReformChange={this.handleReformChange}
-          onVisualizationChange={this.handleVisualizationChange}
-          onYearChange={this.handleYearChange}
-          reform={this.state.reform}
-          visualizationSlug={this.state.visualizationSlug}
-          year={this.state.year}
-        />
-        <hr/>
         {
           this.state.errors ? (
             <div className="alert alert-danger" role="alert">
@@ -441,7 +431,9 @@ var Simulator = React.createClass({
               ) : (
                 <Visualization
                   onDownload={this.handleDownload}
+                  onReformChange={this.handleReformChange}
                   onSettingsChange={this.handleVisualizationSettingsChange}
+                  onVisualizationChange={this.handleVisualizationChange}
                   reform={this.state.reform}
                   settings={this.state.visualizationsSettings}
                   simulationResult={this.state.simulationResult}

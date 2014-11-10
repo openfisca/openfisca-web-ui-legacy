@@ -4,6 +4,9 @@
 var React = require('react/addons'),
   ReactIntlMixin = require('react-intl');
 
+var YearInput = require('./year-input');
+
+
 var appconfig = global.appconfig,
   cx = React.addons.classSet;
 
@@ -14,12 +17,14 @@ var TestCaseToolbar = React.createClass({
     disableSimulate: React.PropTypes.bool,
     displayRepairMenuItem: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
+    errors: React.PropTypes.object,
     getEntitiesKinds: React.PropTypes.func.isRequired,
     isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
     onReset: React.PropTypes.func.isRequired,
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
+    onYearChange: React.PropTypes.func.isRequired,
     testCase: React.PropTypes.object,
     year: React.PropTypes.number,
   },
@@ -40,23 +45,15 @@ var TestCaseToolbar = React.createClass({
     });
     var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
     return (
-      <div>
+      <div className="form-inline" role="form">
         <div className="btn-group" style={{marginRight: 5}}>
           <button
             accessKey="s"
-            className="btn btn-primary"
-            disabled={this.props.disableSimulate}
-            onClick={this.props.onSimulate}
-            type="button">
-            {this.getIntlMessage('simulate')}
-          </button>
-          <button
-            className={cx('btn', 'btn-primary', 'dropdown-toggle')}
+            className="btn btn-primary dropdown-toggle"
             data-toggle="dropdown"
             id="simulation-button"
             type="button">
-            <span className="caret"></span>
-            <span className="sr-only">Toggle Dropdown</span>
+            <span>{this.getIntlMessage('menu')}</span> <span className="caret"></span>
           </button>
           <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
             <li className={cx({disabled: this.props.disableSimulate})} role="presentation">
@@ -117,9 +114,19 @@ var TestCaseToolbar = React.createClass({
             </li>
           </ul>
         </div>
+        <div className={cx({
+          'form-group': true,
+          'has-error': this.props.errors && this.props.errors.period,
+        })}>
+          <YearInput
+            error={this.props.errors && this.props.errors.period && this.props.errors.period['1']}
+            onChange={this.props.onYearChange}
+            value={this.props.year}
+          />
+        </div>
         {
           this.props.isSimulationInProgress && (
-            <span className="label label-default">{this.getIntlMessage('simulationInProgress')}</span>
+            <span className="label label-default visible-xs-inline">{this.getIntlMessage('simulationInProgress')}</span>
           )
         }
       </div>

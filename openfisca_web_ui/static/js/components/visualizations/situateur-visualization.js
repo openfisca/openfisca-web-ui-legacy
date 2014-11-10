@@ -11,6 +11,7 @@ var Curve = require('./svg/curve'),
   Legend = require('./svg/legend'),
   Point = require('./svg/point'),
   VGrid = require('./svg/v-grid'),
+  VisualizationSelect = require('./visualization-select'),
   XAxis = require('./svg/x-axis'),
   YAxis = require('./svg/y-axis');
 
@@ -25,10 +26,12 @@ var SituateurVisualization = React.createClass({
     labelsFontSize: React.PropTypes.number.isRequired,
     legendHeight: React.PropTypes.number.isRequired,
     maxHeightRatio: React.PropTypes.number.isRequired,
+    onVisualizationChange: React.PropTypes.func.isRequired,
     pointColor: React.PropTypes.string.isRequired,
     pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
     value: React.PropTypes.number.isRequired,
+    visualizationSlug: React.PropTypes.string.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
     xFormatNumber: React.PropTypes.func.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
@@ -151,11 +154,23 @@ var SituateurVisualization = React.createClass({
     this.lastPoint = {x: this.props.xMaxValue * 0.99, y: this.props.yMaxValue};
     this.allPoints = this.props.points.concat(this.lastPoint);
     return (
-      <div>
-        {this.state.width && this.renderSvg()}
-        <p className='text-center well'>
-          {this.formatHint()}
-        </p>
+      <div className='panel panel-default'>
+        <div className='panel-heading'>
+          <div className="form-inline">
+            <VisualizationSelect
+              onChange={this.props.onVisualizationChange}
+              value={this.props.visualizationSlug}
+            />
+          </div>
+        </div>
+        <div className='list-group-item'>
+          {this.state.width && this.renderSvg()}
+        </div>
+        <div className='list-group-item'>
+          <p>
+            {this.formatHint()}
+          </p>
+        </div>
       </div>
     );
   },

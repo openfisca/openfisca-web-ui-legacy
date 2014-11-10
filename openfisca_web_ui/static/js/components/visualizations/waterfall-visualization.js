@@ -8,12 +8,13 @@ var Lazy = require('lazy.js'),
   TweenState = require('react-tween-state');
 
 var helpers = require('../../helpers'),
+  ReformSelector = require('./reform-selector'),
   TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree'),
+  VisualizationSelect = require('./visualization-select'),
   WaterfallChart = require('./svg/waterfall-chart');
 
-var cx = React.addons.classSet,
-  obj = helpers.obj;
+var obj = helpers.obj;
 
 
 var WaterfallVisualization = React.createClass({
@@ -32,10 +33,14 @@ var WaterfallVisualization = React.createClass({
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onDownload: React.PropTypes.func.isRequired,
+    onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
+    onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
+    reform: React.PropTypes.string,
     valuesOffset: React.PropTypes.number,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
+    visualizationSlug: React.PropTypes.string.isRequired,
   },
   componentDidMount: function() {
     window.onresize = this.handleWidthChange;
@@ -228,46 +233,63 @@ var WaterfallVisualization = React.createClass({
         leftComponentRef={'chartColumn'}
         rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
         <div ref='chartColumn'>
-          {
-            this.state.chartColumnWidth && (
-              <div>
-                <WaterfallChart
-                  activeVariablesCodes={activeVariablesCodes}
-                  displayVariablesColors={this.props.displayVariablesColors}
-                  formatNumber={this.props.formatNumber}
-                  labelsFontSize={this.props.labelsFontSize}
-                  negativeColor={this.props.negativeColor}
-                  noColorFill={this.props.noColorFill}
-                  onVariableHover={this.handleVariableHover}
-                  onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
-                  positiveColor={this.props.positiveColor}
-                  ref='chart'
-                  tweenProgress={this.getTweeningValue('tweenProgress')}
-                  variables={waterfallChartVariables}
-                  width={this.state.chartColumnWidth}
-                />
-                <p className='text-center well'>
-                  {
-                    activeVariable ?
-                      this.formatHint(variablesWithSubtotals) :
-                      this.getIntlMessage('hoverOverChart')
-                  }
-                </p>
-                <p className='clearfix'>
-                  <button
-                    className={cx({
-                      active: this.props.displayParametersColumn,
-                      btn: true,
-                      'btn-default': true,
-                      'pull-right': true,
-                    })}
-                    onClick={this.handleDisplayParametersColumnClick}>
-                    {this.getIntlMessage('details')}
-                  </button>
-                </p>
+          <div>
+            {
+              this.state.chartColumnWidth && (
+                <div className='panel panel-default'>
+                  <div className='panel-heading'>
+                    <div className="form-inline">
+                      <VisualizationSelect
+                        onChange={this.props.onVisualizationChange}
+                        value={this.props.visualizationSlug}
+                      />
+                      <button className='btn btn-default pull-right' onClick={this.handleDisplayParametersColumnClick}>
+                        {
+                          this.props.displayParametersColumn ?
+                            this.getIntlMessage('enlarge') :
+                            this.getIntlMessage('reduce')
+                        }
+                      </button>
+                    </div>
+                  </div>
+                  <div className='list-group-item'>
+                    <WaterfallChart
+                      activeVariablesCodes={activeVariablesCodes}
+                      displayVariablesColors={this.props.displayVariablesColors}
+                      formatNumber={this.props.formatNumber}
+                      labelsFontSize={this.props.labelsFontSize}
+                      negativeColor={this.props.negativeColor}
+                      noColorFill={this.props.noColorFill}
+                      onVariableHover={this.handleVariableHover}
+                      onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
+                      positiveColor={this.props.positiveColor}
+                      ref='chart'
+                      tweenProgress={this.getTweeningValue('tweenProgress')}
+                      variables={waterfallChartVariables}
+                      width={this.state.chartColumnWidth - 15 * 2 /* bootstrap adds 15px padding to panel-body */}
+                    />
+                  </div>
+                  <div className='list-group-item'>
+                    <p>
+                      {
+                        activeVariable ?
+                          this.formatHint(variablesWithSubtotals) :
+                          this.getIntlMessage('hoverOverChart')
+                      }
+                    </p>
+                  </div>
+                </div>
+              )
+            }
+            <div className='panel panel-default'>
+              <div className='panel-heading'>
+                {this.getIntlMessage('reforms')}
               </div>
-            )
-          }
+              <div className='panel-body'>
+                <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+              </div>
+            </div>
+          </div>
         </div>
         <div ref='parametersColumn'>
           <div className='panel panel-default'>
