@@ -105,15 +105,7 @@ var TestCase = React.createClass({
                      })
                     }
                   </Entity>
-                )
-                .concat(
-                  <p style={{marginBottom: 20}}>
-                    <a href='#' onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}>
-                      {this.getIntlMessage(`addEntity:${kind}`)}
-                    </a>
-                  </p>
-                )
-                .toArray();
+                ).toArray();
             }
           })
         }
