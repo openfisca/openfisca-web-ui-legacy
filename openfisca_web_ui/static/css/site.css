@@ -84,24 +84,6 @@ h3,
     display: none;
 }
 
-.bar-enter {
-  -webkit-transform: scale(0, 1);
-  transition: -webkit-transform 0.5s;
-}
-
-.bar-enter.bar-enter-active {
-  -webkit-transform: scale(1, 1);
-}
-
-.bar-leave {
-  -webkit-transform: scale(1, 1);
-  transition: -webkit-transform 0.5s;
-}
-
-.bar-leave.bar-leave-active {
-  -webkit-transform: scale(0, 1);
-}
-
 
 /* Sticky footer styles
 From http://getbootstrap.com/examples/sticky-footer-navbar/
