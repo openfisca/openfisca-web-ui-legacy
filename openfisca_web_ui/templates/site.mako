@@ -333,17 +333,13 @@ language_name_by_code = {
     <%self:modals/>
     <div id="js-modal"></div>
     <%self:topbar/>
-    <div class="container">
-        <%self:breadcrumb/>
-    % if conf['enabled.disclaimer'] and (ctx.session is None or not ctx.session.disclaimer_closed):
+    <div class="container-fluid">
+        ## <%self:breadcrumb/>
+% if conf['enabled.disclaimer'] and (ctx.session is None or not ctx.session.disclaimer_closed):
         <%self:disclaimer/>
-    % endif
-    </div>
-    <%block name="container">
-    <div class="container">
+% endif
         <%self:container_content/>
     </div>
-    </%block>
     <%self:footer/>
     <%self:scripts/>
     <%self:trackers/>
