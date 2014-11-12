@@ -32,47 +32,43 @@ var AcceptCookiesModal = React.createClass({
   render: function() {
     return (
       <div className="modal fade" role="dialog">
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-lg">
           <div className="modal-content">
-            <form method="post" action={this.props.actionUrlPath}>
-              <div className="modal-header">
-                <h4 className="modal-title">
-                  {this.getIntlMessage('acceptCookiesModalTitle') + ' '}
-                  <small>{this.getIntlMessage('acceptCookiesModalTitleSmall')}</small>
-                </h4>
-              </div>
-              <div className="modal-body">
-                <p>{this.getIntlMessage('acceptCookiesModalParagraph1')}</p>
-                <p>{this.getIntlMessage('acceptCookiesModalParagraph2')}</p>
-                <p>{this.getIntlMessage('acceptCookiesModalParagraph3')}</p>
-                <div className="checkbox">
-                  <label>
-                    <input
-                      checked={this.state.acceptCheckboxChecked}
-                      name="accept-checkbox"
-                      onChange={this.handleAcceptCheckboxChange}
-                      type="checkbox"
-                    />
-                    {this.getIntlMessage('acceptCookiesModalCheckboxLabel')}
-                  </label>
+            <div className="modal-header">
+              <h4 className="modal-title">
+                {this.getIntlMessage('acceptCookiesModalTitle') + ' '}
+                <small>{this.getIntlMessage('acceptCookiesModalTitleSmall')}</small>
+              </h4>
+            </div>
+            <div className="modal-body">
+              <p>{this.getIntlMessage('acceptCookiesModalParagraph1')}</p>
+              <p>{this.getIntlMessage('acceptCookiesModalParagraph2')}</p>
+              <p>{this.getIntlMessage('acceptCookiesModalParagraph3')}</p>
+              <p>{this.getIntlMessage('acceptCookiesModalParagraph4')}</p>
+            </div>
+            <div className="modal-footer">
+              <form action={this.props.actionUrlPath} method="post" role='form'>
+                <div className="checkbox pull-left">
+                  <input
+                    checked={this.state.acceptCheckboxChecked}
+                    id='acceptCheckbox'
+                    name="accept-checkbox"
+                    onChange={this.handleAcceptCheckboxChange}
+                    style={{marginLeft: 0}}
+                    type="checkbox"
+                  />
+                  <label htmlFor='acceptCheckbox'>{this.getIntlMessage('acceptCookiesModalCheckboxLabel')}</label>
                 </div>
-                <p>{this.getIntlMessage('acceptCookiesModalParagraph4')}</p>
-              </div>
-              <div className="modal-footer">
                 <button
                   className="btn btn-success"
                   disabled={! this.state.acceptCheckboxChecked}
                   name="accept"
                   type="submit">
-                  <span className="glyphicon glyphicon-ok"></span>
-                  {' ' + this.getIntlMessage('accept')}
+                  {this.getIntlMessage('accept')}
                 </button>
-                <a className="btn btn-danger" href={appconfig['urls.www']}>
-                  <span className="glyphicon glyphicon-remove"></span>
-                  {' ' + this.getIntlMessage('deny')}
-                </a>
-              </div>
-            </form>
+                <a className="btn btn-danger" href={appconfig['urls.www']}>{this.getIntlMessage('deny')}</a>
+              </form>
+            </div>
           </div>
         </div>
       </div>

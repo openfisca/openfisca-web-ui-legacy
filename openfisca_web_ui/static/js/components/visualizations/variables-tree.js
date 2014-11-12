@@ -2,7 +2,8 @@
 'use strict';
 
 var Lazy = require('lazy.js'),
-  React = require('react/addons');
+  React = require('react/addons'),
+  ReactIntlMixin = require('react-intl');
 
 var Tooltip = require('../tooltip');
 
@@ -10,6 +11,7 @@ var cx = React.addons.classSet;
 
 
 var VariablesTree = React.createClass({
+  mixins: [ReactIntlMixin],
   propTypes: {
     activeVariableCode: React.PropTypes.string,
     displayVariablesColors: React.PropTypes.bool,
@@ -117,18 +119,16 @@ var VariablesTree = React.createClass({
                       }
                     </td>
                     <td>
-                      {
-                        variable.url && (
-                          <Tooltip placement='left'>
-                            <a
-                              href={variable.url}
-                              target='_blank'
-                              title={`Explication sur ${variable.name}`}>
-                              <span className='glyphicon glyphicon-question-sign'></span>
-                            </a>
-                          </Tooltip>
-                        )
-                      }
+                      <Tooltip placement='left'>
+                        <a
+                          href={`${appconfig['urls.www']}outils/variables/${variable.code}`}
+                          target='_blank'
+                          title={
+                            this.formatMessage(this.getIntlMessage('inspectColumnLinkTitle'), {name: variable.code})
+                          }>
+                          <span className='glyphicon glyphicon-question-sign'></span>
+                        </a>
+                      </Tooltip>
                     </td>
                   </tr>
                 );

@@ -18,7 +18,6 @@ var BooleanControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
-    suggestionIcon: React.PropTypes.component,
     value: React.PropTypes.bool,
   },
   handleChange: function(event) {
@@ -38,7 +37,6 @@ var BooleanControl = React.createClass({
     return (
       <div>
         {this.props.label}
-        {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <div className="row">
           <div className="col-sm-6">
             <label className="radio-inline">

@@ -4,7 +4,7 @@
 var React = require('react'),
   ReactIntlMixin = require('react-intl');
 
-var SuggestionIcon = require('../suggestion-icon');
+var Tooltip = require('../../tooltip');
 
 var cx = React.addons.classSet;
 
@@ -22,20 +22,31 @@ var Category = React.createClass({
     return (
       <div className={cx('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">
-          {
-            this.props.hasSuggestions && (
-              <SuggestionIcon className="pull-right">
-                {this.getIntlMessage('categoryContainsSuggestions')}
-              </SuggestionIcon>
-            )
-          }
           <h4 className="panel-title">
-            <a
-              data-parent="#accordion"
-              data-toggle="collapse"
-              href={'#category-' + this.props.index}>
-              {this.props.label}
-            </a>
+            {
+              this.props.hasSuggestions ? (
+                <Tooltip placement='top'>
+                  <a
+                    data-parent="#accordion"
+                    data-toggle="collapse"
+                    href={'#category-' + this.props.index}
+                    style={{
+                      color: 'red',
+                      fontStyle: 'italic',
+                    }}
+                    title={this.getIntlMessage('categoryContainsSuggestions')}>
+                    {this.props.label}
+                  </a>
+                </Tooltip>
+              ) : (
+                <a
+                  data-parent="#accordion"
+                  data-toggle="collapse"
+                  href={'#category-' + this.props.index}>
+                  {this.props.label}
+                </a>
+              )
+            }
           </h4>
         </div>
         <div

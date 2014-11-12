@@ -172,6 +172,14 @@ var BaremeVisualization = React.createClass({
         leftComponentRef={'chartColumn'}
         rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
         <div ref='chartColumn'>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              {this.getIntlMessage('reforms')}
+            </div>
+            <div className='panel-body'>
+              <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+            </div>
+          </div>
           <div>
             {
               this.state.chartColumnWidth && (
@@ -207,7 +215,7 @@ var BaremeVisualization = React.createClass({
                     />
                   </div>
                   <div className='list-group-item'>
-                    {variables && <p>{this.formatHint(variables)}</p>}
+                    {variables && this.formatHint(variables)}
                   </div>
                   <div className='list-group-item'>
                     <BaremeXAxisBoundsSelector
@@ -221,14 +229,6 @@ var BaremeVisualization = React.createClass({
                 </div>
               )
             }
-            <div className='panel panel-default'>
-              <div className='panel-heading'>
-                {this.getIntlMessage('reforms')}
-              </div>
-              <div className='panel-body'>
-                <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
-              </div>
-            </div>
           </div>
         </div>
         <div ref='parametersColumn'>

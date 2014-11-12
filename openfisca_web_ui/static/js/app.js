@@ -54,10 +54,10 @@ function init() {
       disclaimer.init(enabledModules.disclaimer);
     }
   }
-  if (enabledModules.legislation) {
-    var legislation = require('./legislation');
-    legislation.init(enabledModules.legislation);
-  }
+  // if (enabledModules.legislation) {
+  //   var legislation = require('./legislation');
+  //   legislation.init(enabledModules.legislation);
+  // }
   if (enabledModules.situationForm) {
     // TODO use promise.all()
     webservices.fetchEntitiesMetadata(entitiesMetadata => {

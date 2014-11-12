@@ -327,6 +327,21 @@ var Simulator = React.createClass({
           'col-sm-3': true,
           'hidden-xs': this.state.editedEntity,
         })}>
+          <TestCaseToolbar
+            disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
+            entitiesMetadata={this.props.entitiesMetadata}
+            errors={this.state.errors}
+            getEntitiesKinds={models.getEntitiesKinds}
+            isSimulationInProgress={this.state.isSimulationInProgress}
+            onCreateEntity={this.handleCreateEntity}
+            onReset={this.handleReset}
+            onRepair={this.handleRepair}
+            onSimulate={this.simulate}
+            onYearChange={this.handleYearChange}
+            testCase={this.state.testCase}
+            year={this.state.year}
+          />
+          <hr/>
           {
             this.state.testCase && (
               <TestCase
@@ -347,21 +362,6 @@ var Simulator = React.createClass({
               />
             )
           }
-          <hr/>
-          <TestCaseToolbar
-            disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
-            entitiesMetadata={this.props.entitiesMetadata}
-            errors={this.state.errors}
-            getEntitiesKinds={models.getEntitiesKinds}
-            isSimulationInProgress={this.state.isSimulationInProgress}
-            onCreateEntity={this.handleCreateEntity}
-            onReset={this.handleReset}
-            onRepair={this.handleRepair}
-            onSimulate={this.simulate}
-            onYearChange={this.handleYearChange}
-            testCase={this.state.testCase}
-            year={this.state.year}
-          />
         </div>
         <div className="col-lg-9 col-md-9 col-sm-9">
           {rightPanel}
@@ -473,11 +473,13 @@ var Simulator = React.createClass({
     });
   },
   save: function (testCase, testCaseAdditionalData, onComplete) {
-    if ( ! this.props.disableSave) {
+    if (this.props.disableSave) {
+      onComplete();
+    } else {
       webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
         if (data && data.unauthorized) {
           // TODO i18n
-          alert('Votre session a expiré. La page va être rechargée avec une situation vierge.');
+          alert(this.getIntlMessage('sessionHasExpiredExplanation'));
           window.location.reload();
         } else {
           onComplete();

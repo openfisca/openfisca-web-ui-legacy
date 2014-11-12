@@ -17,7 +17,6 @@ var NumberControl = React.createClass({
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.number,
-    suggestionIcon: React.PropTypes.component,
     type: React.PropTypes.string.isRequired,
     value: React.PropTypes.string,
     valType: React.PropTypes.string,
@@ -54,7 +53,6 @@ var NumberControl = React.createClass({
     return (
       <div>
         {this.props.label}
-        {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <div className="row">
           <div className="col-md-4">
             <div className={this.state.isValid === false ? 'has-error' : null}>

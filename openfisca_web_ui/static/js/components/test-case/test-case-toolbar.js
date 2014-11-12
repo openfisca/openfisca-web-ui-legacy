@@ -53,7 +53,7 @@ var TestCaseToolbar = React.createClass({
             data-toggle="dropdown"
             id="simulation-button"
             type="button">
-            <span>{this.getIntlMessage('menu')}</span> <span className="caret"></span>
+            <span>{this.getIntlMessage('actions')}</span> <span className="caret"></span>
           </button>
           <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
             <li className={cx({disabled: this.props.disableSimulate})} role="presentation">

@@ -167,21 +167,20 @@ var SituateurVisualization = React.createClass({
           {this.state.width && this.renderSvg()}
         </div>
         <div className='list-group-item'>
-          <p>
-            {this.formatHint()}
-          </p>
+          {this.formatHint()}
         </div>
       </div>
     );
   },
   renderSvg: function() {
-    var height = this.props.height || this.state.width / this.props.aspectRatio;
+    var width = this.state.width - 15 * 2; // bootstrap adds 15px padding to panel-body
+    var height = this.props.height || width / this.props.aspectRatio;
     this.gridHeight = height - this.props.xAxisHeight - this.props.legendHeight;
-    this.gridWidth = this.state.width - this.props.yAxisWidth - this.props.marginRight;
+    this.gridWidth = width - this.props.yAxisWidth - this.props.marginRight;
     var xValue = this.findXFromY(this.props.value);
     var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
     return (
-      <svg height={height} width={this.state.width}>
+      <svg height={height} width={width}>
         <g transform={`translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`}>
           <HGrid
             height={this.gridHeight}

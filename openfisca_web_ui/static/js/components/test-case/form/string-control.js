@@ -19,7 +19,6 @@ var StringControl = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     required: React.PropTypes.bool,
     suggestion: React.PropTypes.string,
-    suggestionIcon: React.PropTypes.component,
     value: React.PropTypes.oneOfType([
       React.PropTypes.string,
       React.PropTypes.shape({
@@ -83,7 +82,6 @@ var StringControl = React.createClass({
     return (
       <div>
         {this.props.label}
-        {! this.props.error && this.props.suggestion && this.props.suggestionIcon}
         <input
           className="form-control"
           id={this.props.name}
