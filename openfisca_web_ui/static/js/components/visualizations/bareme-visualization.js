@@ -10,7 +10,6 @@ var BaremeChart = require('./svg/bareme-chart'),
   BaremeXAxisBoundsSelector = require('./bareme-x-axis-bounds-selector'),
   helpers = require('../../helpers'),
   ReformSelector = require('./reform-selector'),
-  TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select');
 
@@ -24,7 +23,6 @@ var BaremeVisualization = React.createClass({
     collapsedVariables: React.PropTypes.object,
     defaultXMaxValue: React.PropTypes.number.isRequired,
     defaultXMinValue: React.PropTypes.number.isRequired,
-    displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
@@ -45,11 +43,6 @@ var BaremeVisualization = React.createClass({
   componentDidMount: function() {
     window.onresize = this.handleWidthChange;
     this.handleWidthChange();
-  },
-  componentDidUpdate: function(prevProps) {
-    if (prevProps.displayParametersColumn !== this.props.displayParametersColumn) {
-      this.handleWidthChange();
-    }
   },
   componentWillUnmount: function() {
     window.onresize = null;
@@ -77,7 +70,7 @@ var BaremeVisualization = React.createClass({
   getInitialState: function() {
     return {
       activeVariableCode: null,
-      chartColumnWidth: null,
+      chartContainerWidth: null,
     };
   },
   getVariables: function() {
@@ -129,9 +122,6 @@ var BaremeVisualization = React.createClass({
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
-  handleDisplayParametersColumnClick: function() {
-    this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
-  },
   handleChartDownload: function() {
     var newProps = Lazy(this.refs.chart.props).omit(['ref']).assign({
       attribution: this.props.downloadAttribution,
@@ -153,14 +143,15 @@ var BaremeVisualization = React.createClass({
     });
   },
   handleWidthChange: function() {
-    var width = this.refs.chartColumn.getDOMNode().offsetWidth;
+    var chartContainerDOMNode = this.refs.chartContainer.getDOMNode();
+    var width = chartContainerDOMNode.offsetWidth;
     var height = this.props.height || width / this.props.chartAspectRatio,
       maxHeight = window.innerHeight * this.props.maxHeightRatio;
     if (height > maxHeight) {
       height = maxHeight;
       width = height * this.props.chartAspectRatio;
     }
-    this.setState({chartColumnWidth: width});
+    this.setState({chartContainerWidth: width});
   },
   isCollapsed: function(variable) {
     return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
@@ -168,34 +159,23 @@ var BaremeVisualization = React.createClass({
   render: function() {
     var variables = this.getVariables();
     return (
-      <TwoColumnsLayout
-        leftComponentRef={'chartColumn'}
-        rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
-        <div ref='chartColumn'>
+      <div>
+        <div className='col-lg-7'>
           <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
-          <button
-            className='btn btn-default hidden-sm hidden-xs pull-right'
-            onClick={this.handleDisplayParametersColumnClick}>
-            {
-              this.props.displayParametersColumn ?
-                this.getIntlMessage('hideDetails') :
-                this.getIntlMessage('showDetails')
-            }
-          </button>
           <hr/>
           <div>
-            {
-              this.state.chartColumnWidth && (
-                <div className='panel panel-default'>
-                  <div className='panel-heading'>
-                    <div className="form-inline">
-                      <VisualizationSelect
-                        onChange={this.props.onVisualizationChange}
-                        value={this.props.visualizationSlug}
-                      />
-                    </div>
-                  </div>
-                  <div className='list-group-item'>
+            <div className='panel panel-default'>
+              <div className='panel-heading'>
+                <div className="form-inline">
+                  <VisualizationSelect
+                    onChange={this.props.onVisualizationChange}
+                    value={this.props.visualizationSlug}
+                  />
+                </div>
+              </div>
+              <div className='list-group-item' ref='chartContainer'>
+                {
+                  this.state.chartContainerWidth && (
                     <BaremeChart
                       activeVariableCode={this.state.activeVariableCode}
                       formatNumber={this.props.formatNumber}
@@ -203,29 +183,29 @@ var BaremeVisualization = React.createClass({
                       onVariableToggle={this.handleVariableToggle}
                       ref='chart'
                       variables={variables}
-                      width={this.state.chartColumnWidth - 15 * 2 /* bootstrap adds 15px padding to panel-body */}
+                      width={this.state.chartContainerWidth - 15 * 2 /* Bootstrap adds 15px padding to panel. */}
                       xMaxValue={this.props.xMaxValue}
                       xMinValue={this.props.xMinValue}
                     />
-                  </div>
-                  <div className='list-group-item'>
-                    {variables && this.formatHint(variables)}
-                  </div>
-                  <div className='list-group-item'>
-                    <BaremeXAxisBoundsSelector
-                      defaultXMaxValue={this.props.defaultXMaxValue}
-                      defaultXMinValue={this.props.defaultXMinValue}
-                      onSettingsChange={this.props.onSettingsChange}
-                      xMaxValue={this.props.xMaxValue}
-                      xMinValue={this.props.xMinValue}
-                    />
-                  </div>
-                </div>
-              )
-            }
+                  )
+                }
+              </div>
+              <div className='list-group-item'>
+                {variables && this.formatHint(variables)}
+              </div>
+              <div className='list-group-item'>
+                <BaremeXAxisBoundsSelector
+                  defaultXMaxValue={this.props.defaultXMaxValue}
+                  defaultXMinValue={this.props.defaultXMinValue}
+                  onSettingsChange={this.props.onSettingsChange}
+                  xMaxValue={this.props.xMaxValue}
+                  xMinValue={this.props.xMinValue}
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <div ref='parametersColumn'>
+        <div className='col-lg-5'>
           <div className='panel panel-default'>
             <div className='panel-heading'>
               {this.getIntlMessage('variablesDecomposition')}
@@ -284,7 +264,7 @@ var BaremeVisualization = React.createClass({
             </div>
           </div>
         </div>
-      </TwoColumnsLayout>
+      </div>
     );
   },
 });

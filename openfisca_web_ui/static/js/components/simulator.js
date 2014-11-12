@@ -84,13 +84,11 @@ var Simulator = React.createClass({
       visualizationsSettings: {
         bareme: {
           collapsedVariables: {},
-          displayParametersColumn: true,
           xMaxValue: this.props.defaultPropsByVisualizationSlug.bareme.xMaxValue,
           xMinValue: this.props.defaultPropsByVisualizationSlug.bareme.xMinValue,
         },
         waterfall: {
           collapsedVariables: {},
-          displayParametersColumn: true,
         },
       },
       visualizationSlug: this.props.defaultVisualizationSlug,

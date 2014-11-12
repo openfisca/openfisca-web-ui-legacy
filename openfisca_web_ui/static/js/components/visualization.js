@@ -42,7 +42,6 @@ var Visualization = React.createClass({
         return (
           <BaremeVisualization
             collapsedVariables={this.props.settings.bareme.collapsedVariables}
-            displayParametersColumn={this.props.settings.bareme.displayParametersColumn}
             downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}
             labelsFontSize={this.props.labelsFontSize}
@@ -68,7 +67,6 @@ var Visualization = React.createClass({
             collapsedVariables={this.props.settings.waterfall.collapsedVariables}
             diff={isDiff}
             displaySubtotals={this.props.settings.waterfall.displaySubtotals}
-            displayParametersColumn={this.props.settings.waterfall.displayParametersColumn}
             displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
             downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}

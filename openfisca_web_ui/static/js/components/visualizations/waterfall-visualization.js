@@ -9,7 +9,6 @@ var Lazy = require('lazy.js'),
 
 var helpers = require('../../helpers'),
   ReformSelector = require('./reform-selector'),
-  TwoColumnsLayout = require('./two-columns-layout'),
   VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select'),
   WaterfallChart = require('./svg/waterfall-chart');
@@ -23,7 +22,6 @@ var WaterfallVisualization = React.createClass({
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
     diff: React.PropTypes.bool,
-    displayParametersColumn: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
@@ -48,11 +46,6 @@ var WaterfallVisualization = React.createClass({
   },
   componentWillUnmount: function() {
     window.onresize = null;
-  },
-  componentDidUpdate: function(prevProps) {
-    if (prevProps.displayParametersColumn !== this.props.displayParametersColumn) {
-      this.handleWidthChange();
-    }
   },
   formatHint: function(variables) {
     var variable = Lazy(variables).find({code: this.state.activeVariableCode});
@@ -89,7 +82,7 @@ var WaterfallVisualization = React.createClass({
   getInitialState: function() {
     return {
       activeVariableCode: null,
-      chartColumnWidth: null,
+      chartContainerWidth: null,
       tweenProgress: null,
     };
   },
@@ -104,9 +97,6 @@ var WaterfallVisualization = React.createClass({
       new Blob([svgString], {type: "image/svg+xml"}),
       this.formatMessage(this.getIntlMessage('waterfallFilename'), {extension: 'svg'})
     );
-  },
-  handleDisplayParametersColumnClick: function() {
-    this.props.onSettingsChange({displayParametersColumn: ! this.props.displayParametersColumn});
   },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
@@ -134,14 +124,15 @@ var WaterfallVisualization = React.createClass({
     });
   },
   handleWidthChange: function() {
-    var width = this.refs.chartColumn.getDOMNode().offsetWidth;
+    var chartContainerDOMNode = this.refs.chartContainer.getDOMNode();
+    var width = chartContainerDOMNode.offsetWidth;
     var height = this.props.height || width / this.props.chartAspectRatio,
       maxHeight = window.innerHeight * this.props.maxHeightRatio;
     if (height > maxHeight) {
       height = maxHeight;
       width = height * this.props.chartAspectRatio;
     }
-    this.setState({chartColumnWidth: width});
+    this.setState({chartContainerWidth: width});
   },
   linearizeVariables: function() {
     // Transform this.props.variablesTree into an array and compute base values for waterfall.
@@ -229,63 +220,50 @@ var WaterfallVisualization = React.createClass({
       }
     }
     return (
-      <TwoColumnsLayout
-        leftComponentRef={'chartColumn'}
-        rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
-        <div ref='chartColumn'>
+      <div>
+        <div className='col-lg-7'>
           <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
-          <button
-            className='btn btn-default hidden-sm hidden-xs pull-right'
-            onClick={this.handleDisplayParametersColumnClick}>
-            {
-              this.props.displayParametersColumn ?
-                this.getIntlMessage('hideDetails') :
-                this.getIntlMessage('showDetails')
-            }
-          </button>
           <hr/>
-          <div>
-            {
-              this.state.chartColumnWidth && (
-                <div className='panel panel-default'>
-                  <div className='panel-heading'>
-                    <div className="form-inline">
-                      <VisualizationSelect
-                        onChange={this.props.onVisualizationChange}
-                        value={this.props.visualizationSlug}
-                      />
-                    </div>
-                  </div>
-                  <div className='list-group-item'>
-                    <WaterfallChart
-                      activeVariablesCodes={activeVariablesCodes}
-                      displayVariablesColors={this.props.displayVariablesColors}
-                      formatNumber={this.props.formatNumber}
-                      labelsFontSize={this.props.labelsFontSize}
-                      negativeColor={this.props.negativeColor}
-                      noColorFill={this.props.noColorFill}
-                      onVariableHover={this.handleVariableHover}
-                      onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
-                      positiveColor={this.props.positiveColor}
-                      ref='chart'
-                      tweenProgress={this.getTweeningValue('tweenProgress')}
-                      variables={waterfallChartVariables}
-                      width={this.state.chartColumnWidth - 15 * 2 /* bootstrap adds 15px padding to panel-body */}
-                    />
-                  </div>
-                  <div className='list-group-item'>
-                    {
-                      activeVariable ?
-                        this.formatHint(variablesWithSubtotals) :
-                        this.getIntlMessage('hoverOverChart')
-                    }
-                  </div>
-                </div>
-              )
-            }
+          <div className='panel panel-default'>
+            <div className='panel-heading'>
+              <div className="form-inline">
+                <VisualizationSelect
+                  onChange={this.props.onVisualizationChange}
+                  value={this.props.visualizationSlug}
+                />
+              </div>
+            </div>
+            <div className='list-group-item' ref='chartContainer'>
+              {
+                this.state.chartContainerWidth && (
+                  <WaterfallChart
+                    activeVariablesCodes={activeVariablesCodes}
+                    displayVariablesColors={this.props.displayVariablesColors}
+                    formatNumber={this.props.formatNumber}
+                    labelsFontSize={this.props.labelsFontSize}
+                    negativeColor={this.props.negativeColor}
+                    noColorFill={this.props.noColorFill}
+                    onVariableHover={this.handleVariableHover}
+                    onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
+                    positiveColor={this.props.positiveColor}
+                    ref='chart'
+                    tweenProgress={this.getTweeningValue('tweenProgress')}
+                    variables={waterfallChartVariables}
+                    width={this.state.chartContainerWidth - 15 * 2 /* Bootstrap adds 15px padding to panel. */}
+                  />
+                )
+              }
+            </div>
+            <div className='list-group-item'>
+              {
+                activeVariable ?
+                  this.formatHint(variablesWithSubtotals) :
+                  this.getIntlMessage('hoverOverChart')
+              }
+            </div>
           </div>
         </div>
-        <div ref='parametersColumn'>
+        <div className='col-lg-5'>
           <div className='panel panel-default'>
             <div className='panel-heading'>
               {this.getIntlMessage('variablesDecomposition')}
@@ -371,7 +349,7 @@ var WaterfallVisualization = React.createClass({
             </div>
           </div>
         </div>
-      </TwoColumnsLayout>
+      </div>
     );
   },
 });
