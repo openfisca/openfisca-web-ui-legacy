@@ -172,14 +172,17 @@ var BaremeVisualization = React.createClass({
         leftComponentRef={'chartColumn'}
         rightComponentRef={this.props.displayParametersColumn ? 'parametersColumn' : null}>
         <div ref='chartColumn'>
-          <div className='panel panel-default'>
-            <div className='panel-heading'>
-              {this.getIntlMessage('reforms')}
-            </div>
-            <div className='panel-body'>
-              <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
-            </div>
-          </div>
+          <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+          <button
+            className='btn btn-default hidden-sm hidden-xs pull-right'
+            onClick={this.handleDisplayParametersColumnClick}>
+            {
+              this.props.displayParametersColumn ?
+                this.getIntlMessage('hideDetails') :
+                this.getIntlMessage('showDetails')
+            }
+          </button>
+          <hr/>
           <div>
             {
               this.state.chartColumnWidth && (
@@ -190,15 +193,6 @@ var BaremeVisualization = React.createClass({
                         onChange={this.props.onVisualizationChange}
                         value={this.props.visualizationSlug}
                       />
-                      <button
-                        className='btn btn-default hidden-sm hidden-xs pull-right'
-                        onClick={this.handleDisplayParametersColumnClick}>
-                        {
-                          this.props.displayParametersColumn ?
-                            this.getIntlMessage('enlarge') :
-                            this.getIntlMessage('reduce')
-                        }
-                      </button>
                     </div>
                   </div>
                   <div className='list-group-item'>
