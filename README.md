@@ -30,7 +30,7 @@ Compile gettext catalogs
 
 Install npm dependencies for JavaScript
 
-    npm install
+	npm install
 
 Build `bundle.js` file
 
@@ -61,6 +61,13 @@ automatically:
 
 Bonus: if you set `enabled.livereload = true` in `development.ini`, the "watcher" will reload the page in the browser
 automatically on each JavaScript rebuild.
+
+Database
+--------
+
+Cleanup sessions and test cases:
+
+	mongo openfisca_web_ui --eval 'db.sessions.remove(); db.test_cases.remove()'
 
 Dependencies
 ------------
