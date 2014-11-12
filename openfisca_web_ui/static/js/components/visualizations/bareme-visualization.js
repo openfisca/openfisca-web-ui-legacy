@@ -27,6 +27,7 @@ var BaremeVisualization = React.createClass({
     displayVariablesColors: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
+    isChartFullWidth: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number,
     maxHeightRatio: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
@@ -43,6 +44,11 @@ var BaremeVisualization = React.createClass({
   componentDidMount: function() {
     window.onresize = this.handleWidthChange;
     this.handleWidthChange();
+  },
+  componentDidUpdate: function(prevProps) {
+    if (prevProps.isChartFullWidth !== this.props.isChartFullWidth) {
+      this.handleWidthChange();
+    }
   },
   componentWillUnmount: function() {
     window.onresize = null;
@@ -160,7 +166,7 @@ var BaremeVisualization = React.createClass({
     var variables = this.getVariables();
     return (
       <div>
-        <div className='col-lg-7'>
+        <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
           <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
           <hr/>
           <div>
@@ -171,6 +177,16 @@ var BaremeVisualization = React.createClass({
                     onChange={this.props.onVisualizationChange}
                     value={this.props.visualizationSlug}
                   />
+                  <div className='checkbox pull-right visible-lg-inline'>
+                    <label>
+                      <input
+                        checked={this.props.isChartFullWidth}
+                        onChange={event => this.props.onSettingsChange({isChartFullWidth: event.target.checked})}
+                        type='checkbox'
+                      />
+                      {' ' + this.getIntlMessage('fullWidth')}
+                    </label>
+                  </div>
                 </div>
               </div>
               <div className='list-group-item' ref='chartContainer' style={{padding: '15px 15px 0 0'}}>
@@ -205,7 +221,7 @@ var BaremeVisualization = React.createClass({
             </div>
           </div>
         </div>
-        <div className='col-lg-5'>
+        <div className={this.props.isChartFullWidth ? null : 'col-lg-5'}>
           <div className='panel panel-default'>
             <div className='panel-heading'>
               {this.getIntlMessage('variablesDecomposition')}
