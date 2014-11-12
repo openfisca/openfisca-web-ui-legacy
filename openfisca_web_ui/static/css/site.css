@@ -77,6 +77,12 @@ h3,
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
 }
 
+.modal-open .container-fluid,
+.modal-open nav {
+  filter: blur(1px);
+  -webkit-filter: blur(1px);
+}
+
 .nav-tabs {
     margin-bottom: 30px;
 }
