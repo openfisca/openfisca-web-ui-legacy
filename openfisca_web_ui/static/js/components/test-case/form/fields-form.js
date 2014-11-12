@@ -63,7 +63,9 @@ var FieldsForm = React.createClass({
       suggestion = this.props.suggestions && this.props.suggestions[column.name],
       value = this.props.values && this.props.values[column.name];
     var label = (
-      <Label hasSuggestion={! error && suggestion} name={column.name} required={column.required}>{column.label}</Label>
+      <Label hasSuggestion={Boolean(! error && suggestion)} name={column.name} required={column.required}>
+        {column.label}
+      </Label>
     );
     var cerfaField = column.cerfa_field; // jshint ignore:line
     switch(column['@type']) {
