@@ -16,6 +16,7 @@ var indexJsFile = jsDir + '/index.js';
 var distDir = staticDir + '/dist';
 var vendorJsFiles = [
   './node_modules/html5shiv/src/html5shiv.js',
+  './node_modules/react/dist/react-with-addons.js',
   './node_modules/react/dist/react-with-addons.min.js',
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
