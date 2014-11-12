@@ -233,7 +233,7 @@ var WaterfallVisualization = React.createClass({
                 />
               </div>
             </div>
-            <div className='list-group-item' ref='chartContainer'>
+            <div className='list-group-item' ref='chartContainer' style={{padding: '15px 15px 0 0'}}>
               {
                 this.state.chartContainerWidth && (
                   <WaterfallChart
@@ -249,7 +249,7 @@ var WaterfallVisualization = React.createClass({
                     ref='chart'
                     tweenProgress={this.getTweeningValue('tweenProgress')}
                     variables={waterfallChartVariables}
-                    width={this.state.chartContainerWidth - 15 * 2 /* Bootstrap adds 15px padding to panel. */}
+                    width={this.state.chartContainerWidth - 15 /* Substract right padding. */}
                   />
                 )
               }
