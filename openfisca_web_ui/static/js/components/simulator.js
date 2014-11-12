@@ -405,45 +405,39 @@ var Simulator = React.createClass({
     );
   },
   renderVisualizationPanel: function() {
-    return (
-      <div>
-        {
-          this.state.errors ? (
-            <div className="alert alert-danger" role="alert">
-              <h4>{this.getIntlMessage('incorrectSituation')}</h4>
-              <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
-              <ul>
-                <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
-                <li>
-                  <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
-                    {this.getIntlMessage('resetSituation')}
-                  </button>
-                </li>
-              </ul>
-            </div>
-          ) : (
-            this.state.simulationResult && (
-              this.state.simulationResult.error ? (
-                <div className="alert alert-danger" role="alert">
-                  <h4>{this.getIntlMessage('error')}</h4>
-                  <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
-                </div>
-              ) : (
-                <Visualization
-                  onDownload={this.handleDownload}
-                  onReformChange={this.handleReformChange}
-                  onSettingsChange={this.handleVisualizationSettingsChange}
-                  onVisualizationChange={this.handleVisualizationChange}
-                  reform={this.state.reform}
-                  settings={this.state.visualizationsSettings}
-                  simulationResult={this.state.simulationResult}
-                  visualizationSlug={this.state.visualizationSlug}
-                />
-              )
-            )
-          )
-        }
+    return this.state.errors ? (
+      <div className="alert alert-danger" role="alert">
+        <h4>{this.getIntlMessage('incorrectSituation')}</h4>
+        <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
+        <ul>
+          <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
+          <li>
+            <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
+              {this.getIntlMessage('resetSituation')}
+            </button>
+          </li>
+        </ul>
       </div>
+    ) : (
+      this.state.simulationResult && (
+        this.state.simulationResult.error ? (
+          <div className="alert alert-danger" role="alert">
+            <h4>{this.getIntlMessage('error')}</h4>
+            <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+          </div>
+        ) : (
+          <Visualization
+            onDownload={this.handleDownload}
+            onReformChange={this.handleReformChange}
+            onSettingsChange={this.handleVisualizationSettingsChange}
+            onVisualizationChange={this.handleVisualizationChange}
+            reform={this.state.reform}
+            settings={this.state.visualizationsSettings}
+            simulationResult={this.state.simulationResult}
+            visualizationSlug={this.state.visualizationSlug}
+          />
+        )
+      )
     );
   },
   repair: function(testCase, testCaseAdditionalData) {
