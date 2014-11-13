@@ -65,7 +65,7 @@ window.appconfig = ${helpers.index_appconfig(ctx, alert_on_js_error = data['aler
     <script src="${urlparse.urljoin(conf['urls.persona'], 'include.js')}"></script>
 % endif
     <script src="${urls.get_url(ctx, u'dist/vendor/lazy.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/' + 'react-with-addons.js' if conf['debug'] else 'react-with-addons.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/' + ('react-with-addons.js' if conf['debug'] else 'react-with-addons.min.js'), static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/intl/Intl.min.js', static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/intl/locale-data/jsonp/{}.js'.format(ctx.lang[0]), static = True)}"></script>
     <script src="${urls.get_url(ctx, u'dist/vendor/react-intl/react-intl.min.js', static = True)}"></script>
