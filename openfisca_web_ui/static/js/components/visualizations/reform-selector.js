@@ -25,12 +25,12 @@ var ReformSelector = React.createClass({
           {this.getIntlMessage('reference')}
         </button>
         <button
-          className={classes('plfrss2014')}
-          onClick={() => this.props.onChange('plfrss2014')}
+          className={classes('plf2015')}
+          onClick={() => this.props.onChange('plf2015')}
           title='Projet de loi de financement rectificative de la sécurité sociale'>
-          PLFRSS 2014
+          PLF 2015
         </button>
-        <button className={classes('plfrss2014-diff')} onClick={() => this.props.onChange('plfrss2014-diff')}>
+        <button className={classes('plf2015-diff')} onClick={() => this.props.onChange('plf2015-diff')}>
           {this.getIntlMessage('difference')}
         </button>
       </div>

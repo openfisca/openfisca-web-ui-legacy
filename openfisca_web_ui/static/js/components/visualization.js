@@ -36,7 +36,7 @@ var Visualization = React.createClass({
     this.props.onSettingsChange(this.props.visualizationSlug, settings, simulate);
   },
   render: function() {
-    var isDiff = this.props.reform === 'plfrss2014-diff';
+    var isDiff = this.props.reform === 'plf2015-diff';
     switch (this.props.visualizationSlug) {
       case 'bareme':
         return (

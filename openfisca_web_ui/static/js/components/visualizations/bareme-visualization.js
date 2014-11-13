@@ -80,7 +80,7 @@ var BaremeVisualization = React.createClass({
     };
   },
   getVariables: function() {
-    var isDiff = this.props.reform === 'plfrss2014-diff';
+    var isDiff = this.props.reform === 'plf2015-diff';
     var diffValues = values => {
       var referenceValues = values.slice(0, values.length / 2),
         reformValues = values.slice(values.length / 2, values.length);

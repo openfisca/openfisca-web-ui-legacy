@@ -223,7 +223,7 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     scenario.axes = axes;
   }
   var data = {
-    'reform_names': ['plfrss2014'],
+    'reform_names': ['plf2015'],
     scenarios: [scenario],
   };
   if (decomposition) {
