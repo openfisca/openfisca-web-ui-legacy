@@ -81,6 +81,7 @@ var BaremeVisualization = React.createClass({
     return {
       activeVariableCode: null,
       chartContainerWidth: null,
+      displayBaremeSettings: false,
     };
   },
   getVariables: function() {
@@ -143,6 +144,10 @@ var BaremeVisualization = React.createClass({
       new Blob([svgString], {type: "image/svg+xml"}),
       this.formatMessage(this.getIntlMessage('baremeFilename'), {extension: 'svg'})
     );
+  },
+  handleToggleDisplayBaremeSettingsClick: function(event) {
+    event.preventDefault();
+    this.setState({displayBaremeSettings: ! this.state.displayBaremeSettings});
   },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
@@ -214,17 +219,24 @@ var BaremeVisualization = React.createClass({
               <div className='list-group-item'>
                 {variables && this.formatHint(variables)}
               </div>
-              <div className='list-group-item'>
-                <BaremeSettings
-                  columns={this.props.columns}
-                  defaultXMaxValue={this.props.defaultXMaxValue}
-                  defaultXMinValue={this.props.defaultXMinValue}
-                  defaultXAxisVariableCode={this.props.defaultXAxisVariableCode}
-                  onSettingsChange={this.props.onSettingsChange}
-                  xAxisVariableCode={this.props.xAxisVariableCode}
-                  xMaxValue={this.props.xMaxValue}
-                  xMinValue={this.props.xMinValue}
-                />
+              <div className='panel-footer'>
+                {
+                  this.state.displayBaremeSettings && (
+                    <BaremeSettings
+                      columns={this.props.columns}
+                      defaultXMaxValue={this.props.defaultXMaxValue}
+                      defaultXMinValue={this.props.defaultXMinValue}
+                      defaultXAxisVariableCode={this.props.defaultXAxisVariableCode}
+                      onSettingsChange={this.props.onSettingsChange}
+                      xAxisVariableCode={this.props.xAxisVariableCode}
+                      xMaxValue={this.props.xMaxValue}
+                      xMinValue={this.props.xMinValue}
+                    />
+                  )
+                }
+                <a href='#' onClick={this.handleToggleDisplayBaremeSettingsClick}>
+                  {this.state.displayBaremeSettings ? this.getIntlMessage('hide') : this.getIntlMessage('showSettings')}
+                </a>
               </div>
             </div>
           </div>
