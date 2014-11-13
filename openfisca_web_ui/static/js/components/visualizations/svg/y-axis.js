@@ -10,16 +10,13 @@ var YAxis = React.createClass({
   propTypes: {
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number.isRequired,
-    label: React.PropTypes.string,
-    labelFontSize: React.PropTypes.number.isRequired,
     maxValue: React.PropTypes.number.isRequired,
     minValue: React.PropTypes.number.isRequired,
     nbSteps: React.PropTypes.number.isRequired,
     strokeColor: React.PropTypes.string.isRequired,
-    tickFontSize: React.PropTypes.number.isRequired,
+    tickLabelsFontSize: React.PropTypes.number.isRequired,
     tickSize: React.PropTypes.number.isRequired,
     unit: React.PropTypes.string,
-    width: React.PropTypes.number.isRequired,
   },
   getDefaultProps: function() {
     return {
@@ -27,7 +24,7 @@ var YAxis = React.createClass({
       minValue: 0,
       nbSteps: 10,
       strokeColor: 'black',
-      tickFontSize: 12,
+      tickLabelsFontSize: 12,
       tickSize: 6,
     };
   },
@@ -49,27 +46,16 @@ var YAxis = React.createClass({
             return (
               <g key={idx} transform={`translate(0, ${this.props.height - idx * stepHeight})`}>
                 <text
-                  style={{textAnchor: 'end', fontSize: this.props.tickFontSize}}
+                  className='tick-label'
+                  style={{textAnchor: 'end', fontSize: this.props.tickLabelsFontSize}}
                   x={- this.props.tickSize * 1.66}
-                  y={this.props.tickFontSize * 0.4}>
+                  y={this.props.tickLabelsFontSize * 0.4}>
                   {label}
                 </text>
                 <line style={lineStyle} x2={- this.props.tickSize} y2={0} />
               </g>
             );
           })
-        }
-        {
-          this.props.label && (
-            <text
-              className='axis-label'
-              style={{textAnchor: 'middle', fontSize: this.props.labelFontSize}}
-              transform='rotate(-90)'
-              x={- (this.props.height / 2)}
-              y={- this.props.width + this.props.labelFontSize}>
-              {this.props.label}
-            </text>
-          )
         }
       </g>
     );

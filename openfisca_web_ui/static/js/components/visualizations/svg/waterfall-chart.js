@@ -31,8 +31,19 @@ var WaterfallChart = React.createClass({
     variables: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
-    yAxisWidth: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
+  },
+  componentDidMount: function() {
+    var yAxisDOMNode = this.refs.yAxis.getDOMNode();
+    var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
+    this.setState({yAxisWidth: newYAxisWidth});
+  },
+  componentDidUpdate: function() {
+    var yAxisDOMNode = this.refs.yAxis.getDOMNode();
+    var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
+    if (newYAxisWidth !== this.state.yAxisWidth) {
+      this.setState({yAxisWidth: newYAxisWidth});
+    }
   },
   determineYAxisRange: function(variables) {
     var maxValue = 0;
@@ -50,13 +61,13 @@ var WaterfallChart = React.createClass({
   getDefaultProps: function() {
     return {
       aspectRatio: 4/3,
+      defaultYAxisWidth: 200,
       marginRight: 10,
       marginTop: 10,
       negativeColor: 'red',
       noColorFill: 'gray',
       positiveColor: 'green',
       xAxisHeight: 100,
-      yAxisWidth: 80,
       yNbSteps: 8,
     };
   },
@@ -64,6 +75,7 @@ var WaterfallChart = React.createClass({
     return {
       hoveredVariableCode: null,
       xAxisHoveredVariableCode: null,
+      yAxisWidth: null,
     };
   },
   handleVariableHover: function(variable) {
@@ -102,10 +114,11 @@ var WaterfallChart = React.createClass({
       return {name, props, style};
     });
     var height = this.props.height || this.props.width / this.props.aspectRatio;
+    var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
     var gridHeight = height - this.props.xAxisHeight - this.props.marginTop,
-      gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+      gridWidth = this.props.width - yAxisWidth - this.props.marginRight;
     var stepWidth = gridWidth / xLabels.length;
-    var xAxisTransform = `translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`;
+    var xAxisTransform = `translate(${yAxisWidth}, ${height - this.props.xAxisHeight})`;
     return (
       <svg height={height} width={this.props.width}>
         <g transform={xAxisTransform}>
@@ -116,14 +129,14 @@ var WaterfallChart = React.createClass({
             width={gridWidth}
           />
         </g>
-        <g transform={`translate(${this.props.yAxisWidth}, ${this.props.marginTop})`}>
+        <g transform={`translate(${yAxisWidth}, ${this.props.marginTop})`}>
           <YAxis
             formatNumber={this.props.formatNumber}
             height={gridHeight}
             maxValue={ySmartValues.maxValue}
             nbSteps={this.props.yNbSteps}
+            ref='yAxis'
             unit='€'
-            width={this.props.yAxisWidth}
           />
           <WaterfallBars
             activeVariablesCodes={this.props.activeVariablesCodes}
@@ -162,7 +175,7 @@ var WaterfallChart = React.createClass({
             width={gridWidth}
           />
         </g>
-        <g className='attribution' transform={`translate(${this.props.yAxisWidth}, ${height - 10})`}>
+        <g className='attribution' transform={`translate(${yAxisWidth}, ${height - 10})`}>
           <text>{this.props.attribution}</text>
         </g>
       </svg>

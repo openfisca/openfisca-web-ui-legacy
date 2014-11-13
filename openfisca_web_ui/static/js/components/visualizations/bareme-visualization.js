@@ -189,7 +189,7 @@ var BaremeVisualization = React.createClass({
                   </div>
                 </div>
               </div>
-              <div className='list-group-item' ref='chartContainer' style={{padding: '15px 15px 0 0'}}>
+              <div className='list-group-item' ref='chartContainer'>
                 {
                   this.state.chartContainerWidth && (
                     <BaremeChart
@@ -199,7 +199,7 @@ var BaremeVisualization = React.createClass({
                       onVariableToggle={this.handleVariableToggle}
                       ref='chart'
                       variables={variables}
-                      width={this.state.chartContainerWidth - 15 /* Substract right padding. */}
+                      width={this.state.chartContainerWidth - 15 * 2 /* Substract Bootstrap panel left and right paddings. */}
                       xMaxValue={this.props.xMaxValue}
                       xMinValue={this.props.xMinValue}
                     />

@@ -19,6 +19,7 @@ var BaremeChart = React.createClass({
     activeVariableCode: React.PropTypes.string,
     aspectRatio: React.PropTypes.number.isRequired,
     attribution: React.PropTypes.string,
+    defaultYAxisWidth: React.PropTypes.number.isRequired,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number,
     labelsFontSize: React.PropTypes.number.isRequired,
@@ -33,8 +34,19 @@ var BaremeChart = React.createClass({
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
     xNbSteps: React.PropTypes.number.isRequired,
-    yAxisWidth: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
+  },
+  componentDidMount: function() {
+    var yAxisDOMNode = this.refs.yAxis.getDOMNode();
+    var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
+    this.setState({yAxisWidth: newYAxisWidth});
+  },
+  componentDidUpdate: function() {
+    var yAxisDOMNode = this.refs.yAxis.getDOMNode();
+    var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
+    if (newYAxisWidth !== this.state.yAxisWidth) {
+      this.setState({yAxisWidth: newYAxisWidth});
+    }
   },
   computeMaxValue: function(variables) {
     var maxValue = 0;
@@ -49,14 +61,19 @@ var BaremeChart = React.createClass({
   getDefaultProps: function() {
     return {
       aspectRatio: 4/3,
+      defaultYAxisWidth: 200,
       labelsFontSize: 14,
       marginRight: 10,
       marginTop: 10,
       noColorFill: 'gray',
       xAxisHeight: 100,
-      yAxisWidth: 80,
       xNbSteps: 10,
       yNbSteps: 8,
+    };
+  },
+  getInitialState: function() {
+    return {
+      yAxisWidth: null,
     };
   },
   gridPointToPixel: function(point) {
@@ -85,11 +102,12 @@ var BaremeChart = React.createClass({
       var yMaxValue = this.computeMaxValue(this.props.variables);
       this.ySmartValues = axes.smartValues(0, yMaxValue, this.props.yNbSteps);
     }
+    var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
-    this.gridWidth = this.props.width - this.props.yAxisWidth - this.props.marginRight;
+    this.gridWidth = this.props.width - yAxisWidth - this.props.marginRight;
     return (
       <svg height={height} width={this.props.width}>
-        <g transform={`translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`}>
+        <g transform={`translate(${yAxisWidth}, ${height - this.props.xAxisHeight})`}>
           <HGrid
             height={this.gridHeight}
             nbSteps={this.props.yNbSteps}
@@ -97,7 +115,7 @@ var BaremeChart = React.createClass({
             width={this.gridWidth}
           />
         </g>
-        <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
+        <g transform={`translate(${yAxisWidth}, ${this.props.marginTop})`}>
           <VGrid
             height={this.gridHeight}
             nbSteps={this.props.xNbSteps}
@@ -105,7 +123,7 @@ var BaremeChart = React.createClass({
             width={this.gridWidth}
           />
         </g>
-        <g transform={'translate(' + this.props.yAxisWidth + ', ' + this.props.marginTop + ')'}>
+        <g transform={`translate(${yAxisWidth}, ${this.props.marginTop})`}>
           {
             this.props.variables.map(variable => {
               var toDomainValue = axes.convertLinearRange.bind(null, {
@@ -142,17 +160,14 @@ var BaremeChart = React.createClass({
           <YAxis
             formatNumber={this.props.formatNumber}
             height={this.gridHeight}
-            labelFontSize={this.props.labelsFontSize}
             maxValue={this.ySmartValues.maxValue}
             minValue={this.ySmartValues.minValue}
             nbSteps={this.props.yNbSteps}
+            ref='yAxis'
             unit='€'
-            width={this.props.yAxisWidth}
           />
         </g>
-        <g transform={
-          'translate(' + this.props.yAxisWidth + ', ' + (height - this.props.xAxisHeight) + ')'
-        }>
+        <g transform={`translate(${yAxisWidth},${height - this.props.xAxisHeight})`}>
           <XAxis
             formatNumber={this.props.formatNumber}
             height={this.props.xAxisHeight}
@@ -166,7 +181,7 @@ var BaremeChart = React.createClass({
             width={this.gridWidth}
           />
         </g>
-        <g className='attribution' transform={`translate(${this.props.yAxisWidth}, ${height - 10})`}>
+        <g className='attribution' transform={`translate(${yAxisWidth}, ${height - 10})`}>
           <text>{this.props.attribution}</text>
         </g>
       </svg>

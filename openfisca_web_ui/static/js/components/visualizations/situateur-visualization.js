@@ -21,6 +21,7 @@ var SituateurVisualization = React.createClass({
   propTypes: {
     aspectRatio: React.PropTypes.number.isRequired,
     curveLabel: React.PropTypes.string.isRequired,
+    defaultYAxisWidth: React.PropTypes.number.isRequired,
     formatHint: React.PropTypes.func.isRequired,
     height: React.PropTypes.number,
     labelsFontSize: React.PropTypes.number.isRequired,
@@ -37,7 +38,6 @@ var SituateurVisualization = React.createClass({
     xMaxValue: React.PropTypes.number.isRequired,
     xSnapIntervalValue: React.PropTypes.number.isRequired,
     xSteps: React.PropTypes.number.isRequired,
-    yAxisWidth: React.PropTypes.number.isRequired,
     yFormatNumber: React.PropTypes.func.isRequired,
     yMaxValue: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
@@ -45,6 +45,13 @@ var SituateurVisualization = React.createClass({
   componentDidMount: function() {
     window.onresize = this.handleWidthChange;
     this.handleWidthChange();
+  },
+  componentDidUpdate: function() {
+    var yAxisDOMNode = this.refs.yAxis.getDOMNode();
+    var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
+    if (newYAxisWidth !== this.state.yAxisWidth) {
+      this.setState({yAxisWidth: newYAxisWidth});
+    }
   },
   componentWillUnmount: function() {
     window.onresize = null;
@@ -99,6 +106,7 @@ var SituateurVisualization = React.createClass({
   getDefaultProps: function() {
     return {
       aspectRatio: 4/3,
+      defaultYAxisWidth: 200,
       labelsFontSize: 14,
       legendHeight: 30,
       marginRight: 5,
@@ -107,7 +115,6 @@ var SituateurVisualization = React.createClass({
       xAxisHeight: 60,
       xMaxValue: 100,
       xSteps: 10,
-      yAxisWidth: 80,
       yNbSteps: 10,
     };
   },
@@ -115,6 +122,7 @@ var SituateurVisualization = React.createClass({
     return {
       snapPoint: null,
       width: null,
+      yAxisWidth: null,
     };
   },
   gridPixelToPoint: function(pixel) {
@@ -140,14 +148,14 @@ var SituateurVisualization = React.createClass({
     this.setState({snapPoint: snapPoint});
   },
   handleWidthChange: function() {
-    var width = this.getDOMNode().offsetWidth;
-    var height = this.props.height || width / this.props.aspectRatio,
+    var newChartContainerWidth = this.refs.chartContainer.getDOMNode().offsetWidth;
+    var height = this.props.height || newChartContainerWidth / this.props.aspectRatio,
       maxHeight = window.innerHeight * this.props.maxHeightRatio;
     if (height > maxHeight) {
       height = maxHeight;
-      width = height * this.props.aspectRatio;
+      newChartContainerWidth = height * this.props.aspectRatio;
     }
-    this.setState({width: width});
+    this.setState({chartContainerWidth: newChartContainerWidth});
   },
   render: function() {
     this.pointsXMaxValue = Math.max(...this.props.points.map(point => point.x));
@@ -163,8 +171,8 @@ var SituateurVisualization = React.createClass({
             />
           </div>
         </div>
-        <div className='list-group-item'>
-          {this.state.width && this.renderSvg()}
+        <div className='list-group-item' ref='chartContainer'>
+          {this.state.chartContainerWidth && this.renderSvg()}
         </div>
         <div className='list-group-item'>
           {this.formatHint()}
@@ -173,15 +181,16 @@ var SituateurVisualization = React.createClass({
     );
   },
   renderSvg: function() {
-    var width = this.state.width - 15 * 2; // bootstrap adds 15px padding to panel-body
+    var width = this.state.chartContainerWidth - 15 * 2; // Substract Bootstrap panel left and right paddings.
     var height = this.props.height || width / this.props.aspectRatio;
     this.gridHeight = height - this.props.xAxisHeight - this.props.legendHeight;
-    this.gridWidth = width - this.props.yAxisWidth - this.props.marginRight;
+    var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
+    this.gridWidth = width - yAxisWidth - this.props.marginRight;
     var xValue = this.findXFromY(this.props.value);
     var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
     return (
       <svg height={height} width={width}>
-        <g transform={`translate(${this.props.yAxisWidth}, ${height - this.props.xAxisHeight})`}>
+        <g transform={`translate(${yAxisWidth}, ${height - this.props.xAxisHeight})`}>
           <HGrid
             height={this.gridHeight}
             nbSteps={this.props.yNbSteps}
@@ -198,7 +207,7 @@ var SituateurVisualization = React.createClass({
             width={this.gridWidth}
           />
         </g>
-        <g transform={`translate(${this.props.yAxisWidth}, ${this.props.legendHeight})`}>
+        <g transform={`translate(${yAxisWidth}, ${this.props.legendHeight})`}>
           <VGrid
             height={this.gridHeight}
             nbSteps={this.props.xSteps}
@@ -208,11 +217,10 @@ var SituateurVisualization = React.createClass({
           <YAxis
             formatNumber={this.props.yFormatNumber}
             height={this.gridHeight}
-            labelFontSize={this.props.labelsFontSize}
             maxValue={this.props.yMaxValue}
             nbSteps={this.props.yNbSteps}
+            ref='yAxis'
             unit='€'
-            width={this.props.yAxisWidth}
           />
           <Curve
             points={this.props.points}
@@ -250,7 +258,7 @@ var SituateurVisualization = React.createClass({
             yFormatNumber={this.props.yFormatNumber}
           />
         </g>
-        <g transform={`translate(${this.props.yAxisWidth}, 0)`}>
+        <g transform={`translate(${yAxisWidth}, 0)`}>
           <Legend color='rgb(31, 119, 180)'>{this.props.curveLabel}</Legend>
           <g transform={`translate(${12 * 0.7 * this.props.curveLabel.length}, 0)`}>
             <Legend color={this.props.pointColor}>{this.props.pointLabel}</Legend>
