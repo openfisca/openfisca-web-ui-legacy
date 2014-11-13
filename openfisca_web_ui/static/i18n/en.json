@@ -70,6 +70,7 @@
   "testCaseFilename": "test_case.{extension}",
   "trace": "Trace",
   "unknownValuesAbove": "Values are unknown above {value, number, percent}",
+  "variable": "Variable",
   "variablesDecomposition": "Variables decomposition",
   "waterfall": "Waterfall",
   "waterfallFilename": "waterfall.{extension}",

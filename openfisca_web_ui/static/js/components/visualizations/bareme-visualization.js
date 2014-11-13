@@ -7,7 +7,7 @@ var Lazy = require('lazy.js'),
   saveAs = require('filesaver.js');
 
 var BaremeChart = require('./svg/bareme-chart'),
-  BaremeXAxisBoundsSelector = require('./bareme-x-axis-bounds-selector'),
+  BaremeSettings = require('./bareme-settings'),
   helpers = require('../../helpers'),
   ReformSelector = require('./reform-selector'),
   VariablesTree = require('./variables-tree'),
@@ -21,6 +21,8 @@ var BaremeVisualization = React.createClass({
   propTypes: {
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
+    columns: React.PropTypes.object.isRequired,
+    defaultXAxisVariableCode: React.PropTypes.string.isRequired,
     defaultXMaxValue: React.PropTypes.number.isRequired,
     defaultXMinValue: React.PropTypes.number.isRequired,
     displaySubtotals: React.PropTypes.bool,
@@ -38,6 +40,7 @@ var BaremeVisualization = React.createClass({
     reform: React.PropTypes.string,
     variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
+    xAxisVariableCode: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
   },
@@ -67,6 +70,7 @@ var BaremeVisualization = React.createClass({
     return {
       chartAspectRatio: 4/3,
       collapsedVariables: {},
+      defaultXAxisVariableCode: 'sali',
       defaultXMaxValue: 20000,
       defaultXMinValue: 0,
       maxHeightRatio: 2/3,
@@ -200,6 +204,7 @@ var BaremeVisualization = React.createClass({
                       ref='chart'
                       variables={variables}
                       width={this.state.chartContainerWidth - 15 * 2 /* Substract Bootstrap panel left and right paddings. */}
+                      xAxisLabel={this.props.columns[this.props.xAxisVariableCode].label}
                       xMaxValue={this.props.xMaxValue}
                       xMinValue={this.props.xMinValue}
                     />
@@ -210,10 +215,13 @@ var BaremeVisualization = React.createClass({
                 {variables && this.formatHint(variables)}
               </div>
               <div className='list-group-item'>
-                <BaremeXAxisBoundsSelector
+                <BaremeSettings
+                  columns={this.props.columns}
                   defaultXMaxValue={this.props.defaultXMaxValue}
                   defaultXMinValue={this.props.defaultXMinValue}
+                  defaultXAxisVariableCode={this.props.defaultXAxisVariableCode}
                   onSettingsChange={this.props.onSettingsChange}
+                  xAxisVariableCode={this.props.xAxisVariableCode}
                   xMaxValue={this.props.xMaxValue}
                   xMinValue={this.props.xMinValue}
                 />

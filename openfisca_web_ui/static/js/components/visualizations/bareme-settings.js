@@ -9,12 +9,15 @@ var polyfills = require('../../polyfills');
 var cx = React.addons.classSet;
 
 
-var BaremeXAxisBoundsSelector = React.createClass({
+var BaremeSettings = React.createClass({
 	mixins: [ReactIntlMixin],
 	propTypes: {
+    columns: React.PropTypes.object.isRequired,
+		defaultXAxisVariableCode: React.PropTypes.string.isRequired,
 		defaultXMaxValue: React.PropTypes.number.isRequired,
 		defaultXMinValue: React.PropTypes.number.isRequired,
 		onSettingsChange: React.PropTypes.func.isRequired,
+		xAxisVariableCode: React.PropTypes.string.isRequired,
 		xMaxValue: React.PropTypes.number.isRequired,
 		xMinValue: React.PropTypes.number.isRequired,
 	},
@@ -34,7 +37,11 @@ var BaremeXAxisBoundsSelector = React.createClass({
 	},
 	handleReset: function(event) {
 		event.preventDefault();
-		var changeset = {xMaxValue: this.props.defaultXMaxValue, xMinValue: this.props.defaultXMinValue};
+		var changeset = {
+			xAxisVariableCode: this.props.defaultXAxisVariableCode,
+			xMaxValue: this.props.defaultXMaxValue,
+			xMinValue: this.props.defaultXMinValue,
+		};
 		this.setState(changeset, () => {
 			this.props.onSettingsChange(changeset, true);
 		});
@@ -45,11 +52,29 @@ var BaremeXAxisBoundsSelector = React.createClass({
 		var newXMinValue = this.state.xMinValue || this.props.defaultXMinValue;
 		this.props.onSettingsChange({xMaxValue: newXMaxValue, xMinValue: newXMinValue}, true);
 	},
+	handleVariableCodeChange: function() {
+		this.props.onSettingsChange({xAxisVariableCode: event.target.value}, true);
+	},
 	render: function() {
 		var isMaxValueLessThanMinValue = this.state.xMaxValue !== null && this.state.xMinValue !== null &&
 			this.state.xMaxValue < this.state.xMinValue;
 		return (
 			<form className="form-horizontal" onReset={this.handleReset} onSubmit={this.handleSubmit} role="form">
+				<div className='form-group form-group-sm'>
+					<label className="col-xs-6 control-label" htmlFor="x-axis-variable-code">
+						{this.getIntlMessage('variable')}
+					</label>
+					<div className='col-xs-6'>
+						<select
+							className='form-control'
+							id='x-axis-variable-code'
+							onChange={this.handleVariableCodeChange}
+							value={this.props.xAxisVariableCode}>
+							<option value='sali'>{this.props.columns.sali.label}</option>
+							<option value='choi'>{this.props.columns.choi.label}</option>
+						</select>
+					</div>
+				</div>
 				<div className={cx({
 					'form-group': true,
 					'form-group-sm': true,
@@ -100,23 +125,26 @@ var BaremeXAxisBoundsSelector = React.createClass({
 				</div>
 				<div className="form-group form-group-sm">
 					<div className="col-xs-offset-6 col-xs-6">
-						<button
-							className='btn btn-default btn-sm'
-							disabled={
-								(
-									(this.state.xMaxValue || this.props.defaultXMaxValue) === this.props.xMaxValue &&
-									(this.state.xMinValue || this.props.defaultXMinValue) === this.props.xMinValue
-								) || (
-									(this.state.xMaxValue || this.props.defaultXMaxValue) <
-										(this.state.xMinValue || this.props.defaultXMinValue)
-								)
-							}
-							type='submit'>
-							{this.getIntlMessage('apply')}
-						</button>
-						<button className='btn btn-default btn-sm pull-right' type='reset'>
-							{this.getIntlMessage('reset')}
-						</button>
+						<div className='pull-right'>
+							<button
+								className='btn btn-default btn-sm'
+								disabled={
+									(
+										(this.state.xMaxValue || this.props.defaultXMaxValue) === this.props.xMaxValue &&
+										(this.state.xMinValue || this.props.defaultXMinValue) === this.props.xMinValue
+									) || (
+										(this.state.xMaxValue || this.props.defaultXMaxValue) <
+											(this.state.xMinValue || this.props.defaultXMinValue)
+									)
+								}
+								style={{marginRight: 10}}
+								type='submit'>
+								{this.getIntlMessage('apply')}
+							</button>
+							<button className='btn btn-default btn-sm' type='reset'>
+								{this.getIntlMessage('reset')}
+							</button>
+						</div>
 					</div>
 				</div>
 			</form>
@@ -125,4 +153,4 @@ var BaremeXAxisBoundsSelector = React.createClass({
 });
 
 
-module.exports = BaremeXAxisBoundsSelector;
+module.exports = BaremeSettings;

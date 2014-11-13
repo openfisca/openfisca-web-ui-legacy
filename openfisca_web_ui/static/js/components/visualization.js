@@ -15,6 +15,7 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
 var Visualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    columns: React.PropTypes.object.isRequired,
     downloadAttribution: React.PropTypes.string,
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
@@ -42,6 +43,7 @@ var Visualization = React.createClass({
         return (
           <BaremeVisualization
             collapsedVariables={this.props.settings.bareme.collapsedVariables}
+            columns={this.props.columns}
             downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}
             isChartFullWidth={this.props.settings.bareme.isChartFullWidth}
@@ -54,6 +56,7 @@ var Visualization = React.createClass({
             reform={this.props.reform}
             variablesTree={this.props.simulationResult}
             visualizationSlug={this.props.visualizationSlug}
+            xAxisVariableCode={this.props.settings.bareme.xAxisVariableCode}
             xMaxValue={this.props.settings.bareme.xMaxValue}
             xMinValue={this.props.settings.bareme.xMinValue}
           />

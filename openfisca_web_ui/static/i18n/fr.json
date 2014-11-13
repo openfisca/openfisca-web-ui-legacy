@@ -70,6 +70,7 @@
   "testCaseFilename": "situation.{extension}",
   "trace": "Tracer",
   "unknownValuesAbove": "Valeurs inconnues au delà de {value, number, percent}",
+  "variable": "Variable",
   "variablesDecomposition": "Décomposition des variables",
   "waterfall": "Cascade",
   "waterfallFilename": "cascade.{extension}",

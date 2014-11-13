@@ -31,6 +31,7 @@ var BaremeChart = React.createClass({
     variables: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
+    xAxisLabel: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
     xNbSteps: React.PropTypes.number.isRequired,
@@ -171,7 +172,7 @@ var BaremeChart = React.createClass({
           <XAxis
             formatNumber={this.props.formatNumber}
             height={this.props.xAxisHeight}
-            label="Revenus d'activité imposables"
+            label={this.props.xAxisLabel}
             labelFontSize={this.props.labelsFontSize}
             maxValue={this.props.xMaxValue}
             minValue={this.props.xMinValue}

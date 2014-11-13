@@ -76,6 +76,7 @@
   "testCaseFilename": "@nonTranslated",
   "trace": "@nonTranslated",
   "unknownValuesAbove": "@nonTranslated",
+  "variable": "@nonTranslated",
   "variablesDecomposition": "@nonTranslated",
   "waterfall": "@nonTranslated",
   "waterfallFilename": "@nonTranslated",

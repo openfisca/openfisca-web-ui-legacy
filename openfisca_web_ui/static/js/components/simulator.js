@@ -30,7 +30,6 @@ var Simulator = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     baremeStepsX: React.PropTypes.number.isRequired,
-    baremeVariableCode: React.PropTypes.string.isRequired,
     columns: React.PropTypes.object.isRequired,
     columnsTree: React.PropTypes.object.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
@@ -58,9 +57,9 @@ var Simulator = React.createClass({
   getDefaultProps: function() {
     return {
       baremeStepsX: 200,
-      baremeVariableCode: 'sali',
       defaultPropsByVisualizationSlug: {
         bareme: {
+          xAxisVariableCode: 'sali',
           xMaxValue: 20000,
           xMinValue: 0,
         },
@@ -85,6 +84,7 @@ var Simulator = React.createClass({
         bareme: {
           collapsedVariables: {},
           isChartFullWidth: false,
+          xAxisVariableCode: this.props.defaultPropsByVisualizationSlug.bareme.xAxisVariableCode,
           xMaxValue: this.props.defaultPropsByVisualizationSlug.bareme.xMaxValue,
           xMinValue: this.props.defaultPropsByVisualizationSlug.bareme.xMinValue,
         },
@@ -427,6 +427,7 @@ var Simulator = React.createClass({
           </div>
         ) : (
           <Visualization
+            columns={this.props.columns}
             onDownload={this.handleDownload}
             onReformChange={this.handleReformChange}
             onSettingsChange={this.handleVisualizationSettingsChange}
@@ -513,7 +514,7 @@ var Simulator = React.createClass({
           count: this.props.baremeStepsX,
           max: this.state.visualizationsSettings.bareme.xMaxValue,
           min: this.state.visualizationsSettings.bareme.xMinValue,
-          name: this.props.baremeVariableCode,
+          name: this.state.visualizationsSettings.bareme.xAxisVariableCode,
         },
       ] : null,
       decomposition: null,
