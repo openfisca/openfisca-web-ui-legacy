@@ -25,8 +25,6 @@ var BaremeVisualization = React.createClass({
     defaultXAxisVariableCode: React.PropTypes.string.isRequired,
     defaultXMaxValue: React.PropTypes.number.isRequired,
     defaultXMinValue: React.PropTypes.number.isRequired,
-    displaySubtotals: React.PropTypes.bool,
-    displayVariablesColors: React.PropTypes.bool,
     displayBisectrix: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
