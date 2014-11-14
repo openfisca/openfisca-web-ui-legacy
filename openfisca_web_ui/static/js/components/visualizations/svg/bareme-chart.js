@@ -27,8 +27,7 @@ var BaremeChart = React.createClass({
     marginRight: React.PropTypes.number.isRequired,
     marginTop: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
-    onVariableHover: React.PropTypes.func,
-    onVariableToggle: React.PropTypes.func,
+    onVariableHover: React.PropTypes.func.isRequired,
     variables: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     width: React.PropTypes.number.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
@@ -95,7 +94,7 @@ var BaremeChart = React.createClass({
     };
     return pixel;
   },
-  handleVariableHover: function(variable, event) {
+  handleVariableHover: function(event, variable) {
     this.props.onVariableHover(event.type === 'mouseover' ? variable : null);
   },
   render: function() {
@@ -150,10 +149,9 @@ var BaremeChart = React.createClass({
               var cssColor = variable.color ? `rgb(${variable.color})` : this.props.noColorFill;
               return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
                 <Curve
-                  active={this.props.activeVariableCode === variable.code}
                   fill={isFilled}
                   key={variable.code}
-                  onHover={this.props.onVariableHover ? this.handleVariableHover.bind(null, variable) : null}
+                  onHover={event => this.handleVariableHover(event, variable)}
                   points={points}
                   pointToPixel={this.gridPointToPixel}
                   style={{

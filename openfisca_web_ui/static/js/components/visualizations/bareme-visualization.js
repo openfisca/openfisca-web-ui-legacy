@@ -205,7 +205,6 @@ var BaremeVisualization = React.createClass({
                       displayBisectrix={this.props.displayBisectrix}
                       formatNumber={this.props.formatNumber}
                       onVariableHover={this.handleVariableHover}
-                      onVariableToggle={this.handleVariableToggle}
                       ref='chart'
                       variables={variables}
                       width={this.state.chartContainerWidth - 15 * 2 /* Substract Bootstrap panel left and right paddings. */}

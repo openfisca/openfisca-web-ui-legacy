@@ -7,7 +7,6 @@ var Lazy = require('lazy.js'),
 
 var Curve = React.createClass({
   propTypes: {
-    active: React.PropTypes.bool,
     fill: React.PropTypes.bool,
     onHover: React.PropTypes.func,
     points: React.PropTypes.arrayOf(
@@ -38,9 +37,6 @@ var Curve = React.createClass({
   },
   render: function() {
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();
-    if (this.props.active) {
-      style = Lazy(style).assign({stroke: 'black'}).toObject();
-    }
     return (
       <polyline
         onMouseOut={this.props.onHover}
