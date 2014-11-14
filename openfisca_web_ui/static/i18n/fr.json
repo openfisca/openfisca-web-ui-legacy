@@ -29,6 +29,7 @@
   "deleteNameQuestion": "Supprimer {name} ?",
   "deny": "Refuser",
   "difference": "Différence",
+  "displayBisectrix": "Afficher la bissectrice",
   "displayParameters": "Paramètres d'affichage",
   "displaySubtotals": "Afficher les sous-totaux",
   "displayVariablesColors": "Afficher les couleurs des variables",

@@ -16,6 +16,7 @@ var BaremeSettings = React.createClass({
 		defaultXAxisVariableCode: React.PropTypes.string.isRequired,
 		defaultXMaxValue: React.PropTypes.number.isRequired,
 		defaultXMinValue: React.PropTypes.number.isRequired,
+		displayBisectrix: React.PropTypes.bool,
 		onSettingsChange: React.PropTypes.func.isRequired,
 		xAxisVariableCode: React.PropTypes.string.isRequired,
 		xMaxValue: React.PropTypes.number.isRequired,
@@ -23,6 +24,7 @@ var BaremeSettings = React.createClass({
 	},
 	getInitialState: function() {
 		return {
+			displayBisectrix: this.props.displayBisectrix,
 			xMaxValue: this.props.xMaxValue,
 			xMinValue: this.props.xMinValue,
 		};
@@ -38,6 +40,7 @@ var BaremeSettings = React.createClass({
 	handleReset: function(event) {
 		event.preventDefault();
 		var changeset = {
+			displayBisectrix: false,
 			xAxisVariableCode: this.props.defaultXAxisVariableCode,
 			xMaxValue: this.props.defaultXMaxValue,
 			xMinValue: this.props.defaultXMinValue,
@@ -121,6 +124,20 @@ var BaremeSettings = React.createClass({
 								</p>
 							)
 						}
+					</div>
+				</div>
+				<div className="form-group form-group-sm">
+					<div className='col-xs-offset-6 col-xs-6'>
+						<div className='checkbox'>
+							<label>
+								<input
+									checked={this.props.displayBisectrix}
+									onChange={event => this.props.onSettingsChange({displayBisectrix: event.target.checked})}
+									type='checkbox'
+								/>
+								{this.getIntlMessage('displayBisectrix')}
+							</label>
+						</div>
 					</div>
 				</div>
 				<div className="form-group form-group-sm">

@@ -20,6 +20,7 @@ var BaremeChart = React.createClass({
     aspectRatio: React.PropTypes.number.isRequired,
     attribution: React.PropTypes.string,
     defaultYAxisWidth: React.PropTypes.number.isRequired,
+    displayBisectrix: React.PropTypes.bool,
     formatNumber: React.PropTypes.func.isRequired,
     height: React.PropTypes.number,
     labelsFontSize: React.PropTypes.number.isRequired,
@@ -106,6 +107,11 @@ var BaremeChart = React.createClass({
     var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
     this.gridWidth = this.props.width - yAxisWidth - this.props.marginRight;
+    var minAxesMaxValues = Math.min(this.props.xMaxValue, this.ySmartValues.maxValue);
+    var bisectrixPixels = [
+      this.gridPointToPixel({x: this.props.xMinValue, y: this.ySmartValues.minValue}),
+      this.gridPointToPixel({x: minAxesMaxValues, y: minAxesMaxValues}),
+    ];
     return (
       <svg height={height} width={this.props.width}>
         <g transform={`translate(${yAxisWidth}, ${height - this.props.xAxisHeight})`}>
@@ -158,6 +164,23 @@ var BaremeChart = React.createClass({
               );
             })
           }
+          {
+            this.props.displayBisectrix && (
+              <line
+                className='bisectrix'
+                x1={bisectrixPixels[0].x}
+                y1={bisectrixPixels[0].y}
+                x2={bisectrixPixels[1].x}
+                y2={bisectrixPixels[1].y}
+                style={{
+                  fill: 'none',
+                  stroke: 'black',
+                  strokeDasharray: '5 5',
+                  strokeWidth: 1,
+                }}
+              />
+            )
+          }
           <YAxis
             formatNumber={this.props.formatNumber}
             height={this.gridHeight}
@@ -182,9 +205,13 @@ var BaremeChart = React.createClass({
             width={this.gridWidth}
           />
         </g>
-        <g className='attribution' transform={`translate(${yAxisWidth}, ${height - 10})`}>
-          <text>{this.props.attribution}</text>
-        </g>
+        {
+          this.props.attribution && (
+            <g className='attribution' transform={`translate(${yAxisWidth}, ${height - 10})`}>
+              <text>{this.props.attribution}</text>
+            </g>
+          )
+        }
       </svg>
     );
   },

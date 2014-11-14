@@ -59,6 +59,7 @@ var Simulator = React.createClass({
       baremeStepsX: 200,
       defaultPropsByVisualizationSlug: {
         bareme: {
+          displayBisectrix: false,
           xAxisVariableCode: 'sali',
           xMaxValue: 20000,
           xMinValue: 0,
@@ -83,6 +84,7 @@ var Simulator = React.createClass({
       visualizationsSettings: {
         bareme: {
           collapsedVariables: {},
+          displayBisectrix: this.props.defaultPropsByVisualizationSlug.bareme.displayBisectrix,
           isChartFullWidth: false,
           xAxisVariableCode: this.props.defaultPropsByVisualizationSlug.bareme.xAxisVariableCode,
           xMaxValue: this.props.defaultPropsByVisualizationSlug.bareme.xMaxValue,

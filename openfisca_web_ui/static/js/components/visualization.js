@@ -44,6 +44,7 @@ var Visualization = React.createClass({
           <BaremeVisualization
             collapsedVariables={this.props.settings.bareme.collapsedVariables}
             columns={this.props.columns}
+            displayBisectrix={this.props.settings.bareme.displayBisectrix}
             downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}
             isChartFullWidth={this.props.settings.bareme.isChartFullWidth}

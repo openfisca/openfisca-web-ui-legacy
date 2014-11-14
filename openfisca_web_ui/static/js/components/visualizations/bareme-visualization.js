@@ -27,6 +27,7 @@ var BaremeVisualization = React.createClass({
     defaultXMinValue: React.PropTypes.number.isRequired,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
+    displayBisectrix: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     isChartFullWidth: React.PropTypes.bool,
@@ -203,13 +204,18 @@ var BaremeVisualization = React.createClass({
                   this.state.chartContainerWidth && (
                     <BaremeChart
                       activeVariableCode={this.state.activeVariableCode}
+                      displayBisectrix={this.props.displayBisectrix}
                       formatNumber={this.props.formatNumber}
                       onVariableHover={this.handleVariableHover}
                       onVariableToggle={this.handleVariableToggle}
                       ref='chart'
                       variables={variables}
                       width={this.state.chartContainerWidth - 15 * 2 /* Substract Bootstrap panel left and right paddings. */}
-                      xAxisLabel={this.props.columns[this.props.xAxisVariableCode].label}
+                      xAxisLabel={
+                        this.props.xAxisVariableCode in this.props.columns ?
+                          this.props.columns[this.props.xAxisVariableCode].label :
+                          ''
+                      }
                       xMaxValue={this.props.xMaxValue}
                       xMinValue={this.props.xMinValue}
                     />
@@ -227,6 +233,7 @@ var BaremeVisualization = React.createClass({
                       defaultXMaxValue={this.props.defaultXMaxValue}
                       defaultXMinValue={this.props.defaultXMinValue}
                       defaultXAxisVariableCode={this.props.defaultXAxisVariableCode}
+                      displayBisectrix={this.props.displayBisectrix}
                       onSettingsChange={this.props.onSettingsChange}
                       xAxisVariableCode={this.props.xAxisVariableCode}
                       xMaxValue={this.props.xMaxValue}
