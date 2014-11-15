@@ -18,6 +18,7 @@ var Visualization = React.createClass({
     columns: React.PropTypes.object.isRequired,
     defaultPropsByVisualizationSlug: React.PropTypes.object.isRequired,
     downloadAttribution: React.PropTypes.string,
+    isSimulationInProgress: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
     onReformChange: React.PropTypes.func.isRequired,
@@ -39,58 +40,69 @@ var Visualization = React.createClass({
   },
   render: function() {
     var isDiff = this.props.reform === 'plf2015-diff';
-    switch (this.props.visualizationSlug) {
-      case 'bareme':
-        return (
-          <BaremeVisualization
-            collapsedVariables={this.props.settings.bareme.collapsedVariables}
-            columns={this.props.columns}
-            defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
-            displayBisectrix={this.props.settings.bareme.displayBisectrix}
-            displaySettings={this.props.settings.bareme.displaySettings}
-            downloadAttribution={this.props.downloadAttribution}
-            formatNumber={helpers.formatFrenchNumber}
-            isChartFullWidth={this.props.settings.bareme.isChartFullWidth}
-            labelsFontSize={this.props.labelsFontSize}
-            onDownload={this.props.onDownload}
-            onReformChange={this.props.onReformChange}
-            onSettingsChange={this.handleSettingsChange}
-            onVisualizationChange={this.props.onVisualizationChange}
-            reform={this.props.reform}
-            variablesTree={this.props.simulationResult}
-            visualizationSlug={this.props.visualizationSlug}
-            xAxisVariableCode={this.props.settings.bareme.xAxisVariableCode}
-            xMaxValue={this.props.settings.bareme.xMaxValue}
-            xMinValue={this.props.settings.bareme.xMinValue}
-          />
-        );
-      case 'situateur-revdisp':
-        return this.renderSituateur('revdisp');
-      case 'situateur-sal':
-        return this.renderSituateur('sal');
-      case 'waterfall':
-        return (
-          <WaterfallVisualization
-            collapsedVariables={this.props.settings.waterfall.collapsedVariables}
-            defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
-            diff={isDiff}
-            displaySubtotals={this.props.settings.waterfall.displaySubtotals}
-            displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
-            downloadAttribution={this.props.downloadAttribution}
-            formatNumber={helpers.formatFrenchNumber}
-            isChartFullWidth={this.props.settings.waterfall.isChartFullWidth}
-            labelsFontSize={this.props.labelsFontSize}
-            onDownload={this.props.onDownload}
-            onReformChange={this.props.onReformChange}
-            onSettingsChange={this.handleSettingsChange}
-            onVisualizationChange={this.props.onVisualizationChange}
-            reform={this.props.reform}
-            valuesOffset={isDiff ? null : (this.props.reform ? 1 : 0)}
-            variablesTree={this.props.simulationResult}
-            visualizationSlug={this.props.visualizationSlug}
-          />
-        );
+    var visualizationComponent;
+    if (this.props.visualizationSlug === 'bareme') {
+      visualizationComponent = (
+        <BaremeVisualization
+          collapsedVariables={this.props.settings.bareme.collapsedVariables}
+          columns={this.props.columns}
+          defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
+          displayBisectrix={this.props.settings.bareme.displayBisectrix}
+          displaySettings={this.props.settings.bareme.displaySettings}
+          downloadAttribution={this.props.downloadAttribution}
+          formatNumber={helpers.formatFrenchNumber}
+          isChartFullWidth={this.props.settings.bareme.isChartFullWidth}
+          labelsFontSize={this.props.labelsFontSize}
+          onDownload={this.props.onDownload}
+          onReformChange={this.props.onReformChange}
+          onSettingsChange={this.handleSettingsChange}
+          onVisualizationChange={this.props.onVisualizationChange}
+          reform={this.props.reform}
+          variablesTree={this.props.simulationResult}
+          visualizationSlug={this.props.visualizationSlug}
+          xAxisVariableCode={this.props.settings.bareme.xAxisVariableCode}
+          xMaxValue={this.props.settings.bareme.xMaxValue}
+          xMinValue={this.props.settings.bareme.xMinValue}
+        />
+      );
+    } else if (this.props.visualizationSlug === 'situateur-revdisp') {
+      visualizationComponent = this.renderSituateur('revdisp');
+    } else if (this.props.visualizationSlug === 'situateur-sal') {
+      visualizationComponent = this.renderSituateur('sal');
+    } else if (this.props.visualizationSlug === 'waterfall') {
+      visualizationComponent = (
+        <WaterfallVisualization
+          collapsedVariables={this.props.settings.waterfall.collapsedVariables}
+          defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
+          diff={isDiff}
+          displaySubtotals={this.props.settings.waterfall.displaySubtotals}
+          displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
+          downloadAttribution={this.props.downloadAttribution}
+          formatNumber={helpers.formatFrenchNumber}
+          isChartFullWidth={this.props.settings.waterfall.isChartFullWidth}
+          labelsFontSize={this.props.labelsFontSize}
+          onDownload={this.props.onDownload}
+          onReformChange={this.props.onReformChange}
+          onSettingsChange={this.handleSettingsChange}
+          onVisualizationChange={this.props.onVisualizationChange}
+          reform={this.props.reform}
+          valuesOffset={isDiff ? null : (this.props.reform ? 1 : 0)}
+          variablesTree={this.props.simulationResult}
+          visualizationSlug={this.props.visualizationSlug}
+        />
+      );
     }
+    return (
+      <div>
+        {visualizationComponent}
+        {
+          this.props.isSimulationInProgress &&
+            <span className="label label-default" style={{position: 'absolute', right: 15, top: 0}}>
+              {this.getIntlMessage('simulationInProgress')}
+            </span>
+        }
+      </div>
+    );
   },
   renderSituateur: function(variableName) {
     var value = this.props.simulationResult[0].values[0];
