@@ -45,77 +45,81 @@ var TestCaseToolbar = React.createClass({
     });
     var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
     return (
-      <div className="form-inline" role="form">
-        <div className="btn-group" style={{marginRight: 5}}>
-          <button
-            accessKey="s"
-            className="btn btn-primary dropdown-toggle"
-            data-toggle="dropdown"
-            id="simulation-button"
-            type="button">
-            <span>{this.getIntlMessage('actions')}</span> <span className="caret"></span>
-          </button>
-          <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
-            <li className={cx({disabled: this.props.disableSimulate})} role="presentation">
-              <a
-                href="#"
-                onClick={event => {
-                  event.preventDefault();
-                  if (! this.props.disableSimulate) {
-                    this.props.onSimulate();
-                  }
-                }}
-                role="menuitem"
-                tabIndex="-1">
-                {this.getIntlMessage('simulate')}
-              </a>
-            </li>
-            <li role="presentation">
-              <a href={traceUrl} role="menuitem" tabIndex="-1" target='_blank'>
-                {this.getIntlMessage('trace')}
-              </a>
-            </li>
-            {
-              this.props.displayRepairMenuItem && (
-                <li role="presentation">
-                  <a
-                    href="#"
-                    onClick={event => { event.preventDefault(); this.props.onRepair(); }}
-                    role="menuitem"
-                    tabIndex="-1">
-                    {this.getIntlMessage('repair')}
-                  </a>
-                </li>
-              )
-            }
-            <li role="presentation">
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onReset(); }}
-                role="menuitem"
-                tabIndex="-1">
-                {this.getIntlMessage('reset')}
-              </a>
-            </li>
-            <li className="divider" role="presentation"></li>
-            <li role="presentation">
+      <div className='row'>
+        <div className='col-xs-6'>
+          <div className="btn-group" style={{marginRight: 5}}>
+            <button
+              accessKey="s"
+              className="btn btn-primary dropdown-toggle"
+              data-toggle="dropdown"
+              id="simulation-button"
+              type="button">
+              <span>{this.getIntlMessage('actions')}</span> <span className="caret"></span>
+            </button>
+            <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
+              <li className={cx({disabled: this.props.disableSimulate})} role="presentation">
+                <a
+                  href="#"
+                  onClick={event => {
+                    event.preventDefault();
+                    if (! this.props.disableSimulate) {
+                      this.props.onSimulate();
+                    }
+                  }}
+                  role="menuitem"
+                  tabIndex="-1">
+                  {this.getIntlMessage('simulate')}
+                </a>
+              </li>
+              <li role="presentation">
+                <a href={traceUrl} role="menuitem" tabIndex="-1" target='_blank'>
+                  {this.getIntlMessage('trace')}
+                </a>
+              </li>
               {
-                this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => (
-                  <a
-                    href="#"
-                    key={kind}
-                    onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}
-                    role="menuitem"
-                    tabIndex="-1">
-                    {this.getIntlMessage(`addEntity:${kind}`)}
-                  </a>
-                ))
+                this.props.displayRepairMenuItem && (
+                  <li role="presentation">
+                    <a
+                      href="#"
+                      onClick={event => { event.preventDefault(); this.props.onRepair(); }}
+                      role="menuitem"
+                      tabIndex="-1">
+                      {this.getIntlMessage('repair')}
+                    </a>
+                  </li>
+                )
               }
-            </li>
-          </ul>
+              <li role="presentation">
+                <a
+                  href="#"
+                  onClick={event => { event.preventDefault(); this.props.onReset(); }}
+                  role="menuitem"
+                  tabIndex="-1">
+                  {this.getIntlMessage('reset')}
+                </a>
+              </li>
+              <li className="divider" role="presentation"></li>
+              <li role="presentation">
+                {
+                  this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => (
+                    <a
+                      href="#"
+                      key={kind}
+                      onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}
+                      role="menuitem"
+                      tabIndex="-1">
+                      {this.getIntlMessage(`addEntity:${kind}`)}
+                    </a>
+                  ))
+                }
+              </li>
+            </ul>
+          </div>
         </div>
         <div className={cx({
-          'form-group': true,
+          'col-lg-offset-2': true,
+          'col-lg-4': true,
+          'col-xs-6': true,
           'has-error': this.props.errors && this.props.errors.period,
         })}>
           <YearInput
