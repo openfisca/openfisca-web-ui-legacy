@@ -15,6 +15,7 @@ var BaremeSettings = React.createClass({
     columns: React.PropTypes.object.isRequired,
 		defaultProps: React.PropTypes.object.isRequired,
 		displayBisectrix: React.PropTypes.bool,
+		displaySettings: React.PropTypes.bool,
 		onSettingsChange: React.PropTypes.func.isRequired,
 		xAxisVariableCode: React.PropTypes.string.isRequired,
 		xMaxValue: React.PropTypes.number.isRequired,
@@ -27,6 +28,10 @@ var BaremeSettings = React.createClass({
 			xMinValue: this.props.xMinValue,
 		};
 	},
+	handleDisplaySettingsClick: function(event) {
+		event.preventDefault();
+		this.props.onSettingsChange({displaySettings: ! this.props.displaySettings});
+	},
 	handleMaxValueChange: function() {
 		var newXMaxValue = polyfills.valueAsNumber(this.refs.xMaxValue.getDOMNode());
 		this.setState({xMaxValue: newXMaxValue});
@@ -37,8 +42,16 @@ var BaremeSettings = React.createClass({
 	},
 	handleReset: function(event) {
 		event.preventDefault();
-		this.setState(this.getInitialState(), () => {
-			this.props.onSettingsChange(this.props.defaultProps, true);
+		this.setState({
+			xMaxValue: this.props.defaultProps.xMaxValue,
+			xMinValue: this.props.defaultProps.xMinValue,
+		}, () => {
+			this.props.onSettingsChange({
+				displayBisectrix: this.props.defaultProps.displayBisectrix,
+				xAxisVariableCode: this.props.defaultProps.xAxisVariableCode,
+				xMaxValue: this.props.defaultProps.xMaxValue,
+				xMinValue: this.props.defaultProps.xMinValue,
+			}, true);
 		});
 	},
 	handleSubmit: function(event) {
@@ -53,8 +66,9 @@ var BaremeSettings = React.createClass({
 	render: function() {
 		var isMaxValueLessThanMinValue = this.state.xMaxValue !== null && this.state.xMinValue !== null &&
 			this.state.xMaxValue < this.state.xMinValue;
-		return (
+		return this.props.displaySettings ? (
 			<form className="form-horizontal" onReset={this.handleReset} onSubmit={this.handleSubmit} role="form">
+					<a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('hideSettings')}</a>
 				<div className='form-group form-group-sm'>
 					<label className="col-xs-6 control-label" htmlFor="x-axis-variable-code">
 						{this.getIntlMessage('variable')}
@@ -132,28 +146,27 @@ var BaremeSettings = React.createClass({
 						</div>
 					</div>
 				</div>
-				<div className="form-group form-group-sm">
+				<div className="form-group form-group-sm" style={{marginBottom: 0}}>
 					<div className="col-xs-offset-6 col-xs-6">
-						<div className='pull-right'>
-							<button
-								className='btn btn-default btn-sm'
-								disabled={
-									(this.state.xMaxValue === this.props.xMaxValue && this.state.xMinValue === this.props.xMinValue) || (
-										(this.state.xMaxValue || this.props.defaultProps.xMaxValue) <
-											(this.state.xMinValue || this.props.defaultProps.xMinValue)
-									)
-								}
-								style={{marginRight: 10}}
-								type='submit'>
-								{this.getIntlMessage('apply')}
-							</button>
-							<button className='btn btn-default btn-sm' type='reset'>
-								{this.getIntlMessage('reset')}
-							</button>
-						</div>
+						<button
+							className='btn btn-default btn-sm'
+							disabled={
+								(this.state.xMaxValue === this.props.xMaxValue && this.state.xMinValue === this.props.xMinValue) || (
+									this.state.xMaxValue < this.state.xMinValue
+								)
+							}
+							style={{marginRight: 10}}
+							type='submit'>
+							{this.getIntlMessage('apply')}
+						</button>
+						<button className='btn btn-default btn-sm' type='reset'>
+							{this.getIntlMessage('reset')}
+						</button>
 					</div>
 				</div>
 			</form>
+		) : (
+			<a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('showSettings')}</a>
 		);
 	},
 });

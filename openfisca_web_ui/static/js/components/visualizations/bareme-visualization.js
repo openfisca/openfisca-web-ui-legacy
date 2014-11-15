@@ -139,10 +139,6 @@ var BaremeVisualization = React.createClass({
       this.formatMessage(this.getIntlMessage('baremeFilename'), {extension: 'svg'})
     );
   },
-  handleDisplaySettingsClick: function(event) {
-    event.preventDefault();
-    this.props.onSettingsChange({displaySettings: ! this.props.displaySettings});
-  },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
   },
@@ -218,22 +214,16 @@ var BaremeVisualization = React.createClass({
                 {variables && this.formatHint(variables)}
               </div>
               <div className='panel-footer'>
-                {
-                  this.props.displaySettings && (
-                    <BaremeSettings
-                      columns={this.props.columns}
-                      defaultProps={this.props.defaultProps}
-                      displayBisectrix={this.props.displayBisectrix}
-                      onSettingsChange={this.props.onSettingsChange}
-                      xAxisVariableCode={this.props.xAxisVariableCode}
-                      xMaxValue={this.props.xMaxValue}
-                      xMinValue={this.props.xMinValue}
-                    />
-                  )
-                }
-                <a href='#' onClick={this.handleDisplaySettingsClick}>
-                  {this.state.displaySettings ? this.getIntlMessage('hide') : this.getIntlMessage('showSettings')}
-                </a>
+                <BaremeSettings
+                  columns={this.props.columns}
+                  defaultProps={this.props.defaultProps}
+                  displayBisectrix={this.props.displayBisectrix}
+                  displaySettings={this.props.displaySettings}
+                  onSettingsChange={this.props.onSettingsChange}
+                  xAxisVariableCode={this.props.xAxisVariableCode}
+                  xMaxValue={this.props.xMaxValue}
+                  xMinValue={this.props.xMinValue}
+                />
               </div>
             </div>
           </div>
