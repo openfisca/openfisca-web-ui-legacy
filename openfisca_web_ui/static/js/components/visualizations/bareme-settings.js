@@ -68,7 +68,7 @@ var BaremeSettings = React.createClass({
 			this.state.xMaxValue < this.state.xMinValue;
 		return this.props.displaySettings ? (
 			<form className="form-horizontal" onReset={this.handleReset} onSubmit={this.handleSubmit} role="form">
-					<a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('hideSettings')}</a>
+				<a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('hideSettings')}</a>
 				<div className='form-group form-group-sm'>
 					<label className="col-xs-6 control-label" htmlFor="x-axis-variable-code">
 						{this.getIntlMessage('variable')}

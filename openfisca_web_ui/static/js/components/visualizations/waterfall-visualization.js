@@ -21,7 +21,8 @@ var WaterfallVisualization = React.createClass({
   propTypes: {
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
-    diff: React.PropTypes.bool,
+    diffMode: React.PropTypes.bool,
+    displaySettings: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
@@ -104,6 +105,10 @@ var WaterfallVisualization = React.createClass({
       this.formatMessage(this.getIntlMessage('waterfallFilename'), {extension: 'svg'})
     );
   },
+  handleDisplaySettingsClick: function(event) {
+    event.preventDefault();
+    this.props.onSettingsChange({displaySettings: ! this.props.displaySettings});
+  },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
   },
@@ -157,14 +162,14 @@ var WaterfallVisualization = React.createClass({
         variable.children.forEach(child => {
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
-          if ( ! this.props.diff) {
+          if ( ! this.props.diffMode) {
             childBaseValue += child.values[this.props.valuesOffset];
           }
         });
         newVariables = newVariables.concat(childrenVariables);
       }
       var value;
-      if (this.props.diff) {
+      if (this.props.diffMode) {
         value = variable.values[1] - variable.values[0];
       } else {
         value = variable.values[this.props.valuesOffset];
@@ -277,6 +282,37 @@ var WaterfallVisualization = React.createClass({
                   this.getIntlMessage('hoverOverChart')
               }
             </div>
+            <div className='panel-footer'>
+              {
+                this.props.displaySettings ? (
+                  <div>
+                    <a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('hideSettings')}</a>
+                    <div className='checkbox'>
+                      <label>
+                        <input
+                          checked={this.props.displaySubtotals}
+                          onChange={event => this.props.onSettingsChange({displaySubtotals: event.target.checked})}
+                          type='checkbox'
+                        />
+                        {this.getIntlMessage('displaySubtotals')}
+                      </label>
+                    </div>
+                    <div className='checkbox'>
+                      <label>
+                        <input
+                          checked={this.props.displayVariablesColors}
+                          onChange={event => this.props.onSettingsChange({displayVariablesColors: event.target.checked})}
+                          type='checkbox'
+                        />
+                        {this.getIntlMessage('displayVariablesColors')}
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('showSettings')}</a>
+                )
+              }
+            </div>
           </div>
         </div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-5'}>
@@ -297,33 +333,6 @@ var WaterfallVisualization = React.createClass({
                 positiveColor={this.props.positiveColor}
                 variables={variablesTreeVariables}
               />
-            </div>
-          </div>
-          <div className='panel panel-default'>
-            <div className='panel-heading'>
-              {this.getIntlMessage('displayParameters')}
-            </div>
-            <div className='panel-body'>
-              <div className='checkbox'>
-                <label>
-                  <input
-                    checked={this.props.displaySubtotals}
-                    onChange={event => this.props.onSettingsChange({displaySubtotals: event.target.checked})}
-                    type='checkbox'
-                  />
-                  {this.getIntlMessage('displaySubtotals')}
-                </label>
-              </div>
-              <div className='checkbox'>
-                <label>
-                  <input
-                    checked={this.props.displayVariablesColors}
-                    onChange={event => this.props.onSettingsChange({displayVariablesColors: event.target.checked})}
-                    type='checkbox'
-                  />
-                  {this.getIntlMessage('displayVariablesColors')}
-                </label>
-              </div>
             </div>
           </div>
           <div className='panel panel-default'>

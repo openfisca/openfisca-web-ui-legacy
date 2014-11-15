@@ -65,6 +65,9 @@ var Simulator = React.createClass({
           xMaxValue: 20000,
           xMinValue: 0,
         },
+        waterfall: {
+          displaySettings: false,
+        },
       },
       defaultVisualizationSlug: 'waterfall',
     };
@@ -94,6 +97,7 @@ var Simulator = React.createClass({
         },
         waterfall: {
           collapsedVariables: {},
+          displaySettings: this.props.defaultPropsByVisualizationSlug.waterfall.displaySettings,
           isChartFullWidth: false,
         },
       },

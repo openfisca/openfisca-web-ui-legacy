@@ -74,7 +74,8 @@ var Visualization = React.createClass({
         <WaterfallVisualization
           collapsedVariables={this.props.settings.waterfall.collapsedVariables}
           defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
-          diff={isDiff}
+          diffMode={isDiff}
+          displaySettings={this.props.settings.waterfall.displaySettings}
           displaySubtotals={this.props.settings.waterfall.displaySubtotals}
           displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
           downloadAttribution={this.props.downloadAttribution}
