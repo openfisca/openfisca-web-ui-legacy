@@ -19,7 +19,6 @@ var TestCaseToolbar = React.createClass({
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
     getEntitiesKinds: React.PropTypes.func.isRequired,
-    isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
     onReset: React.PropTypes.func.isRequired,
     onRepair: React.PropTypes.func.isRequired,
@@ -128,11 +127,6 @@ var TestCaseToolbar = React.createClass({
             value={this.props.year}
           />
         </div>
-        {
-          this.props.isSimulationInProgress && (
-            <span className="label label-default visible-xs-inline">{this.getIntlMessage('simulationInProgress')}</span>
-          )
-        }
       </div>
     );
   }

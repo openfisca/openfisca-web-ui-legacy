@@ -334,7 +334,6 @@ var Simulator = React.createClass({
             entitiesMetadata={this.props.entitiesMetadata}
             errors={this.state.errors}
             getEntitiesKinds={models.getEntitiesKinds}
-            isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
             onRepair={this.handleRepair}
@@ -421,24 +420,28 @@ var Simulator = React.createClass({
         </ul>
       </div>
     ) : (
-      this.state.simulationResult && (
-        this.state.simulationResult.error ? (
-          <div className="alert alert-danger" role="alert">
-            <h4>{this.getIntlMessage('error')}</h4>
-            <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
-          </div>
-        ) : (
-          <Visualization
-            columns={this.props.columns}
-            onDownload={this.handleDownload}
-            onReformChange={this.handleReformChange}
-            onSettingsChange={this.handleVisualizationSettingsChange}
-            onVisualizationChange={this.handleVisualizationChange}
-            reform={this.state.reform}
-            settings={this.state.visualizationsSettings}
-            simulationResult={this.state.simulationResult}
-            visualizationSlug={this.state.visualizationSlug}
-          />
+      this.state.isSimulationInProgress ? (
+        <span className="label label-default">{this.getIntlMessage('simulationInProgress')}</span>
+      ) : (
+        this.state.simulationResult && (
+          this.state.simulationResult.error ? (
+            <div className="alert alert-danger" role="alert">
+              <h4>{this.getIntlMessage('error')}</h4>
+              <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+            </div>
+          ) : (
+            <Visualization
+              columns={this.props.columns}
+              onDownload={this.handleDownload}
+              onReformChange={this.handleReformChange}
+              onSettingsChange={this.handleVisualizationSettingsChange}
+              onVisualizationChange={this.handleVisualizationChange}
+              reform={this.state.reform}
+              settings={this.state.visualizationsSettings}
+              simulationResult={this.state.simulationResult}
+              visualizationSlug={this.state.visualizationSlug}
+            />
+          )
         )
       )
     );
