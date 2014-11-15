@@ -116,7 +116,7 @@ OpenFisca
 
 
 <%def name="footer()" filter="trim">
-<footer class="footer navbar-inverse">
+<footer class="footer hidden-xs navbar-inverse">
     <div class="container">
         <ul class="nav navbar-nav">
             <li><a href="http://stats.data.gouv.fr/index.php?idSite=4">Statistiques du site</a></li>
@@ -200,6 +200,15 @@ ${_(u'OpenFisca demonstrator')}
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="${urlparse.urljoin(conf['urls.www'], 'a-propos')}">${_(u'About')}</a></li>
                     <li><a href="${urlparse.urljoin(conf['urls.www'], 'contact')}">${_(u'Contact')}</a></li>
+                    <li class="visible-xs-block">
+                        <a href="http://stats.data.gouv.fr/index.php?idSite=4">Statistiques du site</a>
+                    </li>
+                    <li class="visible-xs-block">
+                        <a href="${urlparse.urljoin(conf['urls.www'], 'mentions-legales')}">${_('Legal terms')}</a>
+                    </li>
+                    <li class="visible-xs-block">
+                        <a href="${urls.get_url(ctx, 'privacy-policy')}">${_('Privacy policy')}</a>
+                    </li>
                     <%self:topbar_lang/>
                 </ul>
             </div>
