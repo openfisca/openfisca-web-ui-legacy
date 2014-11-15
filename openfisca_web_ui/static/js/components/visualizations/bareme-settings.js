@@ -13,9 +13,7 @@ var BaremeSettings = React.createClass({
 	mixins: [ReactIntlMixin],
 	propTypes: {
     columns: React.PropTypes.object.isRequired,
-		defaultXAxisVariableCode: React.PropTypes.string.isRequired,
-		defaultXMaxValue: React.PropTypes.number.isRequired,
-		defaultXMinValue: React.PropTypes.number.isRequired,
+		defaultProps: React.PropTypes.object.isRequired,
 		displayBisectrix: React.PropTypes.bool,
 		onSettingsChange: React.PropTypes.func.isRequired,
 		xAxisVariableCode: React.PropTypes.string.isRequired,
@@ -23,8 +21,8 @@ var BaremeSettings = React.createClass({
 		xMinValue: React.PropTypes.number.isRequired,
 	},
 	getInitialState: function() {
+		// Use internal state to handle user typing on keyboard.
 		return {
-			displayBisectrix: this.props.displayBisectrix,
 			xMaxValue: this.props.xMaxValue,
 			xMinValue: this.props.xMinValue,
 		};
@@ -39,20 +37,14 @@ var BaremeSettings = React.createClass({
 	},
 	handleReset: function(event) {
 		event.preventDefault();
-		var changeset = {
-			displayBisectrix: false,
-			xAxisVariableCode: this.props.defaultXAxisVariableCode,
-			xMaxValue: this.props.defaultXMaxValue,
-			xMinValue: this.props.defaultXMinValue,
-		};
-		this.setState(changeset, () => {
-			this.props.onSettingsChange(changeset, true);
+		this.setState(this.getInitialState(), () => {
+			this.props.onSettingsChange(this.props.defaultProps, true);
 		});
 	},
 	handleSubmit: function(event) {
 		event.preventDefault();
-		var newXMaxValue = this.state.xMaxValue || this.props.defaultXMaxValue;
-		var newXMinValue = this.state.xMinValue || this.props.defaultXMinValue;
+		var newXMaxValue = this.state.xMaxValue;
+		var newXMinValue = this.state.xMinValue;
 		this.props.onSettingsChange({xMaxValue: newXMaxValue, xMinValue: newXMinValue}, true);
 	},
 	handleVariableCodeChange: function() {
@@ -91,7 +83,7 @@ var BaremeSettings = React.createClass({
 							className='form-control'
 							min={0}
 							onChange={this.handleMinValueChange}
-							placeholder={this.props.defaultXMinValue}
+							placeholder={this.props.defaultProps.xMinValue}
 							ref='xMinValue'
 							type='number'
 							value={this.state.xMinValue}
@@ -112,7 +104,7 @@ var BaremeSettings = React.createClass({
 							id='x-axis-max-value'
 							min={0}
 							onChange={this.handleMaxValueChange}
-							placeholder={this.props.defaultXMaxValue}
+							placeholder={this.props.defaultProps.xMaxValue}
 							ref='xMaxValue'
 							type='number'
 							value={this.state.xMaxValue}
@@ -146,12 +138,9 @@ var BaremeSettings = React.createClass({
 							<button
 								className='btn btn-default btn-sm'
 								disabled={
-									(
-										(this.state.xMaxValue || this.props.defaultXMaxValue) === this.props.xMaxValue &&
-										(this.state.xMinValue || this.props.defaultXMinValue) === this.props.xMinValue
-									) || (
-										(this.state.xMaxValue || this.props.defaultXMaxValue) <
-											(this.state.xMinValue || this.props.defaultXMinValue)
+									(this.state.xMaxValue === this.props.xMaxValue && this.state.xMinValue === this.props.xMinValue) || (
+										(this.state.xMaxValue || this.props.defaultProps.xMaxValue) <
+											(this.state.xMinValue || this.props.defaultProps.xMinValue)
 									)
 								}
 								style={{marginRight: 10}}

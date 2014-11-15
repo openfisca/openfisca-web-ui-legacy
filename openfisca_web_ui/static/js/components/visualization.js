@@ -16,6 +16,7 @@ var Visualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     columns: React.PropTypes.object.isRequired,
+    defaultPropsByVisualizationSlug: React.PropTypes.object.isRequired,
     downloadAttribution: React.PropTypes.string,
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
@@ -44,7 +45,9 @@ var Visualization = React.createClass({
           <BaremeVisualization
             collapsedVariables={this.props.settings.bareme.collapsedVariables}
             columns={this.props.columns}
+            defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
             displayBisectrix={this.props.settings.bareme.displayBisectrix}
+            displaySettings={this.props.settings.bareme.displaySettings}
             downloadAttribution={this.props.downloadAttribution}
             formatNumber={helpers.formatFrenchNumber}
             isChartFullWidth={this.props.settings.bareme.isChartFullWidth}
@@ -53,7 +56,6 @@ var Visualization = React.createClass({
             onReformChange={this.props.onReformChange}
             onSettingsChange={this.handleSettingsChange}
             onVisualizationChange={this.props.onVisualizationChange}
-            onXValuesChange={(xMinValue, xMaxValue) => this.handleSettingsChange({xMinValue, xMaxValue}, true)}
             reform={this.props.reform}
             variablesTree={this.props.simulationResult}
             visualizationSlug={this.props.visualizationSlug}
@@ -70,6 +72,7 @@ var Visualization = React.createClass({
         return (
           <WaterfallVisualization
             collapsedVariables={this.props.settings.waterfall.collapsedVariables}
+            defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
             diff={isDiff}
             displaySubtotals={this.props.settings.waterfall.displaySubtotals}
             displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}

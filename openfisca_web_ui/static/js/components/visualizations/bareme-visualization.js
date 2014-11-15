@@ -22,10 +22,9 @@ var BaremeVisualization = React.createClass({
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
     columns: React.PropTypes.object.isRequired,
-    defaultXAxisVariableCode: React.PropTypes.string.isRequired,
-    defaultXMaxValue: React.PropTypes.number.isRequired,
-    defaultXMinValue: React.PropTypes.number.isRequired,
+    defaultProps: React.PropTypes.object.isRequired,
     displayBisectrix: React.PropTypes.bool,
+    displaySettings: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     isChartFullWidth: React.PropTypes.bool,
@@ -69,9 +68,6 @@ var BaremeVisualization = React.createClass({
     return {
       chartAspectRatio: 4/3,
       collapsedVariables: {},
-      defaultXAxisVariableCode: 'sali',
-      defaultXMaxValue: 20000,
-      defaultXMinValue: 0,
       maxHeightRatio: 2/3,
       noColorFill: 'gray',
     };
@@ -80,7 +76,6 @@ var BaremeVisualization = React.createClass({
     return {
       activeVariableCode: null,
       chartContainerWidth: null,
-      displayBaremeSettings: false,
     };
   },
   getVariables: function() {
@@ -144,9 +139,9 @@ var BaremeVisualization = React.createClass({
       this.formatMessage(this.getIntlMessage('baremeFilename'), {extension: 'svg'})
     );
   },
-  handleToggleDisplayBaremeSettingsClick: function(event) {
+  handleDisplaySettingsClick: function(event) {
     event.preventDefault();
-    this.setState({displayBaremeSettings: ! this.state.displayBaremeSettings});
+    this.props.onSettingsChange({displaySettings: ! this.props.displaySettings});
   },
   handleVariableHover: function(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
@@ -224,12 +219,10 @@ var BaremeVisualization = React.createClass({
               </div>
               <div className='panel-footer'>
                 {
-                  this.state.displayBaremeSettings && (
+                  this.props.displaySettings && (
                     <BaremeSettings
                       columns={this.props.columns}
-                      defaultXMaxValue={this.props.defaultXMaxValue}
-                      defaultXMinValue={this.props.defaultXMinValue}
-                      defaultXAxisVariableCode={this.props.defaultXAxisVariableCode}
+                      defaultProps={this.props.defaultProps}
                       displayBisectrix={this.props.displayBisectrix}
                       onSettingsChange={this.props.onSettingsChange}
                       xAxisVariableCode={this.props.xAxisVariableCode}
@@ -238,8 +231,8 @@ var BaremeVisualization = React.createClass({
                     />
                   )
                 }
-                <a href='#' onClick={this.handleToggleDisplayBaremeSettingsClick}>
-                  {this.state.displayBaremeSettings ? this.getIntlMessage('hide') : this.getIntlMessage('showSettings')}
+                <a href='#' onClick={this.handleDisplaySettingsClick}>
+                  {this.state.displaySettings ? this.getIntlMessage('hide') : this.getIntlMessage('showSettings')}
                 </a>
               </div>
             </div>

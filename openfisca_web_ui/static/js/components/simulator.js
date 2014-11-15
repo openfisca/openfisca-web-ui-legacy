@@ -29,7 +29,6 @@ var appconfig = global.appconfig,
 var Simulator = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
-    baremeStepsX: React.PropTypes.number.isRequired,
     columns: React.PropTypes.object.isRequired,
     columnsTree: React.PropTypes.object.isRequired,
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
@@ -56,10 +55,12 @@ var Simulator = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      baremeStepsX: 200,
       defaultPropsByVisualizationSlug: {
         bareme: {
+          baremeStepsX: 200,
           displayBisectrix: false,
+          displaySettings: false,
+          isChartFullWidth: false,
           xAxisVariableCode: 'sali',
           xMaxValue: 20000,
           xMinValue: 0,
@@ -85,7 +86,8 @@ var Simulator = React.createClass({
         bareme: {
           collapsedVariables: {},
           displayBisectrix: this.props.defaultPropsByVisualizationSlug.bareme.displayBisectrix,
-          isChartFullWidth: false,
+          displaySettings: this.props.defaultPropsByVisualizationSlug.bareme.displaySettings,
+          isChartFullWidth: this.props.defaultPropsByVisualizationSlug.bareme.isChartFullWidth,
           xAxisVariableCode: this.props.defaultPropsByVisualizationSlug.bareme.xAxisVariableCode,
           xMaxValue: this.props.defaultPropsByVisualizationSlug.bareme.xMaxValue,
           xMinValue: this.props.defaultPropsByVisualizationSlug.bareme.xMinValue,
@@ -432,6 +434,7 @@ var Simulator = React.createClass({
           ) : (
             <Visualization
               columns={this.props.columns}
+              defaultPropsByVisualizationSlug={this.props.defaultPropsByVisualizationSlug}
               onDownload={this.handleDownload}
               onReformChange={this.handleReformChange}
               onSettingsChange={this.handleVisualizationSettingsChange}
@@ -516,7 +519,7 @@ var Simulator = React.createClass({
     var params = {
       axes: visualizationSlug === 'bareme' ? [
         {
-          count: this.props.baremeStepsX,
+          count: this.props.defaultPropsByVisualizationSlug.bareme.baremeStepsX,
           max: this.state.visualizationsSettings.bareme.xMaxValue,
           min: this.state.visualizationsSettings.bareme.xMinValue,
           name: this.state.visualizationsSettings.bareme.xAxisVariableCode,
