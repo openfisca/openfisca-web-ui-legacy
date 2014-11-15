@@ -108,7 +108,7 @@ var BaremeChart = React.createClass({
     this.gridWidth = this.props.width - yAxisWidth - this.props.marginRight;
     var minAxesMaxValues = Math.min(this.props.xMaxValue, this.ySmartValues.maxValue);
     var bisectrixPixels = [
-      this.gridPointToPixel({x: this.props.xMinValue, y: this.ySmartValues.minValue}),
+      this.gridPointToPixel({x: this.props.xMinValue, y: this.props.xMinValue}),
       this.gridPointToPixel({x: minAxesMaxValues, y: minAxesMaxValues}),
     ];
     return (
