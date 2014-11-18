@@ -1,9 +1,5 @@
 /*From http://prometheusresearch.github.io/react-autocomplete/_static/overrides.css*/
 
-.react-autocomplete-Autocomplete {
-  width: 50%;
-}
-
 .react-autocomplete-Autocomplete__search {
   border: 1px solid #aaa;
   padding: 5px;

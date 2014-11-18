@@ -2,10 +2,12 @@
 'use strict';
 
 var Autocomplete = require('ron-react-autocomplete'),
-	React = require('react');
+	React = require('react'),
+	ReactIntlMixin = require('react-intl');
 
 
 var AutocompleteControl = React.createClass({
+	mixins: [ReactIntlMixin],
 	propTypes: {
 		autocomplete: React.PropTypes.func.isRequired,
 		displayedValue: React.PropTypes.string,
@@ -19,6 +21,12 @@ var AutocompleteControl = React.createClass({
 		this.props.onChange({
 			displayedValue: selectedItem.title,
 			value: selectedItem.id,
+		});
+	},
+	handleDelete: function() {
+		this.props.onChange({
+			displayedValue: '',
+			value: null,
 		});
 	},
 	handleSearch: function(options, searchTerm, cb) {
@@ -43,14 +51,27 @@ var AutocompleteControl = React.createClass({
 		return (
 			<div>
 				{this.props.label}
-	      <Autocomplete
-					onChange={this.handleChange}
-					search={this.handleSearch}
-					value={{
-						id: this.props.value,
-						title: this.props.displayedValue,
-					}}
-				/>
+				<div className='row'>
+					<div className='col-sm-6'>
+			      <Autocomplete
+							onChange={this.handleChange}
+							search={this.handleSearch}
+							value={{
+								id: this.props.value,
+								title: this.props.displayedValue,
+							}}
+						/>
+					</div>
+					<div className='col-sm-6'>
+						<button
+							className='btn btn-default'
+							disabled={this.props.value}
+							onClick={this.handleDelete}
+							type='button'>
+							{this.getIntlMessage('delete')}
+						</button>
+					</div>
+				</div>
 			</div>
 		);
 	}
