@@ -151,6 +151,6 @@ gulp.task('watch', ['clean:dist', 'vendor'], function() {
   });
   gutil.log('Initial bundle in progress...');
   var stream = rebundle().on('end', function() { gutil.log('Initial bundle done.'); });
-  startLiveReload();
+  // startLiveReload();
   return stream;
 });
