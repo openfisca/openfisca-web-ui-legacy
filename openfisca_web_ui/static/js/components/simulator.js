@@ -196,6 +196,7 @@ var Simulator = React.createClass({
     var {action, id, kind} = this.state.editedEntity;
     var changeset = {editedEntity: null};
     if (action === 'edit') {
+      // TODO Sanitization should be done in NumberControl with valueAsNumber polyfill (?)
       var sanitizedChangedValues = Lazy(this.state.editedEntity.changedValues).map((value, columnName) => {
         var columnType = this.props.columns[columnName]['@type'];
         if (columnType === 'Integer') {
@@ -214,6 +215,9 @@ var Simulator = React.createClass({
       var newEntity = Lazy(this.state.testCase[kind][id]).assign(sanitizedChangedValues).toObject();
       var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newEntity);
       changeset.testCase = newTestCase;
+      var newTestCaseAdditionalData = Lazy(this.state.testCaseAdditionalData)
+        .assign(this.state.editedEntity.changedAdditionalData).toObject();
+      changeset.testCaseAdditionalData = newTestCaseAdditionalData;
     }
     this.setState(changeset, this.repair);
   },
@@ -390,12 +394,24 @@ var Simulator = React.createClass({
     })).toArray(); // jshint ignore:line
     var errors = helpers.getObjectPath(this.state.errors, 'test_case', kind, id);
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
-    var additionalDataValues = 'depcom' in entity ? {
-      depcom: {
-        displayedValue: this.state.testCaseAdditionalData.depcom,
-        value: entity.depcom,
-      },
-    } : {};
+    var additionalDataValues = {};
+    if (this.state.editedEntity.changedAdditionalData &&
+        'depcom' in this.state.editedEntity.changedAdditionalData) {
+      // First check in editedEntity
+      additionalDataValues = {
+        depcom: {
+          displayedValue: this.state.editedEntity.changedAdditionalData.depcom,
+          value: this.state.editedEntity.changedValues.depcom,
+        },
+      };
+    } else if ('depcom' in entity) {
+      additionalDataValues = {
+        depcom: {
+          displayedValue: this.state.testCaseAdditionalData.depcom,
+          value: entity.depcom,
+        },
+      };
+    }
     var values = Lazy(entity).assign(this.state.editedEntity.changedValues).assign(additionalDataValues).toObject();
     return (
       <EditForm

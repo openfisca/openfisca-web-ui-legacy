@@ -54,7 +54,7 @@ window.appconfig = ${helpers.index_appconfig(ctx, alert_on_js_error = data['aler
 
 
 <%def name="page_css()" filter="trim">
-    <link href="${urls.get_url(ctx, u'css/typeahead.css', static = True)}" media="screen" rel="stylesheet">
+    <link href="${urls.get_url(ctx, u'css/react-autocomplete.css', static = True)}" media="screen" rel="stylesheet">
 </%def>
 
 

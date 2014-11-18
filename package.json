@@ -34,9 +34,9 @@
     "react-intl": "^1.0.0-rc-1",
     "react-tween-state": "0.0.2",
     "respond": "^0.9.0",
+    "ron-react-autocomplete": "0.0.5",
     "superagent": "^0.18.0",
     "to-csv": "0.0.3",
-    "typeahead.js": "^0.10.5",
     "uuid": "^1.4.1"
   },
   "devDependencies": {

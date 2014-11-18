@@ -2,15 +2,13 @@
 'use strict';
 
 var $ = require('jquery'),
-  React = require('react'),
-  typeahead = require('typeahead.js');
+  React = require('react');
 
 var CerfaField = require('./cerfa-field');
 
 
 var StringControl = React.createClass({
   propTypes: {
-    autocomplete: React.PropTypes.func,
     cerfaField: React.PropTypes.any,
     default: React.PropTypes.string,
     error: React.PropTypes.string,
@@ -19,64 +17,10 @@ var StringControl = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     required: React.PropTypes.bool,
     suggestion: React.PropTypes.string,
-    value: React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.shape({
-        displayedValue: React.PropTypes.string,
-        value: React.PropTypes.string,
-      }),
-    ]),
-  },
-  componentDidMount: function() {
-    if (this.props.autocomplete) {
-      var input = this.refs.input.getDOMNode();
-      $(input)
-      .typeahead({
-        highlight: true,
-        minLength: 1,
-      }, {
-        displayKey: 'main_postal_distribution',
-        source: (query, cb) => {
-          var onComplete = res => cb(res.data.items),
-            onError = error => console.error(error);
-          if (input.value) {
-            this.props.autocomplete(input.value, onComplete, onError);
-          }
-        },
-      })
-      .on('typeahead:autocompleted typeahead:selected',
-        (event, suggestion, datasetName) => this.props.onChange({
-          displayedValue: suggestion.main_postal_distribution,
-          value: suggestion.code,
-        })
-      )
-      .on('typeahead:closed', () => {
-        if (this.props.value && this.props.value.displayedValue && ! this.props.value.value) {
-          $(input).typeahead('val', '');
-        }
-      });
-    }
-  },
-  componentDidUpdate: function(prevProps) {
-    if (this.props.autocomplete && this.props.value && ! this.props.value.displayedValue) {
-      $(this.refs.input.getDOMNode()).typeahead('val', '');
-    }
-  },
-  componentWillUnmount: function() {
-    if (this.props.autocomplete) {
-      $(this.refs.input.getDOMNode()).typeahead('destroy');
-    }
+    value: React.PropTypes.string,
   },
   handleChange: function(event) {
-    var value = event.target.value;
-    if (this.props.autocomplete) {
-      this.props.onChange({
-        displayedValue: this.props.value && this.props.value.value ? '' : value,
-        value: null,
-      });
-    } else {
-      this.props.onChange(value);
-    }
+    this.props.onChange(event.target.value);
   },
   render: function() {
     return (
@@ -90,12 +34,7 @@ var StringControl = React.createClass({
           ref='input'
           required={this.props.required}
           type="text"
-          value={
-              this.props.autocomplete ? (
-                this.props.value ? this.props.value.displayedValue : ''
-              ) :
-              this.props.value
-          }
+          value={this.props.value}
         />
         {
           this.props.cerfaField && (

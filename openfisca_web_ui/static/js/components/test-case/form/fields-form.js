@@ -6,7 +6,8 @@ var invariant = require('react/lib/invariant'),
   React = require('react/addons'),
   ReactIntlMixin = require('react-intl');
 
-var BooleanControl = require('./boolean-control'),
+var AutocompleteControl = require('./autocomplete-control'),
+  BooleanControl = require('./boolean-control'),
   Category = require('./category'),
   DateControl = require('./date-control'),
   EnumerationControl = require('./enumeration-control'),
@@ -130,7 +131,17 @@ var FieldsForm = React.createClass({
         );
         break;
       case 'String':
-        control = (
+        control = column.autocomplete ? (
+          <AutocompleteControl
+            autocomplete={column.autocomplete}
+            displayedValue={value ? value.displayedValue : null}
+            error={error}
+            label={label}
+            name={column.name}
+            onChange={this.props.onChange.bind(null, column)}
+            value={value ? value.value : null}
+          />
+        ) : (
           <StringControl
             autocomplete={column.autocomplete}
             cerfaField={cerfaField}

@@ -1,0 +1,33 @@
+/*From http://prometheusresearch.github.io/react-autocomplete/_static/overrides.css*/
+
+.react-autocomplete-Autocomplete {
+  width: 50%;
+}
+
+.react-autocomplete-Autocomplete__search {
+  border: 1px solid #aaa;
+  padding: 5px;
+}
+.react-autocomplete-Autocomplete__search:focus {
+  outline: none;
+}
+
+.react-autocomplete-Autocomplete__results {
+  background: white;
+  border: 1px solid #aaa;
+  border-top: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.react-autocomplete-Result {
+  margin: 0 !important;
+  padding: 5px 10px;
+}
+
+.react-autocomplete-Result--active {
+  background: #fafafa;
+}
