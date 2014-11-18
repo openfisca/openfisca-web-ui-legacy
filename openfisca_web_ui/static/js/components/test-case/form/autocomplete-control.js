@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Autocomplete = require('ron-react-autocomplete/src/index'),
+var Autocomplete = require('ron-react-autocomplete'),
 	React = require('react');
 
 
