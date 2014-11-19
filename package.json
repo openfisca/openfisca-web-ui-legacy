@@ -30,6 +30,7 @@
     "intl": "^0.1.4",
     "jquery": "^2.1.1",
     "lazy.js": "git+https://github.com/dtao/lazy.js.git",
+    "raf": "^2.0.4",
     "react": "^0.11.1",
     "react-intl": "^1.0.0-rc-1",
     "react-tween-state": "0.0.2",

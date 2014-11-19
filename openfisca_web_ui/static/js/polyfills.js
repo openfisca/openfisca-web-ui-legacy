@@ -74,6 +74,12 @@ function install() {
 			writable: true,
 		}
 	);
+
+	// Polyfill requestAnimationFrame
+	var raf = require('raf');
+	if ( ! window.requestAnimationFrame) {
+		window.requestAnimationFrame = raf;
+	}
 }
 
 
