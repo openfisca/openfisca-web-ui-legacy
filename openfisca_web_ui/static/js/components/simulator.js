@@ -460,6 +460,7 @@ var Simulator = React.createClass({
             reform={this.state.reform}
             settings={this.state.visualizationsSettings}
             simulationResult={this.state.simulationResult}
+            testCase={this.state.testCase}
             visualizationSlug={this.state.visualizationSlug}
           />
         )

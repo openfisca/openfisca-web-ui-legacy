@@ -10,6 +10,7 @@ var BaremeChart = require('./svg/bareme-chart'),
   BaremeSettings = require('./bareme-settings'),
   helpers = require('../../helpers'),
   ReformSelector = require('./reform-selector'),
+  SendFeedbackButton = require('../send-feedback-button'),
   VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select');
 
@@ -36,6 +37,7 @@ var BaremeVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     reform: React.PropTypes.string,
+    testCase: React.PropTypes.object.isRequired,
     variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
     xAxisVariableCode: React.PropTypes.string.isRequired,
@@ -167,6 +169,9 @@ var BaremeVisualization = React.createClass({
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
           <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+          <span style={{marginLeft: 10}}>
+            <SendFeedbackButton testCase={this.props.testCase} />
+          </span>
           <hr/>
           <div>
             <div className='panel panel-default'>

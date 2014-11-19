@@ -9,6 +9,7 @@ var Lazy = require('lazy.js'),
 
 var helpers = require('../../helpers'),
   ReformSelector = require('./reform-selector'),
+  SendFeedbackButton = require('../send-feedback-button'),
   VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select'),
   WaterfallChart = require('./svg/waterfall-chart');
@@ -38,6 +39,7 @@ var WaterfallVisualization = React.createClass({
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     reform: React.PropTypes.string,
+    testCase: React.PropTypes.object.isRequired,
     valuesOffset: React.PropTypes.number,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     visualizationSlug: React.PropTypes.string.isRequired,
@@ -234,6 +236,9 @@ var WaterfallVisualization = React.createClass({
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
           <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+          <span style={{marginLeft: 10}}>
+            <SendFeedbackButton testCase={this.props.testCase} />
+          </span>
           <hr/>
           <div className='panel panel-default'>
             <div className='panel-heading'>

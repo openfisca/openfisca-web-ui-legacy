@@ -27,6 +27,7 @@ var Visualization = React.createClass({
     reform: React.PropTypes.string,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
+    testCase: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   getDefaultProps: function() {
@@ -58,6 +59,7 @@ var Visualization = React.createClass({
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
           reform={this.props.reform}
+          testCase={this.props.testCase}
           variablesTree={this.props.simulationResult}
           visualizationSlug={this.props.visualizationSlug}
           xAxisVariableCode={this.props.settings.bareme.xAxisVariableCode}
@@ -87,6 +89,7 @@ var Visualization = React.createClass({
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
           reform={this.props.reform}
+          testCase={this.props.testCase}
           valuesOffset={isDiff ? null : (this.props.reform ? 1 : 0)}
           variablesTree={this.props.simulationResult}
           visualizationSlug={this.props.visualizationSlug}
