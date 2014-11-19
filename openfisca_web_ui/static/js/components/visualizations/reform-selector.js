@@ -30,7 +30,7 @@ var ReformSelector = React.createClass({
           <button
             className={classes('plf2015')}
             onClick={() => this.props.onChange('plf2015')}
-            title='Projet de loi de financement rectificative'>
+            title='Projet de loi de finances rectificative'>
             PLFR 2014
           </button>
         </Tooltip>
