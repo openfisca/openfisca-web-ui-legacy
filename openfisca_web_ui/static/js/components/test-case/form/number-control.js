@@ -3,7 +3,8 @@
 
 var React = require('react');
 
-var CerfaField = require('./cerfa-field');
+var CerfaField = require('./cerfa-field'),
+  polyfills = require('../../../polyfills');
 
 
 var NumberControl = React.createClass({
@@ -22,10 +23,10 @@ var NumberControl = React.createClass({
     valType: React.PropTypes.string,
   },
   componentDidMount: function() {
-    this.setState({isValid: this.refs.input.getDOMNode().validity.valid});
+    this.setState({isValid: polyfills.isValid(this.refs.input.getDOMNode())});
   },
   componentDidUpdate: function() {
-    var isValid = this.refs.input.getDOMNode().validity.valid;
+    var isValid = polyfills.isValid(this.refs.input.getDOMNode());
     if (this.state.isValid !== isValid) {
       this.setState({isValid: isValid});
     }
