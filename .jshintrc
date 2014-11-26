@@ -19,7 +19,7 @@
   "node": true,
   "nonbsp": true,
   "nonew": true,
-  "strict": true,
+  "strict": false,
   "trailing": true,
   "undef": true,
   "unused": true
