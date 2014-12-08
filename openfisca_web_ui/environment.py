@@ -28,7 +28,6 @@
 
 import logging
 import os
-import socket
 import sys
 
 from biryani1 import strings
@@ -40,7 +39,6 @@ from . import conv, model, templates
 
 app_dir = os.path.dirname(os.path.abspath(__file__))
 db = None
-hostname = socket.gethostname().split('.')[0]
 
 
 def load_environment(global_conf, app_conf):
