@@ -477,10 +477,6 @@ class TestCase(objects.Initable, objects.JsonMonoClassMapper, objects.Mapper, ob
         return value, None
 
 
-def configure(ctx):
-    pass
-
-
 def get_user(ctx, check = False):
     user = ctx.user
     if user is UnboundLocalError:

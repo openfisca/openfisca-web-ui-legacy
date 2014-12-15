@@ -34,10 +34,23 @@ from paste.urlparser import StaticURLParser
 from weberror.errormiddleware import ErrorMiddleware
 import webob
 
-from . import conf, contexts, controllers, environment, model, urls
+from . import conf, contexts, controllers, environment, urls
 
 
 percent_encoding_re = re.compile('%[\dA-Fa-f]{2}')
+
+
+def environment_setter(app):
+    """WSGI middleware that sets request-dependant environment."""
+    def set_environment(environ, start_response):
+        req = webob.Request(environ)
+        urls.application_url = req.application_url
+        try:
+            return app(req.environ, start_response)
+        except webob.exc.WSGIHTTPException as wsgi_exception:
+            return wsgi_exception(environ, start_response)
+
+    return set_environment
 
 
 def language_detector(app):
@@ -62,23 +75,6 @@ def language_detector(app):
         return app(req.environ, start_response)
 
     return detect_language
-
-
-def environment_setter(app):
-    """WSGI middleware that sets request-dependant environment."""
-    def set_environment(environ, start_response):
-        req = webob.Request(environ)
-        ctx = contexts.Ctx(req)
-        urls.application_url = req.application_url
-#        if conf['host_urls'] is not None:
-#            host_url = req.host_url + '/'
-#            if host_url not in conf['host_urls']:
-#                return wsgihelpers.bad_request(ctx, explanation = ctx._(u'Web site not found.'))(environ,
-#                    start_response)
-        model.configure(ctx)
-        return app(req.environ, start_response)
-
-    return set_environment
 
 
 def make_app(global_conf, **app_conf):
