@@ -241,7 +241,7 @@ def route(environ, start_response):
 
 def route_api1_class(environ, start_response):
     router = urls.make_router(
-        (('GET', 'POST'), '^/current?$', api1_current),
+        (('GET', 'POST'), '^/current/?$', api1_current),
         ('GET', '^/search/?$', api1_search),
         )
     return router(environ, start_response)
