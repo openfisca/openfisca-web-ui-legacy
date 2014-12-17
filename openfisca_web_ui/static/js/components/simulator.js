@@ -340,7 +340,9 @@ var Simulator = React.createClass({
           'hidden-xs': this.state.editedEntity,
         })}>
           <TestCaseToolbar
-            disableSimulate={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
+            disableSimulate={
+              Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)
+            }
             entitiesMetadata={this.props.entitiesMetadata}
             errors={this.state.errors}
             getEntitiesKinds={models.getEntitiesKinds}
