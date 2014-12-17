@@ -1,6 +1,6 @@
 language: python
 python: "2.7"
 install:
-  - pip install -r requirements.txt
+  - pip install -e .
 services: mongodb
 script: make test

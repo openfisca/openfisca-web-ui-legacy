@@ -18,7 +18,6 @@ Clone repository
 
 Install Python package with dependencies
 
-	pip install --user --requirement requirements.txt
 	pip install --user --editable .
 
 Compile gettext catalogs
