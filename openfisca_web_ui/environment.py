@@ -58,8 +58,8 @@ def load_environment(global_conf, app_conf):
             'api.urlPaths.fields': conv.pipe(conv.cleanup_line, conv.not_none),
             'api.urlPaths.legislations': conv.pipe(conv.cleanup_line, conv.not_none),
             'api.urlPaths.simulate': conv.pipe(conv.cleanup_line, conv.not_none),
-            'app_conf': conv.set_value(app_conf),
-            'app_dir': conv.set_value(app_dir),
+            'app_conf': conv.set_value(app_conf, handle_none_value = True),
+            'app_dir': conv.set_value(app_dir, handle_none_value = True),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('OpenFisca')),
             'auth.dummy_admin_email': conv.pipe(conv.cleanup_line, conv.default(u'admin@domain.tld')),
             'auth.dummy_user_email': conv.pipe(conv.cleanup_line, conv.default(u'user@domain.tld')),
@@ -75,7 +75,7 @@ def load_environment(global_conf, app_conf):
             'enabled.charts.locating': conv.pipe(conv.guess_bool, conv.not_none),
             'enabled.disclaimer': conv.pipe(conv.guess_bool, conv.not_none),
             'enabled.livereload': conv.pipe(conv.guess_bool, conv.not_none),
-            'global_conf': conv.set_value(global_conf),
+            'global_conf': conv.set_value(global_conf, handle_none_value = True),
             # 'host_urls': conv.pipe(
             #    conv.function(lambda host_urls: host_urls.split()),
             #    conv.uniform_sequence(
