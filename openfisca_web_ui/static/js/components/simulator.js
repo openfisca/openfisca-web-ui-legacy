@@ -385,13 +385,27 @@ var Simulator = React.createClass({
       entity = this.state.testCase[kind][id];
     var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     invariant('children' in this.props.columnsTree[kind], `columnsTree.${kind} has no children`);
-    var categories = Lazy(this.props.columnsTree[kind].children).map(category => ({
-      columns: category.children ? category.children.map(columnName => {
-        invariant(columnName in this.props.columns, `column "${columnName}" is not in columns prop`);
-        return this.props.columns[columnName];
-      }) : null,
-      label: category.label,
-    })).toArray(); // jshint ignore:line
+    var categories = Lazy(this.props.columnsTree[kind].children).map(category => {
+      var columns;
+      if (category.children) {
+        columns = Lazy(category.children).map(columnName => {
+          if (columnName in this.props.columns) {
+            return this.props.columns[columnName];
+          } else {
+            console.log(`column "${columnName}" is not in columns prop`);
+          }
+        }).compact().toArray();
+        if ( ! columns.length) {
+          columns = null;
+        }
+      } else {
+        columns = null;
+      }
+      return {
+        columns: columns,
+        label: category.label,
+      };
+    }).toArray(); // jshint ignore:line
     var errors = helpers.getObjectPath(this.state.errors, 'test_case', kind, id);
     var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
     var additionalDataValues = {};
