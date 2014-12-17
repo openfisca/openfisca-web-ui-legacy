@@ -24,9 +24,6 @@ Install Python package with dependencies
 Compile gettext catalogs
 
 	python setup.py compile_catalog
-	cd src/biryani1
-	python setup.py compile_catalog
-	cd ../..
 
 Install npm dependencies for JavaScript
 

@@ -31,7 +31,7 @@ import re
 import urllib
 import urlparse
 
-from biryani1 import strings
+from biryani import strings
 import webob
 
 from . import conf, contexts, wsgihelpers

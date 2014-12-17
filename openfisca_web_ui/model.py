@@ -32,7 +32,7 @@ import re
 import urllib
 
 import babel.dates
-from biryani1 import strings
+from biryani import strings
 
 from . import conv, objects, urls, wsgihelpers
 

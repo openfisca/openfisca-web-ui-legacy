@@ -30,7 +30,7 @@ import collections
 import json
 import re
 
-from biryani1 import strings
+from biryani import strings
 import pymongo
 import webob
 

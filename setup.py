@@ -65,7 +65,7 @@ setup(
     include_package_data = True,
     install_requires = [
         'Babel >= 0.9.4',
-        'Biryani1 >= 0.9dev',
+        'Biryani[bsonconv,datetimeconv] >= 0.10.1',
         # 'bleach >= 1.2',
         'Mako >= 0.7',
         # 'pymongo >= 2.2',  # Commented because not in Debian pyshared.

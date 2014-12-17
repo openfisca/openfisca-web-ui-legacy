@@ -30,7 +30,7 @@ import logging
 import os
 import sys
 
-from biryani1 import strings
+from biryani import strings
 import pymongo
 
 import openfisca_web_ui

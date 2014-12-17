@@ -30,7 +30,7 @@ import collections
 import datetime
 import json
 
-from biryani1 import strings
+from biryani import strings
 import requests
 
 from .. import conf, contexts, conv, model, templates, urls, uuidhelpers, wsgihelpers

@@ -30,12 +30,12 @@ import datetime
 import logging
 import re
 
-from biryani1.baseconv import *  # NOQA
-from biryani1.bsonconv import *  # NOQA
-from biryani1.datetimeconv import *  # NOQA
-from biryani1.objectconv import *  # NOQA
-from biryani1.jsonconv import *  # NOQA
-from biryani1.states import default_state
+from biryani.baseconv import *  # NOQA
+from biryani.bsonconv import *  # NOQA
+from biryani.datetimeconv import *  # NOQA
+from biryani.objectconv import *  # NOQA
+from biryani.jsonconv import *  # NOQA
+from biryani.states import default_state
 
 
 N_ = lambda message: message

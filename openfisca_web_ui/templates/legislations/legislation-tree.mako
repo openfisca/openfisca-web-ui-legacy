@@ -29,7 +29,7 @@ from copy import copy
 import datetime
 from itertools import chain
 
-from biryani1 import strings
+from biryani import strings
 
 from openfisca_web_ui import urls, uuidhelpers
 from openfisca_web_ui.templates import helpers

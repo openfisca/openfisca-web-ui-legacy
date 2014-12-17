@@ -38,7 +38,7 @@ import pymongo
 import webob
 import webob.multidict
 
-from biryani1 import strings
+from biryani import strings
 
 from .. import contexts, conf, conv, model, paginations, templates, urls, wsgihelpers
 

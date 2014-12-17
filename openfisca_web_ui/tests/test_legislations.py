@@ -3,7 +3,7 @@
 
 import unittest
 
-from biryani1 import strings
+from biryani import strings
 from webob import Request
 
 from . import common
