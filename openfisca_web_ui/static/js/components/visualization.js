@@ -40,7 +40,7 @@ var Visualization = React.createClass({
     this.props.onSettingsChange(this.props.visualizationSlug, settings, simulate);
   },
   render: function() {
-    var isDiff = this.props.reform === 'plf2015-diff';
+    var isDiff = this.props.reform === 'diff'; // FIXME Do not hard-code name.
     var visualizationComponent;
     if (this.props.visualizationSlug === 'bareme') {
       visualizationComponent = (
@@ -48,6 +48,7 @@ var Visualization = React.createClass({
           collapsedVariables={this.props.settings.bareme.collapsedVariables}
           columns={this.props.columns}
           defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
+          diffMode={isDiff}
           displayBisectrix={this.props.settings.bareme.displayBisectrix}
           displaySettings={this.props.settings.bareme.displaySettings}
           downloadAttribution={this.props.downloadAttribution}

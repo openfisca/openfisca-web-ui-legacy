@@ -28,13 +28,13 @@ var ReformSelector = React.createClass({
         </button>
         <Tooltip>
           <button
-            className={classes('plf2015')}
-            onClick={() => this.props.onChange('plf2015')}
+            className={classes('reform')}
+            onClick={() => this.props.onChange('reform')}
             title='Projet de loi de finances rectificative'>
             PLFR 2014
           </button>
         </Tooltip>
-        <button className={classes('plf2015-diff')} onClick={() => this.props.onChange('plf2015-diff')}>
+        <button className={classes('diff')} onClick={() => this.props.onChange('diff')}>
           {this.getIntlMessage('difference')}
         </button>
       </div>

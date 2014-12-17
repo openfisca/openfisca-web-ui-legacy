@@ -24,6 +24,7 @@ var BaremeVisualization = React.createClass({
     collapsedVariables: React.PropTypes.object,
     columns: React.PropTypes.object.isRequired,
     defaultProps: React.PropTypes.object.isRequired,
+    diffMode: React.PropTypes.bool,
     displayBisectrix: React.PropTypes.bool,
     displaySettings: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
@@ -81,7 +82,6 @@ var BaremeVisualization = React.createClass({
     };
   },
   getVariables: function() {
-    var isDiff = this.props.reform === 'plf2015-diff';
     var diffValues = values => {
       var referenceValues = values.slice(0, values.length / 2),
         reformValues = values.slice(values.length / 2, values.length);
@@ -96,12 +96,12 @@ var BaremeVisualization = React.createClass({
         Lazy(variable.children).each(child => {
           var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
-          var values = isDiff ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
+          var values = this.props.diffMode ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
           childBaseValues = Lazy(childBaseValues).zip(values).map(pair => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var values = isDiff ? diffValues(variable.values) : variable.values.slice(sliceStart, sliceEnd);
+      var values = this.props.diffMode ? diffValues(variable.values) : variable.values.slice(sliceStart, sliceEnd);
       var hasValue = Lazy(values).any(value => value !== 0);
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
@@ -121,7 +121,7 @@ var BaremeVisualization = React.createClass({
     };
     var values = this.props.variablesTree.values;
     var valuesLength = this.props.variablesTree.values.length;
-    if ( ! isDiff) {
+    if ( ! this.props.diffMode) {
       var sliceStart = this.props.reform ? valuesLength / 2 : 0;
       var sliceEnd = this.props.reform ? valuesLength : valuesLength / 2;
     }
