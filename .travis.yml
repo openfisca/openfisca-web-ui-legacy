@@ -1,7 +1,6 @@
 language: python
 python: "2.7"
 install:
-  - pip install isodate  # For Biryani1 datetimeconv
   - pip install -r requirements.txt
 services: mongodb
-script: nosetests openfisca_web_ui/tests
+script: make test
