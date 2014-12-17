@@ -66,9 +66,9 @@ setup(
     install_requires = [
         'Babel >= 0.9.4',
         'Biryani[bsonconv,datetimeconv] >= 0.10.1',
-        # 'bleach >= 1.2',
+        # 'bleach >= 1.2',  # Used in texthelpers.
         'Mako >= 0.7',
-        # 'pymongo >= 2.2',  # Commented because not in Debian pyshared.
+        'pymongo >= 2.2',  # Comment if installed from Debian because not exposed in pyshared.
         'requests >= 1.0',
         'WebError >= 0.10',
         'WebOb >= 1.1',
@@ -77,10 +77,7 @@ setup(
         ('**.py', 'python', None),
         ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
         ('static/**', 'ignore', None)]},
-    # package_data = {'openfisca_web_ui': ['i18n/*/LC_MESSAGES/*.mo']},
     packages = find_packages(),
-    paster_plugins = ['PasteScript'],
-    setup_requires = ['PasteScript >= 1.6.3'],
     test_suite = 'nose.collector',
     zip_safe = False,
     )
