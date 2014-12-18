@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react/addons'),
   ReactIntlMixin = require('react-intl'),
   saveAs = require('filesaver.js'),
@@ -165,6 +166,7 @@ var WaterfallVisualization = React.createClass({
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
           if ( ! this.props.diffMode) {
+            invariant(child.values.length > this.props.valuesOffset, 'valuesOffset prop is out of bounds');
             childBaseValue += child.values[this.props.valuesOffset];
           }
         });
@@ -174,6 +176,7 @@ var WaterfallVisualization = React.createClass({
       if (this.props.diffMode) {
         value = variable.values[1] - variable.values[0];
       } else {
+        invariant(variable.values.length > this.props.valuesOffset, 'valuesOffset prop is out of bounds');
         value = variable.values[this.props.valuesOffset];
       }
       var childrenCodes = extractChildrenCodes(variable);
