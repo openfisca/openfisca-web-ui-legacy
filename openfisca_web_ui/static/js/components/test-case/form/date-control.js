@@ -6,7 +6,7 @@ var React = require('react');
 
 var DateControl = React.createClass({
   propTypes: {
-    default: React.PropTypes.bool,
+    default: React.PropTypes.string,
     error: React.PropTypes.string,
     label: React.PropTypes.component.isRequired,
     name: React.PropTypes.string.isRequired,
