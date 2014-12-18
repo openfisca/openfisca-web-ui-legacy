@@ -7,7 +7,8 @@ var Lazy = require('lazy.js'),
 
 var Tooltip = require('../tooltip');
 
-var cx = React.addons.classSet;
+var appconfig = global.appconfig,
+  cx = React.addons.classSet;
 
 
 var VariablesTree = React.createClass({
