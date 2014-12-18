@@ -72,7 +72,7 @@ function fetchEntitiesMetadata(onComplete) {
   var onError = () => alert('Error: unable to fetch entities metadata.');
   request
     .get(makeUrl(appconfig.api.urlPaths.entities))
-    .on('error', function(error) {
+    .on('error', function(/*error*/) {
       onError();
     })
     .end(function (res) {
