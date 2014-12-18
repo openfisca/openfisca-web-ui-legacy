@@ -37,7 +37,7 @@ var BaremeVisualization = React.createClass({
     onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
-    reform: React.PropTypes.string,
+    reformName: React.PropTypes.string,
     testCase: React.PropTypes.object.isRequired,
     variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
@@ -168,7 +168,11 @@ var BaremeVisualization = React.createClass({
     return (
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
-          <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
+          <ReformSelector
+            diffMode={this.props.diffMode}
+            onChange={this.props.onReformChange}
+            reformName={this.props.reformName}
+          />
           <span style={{marginLeft: 10}}>
             <SendFeedbackButton testCase={this.props.testCase} />
           </span>

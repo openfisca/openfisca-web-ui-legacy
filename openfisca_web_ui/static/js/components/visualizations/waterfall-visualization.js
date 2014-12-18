@@ -39,7 +39,7 @@ var WaterfallVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
-    reform: React.PropTypes.string,
+    reformName: React.PropTypes.string,
     testCase: React.PropTypes.object.isRequired,
     valuesOffset: React.PropTypes.number,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
@@ -238,10 +238,16 @@ var WaterfallVisualization = React.createClass({
     return (
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
-          <ReformSelector onChange={this.props.onReformChange} value={this.props.reform} />
-          <span style={{marginLeft: 10}}>
-            <SendFeedbackButton testCase={this.props.testCase} />
-          </span>
+          <div className='form-inline'>
+            <ReformSelector
+              diffMode={this.props.diffMode}
+              onChange={this.props.onReformChange}
+              reformName={this.props.reformName}
+            />
+            <span style={{marginLeft: 10}}>
+              <SendFeedbackButton testCase={this.props.testCase} />
+            </span>
+          </div>
           <hr/>
           <div className='panel panel-default'>
             <div className='panel-heading'>

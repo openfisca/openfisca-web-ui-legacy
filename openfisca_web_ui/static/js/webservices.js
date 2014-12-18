@@ -210,7 +210,7 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
     });
 }
 
-function simulate(axes, decomposition, legislationUrl, testCase, year, onComplete) {
+function simulate(axes, decomposition, legislationUrl, reformName, testCase, year, onComplete) {
   var scenario = {
     'legislation_url': legislationUrl,
     period: {
@@ -222,12 +222,12 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
   if (axes) {
     scenario.axes = axes;
   }
-  var data = {
-    'reform_names': ['plf2015'],
-    scenarios: [scenario],
-  };
+  var data = {scenarios: [scenario]};
   if (decomposition) {
     data.decomposition = decomposition;
+  }
+  if (reformName) {
+    data.reform_names = [reformName];
   }
   request
     .post(makeUrl(appconfig.api.urlPaths.simulate))
@@ -238,7 +238,9 @@ function simulate(axes, decomposition, legislationUrl, testCase, year, onComplet
     .end(function(res) {
       if (res.body && res.body.error) {
         onComplete({
-          errors: res.body.error.errors[0].scenarios['0'],
+          errors: 'scenarios' in res.body.error.errors[0] ?
+            res.body.error.errors[0].scenarios['0'] :
+            res.body.error.errors[0]
         });
       } else if (res.error) {
         onComplete(res);

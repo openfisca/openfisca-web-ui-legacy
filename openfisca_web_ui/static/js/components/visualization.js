@@ -17,6 +17,7 @@ var Visualization = React.createClass({
   propTypes: {
     columns: React.PropTypes.object.isRequired,
     defaultPropsByVisualizationSlug: React.PropTypes.object.isRequired,
+    diffMode: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
     isSimulationInProgress: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number.isRequired,
@@ -24,7 +25,7 @@ var Visualization = React.createClass({
     onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
-    reform: React.PropTypes.string,
+    reformName: React.PropTypes.string,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
     testCase: React.PropTypes.object.isRequired,
@@ -40,7 +41,6 @@ var Visualization = React.createClass({
     this.props.onSettingsChange(this.props.visualizationSlug, settings, simulate);
   },
   render: function() {
-    var isDiff = this.props.reform === 'diff'; // FIXME Do not hard-code name.
     var visualizationComponent;
     if (this.props.visualizationSlug === 'bareme') {
       visualizationComponent = (
@@ -48,7 +48,7 @@ var Visualization = React.createClass({
           collapsedVariables={this.props.settings.bareme.collapsedVariables}
           columns={this.props.columns}
           defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
-          diffMode={isDiff}
+          diffMode={this.props.diffMode}
           displayBisectrix={this.props.settings.bareme.displayBisectrix}
           displaySettings={this.props.settings.bareme.displaySettings}
           downloadAttribution={this.props.downloadAttribution}
@@ -59,7 +59,7 @@ var Visualization = React.createClass({
           onReformChange={this.props.onReformChange}
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
-          reform={this.props.reform}
+          reformName={this.props.reformName}
           testCase={this.props.testCase}
           variablesTree={this.props.simulationResult}
           visualizationSlug={this.props.visualizationSlug}
@@ -77,7 +77,7 @@ var Visualization = React.createClass({
         <WaterfallVisualization
           collapsedVariables={this.props.settings.waterfall.collapsedVariables}
           defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
-          diffMode={isDiff}
+          diffMode={this.props.diffMode}
           displaySettings={this.props.settings.waterfall.displaySettings}
           displaySubtotals={this.props.settings.waterfall.displaySubtotals}
           displayVariablesColors={this.props.settings.waterfall.displayVariablesColors}
@@ -89,9 +89,9 @@ var Visualization = React.createClass({
           onReformChange={this.props.onReformChange}
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
-          reform={this.props.reform}
+          reformName={this.props.reformName}
           testCase={this.props.testCase}
-          valuesOffset={isDiff ? null : (this.props.reform ? 1 : 0)}
+          valuesOffset={this.props.diffMode ? null : (this.props.reformName ? 1 : 0)}
           variablesTree={this.props.simulationResult}
           visualizationSlug={this.props.visualizationSlug}
         />

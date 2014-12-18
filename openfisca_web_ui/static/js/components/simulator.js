@@ -249,8 +249,14 @@ var Simulator = React.createClass({
       this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
-  handleReformChange: function(value) {
-    this.setState({reform: value});
+  handleReformChange: function(reformData) {
+    var changeset = {reform: reformData};
+    // Trigger a new simulation if a reform name if given which is different than the existing one.
+    var triggerSimulation = reformData.name && (! this.state.reform || reformData.name !== this.state.reform.name);
+    if (triggerSimulation) {
+      changeset.simulationResult = null;
+    }
+    this.setState(changeset, triggerSimulation && this.simulate);
   },
   handleRepair: function() {
     if ( ! this.state.editedEntity) {
@@ -466,12 +472,13 @@ var Simulator = React.createClass({
           <Visualization
             columns={this.props.columns}
             defaultPropsByVisualizationSlug={this.props.defaultPropsByVisualizationSlug}
+            diffMode={this.state.reform ? this.state.reform.diffMode : null}
             isSimulationInProgress={this.state.isSimulationInProgress}
             onDownload={this.handleDownload}
             onReformChange={this.handleReformChange}
             onSettingsChange={this.handleVisualizationSettingsChange}
             onVisualizationChange={this.handleVisualizationChange}
-            reform={this.state.reform}
+            reformName={this.state.reform ? this.state.reform.name : null}
             settings={this.state.visualizationsSettings}
             simulationResult={this.state.simulationResult}
             testCase={this.state.testCase}
@@ -526,8 +533,9 @@ var Simulator = React.createClass({
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
       this.setState({isSimulationInProgress: true}, () => {
         var params = this.simulationParams(this.state.visualizationSlug);
-        webservices.simulate(params.axes, params.decomposition, this.state.legislationUrl, this.state.testCase,
-          this.state.year, data => {
+        var reformName = this.state.reform ? this.state.reform.name : null;
+        webservices.simulate(params.axes, params.decomposition, this.state.legislationUrl, reformName,
+          this.state.testCase, this.state.year, data => {
             var changeset = {isSimulationInProgress: false};
             if (data) {
               if (data.error) {

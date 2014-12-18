@@ -4,40 +4,47 @@
 var React = require('react/addons'),
   ReactIntlMixin = require('react-intl');
 
-var Tooltip = require('../tooltip');
-
 var cx = React.addons.classSet;
 
 
 var ReformSelector = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    diffMode: React.PropTypes.bool,
     onChange: React.PropTypes.func.isRequired,
-    value: React.PropTypes.string,
+    reformName: React.PropTypes.string,
   },
   render: function() {
-    var classes = value => cx({
-      active: value === this.props.value,
-      btn: true,
-      'btn-default': true,
-    });
     return (
-      <div className='btn-group'>
-        <button className={classes(null)} onClick={() => this.props.onChange(null)}>
-          {this.getIntlMessage('reference')}
-        </button>
-        <Tooltip>
-          <button
-            className={classes('reform')}
-            onClick={() => this.props.onChange('reform')}
-            title='Projet de loi de finances rectificative'>
-            PLFR 2014
-          </button>
-        </Tooltip>
-        <button className={classes('diff')} onClick={() => this.props.onChange('diff')}>
-          {this.getIntlMessage('difference')}
-        </button>
-      </div>
+      <span>
+        <select
+          className='form-control'
+          onChange={
+            event => this.props.onChange({
+              diffMode: event.target.value ? this.props.diffMode : false,
+              name: event.target.value,
+            })
+          }
+          value={this.props.reformName}
+        >
+          <option value=''>{this.getIntlMessage('reference')}</option>
+          <option value='plfrss2014'>PLFR 2014</option>
+          <option value='landais_piketty_saez'>Landais Piketty Saez</option>
+        </select>
+        <div className='checkbox' style={{marginLeft: 10}}>
+          <label>
+            <input
+              checked={this.props.diffMode}
+              disabled={ ! this.props.reformName}
+              onChange={
+                event => this.props.onChange({diffMode: event.target.checked, name: this.props.reformName})
+              }
+              type='checkbox'
+            />
+            {this.getIntlMessage('difference')}
+          </label>
+        </div>
+      </span>
     );
   }
 });
