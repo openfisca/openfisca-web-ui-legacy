@@ -185,7 +185,7 @@ var WaterfallVisualization = React.createClass({
           depth: depth,
           isCollapsed: variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code],
           isSubtotal: Boolean(variable.children) && depth > 0,
-          shortName: variable.short_name, // jshint ignore:line
+          shortName: variable.short_name,
           value: value,
           values: variable.values,
         })

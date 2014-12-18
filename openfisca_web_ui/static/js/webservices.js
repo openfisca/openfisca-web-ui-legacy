@@ -60,8 +60,8 @@ function fetchCurrentTestCase(onComplete) {
         onComplete(res);
       } else {
         onComplete({
-          testCase: res.body ? res.body.test_case : null, // jshint ignore:line
-          testCaseAdditionalData: res.body ? res.body.test_case_additional_data : null, // jshint ignore:line
+          testCase: res.body ? res.body.test_case : null,
+          testCaseAdditionalData: res.body ? res.body.test_case_additional_data : null,
         });
       }
     });
@@ -97,7 +97,7 @@ function fetchFields(entitiesMetadata, onComplete) {
       } else if (res.body && 'columns' in res.body && 'columns_tree' in res.body) {
         onComplete({
           columns: patchColumns(res.body.columns, entitiesMetadata),
-          columnsTree: res.body.columns_tree, // jshint ignore:line
+          columnsTree: res.body.columns_tree,
         });
       } else {
         onComplete({error: 'invalid fields data: no columns or no columns_tree'});
@@ -123,7 +123,7 @@ function patchColumns(columns, entitiesMetadata) {
       label: 'Année de naissance',
       max: new Date().getFullYear(),
       min: appconfig.constants.minYear,
-      val_type: 'year', // jshint ignore:line
+      val_type: 'year',
     },
   };
   var entitiesNameKeys = Lazy(entitiesMetadata).pluck('nameKey').toArray();
@@ -159,7 +159,7 @@ function repair(testCase, year, onComplete) {
   var data = {
     scenarios: [
       {
-        test_case: testCase, // jshint ignore:line
+        test_case: testCase,
         year: year,
       },
     ],
@@ -174,13 +174,13 @@ function repair(testCase, year, onComplete) {
     .end(function(res) {
       if (res.body && res.body.error) {
         onComplete({
-          errors: res.body.error.errors[0].scenarios['0'], // jshint ignore:line
+          errors: res.body.error.errors[0].scenarios['0'],
           suggestions: null,
         });
       } else if (res.error) {
         onComplete(res);
       } else {
-        var testCase = res.body.repaired_scenarios[0].test_case, // jshint ignore:line
+        var testCase = res.body.repaired_scenarios[0].test_case,
           suggestions = helpers.getObjectPath(res.body, 'suggestions', 'scenarios', '0', 'test_case');
         if (suggestions) {
           suggestions = patchValuesForColumns(suggestions);
@@ -199,8 +199,8 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
   request
     .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
     .send({
-      test_case: testCase, // jshint ignore:line
-      test_case_additional_data: testCaseAdditionalData, // jshint ignore:line
+      test_case: testCase,
+      test_case_additional_data: testCaseAdditionalData,
     })
     .on('error', function(error) {
       onComplete({error: error});

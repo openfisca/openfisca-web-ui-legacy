@@ -68,7 +68,7 @@ var FieldsForm = React.createClass({
         {column.label}
       </Label>
     );
-    var cerfaField = column.cerfa_field; // jshint ignore:line
+    var cerfaField = column.cerfa_field;
     switch(column['@type']) {
       case 'Boolean':
         control = (
@@ -126,7 +126,7 @@ var FieldsForm = React.createClass({
             suggestion={suggestion}
             type={column['@type']}
             value={value ? value.toString() : null}
-            valType={column.val_type} // jshint ignore:line
+            valType={column.val_type}
           />
         );
         break;

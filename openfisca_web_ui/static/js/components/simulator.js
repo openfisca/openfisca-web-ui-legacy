@@ -360,7 +360,7 @@ var Simulator = React.createClass({
               <TestCase
                 activeEntityId={this.state.editedEntity && this.state.editedEntity.id}
                 entitiesMetadata={this.props.entitiesMetadata}
-                errors={this.state.errors && this.state.errors.test_case /* jshint ignore:line */}
+                errors={this.state.errors && this.state.errors.test_case}
                 getEntitiesKinds={models.getEntitiesKinds}
                 getEntityLabel={models.getEntityLabel}
                 onCloseEntity={this.handleEditFormClose}

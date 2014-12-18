@@ -40,7 +40,7 @@ var AutocompleteControl = React.createClass({
         cb(null, data.data.items.map(item => {
           return {
             id: item.code,
-            title: item.main_postal_distribution, // jshint ignore:line
+            title: item.main_postal_distribution,
           };
         }))
       }
