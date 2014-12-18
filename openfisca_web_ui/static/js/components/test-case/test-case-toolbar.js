@@ -48,7 +48,7 @@ var TestCaseToolbar = React.createClass({
         <div className='col-xs-6'>
           <div className="btn-group" style={{marginRight: 5}}>
             <button
-              accessKey="s"
+              accessKey="a"
               className="btn btn-primary dropdown-toggle"
               data-toggle="dropdown"
               id="simulation-button"
@@ -58,6 +58,7 @@ var TestCaseToolbar = React.createClass({
             <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
               <li className={cx({disabled: this.props.disableSimulate})} role="presentation">
                 <a
+                  accessKey="s"
                   href="#"
                   onClick={event => {
                     event.preventDefault();
