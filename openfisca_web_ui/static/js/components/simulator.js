@@ -74,10 +74,8 @@ var Simulator = React.createClass({
   },
   getInitialState: function() {
     return {
-      calculationResult: null,
       editedEntity: null,
       errors: null,
-      isCalculationInProgress: false,
       isSimulationInProgress: false,
       legislationUrl: null,
       reform: null,
