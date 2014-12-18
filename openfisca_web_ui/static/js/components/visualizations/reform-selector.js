@@ -27,7 +27,7 @@ var ReformSelector = React.createClass({
           }
           value={this.props.reformName}
         >
-          <option value=''>{this.getIntlMessage('reference')}</option>
+          <option value=''>{this.getIntlMessage('noReform')}</option>
           <option value='plfrss2014'>PLFR 2014</option>
           <option value='landais_piketty_saez'>Landais Piketty Saez</option>
         </select>
