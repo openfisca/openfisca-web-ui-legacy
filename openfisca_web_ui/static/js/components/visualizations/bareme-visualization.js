@@ -122,8 +122,8 @@ var BaremeVisualization = React.createClass({
     var values = this.props.variablesTree.values;
     var valuesLength = this.props.variablesTree.values.length;
     if ( ! this.props.diffMode) {
-      var sliceStart = this.props.reform ? valuesLength / 2 : 0;
-      var sliceEnd = this.props.reform ? valuesLength : valuesLength / 2;
+      var sliceStart = this.props.reformName ? valuesLength / 2 : 0;
+      var sliceEnd = this.props.reformName ? valuesLength : valuesLength / 2;
     }
     var initBaseValues = Lazy.repeat(0, values.length / 2).toArray();
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
