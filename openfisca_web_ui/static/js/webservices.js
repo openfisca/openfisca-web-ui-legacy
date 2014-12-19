@@ -37,13 +37,16 @@ function fetchCurrentLocaleMessages(onComplete) {
   request
     .get(`${appconfig.i18n.baseUrlPath}/${appconfig.i18n.lang}.json`)
     .on('error', function(/*error*/) {
+    .set('Accept', 'application/json')
       onError();
     })
     .end(function (res) {
       if (res.error) {
         onError();
       }
-      onComplete(res.body);
+      // Workaround: handle case when server returns no Content-Type HTTP header.
+      var body = res.body || JSON.parse(res.text);
+      onComplete(body);
     });
 }
 
