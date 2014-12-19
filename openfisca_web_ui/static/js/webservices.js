@@ -36,8 +36,8 @@ function fetchCurrentLocaleMessages(onComplete) {
   var onError = () => alert('Error: unable to load language files.');
   request
     .get(`${appconfig.i18n.baseUrlPath}/${appconfig.i18n.lang}.json`)
-    .on('error', function(/*error*/) {
     .set('Accept', 'application/json')
+    .on('error', function(/*error*/) {
       onError();
     })
     .end(function (res) {
