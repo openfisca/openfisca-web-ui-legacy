@@ -4,8 +4,7 @@
 
 var React = require('react');
 
-var models = require('./models'),
-  webservices = require('./webservices');
+var webservices = require('./webservices');
 
 
 var appconfig = global.appconfig;
