@@ -21,7 +21,6 @@
     "url": "https://github.com/openfisca/openfisca-web-ui/issues"
   },
   "dependencies": {
-    "X-editable": "git+https://github.com/vitalets/x-editable.git",
     "bootstrap": "^3.1.1",
     "deep-equal": "^0.2.1",
     "es5-ext": "^0.10.4",
