@@ -1,73 +1,71 @@
-OpenFisca-Web-UI
-================
-
-Web user interface for [OpenFisca](http://www.openfisca.org/) -- a versatile microsimulation free software
+# OpenFisca Web User Interface
 
 [![Build Status](https://travis-ci.org/openfisca/openfisca-web-ui.svg?branch=master)](https://travis-ci.org/openfisca/openfisca-web-ui)
 
-Installation
-------------
+Web user interface for [OpenFisca](http://www.openfisca.fr/) -- a versatile microsimulation free software
 
-Installation process requires some tools to be installed. For example on Debian GNU/Linux distribution, as root:
+## Documentation
 
-	aptitude install git python-pip npm make
+Please consult the [OpenFisca documentation](http://www.openfisca.fr/documentation)
 
-Clone repository
+## Installation
 
-	git clone https://github.com/openfisca/openfisca-web-ui.git
+Prerequisites:
 
-Install Python package with dependencies
+* [git](http://git-scm.com)
+* [GNU Make](http://www.gnu.org/software/make/)
+* [Node.js](http://nodejs.org/)
+* [MongoDB](http://www.mongodb.org/)
+* [npm](https://www.npmjs.com/)
+* [pip](https://pip.pypa.io/)
+* [Python](https://www.python.org/)
 
-	pip install --user --editable .
+The way to install these tools depends on your operating system (not documented here).
+Some software might be installed by default, please check.
 
-Compile gettext catalogs
+```
+git clone https://github.com/openfisca/openfisca-web-ui.git
+cd openfisca_web_ui
+python setup.py compile_catalog
+pip install --user --editable .
+python openfisca_web_ui/scripts/setup_app.py development-france.ini
+npm install
+make build
+```
 
-	python setup.py compile_catalog
+OpenFisca-Web-UI is a client of the [OpenFisca-Web-API](https://github.com/openfisca/openfisca-web-api)
+(called with AJAX requests).
 
-Install npm dependencies for JavaScript
+You can either use the official API instance (`http://api.openfisca.fr/``) or install an instance on your machine
+if you need to work on the code of either the [API](https://github.com/openfisca/openfisca-web-api),
+the [Core](https://github.com/openfisca/openfisca-core)
+or the tax-benefit system ([OpenFisca-France](https://github.com/openfisca/openfisca-france) for example).
+In this case please read the [installation documentation](http://www.openfisca.fr/installation).
 
-	npm install
+## Run the server
 
-Build `bundle.js` file
+Depending on your OS you might run the [MongoDB](http://www.mongodb.org/) server by hand.
 
-	make build
+Run the web server of the API:
 
-Run
----
+```
+cd openfisca_web_api
+paster serve --reload development-france.ini
+```
 
-OpenFisca-Web-UI requires [OpenFisca-Web-API](https://github.com/openfisca/openfisca-web-api) to run.
-Please read its [documentation](http://www.openfisca.fr/documentation).
+Run the web server of the UI (in another terminal tab since the previous one is blocked by the previous web server):
 
-Run the local web server for the API from OpenFisca-Web-API directory:
+```
+cd openfisca_web_ui
+paster serve --reload development.ini
+```
 
-	paster serve --reload development.ini
+Open the URL http://localhost:2015/ in your browser.
 
-Then run the local web server for the UI from the OpenFisca-Web-UI directory (recommended in another terminal tab):
+## Development
 
-	paster serve --reload development.ini
+If you change the Python source code, the web server will reload and you'll have to reload the page in your browser.
 
-Now you should open the URL http://localhost:2015/ in your browser and use the application.
-
-If you change the Python source code, the local web server will reload and you can reload the page in your browser.
-
-If you change the JavaScript source code, it is recommended to use the "watcher" to update the `bundle.js` file
-automatically:
+If you'd like to change the JavaScript source code, it is recommended to use the "watcher" to rebuild the code automatically:
 
 	make watch
-
-Bonus: if you set `enabled.livereload = true` in `development.ini`, the "watcher" will reload the page in the browser
-automatically on each JavaScript rebuild.
-
-Database
---------
-
-Cleanup sessions and test cases:
-
-	mongo openfisca_web_ui --eval 'db.sessions.remove(); db.test_cases.remove()'
-
-Dependencies
-------------
-
-* JavaScript dependencies are npm modules declared in `package.json`.
-* CSS dependencies
-	* https://github.com/hyspace/typeahead.js-bootstrap3.less
