@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-07 11:25+0100\n"
-"PO-Revision-Date: 2014-11-07 11:25+0100\n"
+"POT-Creation-Date: 2015-01-15 18:38+0100\n"
+"PO-Revision-Date: 2015-01-15 18:38+0100\n"
 "Last-Translator: Christophe Benz <christophe.benz@data.gouv.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
@@ -61,11 +61,11 @@ msgstr "Aucune simulation avec l'ID, le nom simplifié ou indexée par les mots 
 msgid "Too much simulations with words: {0}"
 msgstr "Trop de simulations avec les mots : {0}"
 
-#: openfisca_web_ui/model.py:503
+#: openfisca_web_ui/model.py:499
 msgid "You must be authenticated as an administrator to access this page."
 msgstr "Vous devez être authentifié en tant qu'administrateur pour accéder à cette page."
 
-#: openfisca_web_ui/model.py:510
+#: openfisca_web_ui/model.py:506
 msgid "You must be an administrator to access this page."
 msgstr "Vous devez être un administrateur pour accéder à cette page."
 
@@ -202,7 +202,7 @@ msgstr "Accueil"
 
 #: openfisca_web_ui/templates/index.mako:43
 #: openfisca_web_ui/templates/site.mako:57
-#: openfisca_web_ui/templates/site.mako:260
+#: openfisca_web_ui/templates/site.mako:270
 msgid "Demonstrator"
 msgstr "Démonstrateur"
 
@@ -216,7 +216,7 @@ msgstr "debug"
 msgid "beta"
 msgstr "beta"
 
-#: openfisca_web_ui/templates/index.mako:58
+#: openfisca_web_ui/templates/index.mako:51
 msgid "Loading demonstrator..."
 msgstr "Chargement du démonstrateur..."
 
@@ -226,6 +226,7 @@ msgstr "Déconnexion en cours…"
 
 #: openfisca_web_ui/templates/privacy-policy.mako:31
 #: openfisca_web_ui/templates/site.mako:124
+#: openfisca_web_ui/templates/site.mako:211
 msgid "Privacy policy"
 msgstr "Politique de confidentialité"
 
@@ -238,6 +239,7 @@ msgid "Please, correct the informations below."
 msgstr "Veuillez corriger les informations ci-dessous."
 
 #: openfisca_web_ui/templates/site.mako:123
+#: openfisca_web_ui/templates/site.mako:208
 msgid "Legal terms"
 msgstr "Mentions légales"
 
@@ -257,32 +259,36 @@ msgstr "Présentation"
 msgid "Documentation"
 msgstr "Documentation"
 
-#: openfisca_web_ui/templates/site.mako:201
+#: openfisca_web_ui/templates/site.mako:199
+msgid "Tools"
+msgstr "Outils"
+
+#: openfisca_web_ui/templates/site.mako:202
 msgid "About"
 msgstr "À propos"
 
-#: openfisca_web_ui/templates/site.mako:202
+#: openfisca_web_ui/templates/site.mako:203
 msgid "Contact"
 msgstr "Contact"
 
-#: openfisca_web_ui/templates/site.mako:214
+#: openfisca_web_ui/templates/site.mako:224
 msgid "France"
 msgstr "France"
 
-#: openfisca_web_ui/templates/site.mako:215
+#: openfisca_web_ui/templates/site.mako:225
 msgid "Tunisia"
 msgstr "Tunisie"
 
-#: openfisca_web_ui/templates/site.mako:240
+#: openfisca_web_ui/templates/site.mako:250
 msgid "Other countries"
 msgstr "Autres pays"
 
-#: openfisca_web_ui/templates/site.mako:264
+#: openfisca_web_ui/templates/site.mako:274
 #: openfisca_web_ui/templates/legislations/admin-view.mako:47
 msgid "Administration"
 msgstr "Administration"
 
-#: openfisca_web_ui/templates/site.mako:267
+#: openfisca_web_ui/templates/site.mako:277
 #: openfisca_web_ui/templates/accounts/admin-delete.mako:38
 #: openfisca_web_ui/templates/accounts/admin-edit.mako:37
 #: openfisca_web_ui/templates/accounts/admin-index.mako:37
@@ -291,7 +297,7 @@ msgstr "Administration"
 msgid "Accounts"
 msgstr "Comptes"
 
-#: openfisca_web_ui/templates/site.mako:272
+#: openfisca_web_ui/templates/site.mako:282
 #: openfisca_web_ui/templates/legislations/admin-delete.mako:37
 #: openfisca_web_ui/templates/legislations/admin-edit.mako:39
 #: openfisca_web_ui/templates/legislations/admin-index.mako:39
@@ -302,7 +308,7 @@ msgstr "Comptes"
 msgid "Legislations"
 msgstr "Législations"
 
-#: openfisca_web_ui/templates/site.mako:277
+#: openfisca_web_ui/templates/site.mako:287
 #: openfisca_web_ui/templates/sessions/admin-delete.mako:38
 #: openfisca_web_ui/templates/sessions/admin-index.mako:39
 #: openfisca_web_ui/templates/sessions/admin-index.mako:100
@@ -310,33 +316,33 @@ msgstr "Législations"
 msgid "Sessions"
 msgstr "Sessions"
 
-#: openfisca_web_ui/templates/site.mako:284
+#: openfisca_web_ui/templates/site.mako:294
 msgid "Your account and simulations"
 msgstr "Votre compte et vos simulations"
 
-#: openfisca_web_ui/templates/site.mako:285
+#: openfisca_web_ui/templates/site.mako:295
 msgid "Sign in"
 msgstr "Connexion"
 
-#: openfisca_web_ui/templates/site.mako:290
+#: openfisca_web_ui/templates/site.mako:300
 #: openfisca_web_ui/templates/accounts/user-view.mako:42
 #: openfisca_web_ui/templates/accounts/user-view.mako:48
 msgid "My account"
 msgstr "Mon compte"
 
-#: openfisca_web_ui/templates/site.mako:296
+#: openfisca_web_ui/templates/site.mako:306
 msgid "Sign out"
 msgstr "Déconnexion"
 
-#: openfisca_web_ui/templates/site.mako:302
+#: openfisca_web_ui/templates/site.mako:312
 msgid "Debug"
 msgstr "Debug"
 
-#: openfisca_web_ui/templates/site.mako:305
+#: openfisca_web_ui/templates/site.mako:315
 msgid "Dummy admin"
 msgstr "Administrateur factice"
 
-#: openfisca_web_ui/templates/site.mako:310
+#: openfisca_web_ui/templates/site.mako:320
 msgid "Dummy user"
 msgstr "Utilisateur factice"
 

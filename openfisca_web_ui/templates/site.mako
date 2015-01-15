@@ -196,6 +196,7 @@ ${_(u'OpenFisca demonstrator')}
     % endif
                     <li><a href="${urlparse.urljoin(conf['urls.www'], 'presentation')}">${_(u'Presentation')}</a></li>
                     <li><a href="${urlparse.urljoin(conf['urls.www'], 'documentation')}">${_(u'Documentation')}</a></li>
+                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'outils')}">${_(u'Tools')}</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="${urlparse.urljoin(conf['urls.www'], 'a-propos')}">${_(u'About')}</a></li>
