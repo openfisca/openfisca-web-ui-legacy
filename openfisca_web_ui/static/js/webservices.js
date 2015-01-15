@@ -239,11 +239,8 @@ function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
     })
     .end(function(res) {
       if (res.body && res.body.error) {
-        onComplete({
-          errors: 'scenarios' in res.body.error.errors[0] ?
-            res.body.error.errors[0].scenarios['0'] :
-            res.body.error.errors[0]
-        });
+        var errors = res.body.error.errors[0];
+        onComplete({errors: typeof errors === 'string' || ! ('scenarios' in errors) ? errors : errors.scenarios['0']});
       } else if (res.error) {
         onComplete(res);
       } else {
