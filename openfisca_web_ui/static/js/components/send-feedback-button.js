@@ -25,7 +25,7 @@ ${JSON.stringify(this.props.testCase, null, 2)}
     var sendFeedbackHref = `mailto:contact@openfisca.fr?subject=Retours sur OpenFisca&body=${encodeURIComponent(sendFeedbackBody)}`; // jshint ignore:line
 
     return (
-      <a className='btn btn-default' href={sendFeedbackHref}>
+      <a className='btn btn-link' href={sendFeedbackHref}>
         {this.getIntlMessage('sendFeedback')}
       </a>
     );
