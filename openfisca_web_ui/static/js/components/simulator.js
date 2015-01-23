@@ -34,6 +34,7 @@ var Simulator = React.createClass({
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
     disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
+    reforms: React.PropTypes.object.isRequired,
     visualizations: React.PropTypes.array,
   },
   componentWillMount: function() {
@@ -478,6 +479,7 @@ var Simulator = React.createClass({
             onSettingsChange={this.handleVisualizationSettingsChange}
             onVisualizationChange={this.handleVisualizationChange}
             reformName={this.state.reform ? this.state.reform.name : null}
+            reforms={this.props.reforms}
             settings={this.state.visualizationsSettings}
             simulationResult={this.state.simulationResult}
             testCase={this.state.testCase}

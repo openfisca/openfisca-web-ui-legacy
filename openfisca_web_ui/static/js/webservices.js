@@ -108,6 +108,23 @@ function fetchFields(entitiesMetadata, onComplete) {
     });
 }
 
+
+function fetchReforms(onComplete) {
+  var onError = () => alert('Error: unable to fetch reforms.');
+  request
+    .get(makeUrl(appconfig.api.urlPaths.reforms))
+    .on('error', function(/*error*/) {
+      onError();
+    })
+    .end(function (res) {
+      if (res.error) {
+        onError();
+      }
+      onComplete(res.body.reforms);
+    });
+}
+
+
 function makeUrl(path) {
   var baseUrl = appconfig.api.baseUrl;
   if (baseUrl.endsWith('/')) {
@@ -250,6 +267,6 @@ function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
 }
 
 module.exports = {
-  fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchEntitiesMetadata, fetchFields, repair, saveCurrentTestCase,
-  simulate,
+  fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchEntitiesMetadata, fetchFields, fetchReforms, repair,
+  saveCurrentTestCase, simulate,
 };

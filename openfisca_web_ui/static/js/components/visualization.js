@@ -26,6 +26,7 @@ var Visualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     reformName: React.PropTypes.string,
+    reforms: React.PropTypes.object.isRequired,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
     testCase: React.PropTypes.object.isRequired,
@@ -60,6 +61,7 @@ var Visualization = React.createClass({
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
           reformName={this.props.reformName}
+          reforms={this.props.reforms}
           testCase={this.props.testCase}
           variablesTree={this.props.simulationResult}
           visualizationSlug={this.props.visualizationSlug}
@@ -90,6 +92,7 @@ var Visualization = React.createClass({
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
           reformName={this.props.reformName}
+          reforms={this.props.reforms}
           testCase={this.props.testCase}
           valuesOffset={this.props.diffMode ? null : (this.props.reformName ? 1 : 0)}
           variablesTree={this.props.simulationResult}

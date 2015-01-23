@@ -40,6 +40,7 @@ var WaterfallVisualization = React.createClass({
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     reformName: React.PropTypes.string,
+    reforms: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
     valuesOffset: React.PropTypes.number,
     variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
@@ -243,6 +244,7 @@ var WaterfallVisualization = React.createClass({
               diffMode={this.props.diffMode}
               onChange={this.props.onReformChange}
               reformName={this.props.reformName}
+              reforms={this.props.reforms}
             />
             <span style={{marginLeft: 10}}>
               <SendFeedbackButton testCase={this.props.testCase} />

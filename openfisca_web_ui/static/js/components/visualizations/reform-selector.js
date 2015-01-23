@@ -1,10 +1,9 @@
 /** @jsx React.DOM */
 'use strict';
 
-var React = require('react/addons'),
+var Lazy = require('lazy.js'),
+  React = require('react/addons'),
   ReactIntlMixin = require('react-intl');
-
-var cx = React.addons.classSet;
 
 
 var ReformSelector = React.createClass({
@@ -13,6 +12,7 @@ var ReformSelector = React.createClass({
     diffMode: React.PropTypes.bool,
     onChange: React.PropTypes.func.isRequired,
     reformName: React.PropTypes.string,
+    reforms: React.PropTypes.object.isRequired,
   },
   render: function() {
     return (
@@ -28,10 +28,11 @@ var ReformSelector = React.createClass({
           value={this.props.reformName}
         >
           <option value=''>{this.getIntlMessage('noReform')}</option>
-          <option value='plfrss2014'>PLFR 2014</option>
-          <option value='landais_piketty_saez'>Landais Piketty Saez</option>
-          <option value='revenu_de_base_cotisations'>Cotisations revenu de base</option>
-          <option value='revenu_de_base_enfants'>Revenu de base enfants</option>
+          {
+            Lazy(this.props.reforms).map((reformTitle, reformName) => (
+              <option key={reformName} value={reformName}>{reformTitle}</option>
+            )).toArray()
+          }
         </select>
         <div className='checkbox' style={{marginLeft: 10}}>
           <label>

@@ -86,6 +86,7 @@ def index_appconfig(ctx, alert_on_js_error):
             'calculate': conf['api.urlPaths.calculate'],
             'entities': conf['api.urlPaths.entities'],
             'fields': conf['api.urlPaths.fields'],
+            'reforms': conf['api.urlPaths.reforms'],
             'simulate': conf['api.urlPaths.simulate'],
             },
         }

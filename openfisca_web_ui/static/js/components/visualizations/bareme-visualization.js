@@ -38,6 +38,7 @@ var BaremeVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     reformName: React.PropTypes.string,
+    reforms: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
     variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
@@ -173,6 +174,7 @@ var BaremeVisualization = React.createClass({
               diffMode={this.props.diffMode}
               onChange={this.props.onReformChange}
               reformName={this.props.reformName}
+              reforms={this.props.reforms}
             />
             <span style={{marginLeft: 10}}>
               <SendFeedbackButton testCase={this.props.testCase} />
