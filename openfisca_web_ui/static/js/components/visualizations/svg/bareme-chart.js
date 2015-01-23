@@ -49,15 +49,20 @@ var BaremeChart = React.createClass({
       this.setState({yAxisWidth: newYAxisWidth});
     }
   },
-  computeMaxValue: function(variables) {
-    var maxValue = 0;
+  computeBoundsValues: function(variables) {
+    var maxValue = 0, minValue = 0;
     variables.forEach(variable => {
-      var variableMaxValue = Math.max.apply(null, this.targetValues(variable));
+      var targetValues = this.targetValues(variable),
+        variableMaxValue = Math.max.apply(null, targetValues),
+        variableMinValue = Math.min.apply(null, targetValues);
       if (variableMaxValue > maxValue) {
         maxValue = variableMaxValue;
       }
+      if (variableMinValue > minValue) {
+        minValue = variableMinValue;
+      }
     });
-    return maxValue;
+    return [minValue, maxValue];
   },
   getDefaultProps: function() {
     return {
@@ -100,8 +105,18 @@ var BaremeChart = React.createClass({
   render: function() {
     var height = this.props.height || this.props.width / this.props.aspectRatio;
     if (this.props.variables.length) {
-      var yMaxValue = this.computeMaxValue(this.props.variables);
-      this.ySmartValues = axes.smartValues(0, yMaxValue, this.props.yNbSteps);
+      var [yMinValue, yMaxValue] = this.computeBoundsValues(this.props.variables);
+      if (yMinValue === yMaxValue) {
+        if (yMinValue > 0) {
+          yMinValue = 0;
+        } else if (yMaxValue < 0) {
+          yMaxValue = 0;
+        } else {
+          yMinValue -= 1000;
+          yMaxValue += 1000;
+        }
+      }
+      this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
     }
     var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
