@@ -82,7 +82,7 @@ function fetchEntitiesMetadata(onComplete) {
       if (res.error) {
         onError();
       }
-      onComplete(res.body);
+      onComplete(res.body.entities);
     });
 }
 
