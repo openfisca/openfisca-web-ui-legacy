@@ -24,6 +24,9 @@ The way to install these tools depends on your operating system (not documented 
 Some software might be installed by default, please check.
 
 ```
+cd
+mkdir openfisca
+cd openfisca
 git clone https://github.com/openfisca/openfisca-web-ui.git
 cd openfisca-web-ui
 python setup.py compile_catalog
@@ -36,7 +39,7 @@ make build-dev
 OpenFisca-Web-UI is a client of the [OpenFisca-Web-API](https://github.com/openfisca/openfisca-web-api)
 (called with AJAX requests).
 
-You can either use the official API instance (`http://api.openfisca.fr/``) or install an instance on your machine
+You can either use the official API instance (`http://api.openfisca.fr`) or install an instance on your machine
 if you need to work on the code of either the [API](https://github.com/openfisca/openfisca-web-api),
 the [Core](https://github.com/openfisca/openfisca-core)
 or the tax-benefit system ([OpenFisca-France](https://github.com/openfisca/openfisca-france) for example).
@@ -46,10 +49,11 @@ In this case please read the [installation documentation](http://www.openfisca.f
 
 Depending on your OS you might start the [MongoDB](http://www.mongodb.org/) server by hand.
 
-If you intend to use your own instance of the web API, run the web server of the API:
+If you intend to use your own instance of the web API, run the web server of the API
+(here we assume you installed it previously):
 
 ```
-cd openfisca-web-api
+cd ~/openfisca/openfisca-web-api
 paster serve --reload development-france.ini
 ```
 
@@ -59,7 +63,7 @@ Otherwise you can change the `api.baseUrl` config key to `http://api.openfisca.f
 Then run the web server of the UI (in another terminal tab since the previous one is blocked by the previous web server):
 
 ```
-cd openfisca-web-ui
+cd ~/openfisca/openfisca-web-ui
 paster serve --reload development-france.ini
 ```
 
