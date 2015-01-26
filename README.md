@@ -25,12 +25,12 @@ Some software might be installed by default, please check.
 
 ```
 git clone https://github.com/openfisca/openfisca-web-ui.git
-cd openfisca_web_ui
+cd openfisca-web-ui
 python setup.py compile_catalog
 pip install --user --editable .
 python openfisca_web_ui/scripts/setup_app.py development-france.ini
 npm install
-make build
+make build-dev
 ```
 
 OpenFisca-Web-UI is a client of the [OpenFisca-Web-API](https://github.com/openfisca/openfisca-web-api)
@@ -44,20 +44,23 @@ In this case please read the [installation documentation](http://www.openfisca.f
 
 ## Run the server
 
-Depending on your OS you might run the [MongoDB](http://www.mongodb.org/) server by hand.
+Depending on your OS you might start the [MongoDB](http://www.mongodb.org/) server by hand.
 
-Run the web server of the API:
+If you intend to use your own instance of the web API, run the web server of the API:
 
 ```
-cd openfisca_web_api
+cd openfisca-web-api
 paster serve --reload development-france.ini
 ```
 
-Run the web server of the UI (in another terminal tab since the previous one is blocked by the previous web server):
+Otherwise you can change the `api.baseUrl` config key to `http://api.openfisca.fr` in the config file
+(for example `development-france.ini`).
+
+Then run the web server of the UI (in another terminal tab since the previous one is blocked by the previous web server):
 
 ```
-cd openfisca_web_ui
-paster serve --reload development.ini
+cd openfisca-web-ui
+paster serve --reload development-france.ini
 ```
 
 Open the URL http://localhost:2015/ in your browser.
