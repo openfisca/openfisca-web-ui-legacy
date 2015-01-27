@@ -213,9 +213,8 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
     });
 }
 
-function simulate(axes, decomposition, legislationUrl, reformName, testCase, year, onComplete) {
+function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
   var scenario = {
-    'legislation_url': legislationUrl,
     period: {
       start: year,
       unit: 'year',

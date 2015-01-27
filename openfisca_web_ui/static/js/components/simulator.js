@@ -77,7 +77,6 @@ var Simulator = React.createClass({
       editedEntity: null,
       errors: null,
       isSimulationInProgress: false,
-      legislationUrl: null,
       reform: null,
       simulationResult: null,
       suggestions: null,
@@ -534,8 +533,8 @@ var Simulator = React.createClass({
       this.setState({isSimulationInProgress: true}, () => {
         var params = this.simulationParams(this.state.visualizationSlug);
         var reformName = this.state.reform ? this.state.reform.name : null;
-        webservices.simulate(params.axes, params.decomposition, this.state.legislationUrl, reformName,
-          this.state.testCase, this.state.year, data => {
+        webservices.simulate(params.axes, params.decomposition, reformName, this.state.testCase, this.state.year,
+          data => {
             var changeset = {isSimulationInProgress: false};
             if (data) {
               if (data.error) {
