@@ -40,10 +40,10 @@ var WaterfallVisualization = React.createClass({
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
     reformName: React.PropTypes.string,
-    reforms: React.PropTypes.object.isRequired,
+    reforms: React.PropTypes.object,
+    simulationResult: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
     valuesOffset: React.PropTypes.number,
-    variablesTree: React.PropTypes.object.isRequired, // OpenFisca API simulation results.
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   componentDidMount: function() {
@@ -150,7 +150,7 @@ var WaterfallVisualization = React.createClass({
     this.setState({chartContainerWidth: width});
   },
   linearizeVariables: function() {
-    // Transform this.props.variablesTree into an array and compute base values for waterfall.
+    // Transform variablesTree into an array and compute base values for waterfall.
     // Also rename snake case keys to camel case.
     function extractChildrenCodes(node) {
       return node.children ? node.children.map(child => {
@@ -166,7 +166,7 @@ var WaterfallVisualization = React.createClass({
         variable.children.forEach(child => {
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
-          if ( ! this.props.diffMode) {
+          if ( ! this.props.simulationResult.diffMode) {
             invariant(child.values.length > this.props.valuesOffset, 'valuesOffset prop is out of bounds');
             childBaseValue += child.values[this.props.valuesOffset];
           }
@@ -174,7 +174,7 @@ var WaterfallVisualization = React.createClass({
         newVariables = newVariables.concat(childrenVariables);
       }
       var value;
-      if (this.props.diffMode) {
+      if (this.props.simulationResult.diffMode) {
         value = variable.values[1] - variable.values[0];
       } else {
         invariant(variable.values.length > this.props.valuesOffset, 'valuesOffset prop is out of bounds');
@@ -197,7 +197,7 @@ var WaterfallVisualization = React.createClass({
       newVariables.push(newVariable);
       return newVariables;
     };
-    var variables = walk(this.props.variablesTree);
+    var variables = walk(this.props.simulationResult.variablesTree);
     return variables;
   },
   removeVariables: function(variables, isRemoved, removeChildren = false) {
@@ -239,14 +239,18 @@ var WaterfallVisualization = React.createClass({
     return (
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
-          <div className='form-inline'>
-            <ReformSelector
-              diffMode={this.props.diffMode}
-              onChange={this.props.onReformChange}
-              reformName={this.props.reformName}
-              reforms={this.props.reforms}
-            />
-            <span style={{marginLeft: 10}}>
+          <div className='clearfix form-inline'>
+            {
+              this.props.reforms && (
+                <ReformSelector
+                  diffMode={this.props.diffMode}
+                  onChange={this.props.onReformChange}
+                  reformName={this.props.reformName}
+                  reforms={this.props.reforms}
+                />
+              )
+            }
+            <span className='pull-right'>
               <SendFeedbackButton testCase={this.props.testCase} />
             </span>
           </div>

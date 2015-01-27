@@ -29,24 +29,28 @@ var ReformSelector = React.createClass({
         >
           <option value=''>{this.getIntlMessage('noReform')}</option>
           {
-            Lazy(this.props.reforms).map((reformTitle, reformName) => (
-              <option key={reformName} value={reformName}>{reformTitle}</option>
+            Lazy(this.props.reforms).map((reformName, reformKey) => (
+              <option key={reformKey} value={reformKey}>{reformName}</option>
             )).toArray()
           }
         </select>
-        <div className='checkbox' style={{marginLeft: 10}}>
-          <label>
-            <input
-              checked={this.props.diffMode}
-              disabled={ ! this.props.reformName}
-              onChange={
-                event => this.props.onChange({diffMode: event.target.checked, name: this.props.reformName})
-              }
-              type='checkbox'
-            />
-            {this.getIntlMessage('difference')}
-          </label>
-        </div>
+        {
+          this.props.reformName && (
+            <div className='checkbox' style={{marginLeft: 10}}>
+              <label>
+                <input
+                  checked={this.props.diffMode}
+                  disabled={ ! this.props.reformName}
+                  onChange={
+                    event => this.props.onChange({diffMode: event.target.checked, name: this.props.reformName})
+                  }
+                  type='checkbox'
+                />
+                {this.getIntlMessage('difference')}
+              </label>
+            </div>
+          )
+        }
       </span>
     );
   }

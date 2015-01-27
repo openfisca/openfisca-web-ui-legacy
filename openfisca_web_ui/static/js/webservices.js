@@ -236,17 +236,20 @@ function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
       start: year,
       unit: 'year',
     },
-    'test_case': testCase,
+    test_case: testCase,
   };
   if (axes) {
     scenario.axes = axes;
   }
-  var data = {scenarios: [scenario]};
+  var data = {
+    reform_names: ['inversion_revenus'],
+    scenarios: [scenario],
+  };
   if (decomposition) {
     data.decomposition = decomposition;
   }
   if (reformName) {
-    data.reform_names = [reformName];
+    data.reform_names.push(reformName);
   }
   request
     .post(makeUrl(appconfig.api.urlPaths.simulate))

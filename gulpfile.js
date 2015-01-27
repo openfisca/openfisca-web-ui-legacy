@@ -4,8 +4,6 @@ var browserify = require('browserify'),
   del = require('del'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
-  livereload = require('gulp-livereload'),
-  notify = require('gulp-notify'),
   source = require('vinyl-source-stream'),
   watchify = require('watchify');
 
@@ -33,41 +31,7 @@ function handleError() {
   /* jshint validthis: true */
   var args = Array.prototype.slice.call(arguments);
   gutil.log(args);
-  var errorData = {
-    message: '<%= error.message %>',
-    title: 'Compile Error',
-  };
-  var filePath;
-  if (args[0] && args[0].fileName) {
-    // React JSX source files.
-    filePath = args[0].fileName;
-  } else {
-    // Vanilla JS source files.
-    var filePathRegex = /Error: Parsing file (.+): Line \d+/;
-    var match = filePathRegex.exec(args[0]);
-    if (match) {
-      filePath = match[1];
-    }
-  }
-  if (filePath) {
-    gutil.log(errorData);
-    errorData.message += ' <a href="file://<%= options.filePath %>">open</a>';
-    gutil.log(errorData);
-    errorData.templateOptions = {filePath: filePath};
-  }
-  notify.onError(errorData).apply(this, args);
   this.emit('end'); // Keep gulp from hanging on this task
-}
-
-
-function startLiveReload() {
-  var port = 35731;
-  var liveReloadServer = livereload(port);
-  var reloadPage = function(event) {
-    gutil.log('Reload browser page.');
-    liveReloadServer.changed(event.path);
-  };
-  return gulp.watch([distDir + '/**/*'], reloadPage);
 }
 
 
@@ -151,6 +115,5 @@ gulp.task('watch', ['clean:dist', 'vendor'], function() {
   });
   gutil.log('Initial bundle in progress...');
   var stream = rebundle().on('end', function() { gutil.log('Initial bundle done.'); });
-  // startLiveReload();
   return stream;
 });

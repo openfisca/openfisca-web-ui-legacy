@@ -34,7 +34,7 @@ var Simulator = React.createClass({
     defaultVisualizationSlug: React.PropTypes.string.isRequired,
     disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
-    reforms: React.PropTypes.object.isRequired,
+    reforms: React.PropTypes.object,
     visualizations: React.PropTypes.array,
   },
   componentWillMount: function() {
@@ -159,7 +159,7 @@ var Simulator = React.createClass({
 
     if (dataKind === 'simulationResult') {
       if (format === 'csv') {
-        var variables = treeToArray(this.state.simulationResult);
+        var variables = treeToArray(this.state.simulationResult.variablesTree);
         var data = variables.map(variable => {
           return {
             code: variable.code,
@@ -173,7 +173,7 @@ var Simulator = React.createClass({
         );
       } else if (format === 'json') {
         saveAs(
-          new Blob([JSON.stringify(this.state.simulationResult, null, 2)], {type: "application/json"}),
+          new Blob([JSON.stringify(this.state.simulationResult.variablesTree, null, 2)], {type: "application/json"}),
           this.formatMessage(this.getIntlMessage('simulationResultFilename'), {extension: 'json'})
         );
       }
@@ -250,13 +250,7 @@ var Simulator = React.createClass({
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleReformChange: function(reformData) {
-    var changeset = {reform: reformData};
-    // Trigger a new simulation if a reform name if given which is different than the existing one.
-    var triggerSimulation = reformData.name && (! this.state.reform || reformData.name !== this.state.reform.name);
-    if (triggerSimulation) {
-      changeset.simulationResult = null;
-    }
-    this.setState(changeset, triggerSimulation && this.simulate);
+    this.setState({reform: reformData}, this.simulate);
   },
   handleRepair: function() {
     if ( ! this.state.editedEntity) {
@@ -547,7 +541,11 @@ var Simulator = React.createClass({
                   changeset.simulationResult = null;
                 } else {
                   changeset.errors = null;
-                  changeset.simulationResult = data;
+                  changeset.simulationResult = {
+                    diffMode: this.state.reform ? this.state.reform.diffMode : false,
+                    reformName: reformName,
+                    variablesTree: data,
+                  };
                 }
               }
             }

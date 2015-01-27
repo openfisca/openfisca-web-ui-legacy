@@ -26,7 +26,7 @@ var Visualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     reformName: React.PropTypes.string,
-    reforms: React.PropTypes.object.isRequired,
+    reforms: React.PropTypes.object,
     settings: React.PropTypes.object.isRequired,
     simulationResult: React.PropTypes.any.isRequired,
     testCase: React.PropTypes.object.isRequired,
@@ -62,8 +62,8 @@ var Visualization = React.createClass({
           onVisualizationChange={this.props.onVisualizationChange}
           reformName={this.props.reformName}
           reforms={this.props.reforms}
+          simulationResult={this.props.simulationResult}
           testCase={this.props.testCase}
-          variablesTree={this.props.simulationResult}
           visualizationSlug={this.props.visualizationSlug}
           xAxisVariableCode={this.props.settings.bareme.xAxisVariableCode}
           xMaxValue={this.props.settings.bareme.xMaxValue}
@@ -93,9 +93,9 @@ var Visualization = React.createClass({
           onVisualizationChange={this.props.onVisualizationChange}
           reformName={this.props.reformName}
           reforms={this.props.reforms}
+          simulationResult={this.props.simulationResult}
           testCase={this.props.testCase}
-          valuesOffset={this.props.diffMode ? null : (this.props.reformName ? 1 : 0)}
-          variablesTree={this.props.simulationResult}
+          valuesOffset={this.props.diffMode ? null : (this.props.simulationResult.reformName ? 1 : 0)}
           visualizationSlug={this.props.visualizationSlug}
         />
       );
@@ -113,7 +113,7 @@ var Visualization = React.createClass({
     );
   },
   renderSituateur: function(variableName) {
-    var value = this.props.simulationResult[0].values[0];
+    var value = this.props.simulationResult.variablesTree[0].values[0];
     var curveLabel, formatHint, pointLabel, points;
     // TODO translate labels and hints.
     if (variableName === 'revdisp') {

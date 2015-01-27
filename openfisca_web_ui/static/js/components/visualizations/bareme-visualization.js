@@ -38,9 +38,9 @@ var BaremeVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     reformName: React.PropTypes.string,
-    reforms: React.PropTypes.object.isRequired,
+    reforms: React.PropTypes.object,
+    simulationResult: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
-    variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
     xAxisVariableCode: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
@@ -97,12 +97,12 @@ var BaremeVisualization = React.createClass({
         Lazy(variable.children).each(child => {
           var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
           childrenVariables = childrenVariables.concat(childVariables);
-          var values = this.props.diffMode ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
+          var values = this.props.simulationResult.diffMode ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
           childBaseValues = Lazy(childBaseValues).zip(values).map(pair => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var values = this.props.diffMode ? diffValues(variable.values) : variable.values.slice(sliceStart, sliceEnd);
+      var values = this.props.simulationResult.diffMode ? diffValues(variable.values) : variable.values.slice(sliceStart, sliceEnd);
       var hasValue = Lazy(values).any(value => value !== 0);
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
@@ -120,14 +120,14 @@ var BaremeVisualization = React.createClass({
       }
       return newVariables;
     };
-    var values = this.props.variablesTree.values;
-    var valuesLength = this.props.variablesTree.values.length;
-    if ( ! this.props.diffMode) {
+    var values = this.props.simulationResult.variablesTree.values;
+    var valuesLength = values.length;
+    if ( ! this.props.simulationResult.diffMode) {
       var sliceStart = this.props.reformName ? valuesLength / 2 : 0;
       var sliceEnd = this.props.reformName ? valuesLength : valuesLength / 2;
     }
     var initBaseValues = Lazy.repeat(0, values.length / 2).toArray();
-    var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
+    var variables = processNode(this.props.simulationResult.variablesTree, initBaseValues, 0, false);
     return variables;
   },
   handleChartDownload: function() {
@@ -169,14 +169,18 @@ var BaremeVisualization = React.createClass({
     return (
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
-          <div className='form-inline'>
-            <ReformSelector
-              diffMode={this.props.diffMode}
-              onChange={this.props.onReformChange}
-              reformName={this.props.reformName}
-              reforms={this.props.reforms}
-            />
-            <span style={{marginLeft: 10}}>
+          <div className='clearfix form-inline'>
+            {
+              this.props.reforms && (
+                <ReformSelector
+                  diffMode={this.props.diffMode}
+                  onChange={this.props.onReformChange}
+                  reformName={this.props.reformName}
+                  reforms={this.props.reforms}
+                />
+              )
+            }
+            <span className='pull-right'>
               <SendFeedbackButton testCase={this.props.testCase} />
             </span>
           </div>
