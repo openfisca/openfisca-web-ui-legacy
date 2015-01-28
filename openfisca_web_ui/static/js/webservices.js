@@ -120,7 +120,14 @@ function fetchReforms(onComplete) {
       if (res.error) {
         onError();
       }
-      onComplete(res.body.reforms);
+      // Blacklist "inversion_revenus" because it is part of "base_reforms" simulate API param.
+      var reforms = {};
+      for (var reformKey in res.body.reforms) {
+        if (reformKey !== 'inversion_revenus') {
+          reforms[reformKey] = res.body.reforms[reformKey];
+        }
+      }
+      onComplete(Object.keys(reforms).length > 0 ? reforms : null);
     });
 }
 
@@ -242,14 +249,14 @@ function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
     scenario.axes = axes;
   }
   var data = {
-    reform_names: ['inversion_revenus'],
+    base_reforms: ['inversion_revenus'],
     scenarios: [scenario],
   };
   if (decomposition) {
     data.decomposition = decomposition;
   }
   if (reformName) {
-    data.reform_names.push(reformName);
+    data.reforms = [reformName];
   }
   request
     .post(makeUrl(appconfig.api.urlPaths.simulate))
