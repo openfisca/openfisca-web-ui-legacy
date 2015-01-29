@@ -43,7 +43,6 @@ var WaterfallVisualization = React.createClass({
     reforms: React.PropTypes.object,
     simulationResult: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
-    valuesOffset: React.PropTypes.number,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   componentDidMount: function() {
@@ -167,8 +166,7 @@ var WaterfallVisualization = React.createClass({
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
           if ( ! this.props.simulationResult.diffMode) {
-            invariant(child.values.length > this.props.valuesOffset, 'valuesOffset prop is out of bounds');
-            childBaseValue += child.values[this.props.valuesOffset];
+            childBaseValue += child.values[0];
           }
         });
         newVariables = newVariables.concat(childrenVariables);
@@ -177,10 +175,10 @@ var WaterfallVisualization = React.createClass({
       if (this.props.simulationResult.diffMode) {
         value = variable.values[1] - variable.values[0];
       } else {
-        invariant(variable.values.length > this.props.valuesOffset, 'valuesOffset prop is out of bounds');
-        value = variable.values[this.props.valuesOffset];
+        value = variable.values[0];
       }
       var childrenCodes = extractChildrenCodes(variable);
+      invariant( ! Object.is(depth, NaN), 'depth is NaN');
       var newVariable = Lazy(variable)
         .omit(['@context', '@type', 'children', 'short_name', 'values'])
         .assign({

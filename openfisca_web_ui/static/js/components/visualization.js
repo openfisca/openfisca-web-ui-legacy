@@ -95,7 +95,6 @@ var Visualization = React.createClass({
           reforms={this.props.reforms}
           simulationResult={this.props.simulationResult}
           testCase={this.props.testCase}
-          valuesOffset={this.props.diffMode ? null : (this.props.simulationResult.reformName ? 1 : 0)}
           visualizationSlug={this.props.visualizationSlug}
         />
       );
