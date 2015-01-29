@@ -456,7 +456,7 @@ var Simulator = React.createClass({
         </ul>
       </div>
     ) : (
-      this.state.simulationResult && (
+      this.state.simulationResult ? (
         this.state.simulationResult.error ? (
           <div className="alert alert-danger" role="alert">
             <h4>{this.getIntlMessage('error')}</h4>
@@ -479,6 +479,12 @@ var Simulator = React.createClass({
             testCase={this.state.testCase}
             visualizationSlug={this.state.visualizationSlug}
           />
+        )
+      ) : (
+        this.state.isSimulationInProgress && (
+          <p>
+            {this.getIntlMessage('simulationInProgress')}
+          </p>
         )
       )
     );
