@@ -6,7 +6,7 @@ all: check test
 build-dev:
 	./node_modules/.bin/gulp dev
 
-build-prod:
+build-prod: npm-install
 	./node_modules/.bin/gulp prod
 
 check: flake8 jshint
@@ -35,6 +35,9 @@ flake8: clean-pyc
 
 jshint: clean-js_dist
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
+
+npm-install:
+	npm install
 
 poedit: update-i18n-python
 	poedit openfisca_web_ui/i18n/fr/LC_MESSAGES/openfisca-web-ui.po
