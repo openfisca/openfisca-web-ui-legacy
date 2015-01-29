@@ -12,7 +12,7 @@ var cx = React.addons.classSet;
 var Category = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
-    children: React.PropTypes.arrayOf(React.PropTypes.component).isRequired,
+    children: React.PropTypes.arrayOf(React.PropTypes.element).isRequired,
     hasErrors: React.PropTypes.bool,
     hasSuggestions: React.PropTypes.bool,
     index: React.PropTypes.number.isRequired,

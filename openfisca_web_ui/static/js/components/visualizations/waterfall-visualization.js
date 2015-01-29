@@ -158,7 +158,7 @@ var WaterfallVisualization = React.createClass({
         return childrenCodes ? [child.code, ...childrenCodes] : child.code;
       }).flatten() : null;
     }
-    var walk = (variable, baseValue = 0, depth = 0) => {
+    var walk = (variable, baseValue, depth) => {
       var newVariables = [];
       if (variable.children) {
         var childrenVariables = [];
@@ -197,7 +197,7 @@ var WaterfallVisualization = React.createClass({
       newVariables.push(newVariable);
       return newVariables;
     };
-    var variables = walk(this.props.simulationResult.variablesTree);
+    var variables = walk(this.props.simulationResult.variablesTree, 0, 0);
     return variables;
   },
   removeVariables: function(variables, isRemoved, removeChildren = false) {

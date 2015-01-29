@@ -12,7 +12,7 @@ var AutocompleteControl = React.createClass({
     autocomplete: React.PropTypes.func.isRequired,
     displayedValue: React.PropTypes.string,
     error: React.PropTypes.string,
-    label: React.PropTypes.component.isRequired,
+    label: React.PropTypes.element.isRequired,
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.string,

@@ -7,7 +7,7 @@ var $ = require('jquery'),
 
 var Tooltip = React.createClass({
   propTypes: {
-    children: React.PropTypes.component.isRequired,
+    children: React.PropTypes.element.isRequired,
     placement: React.PropTypes.string,
   },
   componentDidMount: function() {

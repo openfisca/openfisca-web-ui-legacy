@@ -28,7 +28,7 @@ function init() {
   if (enabledModules.acceptCookiesModal) {
     var AcceptCookiesModal = require('./components/accept-cookies-modal');
     webservices.fetchCurrentLocaleMessages(messages => {
-      React.renderComponent(
+      React.render(
         <AcceptCookiesModal actionUrlPath={enabledModules.acceptCookiesModal.actionUrlPath} messages={messages} />,
         jsModal
       );
@@ -37,7 +37,7 @@ function init() {
   else if (enabledModules.acceptCnilConditionsModal) {
     var AcceptCnilConditionsModal = require('./components/accept-cnil-conditions-modal');
     webservices.fetchCurrentLocaleMessages(messages => {
-      React.renderComponent(
+      React.render(
         <AcceptCnilConditionsModal
           actionUrlPath={enabledModules.acceptCnilConditionsModal.actionUrlPath}
           messages={messages}
@@ -87,7 +87,7 @@ function init() {
                 },
               },
             };
-            React.renderComponent(
+            React.render(
               <Simulator
                 columns={columns}
                 columnsTree={columnsTree}

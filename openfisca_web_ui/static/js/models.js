@@ -59,7 +59,13 @@ function findEntityAndRole(individuId, kind, entitiesMetadata, testCase) {
 }
 
 
-function getEntitiesKinds(entitiesMetadata, {collective = true, persons = true}) {
+function getEntitiesKinds(entitiesMetadata, {collective, persons}) {
+  if (typeof collective === 'undefined') {
+    collective = true;
+  }
+  if (typeof persons === 'undefined') {
+    persons = true;
+  }
   invariant(collective || persons, 'collective or persons must be specified');
   return Object.keys(entitiesMetadata).filter((kind) => {
     var isPersonsEntity = entitiesMetadata[kind].isPersonsEntity;

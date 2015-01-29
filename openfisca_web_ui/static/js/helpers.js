@@ -24,7 +24,13 @@ function assignIn(object, crumbs, value) {
 }
 
 
-function formatFrenchNumber(value, {fixed = false, round = true} = {}) {
+function formatFrenchNumber(value, {fixed, round} = {}) {
+  if (typeof fixed === 'undefined') {
+    fixed = false;
+  }
+  if (typeof round === 'undefined') {
+    round = true;
+  }
   var roundedNumber = Math.round(value);
   var formattedValue = fixed !== false ?
     value.toFixed(fixed) :

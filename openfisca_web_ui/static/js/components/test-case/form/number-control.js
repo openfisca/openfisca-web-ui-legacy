@@ -12,7 +12,7 @@ var NumberControl = React.createClass({
     cerfaField: React.PropTypes.any,
     default: React.PropTypes.number,
     error: React.PropTypes.string,
-    label: React.PropTypes.component.isRequired,
+    label: React.PropTypes.element.isRequired,
     max: React.PropTypes.number,
     min: React.PropTypes.number,
     name: React.PropTypes.string.isRequired,

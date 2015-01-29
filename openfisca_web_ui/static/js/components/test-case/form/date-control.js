@@ -8,7 +8,7 @@ var DateControl = React.createClass({
   propTypes: {
     default: React.PropTypes.string,
     error: React.PropTypes.string,
-    label: React.PropTypes.component.isRequired,
+    label: React.PropTypes.element.isRequired,
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
     suggestion: React.PropTypes.string,
