@@ -36,8 +36,8 @@ function handleError() {
 
 
 gulp.task('bundle:dev', function() {
-  var bundler = browserify(indexJsFile);
-  var stream = bundler.bundle({debug: true})
+  var bundler = browserify(indexJsFile, {cache: {}, debug: true, fullPaths: true, packageCache: {}});
+  var stream = bundler.bundle()
     .on('error', handleError)
     .pipe(source('bundle.js'))
     .pipe(gulp.dest(distDir));
@@ -46,11 +46,7 @@ gulp.task('bundle:dev', function() {
 
 
 gulp.task('bundle:prod', function() {
-  var bundler = browserify(indexJsFile);
-  bundler.plugin('minifyify', {
-    map: '/dist/bundle.map.json',
-    output: distDir + '/bundle.map.json',
-  });
+  var bundler = browserify(indexJsFile, {cache: {}, debug: false, packageCache: {}});
   var stream = bundler.bundle()
     .on('error', handleError)
     .pipe(source('bundle.min.js'))
@@ -102,13 +98,13 @@ gulp.task('vendor:js', function() {
 
 gulp.task('watch', ['clean:dist', 'vendor'], function() {
   function rebundle() {
-    return bundler.bundle({debug: true})
+    return bundler.bundle()
       .on('error', handleError)
       .pipe(source('bundle.js'))
       .pipe(gulp.dest(distDir));
   }
 
-  var bundler = watchify(indexJsFile, {fullPaths: true});
+  var bundler = watchify(browserify(indexJsFile, {cache: {}, debug: true, fullPaths: true, packageCache: {}}));
   bundler.on('update', function() {
     gutil.log('Rebundle in progress...');
     rebundle().on('end', function() { gutil.log('Rebundle done.'); });
