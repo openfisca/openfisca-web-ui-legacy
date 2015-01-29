@@ -61,7 +61,7 @@ function findEntityAndRole(individuId, kind, entitiesMetadata, testCase) {
 
 function getEntitiesKinds(entitiesMetadata, {collective = true, persons = true}) {
   invariant(collective || persons, 'collective or persons must be specified');
-  return Object.keys(entitiesMetadata).filter((kind, entityMetadata) => {
+  return Object.keys(entitiesMetadata).filter((kind) => {
     var isPersonsEntity = entitiesMetadata[kind].isPersonsEntity;
     return collective && ! isPersonsEntity || persons && isPersonsEntity;
   });
@@ -84,7 +84,7 @@ function getInitialTestCase(entitiesMetadata) {
   var testCase = {};
   var individu = createIndividu(entitiesMetadata, testCase);
   var individuId = uuid.v4();
-  testCase['individus'] = {[individuId]: individu};
+  testCase.individus = {[individuId]: individu};
   getEntitiesKinds(entitiesMetadata, {persons: false}).forEach(kind => {
     var entity = createEntity(kind, entitiesMetadata, testCase);
     var defaultRole = entitiesMetadata[kind].roles[0];

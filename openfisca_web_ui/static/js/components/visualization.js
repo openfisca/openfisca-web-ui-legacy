@@ -104,10 +104,11 @@ var Visualization = React.createClass({
       <div>
         {visualizationComponent}
         {
-          this.props.isSimulationInProgress &&
+          this.props.isSimulationInProgress && (
             <span className="label label-default" style={{position: 'absolute', right: 15, top: 0}}>
               {this.getIntlMessage('simulationInProgress')}
             </span>
+          )
         }
       </div>
     );
