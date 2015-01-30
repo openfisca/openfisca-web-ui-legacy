@@ -1,4 +1,5 @@
-STATIC_DIR=openfisca_web_ui/static
+STATIC_DIR="openfisca_web_ui/static"
+TESTS_DIR="openfisca_web_ui/tests"
 
 all: check test
 
@@ -21,7 +22,7 @@ clean-js_dist:
 	./node_modules/.bin/gulp clean:dist
 
 clean-pyc:
-	find -name '*.pyc' -exec rm \{\} \;
+	find . -name '*.pyc' -exec rm \{\} \;
 
 compile-i18n-python:
 	python setup.py compile_catalog
@@ -40,7 +41,7 @@ poedit: update-i18n-python
 	make compile-i18n-python
 
 test: check-syntax-errors
-	nosetests openfisca_web_ui/tests
+	nosetests --with-doctest $(TESTS_DIR)
 
 update-i18n: update-i18n-js update-i18n-python
 
