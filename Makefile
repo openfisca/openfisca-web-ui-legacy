@@ -15,10 +15,10 @@ check-syntax-errors: clean-pyc
 	@# This is a hack around flake8 not displaying E910 errors with the select option.
 	test -z "`flake8 --first | grep E901`"
 
-clean: clean-js_dist clean-pyc
+clean: clean-js-dist clean-pyc
 	rm -Rf cache/templates/
 
-clean-js_dist:
+clean-js-dist:
 	./node_modules/.bin/gulp clean:dist
 
 clean-pyc:
@@ -33,7 +33,7 @@ ctags:
 flake8: clean-pyc
 	flake8
 
-jshint: clean-js_dist
+jshint: clean-js-dist
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
 
 npm-install:
