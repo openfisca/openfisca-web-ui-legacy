@@ -62,6 +62,9 @@ setup(
     entry_points = {
         'paste.app_factory': 'main = openfisca_web_ui.application:make_app',
         },
+    extras_require = {
+        'tests': ['PasteDeploy'],
+        },
     include_package_data = True,
     install_requires = [
         'Babel >= 0.9.4',
