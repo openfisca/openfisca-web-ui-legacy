@@ -12,7 +12,7 @@ var appconfig = global.appconfig;
 
 function init() {
   if (appconfig.alertOnJsError) {
-    window.onerror = function(errorMsg, url, lineNumber) {
+    window.onerror = function(/*errorMsg, url, lineNumber*/) {
       alert(appconfig.i18n.onerrorMessage);
       // TODO call send mail webservice.
       return false;
@@ -29,7 +29,10 @@ function init() {
     var AcceptCookiesModal = require('./components/accept-cookies-modal');
     webservices.fetchCurrentLocaleMessages(messages => {
       React.render(
-        <AcceptCookiesModal actionUrlPath={enabledModules.acceptCookiesModal.actionUrlPath} messages={messages} />,
+        <AcceptCookiesModal
+          actionUrlPath={enabledModules.acceptCookiesModal.actionUrlPath}
+          messages={messages}
+        />,
         jsModal
       );
     });
@@ -53,10 +56,6 @@ function init() {
       disclaimer.init(enabledModules.disclaimer);
     }
   }
-  // if (enabledModules.legislation) {
-  //   var legislation = require('./legislation');
-  //   legislation.init(enabledModules.legislation);
-  // }
   if (enabledModules.situationForm) {
     // TODO use promise.all()
     webservices.fetchEntitiesMetadata(entitiesMetadata => {

@@ -278,11 +278,6 @@ language_name_by_code = {
                             </a>
                         </li>
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="${model.Legislation.get_admin_class_url(ctx)}">
-                                ${_(u'Legislations')}
-                            </a>
-                        </li>
-                        <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="${model.Session.get_admin_class_url(ctx)}">
                                 ${_(u'Sessions')}
                             </a>

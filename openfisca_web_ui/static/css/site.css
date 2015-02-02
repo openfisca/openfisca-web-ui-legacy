@@ -56,27 +56,6 @@ h3,
     margin: 1em 0;
 }
 
-.collapse-node {
-    border-left: px solid #428bca;
-    padding-left: 15px;
-    margin-left: 6px;
-}
-.collapse-node-toggle.legislation-node {
-    display: block;
-}
-.collapse-node-toggle:hover {
-    text-decoration: none;
-}
-.collapse-node-toggle > span.indicator:after {
-    /* symbol for "opening" panels */
-    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
-}
-.collapse-node-toggle.collapsed > span.indicator:after {
-    /* symbol for "collapsed" panels */
-    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
-}
-
 .modal-open .container-fluid,
 .modal-open nav {
   filter: blur(1px);

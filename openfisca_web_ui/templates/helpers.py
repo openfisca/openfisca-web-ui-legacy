@@ -98,7 +98,6 @@ def index_appconfig(ctx, alert_on_js_error):
     appconfig['enabledModules'].update({
         'charts': {
             'urlPaths': {
-                'legislationsSearch': urls.get_url(ctx, 'api/1/legislations/search'),
                 'testCasesSearch': urls.get_url(ctx, 'api/1/test_cases/search'),
                 'testCasesBaseUrl': urls.get_url(ctx, u'test_cases'),
                 'visualizationsSearch': urls.get_url(ctx, 'api/1/visualizations/search'),
@@ -111,14 +110,6 @@ def index_appconfig(ctx, alert_on_js_error):
             },
         })
     appconfig['urls.www'] = conf['urls.www']
-    return appconfig
-
-
-def legislation_appconfig(ctx, legislation_edit_url):
-    appconfig = base_appconfig(ctx)
-    appconfig['enabledModules']['legislation'] = {
-        'legislationEditUrl': legislation_edit_url,
-        }
     return appconfig
 
 

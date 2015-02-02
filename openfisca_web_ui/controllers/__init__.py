@@ -32,7 +32,7 @@ import logging
 from bson import objectid
 
 from .. import contexts, conf, conv, model, templates, urls, uuidhelpers, wsgihelpers
-from . import accounts, auth, legislations, sessions, test_cases
+from . import accounts, auth, sessions, test_cases
 
 
 email_log = logging.getLogger('email')
@@ -112,12 +112,9 @@ def make_router():
         ('POST', '^/accept-cookies/?$', accept_cookies),
         (None, '^/account(?=/|$)', accounts.route_user),
         (None, '^/admin/accounts(?=/|$)', accounts.route_admin_class),
-        (None, '^/admin/legislations(?=/|$)', legislations.route_admin_class),
         (None, '^/admin/sessions(?=/|$)', sessions.route_admin_class),
         (None, '^/api/1/disclaimer_closed$', disclaimer_closed),
-        (None, '^/api/1/legislations(?=/|$)', legislations.route_api1_class),
         (None, '^/api/1/test_cases(?=/|$)', test_cases.route_api1_class),
-        (None, '^/legislations(?=/|$)', legislations.route_user_class),
         (('GET', 'POST'), '^/logout/?$', auth.logout),
         (None, '^/test_cases(?=/|$)', test_cases.route_class),
         ('GET', '^/privacy-policy/?$', privacy_policy),
