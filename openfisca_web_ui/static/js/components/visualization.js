@@ -28,7 +28,7 @@ var Visualization = React.createClass({
     reformName: React.PropTypes.string,
     reforms: React.PropTypes.object,
     settings: React.PropTypes.object.isRequired,
-    simulationResult: React.PropTypes.any.isRequired,
+    simulationResult: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
   },

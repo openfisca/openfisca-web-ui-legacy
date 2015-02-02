@@ -24,6 +24,7 @@ var TestCaseToolbar = React.createClass({
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
     onYearChange: React.PropTypes.func.isRequired,
+    reformName: React.PropTypes.string,
     testCase: React.PropTypes.object,
     year: React.PropTypes.number,
   },
@@ -33,15 +34,19 @@ var TestCaseToolbar = React.createClass({
     };
   },
   render: function() {
-    var simulationJsonStr = JSON.stringify({
+    var simulation = {
       scenarios: [
         {
-          "test_case": this.props.testCase,
+          test_case: this.props.testCase,
           year: this.props.year,
         },
       ],
       variables: ["revdisp"],
-    });
+    };
+    if (this.props.reformName) {
+      simulation.base_reforms = [this.props.reformName];
+    }
+    var simulationJsonStr = JSON.stringify(simulation);
     var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
     return (
       <div className='row'>

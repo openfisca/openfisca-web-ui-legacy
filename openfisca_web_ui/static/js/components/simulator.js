@@ -349,6 +349,7 @@ var Simulator = React.createClass({
             onRepair={this.handleRepair}
             onSimulate={this.simulate}
             onYearChange={this.handleYearChange}
+            reformName={this.state.reform ? this.state.reform.name : null}
             testCase={this.state.testCase}
             year={this.state.year}
           />
