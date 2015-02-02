@@ -118,12 +118,12 @@ var Visualization = React.createClass({
     // TODO translate labels and hints.
     if (variableName === 'revdisp') {
       curveLabel = 'Revenu disponible';
-      formatHint = ({amount, percent}) => `${percent} % des français ont un revenu disponible inférieur à ${amount} €`; // jshint ignore:line
+      formatHint = (amount, percent) => `${percent} % des français ont un revenu disponible inférieur à ${amount} €`; // jshint ignore:line
       pointLabel = 'Votre revenu disponible';
       points = revdispDistribution;
     } else if (variableName === 'sal') {
       curveLabel = 'Salaires imposables';
-      formatHint = ({amount, percent}) => `${percent} % des français ont des salaires imposables inférieurs à ${amount} €`; // jshint ignore:line
+      formatHint = (amount, percent) => `${percent} % des français ont des salaires imposables inférieurs à ${amount} €`; // jshint ignore:line
       pointLabel = 'Vos salaires imposables';
       points = salDistribution;
     }

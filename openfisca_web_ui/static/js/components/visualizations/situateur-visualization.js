@@ -98,10 +98,7 @@ var SituateurVisualization = React.createClass({
     var point = this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value};
     return point.x > this.pointsXMaxValue ?
       this.formatMessage(this.getIntlMessage('unknownValuesAbove'), {value: this.pointsXMaxValue / 100}) :
-      this.props.formatHint({
-        amount: this.props.yFormatNumber(point.y),
-        percent: this.props.xFormatNumber(point.x),
-      });
+      this.props.formatHint(this.props.yFormatNumber(point.y), this.props.xFormatNumber(point.x));
   },
   getDefaultProps: function() {
     return {

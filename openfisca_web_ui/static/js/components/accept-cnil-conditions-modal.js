@@ -37,11 +37,15 @@ var AcceptCnilConditionsModal = React.createClass({
           <div className="modal-content">
             <form method="post" action={this.props.actionUrlPath}>
               <div className="modal-header">
-                <h4 className="modal-title">{this.getIntlMessage('acceptCnilConditionsModalTitle')}</h4>
+                <h4 className="modal-title">
+                  {this.getIntlMessage('acceptCnilConditionsModalTitle')}
+                </h4>
               </div>
               <div className="modal-body">
                 <p>
-                  <a target="_blank" href={this.props.privacyPolicyUrlPath}>{this.getIntlMessage('acceptCnilConditionsModalTermsLink')}</a>
+                  <a target="_blank" href={this.props.privacyPolicyUrlPath}>
+                    {this.getIntlMessage('acceptCnilConditionsModalTermsLink')}
+                  </a>
                 </p>
                 <div className="checkbox">
                   <label>
@@ -85,5 +89,6 @@ var AcceptCnilConditionsModal = React.createClass({
     );
   },
 });
+
 
 module.exports = AcceptCnilConditionsModal;
