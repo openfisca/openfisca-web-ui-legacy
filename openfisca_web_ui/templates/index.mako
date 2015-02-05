@@ -48,7 +48,7 @@ window.appconfig = ${helpers.index_appconfig(ctx, alert_on_js_error = data['aler
 
 <%def name="container_content()" filter="trim">
 <div id="simulator-container">
-    <p>${_('Loading demonstrator...')}</p>
+    <p>${_(u'Loading demonstrator…')}</p>
 </div>
 </%def>
 

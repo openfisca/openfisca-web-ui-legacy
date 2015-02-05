@@ -119,9 +119,9 @@ OpenFisca
 <footer class="footer hidden-xs navbar-inverse">
     <div class="container">
         <ul class="nav navbar-nav">
-            <li><a href="http://stats.data.gouv.fr/index.php?idSite=4">Statistiques du site</a></li>
-            <li><a href="${urlparse.urljoin(conf['urls.www'], 'mentions-legales')}">${_('Legal terms')}</a></li>
-            <li><a href="${urls.get_url(ctx, 'privacy-policy')}">${_('Privacy policy')}</a></li>
+            <li><a href="http://stats.data.gouv.fr/index.php?idSite=4">${_(u'Website statistics')}</a></li>
+            <li><a href="${urlparse.urljoin(conf['urls.www'], 'mentions-legales')}">${_(u'Legal terms')}</a></li>
+            <li><a href="${urls.get_url(ctx, 'privacy-policy')}">${_(u'Privacy policy')}</a></li>
         </ul>
     </div>
 </footer>
@@ -205,10 +205,10 @@ ${_(u'OpenFisca demonstrator')}
                         <a href="http://stats.data.gouv.fr/index.php?idSite=4">Statistiques du site</a>
                     </li>
                     <li class="visible-xs-block">
-                        <a href="${urlparse.urljoin(conf['urls.www'], 'mentions-legales')}">${_('Legal terms')}</a>
+                        <a href="${urlparse.urljoin(conf['urls.www'], 'mentions-legales')}">${_(u'Legal terms')}</a>
                     </li>
                     <li class="visible-xs-block">
-                        <a href="${urls.get_url(ctx, 'privacy-policy')}">${_('Privacy policy')}</a>
+                        <a href="${urls.get_url(ctx, 'privacy-policy')}">${_(u'Privacy policy')}</a>
                     </li>
                     <%self:topbar_lang/>
                 </ul>
@@ -247,7 +247,7 @@ language_name_by_code = {
     % endfor
     % if conf['urls.other_ui_by_country']:
             <li role="presentation" class="divider"></li>
-            <li role="presentation" class="dropdown-header">${_('Other countries')}</li>
+            <li role="presentation" class="dropdown-header">${_(u'Other countries')}</li>
         % for country_code, country_url in conf['urls.other_ui_by_country'].iteritems():
             <li>
                 <a href="${country_url}">

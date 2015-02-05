@@ -28,7 +28,7 @@
 
 <%def name="breadcrumb_content()" filter="trim">
             <%parent:breadcrumb_content/>
-            <li class="active">${_('Privacy policy')}</li>
+            <li class="active">${_(u'Privacy policy')}</li>
 </%def>
 
 
