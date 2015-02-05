@@ -13,6 +13,7 @@ var appconfig = global.appconfig;
 var YearInput = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    disabled: React.PropTypes.bool,
     error: React.PropTypes.string,
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.number.isRequired,
@@ -25,6 +26,7 @@ var YearInput = React.createClass({
     return (
       <input
         className="form-control"
+        disabled={this.props.disabled}
         max={appconfig.constants.maxYear}
         min={appconfig.constants.minYear}
         onChange={this.handleChange}

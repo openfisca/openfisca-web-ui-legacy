@@ -4,7 +4,7 @@
 var React = require('react');
 
 
-var EntityRoleSelector = React.createClass({
+var EntityRoleSelect = React.createClass({
   propTypes: {
     currentEntityId: React.PropTypes.string,
     currentRole: React.PropTypes.string,
@@ -70,4 +70,4 @@ var EntityRoleSelector = React.createClass({
   }
 });
 
-module.exports = EntityRoleSelector;
+module.exports = EntityRoleSelect;

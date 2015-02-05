@@ -1,21 +1,15 @@
 /** @jsx React.DOM */
 'use strict';
 
-var invariant = require('react/lib/invariant'),
-  Lazy = require('lazy.js'),
+var Lazy = require('lazy.js'),
   React = require('react/addons'),
   ReactIntlMixin = require('react-intl'),
   saveAs = require('filesaver.js'),
   TweenState = require('react-tween-state');
 
-var helpers = require('../../helpers'),
-  ReformSelector = require('./reform-selector'),
-  SendFeedbackButton = require('../send-feedback-button'),
-  VariablesTree = require('./variables-tree'),
+var VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select'),
   WaterfallChart = require('./svg/waterfall-chart');
-
-var obj = helpers.obj;
 
 
 var WaterfallVisualization = React.createClass({
@@ -35,14 +29,11 @@ var WaterfallVisualization = React.createClass({
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onDownload: React.PropTypes.func.isRequired,
-    onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
-    reformName: React.PropTypes.string,
-    reforms: React.PropTypes.object,
-    simulationResult: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
+    variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   componentDidMount: function() {
@@ -118,7 +109,7 @@ var WaterfallVisualization = React.createClass({
   handleVariableToggle: function(variable) {
     if (variable.isCollapsed) {
       var newSettings = {
-        collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
+        collapsedVariables: {[variable.code]: ! this.props.collapsedVariables[variable.code]},
       };
       this.props.onSettingsChange(newSettings);
     }
@@ -130,7 +121,7 @@ var WaterfallVisualization = React.createClass({
         this.setState({tweenProgress: null});
         if ( ! variable.isCollapsed) {
           var newSettings = {
-            collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
+            collapsedVariables: {[variable.code]: ! this.props.collapsedVariables[variable.code]},
           };
           this.props.onSettingsChange(newSettings);
         }
@@ -152,10 +143,10 @@ var WaterfallVisualization = React.createClass({
     // Transform variablesTree into an array and compute base values for waterfall.
     // Also rename snake case keys to camel case.
     function extractChildrenCodes(node) {
-      return node.children ? node.children.map(child => {
+      return node.children ? Lazy(node.children).map((child) => {
         var childrenCodes = extractChildrenCodes(child);
         return childrenCodes ? [child.code, ...childrenCodes] : child.code;
-      }).flatten() : null;
+      }).flatten().toArray() : null;
     }
     var walk = (variable, baseValue, depth) => {
       var newVariables = [];
@@ -165,20 +156,14 @@ var WaterfallVisualization = React.createClass({
         variable.children.forEach(child => {
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
-          if ( ! this.props.simulationResult.diffMode) {
+          if ( ! this.props.diffMode) {
             childBaseValue += child.values[0];
           }
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var value;
-      if (this.props.simulationResult.diffMode) {
-        value = variable.values[1] - variable.values[0];
-      } else {
-        value = variable.values[0];
-      }
+      var value = this.props.diffMode ? variable.values[1] - variable.values[0] : variable.values[0];
       var childrenCodes = extractChildrenCodes(variable);
-      invariant( ! Object.is(depth, NaN), 'depth is NaN');
       var newVariable = Lazy(variable)
         .omit(['@context', '@type', 'children', 'short_name', 'values'])
         .assign({
@@ -195,19 +180,19 @@ var WaterfallVisualization = React.createClass({
       newVariables.push(newVariable);
       return newVariables;
     };
-    var variables = walk(this.props.simulationResult.variablesTree, 0, 0);
+    var variables = walk(this.props.variablesTree, 0, 0);
     return variables;
   },
-  removeVariables: function(variables, isRemoved, removeChildren = false) {
+  removeVariables: function(variables, isRemoved, removeChildren) {
     // Filter variables by isRemoved function and rewrite their childrenCodes properties
     // according to the remaining variables.
     var removedVariablesCodes = removeChildren ?
-      variables.filter(isRemoved).map(variable => variable.childrenCodes).flatten().uniq() :
+      Lazy(variables).filter(isRemoved).map(variable => variable.childrenCodes).flatten().uniq().toArray() :
       variables.filter(isRemoved).map(variable => variable.code);
     return variables
-      .filter(variable => ! removedVariablesCodes.contains(variable.code))
+      .filter(variable => ! removedVariablesCodes.includes(variable.code))
       .map(variable => variable.childrenCodes ? Lazy(variable).assign({
-        childrenCodes: variable.childrenCodes.diff(removedVariablesCodes)
+        childrenCodes: Lazy(variable.childrenCodes).difference(removedVariablesCodes).toArray()
       }).toObject() : variable);
   },
   render: function() {
@@ -231,28 +216,17 @@ var WaterfallVisualization = React.createClass({
         if (this.state.activeVariableCode !== 'revdisp') {
           activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
         }
-        activeVariablesCodes = activeVariablesCodes.intersection(waterfallChartVariables.map(_ => _.code));
+        var waterfallChartVariablesCodes = waterfallChartVariables.map(_ => _.code);
+        activeVariablesCodes = activeVariablesCodes.filter(
+          (activeVariablesCode) => waterfallChartVariablesCodes.includes(activeVariablesCode)
+        );
       }
     }
+    // Substract Bootstrap panel left and right paddings.
+    var waterfallChartWidth = this.state.chartContainerWidth - 15 * 2;
     return (
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
-          <div className='clearfix form-inline'>
-            {
-              this.props.reforms && (
-                <ReformSelector
-                  diffMode={this.props.diffMode}
-                  onChange={this.props.onReformChange}
-                  reformName={this.props.reformName}
-                  reforms={this.props.reforms}
-                />
-              )
-            }
-            <span className='pull-right'>
-              <SendFeedbackButton testCase={this.props.testCase} />
-            </span>
-          </div>
-          <hr/>
           <div className='panel panel-default'>
             <div className='panel-heading'>
               <div className="form-inline">
@@ -288,7 +262,7 @@ var WaterfallVisualization = React.createClass({
                     ref='chart'
                     tweenProgress={this.getTweeningValue('tweenProgress')}
                     variables={waterfallChartVariables}
-                    width={this.state.chartContainerWidth - 15 * 2 /* Substract Bootstrap panel left and right paddings. */}
+                    width={waterfallChartWidth}
                   />
                 )
               }
@@ -304,7 +278,9 @@ var WaterfallVisualization = React.createClass({
               {
                 this.props.displaySettings ? (
                   <div>
-                    <a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('hideSettings')}</a>
+                    <a href='#' onClick={this.handleDisplaySettingsClick}>
+                      {this.getIntlMessage('hideSettings')}
+                    </a>
                     <div className='checkbox'>
                       <label>
                         <input
@@ -319,7 +295,9 @@ var WaterfallVisualization = React.createClass({
                       <label>
                         <input
                           checked={this.props.displayVariablesColors}
-                          onChange={event => this.props.onSettingsChange({displayVariablesColors: event.target.checked})}
+                          onChange={(event) => this.props.onSettingsChange(
+                            {displayVariablesColors: event.target.checked}
+                          )}
                           type='checkbox'
                         />
                         {this.getIntlMessage('displayVariablesColors')}
@@ -327,7 +305,9 @@ var WaterfallVisualization = React.createClass({
                     </div>
                   </div>
                 ) : (
-                  <a href='#' onClick={this.handleDisplaySettingsClick}>{this.getIntlMessage('showSettings')}</a>
+                  <a href='#' onClick={this.handleDisplaySettingsClick}>
+                    {this.getIntlMessage('showSettings')}
+                  </a>
                 )
               }
             </div>
@@ -361,7 +341,10 @@ var WaterfallVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
-                  <button className='btn btn-default btn-sm' onClick={() => this.props.onDownload('testCase', 'json')}>
+                  <button
+                    className='btn btn-default btn-sm'
+                    onClick={() => this.props.onDownload('testCase', 'json')}
+                  >
                     JSON
                   </button>
                 </p>
@@ -386,7 +369,12 @@ var WaterfallVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
-                  <button className='btn btn-default btn-sm' onClick={this.handleChartDownload}>SVG</button>
+                  <button
+                    className='btn btn-default btn-sm'
+                    onClick={this.handleChartDownload}
+                  >
+                    SVG
+                  </button>
                 </p>
               </div>
             </div>

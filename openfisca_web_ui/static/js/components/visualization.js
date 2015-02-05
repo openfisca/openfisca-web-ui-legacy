@@ -22,13 +22,10 @@ var Visualization = React.createClass({
     isSimulationInProgress: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number.isRequired,
     onDownload: React.PropTypes.func.isRequired,
-    onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
-    reformName: React.PropTypes.string,
-    reforms: React.PropTypes.object,
     settings: React.PropTypes.object.isRequired,
-    simulationResult: React.PropTypes.object.isRequired,
+    simulationResult: React.PropTypes.any.isRequired,
     testCase: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
@@ -38,7 +35,7 @@ var Visualization = React.createClass({
       labelsFontSize: 14,
     };
   },
-  handleSettingsChange: function(settings, simulate = false) {
+  handleSettingsChange: function(settings, simulate) {
     this.props.onSettingsChange(this.props.visualizationSlug, settings, simulate);
   },
   render: function() {
@@ -46,6 +43,7 @@ var Visualization = React.createClass({
     if (this.props.visualizationSlug === 'bareme') {
       visualizationComponent = (
         <BaremeVisualization
+          baseVariablesTree={this.props.simulationResult.baseValue}
           collapsedVariables={this.props.settings.bareme.collapsedVariables}
           columns={this.props.columns}
           defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
@@ -57,13 +55,10 @@ var Visualization = React.createClass({
           isChartFullWidth={this.props.settings.bareme.isChartFullWidth}
           labelsFontSize={this.props.labelsFontSize}
           onDownload={this.props.onDownload}
-          onReformChange={this.props.onReformChange}
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
-          reformName={this.props.reformName}
-          reforms={this.props.reforms}
-          simulationResult={this.props.simulationResult}
           testCase={this.props.testCase}
+          variablesTree={this.props.simulationResult.value}
           visualizationSlug={this.props.visualizationSlug}
           xAxisVariableCode={this.props.settings.bareme.xAxisVariableCode}
           xMaxValue={this.props.settings.bareme.xMaxValue}
@@ -77,6 +72,7 @@ var Visualization = React.createClass({
     } else if (this.props.visualizationSlug === 'waterfall') {
       visualizationComponent = (
         <WaterfallVisualization
+          baseVariablesTree={this.props.simulationResult.baseValue}
           collapsedVariables={this.props.settings.waterfall.collapsedVariables}
           defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
           diffMode={this.props.diffMode}
@@ -88,13 +84,10 @@ var Visualization = React.createClass({
           isChartFullWidth={this.props.settings.waterfall.isChartFullWidth}
           labelsFontSize={this.props.labelsFontSize}
           onDownload={this.props.onDownload}
-          onReformChange={this.props.onReformChange}
           onSettingsChange={this.handleSettingsChange}
           onVisualizationChange={this.props.onVisualizationChange}
-          reformName={this.props.reformName}
-          reforms={this.props.reforms}
-          simulationResult={this.props.simulationResult}
           testCase={this.props.testCase}
+          variablesTree={this.props.simulationResult.value}
           visualizationSlug={this.props.visualizationSlug}
         />
       );
@@ -104,7 +97,10 @@ var Visualization = React.createClass({
         {visualizationComponent}
         {
           this.props.isSimulationInProgress && (
-            <span className="label label-default" style={{position: 'absolute', right: 15, top: 0}}>
+            <span
+              className="label label-default"
+              style={{position: 'absolute', right: 15, top: 0}}
+            >
               {this.getIntlMessage('simulationInProgress')}
             </span>
           )
@@ -113,7 +109,7 @@ var Visualization = React.createClass({
     );
   },
   renderSituateur: function(variableName) {
-    var value = this.props.simulationResult.variablesTree[0].values[0];
+    var value = this.props.simulationResult.value[0].values[0];
     var curveLabel, formatHint, pointLabel, points;
     // TODO translate labels and hints.
     if (variableName === 'revdisp') {

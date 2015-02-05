@@ -8,6 +8,7 @@ var React = require('react'),
 var VisualizationSelect = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    disabled: React.PropTypes.bool,
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.string,
   },
@@ -16,7 +17,13 @@ var VisualizationSelect = React.createClass({
   },
   render: function() {
     return (
-      <select className="form-control" onChange={this.handleChange} value={this.props.value}>
+      <select
+        className="form-control"
+        disabled={this.props.disabled}
+        onChange={this.handleChange}
+        title={this.getIntlMessage('visualization')}
+        value={this.props.value}
+      >
         <option value="waterfall">{this.getIntlMessage('waterfall')}</option>
         <option value="bareme">{this.getIntlMessage('bareme')}</option>
         <option value="situateur-revdisp">{this.getIntlMessage('situatorOfRevdisp')}</option>

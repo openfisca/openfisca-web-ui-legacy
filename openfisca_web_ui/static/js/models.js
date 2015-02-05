@@ -7,7 +7,7 @@ var invariant = require('react/lib/invariant'),
 var helpers = require('./helpers');
 
 
-function createEntity(kind, entitiesMetadata, testCase = null) {
+function createEntity(kind, entitiesMetadata, testCase) {
   var entity = {};
   var roles = entitiesMetadata[kind].roles;
   if (roles) {
@@ -21,7 +21,7 @@ function createEntity(kind, entitiesMetadata, testCase = null) {
 }
 
 
-function createIndividu(entitiesMetadata, testCase = null) {
+function createIndividu(entitiesMetadata, testCase) {
   return createEntity('individus', entitiesMetadata, testCase);
 }
 
@@ -105,7 +105,7 @@ function getInitialTestCase(entitiesMetadata) {
 }
 
 
-function guessEntityName(kind, entitiesMetadata, testCase = null) {
+function guessEntityName(kind, entitiesMetadata, testCase) {
   var label = entitiesMetadata[kind].label,
     nameKey = entitiesMetadata[kind].nameKey;
   var value;

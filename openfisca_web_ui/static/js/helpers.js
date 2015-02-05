@@ -65,24 +65,4 @@ function getObjectPath(object /*, keys... */) {
 }
 
 
-function obj() {
-  // TODO Use es6 computed properties, remove this function.
-  /*
-  In JavaScript objects cannot be initialized with a key which is a variable.
-  Example:
-    obj('a', 1, 'b', 2)
-      => {a: 1, b: 2}
-    var kind = 'familles';
-    obj(kind, 1)
-      => {familles: 1}
-  */
-  return Lazy(Array.prototype.slice.call(arguments)).chunk(2).toObject();
-}
-
-
-module.exports = {
-  assignIn,
-  formatFrenchNumber,
-  getObjectPath,
-  obj,
-};
+module.exports = {assignIn, formatFrenchNumber, getObjectPath};

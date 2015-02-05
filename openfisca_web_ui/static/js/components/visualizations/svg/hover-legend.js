@@ -29,8 +29,8 @@ var HoverLegend = React.createClass({
   clientPixelToLocalPixel: function(clientPixel) {
     var boundingClientRect = this.getDOMNode().getBoundingClientRect();
     var localPixel = {
-      x: clientPixel.x - boundingClientRect.left,
-      y: clientPixel.y - boundingClientRect.top,
+      x: Math.max(0, clientPixel.x - boundingClientRect.left),
+      y: Math.max(clientPixel.y - boundingClientRect.top),
     };
     return localPixel;
   },
@@ -45,7 +45,7 @@ var HoverLegend = React.createClass({
     var clientPixel = {x: event.clientX, y: event.clientY};
     var localPixel = this.clientPixelToLocalPixel(clientPixel);
     var point = this.props.pixelToPoint(localPixel);
-    var snapX = this.snapXValue(point.x);
+    var snapX = point.x === 0 ? 0 : this.snapXValue(point.x);
     this.props.onHover(snapX);
   },
   handleMouseOut: function() {

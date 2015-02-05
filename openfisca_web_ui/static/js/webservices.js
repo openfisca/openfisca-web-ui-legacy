@@ -8,6 +8,7 @@ var helpers = require('./helpers');
 
 
 var appconfig = global.appconfig;
+var simulateResultByDataCache = {};
 
 
 function fetchCommunes(term, onComplete, onError) {
@@ -237,7 +238,7 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
     });
 }
 
-function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
+function simulate(axes, decomposition, reformKey, testCase, year, force, onComplete) {
   var scenario = {
     period: {
       start: year,
@@ -254,27 +255,39 @@ function simulate(axes, decomposition, reformName, testCase, year, onComplete) {
   };
   if (decomposition) {
     data.decomposition = decomposition;
+    if (reformKey) {
+      data.reform_decomposition = decomposition;
+    }
   }
-  if (reformName) {
-    data.reforms = [reformName];
+  if (reformKey) {
+    data.reforms = [reformKey];
   }
-  request
-    .post(makeUrl(appconfig.api.urlPaths.simulate))
-    .send(data)
-    .on('error', function(error) {
-      onComplete({error: error.message});
-    })
-    .end(function(res) {
-      if (res.body && res.body.error) {
-        var errors = res.body.error.errors[0];
-        onComplete({errors: typeof errors === 'string' || ! ('scenarios' in errors) ? errors : errors.scenarios['0']});
-      } else if (res.error) {
-        onComplete(res);
-      } else {
-        onComplete(res.body.value);
-      }
-    });
+  var dataStr = JSON.stringify(data);
+  if ( ! force && simulateResultByDataCache[dataStr]) {
+    onComplete(simulateResultByDataCache[dataStr]);
+  } else {
+    request
+      .post(makeUrl(appconfig.api.urlPaths.simulate))
+      .send(data)
+      .on('error', function(error) {
+        onComplete({error: error.message});
+      })
+      .end(function(res) {
+        var result;
+        if (res.body && res.body.error) {
+          var errors = res.body.error.errors[0];
+          result = {errors: typeof errors === 'string' || ! ('scenarios' in errors) ? errors : errors.scenarios['0']};
+        } else if (res.error) {
+          result = res;
+        } else {
+          result = res.body;
+          simulateResultByDataCache[dataStr] = result;
+        }
+        onComplete(result);
+      });
+  }
 }
+
 
 module.exports = {
   fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchEntitiesMetadata, fetchFields, fetchReforms, repair,

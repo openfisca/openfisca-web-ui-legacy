@@ -8,18 +8,14 @@ var Lazy = require('lazy.js'),
 
 var BaremeChart = require('./svg/bareme-chart'),
   BaremeSettings = require('./bareme-settings'),
-  helpers = require('../../helpers'),
-  ReformSelector = require('./reform-selector'),
-  SendFeedbackButton = require('../send-feedback-button'),
   VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select');
-
-var obj = helpers.obj;
 
 
 var BaremeVisualization = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    baseVariablesTree: React.PropTypes.object,
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
     columns: React.PropTypes.object.isRequired,
@@ -34,13 +30,10 @@ var BaremeVisualization = React.createClass({
     maxHeightRatio: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onDownload: React.PropTypes.func.isRequired,
-    onReformChange: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
-    reformName: React.PropTypes.string,
-    reforms: React.PropTypes.object,
-    simulationResult: React.PropTypes.object.isRequired,
     testCase: React.PropTypes.object.isRequired,
+    variablesTree: React.PropTypes.object.isRequired,
     visualizationSlug: React.PropTypes.string.isRequired,
     xAxisVariableCode: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
@@ -83,30 +76,30 @@ var BaremeVisualization = React.createClass({
     };
   },
   getVariables: function() {
-    var diffValues = values => {
-      var referenceValues = values.slice(0, values.length / 2),
-        reformValues = values.slice(values.length / 2, values.length);
-      return reformValues.map((value, index) => value - referenceValues[index]);
-    };
+    var isVariableCollapsed = (variable) => variable.code in this.props.collapsedVariables &&
+      this.props.collapsedVariables[variable.code];
+    var diffValues = (values) => values.map((value, index) => value - baseValues[index]);
     var processNode = (variable, baseValues, depth, hidden) => {
       var newVariables = [];
-      var isCollapsed = this.isCollapsed(variable);
-      if (variable.children) {
+      var isCollapsed = isVariableCollapsed(variable);
+      var hasChildren = Boolean(variable.children && variable.children.length);
+      if (hasChildren) {
         var childrenVariables = [];
         var childBaseValues = baseValues;
-        Lazy(variable.children).each(child => {
+        variable.children.forEach((child) => {
           var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
-          childrenVariables = childrenVariables.concat(childVariables);
-          var values = this.props.simulationResult.diffMode ? diffValues(child.values) : child.values.slice(sliceStart, sliceEnd);
-          childBaseValues = Lazy(childBaseValues).zip(values).map(pair => Lazy(pair).sum()).toArray();
+          if (childVariables.length) {
+            childrenVariables = childrenVariables.concat(childVariables);
+          }
+          var values = this.props.diffMode ? diffValues(child.values) : child.values;
+          childBaseValues = Lazy(childBaseValues).zip(values).map((pair) => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var values = this.props.simulationResult.diffMode ? diffValues(variable.values) : variable.values.slice(sliceStart, sliceEnd);
+      var values = this.props.diffMode ? diffValues(variable.values) : variable.values;
       var hasValue = Lazy(values).any(value => value !== 0);
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
-        var hasChildren = !! variable.children;
         newVariableSequence = newVariableSequence.assign({
           baseValues: baseValues,
           depth: depth,
@@ -120,14 +113,8 @@ var BaremeVisualization = React.createClass({
       }
       return newVariables;
     };
-    var values = this.props.simulationResult.variablesTree.values;
-    var valuesLength = values.length;
-    if ( ! this.props.simulationResult.diffMode) {
-      var sliceStart = this.props.reformName ? valuesLength / 2 : 0;
-      var sliceEnd = this.props.reformName ? valuesLength : valuesLength / 2;
-    }
-    var initBaseValues = Lazy.repeat(0, values.length / 2).toArray();
-    var variables = processNode(this.props.simulationResult.variablesTree, initBaseValues, 0, false);
+    var initBaseValues = Lazy.repeat(0, this.props.variablesTree.values.length).toArray();
+    var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
   handleChartDownload: function() {
@@ -147,7 +134,7 @@ var BaremeVisualization = React.createClass({
   },
   handleVariableToggle: function (variable) {
     this.props.onSettingsChange({
-      collapsedVariables: obj(variable.code, ! this.props.collapsedVariables[variable.code]),
+      collapsedVariables: {[variable.code]: ! this.props.collapsedVariables[variable.code]},
     });
   },
   handleWidthChange: function() {
@@ -161,32 +148,14 @@ var BaremeVisualization = React.createClass({
     }
     this.setState({chartContainerWidth: width});
   },
-  isCollapsed: function(variable) {
-    return variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code];
-  },
   render: function() {
     var variables = this.getVariables();
+    // Substract Bootstrap panel left and right paddings.
+    var baremeChartWidth = this.state.chartContainerWidth - 15 * 2;
     return (
       <div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-7'}>
-          <div className='clearfix form-inline'>
-            {
-              this.props.reforms && (
-                <ReformSelector
-                  diffMode={this.props.diffMode}
-                  onChange={this.props.onReformChange}
-                  reformName={this.props.reformName}
-                  reforms={this.props.reforms}
-                />
-              )
-            }
-            <span className='pull-right'>
-              <SendFeedbackButton testCase={this.props.testCase} />
-            </span>
-          </div>
-          <hr/>
-          <div>
-            <div className='panel panel-default'>
+          <div className='panel panel-default'>
               <div className='panel-heading'>
                 <div className="form-inline">
                   <VisualizationSelect
@@ -207,7 +176,7 @@ var BaremeVisualization = React.createClass({
               </div>
               <div className='list-group-item' ref='chartContainer'>
                 {
-                  this.state.chartContainerWidth && (
+                  this.state.chartContainerWidth && variables.length && variables[0].values.length > 1 ? (
                     <BaremeChart
                       activeVariableCode={this.state.activeVariableCode}
                       displayBisectrix={this.props.displayBisectrix}
@@ -215,7 +184,7 @@ var BaremeVisualization = React.createClass({
                       onVariableHover={this.handleVariableHover}
                       ref='chart'
                       variables={variables}
-                      width={this.state.chartContainerWidth - 15 * 2 /* Substract Bootstrap panel left and right paddings. */}
+                      width={baremeChartWidth}
                       xAxisLabel={
                         this.props.xAxisVariableCode in this.props.columns ?
                           this.props.columns[this.props.xAxisVariableCode].label :
@@ -224,7 +193,7 @@ var BaremeVisualization = React.createClass({
                       xMaxValue={this.props.xMaxValue}
                       xMinValue={this.props.xMinValue}
                     />
-                  )
+                ) : null
                 }
               </div>
               <div className='list-group-item'>
@@ -243,7 +212,6 @@ var BaremeVisualization = React.createClass({
                 />
               </div>
             </div>
-          </div>
         </div>
         <div className={this.props.isChartFullWidth ? null : 'col-lg-5'}>
           <div className='panel panel-default'>
@@ -274,7 +242,10 @@ var BaremeVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
-                  <button className='btn btn-default btn-sm' onClick={() => this.props.onDownload('testCase', 'json')}>
+                  <button
+                    className='btn btn-default btn-sm'
+                    onClick={() => this.props.onDownload('testCase', 'json')}
+                  >
                     JSON
                   </button>
                 </p>
@@ -298,7 +269,12 @@ var BaremeVisualization = React.createClass({
               <div className='list-group-item'>
                 <p>
                   <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
-                  <button className='btn btn-default btn-sm' onClick={this.handleChartDownload}>SVG</button>
+                  <button
+                    className='btn btn-default btn-sm'
+                    onClick={this.handleChartDownload}
+                  >
+                    SVG
+                  </button>
                 </p>
               </div>
             </div>

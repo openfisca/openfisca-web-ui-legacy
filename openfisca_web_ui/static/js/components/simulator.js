@@ -2,7 +2,6 @@
 'use strict';
 
 var toCsv = require('to-csv'),
-  deepEqual = require('deep-equal'),
   invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   React = require('react'),
@@ -16,14 +15,16 @@ var EditForm = require('./edit-form'),
   helpers = require('../helpers'),
   models = require('../models'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
+  ReformSelect = require('./reform-select'),
+  SendFeedbackButton = require('./send-feedback-button'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   Visualization = require('./visualization'),
   webservices = require('../webservices');
 
+
 var appconfig = global.appconfig,
-  cx = React.addons.classSet,
-  obj = helpers.obj;
+  cx = React.addons.classSet;
 
 
 var Simulator = React.createClass({
@@ -58,7 +59,7 @@ var Simulator = React.createClass({
     return {
       defaultPropsByVisualizationSlug: {
         bareme: {
-          baremeStepsX: 200,
+          baremeStepsX: 50,
           displayBisectrix: false,
           displaySettings: false,
           isChartFullWidth: false,
@@ -78,7 +79,10 @@ var Simulator = React.createClass({
       editedEntity: null,
       errors: null,
       isSimulationInProgress: false,
-      reform: null,
+      selectedReformDiffMode: null,
+      selectedReformKey: null,
+      selectedVisualizationSlug: this.props.defaultVisualizationSlug,
+      simulationError: null,
       simulationResult: null,
       suggestions: null,
       testCase: null,
@@ -99,7 +103,6 @@ var Simulator = React.createClass({
           isChartFullWidth: false,
         },
       },
-      visualizationSlug: this.props.defaultVisualizationSlug,
       year: appconfig.constants.defaultYear,
     };
   },
@@ -119,7 +122,7 @@ var Simulator = React.createClass({
     // TODO use withIndividu
     var newIndividu = models.createIndividu(this.props.entitiesMetadata, this.state.testCase);
     var newIndividuId = uuid.v4();
-    var newIndividus = Lazy(this.state.testCase.individus).assign(obj(newIndividuId, newIndividu)).toObject();
+    var newIndividus = Lazy(this.state.testCase.individus).assign({[newIndividuId]: newIndividu}).toObject();
     var newTestCase = Lazy(this.state.testCase).assign({individus: newIndividus}).toObject();
     newTestCase = models.withIndividuInEntity(newIndividuId, kind, id, role, this.props.entitiesMetadata, newTestCase);
     this.setState({testCase: newTestCase}, this.repair);
@@ -157,9 +160,11 @@ var Simulator = React.createClass({
       return array;
     }
 
+    invariant(this.state.simulationResult, 'this.state.simulationResult is not defined');
     if (dataKind === 'simulationResult') {
+      var variablesTree = this.state.simulationResult.value;
       if (format === 'csv') {
-        var variables = treeToArray(this.state.simulationResult.variablesTree);
+        var variables = treeToArray(variablesTree);
         var data = variables.map(variable => {
           return {
             code: variable.code,
@@ -173,7 +178,7 @@ var Simulator = React.createClass({
         );
       } else if (format === 'json') {
         saveAs(
-          new Blob([JSON.stringify(this.state.simulationResult.variablesTree, null, 2)], {type: "application/json"}),
+          new Blob([JSON.stringify(variablesTree, null, 2)], {type: "application/json"}),
           this.formatMessage(this.getIntlMessage('simulationResultFilename'), {extension: 'json'})
         );
       }
@@ -187,7 +192,7 @@ var Simulator = React.createClass({
   handleEditEntity: function(kind, id) {
     var nameKey = this.props.entitiesMetadata[kind].nameKey;
     var name = this.state.testCase[kind][id][nameKey];
-    var newEditedEntity = {action: 'edit', changedValues: obj(nameKey, name), id: id, kind: kind};
+    var newEditedEntity = {action: 'edit', changedValues: {[nameKey]: name}, id: id, kind: kind};
     this.setState({editedEntity: newEditedEntity});
   },
   handleEditFormClose: function() {
@@ -221,15 +226,14 @@ var Simulator = React.createClass({
   },
   handleFieldsFormChange: function(kind, id, column, value) {
     var newValue = column.autocomplete ? value.value : value;
-    var newChangedValues = Lazy(this.state.editedEntity.changedValues).assign(obj(column.name, newValue)).toObject();
+    var newChangedValues = Lazy(this.state.editedEntity.changedValues).assign({[column.name]: newValue}).toObject();
     var newEditedEntity = helpers.assignIn(this.state.editedEntity, ['changedValues'], newChangedValues);
     if (column.autocomplete) {
       var newChangedAdditionalData = Lazy(this.state.editedEntity.changedAdditionalData)
-        .assign(obj(column.name, value.displayedValue)).toObject();
+        .assign({[column.name]: value.displayedValue}).toObject();
       newEditedEntity = helpers.assignIn(newEditedEntity, ['changedAdditionalData'], newChangedAdditionalData);
     }
-    var changeset = {editedEntity: newEditedEntity};
-    this.setState(changeset);
+    this.setState({editedEntity: newEditedEntity});
   },
   handleMoveIndividu: function(id) {
     var newEditedEntity = {action: 'move', id: id, kind: 'individus'};
@@ -249,8 +253,11 @@ var Simulator = React.createClass({
       this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
-  handleReformChange: function(reformData) {
-    this.setState({reform: reformData}, this.simulate);
+  handleReformDiffModeChange: function(diffMode) {
+    this.setState({selectedReformDiffMode: diffMode}, this.simulate);
+  },
+  handleReformNameChange: function(reformName) {
+    this.setState({selectedReformKey: reformName}, this.simulate);
   },
   handleRepair: function() {
     if ( ! this.state.editedEntity) {
@@ -267,24 +274,20 @@ var Simulator = React.createClass({
       this.repair(initialTestCase, null);
     }
   },
-  handleVisualizationChange: function(slug) {
-    var changeset = {visualizationSlug: slug};
-    var newSimulationParams = this.simulationParams(slug),
-      oldSimulationParams = this.simulationParams(this.state.visualizationSlug);
-    if (deepEqual(newSimulationParams, oldSimulationParams)) {
-      this.setState(changeset);
-    } else {
+  handleVisualizationChange: function(visualizationSlug) {
+    var changeset = {selectedVisualizationSlug: visualizationSlug};
+    if (visualizationSlug !== this.state.selectedVisualizationSlug) {
       changeset.simulationResult = null;
-      this.setState(changeset, this.simulate);
     }
+    this.setState(changeset, this.simulate);
   },
-  handleVisualizationSettingsChange: function(visualizationName, settings, simulate = false) {
-    var newVisualizationsSettings = Lazy(this.state.visualizationsSettings).merge(obj(visualizationName, settings))
+  handleVisualizationSettingsChange: function(visualizationName, settings, simulate) {
+    var newVisualizationsSettings = Lazy(this.state.visualizationsSettings).merge({[visualizationName]: settings})
       .toObject();
     this.setState({visualizationsSettings: newVisualizationsSettings}, simulate ? this.simulate : null);
   },
   handleVisualizationStateChange: function(visualizationState) {
-    this.setState(obj(this.state.visualizationSlug, visualizationState));
+    this.setState({[this.state.selectedVisualizationSlug]: visualizationState});
   },
   handleYearChange: function(year) {
     this.setState({errors: null, year: year}, this.simulate);
@@ -327,7 +330,37 @@ var Simulator = React.createClass({
         );
       }
     } else {
-      rightPanel = this.renderVisualizationPanel();
+      rightPanel = (
+        <div>
+          <div className='clearfix form-inline'>
+            {
+              this.props.reforms && (
+                <ReformSelect
+                  className='pull-left'
+                  diffMode={this.props.selectedReformDiffMode}
+                  disabled={
+                    Boolean(! this.state.simulationResult || this.state.errors || this.state.isSimulationInProgress)
+                  }
+                  onDiffModeChange={this.handleReformDiffModeChange}
+                  onNameChange={this.handleReformNameChange}
+                  reforms={this.props.reforms}
+                  selectedReformKey={this.state.selectedReformKey}
+                />
+              )
+            }
+            {
+              this.state.testCase && (
+                <SendFeedbackButton
+                  className='pull-right'
+                  testCase={this.state.testCase}
+                />
+              )
+            }
+          </div>
+          <hr />
+          {this.renderVisualizationPanel()}
+        </div>
+      );
     }
     return (
       <div className='row'>
@@ -338,18 +371,16 @@ var Simulator = React.createClass({
           'hidden-xs': this.state.editedEntity,
         })}>
           <TestCaseToolbar
-            disableSimulate={
-              Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)
-            }
+            disabled={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
             entitiesMetadata={this.props.entitiesMetadata}
             errors={this.state.errors}
             getEntitiesKinds={models.getEntitiesKinds}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
             onRepair={this.handleRepair}
-            onSimulate={this.simulate}
+            onSimulate={() => this.simulate({force: true})}
             onYearChange={this.handleYearChange}
-            reformName={this.state.reform ? this.state.reform.name : null}
+            reformKey={this.state.selectedReformKey}
             testCase={this.state.testCase}
             year={this.state.year}
           />
@@ -457,35 +488,32 @@ var Simulator = React.createClass({
         </ul>
       </div>
     ) : (
-      this.state.simulationResult ? (
-        this.state.simulationResult.error ? (
-          <div className="alert alert-danger" role="alert">
-            <h4>{this.getIntlMessage('error')}</h4>
-            <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
-          </div>
-        ) : (
+      this.state.simulationError ? (
+        <div className="alert alert-danger" role="alert">
+          <h4>{this.getIntlMessage('error')}</h4>
+          <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+        </div>
+      ) : (
+        this.state.simulationResult ? (
           <Visualization
             columns={this.props.columns}
             defaultPropsByVisualizationSlug={this.props.defaultPropsByVisualizationSlug}
-            diffMode={this.state.reform ? this.state.reform.diffMode : null}
+            diffMode={this.state.selectedReformDiffMode}
             isSimulationInProgress={this.state.isSimulationInProgress}
             onDownload={this.handleDownload}
-            onReformChange={this.handleReformChange}
             onSettingsChange={this.handleVisualizationSettingsChange}
             onVisualizationChange={this.handleVisualizationChange}
-            reformName={this.state.reform ? this.state.reform.name : null}
-            reforms={this.props.reforms}
             settings={this.state.visualizationsSettings}
             simulationResult={this.state.simulationResult}
             testCase={this.state.testCase}
-            visualizationSlug={this.state.visualizationSlug}
+            visualizationSlug={this.state.selectedVisualizationSlug}
           />
-        )
-      ) : (
-        this.state.isSimulationInProgress && (
-          <p>
-            {this.getIntlMessage('simulationInProgress')}
-          </p>
+        ) : (
+          this.state.isSimulationInProgress && (
+            <p>
+              {this.getIntlMessage('simulationInProgress')}
+            </p>
+          )
         )
       )
     );
@@ -531,29 +559,26 @@ var Simulator = React.createClass({
       });
     }
   },
-  simulate: function() {
+  simulate: function({force = false} = {}) {
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
       this.setState({isSimulationInProgress: true}, () => {
-        var params = this.simulationParams(this.state.visualizationSlug);
-        var reformName = this.state.reform ? this.state.reform.name : null;
-        webservices.simulate(params.axes, params.decomposition, reformName, this.state.testCase, this.state.year,
-          data => {
+        var params = this.simulationParams(this.state.selectedVisualizationSlug);
+        webservices.simulate(params.axes, params.decomposition, this.state.selectedReformKey, this.state.testCase,
+          this.state.year, force, (result) => {
             var changeset = {isSimulationInProgress: false};
-            if (data) {
-              if (data.error) {
-                changeset.simulationResult = {error: data.error};
+            if (result.error) {
+              changeset.errors = null;
+              changeset.simulationError = result.error;
+              changeset.simulationResult = null;
+            } else {
+              if (result.errors) {
+                changeset.errors = result.errors;
+                changeset.simulationError = null;
+                changeset.simulationResult = null;
               } else {
-                if (data.errors) {
-                  changeset.errors = data.errors;
-                  changeset.simulationResult = null;
-                } else {
-                  changeset.errors = null;
-                  changeset.simulationResult = {
-                    diffMode: this.state.reform ? this.state.reform.diffMode : false,
-                    reformName: reformName,
-                    variablesTree: data,
-                  };
-                }
+                changeset.errors = null;
+                changeset.simulationError = null;
+                changeset.simulationResult = result;
               }
             }
             this.setState(changeset);
@@ -562,17 +587,17 @@ var Simulator = React.createClass({
     }
   },
   simulationParams: function(visualizationSlug) {
-    var params = {
-      axes: visualizationSlug === 'bareme' ? [
+    var params = {};
+    if (visualizationSlug === 'bareme') {
+      params.axes = [
         {
           count: this.props.defaultPropsByVisualizationSlug.bareme.baremeStepsX,
           max: this.state.visualizationsSettings.bareme.xMaxValue,
           min: this.state.visualizationsSettings.bareme.xMinValue,
           name: this.state.visualizationsSettings.bareme.xAxisVariableCode,
         },
-      ] : null,
-      decomposition: null,
-    };
+      ];
+    }
     if (visualizationSlug === 'situateur-revdisp') {
       params.decomposition = ['revdisp'];
     } else if (visualizationSlug === 'situateur-sal') {
@@ -581,5 +606,6 @@ var Simulator = React.createClass({
     return params;
   },
 });
+
 
 module.exports = Simulator;

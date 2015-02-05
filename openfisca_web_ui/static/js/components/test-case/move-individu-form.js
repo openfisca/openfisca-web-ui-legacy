@@ -4,7 +4,7 @@
 var Lazy = require('lazy.js'),
   React = require('react');
 
-var EntityRoleSelector = require('./entity-role-selector');
+var EntityRoleSelect = require('./entity-role-select');
 
 
 var MoveIndividuForm = React.createClass({
@@ -35,7 +35,7 @@ var MoveIndividuForm = React.createClass({
               label: this.props.entitiesMetadata[kind].labelByRoleKey[role],
             }));
             return (
-              <EntityRoleSelector
+              <EntityRoleSelect
                 currentEntityId={this.props.currentEntityIdByKind[kind]}
                 currentRole={this.props.currentRoleByKind[kind]}
                 entities={entities}

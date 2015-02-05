@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenFisca-Web-UI 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-02-02 13:52+0100\n"
-"PO-Revision-Date: 2015-01-15 18:38+0100\n"
+"POT-Creation-Date: 2015-02-04 14:05+0100\n"
+"PO-Revision-Date: 2015-02-04 10:20+0100\n"
 "Last-Translator: Christophe Benz <christophe.benz@data.gouv.fr>\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -178,8 +178,8 @@ msgid "beta"
 msgstr "beta"
 
 #: openfisca_web_ui/templates/index.mako:51
-msgid "Loading demonstrator..."
-msgstr "Chargement du démonstrateur..."
+msgid "Loading demonstrator…"
+msgstr "Chargement du démonstrateur…"
 
 #: openfisca_web_ui/templates/logout.mako:45
 msgid "Logout in progress…"
@@ -198,6 +198,10 @@ msgstr "Erreur !"
 #: openfisca_web_ui/templates/site.mako:88
 msgid "Please, correct the informations below."
 msgstr "Veuillez corriger les informations ci-dessous."
+
+#: openfisca_web_ui/templates/site.mako:122
+msgid "Website statistics"
+msgstr "Statistiques du site"
 
 #: openfisca_web_ui/templates/site.mako:123
 #: openfisca_web_ui/templates/site.mako:208

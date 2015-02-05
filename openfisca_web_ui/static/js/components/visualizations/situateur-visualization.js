@@ -225,7 +225,7 @@ var SituateurVisualization = React.createClass({
             style={{stroke: 'rgb(31, 119, 180)'}}
           />
           <Curve
-            points={[this.props.points.last(), this.lastPoint]}
+            points={[this.props.points.slice(-1)[0], this.lastPoint]}
             pointToPixel={this.gridPointToPixel}
             style={{
               stroke: 'rgb(31, 119, 180)',

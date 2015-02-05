@@ -50,7 +50,7 @@ var WaterfallBars = React.createClass({
       <g className='bars'>
         {
           this.props.variables.map((variable, variableIndex) => {
-            var isActive = this.props.activeVariablesCodes && this.props.activeVariablesCodes.contains(variable.code),
+            var isActive = this.props.activeVariablesCodes && this.props.activeVariablesCodes.includes(variable.code),
               isThinBar = variable.isSubtotal && ! variable.isCollapsed;
             var style = {
               fill: this.props.displayVariablesColors ?

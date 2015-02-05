@@ -106,10 +106,10 @@ gulp.task('watch', ['clean:dist', 'vendor'], function() {
 
   var bundler = watchify(browserify(indexJsFile, {cache: {}, debug: true, fullPaths: true, packageCache: {}}));
   bundler.on('update', function() {
-    gutil.log('Rebundle in progress...');
+    gutil.log('Rebundle in progress…');
     rebundle().on('end', function() { gutil.log('Rebundle done.'); });
   });
-  gutil.log('Initial bundle in progress...');
+  gutil.log('Initial bundle in progress…');
   var stream = rebundle().on('end', function() { gutil.log('Initial bundle done.'); });
   return stream;
 });

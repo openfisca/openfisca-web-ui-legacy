@@ -1,7 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react'),
   ReactIntlMixin = require('react-intl');
 
@@ -84,18 +85,18 @@ var BaremeChart = React.createClass({
   },
   gridPointToPixel: function(point) {
     var pixel = {
-      x: axes.convertLinearRange({
+      x: axes.convertLinearRange(point.x, {
         newMax: this.gridWidth,
         newMin: 0,
         oldMax: this.props.xMaxValue,
         oldMin: this.props.xMinValue,
-      }, point.x),
-      y: axes.convertLinearRange({
-        newMax: 0,
+      }),
+      y: axes.convertLinearRange(point.y, {
+        newMax: 0, // newMax and newMin are inverted on Y axis in SVG
         newMin: this.gridHeight,
         oldMax: this.ySmartValues.maxValue,
         oldMin: this.ySmartValues.minValue,
-      }, point.y),
+      }),
     };
     return pixel;
   },
@@ -103,21 +104,21 @@ var BaremeChart = React.createClass({
     this.props.onVariableHover(event.type === 'mouseover' ? variable : null);
   },
   render: function() {
+    invariant(this.props.variables.every((variable) => variable.values.length > 1),
+      'variables must have more than 1 value');
     var height = this.props.height || this.props.width / this.props.aspectRatio;
-    if (this.props.variables.length) {
-      var [yMinValue, yMaxValue] = this.computeBoundsValues(this.props.variables);
-      if (yMinValue === yMaxValue) {
-        if (yMinValue > 0) {
-          yMinValue = 0;
-        } else if (yMaxValue < 0) {
-          yMaxValue = 0;
-        } else {
-          yMinValue -= 1000;
-          yMaxValue += 1000;
-        }
-      }
-      this.ySmartValues = axes.smartValues(yMinValue, yMaxValue, this.props.yNbSteps);
-    }
+    var [yMinValue, yMaxValue] = this.computeBoundsValues(this.props.variables);
+    // if (yMinValue === yMaxValue) {
+    //   if (yMinValue > 0) {
+    //     yMinValue = 0;
+    //   } else if (yMaxValue < 0) {
+    //     yMaxValue = 0;
+    //   } else {
+    //     yMinValue -= 1000;
+    //     yMaxValue += 1000;
+    //   }
+    // }
+    this.ySmartValues = axes.smartValues(0, yMaxValue, this.props.yNbSteps);
     var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
     this.gridHeight = height - this.props.xAxisHeight - this.props.marginTop;
     this.gridWidth = this.props.width - yAxisWidth - this.props.marginRight;
@@ -146,8 +147,8 @@ var BaremeChart = React.createClass({
         </g>
         <g transform={`translate(${yAxisWidth}, ${this.props.marginTop})`}>
           {
-            this.props.variables.map(variable => {
-              var toDomainValue = axes.convertLinearRange.bind(null, {
+            this.props.variables.map((variable) => {
+              var toDomainValue = (value) => axes.convertLinearRange(value, {
                 newMax: this.props.xMaxValue,
                 newMin: this.props.xMinValue,
                 oldMax: variable.values.length - 1,
@@ -160,10 +161,12 @@ var BaremeChart = React.createClass({
                 .zip(this.targetValues(variable)).toArray();
               var pointsSequence = isFilled ? Lazy(basePoints).concat(Lazy(targetPoints).reverse().toArray()) :
                 Lazy(targetPoints);
-              var points = pointsSequence.map(pair => ({x: pair[0], y: pair[1]})).toArray(); // jshint ignore:line
+              invariant(pointsSequence.every((pair) => ! isNaN(pair[0]) && ! isNaN(pair[1])), 'NaN is forbidden');
+              var points = pointsSequence.map((pair) => ({x: pair[0], y: pair[1]})).toArray();
               var cssColor = variable.color ? `rgb(${variable.color})` : this.props.noColorFill;
               return (! variable.hasChildren || variable.isCollapsed || variable.depth === 0) && (
                 <Curve
+                  className={variable.code}
                   fill={isFilled}
                   key={variable.code}
                   onHover={event => this.handleVariableHover(event, variable)}

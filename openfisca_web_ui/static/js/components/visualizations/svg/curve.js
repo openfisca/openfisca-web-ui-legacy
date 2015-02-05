@@ -1,12 +1,14 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Lazy = require('lazy.js'),
+var invariant = require('react/lib/invariant'),
+  Lazy = require('lazy.js'),
   React = require('react');
 
 
 var Curve = React.createClass({
   propTypes: {
+    className: React.PropTypes.string,
     fill: React.PropTypes.bool,
     onHover: React.PropTypes.func,
     points: React.PropTypes.arrayOf(
@@ -32,6 +34,8 @@ var Curve = React.createClass({
   pointsToPixelsStr: function(points) {
     return points.map(point => {
       var pixel = this.props.pointToPixel(point);
+      invariant( ! isNaN(pixel.x), 'pixel.x is NaN');
+      invariant( ! isNaN(pixel.y), 'pixel.y is NaN');
       return `${pixel.x},${pixel.y}`;
     }).join(' ');
   },
@@ -39,6 +43,7 @@ var Curve = React.createClass({
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();
     return (
       <polyline
+        className={this.props.className}
         onMouseOut={this.props.onHover}
         onMouseOver={this.props.onHover}
         points={this.pointsToPixelsStr(this.props.points)}

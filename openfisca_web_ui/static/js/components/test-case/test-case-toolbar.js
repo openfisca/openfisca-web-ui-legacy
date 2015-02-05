@@ -14,7 +14,7 @@ var appconfig = global.appconfig,
 var TestCaseToolbar = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
-    disableSimulate: React.PropTypes.bool,
+    disabled: React.PropTypes.bool,
     displayRepairMenuItem: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
@@ -24,7 +24,7 @@ var TestCaseToolbar = React.createClass({
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
     onYearChange: React.PropTypes.func.isRequired,
-    reformName: React.PropTypes.string,
+    reformKey: React.PropTypes.string,
     testCase: React.PropTypes.object,
     year: React.PropTypes.number,
   },
@@ -43,8 +43,8 @@ var TestCaseToolbar = React.createClass({
       ],
       variables: ["revdisp"],
     };
-    if (this.props.reformName) {
-      simulation.base_reforms = [this.props.reformName];
+    if (this.props.reformKey) {
+      simulation.base_reforms = [this.props.reformKey];
     }
     var simulationJsonStr = JSON.stringify(simulation);
     var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
@@ -56,18 +56,18 @@ var TestCaseToolbar = React.createClass({
               accessKey="a"
               className="btn btn-primary dropdown-toggle"
               data-toggle="dropdown"
-              id="simulation-button"
+              id="actions-button"
               type="button">
               <span>{this.getIntlMessage('actions')}</span> <span className="caret"></span>
             </button>
-            <ul aria-labelledby="simulation-button" className="dropdown-menu" role="menu">
-              <li className={cx({disabled: this.props.disableSimulate})} role="presentation">
+            <ul aria-labelledby="actions-button" className="dropdown-menu" role="menu">
+              <li className={cx({disabled: this.props.disabled})} role="presentation">
                 <a
                   accessKey="s"
                   href="#"
-                  onClick={event => {
+                  onClick={(event) => {
                     event.preventDefault();
-                    if (! this.props.disableSimulate) {
+                    if (! this.props.disabled) {
                       this.props.onSimulate();
                     }
                   }}
@@ -76,17 +76,22 @@ var TestCaseToolbar = React.createClass({
                   {this.getIntlMessage('simulate')}
                 </a>
               </li>
-              <li role="presentation">
+              <li className={cx({disabled: this.props.disabled})} role="presentation">
                 <a href={traceUrl} role="menuitem" tabIndex="-1" target='_blank'>
                   {this.getIntlMessage('trace')}
                 </a>
               </li>
               {
                 this.props.displayRepairMenuItem && (
-                  <li role="presentation">
+                  <li className={cx({disabled: this.props.disabled})} role="presentation">
                     <a
                       href="#"
-                      onClick={event => { event.preventDefault(); this.props.onRepair(); }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        if (! this.props.disabled) {
+                          this.props.onRepair();
+                        }
+                      }}
                       role="menuitem"
                       tabIndex="-1">
                       {this.getIntlMessage('repair')}
@@ -94,23 +99,33 @@ var TestCaseToolbar = React.createClass({
                   </li>
                 )
               }
-              <li role="presentation">
+              <li className={cx({disabled: this.props.disabled})} role="presentation">
                 <a
                   href="#"
-                  onClick={event => { event.preventDefault(); this.props.onReset(); }}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (! this.props.disabled) {
+                      this.props.onReset();
+                    }
+                  }}
                   role="menuitem"
                   tabIndex="-1">
                   {this.getIntlMessage('reset')}
                 </a>
               </li>
               <li className="divider" role="presentation"></li>
-              <li role="presentation">
+              <li className={cx({disabled: this.props.disabled})} role="presentation">
                 {
                   this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => (
                     <a
                       href="#"
                       key={kind}
-                      onClick={event => { event.preventDefault(); this.props.onCreateEntity(kind); }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        if (! this.props.disabled) {
+                          this.props.onCreateEntity(kind);
+                        }
+                      }}
                       role="menuitem"
                       tabIndex="-1">
                       {this.getIntlMessage(`addEntity:${kind}`)}
@@ -128,6 +143,7 @@ var TestCaseToolbar = React.createClass({
           'has-error': this.props.errors && this.props.errors.period,
         })}>
           <YearInput
+            disabled={this.props.disabled}
             error={this.props.errors && this.props.errors.period && this.props.errors.period['1']}
             onChange={this.props.onYearChange}
             value={this.props.year}

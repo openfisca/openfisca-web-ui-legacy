@@ -32,14 +32,10 @@ function smartValues(minValue, maxValue, nbSteps) {
 }
 
 
-function convertLinearRange(options, value) {
+function convertLinearRange(value, options) {
   return ((value - options.oldMin) / (options.oldMax - options.oldMin)) *
     (options.newMax - options.newMin) + options.newMin;
 }
 
 
-module.exports = {
-  convertLinearRange: convertLinearRange,
-  smartStepSize: smartStepSize,
-  smartValues: smartValues,
-};
+module.exports = {convertLinearRange, smartStepSize, smartValues};
