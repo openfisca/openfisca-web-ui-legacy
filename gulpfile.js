@@ -19,7 +19,7 @@ var vendorJsFiles = [
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
   './node_modules/respond/respond.src.js',
-  './node_modules/es6ify/node_modules/traceur/bin/traceur-runtime.js',
+  './node_modules/6to5ify/node_modules/6to5-core/browser-polyfill.js',
 ];
 var vendorDir = distDir + '/vendor',
   vendorBootstrapDir = vendorDir + '/bootstrap',

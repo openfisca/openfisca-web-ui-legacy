@@ -40,10 +40,10 @@
     "uuid": "^2.0.1"
   },
   "devDependencies": {
+    "6to5ify": "^4.1.0",
     "browserify": "^8.1.1",
     "browserify-shim": "^3.8.2",
     "del": "^1.1.1",
-    "es6ify": "^1.6.0",
     "gulp": "^3.8.10",
     "gulp-notify": "^2.2.0",
     "gulp-util": "^3.0.2",
@@ -56,8 +56,12 @@
   },
   "browserify": {
     "transform": [
-      ["reactify", {"es6": true}],
-      "es6ify",
+      [
+        "6to5ify",
+        {
+          "experimental": true
+        }
+      ],
       "browserify-shim"
     ]
   },
