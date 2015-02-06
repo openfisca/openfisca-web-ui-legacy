@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var Autocomplete = require('ron-react-autocomplete'),
-  React = require('react'),
+// var Autocomplete = require('ron-react-autocomplete'),
+var React = require('react'),
   ReactIntlMixin = require('react-intl');
 
 
@@ -42,7 +42,7 @@ var AutocompleteControl = React.createClass({
             id: item.code,
             title: item.main_postal_distribution,
           };
-        }))
+        }));
       }
     };
     this.props.autocomplete(searchTerm, onSuccess, onError);
@@ -53,6 +53,7 @@ var AutocompleteControl = React.createClass({
         {this.props.label}
         <div className='row'>
           <div className='col-sm-6'>
+            {/*
             <Autocomplete
               onChange={this.handleChange}
               search={this.handleSearch}
@@ -61,6 +62,7 @@ var AutocompleteControl = React.createClass({
                 title: this.props.displayedValue,
               }}
             />
+            */}
           </div>
           <div className='col-sm-6'>
             <button

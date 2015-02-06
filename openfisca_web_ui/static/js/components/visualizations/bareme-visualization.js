@@ -21,19 +21,20 @@ var BaremeVisualization = React.createClass({
     columns: React.PropTypes.object.isRequired,
     defaultProps: React.PropTypes.object.isRequired,
     diffMode: React.PropTypes.bool,
+    disabled: React.PropTypes.bool,
     displayBisectrix: React.PropTypes.bool,
     displaySettings: React.PropTypes.bool,
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     isChartFullWidth: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number,
+    loadingIndicatorElement: React.PropTypes.element.isRequired,
     maxHeightRatio: React.PropTypes.number.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
-    testCase: React.PropTypes.object.isRequired,
-    variablesTree: React.PropTypes.object.isRequired,
+    variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
     xAxisVariableCode: React.PropTypes.string.isRequired,
     xMaxValue: React.PropTypes.number.isRequired,
@@ -149,7 +150,7 @@ var BaremeVisualization = React.createClass({
     this.setState({chartContainerWidth: width});
   },
   render: function() {
-    var variables = this.getVariables();
+    var variables = this.props.variablesTree ? this.getVariables() : null;
     // Substract Bootstrap panel left and right paddings.
     var baremeChartWidth = this.state.chartContainerWidth - 15 * 2;
     return (
@@ -159,6 +160,7 @@ var BaremeVisualization = React.createClass({
               <div className='panel-heading'>
                 <div className="form-inline">
                   <VisualizationSelect
+                    disabled={this.props.disabled}
                     onChange={this.props.onVisualizationChange}
                     value={this.props.visualizationSlug}
                   />
@@ -169,14 +171,15 @@ var BaremeVisualization = React.createClass({
                         onChange={event => this.props.onSettingsChange({isChartFullWidth: event.target.checked})}
                         type='checkbox'
                       />
-                      {' ' + this.getIntlMessage('fullWidth')}
+                      {' '}
+                      {this.getIntlMessage('fullWidth')}
                     </label>
                   </div>
                 </div>
               </div>
               <div className='list-group-item' ref='chartContainer'>
                 {
-                  this.state.chartContainerWidth && variables.length && variables[0].values.length > 1 ? (
+                  this.state.chartContainerWidth && this.props.variablesTree ? (
                     <BaremeChart
                       activeVariableCode={this.state.activeVariableCode}
                       displayBisectrix={this.props.displayBisectrix}
@@ -193,12 +196,18 @@ var BaremeVisualization = React.createClass({
                       xMaxValue={this.props.xMaxValue}
                       xMinValue={this.props.xMinValue}
                     />
-                ) : null
+                  ) : (
+                    this.props.loadingIndicatorElement
+                  )
                 }
               </div>
-              <div className='list-group-item'>
-                {variables && this.formatHint(variables)}
-              </div>
+              {
+                variables && (
+                  <div className='list-group-item'>
+                    {this.formatHint(variables)}
+                  </div>
+                )
+              }
               <div className='panel-footer'>
                 <BaremeSettings
                   columns={this.props.columns}
@@ -219,65 +228,79 @@ var BaremeVisualization = React.createClass({
               {this.getIntlMessage('variablesDecomposition')}
             </div>
             <div className='panel-body'>
-              <VariablesTree
-                activeVariableCode={this.state.activeVariableCode}
-                displayVariablesColors={true}
-                displayVariablesValues={false}
-                formatNumber={this.props.formatNumber}
-                negativeColor={this.props.negativeColor}
-                noColorFill={this.props.noColorFill}
-                onVariableHover={this.handleVariableHover}
-                onVariableToggle={this.handleVariableToggle}
-                positiveColor={this.props.positiveColor}
-                variableHeightByCode={{revdisp: 5}}
-                variables={variables}
-              />
+              {
+                this.props.variablesTree ? (
+                  <VariablesTree
+                    activeVariableCode={this.state.activeVariableCode}
+                    displayVariablesColors={true}
+                    displayVariablesValues={false}
+                    formatNumber={this.props.formatNumber}
+                    negativeColor={this.props.negativeColor}
+                    noColorFill={this.props.noColorFill}
+                    onVariableHover={this.handleVariableHover}
+                    onVariableToggle={this.handleVariableToggle}
+                    positiveColor={this.props.positiveColor}
+                    variableHeightByCode={{revdisp: 5}}
+                    variables={variables}
+                  />
+                ) : (
+                  this.props.loadingIndicatorElement
+                )
+              }
             </div>
           </div>
           <div className='panel panel-default'>
             <div className='panel-heading'>
               {this.getIntlMessage('dataExport')}
             </div>
-            <div className='list-group'>
-              <div className='list-group-item'>
-                <p>
-                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={() => this.props.onDownload('testCase', 'json')}
-                  >
-                    JSON
-                  </button>
-                </p>
-              </div>
-              <div className='list-group-item'>
-                <p>
-                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={() => this.props.onDownload('simulationResult', 'json')}
-                    style={{marginRight: '1em'}}>
-                    JSON
-                  </button>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={() => this.props.onDownload('simulationResult', 'csv')}>
-                    CSV
-                  </button>
-                </p>
-              </div>
-              <div className='list-group-item'>
-                <p>
-                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={this.handleChartDownload}
-                  >
-                    SVG
-                  </button>
-                </p>
-              </div>
-            </div>
+            {
+              this.props.variablesTree ? (
+                <div className='list-group'>
+                  <div className='list-group-item'>
+                    <p>
+                      <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={() => this.props.onDownload('testCase', 'json')}
+                      >
+                        JSON
+                      </button>
+                    </p>
+                  </div>
+                  <div className='list-group-item'>
+                    <p>
+                      <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={() => this.props.onDownload('simulationResult', 'json')}
+                        style={{marginRight: '1em'}}>
+                        JSON
+                      </button>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={() => this.props.onDownload('simulationResult', 'csv')}>
+                        CSV
+                      </button>
+                    </p>
+                  </div>
+                  <div className='list-group-item'>
+                    <p>
+                      <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={this.handleChartDownload}
+                      >
+                        SVG
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className='panel-body'>
+                  {this.props.loadingIndicatorElement}
+                </div>
+              )
+            }
           </div>
         </div>
       </div>

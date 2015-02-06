@@ -10,16 +10,20 @@ var toCsv = require('to-csv'),
   shallowEqual = require('react/lib/shallowEqual'),
   uuid = require('uuid');
 
-var EditForm = require('./edit-form'),
+var BaremeVisualization = require('./visualizations/bareme-visualization'),
+  EditForm = require('./edit-form'),
   FieldsForm = require('./test-case/form/fields-form'),
   helpers = require('../helpers'),
   models = require('../models'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
   ReformSelect = require('./reform-select'),
+  revdispDistribution = require('../../data/revdisp-distribution.json'),
+  salDistribution = require('../../data/sal-distribution.json'),
   SendFeedbackButton = require('./send-feedback-button'),
+  SituateurVisualization = require('./visualizations/situateur-visualization'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
-  Visualization = require('./visualization'),
+  WaterfallVisualization = require('./visualizations/waterfall-visualization'),
   webservices = require('../webservices');
 
 
@@ -72,6 +76,8 @@ var Simulator = React.createClass({
         },
       },
       defaultVisualizationSlug: 'waterfall',
+      downloadAttribution: '© openfisca.fr',
+      visualizationsLabelsFontSize: 14,
     };
   },
   getInitialState: function() {
@@ -293,74 +299,15 @@ var Simulator = React.createClass({
     this.setState({errors: null, year: year}, this.simulate);
   },
   render: function() {
-    var rightPanel;
+    var rightColumnElement;
     if (this.state.editedEntity) {
       if (this.state.editedEntity.action === 'edit') {
-        rightPanel = this.renderFieldsFormPanel();
+        rightColumnElement = this.renderFieldsForm();
       } else {
-        invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
-        var currentEntityIdByKind = {},
-          currentRoleByKind = {};
-        var kinds = models.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
-        kinds.forEach(kind => {
-          var entityData = models.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
-            this.state.testCase);
-          if (entityData) {
-            currentEntityIdByKind[kind] = entityData.id;
-            currentRoleByKind[kind] = entityData.role;
-          }
-        });
-        var nameKey = this.props.entitiesMetadata.individus.nameKey;
-        var name = this.state.testCase.individus[this.state.editedEntity.id][nameKey];
-        rightPanel = (
-          <EditForm
-            onClose={this.handleEditFormClose}
-            title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: name})}>
-            <MoveIndividuForm
-              currentEntityIdByKind={currentEntityIdByKind}
-              currentRoleByKind={currentRoleByKind}
-              entitiesMetadata={this.props.entitiesMetadata}
-              getEntitiesKinds={models.getEntitiesKinds}
-              getEntityLabel={models.getEntityLabel}
-              onEntityChange={this.handleMoveIndividuFormChange.bind(null, 'entity')}
-              onRoleChange={this.handleMoveIndividuFormChange.bind(null, 'role')}
-              testCase={this.state.testCase}
-            />
-          </EditForm>
-        );
+        rightColumnElement = this.renderMoveIndividuForm();
       }
     } else {
-      rightPanel = (
-        <div>
-          <div className='clearfix form-inline'>
-            {
-              this.props.reforms && (
-                <ReformSelect
-                  className='pull-left'
-                  diffMode={this.props.selectedReformDiffMode}
-                  disabled={
-                    Boolean(! this.state.simulationResult || this.state.errors || this.state.isSimulationInProgress)
-                  }
-                  onDiffModeChange={this.handleReformDiffModeChange}
-                  onNameChange={this.handleReformNameChange}
-                  reforms={this.props.reforms}
-                  selectedReformKey={this.state.selectedReformKey}
-                />
-              )
-            }
-            {
-              this.state.testCase && (
-                <SendFeedbackButton
-                  className='pull-right'
-                  testCase={this.state.testCase}
-                />
-              )
-            }
-          </div>
-          <hr />
-          {this.renderVisualizationPanel()}
-        </div>
-      );
+      rightColumnElement = this.renderVisualization();
     }
     return (
       <div className='row'>
@@ -378,13 +325,13 @@ var Simulator = React.createClass({
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
             onRepair={this.handleRepair}
-            onSimulate={() => this.simulate({force: true})}
+            onSimulate={() => this.simulate(true)}
             onYearChange={this.handleYearChange}
             reformKey={this.state.selectedReformKey}
             testCase={this.state.testCase}
             year={this.state.year}
           />
-          <hr/>
+          <hr />
           {
             this.state.testCase && (
               <TestCase
@@ -407,12 +354,45 @@ var Simulator = React.createClass({
           }
         </div>
         <div className="col-lg-9 col-md-9 col-sm-9">
-          {rightPanel}
+          {rightColumnElement}
         </div>
       </div>
     );
   },
-  renderFieldsFormPanel: function() {
+  renderMoveIndividuForm: function() {
+    invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
+    var currentEntityIdByKind = {},
+      currentRoleByKind = {};
+    var kinds = models.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
+    kinds.forEach(kind => {
+      var entityData = models.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
+        this.state.testCase);
+      if (entityData) {
+        currentEntityIdByKind[kind] = entityData.id;
+        currentRoleByKind[kind] = entityData.role;
+      }
+    });
+    var nameKey = this.props.entitiesMetadata.individus.nameKey;
+    var name = this.state.testCase.individus[this.state.editedEntity.id][nameKey];
+    return (
+      <EditForm
+        onClose={this.handleEditFormClose}
+        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: name})}
+      >
+        <MoveIndividuForm
+          currentEntityIdByKind={currentEntityIdByKind}
+          currentRoleByKind={currentRoleByKind}
+          entitiesMetadata={this.props.entitiesMetadata}
+          getEntitiesKinds={models.getEntitiesKinds}
+          getEntityLabel={models.getEntityLabel}
+          onEntityChange={(kind, value) => this.handleMoveIndividuFormChange('entity', kind, value)}
+          onRoleChange={(kind, value) => this.handleMoveIndividuFormChange('role', kind, value)}
+          testCase={this.state.testCase}
+        />
+      </EditForm>
+    );
+  },
+  renderFieldsForm: function() {
     var {id, kind} = this.state.editedEntity,
       entity = this.state.testCase[kind][id];
     var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
@@ -462,60 +442,168 @@ var Simulator = React.createClass({
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {name: entityLabel})}>
+        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {name: entityLabel})}
+      >
         <FieldsForm
           categories={categories}
           errors={errors}
-          onChange={this.handleFieldsFormChange.bind(null, kind, id)}
+          onChange={(column, value) => this.handleFieldsFormChange(kind, id, column, value)}
           suggestions={suggestions}
           values={values}
         />
       </EditForm>
     );
   },
-  renderVisualizationPanel: function() {
-    return this.state.errors ? (
-      <div className="alert alert-danger" role="alert">
-        <h4>{this.getIntlMessage('incorrectSituation')}</h4>
-        <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
-        <ul>
-          <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
-          <li>
-            <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
-              {this.getIntlMessage('resetSituation')}
-            </button>
-          </li>
-        </ul>
-      </div>
-    ) : (
-      this.state.simulationError ? (
+  renderSituateurVisualization: function(variableName) {
+    var value = this.state.simulationResult ? this.state.simulationResult.value[0].values[0] : null;
+    var curveLabel, formatHint, pointLabel, points;
+    // TODO translate labels and hints.
+    if (variableName === 'revdisp') {
+      curveLabel = 'Revenu disponible';
+      formatHint = (amount, percent) => `${percent} % des français ont un revenu disponible inférieur à ${amount} €`; // jshint ignore:line
+      pointLabel = 'Votre revenu disponible';
+      points = revdispDistribution;
+    } else if (variableName === 'sal') {
+      curveLabel = 'Salaires imposables';
+      formatHint = (amount, percent) => `${percent} % des français ont des salaires imposables inférieurs à ${amount} €`; // jshint ignore:line
+      pointLabel = 'Vos salaires imposables';
+      points = salDistribution;
+    }
+    return (
+      <SituateurVisualization
+        curveLabel={curveLabel}
+        disabled={this.state.isSimulationInProgress}
+        formatHint={formatHint}
+        labelsFontSize={this.props.labelsFontSize}
+        onVisualizationChange={this.handleVisualizationChange}
+        pointLabel={pointLabel}
+        points={points}
+        value={value}
+        visualizationSlug={this.state.selectedVisualizationSlug}
+        xFormatNumber={(value) => helpers.formatFrenchNumber(value, {fixed: 0})}
+        xSnapIntervalValue={5}
+        yFormatNumber={helpers.formatFrenchNumber}
+        yMaxValue={Math.max(100000, value)}
+      />
+    );
+  },
+  renderVisualization: function() {
+    var bodyElement;
+    if (this.state.errors) {
+      bodyElement = (
         <div className="alert alert-danger" role="alert">
-          <h4>{this.getIntlMessage('error')}</h4>
-          <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+          <h4>{this.getIntlMessage('incorrectSituation')}</h4>
+          <p>{this.getIntlMessage('incorrectSituationExplanation')}</p>
+          <ul>
+            <li>{this.getIntlMessage('incorrectSituationFixErrors')}</li>
+            <li>
+              <button className='btn btn-danger btn-xs' onClick={this.handleReset}>
+                {this.getIntlMessage('resetSituation')}
+              </button>
+            </li>
+          </ul>
         </div>
-      ) : (
-        this.state.simulationResult ? (
-          <Visualization
-            columns={this.props.columns}
-            defaultPropsByVisualizationSlug={this.props.defaultPropsByVisualizationSlug}
-            diffMode={this.state.selectedReformDiffMode}
-            isSimulationInProgress={this.state.isSimulationInProgress}
-            onDownload={this.handleDownload}
-            onSettingsChange={this.handleVisualizationSettingsChange}
-            onVisualizationChange={this.handleVisualizationChange}
-            settings={this.state.visualizationsSettings}
-            simulationResult={this.state.simulationResult}
-            testCase={this.state.testCase}
-            visualizationSlug={this.state.selectedVisualizationSlug}
-          />
-        ) : (
-          this.state.isSimulationInProgress && (
-            <p>
-              {this.getIntlMessage('simulationInProgress')}
-            </p>
-          )
-        )
-      )
+      );
+    } else {
+      if (this.state.simulationError) {
+        bodyElement = (
+          <div className="alert alert-danger" role="alert">
+            <h4>{this.getIntlMessage('error')}</h4>
+            <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+          </div>
+        );
+      } else {
+        var loadingIndicatorElement = (<p>{this.getIntlMessage('loading')}</p>);
+        if (this.state.selectedVisualizationSlug === 'bareme') {
+          bodyElement = (
+            <BaremeVisualization
+              baseVariablesTree={this.state.simulationResult && this.state.simulationResult.baseValue}
+              collapsedVariables={this.state.visualizationsSettings.bareme.collapsedVariables}
+              columns={this.props.columns}
+              defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
+              diffMode={this.state.selectedReformDiffMode}
+              disabled={this.state.isSimulationInProgress}
+              displayBisectrix={this.state.visualizationsSettings.bareme.displayBisectrix}
+              displaySettings={this.state.visualizationsSettings.bareme.displaySettings}
+              downloadAttribution={this.props.downloadAttribution}
+              formatNumber={helpers.formatFrenchNumber}
+              isChartFullWidth={this.state.visualizationsSettings.bareme.isChartFullWidth}
+              labelsFontSize={this.props.visualizationsLabelsFontSize}
+              loadingIndicatorElement={loadingIndicatorElement}
+              onDownload={this.handleDownload}
+              onSettingsChange={
+                (settings, simulate) => this.handleVisualizationSettingsChange('bareme', settings, simulate)
+              }
+              onVisualizationChange={this.handleVisualizationChange}
+              variablesTree={this.state.simulationResult && this.state.simulationResult.value}
+              visualizationSlug={this.state.selectedVisualizationSlug}
+              xAxisVariableCode={this.state.visualizationsSettings.bareme.xAxisVariableCode}
+              xMaxValue={this.state.visualizationsSettings.bareme.xMaxValue}
+              xMinValue={this.state.visualizationsSettings.bareme.xMinValue}
+            />
+          );
+        } else if (this.state.selectedVisualizationSlug === 'situateur-revdisp') {
+          bodyElement = this.renderSituateurVisualization('revdisp');
+        } else if (this.state.selectedVisualizationSlug === 'situateur-sal') {
+          bodyElement = this.renderSituateurVisualization('sal');
+        } else if (this.state.selectedVisualizationSlug === 'waterfall') {
+          bodyElement = (
+            <WaterfallVisualization
+              baseVariablesTree={this.state.simulationResult && this.state.simulationResult.baseValue}
+              collapsedVariables={this.state.visualizationsSettings.waterfall.collapsedVariables}
+              defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
+              diffMode={this.state.selectedReformDiffMode}
+              disabled={this.state.isSimulationInProgress}
+              displaySettings={this.state.visualizationsSettings.waterfall.displaySettings}
+              displaySubtotals={this.state.visualizationsSettings.waterfall.displaySubtotals}
+              displayVariablesColors={this.state.visualizationsSettings.waterfall.displayVariablesColors}
+              downloadAttribution={this.props.downloadAttribution}
+              formatNumber={helpers.formatFrenchNumber}
+              isChartFullWidth={this.state.visualizationsSettings.waterfall.isChartFullWidth}
+              labelsFontSize={this.props.visualizationsLabelsFontSize}
+              loadingIndicatorElement={loadingIndicatorElement}
+              onDownload={this.handleDownload}
+              onSettingsChange={
+                (settings, simulate) => this.handleVisualizationSettingsChange('waterfall', settings, simulate)
+              }
+              onVisualizationChange={this.handleVisualizationChange}
+              variablesTree={this.state.simulationResult && this.state.simulationResult.value}
+              visualizationSlug={this.state.selectedVisualizationSlug}
+            />
+          );
+        }
+      }
+    }
+    return (
+      <div>
+        <div className='clearfix form-inline'>
+          {
+            this.props.reforms && (
+              <ReformSelect
+                className='pull-left'
+                diffMode={this.props.selectedReformDiffMode}
+                disabled={
+                  Boolean(! this.state.simulationResult || this.state.errors || this.state.isSimulationInProgress)
+                }
+                onDiffModeChange={this.handleReformDiffModeChange}
+                onNameChange={this.handleReformNameChange}
+                reforms={this.props.reforms}
+                selectedReformKey={this.state.selectedReformKey}
+              />
+            )
+          }
+          {
+            this.state.testCase && (
+              <SendFeedbackButton
+                className='pull-right'
+                testCase={this.state.testCase}
+              />
+            )
+          }
+        </div>
+        <hr />
+        {bodyElement}
+      </div>
     );
   },
   repair: function(testCase, testCaseAdditionalData) {
@@ -559,7 +647,8 @@ var Simulator = React.createClass({
       });
     }
   },
-  simulate: function({force = false} = {}) {
+  simulate: function(force) {
+    // force parameter bypasses the cache.
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
       this.setState({isSimulationInProgress: true}, () => {
         var params = this.simulationParams(this.state.selectedVisualizationSlug);

@@ -43,6 +43,7 @@
   "incorrectSituationFixErrors": "Correct errors to restore your simulation",
   "individuContainsSuggestions": "\"{name}\" contains suggestions.",
   "inspectColumnLinkTitle": "Inspect \"{name}\"",
+  "loading": "Loading…",
   "maximumLabel": "Maximum",
   "minimumLabel": "Minimum",
   "minimumValueLessThanMaximumValueExplanation": "Minimum value should be smaller than maximum value",

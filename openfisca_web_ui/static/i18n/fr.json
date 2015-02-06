@@ -43,6 +43,7 @@
   "incorrectSituationFixErrors": "Corrigez-les afin de rétablir la simulation.",
   "individuContainsSuggestions": "« {name} » contient des suggestions.",
   "inspectColumnLinkTitle": "Inspecter « {name} »",
+  "loading": "Chargement…",
   "maximumLabel": "Maximum",
   "minimumLabel": "Minimum",
   "minimumValueLessThanMaximumValueExplanation": "La valeur minimum doit être inférieure à la valeur maximum.",

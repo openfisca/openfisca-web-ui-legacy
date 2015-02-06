@@ -22,6 +22,7 @@ var SituateurVisualization = React.createClass({
     aspectRatio: React.PropTypes.number.isRequired,
     curveLabel: React.PropTypes.string.isRequired,
     defaultYAxisWidth: React.PropTypes.number.isRequired,
+    disabled: React.PropTypes.bool,
     formatHint: React.PropTypes.func.isRequired,
     height: React.PropTypes.number,
     labelsFontSize: React.PropTypes.number.isRequired,
@@ -31,7 +32,7 @@ var SituateurVisualization = React.createClass({
     pointColor: React.PropTypes.string.isRequired,
     pointLabel: React.PropTypes.string.isRequired,
     points: React.PropTypes.array.isRequired,
-    value: React.PropTypes.number.isRequired,
+    value: React.PropTypes.number,
     visualizationSlug: React.PropTypes.string.isRequired,
     xAxisHeight: React.PropTypes.number.isRequired,
     xFormatNumber: React.PropTypes.func.isRequired,
@@ -95,7 +96,7 @@ var SituateurVisualization = React.createClass({
     return y;
   },
   formatHint: function() {
-    var point = this.state.snapPoint || {x: this.findXFromY(this.props.value), y: this.props.value};
+    var point = this.state.snapPoint || this.props.value !== null && {x: this.findXFromY(this.props.value), y: this.props.value};
     return point.x > this.pointsXMaxValue ?
       this.formatMessage(this.getIntlMessage('unknownValuesAbove'), {value: this.pointsXMaxValue / 100}) :
       this.props.formatHint(this.props.yFormatNumber(point.y), this.props.xFormatNumber(point.x));
@@ -163,6 +164,7 @@ var SituateurVisualization = React.createClass({
         <div className='panel-heading'>
           <div className="form-inline">
             <VisualizationSelect
+              disabled={this.props.disabled}
               onChange={this.props.onVisualizationChange}
               value={this.props.visualizationSlug}
             />
@@ -171,9 +173,13 @@ var SituateurVisualization = React.createClass({
         <div className='list-group-item' ref='chartContainer'>
           {this.state.chartContainerWidth && this.renderSvg()}
         </div>
-        <div className='list-group-item'>
-          {this.formatHint()}
-        </div>
+        {
+          (this.state.snapPoint || this.props.value !== null) ? (
+            <div className='list-group-item'>
+              {this.formatHint()}
+            </div>
+          ) : null
+        }
       </div>
     );
   },
@@ -183,8 +189,12 @@ var SituateurVisualization = React.createClass({
     this.gridHeight = height - this.props.xAxisHeight - this.props.legendHeight;
     var yAxisWidth = this.state.yAxisWidth === null ? this.props.defaultYAxisWidth : this.state.yAxisWidth;
     this.gridWidth = width - yAxisWidth - this.props.marginRight;
-    var xValue = this.findXFromY(this.props.value);
-    var xSnapValues = Lazy.range(0, 105, this.props.xSnapIntervalValue).concat(xValue).sort().toArray();
+    var xSnapValuesSequence = Lazy.range(0, 105, this.props.xSnapIntervalValue);
+    if (this.props.value !== null) {
+      var xValue = this.findXFromY(this.props.value);
+      xSnapValuesSequence = xSnapValuesSequence.concat(xValue);
+    }
+    var xSnapValues = xSnapValuesSequence.sort().toArray();
     return (
       <svg height={height} width={width}>
         <g transform={`translate(${yAxisWidth}, ${height - this.props.xAxisHeight})`}>
@@ -232,15 +242,19 @@ var SituateurVisualization = React.createClass({
               strokeDasharray: '5 5',
             }}
           />
-          <Point
-            pointToPixel={this.gridPointToPixel}
-            style={{
-              fill: xValue > this.pointsXMaxValue ? 'none' : this.props.pointColor,
-              stroke: this.props.pointColor,
-            }}
-            x={xValue}
-            y={this.props.value}
-          />
+          {
+            this.props.value !== null && (
+              <Point
+                pointToPixel={this.gridPointToPixel}
+                style={{
+                  fill: xValue > this.pointsXMaxValue ? 'none' : this.props.pointColor,
+                  stroke: this.props.pointColor,
+                }}
+                x={xValue}
+                y={this.props.value}
+              />
+            )
+          }
           <HoverLegend
             height={this.gridHeight}
             onHover={this.handleHoverLegendHover}

@@ -18,6 +18,7 @@ var WaterfallVisualization = React.createClass({
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
     diffMode: React.PropTypes.bool,
+    disabled: React.PropTypes.bool,
     displaySettings: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
     displayVariablesColors: React.PropTypes.bool,
@@ -25,6 +26,7 @@ var WaterfallVisualization = React.createClass({
     formatNumber: React.PropTypes.func.isRequired,
     isChartFullWidth: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number,
+    loadingIndicatorElement: React.PropTypes.element.isRequired,
     maxHeightRatio: React.PropTypes.number.isRequired,
     negativeColor: React.PropTypes.string.isRequired,
     noColorFill: React.PropTypes.string.isRequired,
@@ -32,8 +34,7 @@ var WaterfallVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
-    testCase: React.PropTypes.object.isRequired,
-    variablesTree: React.PropTypes.object.isRequired,
+    variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
   componentDidMount: function() {
@@ -196,30 +197,32 @@ var WaterfallVisualization = React.createClass({
       }).toObject() : variable);
   },
   render: function() {
-    var linearizedVariables = this.linearizeVariables();
-    var hasOnlyZeroValues = variable => Math.max.apply(null, variable.values.map(Math.abs)) === 0;
-    var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
-    var isCollapsed = variable => variable.isCollapsed;
-    var variablesWithSubtotals = this.removeVariables(linearizedVariables, hasOnlyZeroValues);
-    var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
-    var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
-    var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
-    var waterfallChartVariables = this.props.displaySubtotals ? displayedVariablesWithSubtotals :
-      displayedVariablesWithoutSubtotals;
-    var variablesTreeVariables = displayedVariablesWithSubtotals;
-    var activeVariablesCodes = null;
-    var activeVariable;
-    if (this.state.activeVariableCode) {
-      activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
-      if (activeVariable) {
-        activeVariablesCodes = [this.state.activeVariableCode];
-        if (this.state.activeVariableCode !== 'revdisp') {
-          activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
+    if (this.props.variablesTree) {
+      var linearizedVariables = this.linearizeVariables();
+      var hasOnlyZeroValues = variable => Math.max.apply(null, variable.values.map(Math.abs)) === 0;
+      var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
+      var isCollapsed = variable => variable.isCollapsed;
+      var variablesWithSubtotals = this.removeVariables(linearizedVariables, hasOnlyZeroValues);
+      var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
+      var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
+      var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
+      var waterfallChartVariables = this.props.displaySubtotals ? displayedVariablesWithSubtotals :
+        displayedVariablesWithoutSubtotals;
+      var variablesTreeVariables = displayedVariablesWithSubtotals;
+      var activeVariablesCodes = null;
+      var activeVariable;
+      if (this.state.activeVariableCode) {
+        activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
+        if (activeVariable) {
+          activeVariablesCodes = [this.state.activeVariableCode];
+          if (this.state.activeVariableCode !== 'revdisp') {
+            activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
+          }
+          var waterfallChartVariablesCodes = waterfallChartVariables.map(_ => _.code);
+          activeVariablesCodes = activeVariablesCodes.filter(
+            (activeVariablesCode) => waterfallChartVariablesCodes.includes(activeVariablesCode)
+          );
         }
-        var waterfallChartVariablesCodes = waterfallChartVariables.map(_ => _.code);
-        activeVariablesCodes = activeVariablesCodes.filter(
-          (activeVariablesCode) => waterfallChartVariablesCodes.includes(activeVariablesCode)
-        );
       }
     }
     // Substract Bootstrap panel left and right paddings.
@@ -231,6 +234,7 @@ var WaterfallVisualization = React.createClass({
             <div className='panel-heading'>
               <div className="form-inline">
                 <VisualizationSelect
+                  disabled={this.props.disabled}
                   onChange={this.props.onVisualizationChange}
                   value={this.props.visualizationSlug}
                 />
@@ -241,14 +245,15 @@ var WaterfallVisualization = React.createClass({
                       onChange={event => this.props.onSettingsChange({isChartFullWidth: event.target.checked})}
                       type='checkbox'
                     />
-                    {' ' + this.getIntlMessage('fullWidth')}
+                    {' '}
+                    {this.getIntlMessage('fullWidth')}
                   </label>
                 </div>
               </div>
             </div>
             <div className='list-group-item' ref='chartContainer'>
               {
-                this.state.chartContainerWidth && (
+                this.state.chartContainerWidth && this.props.variablesTree ? (
                   <WaterfallChart
                     activeVariablesCodes={activeVariablesCodes}
                     displayVariablesColors={this.props.displayVariablesColors}
@@ -264,16 +269,22 @@ var WaterfallVisualization = React.createClass({
                     variables={waterfallChartVariables}
                     width={waterfallChartWidth}
                   />
-                )
-              }
+              ) : (
+                this.props.loadingIndicatorElement
+              )
+            }
             </div>
-            <div className='list-group-item'>
-              {
-                activeVariable ?
-                  this.formatHint(variablesWithSubtotals) :
-                  this.getIntlMessage('hoverOverChart')
-              }
-            </div>
+            {
+              this.state.chartContainerWidth && this.props.variablesTree && (
+                <div className='list-group-item'>
+                  {
+                    activeVariable ?
+                      this.formatHint(variablesWithSubtotals) :
+                      this.getIntlMessage('hoverOverChart')
+                  }
+                </div>
+              )
+            }
             <div className='panel-footer'>
               {
                 this.props.displaySettings ? (
@@ -319,65 +330,81 @@ var WaterfallVisualization = React.createClass({
               {this.getIntlMessage('variablesDecomposition')}
             </div>
             <div className='panel-body'>
-              <VariablesTree
-                activeVariableCode={this.state.activeVariableCode}
-                displayVariablesColors={this.props.displayVariablesColors}
-                displayVariablesValues={true}
-                formatNumber={this.props.formatNumber}
-                negativeColor={this.props.negativeColor}
-                noColorFill={this.props.noColorFill}
-                onVariableHover={this.state.tweenProgress === null ? this.handleVariableHover : null}
-                onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
-                positiveColor={this.props.positiveColor}
-                variables={variablesTreeVariables}
-              />
+              {
+                this.props.variablesTree ? (
+                  <VariablesTree
+                    activeVariableCode={this.state.activeVariableCode}
+                    displayVariablesColors={this.props.displayVariablesColors}
+                    displayVariablesValues={true}
+                    formatNumber={this.props.formatNumber}
+                    negativeColor={this.props.negativeColor}
+                    noColorFill={this.props.noColorFill}
+                    onVariableHover={this.state.tweenProgress === null ? this.handleVariableHover : null}
+                    onVariableToggle={this.state.tweenProgress === null ? this.handleVariableToggle : null}
+                    positiveColor={this.props.positiveColor}
+                    variables={variablesTreeVariables}
+                  />
+                ) : (
+                  this.props.loadingIndicatorElement
+                )
+              }
             </div>
           </div>
           <div className='panel panel-default'>
             <div className='panel-heading'>
               {this.getIntlMessage('dataExport')}
             </div>
-            <div className='list-group'>
-              <div className='list-group-item'>
-                <p>
-                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={() => this.props.onDownload('testCase', 'json')}
-                  >
-                    JSON
-                  </button>
-                </p>
-              </div>
-              <div className='list-group-item'>
-                <p>
-                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={() => this.props.onDownload('simulationResult', 'json')}
-                    style={{marginRight: '1em'}}>
-                    JSON
-                  </button>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={() => this.props.onDownload('simulationResult', 'csv')}
-                    >
-                    CSV
-                  </button>
-                </p>
-              </div>
-              <div className='list-group-item'>
-                <p>
-                  <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
-                  <button
-                    className='btn btn-default btn-sm'
-                    onClick={this.handleChartDownload}
-                  >
-                    SVG
-                  </button>
-                </p>
-              </div>
-            </div>
+            {
+              this.props.variablesTree ? (
+                <div className='list-group'>
+                  <div className='list-group-item'>
+                    <p>
+                      <span style={{marginRight: '1em'}}>{this.getIntlMessage('testCase')}</span>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={() => this.props.onDownload('testCase', 'json')}
+                      >
+                        JSON
+                      </button>
+                    </p>
+                  </div>
+                  <div className='list-group-item'>
+                    <p>
+                      <span style={{marginRight: '1em'}}>
+                        {this.getIntlMessage('simulationResult')}
+                      </span>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={() => this.props.onDownload('simulationResult', 'json')}
+                        style={{marginRight: '1em'}}>
+                        JSON
+                      </button>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={() => this.props.onDownload('simulationResult', 'csv')}
+                        >
+                        CSV
+                      </button>
+                    </p>
+                  </div>
+                  <div className='list-group-item'>
+                    <p>
+                      <span style={{marginRight: '1em'}}>{this.getIntlMessage('chart')}</span>
+                      <button
+                        className='btn btn-default btn-sm'
+                        onClick={this.handleChartDownload}
+                      >
+                        SVG
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className='panel-body'>
+                  {this.props.loadingIndicatorElement}
+                </div>
+              )
+            }
           </div>
         </div>
       </div>
