@@ -1,6 +1,8 @@
 # OpenFisca Web User Interface
 
 [![Build Status](https://travis-ci.org/openfisca/openfisca-web-ui.svg?branch=master)](https://travis-ci.org/openfisca/openfisca-web-ui)
+[![Dependency Status](https://david-dm.org/openfisca/openfisca-web-ui.svg)](https://david-dm.org/openfisca/openfisca-web-ui)
+[![devDependency Status](https://david-dm.org/openfisca/openfisca-web-ui/dev-status.svg)](https://david-dm.org/openfisca/openfisca-web-ui#info=devDependencies)
 
 Web user interface for [OpenFisca](http://www.openfisca.fr/) -- a versatile microsimulation free software
 
