@@ -46,6 +46,7 @@
     "gulp-notify": "^2.2.0",
     "gulp-util": "^3.0.3",
     "jsxhint": "^0.9.0",
+    "npm-check-updates": "^1.5.1",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^2.3.0"
   },

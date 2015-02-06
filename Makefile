@@ -1,12 +1,12 @@
-STATIC_DIR="openfisca_web_ui/static"
-TESTS_DIR="openfisca_web_ui/tests"
+STATIC_DIR=openfisca_web_ui/static
+TESTS_DIR=openfisca_web_ui/tests
 
 all: check test
 
-build-dev:
+build-dev: install-npm
 	./node_modules/.bin/gulp dev
 
-build-prod: npm-install
+build-prod: install-npm-prod
 	./node_modules/.bin/gulp prod
 
 check: flake8 jshint
@@ -33,11 +33,14 @@ ctags:
 flake8: clean-pyc
 	flake8
 
+install-npm:
+	npm install
+
+install-npm-prod:
+	npm install --production
+
 jshint: clean-js-dist
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
-
-npm-install:
-	npm install
 
 poedit: update-i18n-python
 	poedit openfisca_web_ui/i18n/fr/LC_MESSAGES/openfisca-web-ui.po
@@ -53,6 +56,10 @@ update-i18n-python:
 
 update-i18n-js:
 	./openfisca_web_ui/scripts/extract_i18n_json_messages.py --all --no-delete-regex='.+:.+'
+
+update-npm-modules:
+	[ -f ./node_modules/.bin/npm-check-updates ] || npm install
+	./node_modules/.bin/npm-check-updates -u; npm install
 
 watch:
 	./node_modules/.bin/gulp watch
