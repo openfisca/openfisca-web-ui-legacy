@@ -39,8 +39,8 @@ install-npm:
 install-npm-prod:
 	npm install --production
 
-jshint: clean-js-dist
-	./node_modules/.bin/jsxhint ${STATIC_DIR}/js | sed 's/ line \([0-9]\+\), col \([0-9]\+\), /\1:\2:/'
+jshint:
+	./node_modules/.bin/jsxhint ${STATIC_DIR}/js
 
 poedit: update-i18n-python
 	poedit openfisca_web_ui/i18n/fr/LC_MESSAGES/openfisca-web-ui.po
