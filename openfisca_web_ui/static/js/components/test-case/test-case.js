@@ -32,8 +32,8 @@ var TestCase = React.createClass({
   handleEdit: function(kind, id) {
     if (id === this.props.activeEntityId) {
       this.props.onCloseEntity();
-    } else {
-      this.props.onEditEntity && this.props.onEditEntity(kind, id);
+    } else if (this.props.onEditEntity) {
+      this.props.onEditEntity(kind, id);
     }
   },
   render: function() {

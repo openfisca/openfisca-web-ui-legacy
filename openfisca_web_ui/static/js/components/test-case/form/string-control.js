@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
 'use strict';
 
-var $ = require('jquery'),
-  React = require('react');
+
+var React = require('react');
 
 var CerfaField = require('./cerfa-field');
 

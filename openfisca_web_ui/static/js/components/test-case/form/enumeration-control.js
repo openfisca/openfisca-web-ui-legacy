@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 'use strict';
 
+
 var Lazy = require('lazy.js'),
   React = require('react'),
   ReactIntlMixin = require('react-intl');
@@ -37,7 +38,8 @@ var EnumerationControl = React.createClass({
           className="form-control"
           id={this.props.name}
           onChange={this.handleChange}
-          value={this.props.value}>
+          value={this.props.value}
+        >
           <option value="">{firstOptionLabel}</option>
           {
             Lazy(this.props.labels).map((label, labelId) =>
@@ -47,7 +49,8 @@ var EnumerationControl = React.createClass({
         </select>
       </div>
     );
-  }
+  },
 });
+
 
 module.exports = EnumerationControl;

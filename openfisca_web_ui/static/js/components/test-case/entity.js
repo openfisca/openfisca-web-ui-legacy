@@ -36,10 +36,22 @@ var Entity = React.createClass({
             </button>
             <ul className="dropdown-menu" role="menu">
               <li>
-                <a href="#" onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}>
+                <a href="#" onClick={
+                  (event) => {
+                    event.preventDefault();
+                    if (this.props.onEdit) {
+                      this.props.onEdit();
+                    }
+                  }
+                }>
                   {this.getIntlMessage('edit')}
                 </a>
-                <a href="#" onClick={event => { event.preventDefault(); this.props.onDelete(); }}>
+                <a href="#" onClick={
+                  (event) => {
+                    event.preventDefault();
+                    this.props.onDelete();
+                  }
+                }>
                   {this.getIntlMessage('delete')}
                 </a>
               </li>

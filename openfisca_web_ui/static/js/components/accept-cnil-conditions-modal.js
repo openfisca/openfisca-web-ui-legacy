@@ -75,11 +75,13 @@ var AcceptCnilConditionsModal = React.createClass({
                   name="accept"
                   type="submit">
                   <span className="glyphicon glyphicon-ok"></span>
-                  {' ' + this.getIntlMessage('accept')}
+                  {' '}
+                  {this.getIntlMessage('accept')}
                 </button>
                 <button className="btn btn-danger" onClick={this.logout} type="button">
                   <span className="glyphicon glyphicon-remove"></span>
-                  {' ' + this.getIntlMessage('deny')}
+                  {' '}
+                  {this.getIntlMessage('deny')}
                 </button>
               </div>
             </form>
