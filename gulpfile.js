@@ -13,12 +13,12 @@ var jsDir = staticDir + '/js';
 var indexJsFile = jsDir + '/index.js';
 var distDir = staticDir + '/dist';
 var vendorJsFiles = [
-  './node_modules/html5shiv/src/html5shiv.js',
+  './node_modules/html5shiv/dist/html5shiv.min.js',
   './node_modules/react/dist/react-with-addons.js',
   './node_modules/react/dist/react-with-addons.min.js',
   './node_modules/jquery/dist/jquery.js',
   './node_modules/lazy.js/lazy.js',
-  './node_modules/respond/respond.src.js',
+  './node_modules/respond.js/dest/respond.min.js',
   './node_modules/6to5ify/node_modules/6to5-core/browser-polyfill.js',
 ];
 var vendorDir = distDir + '/vendor',

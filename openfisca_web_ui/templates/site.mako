@@ -134,8 +134,8 @@ OpenFisca
 
 <%def name="ie_scripts()" filter="trim">
     <!--[if lt IE 9]>
-    <script src="${urls.get_url(ctx, u'dist/vendor/html5shiv.js', static = True)}"></script>
-    <script src="${urls.get_url(ctx, u'dist/vendor/respond.src.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/html5shiv.min.js', static = True)}"></script>
+    <script src="${urls.get_url(ctx, u'dist/vendor/respond.min.js', static = True)}"></script>
     <![endif]-->
 </%def>
 
