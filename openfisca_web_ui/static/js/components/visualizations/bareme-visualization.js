@@ -8,6 +8,7 @@ var Lazy = require('lazy.js'),
 
 var BaremeChart = require('./svg/bareme-chart'),
   BaremeSettings = require('./bareme-settings'),
+  decompositions = require('../../decompositions'),
   VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select');
 
@@ -76,11 +77,10 @@ var BaremeVisualization = React.createClass({
       chartContainerWidth: null,
     };
   },
-  getVariables() {
+  getVariables(rootVariable) {
     var isVariableCollapsed = (variable) => variable.code in this.props.collapsedVariables &&
       this.props.collapsedVariables[variable.code];
-    var diffValues = (values) => values.map((value, index) => value - baseValues[index]);
-    var processNode = (variable, baseValues, depth, hidden) => {
+    var walk = (variable, baseValues, depth, hidden) => {
       var newVariables = [];
       var isCollapsed = isVariableCollapsed(variable);
       var hasChildren = Boolean(variable.children && variable.children.length);
@@ -88,17 +88,15 @@ var BaremeVisualization = React.createClass({
         var childrenVariables = [];
         var childBaseValues = baseValues;
         variable.children.forEach((child) => {
-          var childVariables = processNode(child, childBaseValues, depth + 1, hidden || isCollapsed);
+          var childVariables = walk(child, childBaseValues, depth + 1, hidden || isCollapsed);
           if (childVariables.length) {
             childrenVariables = childrenVariables.concat(childVariables);
           }
-          var values = this.props.diffMode ? diffValues(child.values) : child.values;
-          childBaseValues = Lazy(childBaseValues).zip(values).map((pair) => Lazy(pair).sum()).toArray();
+          childBaseValues = Lazy(childBaseValues).zip(child.values).map((pair) => Lazy(pair).sum()).toArray();
         });
         newVariables = newVariables.concat(childrenVariables);
       }
-      var values = this.props.diffMode ? diffValues(variable.values) : variable.values;
-      var hasValue = Lazy(values).any(value => value !== 0);
+      var hasValue = Lazy(variable.values).any(value => value !== 0);
       if (! hidden && hasValue) {
         var newVariableSequence = Lazy(variable).omit(['children']);
         newVariableSequence = newVariableSequence.assign({
@@ -107,15 +105,15 @@ var BaremeVisualization = React.createClass({
           hasChildren: hasChildren,
           isCollapsed: isCollapsed,
           isSubtotal: hasChildren && depth > 0,
-          values: values,
+          values: variable.values,
         });
         var newVariable = newVariableSequence.toObject();
         newVariables.push(newVariable);
       }
       return newVariables;
     };
-    var initBaseValues = Lazy.repeat(0, this.props.variablesTree.values.length).toArray();
-    var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
+    var initBaseValues = Lazy.repeat(0, rootVariable.values.length).toArray();
+    var variables = walk(rootVariable, initBaseValues, 0, false);
     return variables;
   },
   handleChartDownload() {
@@ -150,7 +148,17 @@ var BaremeVisualization = React.createClass({
     this.setState({chartContainerWidth: width});
   },
   render() {
-    var variables = this.props.variablesTree ? this.getVariables() : null;
+    var variables;
+    if (this.props.variablesTree) {
+      var rootVariable;
+      if (this.props.diffMode) {
+        var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
+        rootVariable = mergedVariablesTree;
+      } else {
+        rootVariable = this.props.variablesTree;
+      }
+      variables = this.getVariables(rootVariable);
+    }
     // Substract Bootstrap panel left and right paddings.
     var baremeChartWidth = this.state.chartContainerWidth - 15 * 2;
     return (
@@ -179,7 +187,7 @@ var BaremeVisualization = React.createClass({
               </div>
               <div className='list-group-item' ref='chartContainer'>
                 {
-                  this.state.chartContainerWidth && this.props.variablesTree ? (
+                  this.state.chartContainerWidth && variables ? (
                     <BaremeChart
                       activeVariableCode={this.state.activeVariableCode}
                       displayBisectrix={this.props.displayBisectrix}
@@ -229,7 +237,7 @@ var BaremeVisualization = React.createClass({
             </div>
             <div className='panel-body'>
               {
-                this.props.variablesTree ? (
+                variables ? (
                   <VariablesTree
                     activeVariableCode={this.state.activeVariableCode}
                     displayVariablesColors={true}
@@ -254,7 +262,7 @@ var BaremeVisualization = React.createClass({
               {this.getIntlMessage('dataExport')}
             </div>
             {
-              this.props.variablesTree ? (
+              variables ? (
                 <div className='list-group'>
                   <div className='list-group-item'>
                     <p>
@@ -269,7 +277,9 @@ var BaremeVisualization = React.createClass({
                   </div>
                   <div className='list-group-item'>
                     <p>
-                      <span style={{marginRight: '1em'}}>{this.getIntlMessage('simulationResult')}</span>
+                      <span style={{marginRight: '1em'}}>
+                        {this.getIntlMessage('simulationResult')}
+                      </span>
                       <button
                         className='btn btn-default btn-sm'
                         onClick={() => this.props.onDownload('simulationResult', 'json')}

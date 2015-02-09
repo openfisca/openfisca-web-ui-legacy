@@ -7,7 +7,8 @@ var Lazy = require('lazy.js'),
   saveAs = require('filesaver.js'),
   TweenState = require('react-tween-state');
 
-var VariablesTree = require('./variables-tree'),
+var decompositions = require('../../decompositions'),
+  VariablesTree = require('./variables-tree'),
   VisualizationSelect = require('./visualization-select'),
   WaterfallChart = require('./svg/waterfall-chart');
 
@@ -140,7 +141,7 @@ var WaterfallVisualization = React.createClass({
     }
     this.setState({chartContainerWidth: width});
   },
-  linearizeVariables() {
+  linearizeVariables(rootVariable) {
     // Transform variablesTree into an array and compute base values for waterfall.
     // Also rename snake case keys to camel case.
     function extractChildrenCodes(node) {
@@ -150,7 +151,7 @@ var WaterfallVisualization = React.createClass({
       }).flatten().toArray() : null;
     }
     var walk = (variable, baseValue, depth) => {
-      var newVariables = [];
+      var linearVariables = [];
       if (variable.children) {
         var childrenVariables = [];
         var childBaseValue = baseValue;
@@ -161,29 +162,27 @@ var WaterfallVisualization = React.createClass({
             childBaseValue += child.values[0];
           }
         });
-        newVariables = newVariables.concat(childrenVariables);
+        linearVariables = linearVariables.concat(childrenVariables);
       }
-      var value = this.props.diffMode ? variable.values[1] - variable.values[0] : variable.values[0];
-      var childrenCodes = extractChildrenCodes(variable);
       var newVariable = Lazy(variable)
         .omit(['@context', '@type', 'children', 'short_name', 'values'])
         .assign({
           baseValue: baseValue,
-          childrenCodes: childrenCodes,
+          childrenCodes: extractChildrenCodes(variable),
           depth: depth,
           isCollapsed: variable.code in this.props.collapsedVariables && this.props.collapsedVariables[variable.code],
           isSubtotal: Boolean(variable.children) && depth > 0,
           shortName: variable.short_name,
-          value: value,
-          values: variable.values,
+          value: variable.values[0],
         })
         .toObject();
-      newVariables.push(newVariable);
-      return newVariables;
+      linearVariables.push(newVariable);
+      return linearVariables;
     };
-    var variables = walk(this.props.variablesTree, 0, 0);
+    var variables = walk(rootVariable, 0, 0);
     return variables;
   },
+
   removeVariables(variables, isRemoved, removeChildren) {
     // Filter variables by isRemoved function and rewrite their childrenCodes properties
     // according to the remaining variables.
@@ -198,11 +197,17 @@ var WaterfallVisualization = React.createClass({
   },
   render() {
     if (this.props.variablesTree) {
-      var linearizedVariables = this.linearizeVariables();
-      var hasOnlyZeroValues = variable => Math.max.apply(null, variable.values.map(Math.abs)) === 0;
+      var rootVariable;
+      if (this.props.diffMode) {
+        var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
+        rootVariable = mergedVariablesTree;
+      } else {
+        rootVariable = this.props.variablesTree;
+      }
+      var linearVariables = this.linearizeVariables(rootVariable);
       var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
       var isCollapsed = variable => variable.isCollapsed;
-      var variablesWithSubtotals = this.removeVariables(linearizedVariables, hasOnlyZeroValues);
+      var variablesWithSubtotals = this.removeVariables(linearVariables, (variable) => variable.value === 0);
       var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
       var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
       var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
@@ -269,10 +274,10 @@ var WaterfallVisualization = React.createClass({
                     variables={waterfallChartVariables}
                     width={waterfallChartWidth}
                   />
-              ) : (
-                this.props.loadingIndicatorElement
-              )
-            }
+                ) : (
+                  this.props.loadingIndicatorElement
+                )
+              }
             </div>
             {
               this.state.chartContainerWidth && this.props.variablesTree && (

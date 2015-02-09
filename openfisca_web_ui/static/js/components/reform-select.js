@@ -46,6 +46,7 @@ var ReformSelect = React.createClass({
             >
               <label>
                 <input
+                  accessKey='d'
                   checked={this.props.diffMode}
                   disabled={this.props.disabled || ! this.props.selectedReformKey}
                   onChange={(event) => this.props.onDiffModeChange(event.target.checked)}
@@ -58,7 +59,7 @@ var ReformSelect = React.createClass({
         }
       </div>
     );
-  }
+  },
 });
 
 module.exports = ReformSelect;

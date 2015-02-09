@@ -21,7 +21,6 @@ var YAxis = React.createClass({
   getDefaultProps() {
     return {
       labelFontSize: 14,
-      minValue: 0,
       nbSteps: 10,
       strokeColor: 'black',
       tickLabelsFontSize: 12,

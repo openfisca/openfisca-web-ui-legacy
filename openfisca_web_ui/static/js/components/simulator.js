@@ -261,7 +261,7 @@ var Simulator = React.createClass({
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleReformDiffModeChange(diffMode) {
-    this.setState({selectedReformDiffMode: diffMode}, this.simulate);
+    this.setState({selectedReformDiffMode: diffMode});
   },
   handleReformNameChange(reformName) {
     this.setState({selectedReformKey: reformName}, this.simulate);

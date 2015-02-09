@@ -134,6 +134,7 @@ var WaterfallChart = React.createClass({
             formatNumber={this.props.formatNumber}
             height={gridHeight}
             maxValue={ySmartValues.maxValue}
+            minValue={ySmartValues.minValue}
             nbSteps={this.props.yNbSteps}
             ref='yAxis'
             unit='€'
