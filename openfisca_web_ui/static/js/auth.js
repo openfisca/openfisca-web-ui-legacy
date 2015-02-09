@@ -34,7 +34,7 @@ function init(options) {
   } else {
     navigator.id.watch({
       loggedInUser: options.currentUser,
-      onlogin: function(assertion) {
+      onlogin(assertion) {
         $.ajax({
           type: 'POST',
           url: '/login',

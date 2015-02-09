@@ -21,26 +21,26 @@ var BaremeSettings = React.createClass({
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
   },
-  getInitialState: function() {
+  getInitialState() {
     // Use internal state to handle user typing on keyboard.
     return {
       xMaxValue: this.props.xMaxValue,
       xMinValue: this.props.xMinValue,
     };
   },
-  handleDisplaySettingsClick: function(event) {
+  handleDisplaySettingsClick(event) {
     event.preventDefault();
     this.props.onSettingsChange({displaySettings: ! this.props.displaySettings});
   },
-  handleMaxValueChange: function() {
+  handleMaxValueChange() {
     var newXMaxValue = polyfills.valueAsNumber(this.refs.xMaxValue.getDOMNode());
     this.setState({xMaxValue: newXMaxValue});
   },
-  handleMinValueChange: function() {
+  handleMinValueChange() {
     var newXMinValue = polyfills.valueAsNumber(this.refs.xMinValue.getDOMNode());
     this.setState({xMinValue: newXMinValue});
   },
-  handleReset: function(event) {
+  handleReset(event) {
     event.preventDefault();
     this.setState({
       xMaxValue: this.props.defaultProps.xMaxValue,
@@ -54,16 +54,16 @@ var BaremeSettings = React.createClass({
       }, true);
     });
   },
-  handleSubmit: function(event) {
+  handleSubmit(event) {
     event.preventDefault();
     var newXMaxValue = this.state.xMaxValue;
     var newXMinValue = this.state.xMinValue;
     this.props.onSettingsChange({xMaxValue: newXMaxValue, xMinValue: newXMinValue}, true);
   },
-  handleVariableCodeChange: function() {
+  handleVariableCodeChange() {
     this.props.onSettingsChange({xAxisVariableCode: event.target.value}, true);
   },
-  render: function() {
+  render() {
     var isMaxValueLessThanMinValue = this.state.xMaxValue !== null && this.state.xMinValue !== null &&
       this.state.xMaxValue < this.state.xMinValue;
     return this.props.displaySettings ? (

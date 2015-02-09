@@ -21,7 +21,7 @@ var ReformSelect = React.createClass({
     selectedReformKey: React.PropTypes.string,
     style: React.PropTypes.object,
   },
-  render: function() {
+  render() {
     return (
       <div className={this.props.className} style={this.props.style}>
         <select

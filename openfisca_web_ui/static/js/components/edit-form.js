@@ -11,7 +11,7 @@ var EditForm = React.createClass({
     onClose: React.PropTypes.func.isRequired,
     title: React.PropTypes.string.isRequired,
   },
-  render: function() {
+  render() {
     return (
       <form onSubmit={event => { event.preventDefault(); this.props.onClose(); }} role="form">
         <button className="close" title={this.getIntlMessage('close')} type="submit">

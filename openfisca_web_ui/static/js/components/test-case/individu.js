@@ -20,7 +20,7 @@ var Individu = React.createClass({
     onMove: React.PropTypes.func.isRequired,
     suggestions: React.PropTypes.object,
   },
-  render: function() {
+  render() {
     var btnColorClass = this.props.errors ? 'btn-danger' : 'btn-default';
     return (
       <div style={{marginBottom: '0.5em'}}>

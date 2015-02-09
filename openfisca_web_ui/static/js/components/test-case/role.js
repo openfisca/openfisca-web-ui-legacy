@@ -14,7 +14,7 @@ var Role = React.createClass({
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     role: React.PropTypes.string.isRequired,
   },
-  render: function() {
+  render() {
     var maxCardinality = this.props.maxCardinality;
     var addLink = typeof maxCardinality === 'undefined' || ! this.props.children ||
       this.props.children.length < maxCardinality;

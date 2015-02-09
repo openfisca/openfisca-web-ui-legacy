@@ -18,7 +18,7 @@ var Category = React.createClass({
     index: React.PropTypes.number.isRequired,
     label: React.PropTypes.string.isRequired,
   },
-  render: function() {
+  render() {
     return (
       <div className={cx('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">

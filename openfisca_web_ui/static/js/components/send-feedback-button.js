@@ -11,7 +11,7 @@ var SendFeedbackButton = React.createClass({
     className: React.PropTypes.string,
     testCase: React.PropTypes.object.isRequired,
   },
-  render: function() {
+  render() {
     var sendFeedbackBody = `
 Bonjour,
 

@@ -12,10 +12,10 @@ var VisualizationSelect = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.string,
   },
-  handleChange: function(event) {
+  handleChange(event) {
     this.props.onChange(event.target.value);
   },
-  render: function() {
+  render() {
     return (
       <select
         className="form-control"

@@ -20,7 +20,7 @@ var WaterfallBars = React.createClass({
     variables: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       highlightColor: '#eee',
       negativeColor: 'red',
@@ -29,7 +29,7 @@ var WaterfallBars = React.createClass({
       tweenProgress: null,
     };
   },
-  render: function() {
+  render() {
     var unitHeight = this.props.height / (this.props.maxValue - this.props.minValue);
     var y0 = this.props.maxValue > 0 ? this.props.maxValue * unitHeight : 0;
     var stepWidth = this.props.width / this.props.variables.length;

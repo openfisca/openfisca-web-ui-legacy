@@ -22,21 +22,21 @@ var NumberControl = React.createClass({
     value: React.PropTypes.string,
     valType: React.PropTypes.string,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     this.setState({isValid: polyfills.isValid(this.refs.input.getDOMNode())});
   },
-  componentDidUpdate: function() {
+  componentDidUpdate() {
     var isValid = polyfills.isValid(this.refs.input.getDOMNode());
     if (this.state.isValid !== isValid) {
       this.setState({isValid: isValid});
     }
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       isValid: null,
     };
   },
-  render: function() {
+  render() {
     var input = (
       <input
         className="form-control"

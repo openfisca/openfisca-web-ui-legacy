@@ -14,7 +14,7 @@ var Point = React.createClass({
     x: React.PropTypes.number.isRequired,
     y: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       defaultStyle: {
         fill: 'rgb(166, 50, 50)',
@@ -22,7 +22,7 @@ var Point = React.createClass({
       radius: 5,
     };
   },
-  render: function() {
+  render() {
     var point = this.props.pointToPixel({x: this.props.x, y: this.props.y});
     var style = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     return (

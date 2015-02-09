@@ -26,7 +26,7 @@ var HoverLegend = React.createClass({
     xSnapValues: React.PropTypes.array.isRequired,
     yFormatNumber: React.PropTypes.func.isRequired,
   },
-  clientPixelToLocalPixel: function(clientPixel) {
+  clientPixelToLocalPixel(clientPixel) {
     var boundingClientRect = this.getDOMNode().getBoundingClientRect();
     var localPixel = {
       x: Math.max(0, clientPixel.x - boundingClientRect.left),
@@ -34,24 +34,24 @@ var HoverLegend = React.createClass({
     };
     return localPixel;
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       fontSize: 12,
       lineColor: 'black',
       lineStrokeWidth: 1,
     };
   },
-  handleMouseMove: function(event) {
+  handleMouseMove(event) {
     var clientPixel = {x: event.clientX, y: event.clientY};
     var localPixel = this.clientPixelToLocalPixel(clientPixel);
     var point = this.props.pixelToPoint(localPixel);
     var snapX = point.x === 0 ? 0 : this.snapXValue(point.x);
     this.props.onHover(snapX);
   },
-  handleMouseOut: function() {
+  handleMouseOut() {
     this.props.onHover(null);
   },
-  render: function() {
+  render() {
     var elements = [];
     if (this.props.snapPoint) {
       var snapPixel = this.props.pointToPixel(this.props.snapPoint);
@@ -137,7 +137,7 @@ var HoverLegend = React.createClass({
       </g>
     );
   },
-  snapXValue: function(xValue) {
+  snapXValue(xValue) {
     invariant(xValue <= this.props.xMaxValue, 'xValue is greater than xMaxValue (%s > %s)',
       xValue, this.props.xMaxValue);
     var index = Lazy(this.props.xSnapValues).sortedIndex(xValue);

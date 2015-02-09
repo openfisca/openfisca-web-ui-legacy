@@ -14,7 +14,7 @@ var XAxisLabelled = React.createClass({
     tickSize: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       defaultStyle: {
         shapeRendering: 'crispedges',
@@ -24,7 +24,7 @@ var XAxisLabelled = React.createClass({
       tickSize: 6,
     };
   },
-  render: function() {
+  render() {
     var toRadians = function(angle) { return angle * (Math.PI / 180); };
     var lineStyle = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     var stepWidth = this.props.width / this.props.labels.length;

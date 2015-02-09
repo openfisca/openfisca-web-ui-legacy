@@ -14,12 +14,12 @@ var WaterfallBarHover = React.createClass({
     onHover: React.PropTypes.func.isRequired,
     variable: React.PropTypes.object.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       labelHeight: 14,
     };
   },
-  render: function() {
+  render() {
     return (
       <rect
         height={this.props.barHeight}

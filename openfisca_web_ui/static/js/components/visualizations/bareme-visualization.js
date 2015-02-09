@@ -40,19 +40,19 @@ var BaremeVisualization = React.createClass({
     xMaxValue: React.PropTypes.number.isRequired,
     xMinValue: React.PropTypes.number.isRequired,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     window.onresize = this.handleWidthChange;
     this.handleWidthChange();
   },
-  componentDidUpdate: function(prevProps) {
+  componentDidUpdate(prevProps) {
     if (prevProps.isChartFullWidth !== this.props.isChartFullWidth) {
       this.handleWidthChange();
     }
   },
-  componentWillUnmount: function() {
+  componentWillUnmount() {
     window.onresize = null;
   },
-  formatHint: function(variables) {
+  formatHint(variables) {
     var variableName;
     if (this.state.activeVariableCode) {
       var variable = Lazy(variables).find({code: this.state.activeVariableCode});
@@ -62,7 +62,7 @@ var BaremeVisualization = React.createClass({
     }
     return variableName;
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       chartAspectRatio: 4/3,
       collapsedVariables: {},
@@ -70,13 +70,13 @@ var BaremeVisualization = React.createClass({
       noColorFill: 'gray',
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       activeVariableCode: null,
       chartContainerWidth: null,
     };
   },
-  getVariables: function() {
+  getVariables() {
     var isVariableCollapsed = (variable) => variable.code in this.props.collapsedVariables &&
       this.props.collapsedVariables[variable.code];
     var diffValues = (values) => values.map((value, index) => value - baseValues[index]);
@@ -118,7 +118,7 @@ var BaremeVisualization = React.createClass({
     var variables = processNode(this.props.variablesTree, initBaseValues, 0, false);
     return variables;
   },
-  handleChartDownload: function() {
+  handleChartDownload() {
     var newProps = Lazy(this.refs.chart.props).omit(['ref']).assign({
       attribution: this.props.downloadAttribution,
       height: null,
@@ -130,15 +130,15 @@ var BaremeVisualization = React.createClass({
       this.formatMessage(this.getIntlMessage('baremeFilename'), {extension: 'svg'})
     );
   },
-  handleVariableHover: function(variable) {
+  handleVariableHover(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
   },
-  handleVariableToggle: function (variable) {
+  handleVariableToggle (variable) {
     this.props.onSettingsChange({
       collapsedVariables: {[variable.code]: ! this.props.collapsedVariables[variable.code]},
     });
   },
-  handleWidthChange: function() {
+  handleWidthChange() {
     var chartContainerDOMNode = this.refs.chartContainer.getDOMNode();
     var width = chartContainerDOMNode.offsetWidth;
     var height = this.props.height || width / this.props.chartAspectRatio,
@@ -149,7 +149,7 @@ var BaremeVisualization = React.createClass({
     }
     this.setState({chartContainerWidth: width});
   },
-  render: function() {
+  render() {
     var variables = this.props.variablesTree ? this.getVariables() : null;
     // Substract Bootstrap panel left and right paddings.
     var baremeChartWidth = this.state.chartContainerWidth - 15 * 2;

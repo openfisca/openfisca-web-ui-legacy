@@ -18,7 +18,7 @@ var YAxis = React.createClass({
     tickSize: React.PropTypes.number.isRequired,
     unit: React.PropTypes.string,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       labelFontSize: 14,
       minValue: 0,
@@ -28,7 +28,7 @@ var YAxis = React.createClass({
       tickSize: 6,
     };
   },
-  render: function() {
+  render() {
     var range = this.props.maxValue - this.props.minValue;
     invariant(range > 0, 'range must be positive');
     var stepRange = range / this.props.nbSteps;
@@ -60,7 +60,7 @@ var YAxis = React.createClass({
       </g>
     );
   },
-  valueToPixel: function(value) {
+  valueToPixel(value) {
     return (value / (this.props.maxValue - this.props.minValue)) * this.props.height;
   },
 });

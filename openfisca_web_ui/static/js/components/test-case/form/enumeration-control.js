@@ -22,10 +22,10 @@ var EnumerationControl = React.createClass({
       React.PropTypes.string,
     ]),
   },
-  handleChange: function(event) {
+  handleChange(event) {
     this.props.onChange(event.target.value);
   },
-  render: function() {
+  render() {
     var firstOptionLabel = `${this.getIntlMessage('notIndicated')} (${
       this.props.suggestion ?
         this.formatMessage(this.getIntlMessage('suggestedValue'), {value: this.props.labels[this.props.suggestion]}) :

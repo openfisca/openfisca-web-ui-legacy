@@ -17,19 +17,19 @@ var AutocompleteControl = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.string,
   },
-  handleChange: function(selectedItem) {
+  handleChange(selectedItem) {
     this.props.onChange({
       displayedValue: selectedItem.title,
       value: selectedItem.id,
     });
   },
-  handleDelete: function() {
+  handleDelete() {
     this.props.onChange({
       displayedValue: '',
       value: null,
     });
   },
-  handleSearch: function(options, searchTerm, cb) {
+  handleSearch(options, searchTerm, cb) {
     var onError = (xhr, status, err) => {
       if (this.isMounted()) {
         cb(err);
@@ -47,7 +47,7 @@ var AutocompleteControl = React.createClass({
     };
     this.props.autocomplete(searchTerm, onSuccess, onError);
   },
-  render: function() {
+  render() {
     return (
       <div>
         {this.props.label}

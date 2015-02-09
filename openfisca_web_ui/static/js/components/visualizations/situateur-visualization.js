@@ -43,21 +43,21 @@ var SituateurVisualization = React.createClass({
     yMaxValue: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     window.onresize = this.handleWidthChange;
     this.handleWidthChange();
   },
-  componentDidUpdate: function() {
+  componentDidUpdate() {
     var yAxisDOMNode = this.refs.yAxis.getDOMNode();
     var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
     if (newYAxisWidth !== this.state.yAxisWidth) {
       this.setState({yAxisWidth: newYAxisWidth});
     }
   },
-  componentWillUnmount: function() {
+  componentWillUnmount() {
     window.onresize = null;
   },
-  findXFromY: function(y) {
+  findXFromY(y) {
     var points = this.allPoints;
     var yIndex = Lazy(points).pluck('y').sortedIndex(y);
     var high = points[yIndex];
@@ -76,7 +76,7 @@ var SituateurVisualization = React.createClass({
     }
     return x;
   },
-  findYFromX: function(x) {
+  findYFromX(x) {
     var points = this.allPoints;
     var xIndex = Lazy(points).pluck('x').sortedIndex(x);
     var high = points[xIndex];
@@ -95,13 +95,13 @@ var SituateurVisualization = React.createClass({
     }
     return y;
   },
-  formatHint: function() {
+  formatHint() {
     var point = this.state.snapPoint || this.props.value !== null && {x: this.findXFromY(this.props.value), y: this.props.value};
     return point.x > this.pointsXMaxValue ?
       this.formatMessage(this.getIntlMessage('unknownValuesAbove'), {value: this.pointsXMaxValue / 100}) :
       this.props.formatHint(this.props.yFormatNumber(point.y), this.props.xFormatNumber(point.x));
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       aspectRatio: 4/3,
       defaultYAxisWidth: 200,
@@ -116,26 +116,26 @@ var SituateurVisualization = React.createClass({
       yNbSteps: 10,
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       snapPoint: null,
       width: null,
       yAxisWidth: null,
     };
   },
-  gridPixelToPoint: function(pixel) {
+  gridPixelToPoint(pixel) {
     return {
       x: (pixel.x / this.gridWidth) * this.props.xMaxValue,
       y: (1 - pixel.y / this.gridHeight) * this.props.yMaxValue,
     };
   },
-  gridPointToPixel: function(point) {
+  gridPointToPixel(point) {
     return {
       x: (point.x / this.props.xMaxValue) * this.gridWidth,
       y: (1 - point.y / this.props.yMaxValue) * this.gridHeight,
     };
   },
-  handleHoverLegendHover: function(snapX) {
+  handleHoverLegendHover(snapX) {
     var snapPoint;
     if (snapX === null) {
       snapPoint = null;
@@ -145,7 +145,7 @@ var SituateurVisualization = React.createClass({
     }
     this.setState({snapPoint: snapPoint});
   },
-  handleWidthChange: function() {
+  handleWidthChange() {
     var newChartContainerWidth = this.refs.chartContainer.getDOMNode().offsetWidth;
     var height = this.props.height || newChartContainerWidth / this.props.aspectRatio,
       maxHeight = window.innerHeight * this.props.maxHeightRatio;
@@ -155,7 +155,7 @@ var SituateurVisualization = React.createClass({
     }
     this.setState({chartContainerWidth: newChartContainerWidth});
   },
-  render: function() {
+  render() {
     this.pointsXMaxValue = Math.max(...this.props.points.map(point => point.x));
     this.lastPoint = {x: this.props.xMaxValue * 0.99, y: this.props.yMaxValue};
     this.allPoints = this.props.points.concat(this.lastPoint);
@@ -183,7 +183,7 @@ var SituateurVisualization = React.createClass({
       </div>
     );
   },
-  renderSvg: function() {
+  renderSvg() {
     var width = this.state.chartContainerWidth - 15 * 2; // Substract Bootstrap panel left and right paddings.
     var height = this.props.height || width / this.props.aspectRatio;
     this.gridHeight = height - this.props.xAxisHeight - this.props.legendHeight;

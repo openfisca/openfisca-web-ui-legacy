@@ -25,12 +25,12 @@ var TestCaseToolbar = React.createClass({
     testCase: React.PropTypes.object,
     year: React.PropTypes.number,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       displayRepairMenuItem: false,
     };
   },
-  getTraceUrl: function() {
+  getTraceUrl() {
     var simulation = {
       scenarios: [
         {
@@ -47,7 +47,7 @@ var TestCaseToolbar = React.createClass({
     var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
     return traceUrl;
   },
-  render: function() {
+  render() {
     return (
       <div className="btn-group" style={{marginRight: 5}}>
         <button

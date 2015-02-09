@@ -25,15 +25,15 @@ var EntityRoleSelect = React.createClass({
       })
     ).isRequired,
   },
-  handleEntityChange: function(event) {
+  handleEntityChange(event) {
     var newEntityId = event.target.value;
     this.props.onEntityChange(newEntityId);
   },
-  handleRoleChange: function(event) {
+  handleRoleChange(event) {
     var newRole = event.target.value;
     this.props.onRoleChange(newRole);
   },
-  render: function() {
+  render() {
     return (
       <div className='form-group'>
         <label className='control-label' forHtml={this.props.kind}>{this.props.label}</label>

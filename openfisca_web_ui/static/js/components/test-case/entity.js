@@ -16,7 +16,7 @@ var Entity = React.createClass({
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func,
   },
-  render: function() {
+  render() {
     return (
       <div className={cx('panel', this.props.hasErrors ? 'panel-danger' : 'panel-default')}>
         <div className="panel-heading">

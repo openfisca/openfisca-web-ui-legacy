@@ -33,19 +33,19 @@ var WaterfallChart = React.createClass({
     xAxisHeight: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     var yAxisDOMNode = this.refs.yAxis.getDOMNode();
     var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
     this.setState({yAxisWidth: newYAxisWidth});
   },
-  componentDidUpdate: function() {
+  componentDidUpdate() {
     var yAxisDOMNode = this.refs.yAxis.getDOMNode();
     var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
     if (newYAxisWidth !== this.state.yAxisWidth) {
       this.setState({yAxisWidth: newYAxisWidth});
     }
   },
-  determineYAxisRange: function(variables) {
+  determineYAxisRange(variables) {
     var maxValue = 0;
     var minValue = 0;
     variables.forEach(function(variable) {
@@ -58,7 +58,7 @@ var WaterfallChart = React.createClass({
     });
     return [minValue, maxValue];
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       aspectRatio: 4/3,
       defaultYAxisWidth: 200,
@@ -71,24 +71,24 @@ var WaterfallChart = React.createClass({
       yNbSteps: 8,
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       hoveredVariableCode: null,
       xAxisHoveredVariableCode: null,
       yAxisWidth: null,
     };
   },
-  handleVariableHover: function(variable) {
+  handleVariableHover(variable) {
     this.setState({hoveredVariableCode: variable ? variable.code : null});
     if (this.props.onVariableHover) {
       this.props.onVariableHover(variable);
     }
   },
-  handleXAxisVariableHover: function(variable) {
+  handleXAxisVariableHover(variable) {
     this.setState({xAxisHoveredVariableCode: variable ? variable.code : null});
     this.handleVariableHover(variable);
   },
-  render: function() {
+  render() {
     var [yAxisMinValue, yAxisMaxValue] = this.determineYAxisRange(this.props.variables);
     if (yAxisMaxValue === yAxisMinValue) {
       yAxisMaxValue = yAxisMinValue + 1;

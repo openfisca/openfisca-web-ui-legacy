@@ -10,7 +10,7 @@ var SuggestionIcon = React.createClass({
   propTypes: {
     children: React.PropTypes.string.isRequired,
   },
-  render: function() {
+  render() {
     var {children, ...otherProps} = this.props;
     return (
       <Tooltip>

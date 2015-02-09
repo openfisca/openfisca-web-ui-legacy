@@ -29,14 +29,14 @@ var TestCase = React.createClass({
     suggestions: React.PropTypes.object,
     testCase: React.PropTypes.object.isRequired,
   },
-  handleEdit: function(kind, id) {
+  handleEdit(kind, id) {
     if (id === this.props.activeEntityId) {
       this.props.onCloseEntity();
     } else if (this.props.onEditEntity) {
       this.props.onEditEntity(kind, id);
     }
   },
-  render: function() {
+  render() {
     var kinds = this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
     return (
       <div>

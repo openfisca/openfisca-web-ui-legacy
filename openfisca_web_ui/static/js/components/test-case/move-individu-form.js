@@ -18,7 +18,7 @@ var MoveIndividuForm = React.createClass({
     onRoleChange: React.PropTypes.func.isRequired,
     testCase: React.PropTypes.object.isRequired,
   },
-  render: function() {
+  render() {
     return (
       <div>
         {

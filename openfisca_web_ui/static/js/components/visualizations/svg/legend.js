@@ -12,7 +12,7 @@ var Legend = React.createClass({
     fontSize: React.PropTypes.number.isRequired,
     radius: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       circleMarginRight: 5,
       color: 'rgb(31, 119, 180)',
@@ -20,7 +20,7 @@ var Legend = React.createClass({
       radius: 5,
     };
   },
-  render: function() {
+  render() {
     return (
       <g>
         <circle

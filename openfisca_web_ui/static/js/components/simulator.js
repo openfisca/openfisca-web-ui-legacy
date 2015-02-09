@@ -43,7 +43,7 @@ var Simulator = React.createClass({
     reforms: React.PropTypes.object,
     visualizations: React.PropTypes.array,
   },
-  componentWillMount: function() {
+  componentWillMount() {
     webservices.fetchCurrentTestCase(data => {
       if (data && data.error) {
   //      console.error(data.error); // TODO handle error
@@ -60,7 +60,7 @@ var Simulator = React.createClass({
       }
     });
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       defaultPropsByVisualizationSlug: {
         bareme: {
@@ -81,7 +81,7 @@ var Simulator = React.createClass({
       visualizationsLabelsFontSize: 14,
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       editedEntity: null,
       errors: null,
@@ -113,19 +113,19 @@ var Simulator = React.createClass({
       year: appconfig.constants.defaultYear,
     };
   },
-  handleCollapsedVariablesChange: function(variableCode, newStatus) {
+  handleCollapsedVariablesChange(variableCode, newStatus) {
     var newVisualizationsSettings = helpers.assignIn(this.state.visualizationsSettings,
       ['shared', 'collapsedVariables', variableCode], newStatus);
     this.setState({visualizationsSettings: newVisualizationsSettings});
   },
-  handleCreateEntity: function(kind) {
+  handleCreateEntity(kind) {
     // FIXME use withEntity
     var newEntity = models.createEntity(kind, this.props.entitiesMetadata, this.state.testCase);
     var newEntityId = uuid.v4();
     var newTestCase = helpers.assignIn(this.state.testCase, [kind, newEntityId], newEntity);
     this.setState({testCase: newTestCase}, this.repair);
   },
-  handleCreateIndividuInEntity: function(kind, id, role) {
+  handleCreateIndividuInEntity(kind, id, role) {
     // TODO use withIndividu
     var newIndividu = models.createIndividu(this.props.entitiesMetadata, this.state.testCase);
     var newIndividuId = uuid.v4();
@@ -134,7 +134,7 @@ var Simulator = React.createClass({
     newTestCase = models.withIndividuInEntity(newIndividuId, kind, id, role, this.props.entitiesMetadata, newTestCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
-  handleDeleteEntity: function(kind, id) {
+  handleDeleteEntity(kind, id) {
     var entity = this.state.testCase[kind][id];
     var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: entityLabel});
@@ -143,7 +143,7 @@ var Simulator = React.createClass({
       this.setState({testCase: newTestCase}, this.repair);
     }
   },
-  handleDeleteIndividu: function(id) {
+  handleDeleteIndividu(id) {
     var nameKey = this.props.entitiesMetadata.individus.nameKey;
     var name = this.state.testCase.individus[id][nameKey];
     var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: name});
@@ -152,7 +152,7 @@ var Simulator = React.createClass({
       this.setState({testCase: newTestCase}, this.repair);
     }
   },
-  handleDownload: function(dataKind, format) {
+  handleDownload(dataKind, format) {
     function treeToArray(tree) {
       var array = [];
       var walk = variable => {
@@ -196,13 +196,13 @@ var Simulator = React.createClass({
       );
     }
   },
-  handleEditEntity: function(kind, id) {
+  handleEditEntity(kind, id) {
     var nameKey = this.props.entitiesMetadata[kind].nameKey;
     var name = this.state.testCase[kind][id][nameKey];
     var newEditedEntity = {action: 'edit', changedValues: {[nameKey]: name}, id: id, kind: kind};
     this.setState({editedEntity: newEditedEntity});
   },
-  handleEditFormClose: function() {
+  handleEditFormClose() {
     var {action, id, kind} = this.state.editedEntity;
     var changeset = {editedEntity: null};
     if (action === 'edit') {
@@ -231,7 +231,7 @@ var Simulator = React.createClass({
     }
     this.setState(changeset, this.repair);
   },
-  handleFieldsFormChange: function(kind, id, column, value) {
+  handleFieldsFormChange(kind, id, column, value) {
     var newValue = column.autocomplete ? value.value : value;
     var newChangedValues = Lazy(this.state.editedEntity.changedValues).assign({[column.name]: newValue}).toObject();
     var newEditedEntity = helpers.assignIn(this.state.editedEntity, ['changedValues'], newChangedValues);
@@ -242,14 +242,14 @@ var Simulator = React.createClass({
     }
     this.setState({editedEntity: newEditedEntity});
   },
-  handleMoveIndividu: function(id) {
+  handleMoveIndividu(id) {
     var newEditedEntity = {action: 'move', id: id, kind: 'individus'};
     this.setState({
       editedEntity: this.state.editedEntity && shallowEqual(this.state.editedEntity, newEditedEntity) ?
         null : newEditedEntity,
     });
   },
-  handleMoveIndividuFormChange: function(whatChanged, kind, value) {
+  handleMoveIndividuFormChange(whatChanged, kind, value) {
     invariant(this.state.editedEntity, 'handler called without editedEntity in state.');
     var movedIndividuId = this.state.editedEntity.id;
     var oldEntityData = models.findEntityAndRole(movedIndividuId, kind, this.props.entitiesMetadata,
@@ -260,18 +260,18 @@ var Simulator = React.createClass({
       this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
-  handleReformDiffModeChange: function(diffMode) {
+  handleReformDiffModeChange(diffMode) {
     this.setState({selectedReformDiffMode: diffMode}, this.simulate);
   },
-  handleReformNameChange: function(reformName) {
+  handleReformNameChange(reformName) {
     this.setState({selectedReformKey: reformName}, this.simulate);
   },
-  handleRepair: function() {
+  handleRepair() {
     if ( ! this.state.editedEntity) {
       this.repair();
     }
   },
-  handleReset: function() {
+  handleReset() {
     var message = this.getIntlMessage('resetSituationConfirmMessage');
     if (confirm(message)) {
       var initialTestCase = models.getInitialTestCase(this.props.entitiesMetadata);
@@ -281,25 +281,25 @@ var Simulator = React.createClass({
       this.repair(initialTestCase, null);
     }
   },
-  handleVisualizationChange: function(visualizationSlug) {
+  handleVisualizationChange(visualizationSlug) {
     var changeset = {selectedVisualizationSlug: visualizationSlug};
     if (visualizationSlug !== this.state.selectedVisualizationSlug) {
       changeset.simulationResult = null;
     }
     this.setState(changeset, this.simulate);
   },
-  handleVisualizationSettingsChange: function(visualizationName, settings, simulate) {
+  handleVisualizationSettingsChange(visualizationName, settings, simulate) {
     var newVisualizationsSettings = Lazy(this.state.visualizationsSettings).merge({[visualizationName]: settings})
       .toObject();
     this.setState({visualizationsSettings: newVisualizationsSettings}, simulate ? this.simulate : null);
   },
-  handleVisualizationStateChange: function(visualizationState) {
+  handleVisualizationStateChange(visualizationState) {
     this.setState({[this.state.selectedVisualizationSlug]: visualizationState});
   },
-  handleYearChange: function(year) {
+  handleYearChange(year) {
     this.setState({errors: null, year: year}, this.simulate);
   },
-  render: function() {
+  render() {
     var rightColumnElement;
     if (this.state.editedEntity) {
       if (this.state.editedEntity.action === 'edit') {
@@ -358,7 +358,7 @@ var Simulator = React.createClass({
       </div>
     );
   },
-  renderMoveIndividuForm: function() {
+  renderMoveIndividuForm() {
     invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
     var currentEntityIdByKind = {},
       currentRoleByKind = {};
@@ -391,7 +391,7 @@ var Simulator = React.createClass({
       </EditForm>
     );
   },
-  renderFieldsForm: function() {
+  renderFieldsForm() {
     var {id, kind} = this.state.editedEntity,
       entity = this.state.testCase[kind][id];
     var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
@@ -453,7 +453,7 @@ var Simulator = React.createClass({
       </EditForm>
     );
   },
-  renderSituateurVisualization: function(variableName) {
+  renderSituateurVisualization(variableName) {
     var value = this.state.simulationResult ? this.state.simulationResult.value[0].values[0] : null;
     var curveLabel, formatHint, pointLabel, points;
     // TODO translate labels and hints.
@@ -486,7 +486,7 @@ var Simulator = React.createClass({
       />
     );
   },
-  renderVisualization: function() {
+  renderVisualization() {
     var bodyElement;
     if (this.state.errors) {
       bodyElement = (
@@ -612,7 +612,7 @@ var Simulator = React.createClass({
       </div>
     );
   },
-  repair: function(testCase, testCaseAdditionalData) {
+  repair(testCase, testCaseAdditionalData) {
     var originalTestCase = testCase || this.state.testCase;
     if ( ! testCaseAdditionalData) {
       testCaseAdditionalData = this.state.testCaseAdditionalData;
@@ -638,7 +638,7 @@ var Simulator = React.createClass({
       }
     });
   },
-  save: function (testCase, testCaseAdditionalData, onComplete) {
+  save (testCase, testCaseAdditionalData, onComplete) {
     if (this.props.disableSave) {
       onComplete();
     } else {
@@ -653,7 +653,7 @@ var Simulator = React.createClass({
       });
     }
   },
-  simulate: function(force) {
+  simulate(force) {
     // force parameter bypasses the cache.
     if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
       this.setState({isSimulationInProgress: true}, () => {
@@ -681,7 +681,7 @@ var Simulator = React.createClass({
       });
     }
   },
-  simulationParams: function(visualizationSlug) {
+  simulationParams(visualizationSlug) {
     var params = {};
     if (visualizationSlug === 'bareme') {
       params.axes = [

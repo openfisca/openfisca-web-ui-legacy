@@ -13,7 +13,7 @@ var HGrid = React.createClass({
     style: React.PropTypes.object,
     width: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       defaultStyle: {
         shapeRendering: 'crispedges',
@@ -22,7 +22,7 @@ var HGrid = React.createClass({
       startStep: 0,
     };
   },
-  render: function() {
+  render() {
     var style = Lazy(this.props.style).defaults(this.props.defaultStyle).toObject();
     var stepHeight = this.props.height / this.props.nbSteps;
     var steps = Lazy.range(this.props.startStep, this.props.nbSteps + this.props.startStep).toArray();

@@ -27,7 +27,7 @@ var FieldsForm = React.createClass({
     suggestions: React.PropTypes.object,
     values: React.PropTypes.object,
   },
-  render: function() {
+  render() {
     return (
       <div className="panel-group" id="accordion">
         {
@@ -58,7 +58,7 @@ var FieldsForm = React.createClass({
       </div>
     );
   },
-  renderControl: function(column) {
+  renderControl(column) {
     var control;
     var error = this.props.errors && this.props.errors[column.name],
       suggestion = this.props.suggestions && this.props.suggestions[column.name],

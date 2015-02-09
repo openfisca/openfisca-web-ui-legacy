@@ -11,7 +11,7 @@ var CerfaField = React.createClass({
   propTypes: {
     value: React.PropTypes.any.isRequired,
   },
-  render: function() {
+  render() {
     var count = typeof this.props.value === 'object' ? Object.keys(this.props.value).length : 1;
     var helpMessage = this.formatMessage(this.getIntlMessage('cerfaHint'), {
       count: count,

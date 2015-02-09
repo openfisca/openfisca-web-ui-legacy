@@ -27,7 +27,7 @@ var VariablesTree = React.createClass({
     variableHeightByCode: React.PropTypes.object,
     variables: React.PropTypes.array.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       displayVariablesColors: false,
       displayVariablesValues: true,
@@ -38,18 +38,18 @@ var VariablesTree = React.createClass({
       variableHeightByCode: {},
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       hoveredVariableCode: null,
     };
   },
-  handleVariableHover: function(variable) {
+  handleVariableHover(variable) {
     this.setState({hoveredVariableCode: variable ? variable.code : null});
     if (this.props.onVariableHover) {
       this.props.onVariableHover(variable);
     }
   },
-  render: function() {
+  render() {
     var activeVariable = null, variables = [];
     if (this.props.variables.length) {
       var variablesSequence = Lazy(this.props.variables);

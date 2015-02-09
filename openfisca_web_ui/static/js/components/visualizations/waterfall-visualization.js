@@ -37,19 +37,19 @@ var WaterfallVisualization = React.createClass({
     variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     window.onresize = this.handleWidthChange;
     this.handleWidthChange();
   },
-  componentDidUpdate: function(prevProps) {
+  componentDidUpdate(prevProps) {
     if (prevProps.isChartFullWidth !== this.props.isChartFullWidth) {
       this.handleWidthChange();
     }
   },
-  componentWillUnmount: function() {
+  componentWillUnmount() {
     window.onresize = null;
   },
-  formatHint: function(variables) {
+  formatHint(variables) {
     var variable = Lazy(variables).find({code: this.state.activeVariableCode});
     var [startValue, endValue] = [variable.baseValue + variable.value, variable.baseValue].sort();
     if (variable.value < 0) {
@@ -71,7 +71,7 @@ var WaterfallVisualization = React.createClass({
       });
     }
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       chartAspectRatio: 4/3,
       collapsedVariables: {},
@@ -81,14 +81,14 @@ var WaterfallVisualization = React.createClass({
       positiveColor: '#5cb85c', // Bootstrap success color
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       activeVariableCode: null,
       chartContainerWidth: null,
       tweenProgress: null,
     };
   },
-  handleChartDownload: function() {
+  handleChartDownload() {
     var newProps = Lazy(this.refs.chart.props).omit(['ref']).assign({
       attribution: this.props.downloadAttribution,
       height: null,
@@ -100,14 +100,14 @@ var WaterfallVisualization = React.createClass({
       this.formatMessage(this.getIntlMessage('waterfallFilename'), {extension: 'svg'})
     );
   },
-  handleDisplaySettingsClick: function(event) {
+  handleDisplaySettingsClick(event) {
     event.preventDefault();
     this.props.onSettingsChange({displaySettings: ! this.props.displaySettings});
   },
-  handleVariableHover: function(variable) {
+  handleVariableHover(variable) {
     this.setState({activeVariableCode: variable ? variable.code : null});
   },
-  handleVariableToggle: function(variable) {
+  handleVariableToggle(variable) {
     if (variable.isCollapsed) {
       var newSettings = {
         collapsedVariables: {[variable.code]: ! this.props.collapsedVariables[variable.code]},
@@ -129,7 +129,7 @@ var WaterfallVisualization = React.createClass({
       },
     });
   },
-  handleWidthChange: function() {
+  handleWidthChange() {
     var chartContainerDOMNode = this.refs.chartContainer.getDOMNode();
     var width = chartContainerDOMNode.offsetWidth;
     var height = this.props.height || width / this.props.chartAspectRatio,
@@ -140,7 +140,7 @@ var WaterfallVisualization = React.createClass({
     }
     this.setState({chartContainerWidth: width});
   },
-  linearizeVariables: function() {
+  linearizeVariables() {
     // Transform variablesTree into an array and compute base values for waterfall.
     // Also rename snake case keys to camel case.
     function extractChildrenCodes(node) {
@@ -184,7 +184,7 @@ var WaterfallVisualization = React.createClass({
     var variables = walk(this.props.variablesTree, 0, 0);
     return variables;
   },
-  removeVariables: function(variables, isRemoved, removeChildren) {
+  removeVariables(variables, isRemoved, removeChildren) {
     // Filter variables by isRemoved function and rewrite their childrenCodes properties
     // according to the remaining variables.
     var removedVariablesCodes = removeChildren ?
@@ -196,7 +196,7 @@ var WaterfallVisualization = React.createClass({
         childrenCodes: Lazy(variable.childrenCodes).difference(removedVariablesCodes).toArray()
       }).toObject() : variable);
   },
-  render: function() {
+  render() {
     if (this.props.variablesTree) {
       var linearizedVariables = this.linearizeVariables();
       var hasOnlyZeroValues = variable => Math.max.apply(null, variable.values.map(Math.abs)) === 0;

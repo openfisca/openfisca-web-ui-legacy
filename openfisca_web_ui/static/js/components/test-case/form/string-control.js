@@ -19,10 +19,10 @@ var StringControl = React.createClass({
     suggestion: React.PropTypes.string,
     value: React.PropTypes.string,
   },
-  handleChange: function(event) {
+  handleChange(event) {
     this.props.onChange(event.target.value);
   },
-  render: function() {
+  render() {
     return (
       <div>
         {this.props.label}

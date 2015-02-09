@@ -20,11 +20,11 @@ var YearInput = React.createClass({
     onChange: React.PropTypes.func.isRequired,
     value: React.PropTypes.number.isRequired,
   },
-  handleChange: function(event) {
+  handleChange(event) {
     var newValue = polyfills.valueAsNumber(event.target);
     this.props.onChange(newValue);
   },
-  render: function() {
+  render() {
     return (
       <div className={cx(this.props.className, cx({'has-error': this.props.error}))}>
         <input

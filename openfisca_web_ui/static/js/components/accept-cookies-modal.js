@@ -14,22 +14,22 @@ var AcceptCookiesModal = React.createClass({
   propTypes: {
     actionUrlPath: React.PropTypes.string.isRequired,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     $(this.getDOMNode()).modal({
       backdrop: 'static',
       keyboard: false,
       show: true,
     });
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       acceptCheckboxChecked: false,
     };
   },
-  handleAcceptCheckboxChange: function(event) {
+  handleAcceptCheckboxChange(event) {
     this.setState({acceptCheckboxChecked: event.target.checked});
   },
-  render: function() {
+  render() {
     return (
       <div className="modal fade" role="dialog">
         <div className="modal-dialog modal-lg">

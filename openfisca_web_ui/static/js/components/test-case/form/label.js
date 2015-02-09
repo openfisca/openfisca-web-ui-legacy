@@ -17,7 +17,7 @@ var Label = React.createClass({
     name: React.PropTypes.string.isRequired,
     required: React.PropTypes.bool,
   },
-  render: function() {
+  render() {
     return (
       <label className="control-label" htmlFor={this.props.name}>
         {

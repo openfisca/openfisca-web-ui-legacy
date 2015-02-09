@@ -20,7 +20,7 @@ var XAxis = React.createClass({
     tickSize: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       labelFontSize: 14,
       minValue: 0,
@@ -30,7 +30,7 @@ var XAxis = React.createClass({
       tickSize: 6,
     };
   },
-  render: function() {
+  render() {
     var stepRange = (this.props.maxValue - this.props.minValue) / this.props.nbSteps;
     var stepWidth = this.valueToPixel(stepRange);
     var steps = Lazy.range(this.props.minValue, this.props.maxValue + stepRange, stepRange).toArray();
@@ -78,7 +78,7 @@ var XAxis = React.createClass({
       </g>
     );
   },
-  valueToPixel: function(value) {
+  valueToPixel(value) {
     return (value / (this.props.maxValue - this.props.minValue)) * this.props.width;
   },
 });

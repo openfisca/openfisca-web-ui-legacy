@@ -38,19 +38,19 @@ var BaremeChart = React.createClass({
     xNbSteps: React.PropTypes.number.isRequired,
     yNbSteps: React.PropTypes.number.isRequired,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     var yAxisDOMNode = this.refs.yAxis.getDOMNode();
     var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
     this.setState({yAxisWidth: newYAxisWidth});
   },
-  componentDidUpdate: function() {
+  componentDidUpdate() {
     var yAxisDOMNode = this.refs.yAxis.getDOMNode();
     var newYAxisWidth = Math.ceil(yAxisDOMNode.getBoundingClientRect().width);
     if (newYAxisWidth !== this.state.yAxisWidth) {
       this.setState({yAxisWidth: newYAxisWidth});
     }
   },
-  computeBoundsValues: function(variables) {
+  computeBoundsValues(variables) {
     var maxValue = 0, minValue = 0;
     variables.forEach(variable => {
       var targetValues = this.targetValues(variable),
@@ -65,7 +65,7 @@ var BaremeChart = React.createClass({
     });
     return [minValue, maxValue];
   },
-  getDefaultProps: function() {
+  getDefaultProps() {
     return {
       aspectRatio: 4/3,
       defaultYAxisWidth: 200,
@@ -78,12 +78,12 @@ var BaremeChart = React.createClass({
       yNbSteps: 8,
     };
   },
-  getInitialState: function() {
+  getInitialState() {
     return {
       yAxisWidth: null,
     };
   },
-  gridPointToPixel: function(point) {
+  gridPointToPixel(point) {
     var pixel = {
       x: axes.convertLinearRange(point.x, {
         newMax: this.gridWidth,
@@ -100,10 +100,10 @@ var BaremeChart = React.createClass({
     };
     return pixel;
   },
-  handleVariableHover: function(event, variable) {
+  handleVariableHover(event, variable) {
     this.props.onVariableHover(event.type === 'mouseover' ? variable : null);
   },
-  render: function() {
+  render() {
     invariant(this.props.variables.every((variable) => variable.values.length > 1),
       'variables must have more than 1 value');
     var height = this.props.height || this.props.width / this.props.aspectRatio;
@@ -231,7 +231,7 @@ var BaremeChart = React.createClass({
       </svg>
     );
   },
-  targetValues: function(variable) {
+  targetValues(variable) {
     return Lazy(variable.baseValues).zip(variable.values).map(pair => Lazy(pair).sum()).toArray();
   },
 });

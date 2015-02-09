@@ -20,7 +20,7 @@ var BooleanControl = React.createClass({
     suggestion: React.PropTypes.string,
     value: React.PropTypes.bool,
   },
-  handleChange: function(event) {
+  handleChange(event) {
     var valueToBoolean = function(value) {
       var booleanByValue = {
         '': null,
@@ -32,7 +32,7 @@ var BooleanControl = React.createClass({
     };
     this.props.onChange(valueToBoolean(event.target.value));
   },
-  render: function() {
+  render() {
     var booleanToString = function(value) { return value ? 'Oui' : 'Non'; };
     return (
       <div>

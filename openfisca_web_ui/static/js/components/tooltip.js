@@ -10,13 +10,13 @@ var Tooltip = React.createClass({
     children: React.PropTypes.element.isRequired,
     placement: React.PropTypes.string,
   },
-  componentDidMount: function() {
+  componentDidMount() {
     $(this.getDOMNode()).tooltip({placement: this.props.placement});
   },
-  componentDidUpdate: function() {
+  componentDidUpdate() {
     $(this.getDOMNode()).tooltip('fixTitle');
   },
-  render: function() {
+  render() {
     return this.props.children;
   }
 });

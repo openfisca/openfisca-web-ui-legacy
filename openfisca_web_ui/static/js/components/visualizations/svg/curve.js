@@ -20,7 +20,7 @@ var Curve = React.createClass({
     pointToPixel: React.PropTypes.func.isRequired,
     style: React.PropTypes.object,
   },
-  defaultStyle: function() {
+  defaultStyle() {
     var style = this.props.fill ? {
       fill: 'rgb(31, 119, 180)',
     } : {
@@ -31,7 +31,7 @@ var Curve = React.createClass({
       stroke: 'rgb(31, 119, 180)',
     }).toObject();
   },
-  pointsToPixelsStr: function(points) {
+  pointsToPixelsStr(points) {
     return points.map(point => {
       var pixel = this.props.pointToPixel(point);
       invariant( ! isNaN(pixel.x), 'pixel.x is NaN');
@@ -39,7 +39,7 @@ var Curve = React.createClass({
       return `${pixel.x},${pixel.y}`;
     }).join(' ');
   },
-  render: function() {
+  render() {
     var style = Lazy(this.props.style).defaults(this.defaultStyle()).toObject();
     return (
       <polyline
