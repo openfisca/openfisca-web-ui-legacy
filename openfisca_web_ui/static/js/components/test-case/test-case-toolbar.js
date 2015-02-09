@@ -4,8 +4,6 @@
 var React = require('react/addons'),
   ReactIntlMixin = require('react-intl');
 
-var YearInput = require('./year-input');
-
 
 var appconfig = global.appconfig,
   cx = React.addons.classSet;
@@ -23,7 +21,6 @@ var TestCaseToolbar = React.createClass({
     onReset: React.PropTypes.func.isRequired,
     onRepair: React.PropTypes.func.isRequired,
     onSimulate: React.PropTypes.func.isRequired,
-    onYearChange: React.PropTypes.func.isRequired,
     reformKey: React.PropTypes.string,
     testCase: React.PropTypes.object,
     year: React.PropTypes.number,
@@ -33,7 +30,7 @@ var TestCaseToolbar = React.createClass({
       displayRepairMenuItem: false,
     };
   },
-  render: function() {
+  getTraceUrl: function() {
     var simulation = {
       scenarios: [
         {
@@ -48,107 +45,93 @@ var TestCaseToolbar = React.createClass({
     }
     var simulationJsonStr = JSON.stringify(simulation);
     var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
+    return traceUrl;
+  },
+  render: function() {
     return (
-      <div className='row'>
-        <div className='col-xs-6'>
-          <div className="btn-group" style={{marginRight: 5}}>
-            <button
-              accessKey="a"
-              className="btn btn-primary dropdown-toggle"
-              data-toggle="dropdown"
-              id="actions-button"
-              type="button">
-              <span>{this.getIntlMessage('actions')}</span> <span className="caret"></span>
-            </button>
-            <ul aria-labelledby="actions-button" className="dropdown-menu" role="menu">
-              <li className={cx({disabled: this.props.disabled})} role="presentation">
-                <a
-                  accessKey="s"
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    if (! this.props.disabled) {
-                      this.props.onSimulate();
-                    }
-                  }}
-                  role="menuitem"
-                  tabIndex="-1">
-                  {this.getIntlMessage('simulate')}
-                </a>
-              </li>
-              <li className={cx({disabled: this.props.disabled})} role="presentation">
-                <a href={traceUrl} role="menuitem" tabIndex="-1" target='_blank'>
-                  {this.getIntlMessage('trace')}
-                </a>
-              </li>
-              {
-                this.props.displayRepairMenuItem && (
-                  <li className={cx({disabled: this.props.disabled})} role="presentation">
-                    <a
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        if (! this.props.disabled) {
-                          this.props.onRepair();
-                        }
-                      }}
-                      role="menuitem"
-                      tabIndex="-1">
-                      {this.getIntlMessage('repair')}
-                    </a>
-                  </li>
-                )
-              }
-              <li className={cx({disabled: this.props.disabled})} role="presentation">
-                <a
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    if (! this.props.disabled) {
-                      this.props.onReset();
-                    }
-                  }}
-                  role="menuitem"
-                  tabIndex="-1">
-                  {this.getIntlMessage('reset')}
-                </a>
-              </li>
-              <li className="divider" role="presentation"></li>
-              <li className={cx({disabled: this.props.disabled})} role="presentation">
-                {
-                  this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => (
-                    <a
-                      href="#"
-                      key={kind}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        if (! this.props.disabled) {
-                          this.props.onCreateEntity(kind);
-                        }
-                      }}
-                      role="menuitem"
-                      tabIndex="-1">
-                      {this.getIntlMessage(`addEntity:${kind}`)}
-                    </a>
-                  ))
+      <div className="btn-group" style={{marginRight: 5}}>
+        <button
+          accessKey="a"
+          className="btn btn-primary dropdown-toggle"
+          data-toggle="dropdown"
+          id="actions-button"
+          type="button">
+          <span>{this.getIntlMessage('actions')}</span> <span className="caret"></span>
+        </button>
+        <ul aria-labelledby="actions-button" className="dropdown-menu" role="menu">
+          <li className={cx({disabled: this.props.disabled})} role="presentation">
+            <a
+              accessKey="s"
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                if (! this.props.disabled) {
+                  this.props.onSimulate();
                 }
+              }}
+              role="menuitem"
+              tabIndex="-1">
+              {this.getIntlMessage('simulate')}
+            </a>
+          </li>
+          <li className={cx({disabled: this.props.disabled})} role="presentation">
+            <a href={this.getTraceUrl()} role="menuitem" tabIndex="-1" target='_blank'>
+              {this.getIntlMessage('trace')}
+            </a>
+          </li>
+          {
+            this.props.displayRepairMenuItem && (
+              <li className={cx({disabled: this.props.disabled})} role="presentation">
+                <a
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (! this.props.disabled) {
+                      this.props.onRepair();
+                    }
+                  }}
+                  role="menuitem"
+                  tabIndex="-1">
+                  {this.getIntlMessage('repair')}
+                </a>
               </li>
-            </ul>
-          </div>
-        </div>
-        <div className={cx({
-          'col-lg-offset-2': true,
-          'col-lg-4': true,
-          'col-xs-6': true,
-          'has-error': this.props.errors && this.props.errors.period,
-        })}>
-          <YearInput
-            disabled={this.props.disabled}
-            error={this.props.errors && this.props.errors.period && this.props.errors.period['1']}
-            onChange={this.props.onYearChange}
-            value={this.props.year}
-          />
-        </div>
+            )
+          }
+          <li className={cx({disabled: this.props.disabled})} role="presentation">
+            <a
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                if (! this.props.disabled) {
+                  this.props.onReset();
+                }
+              }}
+              role="menuitem"
+              tabIndex="-1">
+              {this.getIntlMessage('reset')}
+            </a>
+          </li>
+          <li className="divider" role="presentation"></li>
+          <li className={cx({disabled: this.props.disabled})} role="presentation">
+            {
+              this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => (
+                <a
+                  href="#"
+                  key={kind}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (! this.props.disabled) {
+                      this.props.onCreateEntity(kind);
+                    }
+                  }}
+                  role="menuitem"
+                  tabIndex="-1">
+                  {this.getIntlMessage(`addEntity:${kind}`)}
+                </a>
+              ))
+            }
+          </li>
+        </ul>
       </div>
     );
   }

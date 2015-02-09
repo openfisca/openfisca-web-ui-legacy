@@ -19,10 +19,11 @@ var ReformSelect = React.createClass({
     onNameChange: React.PropTypes.func.isRequired,
     reforms: React.PropTypes.object.isRequired,
     selectedReformKey: React.PropTypes.string,
+    style: React.PropTypes.object,
   },
   render: function() {
     return (
-      <div className={this.props.className}>
+      <div className={this.props.className} style={this.props.style}>
         <select
           className='form-control'
           disabled={this.props.disabled}
@@ -46,7 +47,7 @@ var ReformSelect = React.createClass({
               <label>
                 <input
                   checked={this.props.diffMode}
-                  disabled={ ! this.props.selectedReformKey}
+                  disabled={this.props.disabled || ! this.props.selectedReformKey}
                   onChange={(event) => this.props.onDiffModeChange(event.target.checked)}
                   type='checkbox'
                 />

@@ -24,6 +24,7 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
   TestCase = require('./test-case/test-case'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   WaterfallVisualization = require('./visualizations/waterfall-visualization'),
+  YearInput = require('./test-case/year-input'),
   webservices = require('../webservices');
 
 
@@ -326,10 +327,8 @@ var Simulator = React.createClass({
             onReset={this.handleReset}
             onRepair={this.handleRepair}
             onSimulate={() => this.simulate(true)}
-            onYearChange={this.handleYearChange}
             reformKey={this.state.selectedReformKey}
             testCase={this.state.testCase}
-            year={this.state.year}
           />
           <hr />
           {
@@ -574,28 +573,35 @@ var Simulator = React.createClass({
         }
       }
     }
+    var disabled = Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress);
     return (
       <div>
         <div className='clearfix form-inline'>
+          <YearInput
+            className='form-group'
+            disabled={disabled}
+            error={this.state.errors && this.state.errors.period && this.state.errors.period['1']}
+            onChange={this.handleYearChange}
+            value={this.state.year}
+          />
           {
             this.props.reforms && (
               <ReformSelect
-                className='pull-left'
+                className='form-group'
                 diffMode={this.props.selectedReformDiffMode}
-                disabled={
-                  Boolean(! this.state.simulationResult || this.state.errors || this.state.isSimulationInProgress)
-                }
+                disabled={disabled}
                 onDiffModeChange={this.handleReformDiffModeChange}
                 onNameChange={this.handleReformNameChange}
                 reforms={this.props.reforms}
                 selectedReformKey={this.state.selectedReformKey}
+                style={{marginLeft: 10}}
               />
             )
           }
           {
             this.state.testCase && (
               <SendFeedbackButton
-                className='pull-right'
+                className='btn btn-link pull-right'
                 testCase={this.state.testCase}
               />
             )

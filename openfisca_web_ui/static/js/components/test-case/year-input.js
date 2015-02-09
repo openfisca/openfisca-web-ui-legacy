@@ -7,12 +7,14 @@ var React = require('react'),
 var polyfills = require('../../polyfills');
 
 
-var appconfig = global.appconfig;
+var appconfig = global.appconfig,
+  cx = React.addons.classSet;
 
 
 var YearInput = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
+    className: React.PropTypes.string,
     disabled: React.PropTypes.bool,
     error: React.PropTypes.string,
     onChange: React.PropTypes.func.isRequired,
@@ -24,18 +26,20 @@ var YearInput = React.createClass({
   },
   render: function() {
     return (
-      <input
-        className="form-control"
-        disabled={this.props.disabled}
-        max={appconfig.constants.maxYear}
-        min={appconfig.constants.minYear}
-        onChange={this.handleChange}
-        placeholder={appconfig.constants.defaultYear}
-        step="1"
-        title={this.props.error || this.getIntlMessage('simulationYear')}
-        type="number"
-        value={this.props.value}
-      />
+      <div className={cx(this.props.className, cx({'has-error': this.props.error}))}>
+        <input
+          className="form-control"
+          disabled={this.props.disabled}
+          max={appconfig.constants.maxYear}
+          min={appconfig.constants.minYear}
+          onChange={this.handleChange}
+          placeholder={appconfig.constants.defaultYear}
+          step="1"
+          title={this.props.error || this.getIntlMessage('simulationYear')}
+          type="number"
+          value={this.props.value}
+        />
+      </div>
     );
   },
 });
