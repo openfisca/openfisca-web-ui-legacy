@@ -516,7 +516,7 @@ var Simulator = React.createClass({
         if (this.state.selectedVisualizationSlug === 'bareme') {
           bodyElement = (
             <BaremeVisualization
-              baseVariablesTree={this.state.simulationResult && this.state.simulationResult.baseValue}
+              baseVariablesTree={this.state.simulationResult && this.state.simulationResult.base_value}
               collapsedVariables={this.state.visualizationsSettings.bareme.collapsedVariables}
               columns={this.props.columns}
               defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
@@ -548,7 +548,7 @@ var Simulator = React.createClass({
         } else if (this.state.selectedVisualizationSlug === 'waterfall') {
           bodyElement = (
             <WaterfallVisualization
-              baseVariablesTree={this.state.simulationResult && this.state.simulationResult.baseValue}
+              baseVariablesTree={this.state.simulationResult && this.state.simulationResult.base_value}
               collapsedVariables={this.state.visualizationsSettings.waterfall.collapsedVariables}
               defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
               diffMode={this.state.selectedReformDiffMode}
