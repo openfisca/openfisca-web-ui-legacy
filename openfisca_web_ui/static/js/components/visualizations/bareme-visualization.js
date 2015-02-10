@@ -35,6 +35,7 @@ var BaremeVisualization = React.createClass({
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
+    reformKey: React.PropTypes.string,
     reformMode: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
@@ -149,15 +150,21 @@ var BaremeVisualization = React.createClass({
     this.setState({chartContainerWidth: width});
   },
   render() {
+    var rootVariable;
     var variables;
-    if (this.props.variablesTree) {
-      var rootVariable;
+    if (this.props.reformKey) {
       if (this.props.reformMode === 'difference') {
-        var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
-        rootVariable = mergedVariablesTree;
+        if (this.props.baseVariablesTree && this.props.variablesTree) {
+          var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
+          rootVariable = mergedVariablesTree;
+        }
       } else {
         rootVariable = this.props.reformMode === 'with' ? this.props.variablesTree : this.props.baseVariablesTree;
       }
+    } else {
+      rootVariable = this.props.variablesTree;
+    }
+    if (rootVariable) {
       variables = this.getVariables(rootVariable);
     }
     // Substract Bootstrap panel left and right paddings.

@@ -14,6 +14,7 @@ var ReformSelect = React.createClass({
   propTypes: {
     className: React.PropTypes.string,
     disabled: React.PropTypes.bool,
+    disableDifference: React.PropTypes.bool,
     onKeyChange: React.PropTypes.func.isRequired,
     onModeChange: React.PropTypes.func.isRequired,
     reforms: React.PropTypes.object.isRequired,
@@ -65,18 +66,22 @@ var ReformSelect = React.createClass({
               >
                 {this.getIntlMessage('with')}
               </button>
-              <button
-                className={cx({
-                  active: this.props.selectedMode === 'difference',
-                  btn: true,
-                  'btn-default': true,
-                })}
-                disabled={this.props.disabled || ! this.props.selectedKey}
-                onClick={(event) => this.props.onModeChange('difference')}
-                type="button"
-              >
-                {this.getIntlMessage('difference')}
-              </button>
+              {
+                ! this.props.disableDifference && (
+                  <button
+                    className={cx({
+                      active: this.props.selectedMode === 'difference',
+                      btn: true,
+                      'btn-default': true,
+                    })}
+                    disabled={this.props.disabled || ! this.props.selectedKey}
+                    onClick={(event) => this.props.onModeChange('difference')}
+                    type="button"
+                  >
+                    {this.getIntlMessage('difference')}
+                  </button>
+                )
+              }
             </div>
           )
         }

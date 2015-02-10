@@ -16,6 +16,7 @@ var decompositions = require('../../decompositions'),
 var WaterfallVisualization = React.createClass({
   mixins: [TweenState.Mixin, ReactIntlMixin],
   propTypes: {
+    baseVariablesTree: React.PropTypes.object,
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
     disabled: React.PropTypes.bool,
@@ -35,6 +36,7 @@ var WaterfallVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
+    reformKey: React.PropTypes.string,
     reformMode: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
@@ -197,14 +199,22 @@ var WaterfallVisualization = React.createClass({
       }).toObject() : variable);
   },
   render() {
-    if (this.props.variablesTree) {
-      var rootVariable;
+    var rootVariable;
+    var waterfallChartVariables;
+    var variablesTreeVariables;
+    if (this.props.reformKey) {
       if (this.props.reformMode === 'difference') {
-        var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
-        rootVariable = mergedVariablesTree;
+        if (this.props.baseVariablesTree && this.props.variablesTree) {
+          var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
+          rootVariable = mergedVariablesTree;
+        }
       } else {
         rootVariable = this.props.reformMode === 'with' ? this.props.variablesTree : this.props.baseVariablesTree;
       }
+    } else {
+      rootVariable = this.props.variablesTree;
+    }
+    if (rootVariable) {
       var linearVariables = this.linearizeVariables(rootVariable);
       var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;
       var isCollapsed = variable => variable.isCollapsed;
@@ -212,7 +222,7 @@ var WaterfallVisualization = React.createClass({
       var variablesWithoutSubtotals = this.removeVariables(variablesWithSubtotals, isSubtotal);
       var displayedVariablesWithSubtotals = this.removeVariables(variablesWithSubtotals, isCollapsed, true);
       var displayedVariablesWithoutSubtotals = this.removeVariables(variablesWithoutSubtotals, isCollapsed, true);
-      var waterfallChartVariables = this.props.displaySubtotals ? displayedVariablesWithSubtotals :
+      waterfallChartVariables = this.props.displaySubtotals ? displayedVariablesWithSubtotals :
         displayedVariablesWithoutSubtotals;
       var variablesTreeVariables = displayedVariablesWithSubtotals;
       var activeVariablesCodes = null;
@@ -259,7 +269,7 @@ var WaterfallVisualization = React.createClass({
             </div>
             <div className='list-group-item' ref='chartContainer'>
               {
-                this.state.chartContainerWidth && this.props.variablesTree ? (
+                this.state.chartContainerWidth && waterfallChartVariables ? (
                   <WaterfallChart
                     activeVariablesCodes={activeVariablesCodes}
                     displayVariablesColors={this.props.displayVariablesColors}
@@ -337,7 +347,7 @@ var WaterfallVisualization = React.createClass({
             </div>
             <div className='panel-body'>
               {
-                this.props.variablesTree ? (
+                variablesTreeVariables ? (
                   <VariablesTree
                     activeVariableCode={this.state.activeVariableCode}
                     displayVariablesColors={this.props.displayVariablesColors}
@@ -361,7 +371,7 @@ var WaterfallVisualization = React.createClass({
               {this.getIntlMessage('dataExport')}
             </div>
             {
-              this.props.variablesTree ? (
+              waterfallChartVariables ? (
                 <div className='list-group'>
                   <div className='list-group-item'>
                     <p>

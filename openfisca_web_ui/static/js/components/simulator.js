@@ -286,6 +286,9 @@ var Simulator = React.createClass({
     if (visualizationSlug !== this.state.selectedVisualizationSlug) {
       changeset.simulationResult = null;
     }
+    if (visualizationSlug.startsWith('situateur-') && this.state.selectedReformMode === 'difference') {
+      changeset.selectedReformMode = 'with';
+    }
     this.setState(changeset, this.simulate);
   },
   handleVisualizationSettingsChange(visualizationName, settings, simulate) {
@@ -457,7 +460,10 @@ var Simulator = React.createClass({
     );
   },
   renderSituateurVisualization(variableName) {
-    var value = this.state.simulationResult ? this.state.simulationResult.value[0].values[0] : null;
+    var valueKey = this.state.selectedReformKey === null || this.state.selectedReformMode === 'with' ?
+      'value' : 'base_value';
+    var value = this.state.simulationResult && this.state.simulationResult[valueKey] ?
+      this.state.simulationResult[valueKey][0].values[0] : null;
     var curveLabel, formatHint, pointLabel, points;
     // TODO translate labels and hints.
     if (variableName === 'revdisp') {
@@ -537,6 +543,7 @@ var Simulator = React.createClass({
                 (settings, simulate) => this.handleVisualizationSettingsChange('bareme', settings, simulate)
               }
               onVisualizationChange={this.handleVisualizationChange}
+              reformKey={this.state.selectedReformKey}
               reformMode={this.state.selectedReformMode}
               variablesTree={this.state.simulationResult && this.state.simulationResult.value}
               visualizationSlug={this.state.selectedVisualizationSlug}
@@ -570,6 +577,7 @@ var Simulator = React.createClass({
                 (settings, simulate) => this.handleVisualizationSettingsChange('waterfall', settings, simulate)
               }
               onVisualizationChange={this.handleVisualizationChange}
+              reformKey={this.state.selectedReformKey}
               reformMode={this.state.selectedReformMode}
               variablesTree={this.state.simulationResult && this.state.simulationResult.value}
               visualizationSlug={this.state.selectedVisualizationSlug}
@@ -594,6 +602,7 @@ var Simulator = React.createClass({
               <ReformSelect
                 className='form-group'
                 disabled={disabled}
+                disableDifference={this.state.selectedVisualizationSlug.startsWith('situateur-')}
                 onKeyChange={this.handleReformKeyChange}
                 onModeChange={this.handleReformModeChange}
                 reforms={this.props.reforms}
