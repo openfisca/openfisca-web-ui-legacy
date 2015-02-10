@@ -225,6 +225,7 @@ var SituateurVisualization = React.createClass({
             formatNumber={this.props.yFormatNumber}
             height={this.gridHeight}
             maxValue={this.props.yMaxValue}
+            minValue={0}
             nbSteps={this.props.yNbSteps}
             ref='yAxis'
             unit='€'
