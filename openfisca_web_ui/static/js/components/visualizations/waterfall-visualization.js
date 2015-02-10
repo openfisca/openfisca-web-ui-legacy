@@ -26,6 +26,7 @@ var WaterfallVisualization = React.createClass({
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     isChartFullWidth: React.PropTypes.bool,
+    isSimulationInProgress: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number,
     loadingIndicatorElement: React.PropTypes.element.isRequired,
     maxHeightRatio: React.PropTypes.number.isRequired,
@@ -275,7 +276,7 @@ var WaterfallVisualization = React.createClass({
                     width={waterfallChartWidth}
                   />
                 ) : (
-                  this.props.loadingIndicatorElement
+                  this.props.isSimulationInProgress && this.props.loadingIndicatorElement
                 )
               }
             </div>
@@ -350,7 +351,7 @@ var WaterfallVisualization = React.createClass({
                     variables={variablesTreeVariables}
                   />
                 ) : (
-                  this.props.loadingIndicatorElement
+                  this.props.isSimulationInProgress && this.props.loadingIndicatorElement
                 )
               }
             </div>
@@ -406,7 +407,7 @@ var WaterfallVisualization = React.createClass({
                 </div>
               ) : (
                 <div className='panel-body'>
-                  {this.props.loadingIndicatorElement}
+                  {this.props.isSimulationInProgress && this.props.loadingIndicatorElement}
                 </div>
               )
             }

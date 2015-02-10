@@ -28,6 +28,7 @@ var BaremeVisualization = React.createClass({
     downloadAttribution: React.PropTypes.string,
     formatNumber: React.PropTypes.func.isRequired,
     isChartFullWidth: React.PropTypes.bool,
+    isSimulationInProgress: React.PropTypes.bool,
     labelsFontSize: React.PropTypes.number,
     loadingIndicatorElement: React.PropTypes.element.isRequired,
     maxHeightRatio: React.PropTypes.number.isRequired,
@@ -205,7 +206,7 @@ var BaremeVisualization = React.createClass({
                       xMinValue={this.props.xMinValue}
                     />
                   ) : (
-                    this.props.loadingIndicatorElement
+                    this.props.isSimulationInProgress && this.props.loadingIndicatorElement
                   )
                 }
               </div>
@@ -252,7 +253,7 @@ var BaremeVisualization = React.createClass({
                     variables={variables}
                   />
                 ) : (
-                  this.props.loadingIndicatorElement
+                  this.props.isSimulationInProgress && this.props.loadingIndicatorElement
                 )
               }
             </div>
@@ -307,7 +308,7 @@ var BaremeVisualization = React.createClass({
                 </div>
               ) : (
                 <div className='panel-body'>
-                  {this.props.loadingIndicatorElement}
+                  {this.props.isSimulationInProgress && this.props.loadingIndicatorElement}
                 </div>
               )
             }
