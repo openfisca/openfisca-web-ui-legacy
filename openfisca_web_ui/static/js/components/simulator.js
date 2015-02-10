@@ -310,6 +310,7 @@ var Simulator = React.createClass({
     } else {
       rightColumnElement = this.renderVisualization();
     }
+    var disabled = Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress);
     return (
       <div className='row'>
         <div className={cx({
@@ -319,7 +320,7 @@ var Simulator = React.createClass({
           'hidden-xs': this.state.editedEntity,
         })}>
           <TestCaseToolbar
-            disabled={Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress)}
+            disabled={disabled}
             entitiesMetadata={this.props.entitiesMetadata}
             errors={this.state.errors}
             getEntitiesKinds={models.getEntitiesKinds}
@@ -335,6 +336,7 @@ var Simulator = React.createClass({
             this.state.testCase && (
               <TestCase
                 activeEntityId={this.state.editedEntity && this.state.editedEntity.id}
+                disabled={disabled}
                 entitiesMetadata={this.props.entitiesMetadata}
                 errors={this.state.errors && this.state.errors.test_case}
                 getEntitiesKinds={models.getEntitiesKinds}

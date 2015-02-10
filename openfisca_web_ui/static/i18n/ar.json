@@ -63,7 +63,6 @@
   "showSettings": "@nonTranslated",
   "simulate": "حسب",
   "simulationErrorExplanation": "@nonTranslated",
-  "simulationInProgress": "@nonTranslated",
   "simulationResult": "@nonTranslated",
   "simulationResultFilename": "@nonTranslated",
   "simulationYear": "@nonTranslated",
@@ -82,5 +81,7 @@
   "waterfallFilename": "@nonTranslated",
   "waterfallHintEquation": "@nonTranslated",
   "waterfallHintValue": "@nonTranslated",
+  "with": "@nonTranslated",
+  "without": "@nonTranslated",
   "yes": "@nonTranslated"
 }

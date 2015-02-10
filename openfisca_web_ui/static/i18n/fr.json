@@ -63,7 +63,6 @@
   "showSettings": "Afficher les paramètres",
   "simulate": "Simuler",
   "simulationErrorExplanation": "La simulation a échoué car une erreur s'est produite sur le serveur.",
-  "simulationInProgress": "Simulation en cours…",
   "simulationResult": "Résultat de la simulation",
   "simulationResultFilename": "résultat_simulation.{extension}",
   "simulationYear": "Année de la simulation",
@@ -82,5 +81,7 @@
   "waterfallFilename": "cascade.{extension}",
   "waterfallHintEquation": "{variableName} : {formattedStartValue} {operator} {absoluteValue} = {formattedEndValue} €",
   "waterfallHintValue": "{variableName} : {absoluteValue} €",
+  "with": "Avec",
+  "without": "Sans",
   "yes": "Oui"
 }

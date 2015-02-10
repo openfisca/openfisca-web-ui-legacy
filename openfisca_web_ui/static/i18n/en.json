@@ -63,7 +63,6 @@
   "showSettings": "Show settings",
   "simulate": "Simulate",
   "simulationErrorExplanation": "The simulation failed because an orror occured on the server.",
-  "simulationInProgress": "Simulation in progress…",
   "simulationResult": "Simulation result",
   "simulationResultFilename": "simulation_result.{extension}",
   "simulationYear": "Year of simulation",
@@ -82,5 +81,7 @@
   "waterfallFilename": "waterfall.{extension}",
   "waterfallHintEquation": "{variableName} : {formattedStartValue} {operator} {absoluteValue} = {formattedEndValue} €",
   "waterfallHintValue": "{variableName} : {absoluteValue} €",
+  "with": "With",
+  "without": "Without",
   "yes": "Yes"
 }

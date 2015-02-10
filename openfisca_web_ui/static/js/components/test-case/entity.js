@@ -11,6 +11,7 @@ var Entity = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     active: React.PropTypes.bool,
+    disabled: React.PropTypes.bool,
     hasErrors: React.PropTypes.bool,
     label: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
@@ -22,7 +23,8 @@ var Entity = React.createClass({
         <div className="panel-heading">
           <div className="btn-group">
             <button
-              className={cx('btn', 'btn-default', 'btn-sm', this.props.active ? 'active' : null)}
+              className={cx('btn', 'btn-default', 'btn-sm', this.props.active ? 'btn-warning' : null)}
+              disabled={this.props.disabled}
               onClick={this.props.onEdit}
               type="button">
               {this.props.label}
@@ -30,32 +32,37 @@ var Entity = React.createClass({
             <button
               className={cx('btn', 'btn-default', 'btn-sm', 'dropdown-toggle')}
               data-toggle="dropdown"
+              disabled={this.props.disabled}
               type="button">
               <span className="caret"></span>
               <span className="sr-only">Toggle Dropdown</span>
             </button>
-            <ul className="dropdown-menu" role="menu">
-              <li>
-                <a href="#" onClick={
-                  (event) => {
-                    event.preventDefault();
-                    if (this.props.onEdit) {
-                      this.props.onEdit();
-                    }
-                  }
-                }>
-                  {this.getIntlMessage('edit')}
-                </a>
-                <a href="#" onClick={
-                  (event) => {
-                    event.preventDefault();
-                    this.props.onDelete();
-                  }
-                }>
-                  {this.getIntlMessage('delete')}
-                </a>
-              </li>
-            </ul>
+            {
+              ! this.props.disabled && (
+                <ul className="dropdown-menu" role="menu">
+                  <li>
+                    <a href="#" onClick={
+                      (event) => {
+                        event.preventDefault();
+                        if (this.props.onEdit) {
+                          this.props.onEdit();
+                        }
+                      }
+                    }>
+                      {this.getIntlMessage('edit')}
+                    </a>
+                    <a href="#" onClick={
+                      (event) => {
+                        event.preventDefault();
+                        this.props.onDelete();
+                      }
+                    }>
+                      {this.getIntlMessage('delete')}
+                    </a>
+                  </li>
+                </ul>
+              )
+            }
           </div>
         </div>
         <div className="list-group">

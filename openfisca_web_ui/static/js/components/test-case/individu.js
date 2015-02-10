@@ -13,6 +13,7 @@ var Individu = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     active: React.PropTypes.bool,
+    disabled: React.PropTypes.bool,
     errors: React.PropTypes.object,
     name: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
@@ -26,7 +27,8 @@ var Individu = React.createClass({
       <div style={{marginBottom: '0.5em'}}>
         <div className="btn-group">
           <button
-            className={cx('btn', btnColorClass, 'btn-sm', this.props.active ? 'active' : null)}
+            className={cx('btn', btnColorClass, 'btn-sm', this.props.active ? 'btn-warning' : null)}
+            disabled={this.props.disabled}
             onClick={this.props.onEdit}
             type="button">
             {this.props.name}
@@ -34,35 +36,40 @@ var Individu = React.createClass({
           <button
             className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle')}
             data-toggle="dropdown"
+            disabled={this.props.disabled}
             type="button">
             <span className="caret"></span>
             <span className="sr-only">Toggle Dropdown</span>
           </button>
-          <ul className="dropdown-menu" role="menu">
-            <li role="presentation">
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}
-                role="menuitem"
-                tabIndex="-1">
-                {this.getIntlMessage('edit')}
-              </a>
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onMove(); }}
-                role="menuitem"
-                tabIndex="-1">
-                {this.getIntlMessage('move')}
-              </a>
-              <a
-                href="#"
-                onClick={event => { event.preventDefault(); this.props.onDelete(); }}
-                role="menuitem"
-                tabIndex="-1">
-                {this.getIntlMessage('delete')}
-              </a>
-            </li>
-          </ul>
+          {
+            ! this.props.disabled && (
+              <ul className="dropdown-menu" role="menu">
+                <li role="presentation">
+                  <a
+                    href="#"
+                    onClick={event => { event.preventDefault(); this.props.onEdit && this.props.onEdit(); }}
+                    role="menuitem"
+                    tabIndex="-1">
+                    {this.getIntlMessage('edit')}
+                  </a>
+                  <a
+                    href="#"
+                    onClick={event => { event.preventDefault(); this.props.onMove(); }}
+                    role="menuitem"
+                    tabIndex="-1">
+                    {this.getIntlMessage('move')}
+                  </a>
+                  <a
+                    href="#"
+                    onClick={event => { event.preventDefault(); this.props.onDelete(); }}
+                    role="menuitem"
+                    tabIndex="-1">
+                    {this.getIntlMessage('delete')}
+                  </a>
+                </li>
+              </ul>
+            )
+          }
         </div>
         {
           this.props.suggestions && (

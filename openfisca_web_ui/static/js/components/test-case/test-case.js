@@ -16,6 +16,7 @@ var TestCase = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     activeEntityId: React.PropTypes.string,
+    disabled: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
     getEntitiesKinds: React.PropTypes.func.isRequired,
@@ -52,6 +53,7 @@ var TestCase = React.createClass({
                 .map(entity =>
                   <Entity
                     active={this.props.activeEntityId === entity.id}
+                    disabled={this.props.disabled}
                     hasErrors={ !! helpers.getObjectPath(this.props.errors, kind, entity.id)}
                     key={entity.id}
                     label={entity.label}
@@ -66,6 +68,7 @@ var TestCase = React.createClass({
                           return (
                             <Individu
                               active={this.props.activeEntityId === individuId}
+                              disabled={this.props.disabled}
                               errors={helpers.getObjectPath(this.props.errors, 'individus', individuId)}
                               id={individuId}
                               key={individuId}
@@ -87,6 +90,7 @@ var TestCase = React.createClass({
                         }
                         return (
                           <Role
+                            disabled={this.props.disabled}
                             error={error}
                             key={role}
                             label={this.props.entitiesMetadata[kind].labelByRoleKey[role]}
