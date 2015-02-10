@@ -161,7 +161,7 @@ var WaterfallVisualization = React.createClass({
         variable.children.forEach(child => {
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
-          if ( ! this.props.reformMode === 'difference') {
+          if (this.props.reformMode !== 'difference') {
             childBaseValue += child.values[0];
           }
         });
