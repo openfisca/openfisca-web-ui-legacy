@@ -13,12 +13,12 @@ var ReformSelect = React.createClass({
   mixins: [ReactIntlMixin],
   propTypes: {
     className: React.PropTypes.string,
-    diffMode: React.PropTypes.bool,
     disabled: React.PropTypes.bool,
-    onDiffModeChange: React.PropTypes.func.isRequired,
-    onNameChange: React.PropTypes.func.isRequired,
+    onKeyChange: React.PropTypes.func.isRequired,
+    onModeChange: React.PropTypes.func.isRequired,
     reforms: React.PropTypes.object.isRequired,
-    selectedReformKey: React.PropTypes.string,
+    selectedKey: React.PropTypes.string,
+    selectedMode: React.PropTypes.string.isRequired,
     style: React.PropTypes.object,
   },
   render() {
@@ -27,9 +27,9 @@ var ReformSelect = React.createClass({
         <select
           className='form-control'
           disabled={this.props.disabled}
-          onChange={(event) => this.props.onNameChange(event.target.value || null)}
+          onChange={(event) => this.props.onKeyChange(event.target.value || null)}
           title={this.getIntlMessage('reform')}
-          value={this.props.selectedReformKey}
+          value={this.props.selectedKey}
         >
           <option value=''>{this.getIntlMessage('noReform')}</option>
           {
@@ -39,21 +39,44 @@ var ReformSelect = React.createClass({
           }
         </select>
         {
-          this.props.selectedReformKey && (
-            <div
-              className={cx({checkbox: true, disabled: this.props.disabled})}
-              style={{marginLeft: 10}}
-            >
-              <label>
-                <input
-                  accessKey='d'
-                  checked={this.props.diffMode}
-                  disabled={this.props.disabled || ! this.props.selectedReformKey}
-                  onChange={(event) => this.props.onDiffModeChange(event.target.checked)}
-                  type='checkbox'
-                />
+          this.props.selectedKey && (
+            <div className="btn-group" role="group" style={{marginLeft: 10}}>
+              <button
+                className={cx({
+                  active: this.props.selectedMode === 'without',
+                  btn: true,
+                  'btn-default': true,
+                })}
+                disabled={this.props.disabled || ! this.props.selectedKey}
+                onClick={(event) => this.props.onModeChange('without')}
+                type="button"
+              >
+                {this.getIntlMessage('without')}
+              </button>
+              <button
+                className={cx({
+                  active: this.props.selectedMode === 'with',
+                  btn: true,
+                  'btn-default': true,
+                })}
+                disabled={this.props.disabled || ! this.props.selectedKey}
+                onClick={(event) => this.props.onModeChange('with')}
+                type="button"
+              >
+                {this.getIntlMessage('with')}
+              </button>
+              <button
+                className={cx({
+                  active: this.props.selectedMode === 'difference',
+                  btn: true,
+                  'btn-default': true,
+                })}
+                disabled={this.props.disabled || ! this.props.selectedKey}
+                onClick={(event) => this.props.onModeChange('difference')}
+                type="button"
+              >
                 {this.getIntlMessage('difference')}
-              </label>
+              </button>
             </div>
           )
         }

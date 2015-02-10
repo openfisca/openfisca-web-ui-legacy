@@ -86,8 +86,8 @@ var Simulator = React.createClass({
       editedEntity: null,
       errors: null,
       isSimulationInProgress: false,
-      selectedReformDiffMode: null,
       selectedReformKey: null,
+      selectedReformMode: 'with',
       selectedVisualizationSlug: this.props.defaultVisualizationSlug,
       simulationError: null,
       simulationResult: null,
@@ -260,11 +260,11 @@ var Simulator = React.createClass({
       this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
-  handleReformDiffModeChange(diffMode) {
-    this.setState({selectedReformDiffMode: diffMode});
+  handleReformKeyChange(reformKey) {
+    this.setState({selectedReformKey: reformKey}, this.simulate);
   },
-  handleReformNameChange(reformName) {
-    this.setState({selectedReformKey: reformName}, this.simulate);
+  handleReformModeChange(reformMode) {
+    this.setState({selectedReformMode: reformMode});
   },
   handleRepair() {
     if ( ! this.state.editedEntity) {
@@ -523,7 +523,6 @@ var Simulator = React.createClass({
               collapsedVariables={this.state.visualizationsSettings.bareme.collapsedVariables}
               columns={this.props.columns}
               defaultProps={this.props.defaultPropsByVisualizationSlug.bareme}
-              diffMode={this.state.selectedReformDiffMode}
               disabled={this.state.isSimulationInProgress}
               displayBisectrix={this.state.visualizationsSettings.bareme.displayBisectrix}
               displaySettings={this.state.visualizationsSettings.bareme.displaySettings}
@@ -538,6 +537,7 @@ var Simulator = React.createClass({
                 (settings, simulate) => this.handleVisualizationSettingsChange('bareme', settings, simulate)
               }
               onVisualizationChange={this.handleVisualizationChange}
+              reformMode={this.state.selectedReformMode}
               variablesTree={this.state.simulationResult && this.state.simulationResult.value}
               visualizationSlug={this.state.selectedVisualizationSlug}
               xAxisVariableCode={this.state.visualizationsSettings.bareme.xAxisVariableCode}
@@ -555,7 +555,6 @@ var Simulator = React.createClass({
               baseVariablesTree={this.state.simulationResult && this.state.simulationResult.base_value}
               collapsedVariables={this.state.visualizationsSettings.waterfall.collapsedVariables}
               defaultProps={this.props.defaultPropsByVisualizationSlug.waterfall}
-              diffMode={this.state.selectedReformDiffMode}
               disabled={this.state.isSimulationInProgress}
               displaySettings={this.state.visualizationsSettings.waterfall.displaySettings}
               displaySubtotals={this.state.visualizationsSettings.waterfall.displaySubtotals}
@@ -571,6 +570,7 @@ var Simulator = React.createClass({
                 (settings, simulate) => this.handleVisualizationSettingsChange('waterfall', settings, simulate)
               }
               onVisualizationChange={this.handleVisualizationChange}
+              reformMode={this.state.selectedReformMode}
               variablesTree={this.state.simulationResult && this.state.simulationResult.value}
               visualizationSlug={this.state.selectedVisualizationSlug}
             />
@@ -593,12 +593,12 @@ var Simulator = React.createClass({
             this.props.reforms && (
               <ReformSelect
                 className='form-group'
-                diffMode={this.props.selectedReformDiffMode}
                 disabled={disabled}
-                onDiffModeChange={this.handleReformDiffModeChange}
-                onNameChange={this.handleReformNameChange}
+                onKeyChange={this.handleReformKeyChange}
+                onModeChange={this.handleReformModeChange}
                 reforms={this.props.reforms}
-                selectedReformKey={this.state.selectedReformKey}
+                selectedKey={this.state.selectedReformKey}
+                selectedMode={this.state.selectedReformMode}
                 style={{marginLeft: 10}}
               />
             )
@@ -643,7 +643,7 @@ var Simulator = React.createClass({
       }
     });
   },
-  save (testCase, testCaseAdditionalData, onComplete) {
+  save(testCase, testCaseAdditionalData, onComplete) {
     if (this.props.disableSave) {
       onComplete();
     } else {

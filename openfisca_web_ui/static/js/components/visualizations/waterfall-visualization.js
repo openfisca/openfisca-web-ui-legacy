@@ -18,7 +18,6 @@ var WaterfallVisualization = React.createClass({
   propTypes: {
     chartAspectRatio: React.PropTypes.number.isRequired,
     collapsedVariables: React.PropTypes.object,
-    diffMode: React.PropTypes.bool,
     disabled: React.PropTypes.bool,
     displaySettings: React.PropTypes.bool,
     displaySubtotals: React.PropTypes.bool,
@@ -36,6 +35,7 @@ var WaterfallVisualization = React.createClass({
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
     positiveColor: React.PropTypes.string.isRequired,
+    reformMode: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
   },
@@ -159,7 +159,7 @@ var WaterfallVisualization = React.createClass({
         variable.children.forEach(child => {
           var childVariables = walk(child, childBaseValue, depth + 1);
           childrenVariables = childrenVariables.concat(childVariables);
-          if ( ! this.props.diffMode) {
+          if ( ! this.props.reformMode === 'difference') {
             childBaseValue += child.values[0];
           }
         });
@@ -199,11 +199,11 @@ var WaterfallVisualization = React.createClass({
   render() {
     if (this.props.variablesTree) {
       var rootVariable;
-      if (this.props.diffMode) {
+      if (this.props.reformMode === 'difference') {
         var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
         rootVariable = mergedVariablesTree;
       } else {
-        rootVariable = this.props.variablesTree;
+        rootVariable = this.props.reformMode === 'with' ? this.props.variablesTree : this.props.baseVariablesTree;
       }
       var linearVariables = this.linearizeVariables(rootVariable);
       var isSubtotal = variable => variable.isSubtotal && ! variable.isCollapsed;

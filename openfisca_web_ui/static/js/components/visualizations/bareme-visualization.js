@@ -21,7 +21,6 @@ var BaremeVisualization = React.createClass({
     collapsedVariables: React.PropTypes.object,
     columns: React.PropTypes.object.isRequired,
     defaultProps: React.PropTypes.object.isRequired,
-    diffMode: React.PropTypes.bool,
     disabled: React.PropTypes.bool,
     displayBisectrix: React.PropTypes.bool,
     displaySettings: React.PropTypes.bool,
@@ -36,6 +35,7 @@ var BaremeVisualization = React.createClass({
     onDownload: React.PropTypes.func.isRequired,
     onSettingsChange: React.PropTypes.func.isRequired,
     onVisualizationChange: React.PropTypes.func.isRequired,
+    reformMode: React.PropTypes.string.isRequired,
     variablesTree: React.PropTypes.object,
     visualizationSlug: React.PropTypes.string.isRequired,
     xAxisVariableCode: React.PropTypes.string.isRequired,
@@ -152,11 +152,11 @@ var BaremeVisualization = React.createClass({
     var variables;
     if (this.props.variablesTree) {
       var rootVariable;
-      if (this.props.diffMode) {
+      if (this.props.reformMode === 'difference') {
         var mergedVariablesTree = decompositions.mergeNodes(this.props.baseVariablesTree, this.props.variablesTree);
         rootVariable = mergedVariablesTree;
       } else {
-        rootVariable = this.props.variablesTree;
+        rootVariable = this.props.reformMode === 'with' ? this.props.variablesTree : this.props.baseVariablesTree;
       }
       variables = this.getVariables(rootVariable);
     }
