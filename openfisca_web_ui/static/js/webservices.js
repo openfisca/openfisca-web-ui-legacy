@@ -8,8 +8,66 @@ var helpers = require('./helpers');
 
 
 var appconfig = global.appconfig;
+var calculateResultByDataCache = {};
 var simulateResultByDataCache = {};
 
+
+// Utils
+
+function makeUrl(path) {
+  var baseUrl = appconfig.api.baseUrl;
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+  return baseUrl + path;
+}
+
+
+function patchColumns(columns, entitiesMetadata) {
+  // Patch columns definitions to match UI specificities.
+  var birth = columns.birth;
+  var newColumns = {
+    birth: {
+      '@type': 'Integer',
+      default: parseInt(birth.default.slice(0, 4)),
+      label: 'Année de naissance',
+      max: new Date().getFullYear(),
+      min: appconfig.constants.minYear,
+      val_type: 'year',
+    },
+  };
+  var entitiesNameKeys = Lazy(entitiesMetadata).pluck('nameKey').toArray();
+  var requiredColumns = Lazy(entitiesNameKeys).map(requiredColumnName => [requiredColumnName, {required: true}])
+    .toObject();
+  newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
+  if ('depcom' in newColumns) {
+    newColumns.depcom.autocomplete = fetchCommunes;
+    newColumns.depcom.label = 'Lieu de résidence';
+  }
+  return newColumns;
+}
+
+
+function patchValuesForColumns(data) {
+  // Change values according to UI-specific columns.
+  if (data.individus) {
+    var newIndividus = Lazy(data.individus).map(function(individu, id) {
+      return [
+        id,
+        individu.birth ?
+          Lazy(individu).assign({birth: parseInt(individu.birth.slice(0, 4))}).toObject() :
+          individu
+      ];
+    }).toObject();
+    var newData = Lazy(data).assign({individus: newIndividus}).toObject();
+    return newData;
+  } else {
+    return data;
+  }
+}
+
+
+// Data fetching and saving API calls
 
 function fetchCommunes(term, onComplete, onError) {
   var url = 'http://ou.comarquage.fr/api/v1/autocomplete-territory',
@@ -32,6 +90,7 @@ function fetchCommunes(term, onComplete, onError) {
   });
 }
 
+
 function fetchCurrentLocaleMessages(onComplete) {
   // TODO Throw exception, caught by window.onerror.
   var onError = () => alert('Error: unable to load language files.');
@@ -50,6 +109,7 @@ function fetchCurrentLocaleMessages(onComplete) {
       onComplete(body);
     });
 }
+
 
 function fetchCurrentTestCase(onComplete) {
   request
@@ -71,6 +131,7 @@ function fetchCurrentTestCase(onComplete) {
     });
 }
 
+
 function fetchEntitiesMetadata(onComplete) {
   // TODO Throw exception, caught by window.onerror.
   var onError = () => alert('Error: unable to fetch entities metadata.');
@@ -86,6 +147,7 @@ function fetchEntitiesMetadata(onComplete) {
       onComplete(res.body.entities);
     });
 }
+
 
 function fetchFields(entitiesMetadata, onComplete) {
   request
@@ -133,55 +195,66 @@ function fetchReforms(onComplete) {
 }
 
 
-function makeUrl(path) {
-  var baseUrl = appconfig.api.baseUrl;
-  if (baseUrl.endsWith('/')) {
-    baseUrl = baseUrl.slice(0, -1);
-  }
-  return baseUrl + path;
+function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
+  request
+    .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
+    .send({
+      test_case: testCase,
+      test_case_additional_data: testCaseAdditionalData,
+    })
+    .on('error', function(error) {
+      onComplete({error: error});
+    })
+    .end(function(res) {
+      onComplete(res.error ? res : res.body);
+    });
 }
 
-function patchColumns(columns, entitiesMetadata) {
-  // Patch columns definitions to match UI specificities.
-  var birth = columns.birth;
-  var newColumns = {
-    birth: {
-      '@type': 'Integer',
-      default: parseInt(birth.default.slice(0, 4)),
-      label: 'Année de naissance',
-      max: new Date().getFullYear(),
-      min: appconfig.constants.minYear,
-      val_type: 'year',
+
+// Simulation API calls
+
+function calculate(reformKey, testCase, variables, year, force, onComplete) {
+  var scenario = {
+    period: {
+      start: year,
+      unit: 'year',
     },
+    test_case: testCase,
   };
-  var entitiesNameKeys = Lazy(entitiesMetadata).pluck('nameKey').toArray();
-  var requiredColumns = Lazy(entitiesNameKeys).map(requiredColumnName => [requiredColumnName, {required: true}])
-    .toObject();
-  newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
-  if ('depcom' in newColumns) {
-    newColumns.depcom.autocomplete = fetchCommunes;
-    newColumns.depcom.label = 'Lieu de résidence';
+  var data = {
+    base_reforms: ['inversion_revenus'],
+    scenarios: [scenario],
+    variables: variables,
+  };
+  if (reformKey) {
+    data.reforms = [reformKey];
   }
-  return newColumns;
+  var dataStr = JSON.stringify(data);
+  if ( ! force && calculateResultByDataCache[dataStr]) {
+    onComplete(calculateResultByDataCache[dataStr]);
+  } else {
+    request
+      .post(makeUrl(appconfig.api.urlPaths.calculate))
+      .send(data)
+      .on('error', function(error) {
+        onComplete({error: error.message});
+      })
+      .end(function(res) {
+        var result;
+        if (res.body && res.body.error) {
+          var errors = res.body.error.errors[0];
+          result = {errors: typeof errors === 'string' || ! ('scenarios' in errors) ? errors : errors.scenarios['0']};
+        } else if (res.error) {
+          result = res;
+        } else {
+          result = res.body;
+          calculateResultByDataCache[dataStr] = result;
+        }
+        onComplete(result);
+      });
+  }
 }
 
-function patchValuesForColumns(data) {
-  // Change values according to UI-specific columns.
-  if (data.individus) {
-    var newIndividus = Lazy(data.individus).map(function(individu, id) {
-      return [
-        id,
-        individu.birth ?
-          Lazy(individu).assign({birth: parseInt(individu.birth.slice(0, 4))}).toObject() :
-          individu
-      ];
-    }).toObject();
-    var newData = Lazy(data).assign({individus: newIndividus}).toObject();
-    return newData;
-  } else {
-    return data;
-  }
-}
 
 function repair(testCase, year, onComplete) {
   var data = {
@@ -223,22 +296,8 @@ function repair(testCase, year, onComplete) {
     });
 }
 
-function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
-  request
-    .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
-    .send({
-      test_case: testCase,
-      test_case_additional_data: testCaseAdditionalData,
-    })
-    .on('error', function(error) {
-      onComplete({error: error});
-    })
-    .end(function(res) {
-      onComplete(res.error ? res : res.body);
-    });
-}
 
-function simulate(axes, decomposition, reformKey, testCase, year, force, onComplete) {
+function simulate(axes, reformKey, testCase, year, force, onComplete) {
   var scenario = {
     period: {
       start: year,
@@ -253,12 +312,6 @@ function simulate(axes, decomposition, reformKey, testCase, year, force, onCompl
     base_reforms: ['inversion_revenus'],
     scenarios: [scenario],
   };
-  if (decomposition) {
-    data.decomposition = decomposition;
-    if (reformKey) {
-      data.reform_decomposition = decomposition;
-    }
-  }
   if (reformKey) {
     data.reforms = [reformKey];
   }
@@ -290,6 +343,6 @@ function simulate(axes, decomposition, reformKey, testCase, year, force, onCompl
 
 
 module.exports = {
-  fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchEntitiesMetadata, fetchFields, fetchReforms, repair,
+  calculate, fetchCurrentLocaleMessages, fetchCurrentTestCase, fetchEntitiesMetadata, fetchFields, fetchReforms, repair,
   saveCurrentTestCase, simulate,
 };

@@ -459,10 +459,20 @@ var Simulator = React.createClass({
     );
   },
   renderSituateurVisualization(variableName) {
+    var value = null;
     var valueKey = this.state.selectedReformKey === null || this.state.selectedReformMode === 'with' ?
       'value' : 'base_value';
-    var value = this.state.simulationResult && this.state.simulationResult[valueKey] ?
-      this.state.simulationResult[valueKey][0].values[0] : null;
+    if (this.state.simulationResult && this.state.simulationResult[valueKey]) {
+      var firstScenarioValues = this.state.simulationResult[valueKey][0];
+      // Hard-code some values because of the choice of situateurs variable names.
+      if (variableName === 'revdisp') {
+        var firstMenage = Lazy(firstScenarioValues.menages).pairs().first()[1];
+        value = firstMenage.revdisp[this.state.year];
+      } else if (variableName === 'sal') {
+        var firstIndividu = Lazy(firstScenarioValues.individus).pairs().first()[1];
+        value = firstIndividu.sal[this.state.year];
+      }
+    }
     var curveLabel, formatHint, pointLabel, points;
     // TODO translate labels and hints.
     if (variableName === 'revdisp') {
@@ -657,7 +667,6 @@ var Simulator = React.createClass({
     } else {
       webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
         if (data && data.unauthorized) {
-          // TODO i18n
           alert(this.getIntlMessage('sessionHasExpiredExplanation'));
           window.location.reload();
         } else {
@@ -667,51 +676,46 @@ var Simulator = React.createClass({
     }
   },
   simulate(force) {
-    // force parameter bypasses the cache.
-    if ( ! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity) {
-      this.setState({isSimulationInProgress: true}, () => {
-        var params = this.simulationParams(this.state.selectedVisualizationSlug);
-        webservices.simulate(params.axes, params.decomposition, this.state.selectedReformKey, this.state.testCase,
-          this.state.year, force, (result) => {
-            var changeset = {isSimulationInProgress: false};
-            if (result.error) {
-              changeset.errors = null;
-              changeset.simulationError = result.error;
-              changeset.simulationResult = null;
-            } else {
-              if (result.errors) {
-                changeset.errors = result.errors;
-                changeset.simulationError = null;
-                changeset.simulationResult = null;
-              } else {
-                changeset.errors = null;
-                changeset.simulationError = null;
-                changeset.simulationResult = result;
-              }
-            }
-            this.setState(changeset);
-          });
-      });
-    }
-  },
-  simulationParams(visualizationSlug) {
-    var params = {};
-    if (visualizationSlug === 'bareme') {
-      params.axes = [
-        {
-          count: this.props.defaultPropsByVisualizationSlug.bareme.baremeStepsX,
-          max: this.state.visualizationsSettings.bareme.xMaxValue,
-          min: this.state.visualizationsSettings.bareme.xMinValue,
-          name: this.state.visualizationsSettings.bareme.xAxisVariableCode,
-        },
-      ];
-    }
-    if (visualizationSlug === 'situateur-revdisp') {
-      params.decomposition = ['revdisp'];
-    } else if (visualizationSlug === 'situateur-sal') {
-      params.decomposition = ['sal'];
-    }
-    return params;
+    var onComplete = (result) => {
+      var changeset = {isSimulationInProgress: false};
+      if (result.error) {
+        changeset.errors = null;
+        changeset.simulationError = result.error;
+        changeset.simulationResult = null;
+      } else if (result.errors) {
+        changeset.errors = result.errors;
+        changeset.simulationError = null;
+        changeset.simulationResult = null;
+      } else {
+        changeset.errors = null;
+        changeset.simulationError = null;
+        changeset.simulationResult = result;
+      }
+      this.setState(changeset);
+    };
+    // "force" parameter bypasses the cache.
+    invariant(! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity,
+      'simulate should not have been called given the current state');
+    this.setState({isSimulationInProgress: true}, () => {
+      if (this.state.selectedVisualizationSlug.startsWith('situateur-')) {
+        var variables = [
+          this.state.selectedVisualizationSlug === 'situateur-sal' ? 'sal' : 'revdisp',
+        ];
+        webservices.calculate(this.state.selectedReformKey, this.state.testCase, variables, this.state.year, force,
+          onComplete);
+      } else {
+        var axes = this.state.selectedVisualizationSlug === 'bareme' ? [
+          {
+            count: this.props.defaultPropsByVisualizationSlug.bareme.baremeStepsX,
+            max: this.state.visualizationsSettings.bareme.xMaxValue,
+            min: this.state.visualizationsSettings.bareme.xMinValue,
+            name: this.state.visualizationsSettings.bareme.xAxisVariableCode,
+          },
+        ] : null;
+        webservices.simulate(axes, this.state.selectedReformKey, this.state.testCase, this.state.year, force,
+          onComplete);
+      }
+    });
   },
 });
 
