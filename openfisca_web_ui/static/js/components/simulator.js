@@ -37,7 +37,6 @@ var Simulator = React.createClass({
   propTypes: {
     columns: React.PropTypes.object.isRequired,
     columnsTree: React.PropTypes.object.isRequired,
-    defaultVisualizationSlug: React.PropTypes.string.isRequired,
     disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
     reforms: React.PropTypes.object,
@@ -76,7 +75,6 @@ var Simulator = React.createClass({
           displaySettings: false,
         },
       },
-      defaultVisualizationSlug: 'waterfall',
       downloadAttribution: '© openfisca.fr',
       visualizationsLabelsFontSize: 14,
     };
@@ -88,7 +86,7 @@ var Simulator = React.createClass({
       isSimulationInProgress: false,
       selectedReformKey: null,
       selectedReformMode: 'with',
-      selectedVisualizationSlug: this.props.defaultVisualizationSlug,
+      selectedVisualizationSlug: 'waterfall',
       simulationError: null,
       simulationResult: null,
       suggestions: null,
