@@ -14,7 +14,6 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
   EditForm = require('./edit-form'),
   FieldsForm = require('./test-case/form/fields-form'),
   helpers = require('../helpers'),
-  models = require('../models'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
   ReformSelect = require('./reform-select'),
   revdispDistribution = require('../../data/revdisp-distribution.json'),
@@ -22,6 +21,7 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
   SendFeedbackButton = require('./send-feedback-button'),
   SituateurVisualization = require('./visualizations/situateur-visualization'),
   TestCase = require('./test-case/test-case'),
+  testCases = require('../test-cases'),
   TestCaseToolbar = require('./test-case/test-case-toolbar'),
   WaterfallVisualization = require('./visualizations/waterfall-visualization'),
   YearInput = require('./test-case/year-input'),
@@ -51,7 +51,7 @@ var Simulator = React.createClass({
       } else {
         var {testCase, testCaseAdditionalData} = data;
         if ( ! testCase) {
-          testCase = models.getInitialTestCase(this.props.entitiesMetadata);
+          testCase = testCases.getInitialTestCase(this.props.entitiesMetadata);
         }
         var newState = Lazy(this.state).assign({testCase, testCaseAdditionalData}).toObject();
         this.setState(newState, () => {
@@ -120,26 +120,27 @@ var Simulator = React.createClass({
   },
   handleCreateEntity(kind) {
     // FIXME use withEntity
-    var newEntity = models.createEntity(kind, this.props.entitiesMetadata, this.state.testCase);
+    var newEntity = testCases.createEntity(kind, this.props.entitiesMetadata, this.state.testCase);
     var newEntityId = uuid.v4();
     var newTestCase = helpers.assignIn(this.state.testCase, [kind, newEntityId], newEntity);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleCreateIndividuInEntity(kind, id, role) {
     // TODO use withIndividu
-    var newIndividu = models.createIndividu(this.props.entitiesMetadata, this.state.testCase);
+    var newIndividu = testCases.createIndividu(this.props.entitiesMetadata, this.state.testCase);
     var newIndividuId = uuid.v4();
     var newIndividus = Lazy(this.state.testCase.individus).assign({[newIndividuId]: newIndividu}).toObject();
     var newTestCase = Lazy(this.state.testCase).assign({individus: newIndividus}).toObject();
-    newTestCase = models.withIndividuInEntity(newIndividuId, kind, id, role, this.props.entitiesMetadata, newTestCase);
+    newTestCase = testCases.withIndividuInEntity(newIndividuId, kind, id, role, this.props.entitiesMetadata,
+        newTestCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleDeleteEntity(kind, id) {
     var entity = this.state.testCase[kind][id];
-    var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
+    var entityLabel = testCases.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: entityLabel});
     if (confirm(message)) {
-      var newTestCase = models.withoutEntity(kind, id, this.state.testCase);
+      var newTestCase = testCases.withoutEntity(kind, id, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
     }
   },
@@ -148,7 +149,7 @@ var Simulator = React.createClass({
     var name = this.state.testCase.individus[id][nameKey];
     var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: name});
     if (confirm(message)) {
-      var newTestCase = models.withoutIndividu(id, this.props.entitiesMetadata, this.state.testCase);
+      var newTestCase = testCases.withoutIndividu(id, this.props.entitiesMetadata, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
     }
   },
@@ -252,11 +253,11 @@ var Simulator = React.createClass({
   handleMoveIndividuFormChange(whatChanged, kind, value) {
     invariant(this.state.editedEntity, 'handler called without editedEntity in state.');
     var movedIndividuId = this.state.editedEntity.id;
-    var oldEntityData = models.findEntityAndRole(movedIndividuId, kind, this.props.entitiesMetadata,
+    var oldEntityData = testCases.findEntityAndRole(movedIndividuId, kind, this.props.entitiesMetadata,
       this.state.testCase);
     var newEntityId = whatChanged === 'entity' ? value : oldEntityData.id;
     var newRole = whatChanged === 'role' ? value : oldEntityData.role;
-    var newTestCase = models.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
+    var newTestCase = testCases.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
       this.props.entitiesMetadata, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
@@ -274,7 +275,7 @@ var Simulator = React.createClass({
   handleReset() {
     var message = this.getIntlMessage('resetSituationConfirmMessage');
     if (confirm(message)) {
-      var initialTestCase = models.getInitialTestCase(this.props.entitiesMetadata);
+      var initialTestCase = testCases.getInitialTestCase(this.props.entitiesMetadata);
       if (this.state.editedEntity) {
         this.setState({editedEntity: null});
       }
@@ -326,7 +327,7 @@ var Simulator = React.createClass({
             disabled={disabled}
             entitiesMetadata={this.props.entitiesMetadata}
             errors={this.state.errors}
-            getEntitiesKinds={models.getEntitiesKinds}
+            getEntitiesKinds={testCases.getEntitiesKinds}
             isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
             onReset={this.handleReset}
@@ -343,8 +344,8 @@ var Simulator = React.createClass({
                 disabled={disabled}
                 entitiesMetadata={this.props.entitiesMetadata}
                 errors={this.state.errors && this.state.errors.test_case}
-                getEntitiesKinds={models.getEntitiesKinds}
-                getEntityLabel={models.getEntityLabel}
+                getEntitiesKinds={testCases.getEntitiesKinds}
+                getEntityLabel={testCases.getEntityLabel}
                 onCloseEntity={this.handleEditFormClose}
                 onCreateEntity={this.handleCreateEntity}
                 onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
@@ -368,9 +369,9 @@ var Simulator = React.createClass({
     invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
     var currentEntityIdByKind = {},
       currentRoleByKind = {};
-    var kinds = models.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
+    var kinds = testCases.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
     kinds.forEach(kind => {
-      var entityData = models.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
+      var entityData = testCases.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
         this.state.testCase);
       if (entityData) {
         currentEntityIdByKind[kind] = entityData.id;
@@ -388,8 +389,8 @@ var Simulator = React.createClass({
           currentEntityIdByKind={currentEntityIdByKind}
           currentRoleByKind={currentRoleByKind}
           entitiesMetadata={this.props.entitiesMetadata}
-          getEntitiesKinds={models.getEntitiesKinds}
-          getEntityLabel={models.getEntityLabel}
+          getEntitiesKinds={testCases.getEntitiesKinds}
+          getEntityLabel={testCases.getEntityLabel}
           onEntityChange={(kind, value) => this.handleMoveIndividuFormChange('entity', kind, value)}
           onRoleChange={(kind, value) => this.handleMoveIndividuFormChange('role', kind, value)}
           testCase={this.state.testCase}
@@ -400,7 +401,7 @@ var Simulator = React.createClass({
   renderFieldsForm() {
     var {id, kind} = this.state.editedEntity,
       entity = this.state.testCase[kind][id];
-    var entityLabel = models.getEntityLabel(kind, entity, this.props.entitiesMetadata);
+    var entityLabel = testCases.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     invariant('children' in this.props.columnsTree[kind], `columnsTree.${kind} has no children`);
     var categories = Lazy(this.props.columnsTree[kind].children).map(category => {
       var columns;
@@ -646,7 +647,7 @@ var Simulator = React.createClass({
         changeset.simulationResult = null;
         this.save(originalTestCase, testCaseAdditionalData, saveComplete);
       } else if (repairedTestCase) {
-        var newTestCase = models.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
+        var newTestCase = testCases.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
         changeset.testCase = newTestCase;
         this.save(newTestCase, testCaseAdditionalData, saveComplete);
       }
