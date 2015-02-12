@@ -132,7 +132,7 @@ function guessEntityName(kind, entitiesMetadata, testCase) {
 
 
 function hasRole(individuId, kind, role, testCase) {
-  return !! findEntity(individuId, kind, role, testCase);
+  return Boolean(findEntity(individuId, kind, role, testCase));
 }
 
 

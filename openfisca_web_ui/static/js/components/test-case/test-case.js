@@ -54,7 +54,7 @@ var TestCase = React.createClass({
                   <Entity
                     active={this.props.activeEntityId === entity.id}
                     disabled={this.props.disabled}
-                    hasErrors={ !! helpers.getObjectPath(this.props.errors, kind, entity.id)}
+                    hasErrors={Boolean(helpers.getObjectPath(this.props.errors, kind, entity.id))}
                     key={entity.id}
                     label={entity.label}
                     onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}

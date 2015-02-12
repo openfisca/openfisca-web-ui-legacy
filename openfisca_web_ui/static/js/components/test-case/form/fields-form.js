@@ -35,11 +35,11 @@ var FieldsForm = React.createClass({
             this.props.categories[0].columns.map(this.renderControl) :
             this.props.categories.map((category, index) => {
               var categoryColumnNames = category.columns.map(column => column.name);
-              var hasErrors = !! (
+              var hasErrors = Boolean(
                 this.props.errors &&
                 Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
               );
-              var hasSuggestions = !! (
+              var hasSuggestions = Boolean(
                 this.props.suggestions &&
                 Lazy(categoryColumnNames).intersection(Object.keys(this.props.suggestions)).size()
               );
