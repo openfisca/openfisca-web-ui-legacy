@@ -61,8 +61,6 @@ function init() {
       var Simulator = require('./components/simulator');
       var mountElement = document.getElementById('simulator-container');
       var {columns, columnsTree} = fields;
-      var testCase = testCaseData.test_case;
-      var testCaseAdditionalData = testCaseData.test_case_additional_data;
       var formats = {
         number: {
           currencyStyle: {
@@ -75,8 +73,8 @@ function init() {
         <Simulator
           columns={columns}
           columnsTree={columnsTree}
-          defaultTestCase={testCase}
-          defaultTestCaseAdditionalData={testCaseAdditionalData}
+          defaultTestCase={testCaseData && testCaseData.test_case}
+          defaultTestCaseAdditionalData={testCaseData && testCaseData.test_case_additional_data}
           disableSave={Boolean(enabledModules.acceptCookiesModal)}
           entitiesMetadata={entitiesMetadata}
           formats={formats}
@@ -87,6 +85,13 @@ function init() {
         mountElement
       );
     };
+    var fetchCurrentTestCaseIfNeeded = (onSuccess, onError) => {
+      if (enabledModules.acceptCookiesModal) {
+        onSuccess(null);
+      } else {
+        webservices.fetchCurrentTestCase(onSuccess, onError);
+      }
+    };
     // TODO use promise.all()
     webservices.fetchEntitiesMetadata(
       (entitiesMetadata) => {
@@ -96,7 +101,7 @@ function init() {
             webservices.fetchFields(
               entitiesMetadata,
               (fields) => {
-                webservices.fetchCurrentTestCase(
+                fetchCurrentTestCaseIfNeeded(
                   (testCaseData) => {
                     webservices.fetchReforms(
                       (reforms) => renderSimulator(entitiesMetadata, fields, messages, reforms, testCaseData),
