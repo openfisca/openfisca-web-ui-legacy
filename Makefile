@@ -3,10 +3,10 @@ TESTS_DIR=openfisca_web_ui/tests
 
 all: check test
 
-build-dev: install-npm
+build-dev: install-npm compile-i18n-python
 	./node_modules/.bin/gulp dev
 
-build-prod: install-npm
+build-prod: install-npm compile-i18n-python
 	./node_modules/.bin/gulp prod
 
 check: flake8 jshint
