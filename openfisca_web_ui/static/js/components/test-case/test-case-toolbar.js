@@ -15,7 +15,6 @@ var TestCaseToolbar = React.createClass({
     disabled: React.PropTypes.bool,
     displayRepairMenuItem: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
-    errors: React.PropTypes.object,
     getEntitiesKinds: React.PropTypes.func.isRequired,
     isSimulationInProgress: React.PropTypes.bool,
     onCreateEntity: React.PropTypes.func.isRequired,
