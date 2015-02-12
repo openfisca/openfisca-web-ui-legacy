@@ -69,7 +69,7 @@ function patchValuesForColumns(data) {
 
 // Data fetching and saving API calls
 
-function fetchCommunes(term, onComplete, onError) {
+function fetchCommunes(term, onSuccess, onError) {
   var url = 'http://ou.comarquage.fr/api/v1/autocomplete-territory',
   data = {
     kind: ['CommuneOfFrance', 'ArrondissementOfCommuneOfFrance', 'AssociatedCommuneOfFrance'],
@@ -83,7 +83,7 @@ function fetchCommunes(term, onComplete, onError) {
     url: url,
   })
   .done(function(data) {
-    onComplete(data);
+    onSuccess(data);
   })
   .fail(function(error) {
     onError(error);
@@ -91,129 +91,119 @@ function fetchCommunes(term, onComplete, onError) {
 }
 
 
-function fetchCurrentLocaleMessages(onComplete) {
-  // TODO Throw exception, caught by window.onerror.
-  var onError = () => alert('Error: unable to load language files.');
+function fetchCurrentLocaleMessages(onSuccess, onError) {
   request
     .get(`${appconfig.i18n.baseUrlPath}/${appconfig.i18n.lang}.json`)
-    .set('Accept', 'application/json')
-    .on('error', function(/*error*/) {
-      onError();
-    })
+    // .set('Accept', 'application/json')
+    .on('error', onError)
     .end(function (res) {
       if (res.error) {
-        onError();
+        onError(res.error);
+      } else {
+        // Workaround: handle case when server returns no Content-Type HTTP header.
+        var body = res.body || JSON.parse(res.text);
+        onSuccess(body);
       }
-      // Workaround: handle case when server returns no Content-Type HTTP header.
-      var body = res.body || JSON.parse(res.text);
-      onComplete(body);
     });
 }
 
 
-function fetchCurrentTestCase(onComplete) {
+function fetchCurrentTestCase(onSuccess, onError) {
   request
     .get(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
-    .on('error', function(error) {
-      onComplete({error: error.message});
-    })
+    .on('error', onError)
     .end(function(res) {
-      if (res.body && res.body.error) {
-        onComplete(res.body);
-      } else if (res.error) {
-        onComplete(res);
+      if (res.error) {
+        onError(res.error);
       } else {
-        onComplete({
-          testCase: res.body ? res.body.test_case : null,
-          testCaseAdditionalData: res.body ? res.body.test_case_additional_data : null,
-        });
+        onSuccess(res.body);
       }
     });
 }
 
 
-function fetchEntitiesMetadata(onComplete) {
-  // TODO Throw exception, caught by window.onerror.
-  var onError = () => alert('Error: unable to fetch entities metadata.');
+function fetchEntitiesMetadata(onSuccess, onError) {
   request
     .get(makeUrl(appconfig.api.urlPaths.entities))
-    .on('error', function(/*error*/) {
-      onError();
-    })
+    .on('error', onError)
     .end(function (res) {
       if (res.error) {
-        onError();
+        onError(res.error);
+      } else if (res.body && res.body.error) {
+        onError(res.body.error);
+      } else {
+        onSuccess(res.body.entities);
       }
-      onComplete(res.body.entities);
     });
 }
 
 
-function fetchFields(entitiesMetadata, onComplete) {
+function fetchFields(entitiesMetadata, onSuccess, onError) {
   request
     .get(makeUrl(appconfig.api.urlPaths.fields))
-    .on('error', function(error) {
-      onComplete({error: error.message});
-    })
+    .on('error', onError)
     .end(function(res) {
-      if (res.body && res.body.error) {
-        onComplete(res.body);
-      } else if (res.error) {
-        onComplete(res);
-      } else if (res.body && 'columns' in res.body && 'columns_tree' in res.body) {
-        onComplete({
+      if (res.error) {
+        onError(res.error);
+      } else if (res.body && res.body.error) {
+        onError(res.body.error);
+      } else if (res.body) {
+        onSuccess({
           columns: patchColumns(res.body.columns, entitiesMetadata),
           columnsTree: res.body.columns_tree,
         });
-      } else {
-        onComplete({error: 'invalid fields data: no columns or no columns_tree'});
       }
     });
 }
 
 
-function fetchReforms(onComplete) {
-  var onError = () => alert('Error: unable to fetch reforms.');
+function fetchReforms(onSuccess, onError) {
   request
     .get(makeUrl(appconfig.api.urlPaths.reforms))
-    .on('error', function(/*error*/) {
-      onError();
-    })
+    .on('error', onError)
     .end(function (res) {
       if (res.error) {
-        onError();
-      }
-      // Blacklist "inversion_revenus" because it is part of "base_reforms" simulate API param.
-      var reforms = {};
-      for (var reformKey in res.body.reforms) {
-        if (reformKey !== 'inversion_revenus') {
-          reforms[reformKey] = res.body.reforms[reformKey];
+        onError(res.error);
+      } else if (res.body && res.body.error) {
+        onError(res.body.error);
+      } else {
+        // Blacklist "inversion_revenus" because it is part of "base_reforms" simulate API param.
+        var reforms = {};
+        if (res.body.reforms && Object.keys(res.body.reforms).length) {
+          for (var reformKey in res.body.reforms) {
+            if (reformKey !== 'inversion_revenus') {
+              reforms[reformKey] = res.body.reforms[reformKey];
+            }
+          }
         }
+        onSuccess(Object.keys(reforms).length ? reforms : null);
       }
-      onComplete(Object.keys(reforms).length > 0 ? reforms : null);
     });
 }
 
 
-function saveCurrentTestCase(testCase, testCaseAdditionalData, onComplete) {
+function saveCurrentTestCase(testCase, testCaseAdditionalData, onSuccess, onError) {
   request
     .post(appconfig.enabledModules.situationForm.urlPaths.currentTestCase)
     .send({
       test_case: testCase,
       test_case_additional_data: testCaseAdditionalData,
     })
-    .on('error', function(error) {
-      onComplete({error: error});
-    })
+    .on('error', onError)
     .end(function(res) {
-      onComplete(res.error ? res : res.body);
+      if (res.error) {
+        onError(res.error);
+      } else {
+        // API endpoint returns no content.
+        onSuccess();
+      }
     });
 }
 
 
 // Simulation API calls
 
-function calculate(reformKey, testCase, variables, year, force, onComplete) {
+function calculate(reformKey, testCase, variables, year, force, onSuccess, onError) {
   var scenario = {
     period: {
       start: year,
@@ -231,32 +221,29 @@ function calculate(reformKey, testCase, variables, year, force, onComplete) {
   }
   var dataStr = JSON.stringify(data);
   if ( ! force && calculateResultByDataCache[dataStr]) {
-    onComplete(calculateResultByDataCache[dataStr]);
+    onSuccess(calculateResultByDataCache[dataStr]);
   } else {
     request
       .post(makeUrl(appconfig.api.urlPaths.calculate))
       .send(data)
-      .on('error', function(error) {
-        onComplete({error: error.message});
-      })
+      .on('error', onError)
       .end(function(res) {
-        var result;
-        if (res.body && res.body.error) {
-          var errors = res.body.error.errors[0];
-          result = {errors: typeof errors === 'string' || ! ('scenarios' in errors) ? errors : errors.scenarios['0']};
-        } else if (res.error) {
-          result = res;
+        if (res.error) {
+          onError(res.error);
+        } else if (res.body && res.body.error) {
+          // Here we receive errors related to the simulation params (test case, year, etc.).
+          // These errors are passed as "success" to be deeply dispatched inside application components.
+          onSuccess({errors: res.body.error.errors[0]});
         } else {
-          result = res.body;
-          calculateResultByDataCache[dataStr] = result;
+          calculateResultByDataCache[dataStr] = res.body;
+          onSuccess(res.body);
         }
-        onComplete(result);
       });
   }
 }
 
 
-function repair(testCase, year, onComplete) {
+function repair(testCase, year, onSuccess, onError) {
   var data = {
     scenarios: [
       {
@@ -269,26 +256,22 @@ function repair(testCase, year, onComplete) {
   request
     .post(makeUrl(appconfig.api.urlPaths.simulate))
     .send(data)
-    .on('error', function(error) {
-      onComplete({error: error.message});
-    })
+    .on('error', onError)
     .end(function(res) {
-      if (res.body && res.body.error) {
-        onComplete({
-          errors: res.body.error.errors[0].scenarios['0'],
-          suggestions: null,
-        });
-      } else if (res.error) {
-        onComplete(res);
+      if (res.error) {
+        onError(res.error);
+      } else if (res.body && res.body.error) {
+        // Here we receive errors related to the simulation params (test case, year, etc.).
+        // These errors are passed as "success" to be deeply dispatched inside application components.
+        onSuccess({errors: res.body.error.errors[0]});
       } else {
-        var testCase = res.body.repaired_scenarios[0].test_case,
-          suggestions = helpers.getObjectPath(res.body, 'suggestions', 'scenarios', '0', 'test_case');
+        var testCase = res.body.repaired_scenarios[0].test_case;
+        testCase = patchValuesForColumns(testCase);
+        var suggestions = helpers.getObjectPath(res.body, 'suggestions', 'scenarios', '0', 'test_case');
         if (suggestions) {
           suggestions = patchValuesForColumns(suggestions);
         }
-        testCase = patchValuesForColumns(testCase);
-        onComplete({
-          errors: null,
+        onSuccess({
           suggestions: suggestions,
           testCase: testCase,
         });
@@ -297,7 +280,7 @@ function repair(testCase, year, onComplete) {
 }
 
 
-function simulate(axes, reformKey, testCase, year, force, onComplete) {
+function simulate(axes, reformKey, testCase, year, force, onSuccess, onError) {
   var scenario = {
     period: {
       start: year,
@@ -317,26 +300,23 @@ function simulate(axes, reformKey, testCase, year, force, onComplete) {
   }
   var dataStr = JSON.stringify(data);
   if ( ! force && simulateResultByDataCache[dataStr]) {
-    onComplete(simulateResultByDataCache[dataStr]);
+    onSuccess(simulateResultByDataCache[dataStr]);
   } else {
     request
       .post(makeUrl(appconfig.api.urlPaths.simulate))
       .send(data)
-      .on('error', function(error) {
-        onComplete({error: error.message});
-      })
+      .on('error', onError)
       .end(function(res) {
-        var result;
-        if (res.body && res.body.error) {
-          var errors = res.body.error.errors[0];
-          result = {errors: typeof errors === 'string' || ! ('scenarios' in errors) ? errors : errors.scenarios['0']};
-        } else if (res.error) {
-          result = res;
+        if (res.error) {
+          onError(res.error);
+        } else if (res.body && res.body.error) {
+          // Here we receive errors related to the simulation params (test case, year, etc.).
+          // These errors are passed as "success" to be deeply dispatched inside application components.
+          onSuccess({errors: res.body.error.errors[0]});
         } else {
-          result = res.body;
-          simulateResultByDataCache[dataStr] = result;
+          simulateResultByDataCache[dataStr] = res.body;
+          onSuccess(res.body);
         }
-        onComplete(result);
       });
   }
 }

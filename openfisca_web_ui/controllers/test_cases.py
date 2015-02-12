@@ -60,7 +60,7 @@ def api1_current(req):
         # session can be None when simulating in background while accept cookie modal is displayed.
         user = session.user if session is not None else None
         if user is None:
-            data = None
+            return wsgihelpers.respond_json(ctx, code = 404, data = None, headers = headers)
         else:
             user.ensure_test_case()
             current_test_case = user.current_test_case
@@ -68,7 +68,7 @@ def api1_current(req):
                 'test_case': current_test_case.api_data,
                 'test_case_additional_data': current_test_case.additional_api_data,
                 }
-        return wsgihelpers.respond_json(ctx, data = data, headers = headers)
+            return wsgihelpers.respond_json(ctx, data = data, headers = headers)
 
 
 @wsgihelpers.wsgify

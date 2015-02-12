@@ -37,27 +37,22 @@ var Simulator = React.createClass({
   propTypes: {
     columns: React.PropTypes.object.isRequired,
     columnsTree: React.PropTypes.object.isRequired,
+    defaultTestCase: React.PropTypes.object,
+    defaultTestCaseAdditionalData: React.PropTypes.object,
     disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
     reforms: React.PropTypes.object,
     visualizations: React.PropTypes.array,
   },
-  componentWillMount() {
-    webservices.fetchCurrentTestCase(data => {
-      if (data && data.error) {
-  //      console.error(data.error); // TODO handle error
-        this.setState(Lazy(this.state).assign({testCase: null}).toObject());
-      } else {
-        var {testCase, testCaseAdditionalData} = data;
-        if ( ! testCase) {
-          testCase = testCases.getInitialTestCase(this.props.entitiesMetadata);
-        }
-        var newState = Lazy(this.state).assign({testCase, testCaseAdditionalData}).toObject();
-        this.setState(newState, () => {
-          this.repair(testCase, testCaseAdditionalData);
-        });
-      }
-    });
+  componentDidMount() {
+    var testCase = this.props.defaultTestCase || testCases.getInitialTestCase(this.props.entitiesMetadata);
+    this.setState(
+      {
+        testCase: testCase,
+        testCaseAdditionalData: this.props.defaultTestCaseAdditionalData,
+      },
+      () => this.repair(testCase, this.props.defaultTestCaseAdditionalData)
+    );
   },
   getDefaultProps() {
     return {
@@ -87,7 +82,7 @@ var Simulator = React.createClass({
       selectedReformKey: null,
       selectedReformMode: 'with',
       selectedVisualizationSlug: 'waterfall',
-      simulationError: null,
+      requestError: null,
       simulationResult: null,
       suggestions: null,
       testCase: null,
@@ -522,11 +517,11 @@ var Simulator = React.createClass({
         </div>
       );
     } else {
-      if (this.state.simulationError) {
+      if (this.state.requestError) {
         bodyElement = (
           <div className="alert alert-danger" role="alert">
             <h4>{this.getIntlMessage('error')}</h4>
-            <p>{this.getIntlMessage('simulationErrorExplanation')}</p>
+            <p>{this.getIntlMessage('requestErrorExplanation')}</p>
           </div>
         );
       } else {
@@ -640,58 +635,68 @@ var Simulator = React.createClass({
     if ( ! testCaseAdditionalData) {
       testCaseAdditionalData = this.state.testCaseAdditionalData;
     }
-    webservices.repair(originalTestCase, this.state.year, data => {
-      var {errors, suggestions} = data,
-        repairedTestCase = data.testCase;
-      var changeset = {errors, suggestions};
-      var saveComplete = () => {
-        this.setState(changeset, () => {
-          if ( ! errors) {
-            this.simulate();
-          }
+    webservices.repair(originalTestCase, this.state.year,
+      (result) => {
+        var {errors, suggestions} = result;
+        var repairedTestCase = result.testCase;
+        var onSaveSuccess = () => this.setState(changeset, errors ? null : this.simulate);
+        var changeset = {errors, suggestions};
+        if (errors) {
+          changeset.simulationResult = null;
+          this.save(originalTestCase, testCaseAdditionalData, onSaveSuccess);
+        } else if (repairedTestCase) {
+          var newTestCase = testCases.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
+          changeset.testCase = newTestCase;
+          this.save(newTestCase, testCaseAdditionalData, onSaveSuccess);
+        }
+      },
+      (error) => {
+        console.error(error);
+        this.setState({
+          errors: null,
+          requestError: error,
+          simulationResult: null,
         });
-      };
-      if (errors) {
-        changeset.simulationResult = null;
-        this.save(originalTestCase, testCaseAdditionalData, saveComplete);
-      } else if (repairedTestCase) {
-        var newTestCase = testCases.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
-        changeset.testCase = newTestCase;
-        this.save(newTestCase, testCaseAdditionalData, saveComplete);
       }
-    });
+    );
   },
-  save(testCase, testCaseAdditionalData, onComplete) {
+  save(testCase, testCaseAdditionalData, onSuccess) {
     if (this.props.disableSave) {
-      onComplete();
+      onSuccess();
     } else {
-      webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, data => {
-        if (data && data.unauthorized) {
+      webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, onSuccess,
+        (error) => {
+          // TODO check if unauhtorized flag is in error
+          console.error(error);
           alert(this.getIntlMessage('sessionHasExpiredExplanation'));
           window.location.reload();
-        } else {
-          onComplete();
         }
-      });
+      );
     }
   },
   simulate(force) {
-    var onComplete = (result) => {
-      var changeset = {isSimulationInProgress: false};
-      if (result.error) {
-        changeset.errors = null;
-        changeset.simulationError = result.error;
-        changeset.simulationResult = null;
-      } else if (result.errors) {
+    var onSuccess = (result) => {
+      var changeset = {
+        isSimulationInProgress: false,
+        requestError: null,
+      };
+      if (result.errors) {
         changeset.errors = result.errors;
-        changeset.simulationError = null;
         changeset.simulationResult = null;
       } else {
         changeset.errors = null;
-        changeset.simulationError = null;
         changeset.simulationResult = result;
       }
       this.setState(changeset);
+    };
+    var onError = (error) => {
+      console.error(error);
+      this.setState({
+        errors: null,
+        isSimulationInProgress: false,
+        requestError: error,
+        simulationResult: null,
+      });
     };
     // "force" parameter bypasses the cache.
     invariant(! this.state.isSimulationInProgress && ! this.state.errors && ! this.state.editedEntity,
@@ -702,7 +707,7 @@ var Simulator = React.createClass({
           this.state.selectedVisualizationSlug === 'situateur-sal' ? 'sal' : 'revdisp',
         ];
         webservices.calculate(this.state.selectedReformKey, this.state.testCase, variables, this.state.year, force,
-          onComplete);
+          onSuccess, onError);
       } else {
         var axes = this.state.selectedVisualizationSlug === 'bareme' ? [
           {
@@ -713,7 +718,7 @@ var Simulator = React.createClass({
           },
         ] : null;
         webservices.simulate(axes, this.state.selectedReformKey, this.state.testCase, this.state.year, force,
-          onComplete);
+          onSuccess, onError);
       }
     });
   },
