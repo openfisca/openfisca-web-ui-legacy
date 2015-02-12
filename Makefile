@@ -6,7 +6,7 @@ all: check test
 build-dev: install-npm
 	./node_modules/.bin/gulp dev
 
-build-prod: install-npm-prod
+build-prod: install-npm
 	./node_modules/.bin/gulp prod
 
 check: flake8 jshint
@@ -35,9 +35,6 @@ flake8: clean-pyc
 
 install-npm:
 	npm install
-
-install-npm-prod:
-	npm install --production
 
 jshint:
 	./node_modules/.bin/jsxhint ${STATIC_DIR}/js
