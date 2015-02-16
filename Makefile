@@ -44,7 +44,7 @@ poedit: update-i18n-python
 	make compile-i18n-python
 
 test: check-syntax-errors
-	nosetests --with-doctest $(TESTS_DIR)
+	nosetests -x --with-doctest $(TESTS_DIR)
 
 update-i18n: update-i18n-js update-i18n-python
 
