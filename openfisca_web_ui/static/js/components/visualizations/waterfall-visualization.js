@@ -54,7 +54,7 @@ var WaterfallVisualization = React.createClass({
     window.onresize = null;
   },
   formatHint(variables) {
-    var variable = Lazy(variables).find({code: this.state.activeVariableCode});
+    var variable = variables.find((variable) => variable.code === this.state.activeVariableCode);
     var [startValue, endValue] = [variable.baseValue + variable.value, variable.baseValue].sort();
     if (variable.value < 0) {
       [endValue, startValue] = [startValue, endValue];
@@ -228,13 +228,15 @@ var WaterfallVisualization = React.createClass({
       var activeVariablesCodes = null;
       var activeVariable;
       if (this.state.activeVariableCode) {
-        activeVariable = displayedVariablesWithSubtotals.find(_ => _.code === this.state.activeVariableCode);
+        activeVariable = displayedVariablesWithSubtotals.find(
+          (variable) => variable.code === this.state.activeVariableCode
+        );
         if (activeVariable) {
           activeVariablesCodes = [this.state.activeVariableCode];
           if (this.state.activeVariableCode !== 'revdisp') {
             activeVariablesCodes = activeVariablesCodes.concat(activeVariable.childrenCodes);
           }
-          var waterfallChartVariablesCodes = waterfallChartVariables.map(_ => _.code);
+          var waterfallChartVariablesCodes = waterfallChartVariables.map((variable) => variable.code);
           activeVariablesCodes = activeVariablesCodes.filter(
             (activeVariablesCode) => waterfallChartVariablesCodes.includes(activeVariablesCode)
           );

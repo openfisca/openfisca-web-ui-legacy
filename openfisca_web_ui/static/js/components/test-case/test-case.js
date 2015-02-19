@@ -9,7 +9,8 @@ var invariant = require('react/lib/invariant'),
 var Entity = require('./entity'),
   helpers = require('../../helpers'),
   Individu = require('./individu'),
-  Role = require('./role');
+  Role = require('./role'),
+  testCases = require('../../test-cases');
 
 
 var TestCase = React.createClass({
@@ -42,29 +43,27 @@ var TestCase = React.createClass({
     return (
       <div>
         {
-          kinds.map(kind => {
+          kinds.map((kind) => {
             if (this.props.testCase[kind]) {
               return Lazy(this.props.testCase[kind])
-                .map((entity, entityId) => Lazy(entity).assign({
-                  id: entityId,
+                .map((entity) => Lazy(entity).assign({
                   label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
                 }).toObject())
                 .sortBy('label')
-                .map(entity =>
+                .map((entity) =>
                   <Entity
                     active={this.props.activeEntityId === entity.id}
                     disabled={this.props.disabled}
                     hasErrors={Boolean(helpers.getObjectPath(this.props.errors, kind, entity.id))}
                     key={entity.id}
                     label={entity.label}
-                    onDelete={this.props.onDeleteEntity.bind(null, kind, entity.id)}
-                    onEdit={this.handleEdit.bind(null, kind, entity.id)}>
+                    onDelete={() => this.props.onDeleteEntity(kind, entity.id)}
+                    onEdit={() => this.handleEdit(kind, entity.id)}>
                     {
                       this.props.entitiesMetadata[kind].roles.map(role => {
                         var maxCardinality = this.props.entitiesMetadata[kind].maxCardinalityByRoleKey[role];
-                        var renderIndividu = individuId => {
-                          invariant(individuId in this.props.testCase.individus,
-                            'individuId is not in testCase.individus');
+                        var renderIndividu = (individuId) => {
+                          var individu = testCases.findEntity('individus', individuId, this.props.testCase);
                           return (
                             <Individu
                               active={this.props.activeEntityId === individuId}
@@ -72,11 +71,7 @@ var TestCase = React.createClass({
                               errors={helpers.getObjectPath(this.props.errors, 'individus', individuId)}
                               id={individuId}
                               key={individuId}
-                              name={
-                                this.props.testCase.individus[individuId][
-                                  this.props.entitiesMetadata.individus.nameKey
-                                ]
-                              }
+                              name={individu[this.props.entitiesMetadata.individus.nameKey]}
                               onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
                               onEdit={this.handleEdit.bind(null, 'individus', individuId)}
                               onMove={this.props.onMoveIndividu.bind(null, individuId)}

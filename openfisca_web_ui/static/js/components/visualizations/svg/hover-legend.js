@@ -61,7 +61,7 @@ var HoverLegend = React.createClass({
         strokeWidth: this.props.lineStrokeWidth,
         shapeRendering: 'crispedges',
       };
-      elements = elements.concat([
+      elements = elements.concat(
         <line
           key='v-line'
           style={lineStyle}
@@ -78,7 +78,7 @@ var HoverLegend = React.createClass({
           y1={snapPixel.y}
           y2={snapPixel.y}
         />
-      ]);
+      );
       var isLastXValue = this.props.snapPoint.x === this.props.xMaxValue;
       if (this.props.snapPoint.x) {
         elements.push(

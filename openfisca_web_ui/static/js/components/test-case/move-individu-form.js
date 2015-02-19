@@ -24,12 +24,10 @@ var MoveIndividuForm = React.createClass({
         {
           this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => {
             var entityMetadata = this.props.entitiesMetadata[kind];
-            var entities = Lazy(this.props.testCase[kind]).map((entity, entityId) => {
-              return {
-                id: entityId,
-                label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
-              };
-            }).sortBy('label').toArray();
+            var entities = Lazy(this.props.testCase[kind]).map((entity) => ({
+              id: entity.id,
+              label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
+            })).sortBy('label').toArray();
             var roles = entityMetadata.roles.map(role => ({
               id: role,
               label: this.props.entitiesMetadata[kind].labelByRoleKey[role],

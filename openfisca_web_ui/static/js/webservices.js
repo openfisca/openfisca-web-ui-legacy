@@ -51,14 +51,11 @@ function patchColumns(columns, entitiesMetadata) {
 function patchValuesForColumns(data) {
   // Change values according to UI-specific columns.
   if (data.individus) {
-    var newIndividus = Lazy(data.individus).map(function(individu, id) {
-      return [
-        id,
-        individu.birth ?
-          Lazy(individu).assign({birth: parseInt(individu.birth.slice(0, 4))}).toObject() :
-          individu
-      ];
-    }).toObject();
+    var newIndividus = Lazy(data.individus).map((individu) => {
+      return individu.birth ?
+        Lazy(individu).assign({birth: parseInt(individu.birth.slice(0, 4))}).toObject() :
+        individu;
+    }).toArray();
     var newData = Lazy(data).assign({individus: newIndividus}).toObject();
     return newData;
   } else {

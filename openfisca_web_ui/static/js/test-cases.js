@@ -4,11 +4,10 @@ var invariant = require('react/lib/invariant'),
   Lazy = require('lazy.js'),
   uuid = require('uuid');
 
-var helpers = require('./helpers');
-
 
 function createEntity(kind, entitiesMetadata, testCase) {
-  var entity = {};
+  var id = uuid.v4();
+  var entity = {id};
   var roles = entitiesMetadata[kind].roles;
   if (roles) {
     roles.forEach(role => {
@@ -26,46 +25,29 @@ function createIndividu(entitiesMetadata, testCase) {
 }
 
 
-function findEntity(individuId, kind, role, testCase) {
-  if ( ! (kind in testCase)) {
-    return null;
-  }
-  var entities = testCase[kind];
-  for (var entityId in entities) {
-    var entity = entities[entityId];
-    // FIXME role can be a singleton.
-    if (role in entity && entity[role].indexOf(individuId) !== -1) {
-      return {id: entityId, entity: entity};
-    }
-  }
-  return null;
+function findEntity(kind, id, testCase) {
+  var entity = testCase[kind].find((entity) => entity.id === id);
+  invariant(entity, 'entity was not found in testCase');
+  return entity;
 }
 
 
 function findEntityAndRole(individuId, kind, entitiesMetadata, testCase) {
-  if ( ! (kind in testCase)) {
-    return null;
-  }
   var entities = testCase[kind];
-  var hasRole = role => hasRoleInEntity(individuId, kind, entity, role, entitiesMetadata);
-  for (var entityId in entities) {
-    var entity = entities[entityId];
-    var role = Lazy(entitiesMetadata[kind].roles).find(hasRole);
+  for (let idx in entities) {
+    var entity = entities[idx];
+    var role = entitiesMetadata[kind].roles.find(
+      (role) => hasRoleInEntity(individuId, kind, entity, role, entitiesMetadata)
+    );
     if (role) {
-      return {entity: entity, id: entityId, role: role};
+      return {entity, role};
     }
   }
-  return null;
+  invariant(false, 'entity and role not found');
 }
 
 
-function getEntitiesKinds(entitiesMetadata, {collective, persons}) {
-  if (typeof collective === 'undefined') {
-    collective = true;
-  }
-  if (typeof persons === 'undefined') {
-    persons = true;
-  }
+function getEntitiesKinds(entitiesMetadata, {collective = true, persons = true} = {}) {
   invariant(collective || persons, 'collective or persons must be specified');
   return Object.keys(entitiesMetadata).filter((kind) => {
     var isPersonsEntity = entitiesMetadata[kind].isPersonsEntity;
@@ -89,17 +71,16 @@ function getEntityLabel(kind, entity, entitiesMetadata) {
 function getInitialTestCase(entitiesMetadata) {
   var testCase = {};
   var individu = createIndividu(entitiesMetadata, testCase);
-  var individuId = uuid.v4();
-  testCase.individus = {[individuId]: individu};
+  testCase.individus = [individu];
   getEntitiesKinds(entitiesMetadata, {persons: false}).forEach(kind => {
     var entity = createEntity(kind, entitiesMetadata, testCase);
     var defaultRole = entitiesMetadata[kind].roles[0];
     if (isSingleton(kind, defaultRole, entitiesMetadata)) {
-      entity[defaultRole] = individuId;
+      entity[defaultRole] = individu.id;
     } else {
-      entity[defaultRole].push(individuId);
+      entity[defaultRole].push(individu.id);
     }
-    testCase[kind] = {[uuid.v4()]: entity};
+    testCase[kind] = [entity];
   });
   return testCase;
 }
@@ -131,17 +112,10 @@ function guessEntityName(kind, entitiesMetadata, testCase) {
 }
 
 
-function hasRole(individuId, kind, role, testCase) {
-  return Boolean(findEntity(individuId, kind, role, testCase));
-}
-
-
 function hasRoleInEntity(individuId, kind, entity, role, entitiesMetadata) {
-  if (isSingleton(kind, role, entitiesMetadata)) {
-    return entity[role] === individuId;
-  } else {
-    return entity[role] && entity[role].indexOf(individuId) !== -1;
-  }
+  return isSingleton(kind, role, entitiesMetadata) ?
+    entity[role] === individuId :
+    entity[role] && entity[role].indexOf(individuId) !== -1;
 }
 
 
@@ -151,29 +125,41 @@ function isSingleton(kind, role, entitiesMetadata) {
 
 
 function moveIndividuInEntity(individuId, kind, id, role, entitiesMetadata, testCase) {
-  var oldEntity = findEntityAndRole(individuId, kind, entitiesMetadata, testCase);
-  var newTestCase = testCase;
-  if (oldEntity) {
-    newTestCase = withoutIndividuInEntity(individuId, kind, oldEntity.id, oldEntity.role, entitiesMetadata,
-      newTestCase);
-  }
+  var oldEntityData = findEntityAndRole(individuId, kind, entitiesMetadata, testCase);
+  var newTestCase = withoutIndividuInEntity(individuId, kind, oldEntityData.entity.id, oldEntityData.role,
+    entitiesMetadata, testCase);
   newTestCase = withIndividuInEntity(individuId, kind, id, role, entitiesMetadata, newTestCase);
+  return newTestCase;
+}
+
+
+function replaceEntity(kind, id, newEntity, testCase) {
+  var newEntities = Lazy(testCase[kind]).reject((entity) => entity.id === id).concat([newEntity]).toArray();
+  var newTestCase = Lazy(testCase).assign({[kind]: newEntities}).toObject();
+  return newTestCase;
+}
+
+
+function withEntity(kind, newEntity, testCase) {
+  var entities = kind in testCase ? testCase[kind] : [];
+  var newEntities = entities.concat(newEntity);
+  var newTestCase = Lazy(testCase).assign({[kind]: newEntities}).toObject();
   return newTestCase;
 }
 
 
 function withEntitiesNamesFilled(entitiesMetadata, testCase) {
   var newEntities = Lazy(getEntitiesKinds(entitiesMetadata, {persons: false})).map(kind => {
-    var newEntitiesOfKind = Lazy(testCase[kind]).map((entity, id) => {
+    var newEntitiesOfKind = Lazy(testCase[kind]).map((entity) => {
       var nameKey = entitiesMetadata[kind].nameKey;
       if (entity[nameKey]) {
-        return [id, entity];
+        return entity;
       } else {
         var newName = guessEntityName(kind, entitiesMetadata, testCase);
         var newEntity = Lazy(entity).assign({[nameKey]: newName}).toObject();
-        return [id, newEntity];
+        return newEntity;
       }
-    }).toObject();
+    }).toArray();
     return [kind, newEntitiesOfKind];
   }).toObject();
   var newTestCase = Lazy(testCase).assign(newEntities).toObject();
@@ -182,26 +168,26 @@ function withEntitiesNamesFilled(entitiesMetadata, testCase) {
 
 
 function withIndividuInEntity(newIndividuId, kind, id, role, entitiesMetadata, testCase) {
-  var newEntitySequence = Lazy(testCase[kind][id]);
+  var newEntitySequence = Lazy(findEntity(kind, id, testCase));
   var newEntity;
   if (isSingleton(kind, role, entitiesMetadata)) {
     newEntity = newEntitySequence.assign({[role]: newIndividuId}).toObject();
   } else {
-    var newIndividuIds = Lazy(newEntitySequence.get(role)).concat(newIndividuId).toArray();
+    var individuIds = newEntitySequence.get(role) || [];
+    var newIndividuIds = individuIds.concat(newIndividuId);
     newEntity = newEntitySequence.assign({[role]: newIndividuIds}).toObject();
   }
-  var newEntitiesOfKind = Lazy(testCase[kind]).assign({[id]: newEntity}).toObject();
-  var newTestCase = Lazy(testCase).assign({[kind]: newEntitiesOfKind}).toObject();
+  var newTestCase = replaceEntity(kind, id, newEntity, testCase);
   return newTestCase;
 }
 
 
 function withoutEntity(kind, id, testCase) {
-  var newEntitiesOfKind = Lazy(testCase[kind]).omit([id]).toObject();
-  if (Object.keys(newEntitiesOfKind).length === 0) {
-    newEntitiesOfKind = null;
+  var newEntities = Lazy(testCase[kind]).reject((entity) => entity.id === id).toArray();
+  if (newEntities.length === 0) {
+    newEntities = null;
   }
-  var newTestCase = Lazy(testCase).assign({[kind]: newEntitiesOfKind}).toObject();
+  var newTestCase = Lazy(testCase).assign({[kind]: newEntities}).toObject();
   return newTestCase;
 }
 
@@ -209,34 +195,41 @@ function withoutEntity(kind, id, testCase) {
 function withoutIndividu(id, entitiesMetadata, testCase) {
   var newTestCase = testCase;
   var kinds = getEntitiesKinds(entitiesMetadata, {persons: false});
-  kinds.forEach(function(kind) {
-    var oldEntity = findEntityAndRole(id, kind, entitiesMetadata, testCase);
-    if (oldEntity) {
-      newTestCase = withoutIndividuInEntity(id, kind, oldEntity.id, oldEntity.role, entitiesMetadata, newTestCase);
-    }
+  kinds.forEach((kind) => {
+    var oldEntityData = findEntityAndRole(id, kind, entitiesMetadata, testCase);
+    newTestCase = withoutIndividuInEntity(id, kind, oldEntityData.entity.id, oldEntityData.role, entitiesMetadata,
+      newTestCase);
   });
-  var newIndividus = Lazy(testCase.individus).omit([id]).toObject();
+  var newIndividus = Lazy(testCase.individus).reject((individu) => individu.id === id).toArray();
   newTestCase = Lazy(newTestCase).assign({individus: newIndividus}).toObject();
   return newTestCase;
 }
 
 
 function withoutIndividuInEntity(individuId, kind, id, role, entitiesMetadata, testCase) {
-  var newTestCase;
+  var entity = findEntity(kind, id, testCase);
+  var newEntities, newEntity, newTestCase;
+  var removeRole = () => {
+    newEntity = Lazy(entity).omit([role]).toObject();
+    newTestCase = replaceEntity(kind, id, newEntity, testCase);
+    return newTestCase;
+  };
   if (isSingleton(kind, role, entitiesMetadata)) {
-    invariant(testCase[kind][id][role] === individuId, 'individuId is not referenced by entity role in testCase');
-    newTestCase = helpers.assignIn(testCase, [kind, id], Lazy(testCase[kind][id]).omit([role]).toObject());
+    newTestCase = removeRole();
   } else {
-    var newIndividuIds = Lazy(testCase[kind][id][role]).without(individuId).toArray();
-    newTestCase = newIndividuIds.length ?
-      helpers.assignIn(testCase, [kind, id, role], newIndividuIds) :
-      helpers.assignIn(testCase, [kind, id], Lazy(testCase[kind][id]).omit([role]).toObject());
+    var newIndividuIds = Lazy(entity[role]).without(individuId).toArray();
+    if (newIndividuIds.length) {
+      newEntity = Lazy(entity).assign({[role]: newIndividuIds}).toObject();
+      newTestCase = replaceEntity(kind, id, newEntity, testCase);
+    } else {
+      newTestCase = removeRole();
+    }
   }
   return newTestCase;
 }
 
 module.exports = {
   createEntity, createIndividu, findEntity, findEntityAndRole, getEntitiesKinds, getEntityLabel, getInitialTestCase,
-  guessEntityName, hasRole, hasRoleInEntity, isSingleton, moveIndividuInEntity, withEntitiesNamesFilled,
-  withIndividuInEntity, withoutEntity, withoutIndividu, withoutIndividuInEntity,
+  guessEntityName, hasRoleInEntity, isSingleton, moveIndividuInEntity, replaceEntity, withEntity,
+  withEntitiesNamesFilled, withIndividuInEntity, withoutEntity, withoutIndividu, withoutIndividuInEntity,
 };

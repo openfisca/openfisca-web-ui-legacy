@@ -112,24 +112,19 @@ var Simulator = React.createClass({
     this.setState({visualizationsSettings: newVisualizationsSettings});
   },
   handleCreateEntity(kind) {
-    // FIXME use withEntity
     var newEntity = testCases.createEntity(kind, this.props.entitiesMetadata, this.state.testCase);
-    var newEntityId = uuid.v4();
-    var newTestCase = helpers.assignIn(this.state.testCase, [kind, newEntityId], newEntity);
+    var newTestCase = testCases.withEntity(kind, newEntity, this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleCreateIndividuInEntity(kind, id, role) {
-    // TODO use withIndividu
     var newIndividu = testCases.createIndividu(this.props.entitiesMetadata, this.state.testCase);
-    var newIndividuId = uuid.v4();
-    var newIndividus = Lazy(this.state.testCase.individus).assign({[newIndividuId]: newIndividu}).toObject();
-    var newTestCase = Lazy(this.state.testCase).assign({individus: newIndividus}).toObject();
-    newTestCase = testCases.withIndividuInEntity(newIndividuId, kind, id, role, this.props.entitiesMetadata,
+    var newTestCase = testCases.withEntity('individus', newIndividu, this.state.testCase);
+    newTestCase = testCases.withIndividuInEntity(newIndividu.id, kind, id, role, this.props.entitiesMetadata,
         newTestCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleDeleteEntity(kind, id) {
-    var entity = this.state.testCase[kind][id];
+    var entity = testCases.findEntity(kind, id, this.state.testCase);
     var entityLabel = testCases.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: entityLabel});
     if (confirm(message)) {
@@ -138,9 +133,9 @@ var Simulator = React.createClass({
     }
   },
   handleDeleteIndividu(id) {
+    var individu = testCases.findEntity('individus', id, this.state.testCase);
     var nameKey = this.props.entitiesMetadata.individus.nameKey;
-    var name = this.state.testCase.individus[id][nameKey];
-    var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: name});
+    var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: individu[nameKey]});
     if (confirm(message)) {
       var newTestCase = testCases.withoutIndividu(id, this.props.entitiesMetadata, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
@@ -192,8 +187,8 @@ var Simulator = React.createClass({
   },
   handleEditEntity(kind, id) {
     var nameKey = this.props.entitiesMetadata[kind].nameKey;
-    var name = this.state.testCase[kind][id][nameKey];
-    var newEditedEntity = {action: 'edit', changedValues: {[nameKey]: name}, id: id, kind: kind};
+    var entity = testCases.findEntity(kind, id, this.state.testCase);
+    var newEditedEntity = {action: 'edit', changedValues: {[nameKey]: entity[nameKey]}, id: id, kind: kind};
     this.setState({editedEntity: newEditedEntity});
   },
   handleEditFormClose() {
@@ -216,8 +211,9 @@ var Simulator = React.createClass({
         }
         return [columnName, value];
       }).toObject();
-      var newEntity = Lazy(this.state.testCase[kind][id]).assign(sanitizedChangedValues).toObject();
-      var newTestCase = helpers.assignIn(this.state.testCase, [kind, id], newEntity);
+      var entity = testCases.findEntity(kind, id, this.state.testCase);
+      var newEntity = Lazy(entity).assign(sanitizedChangedValues).toObject();
+      var newTestCase = testCases.replaceEntity(kind, id, newEntity, this.state.testCase);
       changeset.testCase = newTestCase;
       var newTestCaseAdditionalData = Lazy(this.state.testCaseAdditionalData)
         .assign(this.state.editedEntity.changedAdditionalData).toObject();
@@ -248,7 +244,7 @@ var Simulator = React.createClass({
     var movedIndividuId = this.state.editedEntity.id;
     var oldEntityData = testCases.findEntityAndRole(movedIndividuId, kind, this.props.entitiesMetadata,
       this.state.testCase);
-    var newEntityId = whatChanged === 'entity' ? value : oldEntityData.id;
+    var newEntityId = whatChanged === 'entity' ? value : oldEntityData.entity.id;
     var newRole = whatChanged === 'role' ? value : oldEntityData.role;
     var newTestCase = testCases.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
       this.props.entitiesMetadata, this.state.testCase);
@@ -366,17 +362,15 @@ var Simulator = React.createClass({
     kinds.forEach(kind => {
       var entityData = testCases.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
         this.state.testCase);
-      if (entityData) {
-        currentEntityIdByKind[kind] = entityData.id;
-        currentRoleByKind[kind] = entityData.role;
-      }
+      currentEntityIdByKind[kind] = entityData.entity.id;
+      currentRoleByKind[kind] = entityData.role;
     });
     var nameKey = this.props.entitiesMetadata.individus.nameKey;
-    var name = this.state.testCase.individus[this.state.editedEntity.id][nameKey];
+    var individu = testCases.findEntity('individus', this.state.editedEntity.id, this.state.testCase);
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: name})}
+        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: individu[nameKey]})}
       >
         <MoveIndividuForm
           currentEntityIdByKind={currentEntityIdByKind}
@@ -393,7 +387,7 @@ var Simulator = React.createClass({
   },
   renderFieldsForm() {
     var {id, kind} = this.state.editedEntity,
-      entity = this.state.testCase[kind][id];
+      entity = testCases.findEntity(kind, id, this.state.testCase);
     var entityLabel = testCases.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     invariant('children' in this.props.columnsTree[kind], `columnsTree.${kind} has no children`);
     var categories = Lazy(this.props.columnsTree[kind].children).map(category => {
@@ -635,30 +629,31 @@ var Simulator = React.createClass({
     if ( ! testCaseAdditionalData) {
       testCaseAdditionalData = this.state.testCaseAdditionalData;
     }
-    webservices.repair(originalTestCase, this.state.year,
-      (result) => {
-        var {errors, suggestions} = result;
-        var repairedTestCase = result.testCase;
-        var onSaveSuccess = () => this.setState(changeset, errors ? null : this.simulate);
-        var changeset = {errors, suggestions};
-        if (errors) {
-          changeset.simulationResult = null;
-          this.save(originalTestCase, testCaseAdditionalData, onSaveSuccess);
-        } else if (repairedTestCase) {
-          var newTestCase = testCases.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
-          changeset.testCase = newTestCase;
-          this.save(newTestCase, testCaseAdditionalData, onSaveSuccess);
-        }
-      },
-      (error) => {
-        console.error(error);
-        this.setState({
-          errors: null,
-          requestError: error,
-          simulationResult: null,
-        });
+    webservices.repair(originalTestCase, this.state.year, (result) => {
+      var {errors, suggestions} = result;
+      var repairedTestCase = result.testCase;
+      var onSaveSuccess = () => this.setState(
+        changeset,
+        errors || this.state.editedEntity ? null : this.simulate
+      );
+      var changeset = {errors, suggestions};
+      if (errors) {
+        changeset.simulationResult = null;
+        this.save(originalTestCase, testCaseAdditionalData, onSaveSuccess);
+      } else if (repairedTestCase) {
+        var newTestCase = testCases.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
+        changeset.testCase = newTestCase;
+        this.save(newTestCase, testCaseAdditionalData, onSaveSuccess);
       }
-    );
+    },
+    (error) => {
+      console.error(error);
+      this.setState({
+        errors: null,
+        requestError: error,
+        simulationResult: null,
+      });
+    });
   },
   save(testCase, testCaseAdditionalData, onSuccess) {
     if (this.props.disableSave) {

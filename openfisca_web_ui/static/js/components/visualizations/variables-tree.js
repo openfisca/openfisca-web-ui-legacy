@@ -55,7 +55,7 @@ var VariablesTree = React.createClass({
       var variablesSequence = Lazy(this.props.variables);
       variables = variablesSequence.initial().reverse().concat(variablesSequence.last()).toArray();
       activeVariable = this.props.activeVariableCode ?
-        this.props.variables.find(_ => _.code === this.props.activeVariableCode) : null;
+        this.props.variables.find((variable) => variable.code === this.props.activeVariableCode) : null;
     }
     return (
       <div className='table-responsive'>

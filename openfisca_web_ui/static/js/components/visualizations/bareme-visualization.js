@@ -58,7 +58,7 @@ var BaremeVisualization = React.createClass({
   formatHint(variables) {
     var variableName;
     if (this.state.activeVariableCode) {
-      var variable = Lazy(variables).find({code: this.state.activeVariableCode});
+      var variable = variables.find((variable) => variable.code === this.state.activeVariableCode);
       variableName = variable.name;
     } else {
       variableName = this.getIntlMessage('hoverOverChart');
