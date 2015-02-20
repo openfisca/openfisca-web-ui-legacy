@@ -4,7 +4,8 @@
 var Lazy = require('lazy.js'),
   React = require('react');
 
-var EntityRoleSelect = require('./entity-role-select');
+var EntityRoleSelect = require('./entity-role-select'),
+  testCases = require('../../test-cases');
 
 
 var MoveIndividuForm = React.createClass({
@@ -22,15 +23,19 @@ var MoveIndividuForm = React.createClass({
     return (
       <div>
         {
-          this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map(kind => {
+          this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map((kind) => {
             var entityMetadata = this.props.entitiesMetadata[kind];
-            var entities = Lazy(this.props.testCase[kind]).map((entity) => ({
-              id: entity.id,
-              label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
-            })).sortBy('label').toArray();
-            var roles = entityMetadata.roles.map(role => ({
-              id: role,
+            var entities = Lazy(this.props.testCase[kind]).map((entity) => {
+              return {
+                id: entity.id,
+                label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
+              };
+            }).sortBy('label').toArray();
+            var roles = entityMetadata.roles.map((role) => ({
+              isFull: testCases.isSingleton(kind, role, this.props.entitiesMetadata) &&
+                testCases.findEntity(kind, this.props.currentEntityIdByKind[kind], this.props.testCase)[role] !== null,
               label: this.props.entitiesMetadata[kind].labelByRoleKey[role],
+              value: role,
             }));
             return (
               <EntityRoleSelect

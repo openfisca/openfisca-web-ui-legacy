@@ -6,8 +6,8 @@ var React = require('react');
 
 var EntityRoleSelect = React.createClass({
   propTypes: {
-    currentEntityId: React.PropTypes.string,
-    currentRole: React.PropTypes.string,
+    currentEntityId: React.PropTypes.string.isRequired,
+    currentRole: React.PropTypes.string.isRequired,
     entities: React.PropTypes.arrayOf(
       React.PropTypes.shape({
         id: React.PropTypes.string.isRequired,
@@ -20,8 +20,9 @@ var EntityRoleSelect = React.createClass({
     onRoleChange: React.PropTypes.func.isRequired,
     roles: React.PropTypes.arrayOf(
       React.PropTypes.shape({
-        id: React.PropTypes.string.isRequired,
+        isFull: React.PropTypes.bool,
         label: React.PropTypes.string.isRequired,
+        value: React.PropTypes.string.isRequired,
       })
     ).isRequired,
   },
@@ -43,10 +44,15 @@ var EntityRoleSelect = React.createClass({
               className="form-control"
               id={this.props.kind}
               onChange={this.handleEntityChange}
-              value={this.props.currentEntityId}>
-              {this.props.currentEntityId ? null : <option key='none' value='none'>Aucun</option>}
+              value={this.props.currentEntityId}
+            >
               {
-                this.props.entities.map(entity =>
+                this.props.currentEntityId === 'none' && (
+                  <option key='none' value='none'>Aucun</option>
+                )
+              }
+              {
+                this.props.entities.map((entity) =>
                   <option key={entity.id} value={entity.id}>{entity.label}</option>
                 )
               }
@@ -55,11 +61,24 @@ var EntityRoleSelect = React.createClass({
           <div className='col-sm-6'>
             <select
               className="form-control"
+              disabled={this.props.currentEntityId === 'none'}
               onChange={this.handleRoleChange}
-              value={this.props.currentRole}>
+              value={this.props.currentRole}
+            >
               {
-                this.props.roles.map(role =>
-                  <option key={role.id} value={role.id}>{role.label}</option>
+                this.props.currentRole === 'none' && (
+                  <option key='none' value='none'>Aucun</option>
+                )
+              }
+              {
+                this.props.roles.map((role) =>
+                  <option
+                    disabled={role.isFull && role.value !== this.props.currentRole}
+                    key={role.value}
+                    value={role.value}
+                  >
+                    {role.label}
+                  </option>
                 )
               }
             </select>
@@ -69,5 +88,6 @@ var EntityRoleSelect = React.createClass({
     );
   }
 });
+
 
 module.exports = EntityRoleSelect;

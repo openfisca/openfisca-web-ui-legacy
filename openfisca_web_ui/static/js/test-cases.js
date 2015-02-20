@@ -32,7 +32,7 @@ function findEntity(kind, id, testCase) {
 }
 
 
-function findEntityAndRole(individuId, kind, entitiesMetadata, testCase) {
+function findEntityAndRole(individuId, kind, entitiesMetadata, testCase, {check}) {
   var entities = testCase[kind];
   for (let idx in entities) {
     var entity = entities[idx];
@@ -43,7 +43,11 @@ function findEntityAndRole(individuId, kind, entitiesMetadata, testCase) {
       return {entity, role};
     }
   }
-  invariant(false, 'entity and role not found');
+  if (check) {
+    invariant(false, 'entity and role not found');
+  } else {
+    return null;
+  }
 }
 
 
@@ -125,7 +129,7 @@ function isSingleton(kind, role, entitiesMetadata) {
 
 
 function moveIndividuInEntity(individuId, kind, id, role, entitiesMetadata, testCase) {
-  var oldEntityData = findEntityAndRole(individuId, kind, entitiesMetadata, testCase);
+  var oldEntityData = findEntityAndRole(individuId, kind, entitiesMetadata, testCase, {check: true});
   var newTestCase = withoutIndividuInEntity(individuId, kind, oldEntityData.entity.id, oldEntityData.role,
     entitiesMetadata, testCase);
   newTestCase = withIndividuInEntity(individuId, kind, id, role, entitiesMetadata, newTestCase);
@@ -168,9 +172,11 @@ function withEntitiesNamesFilled(entitiesMetadata, testCase) {
 
 
 function withIndividuInEntity(newIndividuId, kind, id, role, entitiesMetadata, testCase) {
-  var newEntitySequence = Lazy(findEntity(kind, id, testCase));
+  var entity = findEntity(kind, id, testCase);
+  var newEntitySequence = Lazy(entity);
   var newEntity;
   if (isSingleton(kind, role, entitiesMetadata)) {
+    invariant( ! entity[role], `role ${role} is already used in singleton`);
     newEntity = newEntitySequence.assign({[role]: newIndividuId}).toObject();
   } else {
     var individuIds = newEntitySequence.get(role) || [];
@@ -196,7 +202,7 @@ function withoutIndividu(id, entitiesMetadata, testCase) {
   var newTestCase = testCase;
   var kinds = getEntitiesKinds(entitiesMetadata, {persons: false});
   kinds.forEach((kind) => {
-    var oldEntityData = findEntityAndRole(id, kind, entitiesMetadata, testCase);
+    var oldEntityData = findEntityAndRole(id, kind, entitiesMetadata, testCase, {check: true});
     newTestCase = withoutIndividuInEntity(id, kind, oldEntityData.entity.id, oldEntityData.role, entitiesMetadata,
       newTestCase);
   });

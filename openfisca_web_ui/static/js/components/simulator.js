@@ -243,11 +243,17 @@ var Simulator = React.createClass({
     invariant(this.state.editedEntity, 'handler called without editedEntity in state.');
     var movedIndividuId = this.state.editedEntity.id;
     var oldEntityData = testCases.findEntityAndRole(movedIndividuId, kind, this.props.entitiesMetadata,
-      this.state.testCase);
+      this.state.testCase, {check: false});
+    // newEntityId can't be null due to the master/slave relation between entity and role select widgets.
     var newEntityId = whatChanged === 'entity' ? value : oldEntityData.entity.id;
-    var newRole = whatChanged === 'role' ? value : oldEntityData.role;
-    var newTestCase = testCases.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole,
-      this.props.entitiesMetadata, this.state.testCase);
+    var newRole = whatChanged === 'role' ? value : (
+      oldEntityData ? oldEntityData.role : this.props.entitiesMetadata[kind].roles[0]
+    );
+    var newTestCase = oldEntityData ?
+      testCases.moveIndividuInEntity(movedIndividuId, kind, newEntityId, newRole, this.props.entitiesMetadata,
+        this.state.testCase) :
+      testCases.withIndividuInEntity(movedIndividuId, kind, newEntityId, newRole, this.props.entitiesMetadata,
+        this.state.testCase);
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleReformKeyChange(reformKey) {
@@ -353,37 +359,6 @@ var Simulator = React.createClass({
       </div>
     );
   },
-  renderMoveIndividuForm() {
-    invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
-    var currentEntityIdByKind = {},
-      currentRoleByKind = {};
-    var kinds = testCases.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
-    kinds.forEach(kind => {
-      var entityData = testCases.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
-        this.state.testCase);
-      currentEntityIdByKind[kind] = entityData.entity.id;
-      currentRoleByKind[kind] = entityData.role;
-    });
-    var nameKey = this.props.entitiesMetadata.individus.nameKey;
-    var individu = testCases.findEntity('individus', this.state.editedEntity.id, this.state.testCase);
-    return (
-      <EditForm
-        onClose={this.handleEditFormClose}
-        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: individu[nameKey]})}
-      >
-        <MoveIndividuForm
-          currentEntityIdByKind={currentEntityIdByKind}
-          currentRoleByKind={currentRoleByKind}
-          entitiesMetadata={this.props.entitiesMetadata}
-          getEntitiesKinds={testCases.getEntitiesKinds}
-          getEntityLabel={testCases.getEntityLabel}
-          onEntityChange={(kind, value) => this.handleMoveIndividuFormChange('entity', kind, value)}
-          onRoleChange={(kind, value) => this.handleMoveIndividuFormChange('role', kind, value)}
-          testCase={this.state.testCase}
-        />
-      </EditForm>
-    );
-  },
   renderFieldsForm() {
     var {id, kind} = this.state.editedEntity,
       entity = testCases.findEntity(kind, id, this.state.testCase);
@@ -440,6 +415,37 @@ var Simulator = React.createClass({
           onChange={(column, value) => this.handleFieldsFormChange(kind, id, column, value)}
           suggestions={helpers.getObjectPath(this.state.suggestions, kind, id)}
           values={values}
+        />
+      </EditForm>
+    );
+  },
+  renderMoveIndividuForm() {
+    invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
+    var currentEntityIdByKind = {},
+      currentRoleByKind = {};
+    var kinds = testCases.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
+    kinds.forEach(kind => {
+      var entityData = testCases.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
+        this.state.testCase, {check: false});
+      currentEntityIdByKind[kind] = entityData ? entityData.entity.id : 'none';
+      currentRoleByKind[kind] = entityData ? entityData.role : 'none';
+    });
+    var nameKey = this.props.entitiesMetadata.individus.nameKey;
+    var individu = testCases.findEntity('individus', this.state.editedEntity.id, this.state.testCase);
+    return (
+      <EditForm
+        onClose={this.handleEditFormClose}
+        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: individu[nameKey]})}
+      >
+        <MoveIndividuForm
+          currentEntityIdByKind={currentEntityIdByKind}
+          currentRoleByKind={currentRoleByKind}
+          entitiesMetadata={this.props.entitiesMetadata}
+          getEntitiesKinds={testCases.getEntitiesKinds}
+          getEntityLabel={testCases.getEntityLabel}
+          onEntityChange={(kind, value) => this.handleMoveIndividuFormChange('entity', kind, value)}
+          onRoleChange={(kind, value) => this.handleMoveIndividuFormChange('role', kind, value)}
+          testCase={this.state.testCase}
         />
       </EditForm>
     );
