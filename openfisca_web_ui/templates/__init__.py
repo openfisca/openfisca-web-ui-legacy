@@ -41,14 +41,16 @@ custom_lookups = {}  # custom TemplateLookups, inited by function load_environme
 default_lookup = None  # default TemplateLookup, inited by function load_environment
 dirs = None  # Sequence of templates directories, inited by function load_environment
 
-js = lambda x: json.dumps(
-    x,
-    default = lambda obj: obj.isoformat()
-    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date) else None,
-    encoding = 'utf-8',
-    ensure_ascii = False,
-    indent = 2,
-    )
+
+def js(value):
+    return json.dumps(
+        value,
+        default = lambda obj: obj.isoformat()
+        if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date) else None,
+        encoding = 'utf-8',
+        ensure_ascii = False,
+        indent = 2,
+        )
 
 
 def get_default_lookup():

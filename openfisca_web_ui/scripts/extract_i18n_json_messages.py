@@ -79,7 +79,9 @@ def main():
         'deleted': '@deleted',
         'non_translated': u'@nonTranslated',
         }
-    with_tag = lambda string, tag: string if string.startswith(tag) else u'{} {}'.format(tag, string)
+
+    def with_tag(string, tag):
+        return string if string.startswith(tag) else u'{} {}'.format(tag, string)
 
     extract_keys_command = u"""
 grep -P -r --include='*.js' --no-filename --only-match "(?<=getIntlMessage\(\').+?(?=\'\))" {js_dir} | sort | uniq

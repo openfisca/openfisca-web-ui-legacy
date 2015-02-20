@@ -38,9 +38,12 @@ from biryani.jsonconv import *  # NOQA
 from biryani.states import default_state
 
 
-N_ = lambda message: message
 email_log = logging.getLogger('email')
 uuid_re = re.compile(ur'[\da-f]{32}$')
+
+
+def N_(message):
+    return message
 
 
 # Level 1 converters
