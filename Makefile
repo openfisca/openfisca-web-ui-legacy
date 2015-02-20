@@ -11,9 +11,11 @@ build-prod: install-npm compile-i18n-python
 
 check: flake8 jshint
 
-check-syntax-errors: clean-pyc
+check-syntax-errors:
 	@# This is a hack around flake8 not displaying E910 errors with the select option.
-	test -z "`flake8 --first | grep E901`"
+	@# Do not analyse .gitignored files.
+	@# `make` needs `$$` to output `$`. Ref: http://stackoverflow.com/questions/2382764.
+	test -z "`flake8 --first $(shell git ls-files | grep "\.py$$") | grep E901`"
 
 clean: clean-js-dist clean-pyc
 	rm -Rf cache/templates/
@@ -30,8 +32,10 @@ compile-i18n-python:
 ctags:
 	ctags --recurse=yes --exclude=node_modules --exclude=openfisca_web_ui/static/dist .
 
-flake8: clean-pyc
-	flake8
+flake8:
+	@# Do not analyse .gitignored files.
+	@# `make` needs `$$` to output `$`. Ref: http://stackoverflow.com/questions/2382764.
+	flake8 `git ls-files | grep "\.py$$"`
 
 install-npm:
 	npm install
@@ -44,7 +48,10 @@ poedit: update-i18n-python
 	make compile-i18n-python
 
 test: check-syntax-errors
-	nosetests -x --with-doctest $(TESTS_DIR)
+	nosetests $(TESTS_DIR) --stop --with-doctest
+
+test-ci: check-syntax-errors flake8
+	nosetests $(TESTS_DIR) --with-doctest
 
 update-i18n: update-i18n-js update-i18n-python
 
