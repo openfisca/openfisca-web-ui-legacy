@@ -7,8 +7,7 @@ var toCsv = require('to-csv'),
   React = require('react'),
   ReactIntlMixin = require('react-intl'),
   saveAs = require('filesaver.js'),
-  shallowEqual = require('react/lib/shallowEqual'),
-  uuid = require('uuid');
+  shallowEqual = require('react/lib/shallowEqual');
 
 var BaremeVisualization = require('./visualizations/bareme-visualization'),
   EditForm = require('./edit-form'),
