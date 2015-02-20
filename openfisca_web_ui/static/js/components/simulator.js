@@ -303,7 +303,7 @@ var Simulator = React.createClass({
     } else {
       rightColumnElement = this.renderVisualization();
     }
-    var disabled = Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress);
+    var disabled = Boolean(this.state.editedEntity || this.state.isSimulationInProgress);
     return (
       <div className='row'>
         <div className={cx({
@@ -331,7 +331,7 @@ var Simulator = React.createClass({
                 activeEntityId={this.state.editedEntity && this.state.editedEntity.id}
                 disabled={disabled}
                 entitiesMetadata={this.props.entitiesMetadata}
-                errors={this.state.errors && this.state.errors.test_case}
+                errors={helpers.getObjectPath(this.state.errors, 'scenarios', '0', 'test_case')}
                 getEntitiesKinds={testCases.getEntitiesKinds}
                 getEntityLabel={testCases.getEntityLabel}
                 onCloseEntity={this.handleEditFormClose}
@@ -409,9 +409,7 @@ var Simulator = React.createClass({
         columns: columns,
         label: category.label,
       };
-    }).toArray(); // jshint ignore:line
-    var errors = helpers.getObjectPath(this.state.errors, 'test_case', kind, id);
-    var suggestions = helpers.getObjectPath(this.state.suggestions, kind, id);
+    }).toArray();
     var additionalDataValues = {};
     if (this.state.editedEntity.changedAdditionalData &&
         'depcom' in this.state.editedEntity.changedAdditionalData) {
@@ -438,9 +436,9 @@ var Simulator = React.createClass({
       >
         <FieldsForm
           categories={categories}
-          errors={errors}
+          errors={helpers.getObjectPath(this.state.errors, 'scenarios', '0', 'test_case', kind, id)}
           onChange={(column, value) => this.handleFieldsFormChange(kind, id, column, value)}
-          suggestions={suggestions}
+          suggestions={helpers.getObjectPath(this.state.suggestions, kind, id)}
           values={values}
         />
       </EditForm>
@@ -583,14 +581,17 @@ var Simulator = React.createClass({
         }
       }
     }
-    var disabled = Boolean(this.state.editedEntity || this.state.errors || this.state.isSimulationInProgress);
+    var disabled = Boolean(this.state.isSimulationInProgress);
     return (
       <div>
         <div className='clearfix form-inline'>
           <YearInput
             className='form-group'
             disabled={disabled}
-            error={this.state.errors && this.state.errors.period && this.state.errors.period['1']}
+            error={
+              helpers.getObjectPath(this.state.errors, 'scenarios', '0', 'period', 'start') ||
+              helpers.getObjectPath(this.state.errors, 'scenarios', '0', 'period', '1')
+            }
             onChange={this.handleYearChange}
             value={this.state.year}
           />
