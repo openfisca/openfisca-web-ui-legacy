@@ -14,6 +14,7 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
   EditForm = require('./edit-form'),
   FieldsForm = require('./test-case/form/fields-form'),
   helpers = require('../helpers'),
+  logger = require('../logger'),
   MoveIndividuForm = require('./test-case/move-individu-form'),
   ReformSelect = require('./reform-select'),
   revdispDistribution = require('../../data/revdisp-distribution.json'),
@@ -397,7 +398,7 @@ var Simulator = React.createClass({
           if (columnName in this.props.columns) {
             return this.props.columns[columnName];
           } else {
-            console.log(`column "${columnName}" is not in columns prop`);
+            logger.log(`column "${columnName}" is not in columns prop`);
           }
         }).compact().toArray();
         if ( ! columns.length) {
@@ -647,7 +648,7 @@ var Simulator = React.createClass({
       }
     },
     (error) => {
-      console.error(error);
+      logger.error(error);
       this.setState({
         errors: null,
         requestError: error,
@@ -662,7 +663,7 @@ var Simulator = React.createClass({
       webservices.saveCurrentTestCase(testCase, testCaseAdditionalData, onSuccess,
         (error) => {
           // TODO check if unauhtorized flag is in error
-          console.error(error);
+          logger.error(error);
           alert(this.getIntlMessage('sessionHasExpiredExplanation'));
           window.location.reload();
         }
@@ -685,7 +686,7 @@ var Simulator = React.createClass({
       this.setState(changeset);
     };
     var onError = (error) => {
-      console.error(error);
+      logger.error(error);
       this.setState({
         errors: null,
         isSimulationInProgress: false,

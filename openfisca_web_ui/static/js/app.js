@@ -4,7 +4,8 @@
 
 var React = require('react');
 
-var webservices = require('./webservices');
+var logger = require('./logger'),
+  webservices = require('./webservices');
 
 
 var appconfig = global.appconfig;
@@ -106,31 +107,31 @@ function init() {
                     webservices.fetchReforms(
                       (reforms) => renderSimulator(entitiesMetadata, fields, messages, reforms, testCaseData),
                       (error) => {
-                        console.error(error);
+                        logger.error(error);
                         alert('Error: unable to fetch reforms.');
                       }
                     );
                   },
                   (error) => {
-                    console.error(error);
+                    logger.error(error);
                     alert('Error: unable to fetch current test case.');
                   }
                 );
               },
               (error) => {
-                console.error(error);
+                logger.error(error);
                 alert('Error: unable to fetch fields.');
               }
             );
           },
           (error) => {
-            console.error(error);
+            logger.error(error);
             alert('Error: unable to load language files.');
           }
         );
       },
       (error) => {
-        console.error(error);
+        logger.error(error);
         alert('Error: unable to fetch entities metadata.');
       }
     );
