@@ -96,10 +96,12 @@ function fetchCurrentLocaleMessages(onSuccess, onError) {
     .end(function (res) {
       if (res.error) {
         onError(res.error);
-      } else {
+      } else if (res.body) {
         // Workaround: handle case when server returns no Content-Type HTTP header.
         var body = res.body || JSON.parse(res.text);
         onSuccess(body);
+      } else {
+        onError(new Error('Response body is empty'));
       }
     });
 }
@@ -112,8 +114,10 @@ function fetchCurrentTestCase(onSuccess, onError) {
     .end(function(res) {
       if (res.error) {
         onError(res.error);
-      } else {
+      } else if (res.body) {
         onSuccess(res.body);
+      } else {
+        onError(new Error('Response body is empty'));
       }
     });
 }
@@ -124,12 +128,14 @@ function fetchEntitiesMetadata(onSuccess, onError) {
     .get(makeUrl(appconfig.api.urlPaths.entities))
     .on('error', onError)
     .end(function (res) {
-      if (res.error) {
-        onError(res.error);
-      } else if (res.body && res.body.error) {
+      if (res.body && res.body.error) {
         onError(res.body.error);
-      } else {
+      } else if (res.error) {
+        onError(res.error);
+      } else if (res.body) {
         onSuccess(res.body.entities);
+      } else {
+        onError(new Error('Response body is empty'));
       }
     });
 }
@@ -140,15 +146,17 @@ function fetchFields(entitiesMetadata, onSuccess, onError) {
     .get(makeUrl(appconfig.api.urlPaths.fields))
     .on('error', onError)
     .end(function(res) {
-      if (res.error) {
-        onError(res.error);
-      } else if (res.body && res.body.error) {
+      if (res.body && res.body.error) {
         onError(res.body.error);
+      } else if (res.error) {
+        onError(res.error);
       } else if (res.body) {
         onSuccess({
           columns: patchColumns(res.body.columns, entitiesMetadata),
           columnsTree: res.body.columns_tree,
         });
+      } else {
+        onError(new Error('Response body is empty'));
       }
     });
 }
@@ -159,11 +167,11 @@ function fetchReforms(onSuccess, onError) {
     .get(makeUrl(appconfig.api.urlPaths.reforms))
     .on('error', onError)
     .end(function (res) {
-      if (res.error) {
-        onError(res.error);
-      } else if (res.body && res.body.error) {
+      if (res.body && res.body.error) {
         onError(res.body.error);
-      } else {
+      } else if (res.error) {
+        onError(res.error);
+      } else if (res.body) {
         // Blacklist "inversion_revenus" because it is part of "base_reforms" simulate API param.
         var reforms = {};
         if (res.body.reforms && Object.keys(res.body.reforms).length) {
@@ -174,6 +182,8 @@ function fetchReforms(onSuccess, onError) {
           }
         }
         onSuccess(Object.keys(reforms).length ? reforms : null);
+      } else {
+        onError(new Error('Response body is empty'));
       }
     });
 }
@@ -225,15 +235,17 @@ function calculate(reformKey, testCase, variables, year, force, onSuccess, onErr
       .send(data)
       .on('error', onError)
       .end(function(res) {
-        if (res.error) {
-          onError(res.error);
-        } else if (res.body && res.body.error) {
+        if (res.body && res.body.error) {
           // Here we receive errors related to the simulation params (test case, year, etc.).
           // These errors are passed as "success" to be deeply dispatched inside application components.
           onSuccess({errors: res.body.error.errors[0]});
-        } else {
+        } else if (res.error) {
+          onError(res.error);
+        } else if (res.body) {
           calculateResultByDataCache[dataStr] = res.body;
           onSuccess(res.body);
+        } else {
+          onError(new Error('Response body is empty'));
         }
       });
   }
@@ -255,13 +267,13 @@ function repair(testCase, year, onSuccess, onError) {
     .send(data)
     .on('error', onError)
     .end(function(res) {
-      if (res.error) {
-        onError(res.error);
-      } else if (res.body && res.body.error) {
+      if (res.body && res.body.error) {
         // Here we receive errors related to the simulation params (test case, year, etc.).
         // These errors are passed as "success" to be deeply dispatched inside application components.
         onSuccess({errors: res.body.error.errors[0]});
-      } else {
+      } else if (res.error) {
+        onError(res.error);
+      } else if (res.body) {
         var testCase = res.body.repaired_scenarios[0].test_case;
         testCase = patchValuesForColumns(testCase);
         var suggestions = helpers.getObjectPath(res.body, 'suggestions', 'scenarios', '0', 'test_case');
@@ -272,6 +284,8 @@ function repair(testCase, year, onSuccess, onError) {
           suggestions: suggestions,
           testCase: testCase,
         });
+      } else {
+        onError(new Error('Response body is empty'));
       }
     });
 }
@@ -304,15 +318,17 @@ function simulate(axes, reformKey, testCase, year, force, onSuccess, onError) {
       .send(data)
       .on('error', onError)
       .end(function(res) {
-        if (res.error) {
-          onError(res.error);
-        } else if (res.body && res.body.error) {
+        if (res.body && res.body.error) {
           // Here we receive errors related to the simulation params (test case, year, etc.).
           // These errors are passed as "success" to be deeply dispatched inside application components.
           onSuccess({errors: res.body.error.errors[0]});
-        } else {
+        } else if (res.error) {
+          onError(res.error);
+        } else if (res.body) {
           simulateResultByDataCache[dataStr] = res.body;
           onSuccess(res.body);
+        } else {
+          onError(new Error('Response body is empty'));
         }
       });
   }
