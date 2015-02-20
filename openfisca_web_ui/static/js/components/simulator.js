@@ -315,7 +315,6 @@ var Simulator = React.createClass({
           <TestCaseToolbar
             disabled={disabled}
             entitiesMetadata={this.props.entitiesMetadata}
-            errors={this.state.errors}
             getEntitiesKinds={testCases.getEntitiesKinds}
             isSimulationInProgress={this.state.isSimulationInProgress}
             onCreateEntity={this.handleCreateEntity}
