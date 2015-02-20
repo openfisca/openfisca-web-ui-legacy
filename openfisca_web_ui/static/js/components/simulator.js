@@ -329,6 +329,7 @@ var Simulator = React.createClass({
             onSimulate={() => this.simulate(true)}
             reformKey={this.state.selectedReformKey}
             testCase={this.state.testCase}
+            year={this.state.year}
           />
           <hr />
           {

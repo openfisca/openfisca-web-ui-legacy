@@ -23,7 +23,7 @@ var TestCaseToolbar = React.createClass({
     onSimulate: React.PropTypes.func.isRequired,
     reformKey: React.PropTypes.string,
     testCase: React.PropTypes.object,
-    year: React.PropTypes.number,
+    year: React.PropTypes.number.isRequired,
   },
   getDefaultProps() {
     return {
@@ -44,7 +44,8 @@ var TestCaseToolbar = React.createClass({
       simulation.base_reforms = [this.props.reformKey];
     }
     var simulationJsonStr = JSON.stringify(simulation);
-    var traceUrl = `${appconfig['urls.www']}outils/trace?simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`; // jshint ignore:line
+    var traceQueryString = `simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
+    var traceUrl = `${appconfig['urls.www']}outils/trace?${traceQueryString}`;
     return traceUrl;
   },
   render() {
