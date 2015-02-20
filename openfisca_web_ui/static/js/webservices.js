@@ -257,7 +257,10 @@ function repair(testCase, year, onSuccess, onError) {
     scenarios: [
       {
         test_case: testCase,
-        year: year,
+        period: {
+          start: year,
+          unit: 'year',
+        },
       },
     ],
     validate: true,
