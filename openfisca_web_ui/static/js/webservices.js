@@ -151,6 +151,12 @@ function fetchFields(entitiesMetadata, onSuccess, onError) {
       } else if (res.error) {
         onError(res.error);
       } else if (res.body) {
+        if ( ! res.body.columns || Object.keys(res.body.columns).length === 0) {
+          onError(new Error('columns is empty'));
+        }
+        if ( ! res.body.columns_tree || Object.keys(res.body.columns_tree).length === 0) {
+          onError(new Error('columns_tree is empty'));
+        }
         onSuccess({
           columns: patchColumns(res.body.columns, entitiesMetadata),
           columnsTree: res.body.columns_tree,
