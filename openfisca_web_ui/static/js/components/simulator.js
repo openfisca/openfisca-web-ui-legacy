@@ -459,10 +459,10 @@ var Simulator = React.createClass({
       var firstScenarioValues = this.state.simulationResult[valueKey][0];
       // Hard-code some values because of the choice of situateurs variable names.
       if (variableName === 'revdisp') {
-        var firstMenage = Lazy(firstScenarioValues.menages).pairs().first()[1];
+        var firstMenage = firstScenarioValues.menages[0];
         value = firstMenage.revdisp[this.state.year];
       } else if (variableName === 'sal') {
-        var firstIndividu = Lazy(firstScenarioValues.individus).pairs().first()[1];
+        var firstIndividu = firstScenarioValues.individus[0];
         value = firstIndividu.sal[this.state.year];
       }
     }
