@@ -708,8 +708,8 @@ var Simulator = React.createClass({
         var variables = [
           this.state.selectedVisualizationSlug === 'situateur-sal' ? 'sal' : 'revdisp',
         ];
-        webservices.calculate(this.state.selectedReformKey, this.state.testCase, variables, this.state.year, force,
-          onSuccess, onError);
+        webservices.calculate(this.props.entitiesMetadata, this.state.selectedReformKey, this.state.testCase, variables,
+         this.state.year, force, onSuccess, onError);
       } else {
         var axes = this.state.selectedVisualizationSlug === 'bareme' ? [
           {
@@ -719,8 +719,8 @@ var Simulator = React.createClass({
             name: this.state.visualizationsSettings.bareme.xAxisVariableCode,
           },
         ] : null;
-        webservices.simulate(axes, this.state.selectedReformKey, this.state.testCase, this.state.year, force,
-          onSuccess, onError);
+        webservices.simulate(axes, this.props.entitiesMetadata, this.state.selectedReformKey, this.state.testCase,
+          this.state.year, force, onSuccess, onError);
       }
     });
   },

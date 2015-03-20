@@ -25,6 +25,32 @@ function createIndividu(entitiesMetadata, testCase) {
 }
 
 
+function duplicateValuesOverThreeYears(entitiesMetadata, testCase, year) {
+  var newTestCase = Lazy(testCase).map((entities, entityKey) => {
+    var newEntities = Lazy(entities).map((entity) => {
+      var newEntity = Lazy(entity).map((value, key) => {
+        if (
+          key === 'id' || key === entitiesMetadata[entityKey].nameKey ||
+          entitiesMetadata[entityKey].roles && entitiesMetadata[entityKey].roles.includes(key)
+        ) {
+          return [key, value];
+        } else {
+          var newValue = {
+            [year]: value,
+            [year - 1]: value,
+            [year - 2]: value,
+          };
+          return [key, newValue];
+        }
+      }).toObject();
+      return newEntity;
+    }).toArray();
+    return [entityKey, newEntities];
+  }).toObject();
+  return newTestCase;
+}
+
+
 function findEntity(kind, id, testCase) {
   var entity = testCase[kind].find((entity) => entity.id === id);
   invariant(entity, 'entity was not found in testCase');
@@ -235,7 +261,8 @@ function withoutIndividuInEntity(individuId, kind, id, role, entitiesMetadata, t
 }
 
 module.exports = {
-  createEntity, createIndividu, findEntity, findEntityAndRole, getEntitiesKinds, getEntityLabel, getInitialTestCase,
-  guessEntityName, hasRoleInEntity, isSingleton, moveIndividuInEntity, replaceEntity, withEntity,
-  withEntitiesNamesFilled, withIndividuInEntity, withoutEntity, withoutIndividu, withoutIndividuInEntity,
+  createEntity, createIndividu, duplicateValuesOverThreeYears, findEntity, findEntityAndRole, getEntitiesKinds,
+  getEntityLabel, getInitialTestCase, guessEntityName, hasRoleInEntity, isSingleton, moveIndividuInEntity,
+  replaceEntity, withEntity, withEntitiesNamesFilled, withIndividuInEntity, withoutEntity, withoutIndividu,
+  withoutIndividuInEntity,
 };

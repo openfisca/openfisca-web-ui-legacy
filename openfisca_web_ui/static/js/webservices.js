@@ -4,7 +4,8 @@ var $ = require('jquery'),
   Lazy = require('lazy.js'),
   request = require('superagent');
 
-var helpers = require('./helpers');
+var helpers = require('./helpers'),
+  testCases = require('./test-cases');
 
 
 var appconfig = global.appconfig;
@@ -13,6 +14,7 @@ var simulateResultByDataCache = {};
 
 
 // Utils
+
 
 function makeUrl(path) {
   var baseUrl = appconfig.api.baseUrl;
@@ -216,13 +218,13 @@ function saveCurrentTestCase(testCase, testCaseAdditionalData, onSuccess, onErro
 
 // Simulation API calls
 
-function calculate(reformKey, testCase, variables, year, force, onSuccess, onError) {
+function calculate(entitiesMetadata, reformKey, testCase, variables, year, force, onSuccess, onError) {
   var scenario = {
     period: {
       start: year,
       unit: 'year',
     },
-    test_case: testCase,
+    test_case: testCases.duplicateValuesOverThreeYears(entitiesMetadata, testCase, year),
   };
   var data = {
     base_reforms: ['inversion_revenus'],
@@ -300,13 +302,13 @@ function repair(testCase, year, onSuccess, onError) {
 }
 
 
-function simulate(axes, reformKey, testCase, year, force, onSuccess, onError) {
+function simulate(axes, entitiesMetadata, reformKey, testCase, year, force, onSuccess, onError) {
   var scenario = {
     period: {
       start: year,
       unit: 'year',
     },
-    test_case: testCase,
+    test_case: testCases.duplicateValuesOverThreeYears(entitiesMetadata, testCase, year),
   };
   if (axes) {
     scenario.axes = axes;
