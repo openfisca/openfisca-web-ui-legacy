@@ -79,8 +79,7 @@ var BaremeSettings = React.createClass({
               id='x-axis-variable-code'
               onChange={this.handleVariableCodeChange}
               value={this.props.xAxisVariableCode}>
-              <option value='sali'>{this.props.columns.sali.label}</option>
-              <option value='choi'>{this.props.columns.choi.label}</option>
+              <option value='salaire_de_base'>{this.props.columns.salaire_de_base.label}</option>
             </select>
           </div>
         </div>

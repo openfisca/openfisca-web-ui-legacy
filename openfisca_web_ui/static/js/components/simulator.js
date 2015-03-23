@@ -62,7 +62,7 @@ var Simulator = React.createClass({
           displayBisectrix: false,
           displaySettings: false,
           isChartFullWidth: false,
-          xAxisVariableCode: 'sali',
+          xAxisVariableCode: 'salaire_de_base',
           xMaxValue: 20000,
           xMinValue: 0,
         },
