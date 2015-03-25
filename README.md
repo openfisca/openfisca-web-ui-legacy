@@ -23,16 +23,12 @@ Prerequisites:
 * [Python](https://www.python.org/)
 
 The way to install these tools depends on your operating system (not documented here).
-Some software might be installed by default, please check.
+
+From the cloned repository directory:
 
 ```
-cd
-mkdir openfisca
-cd openfisca
-git clone https://github.com/openfisca/openfisca-web-ui.git
-cd openfisca-web-ui
-python setup.py compile_catalog
 pip install --user --editable .
+python setup.py compile_catalog
 python openfisca_web_ui/scripts/setup_app.py development-france.ini
 npm install
 make build-dev
@@ -49,25 +45,19 @@ In this case please read the [installation documentation](http://www.openfisca.f
 
 ## Run the server
 
-Depending on your OS you might start the [MongoDB](http://www.mongodb.org/) server by hand.
+First run the [MongoDB](http://www.mongodb.org/) server.
 
-If you intend to use your own instance of the web API, run the web server of the API
-(here we assume you installed it previously):
+Configure the web API URLs in `development-france.ini`:
+* to use your own instance of the web API, leave the default values
+* to use the public instance of the web API, change the URLs containing `localhost:2000` by `api.openfisca.fr`
 
-```
-cd ~/openfisca/openfisca-web-api
-paster serve --reload development-france.ini
-```
+If you installed your own instance of the web API, run its web server from its directory:
 
-Otherwise you can change the `api.baseUrl` config key to `http://api.openfisca.fr` in the config file
-(for example `development-france.ini`).
+  paster serve --reload development-france.ini
 
-Then run the web server of the UI (in another terminal tab since the previous one is blocked by the previous web server):
+Then run the web server of the UI from its directory (open another terminal tab):
 
-```
-cd ~/openfisca/openfisca-web-ui
-paster serve --reload development-france.ini
-```
+  paster serve --reload development-france.ini
 
 Open the URL http://localhost:2015/ in your browser.
 
@@ -75,6 +65,6 @@ Open the URL http://localhost:2015/ in your browser.
 
 If you change the Python source code, the web server will reload and you'll have to reload the page in your browser.
 
-If you'd like to change the JavaScript source code, it is recommended to use the "watcher" to rebuild the code automatically:
+Use the "watcher" to rebuild the code when a JavaScript file changes:
 
 	make watch
