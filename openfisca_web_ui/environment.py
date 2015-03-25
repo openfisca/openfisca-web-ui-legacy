@@ -49,20 +49,45 @@ def load_environment(global_conf, app_conf):
     conf.update(conv.check(conv.struct(
         {
             'alert_on_js_error': conv.pipe(conv.guess_bool, conv.not_none),
-            'api.baseUrl': conv.pipe(
+            'api.base_url': conv.pipe(
                 conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
                 conv.not_none,
                 ),
-            'api.urlPaths.calculate': conv.pipe(conv.cleanup_line, conv.not_none),
-            'api.urlPaths.entities': conv.pipe(conv.cleanup_line, conv.not_none),
-            'api.urlPaths.fields': conv.pipe(conv.cleanup_line, conv.not_none),
-            'api.urlPaths.reforms': conv.pipe(conv.cleanup_line, conv.not_none),
-            'api.urlPaths.simulate': conv.pipe(conv.cleanup_line, conv.not_none),
+            'api.calculate_url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.entities_url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.fields_url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.reforms_url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.repair_url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
+            'api.simulate_url': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_query = True, full = True),
+                conv.not_none,
+                ),
             'app_conf': conv.set_value(app_conf, handle_none_value = True),
             'app_dir': conv.set_value(app_dir, handle_none_value = True),
             'app_name': conv.pipe(conv.cleanup_line, conv.default('OpenFisca')),
             'auth.dummy_admin_email': conv.pipe(conv.cleanup_line, conv.default(u'admin@domain.tld')),
             'auth.dummy_user_email': conv.pipe(conv.cleanup_line, conv.default(u'user@domain.tld')),
+            'base_reforms': conv.pipe(
+                conv.cleanup_line,
+                conv.function(lambda value: value.split(',')),
+                conv.uniform_sequence(conv.cleanup_line),
+                conv.empty_to_none,
+                ),
             'cache_dir': conv.default(os.path.join(os.path.dirname(app_dir), 'cache')),
             'cookie': conv.default('openfisca-web-ui'),
             'country': conv.cleanup_line,

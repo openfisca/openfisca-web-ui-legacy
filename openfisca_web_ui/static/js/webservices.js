@@ -16,15 +16,6 @@ var simulateResultByDataCache = {};
 // Utils
 
 
-function makeUrl(path) {
-  var baseUrl = appconfig.api.baseUrl;
-  if (baseUrl.endsWith('/')) {
-    baseUrl = baseUrl.slice(0, -1);
-  }
-  return baseUrl + path;
-}
-
-
 function patchColumns(columns, entitiesMetadata) {
   // Patch columns definitions to match UI specificities.
   var birth = columns.birth;
@@ -127,7 +118,7 @@ function fetchCurrentTestCase(onSuccess, onError) {
 
 function fetchEntitiesMetadata(onSuccess, onError) {
   request
-    .get(makeUrl(appconfig.api.urlPaths.entities))
+    .get(appconfig.api.entitiesUrl)
     .on('error', onError)
     .end(function (res) {
       if (res.body && res.body.error) {
@@ -145,7 +136,7 @@ function fetchEntitiesMetadata(onSuccess, onError) {
 
 function fetchFields(entitiesMetadata, onSuccess, onError) {
   request
-    .get(makeUrl(appconfig.api.urlPaths.fields))
+    .get(appconfig.api.fieldsUrl)
     .on('error', onError)
     .end(function(res) {
       if (res.body && res.body.error) {
@@ -172,7 +163,7 @@ function fetchFields(entitiesMetadata, onSuccess, onError) {
 
 function fetchReforms(onSuccess, onError) {
   request
-    .get(makeUrl(appconfig.api.urlPaths.reforms))
+    .get(appconfig.api.reformsUrl)
     .on('error', onError)
     .end(function (res) {
       if (res.body && res.body.error) {
@@ -180,11 +171,11 @@ function fetchReforms(onSuccess, onError) {
       } else if (res.error) {
         onError(res.error);
       } else if (res.body) {
-        // Blacklist "inversion_revenus" because it is part of "base_reforms" simulate API param.
+        // Exclude values included in appconfig.base_reforms.
         var reforms = {};
         if (res.body.reforms && Object.keys(res.body.reforms).length) {
           for (var reformKey in res.body.reforms) {
-            if (reformKey !== 'inversion_revenus') {
+            if ( ! appconfig.base_reforms || ! appconfig.base_reforms.includes(reformKey)) {
               reforms[reformKey] = res.body.reforms[reformKey];
             }
           }
@@ -227,10 +218,12 @@ function calculate(entitiesMetadata, reformKey, testCase, variables, year, force
     test_case: testCases.duplicateValuesOverThreeYears(entitiesMetadata, testCase, year),
   };
   var data = {
-    base_reforms: ['inversion_revenus'],
     scenarios: [scenario],
     variables: variables,
   };
+  if (appconfig.base_reforms) {
+    data.base_reforms = appconfig.base_reforms;
+  }
   if (reformKey) {
     data.reforms = [reformKey];
   }
@@ -239,7 +232,7 @@ function calculate(entitiesMetadata, reformKey, testCase, variables, year, force
     onSuccess(calculateResultByDataCache[dataStr]);
   } else {
     request
-      .post(makeUrl(appconfig.api.urlPaths.calculate))
+      .post(appconfig.api.calculateUrl)
       .send(data)
       .on('error', onError)
       .end(function(res) {
@@ -274,7 +267,7 @@ function repair(testCase, year, onSuccess, onError) {
     validate: true,
   };
   request
-    .post(makeUrl(appconfig.api.urlPaths.simulate))
+    .post(appconfig.api.repairUrl)
     .send(data)
     .on('error', onError)
     .end(function(res) {
@@ -314,9 +307,11 @@ function simulate(axes, entitiesMetadata, reformKey, testCase, year, force, onSu
     scenario.axes = axes;
   }
   var data = {
-    base_reforms: ['inversion_revenus'],
     scenarios: [scenario],
   };
+  if (appconfig.base_reforms) {
+    data.base_reforms = appconfig.base_reforms;
+  }
   if (reformKey) {
     data.reforms = [reformKey];
   }
@@ -325,7 +320,7 @@ function simulate(axes, entitiesMetadata, reformKey, testCase, year, force, onSu
     onSuccess(simulateResultByDataCache[dataStr]);
   } else {
     request
-      .post(makeUrl(appconfig.api.urlPaths.simulate))
+      .post(appconfig.api.simulateUrl)
       .send(data)
       .on('error', onError)
       .end(function(res) {

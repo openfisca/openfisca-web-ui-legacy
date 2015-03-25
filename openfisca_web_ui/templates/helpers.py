@@ -79,22 +79,26 @@ def base_appconfig(ctx):
 
 def index_appconfig(ctx, alert_on_js_error):
     appconfig = base_appconfig(ctx)
-    appconfig['alertOnJsError'] = alert_on_js_error
-    appconfig['api'] = {
-        'baseUrl': conf['api.baseUrl'],
-        'urlPaths': {
-            'calculate': conf['api.urlPaths.calculate'],
-            'entities': conf['api.urlPaths.entities'],
-            'fields': conf['api.urlPaths.fields'],
-            'reforms': conf['api.urlPaths.reforms'],
-            'simulate': conf['api.urlPaths.simulate'],
+    if conf['base_reforms'] is not None:
+        appconfig['base_reforms'] = conf['base_reforms']
+    appconfig.update({
+        'alertOnJsError': alert_on_js_error,
+        'api': {
+            'baseUrl': conf['api.base_url'],
+            'calculateUrl': conf['api.calculate_url'],
+            'entitiesUrl': conf['api.entities_url'],
+            'fieldsUrl': conf['api.fields_url'],
+            'reformsUrl': conf['api.reforms_url'],
+            'repairUrl': conf['api.repair_url'],
+            'simulateUrl': conf['api.simulate_url'],
             },
-        }
-    appconfig['constants'] = {
-        'defaultYear': conf['ui.default_year'],
-        'maxYear': conf['ui.max_year'],
-        'minYear': conf['ui.min_year'],
-        }
+        'constants': {
+            'defaultYear': conf['ui.default_year'],
+            'maxYear': conf['ui.max_year'],
+            'minYear': conf['ui.min_year'],
+            },
+        'urls.www': conf['urls.www'],
+        })
     appconfig['enabledModules'].update({
         'charts': {
             'urlPaths': {
@@ -109,7 +113,6 @@ def index_appconfig(ctx, alert_on_js_error):
                 },
             },
         })
-    appconfig['urls.www'] = conf['urls.www']
     return appconfig
 
 
