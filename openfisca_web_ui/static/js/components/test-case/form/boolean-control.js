@@ -17,7 +17,7 @@ var BooleanControl = React.createClass({
     label: React.PropTypes.element.isRequired,
     name: React.PropTypes.string.isRequired,
     onChange: React.PropTypes.func.isRequired,
-    suggestion: React.PropTypes.string,
+    suggestion: React.PropTypes.bool,
     value: React.PropTypes.bool,
   },
   handleChange(event) {
@@ -72,7 +72,7 @@ var BooleanControl = React.createClass({
           </div>
           <div className="col-sm-6">
             {
-              this.props.suggestion ?
+              this.props.suggestion !== undefined ?
                 this.formatMessage(this.getIntlMessage('suggestedValue'), {
                   value: booleanToString(this.props.suggestion),
                 }) :
