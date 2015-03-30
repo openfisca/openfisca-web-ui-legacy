@@ -29,10 +29,7 @@ function patchColumns(columns, entitiesMetadata) {
       val_type: 'year',
     },
   };
-  var entitiesNameKeys = Lazy(entitiesMetadata).pluck('nameKey').toArray();
-  var requiredColumns = Lazy(entitiesNameKeys).map(requiredColumnName => [requiredColumnName, {required: true}])
-    .toObject();
-  newColumns = Lazy(columns).merge(newColumns).merge(requiredColumns).toObject();
+  newColumns = Lazy(columns).merge(newColumns).toObject();
   if ('depcom' in newColumns) {
     newColumns.depcom.autocomplete = fetchCommunes;
     newColumns.depcom.label = 'Lieu de résidence';

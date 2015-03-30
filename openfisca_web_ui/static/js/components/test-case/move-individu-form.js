@@ -14,7 +14,6 @@ var MoveIndividuForm = React.createClass({
     currentRoleByKind: React.PropTypes.object.isRequired,
     entitiesMetadata: React.PropTypes.object.isRequired,
     getEntitiesKinds: React.PropTypes.func.isRequired,
-    getEntityLabel: React.PropTypes.func.isRequired,
     onEntityChange: React.PropTypes.func.isRequired,
     onRoleChange: React.PropTypes.func.isRequired,
     testCase: React.PropTypes.object.isRequired,
@@ -25,12 +24,6 @@ var MoveIndividuForm = React.createClass({
         {
           this.props.getEntitiesKinds(this.props.entitiesMetadata, {persons: false}).map((kind) => {
             var entityMetadata = this.props.entitiesMetadata[kind];
-            var entities = Lazy(this.props.testCase[kind]).map((entity) => {
-              return {
-                id: entity.id,
-                label: this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata),
-              };
-            }).sortBy('label').toArray();
             var roles = entityMetadata.roles.map((role) => ({
               isFull: testCases.isSingleton(kind, role, this.props.entitiesMetadata) &&
                 testCases.findEntity(kind, this.props.currentEntityIdByKind[kind], this.props.testCase)[role] !== null,
@@ -41,7 +34,7 @@ var MoveIndividuForm = React.createClass({
               <EntityRoleSelect
                 currentEntityId={this.props.currentEntityIdByKind[kind]}
                 currentRole={this.props.currentRoleByKind[kind]}
-                entities={entities}
+                entityIds={this.props.testCase[kind].map(entity => entity.id)}
                 key={kind}
                 kind={kind}
                 label={entityMetadata.label}

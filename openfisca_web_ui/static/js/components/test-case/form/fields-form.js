@@ -27,34 +27,53 @@ var FieldsForm = React.createClass({
     suggestions: React.PropTypes.object,
     values: React.PropTypes.object,
   },
+  handleIdChange(event) {
+    this.props.onChange({name: 'id'}, event.target.value);
+  },
   render() {
     return (
-      <div className="panel-group" id="accordion">
-        {
-          this.props.categories.length === 1 ?
-            this.props.categories[0].columns.map(this.renderControl) :
-            this.props.categories.map((category, index) => {
-              var categoryColumnNames = category.columns.map(column => column.name);
-              var hasErrors = Boolean(
-                this.props.errors &&
-                Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
-              );
-              var hasSuggestions = Boolean(
-                this.props.suggestions &&
-                Lazy(categoryColumnNames).intersection(Object.keys(this.props.suggestions)).size()
-              );
-              return category.columns && (
-                <Category
-                  hasErrors={hasErrors}
-                  hasSuggestions={hasSuggestions}
-                  index={index}
-                  key={index}
-                  label={category.label}>
-                  {category.columns.map(this.renderControl)}
-                </Category>
-              );
-            })
-        }
+      <div>
+        <div className="form-group">
+          <label className="control-label" htmlFor="name">{this.getIntlMessage('name')}</label>
+          <div className="row">
+            <div className="col-md-4">
+              <input
+                className="form-control"
+                id="name"
+                onChange={this.handleIdChange}
+                type="text"
+                value={this.props.values.id}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="panel-group" id="accordion">
+          {
+            this.props.categories.length === 1 ?
+              this.props.categories[0].columns.map(this.renderControl) :
+              this.props.categories.map((category, index) => {
+                var categoryColumnNames = category.columns.map(column => column.name);
+                var hasErrors = Boolean(
+                  this.props.errors &&
+                  Lazy(categoryColumnNames).intersection(Object.keys(this.props.errors)).size()
+                );
+                var hasSuggestions = Boolean(
+                  this.props.suggestions &&
+                  Lazy(categoryColumnNames).intersection(Object.keys(this.props.suggestions)).size()
+                );
+                return category.columns && (
+                  <Category
+                    hasErrors={hasErrors}
+                    hasSuggestions={hasSuggestions}
+                    index={index}
+                    key={index}
+                    label={category.label}>
+                    {category.columns.map(this.renderControl)}
+                  </Category>
+                );
+              })
+          }
+        </div>
       </div>
     );
   },

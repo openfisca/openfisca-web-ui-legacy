@@ -13,7 +13,7 @@ var Entity = React.createClass({
     active: React.PropTypes.bool,
     disabled: React.PropTypes.bool,
     hasErrors: React.PropTypes.bool,
-    label: React.PropTypes.string.isRequired,
+    id: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func,
   },
@@ -27,7 +27,7 @@ var Entity = React.createClass({
               disabled={this.props.disabled}
               onClick={this.props.onEdit}
               type="button">
-              {this.props.label}
+              {this.props.id}
             </button>
             <button
               className={cx('btn', 'btn-default', 'btn-sm', 'dropdown-toggle')}

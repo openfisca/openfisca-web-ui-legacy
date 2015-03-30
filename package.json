@@ -34,8 +34,7 @@
     "respond.js": "^1.4.2",
     "ron-react-autocomplete": "1.0.3",
     "superagent": "^0.21.0",
-    "to-csv": "0.0.3",
-    "uuid": "^2.0.1"
+    "to-csv": "0.0.3"
   },
   "devDependencies": {
     "6to5ify": "^4.1.0",

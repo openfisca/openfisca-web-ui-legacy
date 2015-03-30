@@ -28,8 +28,7 @@ var BaremeVisualization = require('./visualizations/bareme-visualization'),
   webservices = require('../webservices');
 
 
-var appconfig = global.appconfig,
-  cx = React.addons.classSet;
+var cx = React.addons.classSet;
 
 
 var Simulator = React.createClass({
@@ -37,22 +36,16 @@ var Simulator = React.createClass({
   propTypes: {
     columns: React.PropTypes.object.isRequired,
     columnsTree: React.PropTypes.object.isRequired,
-    defaultTestCase: React.PropTypes.object,
-    defaultTestCaseAdditionalData: React.PropTypes.object,
     disableSave: React.PropTypes.bool,
     entitiesMetadata: React.PropTypes.object.isRequired,
     reforms: React.PropTypes.object,
+    testCase: React.PropTypes.object.isRequired,
+    testCaseAdditionalData: React.PropTypes.object,
     visualizations: React.PropTypes.array,
+    year: React.PropTypes.number.isRequired,
   },
   componentDidMount() {
-    var testCase = this.props.defaultTestCase || testCases.getInitialTestCase(this.props.entitiesMetadata);
-    this.setState(
-      {
-        testCase: testCase,
-        testCaseAdditionalData: this.props.defaultTestCaseAdditionalData,
-      },
-      () => this.repair(testCase, this.props.defaultTestCaseAdditionalData)
-    );
+    this.simulate();
   },
   getDefaultProps() {
     return {
@@ -85,8 +78,8 @@ var Simulator = React.createClass({
       requestError: null,
       simulationResult: null,
       suggestions: null,
-      testCase: null,
-      testCaseAdditionalData: null,
+      testCase: this.props.testCase,
+      testCaseAdditionalData: this.props.testCaseAdditionalData,
       visualizationsSettings: {
         bareme: {
           collapsedVariables: {},
@@ -103,7 +96,7 @@ var Simulator = React.createClass({
           isChartFullWidth: false,
         },
       },
-      year: appconfig.constants.defaultYear,
+      year: this.props.year,
     };
   },
   handleCollapsedVariablesChange(variableCode, newStatus) {
@@ -124,9 +117,7 @@ var Simulator = React.createClass({
     this.setState({testCase: newTestCase}, this.repair);
   },
   handleDeleteEntity(kind, id) {
-    var entity = testCases.findEntity(kind, id, this.state.testCase);
-    var entityLabel = testCases.getEntityLabel(kind, entity, this.props.entitiesMetadata);
-    var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: entityLabel});
+    var message = this.formatMessage(this.getIntlMessage('deleteIdQuestion'), {id});
     if (confirm(message)) {
       var newTestCase = testCases.withoutEntity(kind, id, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
@@ -134,8 +125,7 @@ var Simulator = React.createClass({
   },
   handleDeleteIndividu(id) {
     var individu = testCases.findEntity('individus', id, this.state.testCase);
-    var nameKey = this.props.entitiesMetadata.individus.nameKey;
-    var message = this.formatMessage(this.getIntlMessage('deleteNameQuestion'), {name: individu[nameKey]});
+    var message = this.formatMessage(this.getIntlMessage('deleteIdQuestion'), {id});
     if (confirm(message)) {
       var newTestCase = testCases.withoutIndividu(id, this.props.entitiesMetadata, this.state.testCase);
       this.setState({testCase: newTestCase}, this.repair);
@@ -186,9 +176,8 @@ var Simulator = React.createClass({
     }
   },
   handleEditEntity(kind, id) {
-    var nameKey = this.props.entitiesMetadata[kind].nameKey;
     var entity = testCases.findEntity(kind, id, this.state.testCase);
-    var newEditedEntity = {action: 'edit', changedValues: {[nameKey]: entity[nameKey]}, id: id, kind: kind};
+    var newEditedEntity = {action: 'edit', changedValues: {}, id, kind};
     this.setState({editedEntity: newEditedEntity});
   },
   handleEditFormClose() {
@@ -197,23 +186,25 @@ var Simulator = React.createClass({
     if (action === 'edit') {
       // TODO Sanitization should be done in NumberControl with valueAsNumber polyfill (?)
       var sanitizedChangedValues = Lazy(this.state.editedEntity.changedValues).map((value, columnName) => {
-        var columnType = this.props.columns[columnName]['@type'];
-        if (columnType === 'Integer') {
-          value = parseInt(value);
-          if (isNaN(value)) {
-            value = null;
-          }
-        } else if (columnType === 'Float') {
-          value = parseFloat(value);
-          if (isNaN(value)) {
-            value = null;
+        if (columnName !== 'id') {
+          var columnType = this.props.columns[columnName]['@type'];
+          if (columnType === 'Integer') {
+            value = parseInt(value);
+            if (isNaN(value)) {
+              value = null;
+            }
+          } else if (columnType === 'Float') {
+            value = parseFloat(value);
+            if (isNaN(value)) {
+              value = null;
+            }
           }
         }
         return [columnName, value];
       }).toObject();
       var entity = testCases.findEntity(kind, id, this.state.testCase);
       var newEntity = Lazy(entity).assign(sanitizedChangedValues).toObject();
-      var newTestCase = testCases.replaceEntity(kind, id, newEntity, this.state.testCase);
+      var newTestCase = testCases.replaceEntity(kind, id, newEntity, this.props.entitiesMetadata, this.state.testCase);
       changeset.testCase = newTestCase;
       var newTestCaseAdditionalData = Lazy(this.state.testCaseAdditionalData)
         .assign(this.state.editedEntity.changedAdditionalData).toObject();
@@ -340,7 +331,6 @@ var Simulator = React.createClass({
                 entitiesMetadata={this.props.entitiesMetadata}
                 errors={helpers.getObjectPath(this.state.errors, 'scenarios', '0', 'test_case')}
                 getEntitiesKinds={testCases.getEntitiesKinds}
-                getEntityLabel={testCases.getEntityLabel}
                 onCloseEntity={this.handleEditFormClose}
                 onCreateEntity={this.handleCreateEntity}
                 onCreateIndividuInEntity={this.handleCreateIndividuInEntity}
@@ -363,7 +353,6 @@ var Simulator = React.createClass({
   renderFieldsForm() {
     var {id, kind} = this.state.editedEntity,
       entity = testCases.findEntity(kind, id, this.state.testCase);
-    var entityLabel = testCases.getEntityLabel(kind, entity, this.props.entitiesMetadata);
     invariant('children' in this.props.columnsTree[kind], `columnsTree.${kind} has no children`);
     var categories = Lazy(this.props.columnsTree[kind].children).map(category => {
       var columns;
@@ -408,7 +397,7 @@ var Simulator = React.createClass({
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {name: entityLabel})}
+        title={this.formatMessage(this.getIntlMessage('editFormTitle'), {id})}
       >
         <FieldsForm
           categories={categories}
@@ -424,26 +413,25 @@ var Simulator = React.createClass({
     invariant(this.state.editedEntity.action === 'move', 'editedEntity.action is either "edit" or "move"');
     var currentEntityIdByKind = {},
       currentRoleByKind = {};
+    var editedEntityId = this.state.editedEntity.id;
     var kinds = testCases.getEntitiesKinds(this.props.entitiesMetadata, {persons: false});
     kinds.forEach(kind => {
-      var entityData = testCases.findEntityAndRole(this.state.editedEntity.id, kind, this.props.entitiesMetadata,
+      var entityData = testCases.findEntityAndRole(editedEntityId, kind, this.props.entitiesMetadata,
         this.state.testCase, {check: false});
       currentEntityIdByKind[kind] = entityData ? entityData.entity.id : 'none';
       currentRoleByKind[kind] = entityData ? entityData.role : 'none';
     });
-    var nameKey = this.props.entitiesMetadata.individus.nameKey;
-    var individu = testCases.findEntity('individus', this.state.editedEntity.id, this.state.testCase);
+    var individu = testCases.findEntity('individus', editedEntityId, this.state.testCase);
     return (
       <EditForm
         onClose={this.handleEditFormClose}
-        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {name: individu[nameKey]})}
+        title={this.formatMessage(this.getIntlMessage('moveFormTitle'), {id: editedEntityId})}
       >
         <MoveIndividuForm
           currentEntityIdByKind={currentEntityIdByKind}
           currentRoleByKind={currentRoleByKind}
           entitiesMetadata={this.props.entitiesMetadata}
           getEntitiesKinds={testCases.getEntitiesKinds}
-          getEntityLabel={testCases.getEntityLabel}
           onEntityChange={(kind, value) => this.handleMoveIndividuFormChange('entity', kind, value)}
           onRoleChange={(kind, value) => this.handleMoveIndividuFormChange('role', kind, value)}
           testCase={this.state.testCase}
@@ -648,9 +636,8 @@ var Simulator = React.createClass({
         changeset.simulationResult = null;
         this.save(originalTestCase, testCaseAdditionalData, onSaveSuccess);
       } else if (repairedTestCase) {
-        var newTestCase = testCases.withEntitiesNamesFilled(this.props.entitiesMetadata, repairedTestCase);
-        changeset.testCase = newTestCase;
-        this.save(newTestCase, testCaseAdditionalData, onSaveSuccess);
+        changeset.testCase = repairedTestCase;
+        this.save(repairedTestCase, testCaseAdditionalData, onSaveSuccess);
       }
     },
     (error) => {

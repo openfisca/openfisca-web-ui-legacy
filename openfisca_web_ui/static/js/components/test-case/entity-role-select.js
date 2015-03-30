@@ -8,12 +8,7 @@ var EntityRoleSelect = React.createClass({
   propTypes: {
     currentEntityId: React.PropTypes.string.isRequired,
     currentRole: React.PropTypes.string.isRequired,
-    entities: React.PropTypes.arrayOf(
-      React.PropTypes.shape({
-        id: React.PropTypes.string.isRequired,
-        label: React.PropTypes.string.isRequired,
-      })
-    ).isRequired,
+    entityIds: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     kind: React.PropTypes.string.isRequired,
     label: React.PropTypes.string.isRequired,
     onEntityChange: React.PropTypes.func.isRequired,
@@ -46,16 +41,8 @@ var EntityRoleSelect = React.createClass({
               onChange={this.handleEntityChange}
               value={this.props.currentEntityId}
             >
-              {
-                this.props.currentEntityId === 'none' && (
-                  <option key='none' value='none'>Aucun</option>
-                )
-              }
-              {
-                this.props.entities.map((entity) =>
-                  <option key={entity.id} value={entity.id}>{entity.label}</option>
-                )
-              }
+              {this.props.currentEntityId === 'none' && <option key='none' value='none'>Aucun</option>}
+              {this.props.entityIds.map(entityId => <option key={entityId} value={entityId}>{entityId}</option>)}
             </select>
           </div>
           <div className='col-sm-6'>

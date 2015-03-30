@@ -31,7 +31,6 @@ var StringControl = React.createClass({
           id={this.props.name}
           onChange={this.handleChange}
           placeholder={this.props.suggestion || this.props.default}
-          ref='input'
           required={this.props.required}
           type="text"
           value={this.props.value}

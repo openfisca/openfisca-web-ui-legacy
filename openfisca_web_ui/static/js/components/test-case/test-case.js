@@ -20,7 +20,6 @@ var TestCase = React.createClass({
     entitiesMetadata: React.PropTypes.object.isRequired,
     errors: React.PropTypes.object,
     getEntitiesKinds: React.PropTypes.func.isRequired,
-    getEntityLabel: React.PropTypes.func.isRequired,
     onCloseEntity: React.PropTypes.func.isRequired,
     onCreateIndividuInEntity: React.PropTypes.func.isRequired,
     onDeleteEntity: React.PropTypes.func.isRequired,
@@ -49,8 +48,8 @@ var TestCase = React.createClass({
                   active={this.props.activeEntityId === entity.id}
                   disabled={this.props.disabled}
                   hasErrors={Boolean(helpers.getObjectPath(this.props.errors, kind, String(entityIdx)))}
+                  id={entity.id}
                   key={entity.id}
-                  label={this.props.getEntityLabel(kind, entity, this.props.entitiesMetadata)}
                   onDelete={() => this.props.onDeleteEntity(kind, entity.id)}
                   onEdit={() => this.handleEdit(kind, entity.id)}
                 >
@@ -66,7 +65,6 @@ var TestCase = React.createClass({
                             errors={helpers.getObjectPath(this.props.errors, 'individus', String(individuIdx))}
                             id={individuId}
                             key={individuId}
-                            name={individu[this.props.entitiesMetadata.individus.nameKey]}
                             onDelete={this.props.onDeleteIndividu.bind(null, individuId)}
                             onEdit={this.handleEdit.bind(null, 'individus', individuId)}
                             onMove={this.props.onMoveIndividu.bind(null, individuId)}

@@ -5,6 +5,7 @@
 var React = require('react');
 
 var logger = require('./logger'),
+  testCases = require('./test-cases'),
   webservices = require('./webservices');
 
 
@@ -70,21 +71,30 @@ function init() {
           },
         },
       };
-      React.render(
-        <Simulator
-          columns={columns}
-          columnsTree={columnsTree}
-          defaultTestCase={testCaseData && testCaseData.test_case}
-          defaultTestCaseAdditionalData={testCaseData && testCaseData.test_case_additional_data}
-          disableSave={Boolean(enabledModules.acceptCookiesModal)}
-          entitiesMetadata={entitiesMetadata}
-          formats={formats}
-          locales={appconfig.i18n.lang}
-          messages={messages}
-          reforms={reforms}
-        />,
-        mountElement
-      );
+      var testCase = testCaseData ? testCaseData.test_case : null;
+      if (!testCase) {
+        testCase = testCases.getInitialTestCase(entitiesMetadata);
+      }
+      var testCaseAdditionalData = testCaseData ? testCaseData.test_case_additional_data : null;
+      var year = appconfig.constants.defaultYear;
+      webservices.repair(testCase, year, (result) => {
+        React.render(
+          <Simulator
+            columns={columns}
+            columnsTree={columnsTree}
+            disableSave={Boolean(enabledModules.acceptCookiesModal)}
+            entitiesMetadata={entitiesMetadata}
+            formats={formats}
+            locales={appconfig.i18n.lang}
+            messages={messages}
+            reforms={reforms}
+            testCase={result.testCase}
+            testCaseAdditionalData={testCaseAdditionalData}
+            year={year}
+          />,
+          mountElement
+        );
+      });
     };
     var fetchCurrentTestCaseIfNeeded = (onSuccess, onError) => {
       if (enabledModules.acceptCookiesModal) {

@@ -15,7 +15,7 @@ var Individu = React.createClass({
     active: React.PropTypes.bool,
     disabled: React.PropTypes.bool,
     errors: React.PropTypes.object,
-    name: React.PropTypes.string.isRequired,
+    id: React.PropTypes.string.isRequired,
     onDelete: React.PropTypes.func.isRequired,
     onEdit: React.PropTypes.func,
     onMove: React.PropTypes.func.isRequired,
@@ -31,7 +31,7 @@ var Individu = React.createClass({
             disabled={this.props.disabled}
             onClick={this.props.onEdit}
             type="button">
-            {this.props.name}
+            {this.props.id}
           </button>
           <button
             className={cx('btn', btnColorClass, 'btn-sm', 'dropdown-toggle')}
@@ -74,7 +74,7 @@ var Individu = React.createClass({
         {
           this.props.suggestions && (
             <SuggestionIcon>
-              {this.formatMessage(this.getIntlMessage('individuContainsSuggestions'), {name: this.props.name})}
+              {this.formatMessage(this.getIntlMessage('individuContainsSuggestions'), {id: this.props.id})}
             </SuggestionIcon>
           )
         }
