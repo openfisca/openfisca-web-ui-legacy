@@ -45,7 +45,7 @@ doc_lines = __doc__.split('\n')
 
 setup(
     name = 'OpenFisca-Web-UI',
-    version = '0.2dev',
+    version = '0.2.dev0',
 
     author = 'OpenFisca Team',
     author_email = 'contact@openfisca.fr',
