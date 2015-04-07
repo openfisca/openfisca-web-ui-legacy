@@ -59,7 +59,7 @@ Then run the web server of the UI from its directory (open another terminal tab)
 
   paster serve --reload development-france.ini
 
-Open the URL http://localhost:2015/ in your browser.
+Open the URL http://localhost:2020/ in your browser.
 
 ## Development
 
