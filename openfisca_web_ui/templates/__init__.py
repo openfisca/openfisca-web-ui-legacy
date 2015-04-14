@@ -31,6 +31,7 @@ import email.header
 import json
 import os
 
+import mako.exceptions
 import mako.lookup
 import markupsafe
 
@@ -101,15 +102,22 @@ def qp(s, encoding = 'utf-8'):
 
 def render(ctx, template_path, custom_name = None, **kw):
     assert template_path.startswith('/')
-    return get_lookup(custom_name).get_template(template_path).render_unicode(
-        _ = ctx.translator.ugettext,
-        ctx = ctx,
-        js = js,
-        markupsafe = markupsafe,
-        N_ = lambda message: message,
-        qp = qp,
-        req = ctx.req,
-        **kw).strip()
+    template = get_lookup(custom_name).get_template(template_path)
+    try:
+        return template.render_unicode(
+            _ = ctx.translator.ugettext,
+            ctx = ctx,
+            js = js,
+            markupsafe = markupsafe,
+            N_ = lambda message: message,
+            qp = qp,
+            req = ctx.req,
+            **kw).strip()
+    except:
+        if conf['debug']:
+            return mako.exceptions.html_error_template().render()
+        else:
+            raise
 
 
 def render_def(ctx, template_path, def_name, custom_name = None, **kw):
