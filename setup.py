@@ -71,7 +71,7 @@ setup(
         'Biryani[bsonconv,datetimeconv] >= 0.10.1',
         # 'bleach >= 1.2',  # Used in texthelpers.
         'Mako >= 0.7',
-        'pymongo >= 2.2',  # Comment if installed from Debian because not exposed in pyshared.
+        'pymongo >= 2.2, < 3',  # Comment if installed from Debian because not exposed in pyshared.
         'requests >= 1.0',
         'WebError >= 0.10',
         'WebOb >= 1.1',
