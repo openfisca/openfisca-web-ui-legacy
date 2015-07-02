@@ -115,7 +115,14 @@ function init() {
                 fetchCurrentTestCaseIfNeeded(
                   (testCaseData) => {
                     webservices.fetchReforms(
-                      (reforms) => renderSimulator(entitiesMetadata, fields, messages, reforms, testCaseData),
+                      (reforms) => {
+                        const reformsBlacklist = ['inversion_revenus'];
+                        var validReforms = Lazy(reforms).omit(reformsBlacklist).toObject();
+                        if (Object.keys(validReforms).length === 0) {
+                          validReforms = null;
+                        }
+                        renderSimulator(entitiesMetadata, fields, messages, validReforms, testCaseData);
+                      },
                       (error) => {
                         logger.error(error);
                         alert('Error: unable to fetch reforms.');
