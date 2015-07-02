@@ -26,7 +26,7 @@ function createIndividu(entitiesMetadata, testCase) {
 }
 
 
-function duplicateValuesOverThreeYears(entitiesMetadata, testCase, year) {
+function duplicateValuesOverPastYears(entitiesMetadata, testCase, year) {
   var newTestCase = Lazy(testCase).map((entities, entityKey) => {
     var newEntities = Lazy(entities).map((entity) => {
       var newEntity = Lazy(entity).map((value, key) => {
@@ -37,6 +37,8 @@ function duplicateValuesOverThreeYears(entitiesMetadata, testCase, year) {
             [year]: value,
             [year - 1]: value,
             [year - 2]: value,
+            [year - 3]: value,
+            [year - 4]: value,
           };
           return [key, newValue];
         }
@@ -232,7 +234,7 @@ function withoutIndividuInEntity(individuId, kind, id, role, entitiesMetadata, t
 module.exports = {
   createEntity,
   createIndividu,
-  duplicateValuesOverThreeYears,
+  duplicateValuesOverPastYears,
   findEntity,
   findEntityAndRole,
   getEntitiesKinds,

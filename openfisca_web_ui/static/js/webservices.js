@@ -212,7 +212,7 @@ function calculate(entitiesMetadata, reformKey, testCase, variables, year, force
       start: year,
       unit: 'year',
     },
-    test_case: testCases.duplicateValuesOverThreeYears(entitiesMetadata, testCase, year),
+    test_case: testCases.duplicateValuesOverPastYears(entitiesMetadata, testCase, year),
   };
   var data = {
     scenarios: [scenario],
@@ -298,7 +298,7 @@ function simulate(axes, entitiesMetadata, reformKey, testCase, year, force, onSu
       start: year,
       unit: 'year',
     },
-    test_case: testCases.duplicateValuesOverThreeYears(entitiesMetadata, testCase, year),
+    test_case: testCases.duplicateValuesOverPastYears(entitiesMetadata, testCase, year),
   };
   if (axes) {
     scenario.axes = axes;
