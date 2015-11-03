@@ -8,7 +8,7 @@ Web user interface for [OpenFisca](http://www.openfisca.fr/) -- a versatile micr
 
 ## Documentation
 
-Please consult the [OpenFisca documentation](http://www.openfisca.fr/documentation)
+Please consult the [OpenFisca documentation](http://doc.openfisca.fr/)
 
 ## Installation
 
