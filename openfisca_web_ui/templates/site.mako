@@ -40,7 +40,7 @@ from openfisca_web_ui.templates import helpers
 
 
 <%def name="brand()" filter="trim">
-OpenFisca
+${_('OpenFisca Demonstrator')}
 </%def>
 
 
@@ -194,13 +194,9 @@ ${_(u'OpenFisca demonstrator')}
     % if conf['enabled.auth']:
                     <%self:topbar_ui_menu/>
     % endif
-                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'presentation')}">${_(u'Presentation')}</a></li>
-                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'documentation')}">${_(u'Documentation')}</a></li>
-                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'outils')}">${_(u'Tools')}</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'a-propos')}">${_(u'About')}</a></li>
-                    <li><a href="${urlparse.urljoin(conf['urls.www'], 'contact')}">${_(u'Contact')}</a></li>
+                    <li><a href="${conf['urls.www']}">${_(u'Back to Home')}</a></li>
                     <li class="visible-xs-block">
                         <a href="http://stats.data.gouv.fr/index.php?idSite=4">Statistiques du site</a>
                     </li>
