@@ -4,4 +4,4 @@ install:
   - pip install flake8
   - pip install -e .[tests]
 services: mongodb
-script: make test-ci
+script: make test
