@@ -69,7 +69,6 @@ setup(
     install_requires = [
         'Babel >= 0.9.4',
         'Biryani[bsonconv,datetimeconv] >= 0.10.1',
-        # 'bleach >= 1.2',  # Used in texthelpers.
         'Mako >= 0.7',
         'pymongo >= 2.2, < 3',  # Comment if installed from Debian because not exposed in pyshared.
         'requests >= 1.0',
