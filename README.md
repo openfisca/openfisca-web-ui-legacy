@@ -51,10 +51,6 @@ Configure the web API URLs in `development-france.ini`:
 * to use your own instance of the web API, leave the default values
 * to use the public instance of the web API, change the URLs containing `localhost:2000` by `api.openfisca.fr`
 
-If you installed your own instance of the web API, run its web server from its directory:
-
-  paster serve --reload development-france.ini
-
 Then run the web server of the UI from its directory (open another terminal tab):
 
   paster serve --reload development-france.ini
