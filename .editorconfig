@@ -1,0 +1,5 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+[*.{js,json}]
+indent_style = space
+indent_size = 2

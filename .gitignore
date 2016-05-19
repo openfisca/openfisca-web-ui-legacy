@@ -1,17 +1,3 @@
-.DS_Store
-*.egg-info
-*.mo
-*.pot
-*.pyc
-*.pyo
 *~
-/build
-/cache
-/development-local*.ini
-/dist
 /node_modules
 /npm-debug.log
-/openfisca_web_ui/static/dist
-/openfisca_web_ui/static/js/*-mock.js
-/src
-/tags
