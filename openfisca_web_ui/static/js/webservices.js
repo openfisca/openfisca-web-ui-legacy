@@ -18,11 +18,11 @@ var simulateResultByDataCache = {};
 
 function patchColumns(columns, entitiesMetadata) {
   // Patch columns definitions to match UI specificities.
-  var birth = columns.birth;
+  var date_naissance = columns.date_naissance;
   var newColumns = {
-    birth: {
+    date_naissance: {
       '@type': 'Integer',
-      default: parseInt(birth.default.slice(0, 4)),
+      default: parseInt(date_naissance.default.slice(0, 4)),
       label: 'Année de naissance',
       max: new Date().getFullYear(),
       min: appconfig.constants.minYear,
@@ -42,8 +42,8 @@ function patchValuesForColumns(data) {
   // Change values according to UI-specific columns.
   if (data.individus) {
     var newIndividus = Lazy(data.individus).map((individu) => {
-      return individu.birth ?
-        Lazy(individu).assign({birth: parseInt(individu.birth.slice(0, 4))}).toObject() :
+      return individu.date_naissance ?
+        Lazy(individu).assign({date_naissance: parseInt(individu.date_naissance.slice(0, 4))}).toObject() :
         individu;
     }).toArray();
     var newData = Lazy(data).assign({individus: newIndividus}).toObject();
