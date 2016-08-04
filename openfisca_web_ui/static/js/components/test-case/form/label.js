@@ -42,7 +42,7 @@ var Label = React.createClass({
         }
         <Tooltip placement='top'>
           <a
-            href={`${appconfig['urls.www']}outils/variables/${this.props.name}`}
+            href={`${appconfig['urls.legislation_explorer']}variables/${this.props.name}`}
             style={{marginLeft: 10}}
             target='_blank'
             title={this.formatMessage(this.getIntlMessage('inspectColumnLinkTitle'), {name: this.props.name})}>

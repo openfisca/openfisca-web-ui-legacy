@@ -97,6 +97,7 @@ def index_appconfig(ctx, alert_on_js_error):
             'maxYear': conf['ui.max_year'],
             'minYear': conf['ui.min_year'],
             },
+        'urls.legislation_explorer': conf['urls.legislation_explorer'],
         'urls.www': conf['urls.www'],
         })
     appconfig['enabledModules'].update({

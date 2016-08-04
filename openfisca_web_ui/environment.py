@@ -131,6 +131,11 @@ def load_environment(global_conf, app_conf):
             'ui.default_year': conv.pipe(conv.input_to_int, conv.default(2013)),
             'ui.max_year': conv.pipe(conv.input_to_int, conv.default(2099)),
             'ui.min_year': conv.pipe(conv.input_to_int, conv.default(1870)),
+            'urls.legislation_explorer': conv.pipe(
+                conv.make_input_to_url(error_if_fragment = True, error_if_path = True, error_if_query = True,
+                    full = True),
+                conv.not_none,
+                ),
             'urls.other_ui_by_country': conv.pipe(
                 conv.cleanup_line,
                 conv.function(lambda value: value.split('\n')),

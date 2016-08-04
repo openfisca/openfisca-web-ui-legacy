@@ -122,7 +122,7 @@ var VariablesTree = React.createClass({
                     <td>
                       <Tooltip placement='left'>
                         <a
-                          href={`${appconfig['urls.www']}outils/variables/${variable.code}`}
+                          href={`${appconfig['urls.legislation_explorer']}variables/${variable.code}`}
                           target='_blank'
                           title={
                             this.formatMessage(this.getIntlMessage('inspectColumnLinkTitle'), {name: variable.code})

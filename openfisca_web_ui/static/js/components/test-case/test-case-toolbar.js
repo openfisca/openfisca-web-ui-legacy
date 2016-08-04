@@ -48,7 +48,7 @@ var TestCaseToolbar = React.createClass({
     }
     var simulationJsonStr = JSON.stringify(simulation);
     var traceQueryString = `simulation=${simulationJsonStr}&api_url=${appconfig.api.baseUrl}`;
-    var traceUrl = `${appconfig['urls.www']}outils/trace?${traceQueryString}`;
+    var traceUrl = `${appconfig['urls.www']}tools/trace?${traceQueryString}`;
     return traceUrl;
   },
   render() {
