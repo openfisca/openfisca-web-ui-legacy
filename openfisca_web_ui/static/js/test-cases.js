@@ -22,7 +22,7 @@ function createEntity(kind, entitiesMetadata, testCase) {
 
 
 function createIndividu(entitiesMetadata, testCase) {
-  return createEntity('individus', entitiesMetadata, testCase);
+  return createEntity('individu', entitiesMetadata, testCase);
 }
 
 
@@ -102,16 +102,16 @@ function getInitialTestCase(entitiesMetadata) {
   var testCase = {};
   var individu = createIndividu(entitiesMetadata, testCase);
   testCase.individus = [individu];
-  getEntitiesKinds(entitiesMetadata, {persons: false}).forEach(kind => {
-    var entity = createEntity(kind, entitiesMetadata, testCase);
-    var firstRole = entitiesMetadata[kind].roles[0];
-    if (isSingleton(kind, firstRole, entitiesMetadata)) {
-      entity[firstRole] = individu.id;
-    } else {
-      entity[firstRole].push(individu.id);
-    }
-    testCase[kind] = [entity];
-  });
+  // getEntitiesKinds(entitiesMetadata, {persons: false}).forEach(kind => {
+  //   var entity = createEntity(kind, entitiesMetadata, testCase);
+  //   var firstRole = entitiesMetadata[kind].roles[0];
+  //   if (isSingleton(kind, firstRole, entitiesMetadata)) {
+  //     entity[firstRole] = individu.id;
+  //   } else {
+  //     entity[firstRole].push(individu.id);
+  //   }
+  //   testCase[kind] = [entity];
+  // });
   return testCase;
 }
 

@@ -36,8 +36,9 @@ var TestCaseToolbar = React.createClass({
     var simulation = {
       scenarios: [
         {
-          test_case: testCases.duplicateValuesOverPastYears(this.props.entitiesMetadata, this.props.testCase,
-            this.props.year),
+          // test_case: testCases.duplicateValuesOverPastYears(this.props.entitiesMetadata, this.props.testCase,
+          //   this.props.year),
+          test_case: this.props.testCase,
           year: this.props.year,
         },
       ],
