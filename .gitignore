@@ -15,3 +15,4 @@
 /openfisca_web_ui/static/js/*-mock.js
 /src
 /tags
+yarn.lock
